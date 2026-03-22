@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { SUPPORTED_LANGUAGES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { SettingsForm } from "@/components/dashboard/SettingsForm";
 import {
   User,
   CreditCard,
@@ -10,25 +10,6 @@ import {
   Zap,
   Shield,
 } from "lucide-react";
-
-const EXPERIENCE_LEVELS = [
-  { value: "junior", label: "Junior (0–2 years)" },
-  { value: "mid", label: "Mid-level (3–5 years)" },
-  { value: "senior", label: "Senior (5–8 years)" },
-  { value: "staff", label: "Staff / Principal (8+ years)" },
-];
-
-const TARGET_COMPANIES = [
-  "Google", "Meta", "Amazon", "Apple", "Microsoft",
-  "Netflix", "Uber", "Airbnb", "Stripe", "OpenAI", "Other",
-];
-
-const LANGUAGE_LABELS: Record<string, string> = {
-  python: "Python 3",
-  javascript: "JavaScript (Node)",
-  java: "Java",
-  cpp: "C++",
-};
 
 const PLAN_CONFIG = {
   starter: {
@@ -66,7 +47,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("*")
+    .select("display_name, target_company, experience_level, preferred_language, plan")
     .eq("id", user.id)
     .single();
 
@@ -90,135 +71,15 @@ export default async function SettingsPage() {
           <User className="w-4 h-4 text-brand-cyan" />
           <h2 className="text-sm font-semibold text-brand-text">Profile</h2>
         </div>
-        <div className="p-6 space-y-5">
-          {/* Display Name */}
-          <div className="space-y-1.5">
-            <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-              Display Name
-            </label>
-            <input
-              type="text"
-              defaultValue={profile?.display_name ?? ""}
-              placeholder="Your name"
-              disabled
-              className="w-full px-3 py-2.5 bg-brand-surface border border-brand-border rounded-lg text-brand-text text-sm placeholder:text-brand-muted focus:outline-none focus:border-brand-cyan/50 disabled:opacity-60 disabled:cursor-not-allowed"
-            />
-          </div>
-
-          {/* Email (read-only) */}
-          <div className="space-y-1.5">
-            <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-              Email
-            </label>
-            <input
-              type="email"
-              value={user.email ?? ""}
-              readOnly
-              disabled
-              className="w-full px-3 py-2.5 bg-brand-surface border border-brand-border rounded-lg text-brand-muted text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-            />
-            <p className="text-brand-muted text-xs">
-              Email is managed through your OAuth provider.
-            </p>
-          </div>
-
-          {/* Target Company */}
-          <div className="space-y-1.5">
-            <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-              Target Company
-            </label>
-            <select
-              defaultValue={profile?.target_company ?? ""}
-              disabled
-              className="w-full px-3 py-2.5 bg-brand-surface border border-brand-border rounded-lg text-brand-muted text-sm appearance-none focus:outline-none focus:border-brand-cyan/50 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <option value="">Select a company</option>
-              {TARGET_COMPANIES.map((company) => (
-                <option key={company} value={company.toLowerCase()}>
-                  {company}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Experience Level */}
-          <div className="space-y-1.5">
-            <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-              Experience Level
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {EXPERIENCE_LEVELS.map((level) => (
-                <label
-                  key={level.value}
-                  className={cn(
-                    "flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-sm cursor-not-allowed opacity-60",
-                    profile?.experience_level === level.value
-                      ? "border-brand-cyan/40 bg-brand-cyan/5 text-brand-cyan"
-                      : "border-brand-border bg-brand-surface text-brand-muted"
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="experience"
-                    value={level.value}
-                    defaultChecked={
-                      profile?.experience_level === level.value
-                    }
-                    disabled
-                    className="sr-only"
-                  />
-                  <div
-                    className={cn(
-                      "w-3.5 h-3.5 rounded-full border-2 shrink-0",
-                      profile?.experience_level === level.value
-                        ? "border-brand-cyan bg-brand-cyan"
-                        : "border-brand-border"
-                    )}
-                  />
-                  <span>{level.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Preferred Language */}
-          <div className="space-y-1.5">
-            <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-              Preferred Language
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  disabled
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                    profile?.preferred_language === lang
-                      ? "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan"
-                      : "border-brand-border bg-brand-surface text-brand-muted"
-                  )}
-                >
-                  {LANGUAGE_LABELS[lang]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Save Button (disabled, for now) */}
-          <div className="pt-2">
-            <button
-              type="button"
-              disabled
-              className="px-5 py-2.5 bg-brand-cyan text-brand-deep font-semibold text-sm rounded-lg opacity-50 cursor-not-allowed"
-            >
-              Save Changes
-            </button>
-            <p className="text-brand-muted text-xs mt-2">
-              Profile editing coming soon.
-            </p>
-          </div>
-        </div>
+        <SettingsForm
+          initialProfile={{
+            display_name: profile?.display_name ?? null,
+            email: user.email ?? "",
+            target_company: profile?.target_company ?? null,
+            experience_level: profile?.experience_level ?? null,
+            preferred_language: profile?.preferred_language ?? null,
+          }}
+        />
       </section>
 
       {/* Subscription Section */}
@@ -243,12 +104,8 @@ export default async function SettingsPage() {
                     : "bg-brand-green/10 border-brand-green/30 text-brand-green"
               )}
             >
-              {currentPlan === "pro" && (
-                <Zap className="w-3 h-3" />
-              )}
-              {currentPlan === "starter" && (
-                <CheckCircle2 className="w-3 h-3" />
-              )}
+              {currentPlan === "pro" && <Zap className="w-3 h-3" />}
+              {currentPlan === "starter" && <CheckCircle2 className="w-3 h-3" />}
               {currentPlan === "free"
                 ? "Free Plan"
                 : currentPlan === "starter"

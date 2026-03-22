@@ -52,35 +52,37 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // TODO: Replace with real DB query once problems are seeded:
-    // const offset = (page - 1) * limit;
-    // let query = db
-    //   .select()
-    //   .from(problems)
-    //   .limit(limit)
-    //   .offset(offset)
-    //   .orderBy(asc(problems.difficulty), asc(problems.title));
-    //
-    // if (difficulty) query = query.where(eq(problems.difficulty, difficulty));
-    // if (category)   query = query.where(eq(problems.category, category));
-    // if (search)     query = query.where(ilike(problems.title, `%${search}%`));
-    //
-    // const [rows, [{ count }]] = await Promise.all([
-    //   query,
-    //   db.select({ count: sql<number>`count(*)` }).from(problems),
-    // ]);
+    const { getProblems } = await import("@/lib/db/queries");
 
-    void difficulty;
-    void category;
-    void search;
-    void page;
-    void limit;
+    const rows = await getProblems({
+      difficulty: difficulty as DifficultyLevel | undefined,
+      category,
+      search,
+    });
+
+    // Strip fields that could reveal solutions or hidden test cases
+    const safeProblems = rows.slice((page - 1) * limit, (page - 1) * limit + limit).map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      difficulty: p.difficulty,
+      category: p.category,
+      company_tags: p.company_tags,
+      description: p.description,
+      examples: p.examples,
+      constraints: p.constraints,
+      starter_code: p.starter_code,
+      optimal_complexity: p.optimal_complexity,
+      follow_up_questions: p.follow_up_questions,
+      hints: p.hints,
+      // solution_approach and test_cases intentionally excluded
+    }));
 
     return NextResponse.json({
       success: true,
       data: {
-        problems: [],
-        total: 0,
+        problems: safeProblems,
+        total: rows.length,
         page,
         limit,
       },

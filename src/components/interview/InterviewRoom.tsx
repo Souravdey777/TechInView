@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ import { InterviewControls } from "./InterviewControls";
 import type { VoiceState } from "./VoiceVisualizer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useVoiceInterview } from "@/hooks/useVoiceInterview";
+import { useInterviewStore } from "@/stores/interview-store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,41 +36,6 @@ type InterviewRoomProps = {
 };
 
 // ─── Mock data (replaced by real API data in production) ──────────────────────
-
-const MOCK_PROBLEM = {
-  title: "Two Sum",
-  difficulty: "easy" as const,
-  category: "arrays",
-  description:
-    "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.",
-  examples: [
-    {
-      input: "nums = [2,7,11,15], target = 9",
-      output: "[0,1]",
-      explanation:
-        "Because nums[0] + nums[1] == 9, we return [0, 1].",
-    },
-    {
-      input: "nums = [3,2,4], target = 6",
-      output: "[1,2]",
-    },
-    {
-      input: "nums = [3,3], target = 6",
-      output: "[0,1]",
-    },
-  ],
-  constraints: [
-    "2 <= nums.length <= 10^4",
-    "-10^9 <= nums[i] <= 10^9",
-    "-10^9 <= target <= 10^9",
-    "Only one valid answer exists.",
-  ],
-  hints: [
-    "A brute force O(n²) solution works, but can you do better?",
-    "Think about what complement you need for each number. How could you store what you have seen so far?",
-    "A hash map lets you look up complements in O(1) time.",
-  ],
-};
 
 const STARTER_CODE: Record<SupportedLanguage, string> = {
   python: `def twoSum(nums: list[int], target: int) -> list[int]:
@@ -106,11 +72,62 @@ public:
 `,
 };
 
+const MOCK_PROBLEM = {
+  title: "Two Sum",
+  difficulty: "easy" as const,
+  category: "arrays",
+  description:
+    "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.",
+  examples: [
+    {
+      input: "nums = [2,7,11,15], target = 9",
+      output: "[0,1]",
+      explanation:
+        "Because nums[0] + nums[1] == 9, we return [0, 1].",
+    },
+    {
+      input: "nums = [3,2,4], target = 6",
+      output: "[1,2]",
+    },
+    {
+      input: "nums = [3,3], target = 6",
+      output: "[0,1]",
+    },
+  ],
+  constraints: [
+    "2 <= nums.length <= 10^4",
+    "-10^9 <= nums[i] <= 10^9",
+    "-10^9 <= target <= 10^9",
+    "Only one valid answer exists.",
+  ],
+  starter_code: STARTER_CODE as Record<string, string>,
+  optimal_complexity: { time: "O(n)", space: "O(n)" },
+  hints: [
+    "A brute force O(n²) solution works, but can you do better?",
+    "Think about what complement you need for each number. How could you store what you have seen so far?",
+    "A hash map lets you look up complements in O(1) time.",
+  ],
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const router = useRouter();
   const voice = useVoiceInterview();
+
+  // ── Read setup config from Zustand store ───────────────────────────────────
+  const storeConfig = useInterviewStore((s) => s.setupConfig);
+  const storeProblem = useInterviewStore((s) => s.problem);
+  const storeCode = useInterviewStore((s) => s.currentCode);
+  const completeInterviewStore = useInterviewStore((s) => s.completeInterview);
+
+  // Derive the active problem — store data or fallback to mock
+  const activeProblem = useMemo(
+    () => storeProblem ?? MOCK_PROBLEM,
+    [storeProblem]
+  );
+  const initialLanguage = (storeConfig?.language ?? "python") as SupportedLanguage;
+  const maxDuration = storeConfig?.maxDurationSeconds ?? 45 * 60;
 
   // ── Conversation state ──────────────────────────────────────────────────────
   type ChatMessage = { role: "interviewer" | "candidate"; content: string; time: string };
@@ -122,16 +139,21 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   // ── Interview state ──────────────────────────────────────────────────────────
   const [currentPhase, setCurrentPhase] = useState<InterviewPhase>("INTRO");
-  const [timeLeft, setTimeLeft] = useState(45 * 60);
-  const [isTimerRunning] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(maxDuration);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   // ── Code state ───────────────────────────────────────────────────────────────
-  const [language, setLanguage] = useState<SupportedLanguage>("python");
-  const [code, setCode] = useState(STARTER_CODE.python);
+  const [language, setLanguage] = useState<SupportedLanguage>(initialLanguage);
+  const [code, setCode] = useState(
+    storeCode || activeProblem.starter_code[initialLanguage] || STARTER_CODE[initialLanguage]
+  );
 
   // ── Test state ───────────────────────────────────────────────────────────────
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isRunningTests, setIsRunningTests] = useState(false);
+
+  // ── Scoring state ──────────────────────────────────────────────────────────
+  const [isScoring, setIsScoring] = useState(false);
 
   // ── Derived voice state for UI ──────────────────────────────────────────────
   const voiceState: VoiceState = isAiThinking ? "thinking" : voice.voiceState as VoiceState;
@@ -161,7 +183,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         body: JSON.stringify({
           message: userMessage,
           conversationHistory: conversationRef.current.slice(-10),
-          problem: MOCK_PROBLEM,
+          problem: activeProblem,
           currentPhase,
           currentCode: code,
           elapsedSeconds: Math.floor((Date.now() - startTimeRef.current) / 1000),
@@ -184,7 +206,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } catch {
       setIsAiThinking(false);
     }
-  }, [currentPhase, code, getTimeStr, voice]);
+  }, [currentPhase, code, getTimeStr, voice, activeProblem]);
 
   // ── Start interview (triggered by user click to enable audio) ───────────────
   const startInterview = useCallback(async () => {
@@ -195,6 +217,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     }
 
     setHasStarted(true);
+    setIsTimerRunning(true);
     startTimeRef.current = Date.now();
     setIsAiThinking(true);
 
@@ -205,7 +228,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         body: JSON.stringify({
           message: "The interview is starting. Please introduce yourself and the problem.",
           conversationHistory: [],
-          problem: MOCK_PROBLEM,
+          problem: activeProblem,
           currentPhase: "INTRO",
           currentCode: "",
           elapsedSeconds: 0,
@@ -281,11 +304,12 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     (newLang: SupportedLanguage) => {
       setLanguage(newLang);
       // Preserve code if user has edited beyond the starter; otherwise swap template
-      if (code === STARTER_CODE[language]) {
-        setCode(STARTER_CODE[newLang]);
+      const currentStarter = activeProblem.starter_code[language] ?? STARTER_CODE[language];
+      if (code === currentStarter) {
+        setCode(activeProblem.starter_code[newLang] ?? STARTER_CODE[newLang]);
       }
     },
-    [code, language]
+    [code, language, activeProblem]
   );
 
   const handleRunCode = useCallback(async () => {
@@ -319,22 +343,194 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   }, [language, code, interviewId]);
 
   const handleEndInterview = useCallback(async () => {
+    setIsScoring(true);
+
+    // Stop voice
+    voice.stopListening();
+    voice.stopSpeaking();
+
+    const transcript = conversationRef.current.map((msg, i) => ({
+      role: msg.role as "interviewer" | "candidate" | "system",
+      content: msg.content,
+      timestamp_ms: i * 30000, // approximate
+    }));
+
+    const passed = testResults.filter((t) => t.passed).length;
+    const total = testResults.length;
+
+    // Call the complete API with full data for AI scoring
+    let scoringData: {
+      overall_score?: number;
+      scores?: Record<string, { score: number; feedback: string }>;
+      hire_recommendation?: string;
+      summary?: string;
+      key_strengths?: string[];
+      areas_to_improve?: string[];
+    } | null = null;
+
     try {
-      await fetch("/api/interview/complete", {
+      const res = await fetch("/api/interview/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ interviewId, finalCode: code }),
+        body: JSON.stringify({
+          interviewId,
+          finalCode: code,
+          language,
+          transcript,
+          testsPassed: passed,
+          testsTotal: total,
+          problem: {
+            title: activeProblem.title,
+            description: activeProblem.description,
+            difficulty: activeProblem.difficulty,
+            category: activeProblem.category,
+            optimal_complexity: activeProblem.optimal_complexity ?? { time: "Unknown", space: "Unknown" },
+          },
+        }),
       });
-    } catch {
-      // Navigate regardless — results page will handle missing data
-    }
-    router.push(`/results/${interviewId}`);
-  }, [interviewId, code, router]);
 
-  void setCurrentPhase;
-  void setTimeLeft;
+      const json = await res.json();
+      if (json.success && json.data?.scoring) {
+        scoringData = json.data.scoring;
+      }
+    } catch {
+      // Scoring failed — will navigate with null scores, results page uses mock fallback
+    }
+
+    // Map scoring data into the store shape
+    const storeScores = scoringData?.scores
+      ? {
+          problem_solving: {
+            score: (scoringData.scores.problem_solving as { score: number; feedback: string }).score,
+            feedback: (scoringData.scores.problem_solving as { score: number; feedback: string }).feedback,
+          },
+          code_quality: {
+            score: (scoringData.scores.code_quality as { score: number; feedback: string }).score,
+            feedback: (scoringData.scores.code_quality as { score: number; feedback: string }).feedback,
+          },
+          communication: {
+            score: (scoringData.scores.communication as { score: number; feedback: string }).score,
+            feedback: (scoringData.scores.communication as { score: number; feedback: string }).feedback,
+          },
+          technical_knowledge: {
+            score: (scoringData.scores.technical_knowledge as { score: number; feedback: string }).score,
+            feedback: (scoringData.scores.technical_knowledge as { score: number; feedback: string }).feedback,
+          },
+          testing: {
+            score: (scoringData.scores.testing as { score: number; feedback: string }).score,
+            feedback: (scoringData.scores.testing as { score: number; feedback: string }).feedback,
+          },
+        }
+      : null;
+
+    completeInterviewStore({
+      finalCode: code,
+      language,
+      transcript,
+      overallScore: scoringData?.overall_score ?? null,
+      scores: storeScores,
+      hireRecommendation: scoringData?.hire_recommendation ?? null,
+      summary: scoringData?.summary ?? null,
+      keyStrengths: scoringData?.key_strengths ?? null,
+      areasToImprove: scoringData?.areas_to_improve ?? null,
+      testsPassed: passed,
+      testsTotal: total,
+      problemTitle: activeProblem.title,
+      problemDifficulty: activeProblem.difficulty,
+      problemCategory: activeProblem.category,
+    });
+
+    router.push(`/results/${interviewId}`);
+  }, [interviewId, code, language, router, testResults, activeProblem, completeInterviewStore, voice]);
+
+  // ── Timer countdown ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!hasStarted || !isTimerRunning) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          handleEndInterview();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  // handleEndInterview is stable (useCallback with fixed deps); intentionally
+  // omitted to avoid restarting the interval when other state changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasStarted, isTimerRunning]);
+
+  // ── Phase transitions based on elapsed time ──────────────────────────────────
+  useEffect(() => {
+    if (!hasStarted) return;
+
+    const elapsed = maxDuration - timeLeft;
+    const pct = elapsed / maxDuration;
+
+    // Phase boundaries as fractions of total duration (calibrated for 45 min)
+    // INTRO:               0%  – 2.2%   (0–60s of 2700)
+    // PROBLEM_PRESENTED:   2.2% – 4.4%  (60–120s)
+    // CLARIFICATION:       4.4% – 11.1% (120–300s)
+    // APPROACH_DISCUSSION: 11.1% – 26.7%(300–720s)
+    // CODING:              26.7% – 71.1%(720–1920s)
+    // TESTING:             71.1% – 82.2%(1920–2220s)
+    // COMPLEXITY_ANALYSIS: 82.2% – 88.9%(2220–2400s)
+    // FOLLOW_UP:           88.9% – 95.6%(2400–2580s)
+    // WRAP_UP:             95.6% – 100% (2580–2700s)
+
+    let nextPhase: InterviewPhase;
+    if (pct < 2.2 / 100) {
+      nextPhase = "INTRO";
+    } else if (pct < 4.4 / 100) {
+      nextPhase = "PROBLEM_PRESENTED";
+    } else if (pct < 11.1 / 100) {
+      nextPhase = "CLARIFICATION";
+    } else if (pct < 26.7 / 100) {
+      nextPhase = "APPROACH_DISCUSSION";
+    } else if (pct < 71.1 / 100) {
+      nextPhase = "CODING";
+    } else if (pct < 82.2 / 100) {
+      nextPhase = "TESTING";
+    } else if (pct < 88.9 / 100) {
+      nextPhase = "COMPLEXITY_ANALYSIS";
+    } else if (pct < 95.6 / 100) {
+      nextPhase = "FOLLOW_UP";
+    } else {
+      nextPhase = "WRAP_UP";
+    }
+
+    setCurrentPhase((prev) => (prev !== nextPhase ? nextPhase : prev));
+  }, [timeLeft, hasStarted, maxDuration]);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
+
+  // Scoring overlay — shown while AI evaluates the interview
+  if (isScoring) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep">
+        <div className="flex flex-col items-center gap-6 max-w-md text-center px-6">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-brand-cyan bg-brand-card animate-pulse">
+            <span className="text-3xl font-bold text-brand-cyan">A</span>
+          </div>
+          <h1 className="text-2xl font-bold text-brand-text">
+            Alex is reviewing your performance...
+          </h1>
+          <p className="text-brand-muted text-sm">
+            Evaluating problem solving, code quality, communication, technical knowledge, and testing. This usually takes 5-10 seconds.
+          </p>
+          <div className="flex gap-1.5 mt-2">
+            <span className="w-2 h-2 bg-brand-cyan rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-2 h-2 bg-brand-cyan rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-2 h-2 bg-brand-cyan rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Start overlay — requires user click to unlock browser audio
   if (!hasStarted) {
@@ -346,7 +542,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           </div>
           <h1 className="text-2xl font-bold text-brand-text">Ready to begin?</h1>
           <p className="text-brand-muted text-sm">
-            Alex, your AI interviewer, will introduce the problem and guide you through a 45-minute mock interview. Make sure your speakers are on.
+            Alex, your AI interviewer, will introduce the problem and guide you through a {Math.round(maxDuration / 60)}-minute mock interview. Make sure your speakers are on.
           </p>
           <button
             onClick={startInterview}
@@ -423,7 +619,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 value="problem"
                 className="flex-1 overflow-hidden mt-0"
               >
-                <ProblemPanel problem={MOCK_PROBLEM} />
+                <ProblemPanel problem={{ ...activeProblem, difficulty: activeProblem.difficulty as "easy" | "medium" | "hard" }} />
               </TabsContent>
 
               <TabsContent

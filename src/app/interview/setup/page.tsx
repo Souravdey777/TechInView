@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Mic,
   MicOff,
@@ -13,9 +13,13 @@ import {
   ChevronRight,
   Loader2,
   AlertCircle,
+  Search,
+  BookOpen,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useInterviewStore } from "@/stores/interview-store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,6 +39,16 @@ type Category =
 type Language = "python" | "javascript" | "java" | "cpp";
 type Duration = 30 | 45;
 type MicStatus = "idle" | "checking" | "granted" | "denied";
+type ProblemMode = "random" | "specific";
+
+type ProblemSummary = {
+  id: string;
+  title: string;
+  slug: string;
+  difficulty: Difficulty;
+  category: string;
+  company_tags: string[] | null;
+};
 
 type SetupFormState = {
   difficulty: Difficulty;
@@ -65,6 +79,12 @@ const DIFFICULTIES: { value: Difficulty; label: string; color: string; activeCol
     activeColor: "bg-brand-rose/10 border-brand-rose text-brand-rose",
   },
 ];
+
+const DIFFICULTY_BADGE: Record<Difficulty, string> = {
+  easy: "bg-brand-green/10 text-brand-green border border-brand-green/30",
+  medium: "bg-brand-amber/10 text-brand-amber border border-brand-amber/30",
+  hard: "bg-brand-rose/10 text-brand-rose border border-brand-rose/30",
+};
 
 const CATEGORIES: { value: Category; label: string }[] = [
   { value: "any", label: "Any" },
@@ -113,10 +133,67 @@ function SectionCard({
   );
 }
 
+// ─── Difficulty badge ─────────────────────────────────────────────────────────
+
+function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
+  return (
+    <span
+      className={cn(
+        "rounded-full px-2 py-0.5 text-xs font-semibold capitalize",
+        DIFFICULTY_BADGE[difficulty]
+      )}
+    >
+      {difficulty}
+    </span>
+  );
+}
+
+// ─── Category tag ─────────────────────────────────────────────────────────────
+
+function CategoryTag({ category }: { category: string }) {
+  const label =
+    CATEGORIES.find((c) => c.value === category)?.label ?? category;
+  return (
+    <span className="rounded-full border border-brand-border px-2 py-0.5 text-xs text-brand-muted">
+      {label}
+    </span>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function InterviewSetupPage() {
+  return (
+    <Suspense fallback={<SetupSkeleton />}>
+      <InterviewSetupInner />
+    </Suspense>
+  );
+}
+
+function SetupSkeleton() {
+  return (
+    <div className="min-h-screen bg-brand-deep text-brand-text">
+      <div className="border-b border-brand-border bg-brand-surface">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2">
+            <Code2 className="h-5 w-5 text-brand-cyan" />
+            <span className="font-semibold tracking-tight text-brand-text">TechInView</span>
+          </div>
+        </div>
+      </div>
+      <div className="mx-auto max-w-3xl space-y-6 px-6 py-10">
+        <div className="h-8 w-56 animate-pulse rounded-lg bg-brand-card" />
+        <div className="h-40 animate-pulse rounded-xl bg-brand-card" />
+        <div className="h-24 animate-pulse rounded-xl bg-brand-card" />
+      </div>
+    </div>
+  );
+}
+
+function InterviewSetupInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initFromSetup = useInterviewStore((s) => s.initFromSetup);
 
   const [form, setForm] = useState<SetupFormState>({
     difficulty: "medium",
@@ -127,6 +204,99 @@ export default function InterviewSetupPage() {
   const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+
+  // Problem selection state
+  const [problemMode, setProblemMode] = useState<ProblemMode>("random");
+  const [problems, setProblems] = useState<ProblemSummary[]>([]);
+  const [problemsLoading, setProblemsLoading] = useState(false);
+  const [problemsError, setProblemsError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProblem, setSelectedProblem] = useState<ProblemSummary | null>(null);
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSpecificSelected = problemMode === "specific" && selectedProblem !== null;
+
+  // ─── Fetch problems ────────────────────────────────────────────────────────
+
+  const fetchProblems = useCallback(async (query: string) => {
+    setProblemsLoading(true);
+    setProblemsError(null);
+    try {
+      const params = new URLSearchParams({ limit: "50" });
+      if (query.trim()) params.set("search", query.trim());
+      const res = await fetch(`/api/problems?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to load problems");
+      const json = (await res.json()) as {
+        success: boolean;
+        data?: { problems: ProblemSummary[] };
+        error?: string;
+      };
+      if (!json.success) throw new Error(json.error ?? "Failed to load problems");
+      setProblems(json.data?.problems ?? []);
+    } catch (err) {
+      setProblemsError(err instanceof Error ? err.message : "Failed to load problems");
+    } finally {
+      setProblemsLoading(false);
+    }
+  }, []);
+
+  // Load problems when "specific" mode is first activated
+  useEffect(() => {
+    if (problemMode === "specific" && problems.length === 0 && !problemsLoading) {
+      fetchProblems("");
+    }
+  }, [problemMode, problems.length, problemsLoading, fetchProblems]);
+
+  // Debounced search
+  useEffect(() => {
+    if (problemMode !== "specific") return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchProblems(searchQuery);
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery, problemMode, fetchProblems]);
+
+  // Auto-select from ?problem=slug URL param
+  useEffect(() => {
+    const slugFromUrl = searchParams.get("problem");
+    if (!slugFromUrl) return;
+
+    setProblemMode("specific");
+
+    // Fetch just the one problem by search to pre-select it
+    const findAndSelect = async () => {
+      try {
+        const res = await fetch(`/api/problems?search=${encodeURIComponent(slugFromUrl)}&limit=50`);
+        if (!res.ok) return;
+        const json = (await res.json()) as {
+          success: boolean;
+          data?: { problems: ProblemSummary[] };
+        };
+        const match = json.data?.problems?.find((p) => p.slug === slugFromUrl);
+        if (match) {
+          setSelectedProblem(match);
+          // Also populate full list so the user sees context
+          setProblems(json.data?.problems ?? []);
+        }
+      } catch {
+        // Silently ignore — user can still search manually
+      }
+    };
+
+    void findAndSelect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
+
+  // Focus search input when switching to specific mode
+  useEffect(() => {
+    if (problemMode === "specific") {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+  }, [problemMode]);
 
   // ─── Mic check ──────────────────────────────────────────────────────────────
 
@@ -147,25 +317,51 @@ export default function InterviewSetupPage() {
     setIsCreating(true);
     setCreateError(null);
     try {
+      const body: Record<string, unknown> = {
+        difficulty: form.difficulty,
+        category: form.category === "any" ? null : form.category,
+        language: form.language,
+        maxDurationSeconds: form.duration * 60,
+      };
+
+      if (problemMode === "specific" && selectedProblem) {
+        body.problemSlug = selectedProblem.slug;
+      }
+
       const res = await fetch("/api/interview/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          difficulty: form.difficulty,
-          category: form.category === "any" ? null : form.category,
-          language: form.language,
-          maxDurationSeconds: form.duration * 60,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
-        const body = (await res.json()) as { error?: string };
-        throw new Error(body.error ?? "Failed to start interview");
+        const responseBody = (await res.json()) as { error?: string };
+        throw new Error(responseBody.error ?? "Failed to start interview");
       }
 
-      const data = (await res.json()) as { data?: { interviewId?: string } };
+      const data = (await res.json()) as {
+        data?: {
+          interviewId?: string;
+          problem?: Record<string, unknown>;
+          language?: string;
+          maxDuration?: number;
+          startedAt?: string;
+        };
+      };
       const interviewId = data.data?.interviewId;
       if (!interviewId) throw new Error("No interview ID returned");
+
+      // Store full setup data in Zustand so InterviewRoom + Results can read it
+      initFromSetup({
+        interviewId,
+        problem: data.data?.problem as Parameters<typeof initFromSetup>[0]["problem"],
+        language: data.data?.language ?? form.language,
+        maxDurationSeconds: data.data?.maxDuration ?? form.duration * 60,
+        difficulty: form.difficulty,
+        category: form.category === "any" ? null : form.category,
+        startedAt: data.data?.startedAt ?? new Date().toISOString(),
+      });
+
       router.push(`/interview/${interviewId}`);
     } catch (err) {
       setCreateError(
@@ -174,6 +370,16 @@ export default function InterviewSetupPage() {
       setIsCreating(false);
     }
   }
+
+  // ─── Filtered problems for display ──────────────────────────────────────────
+
+  // If a problem is pre-selected, show it pinned at top, then rest below
+  const displayProblems: ProblemSummary[] = selectedProblem
+    ? [
+        selectedProblem,
+        ...problems.filter((p) => p.slug !== selectedProblem.slug),
+      ]
+    : problems;
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
@@ -205,32 +411,202 @@ export default function InterviewSetupPage() {
 
         {/* 1 – Problem Selection */}
         <SectionCard title="Problem Selection">
-          <div className="flex items-center gap-3 rounded-lg border border-brand-cyan/30 bg-brand-cyan/5 px-4 py-3">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-brand-cyan bg-brand-cyan">
-              <div className="h-2 w-2 rounded-full bg-brand-deep" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Shuffle className="h-4 w-4 text-brand-cyan" />
-              <span className="text-sm font-medium text-brand-text">
-                Random Problem
+          {/* Mode toggle */}
+          <div className="flex gap-3">
+            {/* Random option */}
+            <button
+              onClick={() => setProblemMode("random")}
+              className={cn(
+                "flex flex-1 items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150",
+                problemMode === "random"
+                  ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
+                  : "border-brand-border hover:border-brand-subtle"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
+                  problemMode === "random"
+                    ? "border-brand-cyan bg-brand-cyan"
+                    : "border-brand-border"
+                )}
+              >
+                {problemMode === "random" && (
+                  <div className="h-2 w-2 rounded-full bg-brand-deep" />
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Shuffle className="h-4 w-4 text-brand-cyan" />
+                <span className="text-sm font-medium text-brand-text">
+                  Random Problem
+                </span>
+              </div>
+              <span className="ml-auto text-xs text-brand-muted">
+                Recommended
               </span>
-            </div>
-            <span className="ml-auto text-xs text-brand-muted">
-              Recommended
-            </span>
+            </button>
+
+            {/* Specific option */}
+            <button
+              onClick={() => setProblemMode("specific")}
+              className={cn(
+                "flex flex-1 items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150",
+                problemMode === "specific"
+                  ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
+                  : "border-brand-border hover:border-brand-subtle"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
+                  problemMode === "specific"
+                    ? "border-brand-cyan bg-brand-cyan"
+                    : "border-brand-border"
+                )}
+              >
+                {problemMode === "specific" && (
+                  <div className="h-2 w-2 rounded-full bg-brand-deep" />
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-brand-cyan" />
+                <span className="text-sm font-medium text-brand-text">
+                  Choose Specific
+                </span>
+              </div>
+            </button>
           </div>
-          <p className="mt-3 text-xs text-brand-muted">
-            A problem will be selected based on your difficulty and category
-            preferences below.
-          </p>
+
+          {/* Random mode hint */}
+          {problemMode === "random" && (
+            <p className="mt-3 text-xs text-brand-muted">
+              A problem will be selected based on your difficulty and category
+              preferences below.
+            </p>
+          )}
+
+          {/* Specific mode: search + list */}
+          {problemMode === "specific" && (
+            <div className="mt-4 space-y-3">
+              {/* Selected problem banner */}
+              {selectedProblem && (
+                <div className="flex items-center gap-3 rounded-lg border border-brand-cyan/40 bg-brand-cyan/5 px-4 py-2.5">
+                  <CheckCircle className="h-4 w-4 shrink-0 text-brand-cyan" />
+                  <span className="flex-1 text-sm font-medium text-brand-text">
+                    {selectedProblem.title}
+                  </span>
+                  <DifficultyBadge difficulty={selectedProblem.difficulty} />
+                  <button
+                    onClick={() => setSelectedProblem(null)}
+                    className="ml-1 rounded p-0.5 text-brand-muted hover:text-brand-text"
+                    aria-label="Clear selection"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* Search input */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search problems by title…"
+                  className="w-full rounded-lg border border-brand-border bg-brand-surface py-2.5 pl-9 pr-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-text"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Problems list */}
+              <div className="max-h-64 overflow-y-auto rounded-lg border border-brand-border">
+                {problemsLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-8 text-sm text-brand-muted">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading problems…
+                  </div>
+                ) : problemsError ? (
+                  <div className="flex items-center gap-2 px-4 py-6 text-sm text-brand-rose">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    {problemsError}
+                  </div>
+                ) : displayProblems.length === 0 ? (
+                  <div className="py-8 text-center text-sm text-brand-muted">
+                    {searchQuery
+                      ? `No problems match "${searchQuery}"`
+                      : "No problems found"}
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-brand-border">
+                    {displayProblems.map((problem) => {
+                      const isSelected = selectedProblem?.slug === problem.slug;
+                      return (
+                        <li key={problem.slug}>
+                          <button
+                            onClick={() =>
+                              setSelectedProblem(isSelected ? null : problem)
+                            }
+                            className={cn(
+                              "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-100",
+                              isSelected
+                                ? "border-l-2 border-brand-cyan bg-brand-cyan/5"
+                                : "hover:bg-brand-surface"
+                            )}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p
+                                className={cn(
+                                  "truncate text-sm font-medium",
+                                  isSelected
+                                    ? "text-brand-cyan"
+                                    : "text-brand-text"
+                                )}
+                              >
+                                {problem.title}
+                              </p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-2">
+                              <CategoryTag category={problem.category} />
+                              <DifficultyBadge difficulty={problem.difficulty} />
+                              {isSelected && (
+                                <CheckCircle className="h-4 w-4 text-brand-cyan" />
+                              )}
+                            </div>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+
+              {/* Prompt if none selected */}
+              {!selectedProblem && !problemsLoading && (
+                <p className="text-xs text-brand-muted">
+                  Click a problem above to select it for your interview.
+                </p>
+              )}
+            </div>
+          )}
         </SectionCard>
 
         {/* 2 – Difficulty */}
         <SectionCard title="Difficulty">
-          <div className="flex gap-3">
+          <div className={cn("flex gap-3", isSpecificSelected && "opacity-40 pointer-events-none")}>
             {DIFFICULTIES.map((d) => (
               <button
                 key={d.value}
+                disabled={isSpecificSelected}
                 onClick={() => setForm((f) => ({ ...f, difficulty: d.value }))}
                 className={cn(
                   "flex-1 rounded-lg border px-4 py-3 text-sm font-semibold transition-all duration-150",
@@ -241,14 +617,20 @@ export default function InterviewSetupPage() {
               </button>
             ))}
           </div>
+          {isSpecificSelected && (
+            <p className="mt-2 text-xs text-brand-amber">
+              Locked to {selectedProblem?.difficulty} — determined by the selected problem.
+            </p>
+          )}
         </SectionCard>
 
         {/* 3 – Category */}
         <SectionCard title="Topic Category">
-          <div className="flex flex-wrap gap-2">
+          <div className={cn("flex flex-wrap gap-2", isSpecificSelected && "opacity-40 pointer-events-none")}>
             {CATEGORIES.map((c) => (
               <button
                 key={c.value}
+                disabled={isSpecificSelected}
                 onClick={() => setForm((f) => ({ ...f, category: c.value }))}
                 className={cn(
                   "rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-150",
@@ -261,6 +643,11 @@ export default function InterviewSetupPage() {
               </button>
             ))}
           </div>
+          {isSpecificSelected && (
+            <p className="mt-2 text-xs text-brand-amber">
+              Locked to {selectedProblem?.category} — determined by the selected problem.
+            </p>
+          )}
         </SectionCard>
 
         {/* 4 – Language */}
@@ -391,7 +778,10 @@ export default function InterviewSetupPage() {
           <Button
             size="lg"
             onClick={handleStartInterview}
-            disabled={isCreating}
+            disabled={
+              isCreating ||
+              (problemMode === "specific" && !selectedProblem)
+            }
             className="w-full gap-2 text-base font-semibold"
           >
             {isCreating ? (
@@ -406,6 +796,11 @@ export default function InterviewSetupPage() {
               </>
             )}
           </Button>
+          {problemMode === "specific" && !selectedProblem && (
+            <p className="mt-2 text-center text-xs text-brand-amber">
+              Select a problem above to continue.
+            </p>
+          )}
           <p className="mt-3 text-center text-xs text-brand-muted">
             By starting, you agree that Alex (our AI interviewer) will record
             and analyze your session.

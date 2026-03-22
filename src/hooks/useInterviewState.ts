@@ -35,7 +35,7 @@ export function useInterviewState() {
 
   return {
     // Store state
-    interview: store.interview,
+    interviewId: store.interviewId,
     problem: store.problem,
     messages: store.messages,
     currentPhase: store.currentPhase,
@@ -44,17 +44,19 @@ export function useInterviewState() {
     voiceState: store.voiceState,
     isInterviewActive: store.isInterviewActive,
     textInputMode: store.textInputMode,
+    setupConfig: store.setupConfig,
+    interviewResult: store.interviewResult,
 
     // Store actions
-    setInterview: store.setInterview,
     setProblem: store.setProblem,
     setCode: store.setCode,
     addMessage: store.addMessage,
     setPhase: store.setPhase,
     setVoiceState: store.setVoiceState,
     setTestResults: store.setTestResults,
-    endInterview: store.endInterview,
+    completeInterview: store.completeInterview,
     toggleTextInput: store.toggleTextInput,
+    reset: store.reset,
 
     // Extended actions
     advancePhase,

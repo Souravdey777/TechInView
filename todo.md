@@ -1,0 +1,76 @@
+# TechInView — Development TODO (Execution Order)
+
+## Phase 1: Complete the Core Interview Loop
+_Goal: One full interview from start to scored results_
+
+- [x] 1. Seed 15 problems into Supabase DB — wire `scripts/seed-problems.ts` to real DB insert
+- [x] 2. Wire `/api/interview/start` to select random problem from DB based on difficulty/category
+- [x] 3. Load test cases dynamically from the selected problem (not hardcoded Two Sum)
+- [x] 4. Timer actually counts down during interview
+- [x] 5. Phase transitions — Alex advances through INTRO → PROBLEM → CODING → etc. based on time/conversation
+- [x] 6. Wire real AI scoring on "End Interview" — call `scoreInterview()` from `src/lib/ai/scorer.ts`
+- [x] 7. Results page reads from Zustand store + displays real AI-generated scores, radar chart, feedback
+- [x] 8. Save completed interview + scores to DB (interviews table)
+
+## Phase 2: Data-Driven Pages
+_Goal: Dashboard, problems, progress all pull real data_
+
+- [x] 9. Problems page loads from DB with working filters (difficulty, category, search)
+- [x] 10. Setup page "Choose specific" option lists real problems from DB
+- [x] 11. Dashboard shows real interview history from DB
+- [x] 12. Dashboard stats (total interviews, avg score, problems solved) from DB queries
+- [x] 13. Progress page shows real score trends and category breakdown
+- [x] 14. Settings page saves profile updates to DB (target company, preferred language, experience level)
+
+## Phase 3: Polish & UX
+_Goal: Feel like a real product_
+
+- [x] 15. Loading skeletons on all data-fetching pages
+- [x] 16. Error boundaries on every route segment
+- [x] 17. Toast notifications for user-facing errors
+- [x] 18. Mobile responsive landing page (interview room stays desktop-only)
+- [x] 19. Landing page demo preview (dynamic OG image)
+- [x] 20. OG images for social sharing
+
+## Phase 4: Deploy MVP
+_Goal: Live on the internet, shareable link_
+
+- [ ] 21. Push to GitHub
+- [ ] 22. Deploy frontend to Vercel
+- [ ] 23. Set up production env vars on Vercel
+- [ ] 24. Update Supabase auth redirect URLs to production domain
+- [ ] 25. Configure custom domain (techinview.ai)
+- [ ] 26. Smoke test full flow on production
+
+## Phase 5: Monetization
+_Goal: Accept payments_
+
+- [ ] 27. Stripe checkout for Starter ($19/mo) and Pro ($29/mo) plans
+- [ ] 28. Stripe customer portal for managing subscriptions
+- [ ] 29. Wire Stripe webhook to update user plan in DB
+- [ ] 30. Enforce free tier limit (1 interview/week) in `/api/interview/start`
+
+## Phase 6: Voice Upgrade
+_Goal: Replace browser APIs with production-quality voice_
+
+- [ ] 31. Integrate Deepgram Nova-2 for server-side STT (replace browser SpeechRecognition)
+- [ ] 32. Integrate ElevenLabs Turbo v2.5 for TTS (replace browser SpeechSynthesis)
+- [ ] 33. Deploy voice-server to Railway
+- [ ] 34. Wire WebSocket voice pipeline: Browser → Railway → Deepgram/Claude/ElevenLabs → Browser
+- [ ] 35. Interruption handling — stop Alex when user starts speaking
+
+## Phase 7: Analytics & Growth
+_Goal: Understand usage, iterate_
+
+- [ ] 36. PostHog integration (interview_started, completed, code_run, payment events)
+- [ ] 37. Track conversion funnel: landing → signup → first interview → payment
+
+## Post-V1 Roadmap
+_After launch & initial traction_
+
+- [ ] Company-specific interviewer personas
+- [ ] Problem bank expansion (100+ problems)
+- [ ] Spaced repetition queue
+- [ ] System Design mode (Excalidraw)
+- [ ] Machine Coding (multi-file IDE)
+- [ ] Peer matching (viral loop)

@@ -25,12 +25,8 @@ type SpeechRecognitionInstance = {
   abort: () => void;
 };
 
-declare global {
-  interface Window {
-    SpeechRecognition?: SpeechRecognitionType;
-    webkitSpeechRecognition?: SpeechRecognitionType;
-  }
-}
+// SpeechRecognition & webkitSpeechRecognition are declared in lib.dom.d.ts.
+// We cast at usage to our local SpeechRecognitionType.
 
 type VoiceState = "idle" | "listening" | "thinking" | "speaking";
 
@@ -51,8 +47,9 @@ export function useVoiceInterview() {
       try { recognitionRef.current.abort(); } catch { /* ignore */ }
     }
 
+    const win = window as unknown as Record<string, unknown>;
     const SpeechRecognitionCtor =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+      (win.SpeechRecognition || win.webkitSpeechRecognition) as SpeechRecognitionType | undefined;
     if (!SpeechRecognitionCtor) return;
 
     const recognition = new SpeechRecognitionCtor();

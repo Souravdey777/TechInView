@@ -1,108 +1,100 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { scoreInterview } from "@/lib/ai/scorer";
 
-type ScoreInterviewBody = {
-  interviewId: string;
-};
-
-type DimensionScore = {
-  score: number;
-  feedback: string;
-};
-
-type MockScoreData = {
-  interviewId: string;
-  overall_score: number;
-  hire_recommendation: string;
-  feedback_summary: string;
-  scores: {
-    problem_solving: DimensionScore;
-    code_quality: DimensionScore;
-    communication: DimensionScore;
-    technical_knowledge: DimensionScore;
-    testing: DimensionScore;
+type ScoreRequestBody = {
+  transcript: { role: string; content: string }[];
+  finalCode: string;
+  testsPassed: number;
+  testsTotal: number;
+  problem: {
+    title: string;
+    description: string;
+    optimal_complexity: { time: string; space: string };
   };
 };
 
+// ─── Mock scores returned when ANTHROPIC_API_KEY is not set ───────────────────
+
+function getMockResult(testsPassed: number, testsTotal: number) {
+  const passRate = testsTotal > 0 ? testsPassed / testsTotal : 0;
+  const baseScore = 55 + Math.round(passRate * 20);
+
+  return {
+    overall_score: baseScore,
+    scores: {
+      problem_solving: { score: baseScore + 5, feedback: "Mock feedback: scoring unavailable (no API key)." },
+      code_quality: { score: baseScore, feedback: "Mock feedback: scoring unavailable (no API key)." },
+      communication: { score: baseScore - 5, feedback: "Mock feedback: scoring unavailable (no API key)." },
+      technical_knowledge: { score: baseScore, feedback: "Mock feedback: scoring unavailable (no API key)." },
+      testing: { score: baseScore - 10, feedback: "Mock feedback: scoring unavailable (no API key)." },
+    },
+    hire_recommendation: baseScore >= 70 ? "hire" : baseScore >= 55 ? "lean_hire" : "lean_no_hire",
+    key_strengths: ["Completed the interview session"],
+    areas_to_improve: ["Set ANTHROPIC_API_KEY to enable real AI scoring"],
+    summary: "AI scoring is currently unavailable because ANTHROPIC_API_KEY is not configured. These are placeholder scores based on test pass rate.",
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const body = (await req.json()) as ScoreRequestBody;
+    const { transcript, finalCode, testsPassed, testsTotal, problem } = body;
 
-    if (authError || !user) {
+    if (!transcript || transcript.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const body = (await req.json()) as ScoreInterviewBody;
-    const { interviewId } = body;
-
-    if (!interviewId) {
-      return NextResponse.json(
-        { success: false, error: "interviewId is required" },
+        { success: false, error: "transcript is required" },
         { status: 400 }
       );
     }
 
-    // TODO: Fetch the completed interview record and message transcript from DB,
-    // then call scoreInterview() from @/lib/ai/scorer with the full context.
-    // const interview = await db.query.interviews.findFirst({
-    //   where: and(eq(interviews.id, interviewId), eq(interviews.user_id, user.id)),
-    // });
-    // const transcript = await db.query.messages.findMany({
-    //   where: eq(messages.interview_id, interviewId),
-    //   orderBy: asc(messages.timestamp_ms),
-    // });
-    // const scoreResult = await scoreInterview({ interview, transcript });
+    // If no API key is set, return mock scores instead of crashing
+    if (!process.env.ANTHROPIC_API_KEY) {
+      const mockResult = getMockResult(testsPassed ?? 0, testsTotal ?? 0);
+      return NextResponse.json({ success: true, data: mockResult });
+    }
 
-    // Mock scoring data returned until AI scorer is wired to DB
-    const mockScore: MockScoreData = {
-      interviewId,
-      overall_score: 72,
-      hire_recommendation: "hire",
-      feedback_summary:
-        "Strong performance overall. You identified an optimal hash map approach and implemented it cleanly. Time complexity analysis was accurate. Focus on verbalizing edge cases more proactively before coding.",
-      scores: {
-        problem_solving: {
-          score: 75,
-          feedback:
-            "Good clarifying questions about edge cases. You correctly identified the hash map approach after briefly considering brute force.",
-        },
-        code_quality: {
-          score: 78,
-          feedback:
-            "Clean, readable code with good variable naming. Minor improvement: prefer early returns to reduce nesting.",
-        },
-        communication: {
-          score: 68,
-          feedback:
-            "Explained your approach clearly at a high level. Could improve by narrating implementation decisions as you code.",
-        },
-        technical_knowledge: {
-          score: 70,
-          feedback:
-            "Correctly stated O(n) time and O(n) space. Showed understanding of hash map trade-offs.",
-        },
-        testing: {
-          score: 65,
-          feedback:
-            "Tested the provided examples. Missed checking for negative numbers and target = 0 edge cases.",
-        },
+    // Attach placeholder timestamps so the scorer's type is satisfied
+    const messagesWithTimestamps = transcript.map((msg, i) => ({
+      ...msg,
+      timestamp_ms: i * 30000,
+    }));
+
+    const result = await scoreInterview({
+      messages: messagesWithTimestamps,
+      finalCode: finalCode || "",
+      testsPassed: testsPassed ?? 0,
+      testsTotal: testsTotal ?? 0,
+      problem: {
+        title: problem?.title ?? "Unknown Problem",
+        description: problem?.description ?? "",
+        optimal_complexity: problem?.optimal_complexity ?? { time: "Unknown", space: "Unknown" },
       },
-    };
+    });
 
     return NextResponse.json({
       success: true,
-      data: mockScore,
+      data: {
+        overall_score: result.overall_score,
+        scores: {
+          problem_solving: { score: result.scores.problem_solving.score, feedback: result.scores.problem_solving.feedback },
+          code_quality: { score: result.scores.code_quality.score, feedback: result.scores.code_quality.feedback },
+          communication: { score: result.scores.communication.score, feedback: result.scores.communication.feedback },
+          technical_knowledge: { score: result.scores.technical_knowledge.score, feedback: result.scores.technical_knowledge.feedback },
+          testing: { score: result.scores.testing.score, feedback: result.scores.testing.feedback },
+        },
+        hire_recommendation: result.hire_recommendation,
+        key_strengths: result.key_strengths,
+        areas_to_improve: result.areas_to_improve,
+        summary: result.summary,
+      },
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error("Scoring error:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to score interview" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to score interview",
+      },
       { status: 500 }
     );
   }

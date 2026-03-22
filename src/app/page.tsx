@@ -3,10 +3,10 @@ import { Mic, Code2, BarChart3 } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-brand-deep text-brand-text">
+    <div className="min-h-screen bg-brand-deep text-brand-text overflow-x-hidden">
       {/* Navbar */}
       <header className="sticky top-0 z-50 bg-brand-deep/80 backdrop-blur-md border-b border-brand-border">
-        <nav className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-1">
             <span className="text-xl font-bold font-heading text-brand-text tracking-tight">
               TechInView
@@ -37,7 +37,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-24 pb-32 px-6">
+      <section className="relative overflow-hidden pt-24 pb-32 px-4 sm:px-6">
         {/* Gradient mesh background */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -52,7 +52,7 @@ export default function LandingPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
             Voice-powered AI interviewer
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight text-brand-text mb-6 animate-fade-in">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight text-brand-text mb-6 animate-fade-in">
             Ace your next{" "}
             <span className="text-gradient-cyan">coding interview</span>
           </h1>
@@ -82,7 +82,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-24 px-6 bg-brand-surface">
+      <section id="features" className="py-24 px-4 sm:px-6 bg-brand-surface">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -93,7 +93,7 @@ export default function LandingPage() {
               preparation seriously.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="glass-card p-8 flex flex-col gap-4 hover:border-brand-cyan/30 transition-colors">
               <div className="w-12 h-12 rounded-xl bg-brand-cyan/10 flex items-center justify-center">
                 <Mic className="w-6 h-6 text-brand-cyan" />
@@ -138,7 +138,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 px-6 bg-brand-deep">
+      <section className="py-24 px-4 sm:px-6 bg-brand-deep">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -148,7 +148,7 @@ export default function LandingPage() {
               From setup to feedback in under an hour.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {/* Connector line */}
             <div className="hidden md:block absolute top-8 left-1/3 right-1/3 h-px bg-gradient-to-r from-transparent via-brand-border to-transparent" />
             <div className="flex flex-col items-center text-center gap-4">
@@ -194,7 +194,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-24 px-6 bg-brand-surface">
+      <section id="pricing" className="py-24 px-4 sm:px-6 bg-brand-surface">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -204,7 +204,7 @@ export default function LandingPage() {
               Start free, upgrade when you&apos;re ready.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Starter */}
             <div className="glass-card p-8 flex flex-col gap-6">
               <div>
@@ -302,7 +302,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-brand-border bg-brand-deep">
+      <footer className="py-12 px-4 sm:px-6 border-t border-brand-border bg-brand-deep">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-1">
             <span className="font-bold font-heading text-brand-text">
