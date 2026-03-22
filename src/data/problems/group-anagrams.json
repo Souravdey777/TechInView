@@ -1,0 +1,72 @@
+{
+  "title": "Group Anagrams",
+  "slug": "group-anagrams",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": ["amazon", "google", "facebook", "microsoft", "uber"],
+  "description": "Given an array of strings `strs`, group **the anagrams** together. You can return the answer in **any order**.\n\nAn **anagram** is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.\n\n**Example 1:**\n```\nInput: strs = [\"eat\",\"tea\",\"tan\",\"ate\",\"nat\",\"bat\"]\nOutput: [[\"bat\"],[\"nat\",\"tan\"],[\"ate\",\"eat\",\"tea\"]]\n```\n\n**Example 2:**\n```\nInput: strs = [\"\"]\nOutput: [[\"\"]]\n```\n\n**Example 3:**\n```\nInput: strs = [\"a\"]\nOutput: [[\"a\"]]\n```",
+  "examples": [
+    {
+      "input": "strs = [\"eat\",\"tea\",\"tan\",\"ate\",\"nat\",\"bat\"]",
+      "output": "[[\"bat\"],[\"nat\",\"tan\"],[\"ate\",\"eat\",\"tea\"]]",
+      "explanation": "\"eat\", \"tea\", and \"ate\" are all anagrams of each other. \"tan\" and \"nat\" are anagrams. \"bat\" has no anagram in the list."
+    },
+    {
+      "input": "strs = [\"hhhhu\",\"tttti\",\"tttit\",\"hhhuh\"]",
+      "output": "[[\"hhhhu\",\"hhhuh\"],[\"tttti\",\"tttit\"]]",
+      "explanation": "\"hhhhu\" and \"hhhuh\" share the same character counts (4 h's and 1 u). \"tttti\" and \"tttit\" share the same counts (4 t's and 1 i)."
+    }
+  ],
+  "constraints": [
+    "1 <= strs.length <= 10^4",
+    "0 <= strs[i].length <= 100",
+    "strs[i] consists of lowercase English letters."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:\n        # Write your solution here\n        pass",
+    "javascript": "function groupAnagrams(strs) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<String>> groupAnagrams(String[] strs) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "strs = [\"eat\",\"tea\",\"tan\",\"ate\",\"nat\",\"bat\"]",
+      "expected_output": "[[\"bat\"],[\"nat\",\"tan\"],[\"ate\",\"eat\",\"tea\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "strs = [\"\"]",
+      "expected_output": "[[\"\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "strs = [\"a\"]",
+      "expected_output": "[[\"a\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "strs = [\"abc\",\"bca\",\"cab\",\"xyz\",\"zyx\"]",
+      "expected_output": "[[\"abc\",\"bca\",\"cab\"],[\"xyz\",\"zyx\"]]",
+      "is_hidden": true
+    },
+    {
+      "input": "strs = [\"dd\",\"ad\",\"da\"]",
+      "expected_output": "[[\"dd\"],[\"ad\",\"da\"]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The canonical key for a group of anagrams is any representation invariant to letter order. Two approaches: (1) Sort each string — sorted characters form the key. Use a hash map where key = sorted string, value = list of original strings. O(n * k log k) time where k is max string length. (2) Character frequency tuple — for each string, build a tuple of 26 counts (one per letter a-z). This key is O(k) to compute vs O(k log k) for sorting, giving O(n * k) overall time. Both use O(n * k) space for the output.",
+  "hints": [
+    "Two strings are anagrams if and only if they have the same characters with the same frequencies. How can you create a unique \"fingerprint\" for each group?",
+    "One approach: sort each string. Anagrams will produce the same sorted string, which you can use as a hash map key.",
+    "A faster approach: use a character frequency count (array of 26 integers) as the key instead of sorting. This reduces per-string processing from O(k log k) to O(k)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * k)",
+    "space": "O(n * k)"
+  },
+  "follow_up_questions": [
+    "What if the strings contained Unicode characters beyond ASCII — how would you adapt the frequency-count approach?",
+    "How would you solve this if you had to process a stream of strings online, grouping them as they arrive?"
+  ]
+}

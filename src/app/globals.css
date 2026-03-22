@@ -2,26 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 220 20% 3%;
+    --foreground: 214 32% 91%;
+    --card: 215 30% 9%;
+    --card-foreground: 214 32% 91%;
+    --popover: 215 30% 9%;
+    --popover-foreground: 214 32% 91%;
+    --primary: 187 92% 53%;
+    --primary-foreground: 220 20% 3%;
+    --secondary: 215 25% 12%;
+    --secondary-foreground: 214 32% 91%;
+    --muted: 215 25% 12%;
+    --muted-foreground: 215 18% 56%;
+    --accent: 215 25% 12%;
+    --accent-foreground: 214 32% 91%;
+    --destructive: 330 65% 70%;
+    --destructive-foreground: 220 20% 3%;
+    --border: 215 30% 15%;
+    --input: 215 30% 15%;
+    --ring: 187 92% 53%;
+    --radius: 0.625rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a2332;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a3a4f;
+}
+
+/* Utility classes */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .glass-card {
+    @apply bg-brand-card/80 backdrop-blur-sm border border-brand-border rounded-xl;
   }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.15),
+                0 0 60px rgba(34, 211, 238, 0.05);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.15),
+                0 0 60px rgba(52, 211, 153, 0.05);
+  }
+
+  .text-gradient-cyan {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-cyan to-cyan-300;
+  }
+}
+
+/* Selection */
+::selection {
+  background: rgba(34, 211, 238, 0.2);
+  color: #e2e8f0;
+}
+
+/* Focus ring */
+:focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
 }

@@ -1,0 +1,73 @@
+{
+  "title": "Number of Islands",
+  "slug": "number-of-islands",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": ["amazon", "google", "microsoft", "bloomberg", "linkedin"],
+  "description": "Given an `m x n` 2D binary grid `grid` which represents a map of `'1'`s (land) and `'0'`s (water), return *the number of islands*.\n\nAn **island** is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.\n\n**Example 1:**\n```\nInput: grid = [\n  [\"1\",\"1\",\"1\",\"1\",\"0\"],\n  [\"1\",\"1\",\"0\",\"1\",\"0\"],\n  [\"1\",\"1\",\"0\",\"0\",\"0\"],\n  [\"0\",\"0\",\"0\",\"0\",\"0\"]\n]\nOutput: 1\n```\n\n**Example 2:**\n```\nInput: grid = [\n  [\"1\",\"0\",\"1\",\"1\",\"0\"],\n  [\"1\",\"0\",\"1\",\"0\",\"0\"],\n  [\"0\",\"0\",\"0\",\"0\",\"1\"],\n  [\"0\",\"0\",\"0\",\"1\",\"1\"]\n]\nOutput: 3\n```",
+  "examples": [
+    {
+      "input": "grid = [[\"1\",\"1\",\"1\",\"1\",\"0\"],[\"1\",\"1\",\"0\",\"1\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"0\",\"0\"]]",
+      "output": "1",
+      "explanation": "All connected '1' cells form a single island. There are no other disconnected land cells."
+    },
+    {
+      "input": "grid = [[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"1\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"1\",\"1\"]]",
+      "output": "3",
+      "explanation": "There are three separate groups of connected land cells: top-left 2x2 block, center cell at (2,2), and bottom-right two cells at (3,3) and (3,4)."
+    }
+  ],
+  "constraints": [
+    "m == grid.length",
+    "n == grid[i].length",
+    "1 <= m, n <= 300",
+    "grid[i][j] is '0' or '1'."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def numIslands(self, grid: list[list[str]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function numIslands(grid) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int numIslands(char[][] grid) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "grid = [[\"1\",\"1\",\"1\",\"1\",\"0\"],[\"1\",\"1\",\"0\",\"1\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"0\",\"0\"]]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"1\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"1\",\"1\"]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[\"1\"]]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[\"0\",\"0\",\"0\"],[\"0\",\"0\",\"0\"]]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "grid = [[\"1\",\"0\",\"1\"],[\"0\",\"1\",\"0\"],[\"1\",\"0\",\"1\"]]",
+      "expected_output": "5",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "This is a connected components problem. Iterate through every cell in the grid. When you find a '1' (unvisited land), increment the island count and use DFS or BFS to mark all connected land cells as visited (either change them to '0' or use a separate visited set). DFS approach: recursively visit up, down, left, right neighbors that are '1'. BFS approach: use a queue. Both run in O(m * n) time and O(m * n) space in the worst case (a grid fully of land requires O(m*n) for the DFS call stack or BFS queue). Union-Find is a third valid approach that can handle dynamic connectivity.",
+  "hints": [
+    "When you find a land cell ('1'), how can you find all the land cells that are part of the same island and mark them so you don't count them again?",
+    "Use DFS or BFS. Starting from any unvisited land cell, traverse all connected land cells (up/down/left/right) and mark them as visited. Each time you start a new traversal, you've found a new island.",
+    "Iterate through the grid. When you encounter a '1', increment your count and run DFS/BFS from that cell, marking all reachable '1's as '0' (or visited). Then continue scanning."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n)",
+    "space": "O(m * n)"
+  },
+  "follow_up_questions": [
+    "How would you solve this if the grid were very large and given as a stream of rows, rather than all at once?",
+    "What if islands could also be connected diagonally? How would you modify the approach?"
+  ]
+}

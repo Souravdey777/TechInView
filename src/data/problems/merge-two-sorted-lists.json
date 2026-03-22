@@ -1,0 +1,72 @@
+{
+  "title": "Merge Two Sorted Lists",
+  "slug": "merge-two-sorted-lists",
+  "difficulty": "easy",
+  "category": "linked-lists",
+  "company_tags": ["amazon", "google", "microsoft", "apple", "bloomberg"],
+  "description": "You are given the heads of two sorted linked lists `list1` and `list2`.\n\nMerge the two lists into one **sorted** list. The list should be made by splicing together the nodes of the first two lists.\n\nReturn the *head of the merged linked list*.\n\n**Example 1:**\n```\nInput: list1 = [1,2,4], list2 = [1,3,4]\nOutput: [1,1,2,3,4,4]\n```\n\n**Example 2:**\n```\nInput: list1 = [], list2 = []\nOutput: []\n```\n\n**Example 3:**\n```\nInput: list1 = [], list2 = [0]\nOutput: [0]\n```",
+  "examples": [
+    {
+      "input": "list1 = [1,2,4], list2 = [1,3,4]",
+      "output": "[1,1,2,3,4,4]",
+      "explanation": "Compare nodes from both lists. 1<=1, take list1's 1. Then 1<=2 so take list2's 1. Then 2<=3 so take list1's 2. Then 3<=4, take list2's 3. Then 4=4, take list1's 4. Finally take list2's 4."
+    },
+    {
+      "input": "list1 = [], list2 = [0]",
+      "output": "[0]",
+      "explanation": "list1 is empty, so the result is simply list2."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in both lists is in the range [0, 50].",
+    "-100 <= Node.val <= 100",
+    "Both list1 and list2 are sorted in non-decreasing order."
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def mergeTwoLists(self, list1: ListNode | None, list2: ListNode | None) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction mergeTwoLists(list1, list2) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "list1 = [1,2,4], list2 = [1,3,4]",
+      "expected_output": "[1,1,2,3,4,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [], list2 = []",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [], list2 = [0]",
+      "expected_output": "[0]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [1,3,5], list2 = [2,4,6]",
+      "expected_output": "[1,2,3,4,5,6]",
+      "is_hidden": true
+    },
+    {
+      "input": "list1 = [1,1,1], list2 = [1,1,1]",
+      "expected_output": "[1,1,1,1,1,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use a dummy head node to simplify edge cases. Maintain a current pointer starting at dummy. While both lists are non-empty, compare the heads: append the smaller node to current.next and advance that list's pointer. Advance current forward. When one list is exhausted, append the remaining non-empty list directly (since it's already sorted). Return dummy.next as the merged head. Time O(n + m) where n and m are the lengths of the two lists. Space O(1) since we reuse existing nodes. The recursive solution is elegant but uses O(n + m) stack space.",
+  "hints": [
+    "Think about the merge step from merge sort. At each step, which node should come next in the merged list?",
+    "Use a dummy head node to avoid special-casing the start of the merged list. This simplifies your pointer manipulation.",
+    "Compare list1.val and list2.val. Attach the smaller node to your result list, advance that pointer, and repeat. When one list runs out, attach the rest of the other list."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + m)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you solve this recursively? How does the recursive solution differ in space complexity?",
+    "How would you merge k sorted linked lists efficiently?"
+  ]
+}

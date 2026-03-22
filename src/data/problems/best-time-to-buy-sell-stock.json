@@ -1,0 +1,71 @@
+{
+  "title": "Best Time to Buy and Sell Stock",
+  "slug": "best-time-to-buy-sell-stock",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": ["amazon", "google", "microsoft", "bloomberg", "goldman-sachs"],
+  "description": "You are given an array `prices` where `prices[i]` is the price of a given stock on the `i`th day.\n\nYou want to maximize your profit by choosing a **single day** to buy one stock and choosing a **different day in the future** to sell that stock.\n\nReturn the *maximum profit you can achieve from this transaction*. If you cannot achieve any profit, return `0`.\n\n**Example 1:**\n```\nInput: prices = [7,1,5,3,6,4]\nOutput: 5\nExplanation: Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6 - 1 = 5.\nNote that buying on day 2 and selling on day 1 is not allowed because you must buy before you sell.\n```\n\n**Example 2:**\n```\nInput: prices = [7,6,4,3,1]\nOutput: 0\nExplanation: In this case, no transactions are done and the max profit = 0.\n```",
+  "examples": [
+    {
+      "input": "prices = [7,1,5,3,6,4]",
+      "output": "5",
+      "explanation": "Buy on day 2 (price = 1) and sell on day 5 (price = 6). Profit = 6 - 1 = 5. Selling on day 3 for profit 5 - 1 = 4 is less optimal."
+    },
+    {
+      "input": "prices = [7,6,4,3,1]",
+      "output": "0",
+      "explanation": "Prices are strictly decreasing, so no profitable transaction is possible. Return 0."
+    }
+  ],
+  "constraints": [
+    "1 <= prices.length <= 10^5",
+    "0 <= prices[i] <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxProfit(self, prices: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxProfit(prices) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "prices = [7,1,5,3,6,4]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "prices = [7,6,4,3,1]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "prices = [2,4,1]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "prices = [3,1,4,8,2,9]",
+      "expected_output": "8",
+      "is_hidden": true
+    },
+    {
+      "input": "prices = [1]",
+      "expected_output": "0",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Track the minimum price seen so far and the maximum profit achievable. Iterate through the array once: for each price, compute the profit if you sold today (price - min_price_so_far) and update max_profit if this beats the current best. Also update min_price if the current price is lower. This single pass gives O(n) time and O(1) space. The key insight is that to maximize profit for any sell day, you always want to buy at the lowest price seen before that day.",
+  "hints": [
+    "You don't need to consider every pair. For each potential sell day, what is the best buy day?",
+    "For a given sell day, the best buy day is the day with the minimum price among all previous days. Can you track that efficiently?",
+    "Use two variables: one to track the minimum price seen so far, and one to track the maximum profit. Update both in a single pass."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve this if you were allowed to make at most 2 transactions (buy-sell pairs)?",
+    "What if you could hold at most one share but make unlimited transactions — which days would you buy and sell?"
+  ]
+}

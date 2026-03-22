@@ -1,0 +1,81 @@
+{
+  "title": "Valid Parentheses",
+  "slug": "valid-parentheses",
+  "difficulty": "easy",
+  "category": "stacks-queues",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "bloomberg"],
+  "description": "Given a string `s` containing just the characters `'('`, `')'`, `'{'`, `'}'`, `'['` and `']'`, determine if the input string is valid.\n\nAn input string is valid if:\n\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.\n\n**Example 1:**\n```\nInput: s = \"()\"\nOutput: true\n```\n\n**Example 2:**\n```\nInput: s = \"()[]{}\"\nOutput: true\n```\n\n**Example 3:**\n```\nInput: s = \"(]\"\nOutput: false\n```",
+  "examples": [
+    {
+      "input": "s = \"()[]{}\"",
+      "output": "true",
+      "explanation": "Each opening bracket is matched by the same type of closing bracket in the correct order."
+    },
+    {
+      "input": "s = \"([)]\"",
+      "output": "false",
+      "explanation": "The brackets are not closed in the correct order — the '[' is closed by ')' before the '(' is closed."
+    },
+    {
+      "input": "s = \"{[]}\"",
+      "output": "true",
+      "explanation": "The '[' inside '{}' is properly closed before the outer '{' is closed."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^4",
+    "s consists of parentheses only '()[]{}'."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def isValid(self, s: str) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function isValid(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean isValid(String s) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool isValid(string s) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"()\"",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"()[]{}\"",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"(]\"",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"([)]\"",
+      "expected_output": "false",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"{[]}\"",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"]\"",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use a stack. Iterate through each character in the string. If the character is an opening bracket ('(', '[', '{'), push it onto the stack. If it's a closing bracket, check whether the stack is non-empty and whether the top of the stack is the matching opening bracket. If yes, pop the stack. If no (wrong match or empty stack), return false immediately. After processing all characters, return true only if the stack is empty — meaning every opened bracket was properly closed.",
+  "hints": [
+    "When you encounter a closing bracket, what do you need to know about the most recently seen bracket?",
+    "A stack is perfect here — it gives you access to the most recently opened bracket that hasn't been closed yet.",
+    "Push opening brackets onto the stack. When you see a closing bracket, pop from the stack and check if it matches. Return false if they don't match or the stack is empty when you need to pop."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you modify this to also return the index of the first invalid character?",
+    "What if the string could also contain other characters that should be ignored?"
+  ]
+}

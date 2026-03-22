@@ -1,0 +1,71 @@
+{
+  "title": "Reverse Linked List",
+  "slug": "reverse-linked-list",
+  "difficulty": "easy",
+  "category": "linked-lists",
+  "company_tags": ["amazon", "google", "microsoft", "apple", "adobe"],
+  "description": "Given the `head` of a singly linked list, reverse the list, and return the *reversed list*.\n\n**Example 1:**\n```\nInput: head = [1,2,3,4,5]\nOutput: [5,4,3,2,1]\n```\n\n**Example 2:**\n```\nInput: head = [1,2]\nOutput: [2,1]\n```\n\n**Example 3:**\n```\nInput: head = []\nOutput: []\n```",
+  "examples": [
+    {
+      "input": "head = [1,2,3,4,5]",
+      "output": "[5,4,3,2,1]",
+      "explanation": "The linked list 1 -> 2 -> 3 -> 4 -> 5 becomes 5 -> 4 -> 3 -> 2 -> 1 after reversal."
+    },
+    {
+      "input": "head = [1,2]",
+      "output": "[2,1]",
+      "explanation": "The linked list 1 -> 2 becomes 2 -> 1 after reversal."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the list is the range [0, 5000].",
+    "-5000 <= Node.val <= 5000"
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reverseList(self, head: ListNode | None) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction reverseList(head) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode reverseList(ListNode head) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "head = [1,2,3,4,5]",
+      "expected_output": "[5,4,3,2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1,2]",
+      "expected_output": "[2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = []",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1]",
+      "expected_output": "[1]",
+      "is_hidden": true
+    },
+    {
+      "input": "head = [1,2,3]",
+      "expected_output": "[3,2,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Iterative approach: use three pointers — prev (starts null), curr (starts at head), and next. At each step: save curr.next in next, point curr.next to prev, move prev to curr, move curr to next. When curr is null, prev is the new head. O(n) time, O(1) space. Recursive approach: recurse to the end of the list, then on the way back point each node's next.next to itself and set its next to null. The base case returns the last node as the new head. O(n) time, O(n) space due to call stack. The iterative approach is preferred in interviews.",
+  "hints": [
+    "You need to change the direction of every pointer in the list. What information do you need to keep track of at each step to avoid losing the rest of the list?",
+    "Use three pointers: previous, current, and next. Save the next node before you redirect the current node's pointer.",
+    "Iteratively: set curr.next = prev, then advance both prev and curr forward. When curr is null, prev is the new head of the reversed list."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you solve it recursively? What is the space complexity of the recursive solution?",
+    "How would you reverse only a portion of the linked list, from position m to position n?"
+  ]
+}

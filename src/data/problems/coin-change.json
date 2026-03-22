@@ -1,0 +1,72 @@
+{
+  "title": "Coin Change",
+  "slug": "coin-change",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": ["amazon", "google", "meta", "microsoft", "goldman-sachs"],
+  "description": "You are given an integer array `coins` representing coins of different denominations and an integer `amount` representing a total amount of money.\n\nReturn the *fewest number of coins that you need to make up that amount*. If that amount of money cannot be made up by any combination of the coins, return `-1`.\n\nYou may assume that you have an **infinite number** of each kind of coin.\n\n**Example 1:**\n```\nInput: coins = [1,5,10,25], amount = 36\nOutput: 3\nExplanation: 25 + 10 + 1 = 36 (3 coins)\n```\n\n**Example 2:**\n```\nInput: coins = [2], amount = 3\nOutput: -1\nExplanation: It is impossible to make 3 using only coins of value 2.\n```\n\n**Example 3:**\n```\nInput: coins = [1,2,5], amount = 11\nOutput: 3\nExplanation: 5 + 5 + 1 = 11 (3 coins)\n```",
+  "examples": [
+    {
+      "input": "coins = [1,2,5], amount = 11",
+      "output": "3",
+      "explanation": "11 = 5 + 5 + 1. Three coins is the minimum. Other combos like 2+2+2+2+2+1 use 6 coins."
+    },
+    {
+      "input": "coins = [2], amount = 3",
+      "output": "-1",
+      "explanation": "No combination of coins with denomination 2 can sum to 3 (an odd number). Return -1."
+    }
+  ],
+  "constraints": [
+    "1 <= coins.length <= 12",
+    "1 <= coins[i] <= 2^31 - 1",
+    "0 <= amount <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def coinChange(self, coins: list[int], amount: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function coinChange(coins, amount) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int coinChange(int[] coins, int amount) {\n        // Write your solution here\n        return -1;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int coinChange(vector<int>& coins, int amount) {\n        // Write your solution here\n        return -1;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "coins = [1,2,5], amount = 11",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "coins = [2], amount = 3",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "coins = [1], amount = 0",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "coins = [1], amount = 2",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "coins = [186,419,83,408], amount = 6249",
+      "expected_output": "20",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Bottom-up dynamic programming. Create a dp array of size amount+1 initialized to infinity (or amount+1 as a sentinel). Set dp[0] = 0 (zero coins needed to make amount 0). For each amount from 1 to amount, try each coin: if coin <= current_amount, dp[current] = min(dp[current], dp[current - coin] + 1). This builds up the minimum number of coins for every sub-amount. Final answer is dp[amount] if it's not infinity, else -1. Time O(amount * len(coins)), Space O(amount). The greedy approach (always pick largest coin) fails for some coin sets like [1, 3, 4] for amount 6.",
+  "hints": [
+    "Greedy doesn't always work here — consider coins = [1, 3, 4] and amount = 6. The greedy picks 4+1+1=3 coins but 3+3=2 coins is optimal. Think about a more exhaustive approach.",
+    "Define dp[i] as the minimum number of coins needed to make amount i. What is dp[0]? How does dp[i] relate to dp[i - coin] for each coin?",
+    "For each amount from 1 to target, dp[amount] = min over all coins c where c <= amount of (dp[amount - c] + 1). Initialize dp[0] = 0 and all others to infinity. Return dp[target] if finite, else -1."
+  ],
+  "optimal_complexity": {
+    "time": "O(amount * n)",
+    "space": "O(amount)"
+  },
+  "follow_up_questions": [
+    "How would you modify this to return the actual coins used, not just the count?",
+    "What if you wanted to count the total number of distinct combinations (not the minimum), like the 'Coin Change 2' problem?"
+  ]
+}

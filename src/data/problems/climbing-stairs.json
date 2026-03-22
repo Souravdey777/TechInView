@@ -1,0 +1,70 @@
+{
+  "title": "Climbing Stairs",
+  "slug": "climbing-stairs",
+  "difficulty": "easy",
+  "category": "dp",
+  "company_tags": ["amazon", "google", "apple", "adobe", "tiktok"],
+  "description": "You are climbing a staircase. It takes `n` steps to reach the top.\n\nEach time you can either climb `1` or `2` steps. In how many distinct ways can you climb to the top?\n\n**Example 1:**\n```\nInput: n = 2\nOutput: 2\nExplanation: There are two ways to climb to the top.\n1. 1 step + 1 step\n2. 2 steps\n```\n\n**Example 2:**\n```\nInput: n = 3\nOutput: 3\nExplanation: There are three ways to climb to the top.\n1. 1 step + 1 step + 1 step\n2. 1 step + 2 steps\n3. 2 steps + 1 step\n```",
+  "examples": [
+    {
+      "input": "n = 2",
+      "output": "2",
+      "explanation": "Two ways: (1+1) or (2)."
+    },
+    {
+      "input": "n = 5",
+      "output": "8",
+      "explanation": "Eight ways: 1+1+1+1+1, 1+1+1+2, 1+1+2+1, 1+2+1+1, 2+1+1+1, 1+2+2, 2+1+2, 2+2+1."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 45"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function climbStairs(n) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int climbStairs(int n) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 2",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 10",
+      "expected_output": "89",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 45",
+      "expected_output": "1836311903",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "This is a Fibonacci-sequence problem in disguise. To reach step n, you must have come from step n-1 (one step) or step n-2 (two steps). So ways(n) = ways(n-1) + ways(n-2), with base cases ways(1) = 1 and ways(2) = 2. The naive recursive solution is O(2^n) without memoization. With memoization (top-down DP) it becomes O(n) time and O(n) space. The bottom-up DP approach uses O(1) space: maintain just two variables (prev and curr), iterating from 3 to n and updating them each step.",
+  "hints": [
+    "To reach step n, where could you have been on the previous step? What does that tell you about the structure of the problem?",
+    "The number of ways to reach step n depends only on the ways to reach step n-1 and step n-2. Does this recurrence remind you of a well-known sequence?",
+    "This is Fibonacci. Use two variables to track the previous two counts, updating them iteratively from step 3 to n. No extra array needed."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "What if you could take 1, 2, or 3 steps at a time — how would the recurrence change?",
+    "What if each step had a cost and you wanted to minimize the total cost to reach the top? (That is the 'Min Cost Climbing Stairs' problem.)"
+  ]
+}

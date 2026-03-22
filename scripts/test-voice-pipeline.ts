@@ -1,0 +1,13 @@
+console.log("🎤 Voice Pipeline Test");
+console.log("=".repeat(40));
+console.log("\n1. Checking environment variables...");
+console.log(`   ANTHROPIC_API_KEY: ${process.env.ANTHROPIC_API_KEY ? "✓ Set" : "✗ Missing"}`);
+console.log(`   DEEPGRAM_API_KEY: ${process.env.DEEPGRAM_API_KEY ? "✓ Set" : "✗ Missing"}`);
+console.log(`   ELEVENLABS_API_KEY: ${process.env.ELEVENLABS_API_KEY ? "✓ Set" : "✗ Missing"}`);
+console.log("\n2. Testing Claude LLM...");
+console.log("   TODO: Send test prompt and measure latency");
+console.log("\n3. Testing Deepgram STT...");
+console.log("   TODO: Send test audio and verify transcript");
+console.log("\n4. Testing ElevenLabs TTS...");
+console.log("   TODO: Send test text and verify audio output");
+console.log("\n✅ Pipeline test complete (stubs only)");

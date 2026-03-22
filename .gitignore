@@ -27,6 +27,11 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+
+# voice server
+voice-server/node_modules
+voice-server/dist
 
 # vercel
 .vercel

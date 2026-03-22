@@ -1,0 +1,72 @@
+{
+  "title": "Container With Most Water",
+  "slug": "container-with-most-water",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": ["amazon", "google", "meta", "bloomberg", "adobe"],
+  "description": "You are given an integer array `height` of length `n`. There are `n` vertical lines drawn such that the two endpoints of the `i`th line are `(i, 0)` and `(i, height[i])`.\n\nFind two lines that together with the x-axis form a container, such that the container contains the most water.\n\nReturn the *maximum amount of water a container can store*.\n\n**Notice** that you may not slant the container.\n\n**Example 1:**\n```\nInput: height = [1,8,6,2,5,4,8,3,7]\nOutput: 49\nExplanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7].\nIn this case, the max area of water the container can contain is 49 (between index 1 and 8, min(8,7) * (8-1) = 7 * 7 = 49).\n```\n\n**Example 2:**\n```\nInput: height = [1,1]\nOutput: 1\n```",
+  "examples": [
+    {
+      "input": "height = [1,8,6,2,5,4,8,3,7]",
+      "output": "49",
+      "explanation": "Using lines at index 1 (height 8) and index 8 (height 7): area = min(8, 7) * (8 - 1) = 7 * 7 = 49."
+    },
+    {
+      "input": "height = [1,1]",
+      "output": "1",
+      "explanation": "Only two lines available. Area = min(1, 1) * (1 - 0) = 1."
+    }
+  ],
+  "constraints": [
+    "n == height.length",
+    "2 <= n <= 10^5",
+    "0 <= height[i] <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxArea(self, height: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxArea(height) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxArea(int[] height) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "height = [1,8,6,2,5,4,8,3,7]",
+      "expected_output": "49",
+      "is_hidden": false
+    },
+    {
+      "input": "height = [1,1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "height = [4,3,2,1,4]",
+      "expected_output": "16",
+      "is_hidden": false
+    },
+    {
+      "input": "height = [1,2,1]",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "height = [2,3,4,5,18,17,6]",
+      "expected_output": "17",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use a two-pointer approach. Place one pointer at the left end and one at the right end of the array. At each step, compute the current area: min(height[left], height[right]) * (right - left). Update max_area if this is larger. Then move the pointer pointing to the shorter line inward — because moving the taller-line pointer can only decrease or keep the width the same while the height is still bounded by the shorter line, so it can never increase the area. Continue until the pointers meet. This runs in O(n) time and O(1) space.",
+  "hints": [
+    "The area is determined by the shorter of the two lines and the distance between them. Think about what happens when you have two pointers.",
+    "Start with the widest possible container (pointers at both ends). The area can only improve if the height increases enough to compensate for reducing the width.",
+    "Use two pointers. Always move the pointer at the shorter line inward — moving the taller line inward is never beneficial because the constraining factor is the shorter line."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you prove that the two-pointer approach never misses the optimal pair?",
+    "How would this problem change if the lines had variable widths instead of unit width?"
+  ]
+}
