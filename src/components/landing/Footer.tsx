@@ -9,8 +9,7 @@ export function Footer() {
           <span className="text-brand-cyan text-xl leading-none">.</span>
         </div>
         <p className="text-brand-muted text-sm">
-          Built by Sourav Dey &mdash; &copy; 2024 TechInView. All rights
-          reserved.
+          &copy; {new Date().getFullYear()} TechInView. All rights reserved.
         </p>
       </div>
     </footer>

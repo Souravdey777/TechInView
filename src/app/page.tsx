@@ -575,7 +575,7 @@ export default async function LandingPage() {
             </div>
 
             <p className="text-brand-muted text-sm">
-              &copy; {new Date().getFullYear()} TechInView. Built by Sourav Dey.
+              &copy; {new Date().getFullYear()} TechInView. All rights reserved.
             </p>
           </div>
         </div>

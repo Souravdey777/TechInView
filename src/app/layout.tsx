@@ -30,8 +30,8 @@ export const metadata: Metadata = {
     "technical interview",
     "voice interview",
   ],
-  authors: [{ name: "Sourav Dey" }],
-  creator: "Sourav Dey",
+  authors: [{ name: "TechInView" }],
+  creator: "TechInView",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai"
   ),
