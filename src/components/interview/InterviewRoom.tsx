@@ -478,6 +478,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       : null;
 
     completeInterviewStore({
+      interviewId,
       finalCode: code,
       language,
       transcript,

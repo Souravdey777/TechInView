@@ -2,6 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, Loader2, FileQuestion } from "lucide-react";
 import { ScoreSummary } from "@/components/results/ScoreSummary";
@@ -12,6 +14,7 @@ import { CodeReview } from "@/components/results/CodeReview";
 import { SCORING_DIMENSIONS } from "@/lib/constants";
 import type { HireRecommendation } from "@/lib/constants";
 import { useInterviewStore } from "@/stores/interview-store";
+import { useSupabase } from "@/hooks/useSupabase";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -111,11 +114,89 @@ function ScoringUnavailableCard({ reason }: { reason: "in_progress" | "failed" }
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ResultsPage() {
-  const result = useInterviewStore((s) => s.interviewResult);
+  const params = useParams();
+  const pageId = params.id as string;
+  const storeResult = useInterviewStore((s) => s.interviewResult);
   const setupConfig = useInterviewStore((s) => s.setupConfig);
   const storeProblem = useInterviewStore((s) => s.problem);
+  const { supabase } = useSupabase();
 
-  // No result in store at all
+  // If the store result matches this page's ID, use it directly
+  // Otherwise, fetch from DB
+  const [dbResult, setDbResult] = useState<typeof storeResult>(null);
+  const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
+
+  const storeMatchesPage = storeResult?.interviewId === pageId;
+  const result = storeMatchesPage ? storeResult : dbResult;
+
+  useEffect(() => {
+    if (storeMatchesPage || fetched) return;
+
+    setLoading(true);
+    (async () => {
+      try {
+        const { data: interview } = await supabase
+          .from("interviews")
+          .select("*, problems(title, difficulty, category), messages(*)")
+          .eq("id", pageId)
+          .single();
+
+        if (interview && interview.overall_score != null) {
+          const scores = interview.scores as Record<string, { score: number; feedback: string }> | null;
+          const prob = interview.problems as unknown as { title: string; difficulty: string; category: string } | null;
+          const msgs = (interview.messages as unknown as { role: string; content: string; timestamp_ms: number }[]) || [];
+
+          setDbResult({
+            interviewId: interview.id,
+            finalCode: interview.final_code ?? "",
+            language: interview.language ?? "python",
+            transcript: msgs.map((m) => ({
+              role: m.role as "interviewer" | "candidate" | "system",
+              content: m.content,
+              timestamp_ms: m.timestamp_ms,
+            })),
+            overallScore: interview.overall_score,
+            scores: scores ? {
+              problem_solving: scores.problem_solving ?? { score: 0, feedback: "" },
+              code_quality: scores.code_quality ?? { score: 0, feedback: "" },
+              communication: scores.communication ?? { score: 0, feedback: "" },
+              technical_knowledge: scores.technical_knowledge ?? { score: 0, feedback: "" },
+              testing: scores.testing ?? { score: 0, feedback: "" },
+            } : null,
+            hireRecommendation: interview.hire_recommendation,
+            summary: interview.feedback_summary,
+            keyStrengths: null,
+            areasToImprove: null,
+            testsPassed: interview.tests_passed ?? 0,
+            testsTotal: interview.tests_total ?? 0,
+            problemTitle: prob?.title ?? "Interview",
+            problemDifficulty: prob?.difficulty ?? "medium",
+            problemCategory: prob?.category ?? "arrays",
+          });
+        }
+      } catch {
+        // Failed to fetch — will show NoResultState
+      } finally {
+        setLoading(false);
+        setFetched(true);
+      }
+    })();
+  }, [pageId, storeMatchesPage, fetched, supabase]);
+
+  // Loading state while fetching from DB
+  if (!storeMatchesPage && loading) {
+    return (
+      <main className="min-h-screen bg-brand-deep text-brand-text flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-cyan" />
+          <p className="text-sm text-brand-muted">Loading results...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // No result found
   if (!result) {
     return <NoResultState />;
   }

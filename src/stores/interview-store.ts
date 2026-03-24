@@ -62,6 +62,7 @@ type SetupConfig = {
 // ─── Interview result (populated when interview ends) ────────────────────────
 
 type InterviewResult = {
+  interviewId: string;
   finalCode: string;
   language: string;
   transcript: StoreMessage[];
