@@ -28,7 +28,7 @@
 | ORM                | Drizzle ORM                         | latest     |
 | STT (Speech→Text)  | Deepgram Nova-2 (streaming)         | latest     |
 | LLM (AI Brain)     | Claude Sonnet 4 (Anthropic API)     | claude-sonnet-4-20250514 |
-| TTS (Text→Speech)  | ElevenLabs Turbo v2.5 (streaming)   | latest     |
+| TTS (Text→Speech)  | Deepgram Aura 2 (streaming)            | latest     |
 | Code Editor        | Monaco Editor (@monaco-editor/react) | latest    |
 | Code Execution     | Piston API (self-hosted or public)  | latest     |
 | Payments           | Stripe (Checkout + Customer Portal) | latest     |
@@ -151,7 +151,7 @@ techinview/
 │   │   │
 │   │   ├── voice/
 │   │   │   ├── deepgram.ts           # Deepgram streaming STT client
-│   │   │   ├── elevenlabs.ts         # ElevenLabs streaming TTS client
+│   │   │   ├── deepgram-tts.ts       # Deepgram Aura 2 streaming TTS client
 │   │   │   └── pipeline.ts           # Voice orchestrator: STT → LLM → TTS
 │   │   │
 │   │   ├── db/
@@ -191,7 +191,7 @@ techinview/
 │   │   ├── index.ts                   # WS server entrypoint
 │   │   ├── voice-handler.ts           # Per-connection voice pipeline
 │   │   ├── deepgram-stream.ts         # Deepgram streaming integration
-│   │   ├── elevenlabs-stream.ts       # ElevenLabs streaming integration
+│   │   ├── deepgram-tts-stream.ts     # Deepgram Aura 2 streaming TTS integration
 │   │   └── claude-stream.ts           # Claude streaming integration
 │   └── Dockerfile                     # For Railway deployment
 │
@@ -219,9 +219,9 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Deepgram (STT)
 DEEPGRAM_API_KEY=...
 
-# ElevenLabs (TTS)
-ELEVENLABS_API_KEY=...
-ELEVENLABS_VOICE_ID=...                # Pre-selected voice for "Alex"
+# Deepgram (shared key for both STT and TTS)
+# DEEPGRAM_API_KEY already set above — used for both Nova-2 STT and Aura TTS
+DEEPGRAM_VOICE_MODEL=aura-2-asteria-en   # Pre-selected voice for "Alex"
 
 # Piston (Code Execution)
 PISTON_API_URL=https://emkc.org/api/v2/piston  # Public, or self-hosted URL
@@ -344,7 +344,7 @@ State transitions are managed by `useInterviewState.ts` hook. The AI interviewer
 2. **Pass current code as context every 3-4 turns** — not every message (saves tokens).
 3. **Use the solution_approach field** so the AI knows the optimal path and can guide toward it.
 4. **Separate the interviewer prompt from the scorer prompt** — different system prompts, different calls.
-5. **Stream everything** — Claude streaming, ElevenLabs streaming. Never wait for full responses.
+5. **Stream everything** — Claude streaming, Deepgram TTS streaming. Never wait for full responses.
 
 ### Context Window Management
 
@@ -383,8 +383,8 @@ Each Claude call includes:
     │        Stream response token by token
     │
     │    On sentence boundary detected:
-    ├──→ [ElevenLabs Streaming TTS]
-    │        Turbo v2.5 model, pre-selected "Alex" voice
+    ├──→ [Deepgram Aura Streaming TTS]
+    │        Aura 2 model (e.g. aura-2-asteria-en), pre-selected "Alex" voice
     │        Stream audio chunks back immediately
     │
     │    Audio chunks:
@@ -403,12 +403,12 @@ Each Claude call includes:
 | Mic → Deepgram STT       | 100ms     | 300ms          |
 | Deepgram processing      | 200ms     | 500ms          |
 | Claude first token       | 300ms     | 800ms          |
-| ElevenLabs first byte    | 200ms     | 500ms          |
+| Deepgram TTS first byte  | 200ms     | 500ms          |
 | **Total perceived delay** | **~800ms** | **<2000ms**   |
 
 ### Critical Implementation Details
 
-1. **Sentence-level TTS**: Don't wait for Claude's full response. Detect sentence boundaries and send each sentence to ElevenLabs immediately.
+1. **Sentence-level TTS**: Don't wait for Claude's full response. Detect sentence boundaries and send each sentence to Deepgram Aura 2 immediately.
 2. **Interruption handling**: When Deepgram VAD detects user speech, immediately stop TTS playback and flush the audio buffer.
 3. **Silence detection**: If no speech for >90s during CODING phase, AI offers encouragement. If >120s in APPROACH phase, AI offers a hint.
 4. **Echo cancellation**: Enable `echoCancellation: true` in `getUserMedia` constraints.

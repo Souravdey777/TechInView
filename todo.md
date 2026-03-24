@@ -63,9 +63,9 @@ _Goal: Accept payments_
 _Goal: Replace browser APIs with production-quality voice_
 
 - [ ] 31. Integrate Deepgram Nova-2 for server-side STT (replace browser SpeechRecognition)
-- [ ] 32. Integrate ElevenLabs Turbo v2.5 for TTS (replace browser SpeechSynthesis)
+- [ ] 32. Integrate Deepgram Aura 2 for TTS (replace browser SpeechSynthesis)
 - [ ] 33. Deploy voice-server to Railway
-- [ ] 34. Wire WebSocket voice pipeline: Browser → Railway → Deepgram/Claude/ElevenLabs → Browser
+- [ ] 34. Wire WebSocket voice pipeline: Browser → Railway → Deepgram STT/Claude/Deepgram TTS → Browser
 - [ ] 35. Interruption handling — stop Alex when user starts speaking
 
 ## Phase 7: Analytics & Growth

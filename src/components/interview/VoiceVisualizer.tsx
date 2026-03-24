@@ -10,224 +10,199 @@ type VoiceVisualizerProps = {
 };
 
 /**
- * Siri / Gemini-style animated orb visualizer.
- * Layered glows, morphing blobs, and expanding rings per state.
+ * Siri-style fluid orb — smooth iridescent sphere with swirling
+ * color gradients that blend and morph organically.
  */
 export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
+  const isActive = state !== "idle";
+
   return (
     <div className={cn("relative flex items-center justify-center", className)}>
       <style>{`
-        /* ─── Idle: slow breathing ─── */
-        @keyframes orb-idle {
-          0%, 100% { transform: scale(0.92); border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%; }
-          50% { transform: scale(1.04); border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
-        }
-        @keyframes orb-idle-glow {
-          0%, 100% { opacity: 0.25; transform: scale(0.9); }
-          50% { opacity: 0.6; transform: scale(1.2); }
-        }
-        @keyframes orb-idle-inner {
-          0%, 100% { opacity: 0.25; transform: scale(0.85); }
-          50% { opacity: 0.55; transform: scale(1.1); }
-        }
-
-        /* ─── Listening: energized, organic morphing ─── */
-        @keyframes orb-listen {
-          0%   { transform: scale(1.0)  rotate(0deg);   border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%; }
-          15%  { transform: scale(1.12) rotate(45deg);   border-radius: 55% 45% 40% 60% / 60% 55% 45% 40%; }
-          30%  { transform: scale(0.95) rotate(100deg);  border-radius: 45% 55% 60% 40% / 40% 60% 55% 45%; }
-          45%  { transform: scale(1.1)  rotate(160deg);  border-radius: 60% 40% 45% 55% / 55% 45% 40% 60%; }
-          60%  { transform: scale(0.93) rotate(210deg);  border-radius: 42% 58% 52% 48% / 52% 42% 58% 48%; }
-          75%  { transform: scale(1.08) rotate(280deg);  border-radius: 58% 42% 48% 52% / 48% 58% 42% 52%; }
-          100% { transform: scale(1.0)  rotate(360deg);  border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%; }
-        }
-        @keyframes orb-listen-glow {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          30% { opacity: 0.7; transform: scale(1.25); }
-          60% { opacity: 0.4; transform: scale(1.1); }
-        }
-        @keyframes orb-listen-inner {
-          0%, 100% { opacity: 0.4; transform: scale(0.9); }
-          40% { opacity: 0.8; transform: scale(1.15); }
-          70% { opacity: 0.5; transform: scale(0.95); }
-        }
-
-        /* ─── Thinking: pulsing anticipation with shimmer ─── */
-        @keyframes orb-think {
-          0%, 100% { transform: scale(0.93); border-radius: 46% 54% 50% 50% / 50% 46% 54% 50%; }
-          25% { transform: scale(1.02); border-radius: 50% 50% 46% 54% / 54% 50% 50% 46%; }
-          50% { transform: scale(0.96); border-radius: 54% 46% 50% 50% / 50% 54% 46% 50%; }
-          75% { transform: scale(1.04); border-radius: 50% 50% 54% 46% / 46% 50% 50% 54%; }
-        }
-        @keyframes orb-think-glow {
-          0%, 100% { opacity: 0.2; transform: scale(0.95); }
-          50% { opacity: 0.55; transform: scale(1.2); }
-        }
-        @keyframes orb-think-inner {
-          0%, 100% { opacity: 0.3; transform: scale(0.85); }
-          50% { opacity: 0.7; transform: scale(1.1); }
-        }
-        @keyframes orb-think-shimmer {
-          0% { transform: rotate(0deg); }
+        /* ─── Siri orb keyframes ─── */
+        @keyframes siri-rotate-1 {
+          0%   { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-
-        /* ─── Speaking: lively, expressive morphing ─── */
-        @keyframes orb-speak {
-          0%   { transform: scale(0.9)  rotate(0deg);   border-radius: 36% 64% 56% 44% / 44% 36% 64% 56%; }
-          12%  { transform: scale(1.14) rotate(50deg);   border-radius: 56% 44% 36% 64% / 64% 56% 44% 36%; }
-          25%  { transform: scale(0.88) rotate(100deg);  border-radius: 44% 56% 64% 36% / 36% 64% 56% 44%; }
-          37%  { transform: scale(1.12) rotate(155deg);  border-radius: 64% 36% 44% 56% / 56% 44% 36% 64%; }
-          50%  { transform: scale(0.92) rotate(200deg);  border-radius: 38% 62% 54% 46% / 46% 38% 62% 54%; }
-          62%  { transform: scale(1.1)  rotate(250deg);  border-radius: 54% 46% 38% 62% / 62% 54% 46% 38%; }
-          75%  { transform: scale(0.9)  rotate(300deg);  border-radius: 62% 38% 46% 54% / 54% 46% 38% 62%; }
-          87%  { transform: scale(1.08) rotate(340deg);  border-radius: 46% 54% 62% 38% / 38% 62% 54% 46%; }
-          100% { transform: scale(0.9)  rotate(360deg);  border-radius: 36% 64% 56% 44% / 44% 36% 64% 56%; }
+        @keyframes siri-rotate-2 {
+          0%   { transform: rotate(0deg); }
+          100% { transform: rotate(-360deg); }
         }
-        @keyframes orb-speak-glow {
-          0%, 100% { opacity: 0.35; transform: scale(1); }
-          25% { opacity: 0.75; transform: scale(1.3); }
-          50% { opacity: 0.4; transform: scale(1.05); }
-          75% { opacity: 0.7; transform: scale(1.25); }
+        @keyframes siri-morph {
+          0%, 100% { border-radius: 42% 58% 50% 50% / 50% 42% 58% 50%; transform: scale(0.95); }
+          25%  { border-radius: 50% 50% 42% 58% / 58% 50% 50% 42%; transform: scale(1.02); }
+          50%  { border-radius: 58% 42% 50% 50% / 50% 58% 42% 50%; transform: scale(0.98); }
+          75%  { border-radius: 50% 50% 58% 42% / 42% 50% 50% 58%; transform: scale(1.03); }
         }
-        @keyframes orb-speak-inner {
-          0%, 100% { opacity: 0.5; transform: scale(0.85); }
-          30% { opacity: 0.9; transform: scale(1.15); }
-          60% { opacity: 0.5; transform: scale(0.9); }
-          80% { opacity: 0.85; transform: scale(1.1); }
+        @keyframes siri-morph-active {
+          0%, 100% { border-radius: 38% 62% 48% 52% / 52% 38% 62% 48%; transform: scale(0.92); }
+          14%  { border-radius: 52% 48% 38% 62% / 62% 52% 48% 38%; transform: scale(1.08); }
+          28%  { border-radius: 62% 38% 52% 48% / 48% 62% 38% 52%; transform: scale(0.95); }
+          42%  { border-radius: 48% 52% 62% 38% / 38% 48% 52% 62%; transform: scale(1.06); }
+          57%  { border-radius: 38% 62% 48% 52% / 52% 38% 62% 48%; transform: scale(0.93); }
+          71%  { border-radius: 58% 42% 38% 62% / 62% 58% 42% 38%; transform: scale(1.05); }
+          85%  { border-radius: 42% 58% 62% 38% / 38% 42% 58% 62%; transform: scale(0.97); }
         }
-
-        /* ─── Shared: expanding rings ─── */
-        @keyframes orb-ring-expand {
-          0% { transform: scale(0.6); opacity: 0.7; }
-          100% { transform: scale(2.2); opacity: 0; }
+        @keyframes siri-glow-pulse {
+          0%, 100% { opacity: 0.3; transform: scale(0.9); }
+          50% { opacity: 0.65; transform: scale(1.15); }
+        }
+        @keyframes siri-glow-active {
+          0%, 100% { opacity: 0.4; transform: scale(0.95); }
+          30% { opacity: 0.8; transform: scale(1.2); }
+          60% { opacity: 0.5; transform: scale(1.05); }
+        }
+        @keyframes siri-ring-expand {
+          0% { transform: scale(0.7); opacity: 0.5; }
+          100% { transform: scale(2); opacity: 0; }
         }
       `}</style>
 
-      {/* ── Layer 1: Outer ambient glow ── */}
+      {/* ── Ambient glow ── */}
       <div
         className={cn(
-          "absolute rounded-full blur-2xl transition-all duration-700",
-          state === "idle" && "w-32 h-32 bg-brand-cyan/20",
-          state === "listening" && "w-36 h-36 bg-brand-cyan/30",
-          state === "thinking" && "w-32 h-32 bg-brand-amber/25",
-          state === "speaking" && "w-40 h-40 bg-brand-green/30",
+          "absolute rounded-full transition-all duration-700",
+          state === "idle" && "w-28 h-28 blur-2xl",
+          state === "listening" && "w-36 h-36 blur-3xl",
+          state === "thinking" && "w-32 h-32 blur-2xl",
+          state === "speaking" && "w-40 h-40 blur-3xl",
         )}
         style={{
-          animation: state === "idle"
-            ? "orb-idle-glow 4s ease-in-out infinite"
+          background: state === "idle"
+            ? "radial-gradient(circle, rgba(34,211,238,0.2) 0%, rgba(139,92,246,0.1) 50%, transparent 70%)"
             : state === "listening"
-            ? "orb-listen-glow 2.5s ease-in-out infinite"
+            ? "radial-gradient(circle, rgba(34,211,238,0.35) 0%, rgba(139,92,246,0.2) 50%, transparent 70%)"
             : state === "thinking"
-            ? "orb-think-glow 2s ease-in-out infinite"
-            : "orb-speak-glow 1.8s ease-in-out infinite",
+            ? "radial-gradient(circle, rgba(251,191,36,0.3) 0%, rgba(251,146,60,0.15) 50%, transparent 70%)"
+            : "radial-gradient(circle, rgba(52,211,153,0.35) 0%, rgba(34,211,238,0.2) 50%, transparent 70%)",
+          animation: isActive
+            ? `siri-glow-active ${state === "speaking" ? "1.5s" : "2.5s"} ease-in-out infinite`
+            : "siri-glow-pulse 5s ease-in-out infinite",
         }}
       />
 
-      {/* ── Layer 2: Second glow layer (depth) — active states only ── */}
-      {state !== "idle" && (
-        <div
-          className={cn(
-            "absolute rounded-full blur-3xl transition-all duration-700",
-            state === "listening" && "w-28 h-28 bg-cyan-400/15",
-            state === "thinking" && "w-24 h-24 bg-amber-400/12",
-            state === "speaking" && "w-32 h-32 bg-emerald-400/15",
-          )}
-          style={{
-            animation: state === "listening"
-              ? "orb-listen-glow 2.5s ease-in-out 0.8s infinite"
-              : state === "thinking"
-              ? "orb-think-glow 2s ease-in-out 0.6s infinite"
-              : "orb-speak-glow 1.8s ease-in-out 0.5s infinite",
-          }}
-        />
-      )}
-
-      {/* ── Layer 3: Expanding rings ── */}
+      {/* ── Expanding rings (listening/speaking) ── */}
       {(state === "listening" || state === "speaking") && (
         <>
           <div
-            className={cn(
-              "absolute w-20 h-20 rounded-full border-2",
-              state === "listening" ? "border-brand-cyan/50" : "border-brand-green/50"
-            )}
-            style={{ animation: "orb-ring-expand 2.2s ease-out infinite" }}
+            className="absolute w-[72px] h-[72px] rounded-full"
+            style={{
+              border: state === "listening" ? "1.5px solid rgba(34,211,238,0.3)" : "1.5px solid rgba(52,211,153,0.3)",
+              animation: "siri-ring-expand 2.5s ease-out infinite",
+            }}
           />
           <div
-            className={cn(
-              "absolute w-20 h-20 rounded-full border",
-              state === "listening" ? "border-brand-cyan/35" : "border-brand-green/35"
-            )}
-            style={{ animation: "orb-ring-expand 2.2s ease-out 0.7s infinite" }}
-          />
-          <div
-            className={cn(
-              "absolute w-20 h-20 rounded-full border",
-              state === "listening" ? "border-brand-cyan/20" : "border-brand-green/20"
-            )}
-            style={{ animation: "orb-ring-expand 2.2s ease-out 1.4s infinite" }}
+            className="absolute w-[72px] h-[72px] rounded-full"
+            style={{
+              border: state === "listening" ? "1px solid rgba(139,92,246,0.25)" : "1px solid rgba(34,211,238,0.25)",
+              animation: "siri-ring-expand 2.5s ease-out 0.8s infinite",
+            }}
           />
         </>
       )}
 
-      {/* Thinking: rotating shimmer ring */}
-      {state === "thinking" && (
-        <div
-          className="absolute w-24 h-24 rounded-full"
-          style={{
-            background: "conic-gradient(from 0deg, transparent 0%, rgba(251,191,36,0.3) 25%, transparent 50%, rgba(251,191,36,0.2) 75%, transparent 100%)",
-            animation: "orb-think-shimmer 3s linear infinite",
-          }}
-        />
-      )}
-
-      {/* ── Layer 4: Main orb — morphing blob ── */}
+      {/* ── The orb — layered rotating gradients inside a morphing container ── */}
       <div
-        className={cn(
-          "relative z-10 w-20 h-20 transition-all duration-500",
-          state === "idle" && "bg-gradient-to-br from-brand-cyan/40 via-brand-cyan/20 to-brand-cyan/10",
-          state === "listening" && "bg-gradient-to-br from-brand-cyan/70 via-cyan-400/40 to-brand-cyan/15",
-          state === "thinking" && "bg-gradient-to-br from-brand-amber/60 via-amber-400/30 to-brand-amber/15",
-          state === "speaking" && "bg-gradient-to-br from-brand-green/70 via-emerald-400/40 to-brand-green/15",
-        )}
+        className="relative z-10 w-[76px] h-[76px] overflow-hidden"
         style={{
-          borderRadius: "42% 58% 52% 48% / 48% 42% 58% 52%",
-          animation: state === "idle"
-            ? "orb-idle 5s ease-in-out infinite"
-            : state === "listening"
-            ? "orb-listen 4s ease-in-out infinite"
-            : state === "thinking"
-            ? "orb-think 2.5s ease-in-out infinite"
-            : "orb-speak 2.8s ease-in-out infinite",
+          animation: isActive
+            ? `siri-morph-active ${state === "speaking" ? "3s" : state === "thinking" ? "4s" : "3.5s"} ease-in-out infinite`
+            : "siri-morph 6s ease-in-out infinite",
+          borderRadius: "42% 58% 50% 50% / 50% 42% 58% 50%",
         }}
       >
-        {/* Inner bright core */}
+        {/* Base fill — dark with tint */}
         <div
-          className={cn(
-            "absolute inset-3 rounded-full blur-sm transition-colors duration-500",
-            state === "idle" && "bg-brand-cyan/30",
-            state === "listening" && "bg-brand-cyan/50",
-            state === "thinking" && "bg-brand-amber/40",
-            state === "speaking" && "bg-brand-green/50",
-          )}
+          className="absolute inset-0"
           style={{
-            animation: state === "idle"
-              ? "orb-idle-inner 5s ease-in-out infinite"
+            background: state === "idle"
+              ? "radial-gradient(circle at 50% 50%, rgba(34,211,238,0.08) 0%, rgba(7,8,10,0.9) 70%)"
               : state === "listening"
-              ? "orb-listen-inner 2.5s ease-in-out infinite"
+              ? "radial-gradient(circle at 50% 50%, rgba(34,211,238,0.15) 0%, rgba(7,8,10,0.8) 70%)"
               : state === "thinking"
-              ? "orb-think-inner 2s ease-in-out infinite"
-              : "orb-speak-inner 1.8s ease-in-out infinite",
+              ? "radial-gradient(circle at 50% 50%, rgba(251,191,36,0.12) 0%, rgba(7,8,10,0.85) 70%)"
+              : "radial-gradient(circle at 50% 50%, rgba(52,211,153,0.15) 0%, rgba(7,8,10,0.8) 70%)",
+          }}
+        />
+
+        {/* Gradient layer 1 — slow clockwise */}
+        <div
+          className="absolute inset-[-20%] rounded-full"
+          style={{
+            background: state === "idle"
+              ? "conic-gradient(from 0deg, transparent 0%, rgba(34,211,238,0.2) 15%, transparent 30%, rgba(139,92,246,0.15) 50%, transparent 65%, rgba(34,211,238,0.18) 80%, transparent 100%)"
+              : state === "listening"
+              ? "conic-gradient(from 0deg, transparent 0%, rgba(34,211,238,0.45) 15%, transparent 30%, rgba(139,92,246,0.35) 50%, transparent 65%, rgba(96,165,250,0.4) 80%, transparent 100%)"
+              : state === "thinking"
+              ? "conic-gradient(from 0deg, transparent 0%, rgba(251,191,36,0.4) 15%, transparent 30%, rgba(251,146,60,0.3) 50%, transparent 65%, rgba(251,191,36,0.35) 80%, transparent 100%)"
+              : "conic-gradient(from 0deg, transparent 0%, rgba(52,211,153,0.45) 15%, transparent 30%, rgba(34,211,238,0.35) 50%, transparent 65%, rgba(110,231,183,0.4) 80%, transparent 100%)",
+            filter: "blur(8px)",
+            animation: `siri-rotate-1 ${isActive ? (state === "speaking" ? "3s" : "5s") : "10s"} linear infinite`,
+          }}
+        />
+
+        {/* Gradient layer 2 — counter-clockwise */}
+        <div
+          className="absolute inset-[-15%] rounded-full"
+          style={{
+            background: state === "idle"
+              ? "conic-gradient(from 120deg, transparent 0%, rgba(139,92,246,0.15) 20%, transparent 40%, rgba(34,211,238,0.12) 60%, transparent 80%, rgba(168,85,247,0.1) 95%, transparent 100%)"
+              : state === "listening"
+              ? "conic-gradient(from 120deg, transparent 0%, rgba(139,92,246,0.35) 20%, transparent 40%, rgba(34,211,238,0.3) 60%, transparent 80%, rgba(168,85,247,0.3) 95%, transparent 100%)"
+              : state === "thinking"
+              ? "conic-gradient(from 120deg, transparent 0%, rgba(251,146,60,0.3) 20%, transparent 40%, rgba(251,191,36,0.25) 60%, transparent 80%, rgba(245,158,11,0.25) 95%, transparent 100%)"
+              : "conic-gradient(from 120deg, transparent 0%, rgba(34,211,238,0.35) 20%, transparent 40%, rgba(52,211,153,0.3) 60%, transparent 80%, rgba(20,184,166,0.3) 95%, transparent 100%)",
+            filter: "blur(6px)",
+            animation: `siri-rotate-2 ${isActive ? (state === "speaking" ? "4s" : "7s") : "14s"} linear infinite`,
+          }}
+        />
+
+        {/* Gradient layer 3 — faster, tighter swirl */}
+        <div
+          className="absolute inset-[-10%] rounded-full"
+          style={{
+            background: state === "idle"
+              ? "conic-gradient(from 240deg, transparent 0%, rgba(34,211,238,0.1) 25%, transparent 50%, rgba(139,92,246,0.08) 75%, transparent 100%)"
+              : state === "listening"
+              ? "conic-gradient(from 240deg, transparent 0%, rgba(96,165,250,0.3) 25%, transparent 50%, rgba(34,211,238,0.25) 75%, transparent 100%)"
+              : state === "thinking"
+              ? "conic-gradient(from 240deg, transparent 0%, rgba(251,191,36,0.25) 25%, transparent 50%, rgba(251,146,60,0.2) 75%, transparent 100%)"
+              : "conic-gradient(from 240deg, transparent 0%, rgba(110,231,183,0.3) 25%, transparent 50%, rgba(52,211,153,0.25) 75%, transparent 100%)",
+            filter: "blur(5px)",
+            animation: `siri-rotate-1 ${isActive ? (state === "speaking" ? "2s" : "4s") : "8s"} linear infinite`,
+          }}
+        />
+
+        {/* Bright center core */}
+        <div
+          className="absolute inset-[25%] rounded-full"
+          style={{
+            background: state === "idle"
+              ? "radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 70%)"
+              : state === "listening"
+              ? "radial-gradient(circle, rgba(34,211,238,0.3) 0%, rgba(139,92,246,0.1) 50%, transparent 70%)"
+              : state === "thinking"
+              ? "radial-gradient(circle, rgba(251,191,36,0.25) 0%, rgba(251,146,60,0.08) 50%, transparent 70%)"
+              : "radial-gradient(circle, rgba(52,211,153,0.3) 0%, rgba(34,211,238,0.1) 50%, transparent 70%)",
+            filter: "blur(3px)",
+            animation: `siri-glow-pulse ${isActive ? "2s" : "5s"} ease-in-out infinite`,
+          }}
+        />
+
+        {/* Surface sheen — subtle highlight for 3D effect */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: "radial-gradient(ellipse at 35% 30%, rgba(255,255,255,0.08) 0%, transparent 50%)",
           }}
         />
       </div>
-
     </div>
   );
 }
 
 /**
- * Compact mic visualizer — Siri-style glowing ring around mic button.
+ * Compact mic visualizer — glowing ring around mic button.
  */
 export function MicVisualizer({ isActive, className }: { isActive: boolean; className?: string }) {
   return (
@@ -245,12 +220,10 @@ export function MicVisualizer({ isActive, className }: { isActive: boolean; clas
 
       {isActive && (
         <>
-          {/* Soft glow behind */}
           <div
             className="absolute w-[130%] h-[130%] rounded-full bg-brand-cyan/15 blur-md"
             style={{ animation: "mic-glow 1.5s ease-in-out infinite" }}
           />
-          {/* Expanding rings */}
           <div
             className="absolute w-full h-full rounded-full border-2 border-brand-cyan/50"
             style={{ animation: "mic-ring 1.8s ease-out infinite" }}

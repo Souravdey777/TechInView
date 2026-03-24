@@ -11,7 +11,7 @@ import { ProblemPanel } from "./ProblemPanel";
 import { TestRunner, type TestResult } from "./TestRunner";
 import { Timer } from "./Timer";
 import { InterviewControls } from "./InterviewControls";
-import type { VoiceState } from "./VoiceVisualizer";
+import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useVoiceInterview } from "@/hooks/useVoiceInterview";
 import { useInterviewStore } from "@/stores/interview-store";
@@ -74,6 +74,7 @@ public:
 
 const MOCK_PROBLEM = {
   title: "Two Sum",
+  slug: "two-sum",
   difficulty: "easy" as const,
   category: "arrays",
   description:
@@ -373,7 +374,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       const res = await fetch("/api/interview/run-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, code, interviewId }),
+        body: JSON.stringify({ language, code, interviewId, problemSlug: activeProblem.slug }),
       });
 
       const json = await res.json();
@@ -393,7 +394,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } finally {
       setIsRunningTests(false);
     }
-  }, [language, code, interviewId]);
+  }, [language, code, interviewId, activeProblem.slug]);
 
   const handleEndInterview = useCallback(async () => {
     setIsScoring(true);
@@ -568,24 +569,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         <div className="absolute inset-0 bg-grid-pattern opacity-30" />
         <div className="absolute w-[400px] h-[400px] rounded-full bg-brand-cyan/5 blur-[100px] animate-pulse" />
         <style>{`
-          @keyframes scoring-orb {
-            0%, 100% { transform: scale(0.9) rotate(0deg); border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%; }
-            25% { transform: scale(1.1) rotate(90deg); border-radius: 55% 45% 40% 60% / 60% 55% 45% 40%; }
-            50% { transform: scale(0.95) rotate(180deg); border-radius: 45% 55% 60% 40% / 40% 60% 55% 45%; }
-            75% { transform: scale(1.08) rotate(270deg); border-radius: 60% 40% 45% 55% / 55% 45% 40% 60%; }
-          }
-          @keyframes scoring-glow {
-            0%, 100% { opacity: 0.3; transform: scale(0.9); }
-            50% { opacity: 0.7; transform: scale(1.3); }
-          }
-          @keyframes scoring-ring {
-            0% { transform: scale(0.5); opacity: 0.6; }
-            100% { transform: scale(2.5); opacity: 0; }
-          }
-          @keyframes scoring-shimmer {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
           @keyframes scoring-progress {
             0% { width: 0%; }
             20% { width: 30%; }
@@ -600,15 +583,9 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           }
         `}</style>
         <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">
-          <div className="relative flex items-center justify-center h-32 w-32">
-            <div className="absolute w-36 h-36 rounded-full bg-brand-cyan/20 blur-2xl" style={{ animation: "scoring-glow 2.5s ease-in-out infinite" }} />
-            <div className="absolute w-28 h-28 rounded-full" style={{ background: "conic-gradient(from 0deg, transparent 0%, rgba(34,211,238,0.35) 25%, transparent 50%, rgba(34,211,238,0.2) 75%, transparent 100%)", animation: "scoring-shimmer 3s linear infinite" }} />
-            <div className="absolute w-20 h-20 rounded-full border border-brand-cyan/40" style={{ animation: "scoring-ring 2.5s ease-out infinite" }} />
-            <div className="absolute w-20 h-20 rounded-full border border-brand-cyan/25" style={{ animation: "scoring-ring 2.5s ease-out 0.8s infinite" }} />
-            <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-brand-cyan/60 via-cyan-400/30 to-brand-cyan/10" style={{ borderRadius: "42% 58% 52% 48% / 48% 42% 58% 52%", animation: "scoring-orb 3s ease-in-out infinite" }}>
-              <div className="absolute inset-3 rounded-full blur-sm bg-brand-cyan/40" style={{ animation: "scoring-glow 2.5s ease-in-out infinite" }} />
-            </div>
-          </div>
+          {/* Siri orb — thinking state for scoring */}
+          <VoiceVisualizer state="thinking" className="h-36 w-36" />
+
           <div style={{ animation: "scoring-fade-in 0.6s ease-out 0.2s both" }}>
             <h1 className="text-2xl font-bold text-brand-text">Alex is reviewing your performance</h1>
             <p className="text-brand-muted text-sm mt-2 leading-relaxed">Evaluating problem solving, code quality, communication, technical knowledge, and testing.</p>
@@ -618,7 +595,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
               <div key={dim} className="flex items-center gap-3">
                 <span className="text-[11px] text-brand-muted w-32 text-right shrink-0">{dim}</span>
                 <div className="flex-1 h-1.5 rounded-full bg-brand-border overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-brand-cyan to-cyan-400" style={{ animation: `scoring-progress ${6 + i * 1.5}s ease-out ${i * 0.4}s both` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-brand-amber to-amber-400" style={{ animation: `scoring-progress ${6 + i * 1.5}s ease-out ${i * 0.4}s both` }} />
                 </div>
               </div>
             ))}
@@ -636,18 +613,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         <div className="absolute inset-0 bg-grid-pattern opacity-30" />
         <div className="absolute w-[500px] h-[500px] rounded-full bg-brand-cyan/4 blur-[120px]" />
         <style>{`
-          @keyframes start-orb {
-            0%, 100% { transform: scale(0.92); border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%; }
-            50% { transform: scale(1.04); border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
-          }
-          @keyframes start-glow {
-            0%, 100% { opacity: 0.25; transform: scale(0.9); }
-            50% { opacity: 0.55; transform: scale(1.2); }
-          }
-          @keyframes start-inner {
-            0%, 100% { opacity: 0.2; transform: scale(0.85); }
-            50% { opacity: 0.5; transform: scale(1.1); }
-          }
           @keyframes start-fade-up {
             0% { opacity: 0; transform: translateY(20px); }
             100% { opacity: 1; transform: translateY(0); }
@@ -658,13 +623,11 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           }
         `}</style>
         <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">
-          <div className="relative flex items-center justify-center h-36 w-36" style={{ animation: "start-fade-up 0.8s ease-out both" }}>
-            <div className="absolute w-36 h-36 rounded-full bg-brand-cyan/15 blur-2xl" style={{ animation: "start-glow 5s ease-in-out infinite" }} />
-            <div className="absolute w-28 h-28 rounded-full bg-cyan-400/8 blur-3xl" style={{ animation: "start-glow 5s ease-in-out 1.5s infinite" }} />
-            <div className="relative z-10 w-24 h-24 bg-gradient-to-br from-brand-cyan/40 via-brand-cyan/20 to-brand-cyan/10" style={{ borderRadius: "44% 56% 52% 48% / 48% 44% 56% 52%", animation: "start-orb 5s ease-in-out infinite" }}>
-              <div className="absolute inset-3 rounded-full blur-sm bg-brand-cyan/25" style={{ animation: "start-inner 5s ease-in-out infinite" }} />
-            </div>
+          {/* Siri orb — idle state for start screen */}
+          <div style={{ animation: "start-fade-up 0.8s ease-out both" }}>
+            <VoiceVisualizer state="idle" className="h-40 w-40" />
           </div>
+
           <div style={{ animation: "start-fade-up 0.8s ease-out 0.15s both" }}>
             <h1 className="text-3xl font-bold text-brand-text tracking-tight">Ready to begin?</h1>
             <p className="text-brand-muted text-sm mt-3 leading-relaxed">
