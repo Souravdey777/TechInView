@@ -81,6 +81,65 @@
   }
 }
 
+/* Grid dot pattern */
+.bg-grid-pattern {
+  background-image: radial-gradient(circle, rgba(34, 211, 238, 0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+
+/* Animate on scroll — hidden by default, revealed via IntersectionObserver or group */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.animate-on-scroll.is-visible {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+/* Typing cursor blink */
+@keyframes blink-caret {
+  0%, 100% { border-color: transparent; }
+  50% { border-color: #22d3ee; }
+}
+
+.typing-cursor {
+  border-right: 2px solid #22d3ee;
+  animation: blink-caret 0.8s step-end infinite;
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Shimmer for stats */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.text-shimmer {
+  background: linear-gradient(90deg, #22d3ee 0%, #67e8f9 40%, #22d3ee 80%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
 /* Selection */
 ::selection {
   background: rgba(34, 211, 238, 0.2);

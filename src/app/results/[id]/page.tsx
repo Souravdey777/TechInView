@@ -158,11 +158,43 @@ export default function ResultsPage() {
     : [];
 
   return (
-    <main className="min-h-screen bg-brand-deep text-brand-text">
-      <div className="max-w-5xl mx-auto py-8 px-4">
+    <main className="min-h-screen bg-brand-deep text-brand-text relative overflow-hidden">
+      {/* Background ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-brand-cyan/3 blur-[120px] pointer-events-none" />
+
+      <style>{`
+        @keyframes results-fade-up {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes results-scale-in {
+          0% { opacity: 0; transform: scale(0.92); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes results-slide-left {
+          0% { opacity: 0; transform: translateX(-16px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes results-slide-right {
+          0% { opacity: 0; transform: translateX(16px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        .r-anim-1 { animation: results-fade-up 0.5s ease-out 0.05s both; }
+        .r-anim-2 { animation: results-fade-up 0.5s ease-out 0.15s both; }
+        .r-anim-3 { animation: results-scale-in 0.5s ease-out 0.25s both; }
+        .r-anim-4 { animation: results-scale-in 0.5s ease-out 0.35s both; }
+        .r-anim-5 { animation: results-fade-up 0.5s ease-out 0.45s both; }
+        .r-anim-6 { animation: results-fade-up 0.5s ease-out 0.55s both; }
+        .r-anim-7 { animation: results-fade-up 0.5s ease-out 0.65s both; }
+        .r-anim-8 { animation: results-fade-up 0.5s ease-out 0.75s both; }
+        .r-anim-sl { animation: results-slide-left 0.5s ease-out 0.5s both; }
+        .r-anim-sr { animation: results-slide-right 0.5s ease-out 0.55s both; }
+      `}</style>
+
+      <div className="relative z-10 max-w-5xl mx-auto py-8 px-4">
 
         {/* Top nav */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 r-anim-1">
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 text-sm text-brand-muted hover:text-brand-text transition-colors group"
@@ -176,7 +208,7 @@ export default function ResultsPage() {
         </div>
 
         {/* Page title */}
-        <div className="mb-8">
+        <div className="mb-8 r-anim-2">
           <h1 className="text-2xl font-bold text-brand-text tracking-tight">
             Interview Results
           </h1>
@@ -189,7 +221,7 @@ export default function ResultsPage() {
 
         {/* ── Section 1: Score Summary (only if scores exist) ── */}
         {hasScores && overallScore !== null && hireRec && summary ? (
-          <section className="mb-6">
+          <section className="mb-6 r-anim-3">
             <ScoreSummary
               overallScore={overallScore}
               hireRecommendation={hireRec}
@@ -197,33 +229,34 @@ export default function ResultsPage() {
             />
           </section>
         ) : (
-          <section className="mb-6">
+          <section className="mb-6 r-anim-3">
             <ScoringUnavailableCard reason="failed" />
           </section>
         )}
 
         {/* ── Section 2: Radar Chart (only if scores exist) ── */}
         {hasScores && radarData.length > 0 && (
-          <section className="mb-6">
+          <section className="mb-6 r-anim-4">
             <ScoreRadar scores={radarData} />
           </section>
         )}
 
         {/* ── Section 3: Feedback Cards (only if scores exist) ── */}
         {hasScores && feedbackCards.length > 0 && (
-          <section className="mb-6">
+          <section className="mb-6 r-anim-5">
             <h2 className="text-base font-semibold text-brand-text mb-4">
               Dimension Breakdown
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {feedbackCards.map((card) => (
-                <FeedbackCard
-                  key={card.dimension}
-                  dimension={card.dimension}
-                  score={card.score}
-                  weight={card.weight}
-                  feedback={card.feedback}
-                />
+              {feedbackCards.map((card, i) => (
+                <div key={card.dimension} style={{ animation: `results-scale-in 0.4s ease-out ${0.5 + i * 0.08}s both` }}>
+                  <FeedbackCard
+                    dimension={card.dimension}
+                    score={card.score}
+                    weight={card.weight}
+                    feedback={card.feedback}
+                  />
+                </div>
               ))}
             </div>
           </section>
@@ -233,14 +266,14 @@ export default function ResultsPage() {
         {hasScores && (keyStrengths || areasToImprove) && (
           <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {keyStrengths && keyStrengths.length > 0 && (
-              <div className="rounded-xl border border-brand-border bg-brand-card p-5">
+              <div className="rounded-xl border border-brand-border bg-brand-card p-5 r-anim-sl">
                 <h3 className="text-sm font-semibold text-brand-green flex items-center gap-2 mb-3">
                   <CheckCircle className="h-4 w-4" />
                   Key Strengths
                 </h3>
                 <ul className="space-y-2">
                   {keyStrengths.map((s, i) => (
-                    <li key={i} className="text-sm text-brand-text flex items-start gap-2">
+                    <li key={i} className="text-sm text-brand-text flex items-start gap-2" style={{ animation: `results-fade-up 0.3s ease-out ${0.6 + i * 0.06}s both` }}>
                       <span className="text-brand-green mt-0.5 shrink-0">+</span>
                       {s}
                     </li>
@@ -249,14 +282,14 @@ export default function ResultsPage() {
               </div>
             )}
             {areasToImprove && areasToImprove.length > 0 && (
-              <div className="rounded-xl border border-brand-border bg-brand-card p-5">
+              <div className="rounded-xl border border-brand-border bg-brand-card p-5 r-anim-sr">
                 <h3 className="text-sm font-semibold text-brand-amber flex items-center gap-2 mb-3">
                   <AlertCircle className="h-4 w-4" />
                   Areas to Improve
                 </h3>
                 <ul className="space-y-2">
                   {areasToImprove.map((a, i) => (
-                    <li key={i} className="text-sm text-brand-text flex items-start gap-2">
+                    <li key={i} className="text-sm text-brand-text flex items-start gap-2" style={{ animation: `results-fade-up 0.3s ease-out ${0.65 + i * 0.06}s both` }}>
                       <span className="text-brand-amber mt-0.5 shrink-0">-</span>
                       {a}
                     </li>
@@ -269,7 +302,7 @@ export default function ResultsPage() {
 
         {/* ── Section 4: Code Review (always shown when code exists) ── */}
         {finalCode && (
-          <section className="mb-6">
+          <section className="mb-6 r-anim-7">
             <CodeReview
               code={finalCode}
               language={codeLanguage}
@@ -280,16 +313,16 @@ export default function ResultsPage() {
         )}
 
         {/* ── Section 5: Transcript (always shown when messages exist) ── */}
-        <section className="mb-10">
+        <section className="mb-10 r-anim-7">
           <TranscriptReview messages={transcript} />
         </section>
 
         {/* ── CTA: Practice Again ── */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-brand-border">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-brand-border r-anim-8">
           <p className="text-sm text-brand-muted">Ready to improve your score?</p>
           <Link
             href="/interview/setup"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
           >
             <RefreshCw className="h-4 w-4" />
             Practice Again

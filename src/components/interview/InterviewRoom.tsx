@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Code2 } from "lucide-react";
+import { Code2, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { VoicePanel } from "./VoicePanel";
@@ -158,6 +158,59 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // ── Derived voice state for UI ──────────────────────────────────────────────
   const voiceState: VoiceState = isAiThinking ? "thinking" : voice.voiceState as VoiceState;
   const [isMicEnabled, setIsMicEnabled] = useState(false);
+
+  // ── Resizable panel state ─────────────────────────────────────────────────
+  const MIN_PANEL = 300;
+  const MAX_PANEL = 700;
+  const DEFAULT_PANEL = 400;
+  const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartX = useRef(0);
+  const dragStartWidth = useRef(DEFAULT_PANEL);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    dragStartX.current = e.clientX;
+    dragStartWidth.current = panelWidth;
+  }, [panelWidth]);
+
+  const handleTouchResizeStart = useCallback((e: React.TouchEvent) => {
+    setIsDragging(true);
+    dragStartX.current = e.touches[0].clientX;
+    dragStartWidth.current = panelWidth;
+  }, [panelWidth]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMove = (clientX: number) => {
+      const delta = clientX - dragStartX.current;
+      const newWidth = Math.min(MAX_PANEL, Math.max(MIN_PANEL, dragStartWidth.current + delta));
+      setPanelWidth(newWidth);
+    };
+
+    const onMouseMove = (e: MouseEvent) => handleMove(e.clientX);
+    const onTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX);
+    const onEnd = () => setIsDragging(false);
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onEnd);
+    document.addEventListener("touchmove", onTouchMove);
+    document.addEventListener("touchend", onEnd);
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onEnd);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchend", onEnd);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isDragging]);
 
   // ── Helper: get elapsed time string ─────────────────────────────────────────
   const getTimeStr = useCallback(() => {
@@ -511,22 +564,66 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // Scoring overlay — shown while AI evaluates the interview
   if (isScoring) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep">
-        <div className="flex flex-col items-center gap-6 max-w-md text-center px-6">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-brand-cyan bg-brand-card animate-pulse">
-            <span className="text-3xl font-bold text-brand-cyan">A</span>
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep overflow-hidden">
+        <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+        <div className="absolute w-[400px] h-[400px] rounded-full bg-brand-cyan/5 blur-[100px] animate-pulse" />
+        <style>{`
+          @keyframes scoring-orb {
+            0%, 100% { transform: scale(0.9) rotate(0deg); border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%; }
+            25% { transform: scale(1.1) rotate(90deg); border-radius: 55% 45% 40% 60% / 60% 55% 45% 40%; }
+            50% { transform: scale(0.95) rotate(180deg); border-radius: 45% 55% 60% 40% / 40% 60% 55% 45%; }
+            75% { transform: scale(1.08) rotate(270deg); border-radius: 60% 40% 45% 55% / 55% 45% 40% 60%; }
+          }
+          @keyframes scoring-glow {
+            0%, 100% { opacity: 0.3; transform: scale(0.9); }
+            50% { opacity: 0.7; transform: scale(1.3); }
+          }
+          @keyframes scoring-ring {
+            0% { transform: scale(0.5); opacity: 0.6; }
+            100% { transform: scale(2.5); opacity: 0; }
+          }
+          @keyframes scoring-shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes scoring-progress {
+            0% { width: 0%; }
+            20% { width: 30%; }
+            50% { width: 55%; }
+            80% { width: 80%; }
+            95% { width: 92%; }
+            100% { width: 95%; }
+          }
+          @keyframes scoring-fade-in {
+            0% { opacity: 0; transform: translateY(12px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+        <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">
+          <div className="relative flex items-center justify-center h-32 w-32">
+            <div className="absolute w-36 h-36 rounded-full bg-brand-cyan/20 blur-2xl" style={{ animation: "scoring-glow 2.5s ease-in-out infinite" }} />
+            <div className="absolute w-28 h-28 rounded-full" style={{ background: "conic-gradient(from 0deg, transparent 0%, rgba(34,211,238,0.35) 25%, transparent 50%, rgba(34,211,238,0.2) 75%, transparent 100%)", animation: "scoring-shimmer 3s linear infinite" }} />
+            <div className="absolute w-20 h-20 rounded-full border border-brand-cyan/40" style={{ animation: "scoring-ring 2.5s ease-out infinite" }} />
+            <div className="absolute w-20 h-20 rounded-full border border-brand-cyan/25" style={{ animation: "scoring-ring 2.5s ease-out 0.8s infinite" }} />
+            <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-brand-cyan/60 via-cyan-400/30 to-brand-cyan/10" style={{ borderRadius: "42% 58% 52% 48% / 48% 42% 58% 52%", animation: "scoring-orb 3s ease-in-out infinite" }}>
+              <div className="absolute inset-3 rounded-full blur-sm bg-brand-cyan/40" style={{ animation: "scoring-glow 2.5s ease-in-out infinite" }} />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-brand-text">
-            Alex is reviewing your performance...
-          </h1>
-          <p className="text-brand-muted text-sm">
-            Evaluating problem solving, code quality, communication, technical knowledge, and testing. This usually takes 5-10 seconds.
-          </p>
-          <div className="flex gap-1.5 mt-2">
-            <span className="w-2 h-2 bg-brand-cyan rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-            <span className="w-2 h-2 bg-brand-cyan rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-            <span className="w-2 h-2 bg-brand-cyan rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          <div style={{ animation: "scoring-fade-in 0.6s ease-out 0.2s both" }}>
+            <h1 className="text-2xl font-bold text-brand-text">Alex is reviewing your performance</h1>
+            <p className="text-brand-muted text-sm mt-2 leading-relaxed">Evaluating problem solving, code quality, communication, technical knowledge, and testing.</p>
           </div>
+          <div className="w-full space-y-2.5" style={{ animation: "scoring-fade-in 0.6s ease-out 0.5s both" }}>
+            {["Problem Solving", "Code Quality", "Communication", "Technical Knowledge", "Testing"].map((dim, i) => (
+              <div key={dim} className="flex items-center gap-3">
+                <span className="text-[11px] text-brand-muted w-32 text-right shrink-0">{dim}</span>
+                <div className="flex-1 h-1.5 rounded-full bg-brand-border overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-brand-cyan to-cyan-400" style={{ animation: `scoring-progress ${6 + i * 1.5}s ease-out ${i * 0.4}s both` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-brand-muted/60" style={{ animation: "scoring-fade-in 0.6s ease-out 0.8s both" }}>This usually takes 5-10 seconds</p>
         </div>
       </div>
     );
@@ -535,23 +632,56 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // Start overlay — requires user click to unlock browser audio
   if (!hasStarted) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep">
-        <div className="flex flex-col items-center gap-6 max-w-md text-center px-6">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-brand-cyan bg-brand-card">
-            <span className="text-3xl font-bold text-brand-cyan">A</span>
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep overflow-hidden">
+        <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+        <div className="absolute w-[500px] h-[500px] rounded-full bg-brand-cyan/4 blur-[120px]" />
+        <style>{`
+          @keyframes start-orb {
+            0%, 100% { transform: scale(0.92); border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%; }
+            50% { transform: scale(1.04); border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+          }
+          @keyframes start-glow {
+            0%, 100% { opacity: 0.25; transform: scale(0.9); }
+            50% { opacity: 0.55; transform: scale(1.2); }
+          }
+          @keyframes start-inner {
+            0%, 100% { opacity: 0.2; transform: scale(0.85); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+          }
+          @keyframes start-fade-up {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes start-btn-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(34,211,238,0.15), 0 0 60px rgba(34,211,238,0.05); }
+            50% { box-shadow: 0 0 30px rgba(34,211,238,0.3), 0 0 80px rgba(34,211,238,0.1); }
+          }
+        `}</style>
+        <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">
+          <div className="relative flex items-center justify-center h-36 w-36" style={{ animation: "start-fade-up 0.8s ease-out both" }}>
+            <div className="absolute w-36 h-36 rounded-full bg-brand-cyan/15 blur-2xl" style={{ animation: "start-glow 5s ease-in-out infinite" }} />
+            <div className="absolute w-28 h-28 rounded-full bg-cyan-400/8 blur-3xl" style={{ animation: "start-glow 5s ease-in-out 1.5s infinite" }} />
+            <div className="relative z-10 w-24 h-24 bg-gradient-to-br from-brand-cyan/40 via-brand-cyan/20 to-brand-cyan/10" style={{ borderRadius: "44% 56% 52% 48% / 48% 44% 56% 52%", animation: "start-orb 5s ease-in-out infinite" }}>
+              <div className="absolute inset-3 rounded-full blur-sm bg-brand-cyan/25" style={{ animation: "start-inner 5s ease-in-out infinite" }} />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-brand-text">Ready to begin?</h1>
-          <p className="text-brand-muted text-sm">
-            Alex, your AI interviewer, will introduce the problem and guide you through a {Math.round(maxDuration / 60)}-minute mock interview. Make sure your speakers are on.
-          </p>
-          <button
-            onClick={startInterview}
-            className="flex items-center gap-2 rounded-xl bg-brand-cyan px-8 py-3 text-base font-semibold text-brand-deep transition-all hover:bg-brand-cyan/90 hover:scale-105"
-          >
+          <div style={{ animation: "start-fade-up 0.8s ease-out 0.15s both" }}>
+            <h1 className="text-3xl font-bold text-brand-text tracking-tight">Ready to begin?</h1>
+            <p className="text-brand-muted text-sm mt-3 leading-relaxed">
+              Alex, your AI interviewer, will introduce the problem and guide you through a{" "}
+              <span className="text-brand-text font-medium">{Math.round(maxDuration / 60)}-minute</span> mock interview.
+            </p>
+          </div>
+          <div className="flex items-center justify-center gap-6 text-[11px] text-brand-muted" style={{ animation: "start-fade-up 0.8s ease-out 0.3s both" }}>
+            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-cyan/60" />Voice conversation</span>
+            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-green/60" />Live coding</span>
+            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-amber/60" />AI scoring</span>
+          </div>
+          <button onClick={startInterview} className="flex items-center gap-2 rounded-xl bg-brand-cyan px-10 py-3.5 text-base font-semibold text-brand-deep transition-all hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98]" style={{ animation: "start-fade-up 0.8s ease-out 0.45s both, start-btn-glow 3s ease-in-out infinite" }}>
             Start Interview
           </button>
-          <p className="text-xs text-brand-muted">
-            You can use the mic or type your responses
+          <p className="text-xs text-brand-muted/60" style={{ animation: "start-fade-up 0.8s ease-out 0.6s both" }}>
+            Make sure your speakers are on &middot; You can also type responses
           </p>
         </div>
       </div>
@@ -590,8 +720,11 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
       {/* ── Main area ── */}
       <div className="flex flex-1 overflow-hidden">
-        {/* ── Left panel ── */}
-        <aside className="flex w-[360px] shrink-0 flex-col border-r border-brand-border bg-brand-surface overflow-hidden">
+        {/* ── Left panel (resizable) ── */}
+        <aside
+          className="flex shrink-0 flex-col border-r border-brand-border bg-brand-surface overflow-hidden"
+          style={{ width: `${panelWidth}px` }}
+        >
           {/* Voice panel always visible at top */}
           <div className="shrink-0 border-b border-brand-border">
             <VoicePanel
@@ -631,6 +764,21 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             </Tabs>
           </div>
         </aside>
+
+        {/* ── Resize handle ── */}
+        <div
+          className={cn(
+            "flex w-2 shrink-0 cursor-col-resize items-center justify-center border-r border-brand-border bg-brand-surface transition-colors hover:bg-brand-cyan/10 group",
+            isDragging && "bg-brand-cyan/10"
+          )}
+          onMouseDown={handleResizeStart}
+          onTouchStart={handleTouchResizeStart}
+        >
+          <GripVertical className={cn(
+            "h-5 w-5 text-brand-border transition-colors group-hover:text-brand-cyan/60",
+            isDragging && "text-brand-cyan/60"
+          )} />
+        </div>
 
         {/* ── Right panel ── */}
         <main className="flex flex-1 flex-col overflow-hidden">

@@ -10,7 +10,7 @@ declare global {
 }
 import { Mic, MicOff, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
+import { VoiceVisualizer, MicVisualizer, type VoiceState } from "./VoiceVisualizer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -65,8 +65,8 @@ const PHASE_COLORS: Record<InterviewPhase, string> = {
 
 const STATE_LABELS: Record<VoiceState, string> = {
   idle: "Ready",
-  listening: "Listening…",
-  thinking: "Thinking…",
+  listening: "Listening...",
+  thinking: "Thinking...",
   speaking: "Alex is speaking",
 };
 
@@ -75,15 +75,6 @@ const STATE_COLORS: Record<VoiceState, string> = {
   listening: "text-brand-cyan",
   thinking: "text-brand-amber",
   speaking: "text-brand-green",
-};
-
-// ─── Avatar ring colors ───────────────────────────────────────────────────────
-
-const RING_COLORS: Record<VoiceState, string> = {
-  idle: "border-brand-border",
-  listening: "border-brand-cyan shadow-[0_0_24px_rgba(34,211,238,0.25)]",
-  thinking: "border-brand-amber shadow-[0_0_24px_rgba(251,191,36,0.2)]",
-  speaking: "border-brand-green shadow-[0_0_24px_rgba(52,211,153,0.25)]",
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -119,8 +110,8 @@ export function VoicePanel({
   }
 
   return (
-    <div className="flex flex-col gap-3 p-4">
-      {/* Phase badge */}
+    <div className="flex flex-col gap-2 p-4">
+      {/* Phase badge + state */}
       <div className="flex items-center justify-between">
         <span
           className={cn(
@@ -135,81 +126,51 @@ export function VoicePanel({
         </span>
       </div>
 
-      {/* Avatar */}
-      <div className="flex flex-col items-center gap-4 py-4">
-        {/* Animated rings behind avatar */}
-        <div className="relative flex items-center justify-center">
-          {/* Outer pulse ring — only visible when active */}
-          {(voiceState === "listening" || voiceState === "speaking") && (
-            <>
-              <div
-                className={cn(
-                  "absolute h-28 w-28 rounded-full border-2 opacity-0",
-                  voiceState === "listening"
-                    ? "border-brand-cyan animate-[pulse-ring_1.6s_ease-out_infinite]"
-                    : "border-brand-green animate-[pulse-ring_1.2s_ease-out_infinite]"
-                )}
-              />
-              <div
-                className={cn(
-                  "absolute h-24 w-24 rounded-full border opacity-0",
-                  voiceState === "listening"
-                    ? "border-brand-cyan/60 animate-[pulse-ring_1.6s_ease-out_0.4s_infinite]"
-                    : "border-brand-green/60 animate-[pulse-ring_1.2s_ease-out_0.3s_infinite]"
-                )}
-              />
-            </>
-          )}
-
-          {/* Avatar circle */}
-          <div
-            className={cn(
-              "relative z-10 flex h-20 w-20 items-center justify-center rounded-full border-2 bg-brand-card transition-all duration-300",
-              RING_COLORS[voiceState]
-            )}
-          >
-            <span className="text-3xl font-bold text-brand-cyan">A</span>
-          </div>
-        </div>
-
-        {/* Name + title */}
-        <div className="text-center">
+      {/* Orb visualizer — the hero element */}
+      <div className="flex flex-col items-center gap-1 py-3">
+        <VoiceVisualizer state={voiceState} className="h-32 w-32" />
+        <div className="text-center mt-1">
           <p className="text-sm font-semibold text-brand-text">Alex</p>
-          <p className="text-xs text-brand-muted">AI Interviewer</p>
+          <p className="text-[11px] text-brand-muted">AI Interviewer</p>
         </div>
-
-        {/* Visualizer */}
-        <VoiceVisualizer state={voiceState} className="h-10 w-48" />
       </div>
 
-      {/* Mic toggle */}
+      {/* Mic button — Siri-style with animated rings */}
       <div className="flex flex-col items-center gap-1">
-        <button
-          onClick={onToggleMic}
-          disabled={!speechSupported}
-          className={cn(
-            "flex h-14 w-14 items-center justify-center rounded-full border-2 transition-all duration-200",
-            !speechSupported
-              ? "border-brand-border bg-brand-card text-brand-muted cursor-not-allowed opacity-50"
-              : isMicEnabled
-              ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20"
-              : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-subtle hover:text-brand-text"
-          )}
-          aria-label={isMicEnabled ? "Mute microphone" : "Enable microphone"}
-        >
-          {isMicEnabled ? (
-            <Mic className="h-5 w-5" />
-          ) : (
-            <MicOff className="h-5 w-5" />
-          )}
-        </button>
+        <div className="relative">
+          <MicVisualizer isActive={isMicEnabled} className="absolute inset-0" />
+          <button
+            onClick={onToggleMic}
+            disabled={!speechSupported}
+            className={cn(
+              "relative z-10 flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300",
+              !speechSupported
+                ? "bg-brand-card border border-brand-border text-brand-muted cursor-not-allowed opacity-50"
+                : isMicEnabled
+                ? "bg-brand-cyan/20 text-brand-cyan border-2 border-brand-cyan shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                : "bg-brand-card border border-brand-border text-brand-muted hover:border-brand-subtle hover:text-brand-text"
+            )}
+            aria-label={isMicEnabled ? "Mute microphone" : "Enable microphone"}
+          >
+            {isMicEnabled ? (
+              <Mic className="h-5 w-5" />
+            ) : (
+              <MicOff className="h-5 w-5" />
+            )}
+          </button>
+        </div>
         {!speechSupported && (
           <span className="text-[10px] text-brand-muted">Mic not supported — use text input below</span>
+        )}
+        {speechSupported && (
+          <span className="text-[10px] text-brand-muted mt-0.5">
+            {isMicEnabled ? "Tap to stop" : "Tap to speak"}
+          </span>
         )}
       </div>
 
       {/* Text fallback toggle */}
-      <div className="border-t border-brand-border pt-3">
+      <div className="border-t border-brand-border pt-2 mt-1">
         <button
           onClick={() => {
             setTextOpen((v) => !v);
@@ -234,7 +195,7 @@ export function VoicePanel({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your response… (Enter to send)"
+              placeholder="Type your response... (Enter to send)"
               rows={3}
               className="w-full resize-none rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5 text-sm text-brand-text placeholder:text-brand-muted/60 focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
             />

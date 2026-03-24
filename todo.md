@@ -35,20 +35,29 @@ _Goal: Feel like a real product_
 ## Phase 4: Deploy MVP
 _Goal: Live on the internet, shareable link_
 
-- [ ] 21. Push to GitHub
-- [ ] 22. Deploy frontend to Vercel
-- [ ] 23. Set up production env vars on Vercel
-- [ ] 24. Update Supabase auth redirect URLs to production domain
+- [x] 21. Push to GitHub
+- [x] 22. Deploy frontend to Vercel
+- [x] 23. Set up production env vars on Vercel
+- [x] 24. Update Supabase auth redirect URLs to production domain
 - [ ] 25. Configure custom domain (techinview.ai)
 - [ ] 26. Smoke test full flow on production
 
 ## Phase 5: Monetization
 _Goal: Accept payments_
 
-- [ ] 27. Stripe checkout for Starter ($19/mo) and Pro ($29/mo) plans
-- [ ] 28. Stripe customer portal for managing subscriptions
-- [ ] 29. Wire Stripe webhook to update user plan in DB
-- [ ] 30. Enforce free tier limit (1 interview/week) in `/api/interview/start`
+- [ ] 27. Stripe checkout for credit packs:
+  - Free trial: 1 interview, $0 (hook & convert)
+  - Single interview: $8 (₹349 India, $4 Brazil/SEA)
+  - 3-pack (Popular): $18 (₹799 India, $9 Brazil/SEA) — 25% off per interview
+  - 5-pack (Best Value): $24 (₹1099 India, $18 Brazil/SEA) — 40% off per interview
+- [ ] 28. PPP pricing — detect country via Vercel `x-vercel-ip-country` header, show localized prices
+- [ ] 29. Wire Stripe webhook to credit user's interview balance in DB
+- [ ] 30. Implement freemium tier restrictions:
+  - No advanced report (basic score only, no detailed feedback breakdown)
+  - No advanced persona (default "Alex" only, no FAANG-specific voices)
+  - 20-min interview cap (instead of 45 min)
+  - Only 2 easy problems available (randomly picks one at runtime)
+  - Enforce in `/api/interview/start` + interview room UI
 
 ## Phase 6: Voice Upgrade
 _Goal: Replace browser APIs with production-quality voice_
@@ -68,6 +77,8 @@ _Goal: Understand usage, iterate_
 ## Post-V1 Roadmap
 _After launch & initial traction_
 
+- [ ] FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Alex", each with distinct personality and interview style
+- [ ] Referral program for influencers — custom referral links, tracking, commission/credit payouts
 - [ ] Company-specific interviewer personas
 - [ ] Problem bank expansion (100+ problems)
 - [ ] Spaced repetition queue
