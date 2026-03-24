@@ -135,7 +135,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const conversationRef = useRef<{ role: string; content: string }[]>([]);
+  const conversationRef = useRef<{ role: string; content: string; timestamp_ms: number }[]>([]);
   const startTimeRef = useRef(Date.now());
 
   // ── Interview state ──────────────────────────────────────────────────────────
@@ -224,9 +224,10 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // ── Send message to AI and speak response ──────────────────────────────────
   const sendToAI = useCallback(async (userMessage: string) => {
     // Add user message to chat
+    const elapsedMs = Date.now() - startTimeRef.current;
     const userMsg: ChatMessage = { role: "candidate", content: userMessage, time: getTimeStr() };
     setChatMessages(prev => [...prev, userMsg]);
-    conversationRef.current.push({ role: "candidate", content: userMessage });
+    conversationRef.current.push({ role: "candidate", content: userMessage, timestamp_ms: elapsedMs });
 
     setIsAiThinking(true);
 
@@ -247,9 +248,10 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       const data = await res.json();
       if (data.success && data.data?.message) {
         const aiText = data.data.message;
+        const aiElapsedMs = Date.now() - startTimeRef.current;
         const aiMsg: ChatMessage = { role: "interviewer", content: aiText, time: getTimeStr() };
         setChatMessages(prev => [...prev, aiMsg]);
-        conversationRef.current.push({ role: "interviewer", content: aiText });
+        conversationRef.current.push({ role: "interviewer", content: aiText, timestamp_ms: aiElapsedMs });
 
         setIsAiThinking(false);
         // Speak the response using browser TTS
@@ -292,7 +294,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       if (data.success && data.data?.message) {
         const aiText = data.data.message;
         setChatMessages([{ role: "interviewer", content: aiText, time: "0:00" }]);
-        conversationRef.current.push({ role: "interviewer", content: aiText });
+        conversationRef.current.push({ role: "interviewer", content: aiText, timestamp_ms: 0 });
         setIsAiThinking(false);
         voice.speakText(aiText);
       } else {
@@ -403,10 +405,10 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     voice.stopListening();
     voice.stopSpeaking();
 
-    const transcript = conversationRef.current.map((msg, i) => ({
+    const transcript = conversationRef.current.map((msg) => ({
       role: msg.role as "interviewer" | "candidate" | "system",
       content: msg.content,
-      timestamp_ms: i * 30000, // approximate
+      timestamp_ms: msg.timestamp_ms,
     }));
 
     const passed = testResults.filter((t) => t.passed).length;

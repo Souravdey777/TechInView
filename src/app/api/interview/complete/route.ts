@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
           overall_score: scoringResult?.overall_score ?? null,
           scores: scoringResult?.scores ?? null,
           feedback_summary: scoringResult?.summary ?? null,
-          hire_recommendation: scoringResult?.hire_recommendation as "strong_hire" | "hire" | "lean_hire" | "lean_no_hire" | "no_hire" | null ?? null,
+          hire_recommendation: (scoringResult?.hire_recommendation ?? null) as "strong_hire" | "hire" | "lean_hire" | "lean_no_hire" | "no_hire" | null,
         });
 
         // Save conversation messages in parallel
@@ -95,11 +95,11 @@ export async function POST(req: NextRequest) {
         }
 
         // Update progress stats for this category
-        if (problem.category && scoringResult?.overall_score != null) {
+        if (user && problem.category && scoringResult && scoringResult.overall_score != null) {
           await updateProgress(user.id, problem.category, scoringResult.overall_score);
         }
 
-        console.log(`✓ Interview ${interviewId} saved to DB for user ${user.id}`);
+        console.log(`✓ Interview ${interviewId} saved to DB`);
       } catch (dbError) {
         // Log but don't fail — user still gets results
         console.error("Failed to save interview to DB:", dbError);
