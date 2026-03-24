@@ -12,6 +12,7 @@ import {
   LineChart,
 } from "lucide-react";
 import { ScoreTrendChart } from "@/components/dashboard/ScoreTrendChart";
+import { InterviewTypeTabs } from "@/components/shared/InterviewTypeTabs";
 
 export const dynamic = "force-dynamic";
 
@@ -147,6 +148,8 @@ export default async function ProgressPage() {
         </p>
       </div>
 
+      <InterviewTypeTabs>
+
       {/* Score Trend */}
       <div>
         <div className="flex items-center gap-2 mb-4">
@@ -266,6 +269,8 @@ export default async function ProgressPage() {
           )}
         </div>
       </div>
+
+      </InterviewTypeTabs>
     </div>
   );
 }

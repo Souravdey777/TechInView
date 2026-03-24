@@ -6,34 +6,8 @@ import {
   User,
   CreditCard,
   AlertTriangle,
-  CheckCircle2,
-  Zap,
-  Shield,
+  Ticket,
 } from "lucide-react";
-
-const PLAN_CONFIG = {
-  starter: {
-    name: "Starter",
-    price: "$19/mo",
-    color: "text-brand-cyan",
-    bg: "bg-brand-cyan/10",
-    border: "border-brand-cyan/25",
-    features: ["5 interviews/week", "All DSA problems", "Score history"],
-  },
-  pro: {
-    name: "Pro",
-    price: "$29/mo",
-    color: "text-brand-green",
-    bg: "bg-brand-green/10",
-    border: "border-brand-green/25",
-    features: [
-      "Unlimited interviews",
-      "All DSA problems",
-      "Company personas",
-      "Priority support",
-    ],
-  },
-};
 
 export default async function SettingsPage() {
   const supabase = createClient();
@@ -47,11 +21,13 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, target_company, experience_level, preferred_language, plan")
+    .select("display_name, target_company, experience_level, preferred_language, interview_credits, has_used_free_trial, interviews_completed")
     .eq("id", user.id)
     .single();
 
-  const currentPlan: "free" | "starter" | "pro" = profile?.plan ?? "free";
+  const credits = profile?.interview_credits ?? 1;
+  const hasUsedTrial = profile?.has_used_free_trial ?? false;
+  const interviewsCompleted = profile?.interviews_completed ?? 0;
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
@@ -82,118 +58,75 @@ export default async function SettingsPage() {
         />
       </section>
 
-      {/* Subscription Section */}
+      {/* Interview Credits Section */}
       <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-border">
-          <CreditCard className="w-4 h-4 text-brand-cyan" />
+          <Ticket className="w-4 h-4 text-brand-cyan" />
           <h2 className="text-sm font-semibold text-brand-text">
-            Subscription
+            Interview Credits
           </h2>
         </div>
-        <div className="p-6 space-y-4">
-          {/* Current Plan Badge */}
-          <div className="flex items-center gap-3">
-            <span className="text-brand-muted text-sm">Current plan:</span>
-            <span
-              className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border",
-                currentPlan === "free"
-                  ? "bg-brand-surface border-brand-border text-brand-muted"
-                  : currentPlan === "starter"
-                    ? "bg-brand-cyan/10 border-brand-cyan/30 text-brand-cyan"
-                    : "bg-brand-green/10 border-brand-green/30 text-brand-green"
-              )}
-            >
-              {currentPlan === "pro" && <Zap className="w-3 h-3" />}
-              {currentPlan === "starter" && <CheckCircle2 className="w-3 h-3" />}
-              {currentPlan === "free"
-                ? "Free Plan"
-                : currentPlan === "starter"
-                  ? "Starter"
-                  : "Pro"}
+        <div className="p-6 space-y-5">
+          {/* Credits balance */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-brand-muted text-sm">Available credits</p>
+              <p className="text-xs text-brand-muted mt-0.5">
+                {interviewsCompleted} interview{interviewsCompleted !== 1 ? "s" : ""} completed
+                {!hasUsedTrial && credits > 0 && " · Free trial available"}
+              </p>
+            </div>
+            <span className={cn(
+              "text-3xl font-bold font-heading",
+              credits > 0 ? "text-brand-cyan" : "text-brand-muted"
+            )}>
+              {credits}
             </span>
           </div>
 
-          {currentPlan === "free" && (
-            <p className="text-brand-muted text-sm">
-              You are on the free plan. Upgrade to unlock more interviews and
-              features.
-            </p>
-          )}
-
-          {/* Plan Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            {(["starter", "pro"] as const).map((plan) => {
-              const cfg = PLAN_CONFIG[plan];
-              const isCurrentPlan = currentPlan === plan;
-              return (
-                <div
-                  key={plan}
-                  className={cn(
-                    "rounded-xl border p-5 flex flex-col gap-4",
-                    isCurrentPlan
-                      ? cn(cfg.bg, cfg.border)
-                      : "bg-brand-surface border-brand-border"
-                  )}
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span
-                        className={cn(
-                          "text-base font-bold font-heading",
-                          isCurrentPlan ? cfg.color : "text-brand-text"
-                        )}
-                      >
-                        {cfg.name}
-                      </span>
-                      <span
-                        className={cn(
-                          "text-lg font-bold font-heading",
-                          isCurrentPlan ? cfg.color : "text-brand-text"
-                        )}
-                      >
-                        {cfg.price}
-                      </span>
-                    </div>
-                    <ul className="space-y-1 mt-3">
-                      {cfg.features.map((feature) => (
-                        <li
-                          key={feature}
-                          className="flex items-center gap-2 text-xs text-brand-muted"
-                        >
-                          <Shield className="w-3 h-3 text-brand-green shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {isCurrentPlan ? (
-                    <span className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-brand-surface/50 text-brand-muted border border-current/10">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Current Plan
+          {/* Credit packs */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { name: "1 Interview", price: "$8", credits: 1, color: "brand-cyan" },
+              { name: "3-Pack", price: "$18", credits: 3, badge: "Save 25%", color: "brand-green" },
+              { name: "5-Pack", price: "$24", credits: 5, badge: "Save 40%", color: "brand-amber" },
+            ].map((pack) => (
+              <div
+                key={pack.name}
+                className="rounded-xl border border-brand-border bg-brand-surface p-4 flex flex-col gap-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-brand-text">{pack.name}</span>
+                  {pack.badge && (
+                    <span className={cn(
+                      "text-[10px] font-semibold px-2 py-0.5 rounded-full",
+                      pack.color === "brand-green" ? "bg-brand-green/15 text-brand-green" : "bg-brand-amber/15 text-brand-amber"
+                    )}>
+                      {pack.badge}
                     </span>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled
-                      className={cn(
-                        "px-3 py-2 rounded-lg text-xs font-semibold border transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                        plan === "pro"
-                          ? "bg-brand-green/10 border-brand-green/30 text-brand-green"
-                          : "bg-brand-cyan/10 border-brand-cyan/30 text-brand-cyan"
-                      )}
-                    >
-                      Upgrade to {cfg.name}
-                    </button>
                   )}
                 </div>
-              );
-            })}
+                <span className="text-xl font-bold text-brand-text">{pack.price}</span>
+                <button
+                  type="button"
+                  disabled
+                  className={cn(
+                    "px-3 py-2 rounded-lg text-xs font-semibold border transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                    `bg-${pack.color}/10 border-${pack.color}/30 text-${pack.color}`
+                  )}
+                >
+                  Buy Credits
+                </button>
+              </div>
+            ))}
           </div>
-          <p className="text-brand-muted text-xs">
-            Stripe billing coming soon. Plans will be available at launch.
-          </p>
+
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-3.5 h-3.5 text-brand-muted" />
+            <p className="text-brand-muted text-xs">
+              Stripe payments coming soon. Credits never expire.
+            </p>
+          </div>
         </div>
       </section>
 

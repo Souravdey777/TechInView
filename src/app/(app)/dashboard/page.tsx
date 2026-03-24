@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { InterviewHistory } from "@/components/dashboard/InterviewHistory";
-import { ArrowRight, Mic, Zap } from "lucide-react";
+import { ArrowRight, Mic, Zap, Braces, Network, MonitorSmartphone, Lock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -113,6 +113,58 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      {/* Interview Types */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* DSA — active */}
+        <Link
+          href="/interview/setup"
+          className="flex items-center gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-4 py-3.5 transition-all hover:border-brand-cyan/50 hover:bg-brand-cyan/8 group"
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-cyan/10 border border-brand-cyan/25">
+            <Braces className="w-4 h-4 text-brand-cyan" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-brand-text">DSA / Coding</p>
+            <p className="text-[11px] text-brand-muted truncate">Algorithms &amp; data structures</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-brand-cyan opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+        </Link>
+
+        {/* System Design — coming soon */}
+        <div className="flex items-center gap-3 rounded-xl border border-brand-border px-4 py-3.5 opacity-50 cursor-not-allowed">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-surface border border-brand-border">
+            <Network className="w-4 h-4 text-brand-muted" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold text-brand-muted">System Design</p>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-amber/10 text-brand-amber border border-brand-amber/25">
+                <Lock className="w-2.5 h-2.5" />
+                Soon
+              </span>
+            </div>
+            <p className="text-[11px] text-brand-muted/60 truncate">Scalable architecture</p>
+          </div>
+        </div>
+
+        {/* Machine Coding — coming soon */}
+        <div className="flex items-center gap-3 rounded-xl border border-brand-border px-4 py-3.5 opacity-50 cursor-not-allowed">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-surface border border-brand-border">
+            <MonitorSmartphone className="w-4 h-4 text-brand-muted" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold text-brand-muted">Machine Coding</p>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-amber/10 text-brand-amber border border-brand-amber/25">
+                <Lock className="w-2.5 h-2.5" />
+                Soon
+              </span>
+            </div>
+            <p className="text-[11px] text-brand-muted/60 truncate">Multi-file IDE projects</p>
+          </div>
+        </div>
+      </div>
+
       {/* Stats Grid */}
       <StatsOverview
         totalInterviews={totalInterviews}
@@ -171,6 +223,7 @@ export default async function DashboardPage() {
         </div>
         <InterviewHistory interviews={historyItems} />
       </div>
+
     </div>
   );
 }

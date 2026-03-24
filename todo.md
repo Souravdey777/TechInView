@@ -74,14 +74,22 @@ _Goal: Understand usage, iterate_
 - [ ] 36. PostHog integration (interview_started, completed, code_run, payment events)
 - [ ] 37. Track conversion funnel: landing → signup → first interview → payment
 
+## Pre-V1 Launch
+_Ship before going live_
+
+- [ ] 38. User onboarding flow — first-time setup wizard (name, target company, experience level, preferred language)
+- [ ] 39. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
+- [ ] 40. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Alex", each with distinct personality and interview style
+- [ ] 41. Referral program for influencers — custom referral links, tracking, commission/credit payouts
+- [ ] Problem bank expansion (50+ problems)
+
 ## Post-V1 Roadmap
 _After launch & initial traction_
 
-- [ ] FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Alex", each with distinct personality and interview style
-- [ ] Referral program for influencers — custom referral links, tracking, commission/credit payouts
-- [ ] Company-specific interviewer personas
+- [ ] Other Company-specific interviewer personas
 - [ ] Problem bank expansion (100+ problems)
 - [ ] Spaced repetition queue
 - [ ] System Design mode (Excalidraw)
 - [ ] Machine Coding (multi-file IDE)
 - [ ] Peer matching (viral loop)
+- [ ] LeaderBoard & Challenges

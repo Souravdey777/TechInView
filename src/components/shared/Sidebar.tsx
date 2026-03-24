@@ -10,6 +10,7 @@ import {
   Settings2,
   LogOut,
   Cpu,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupabase } from "@/hooks/useSupabase";
@@ -80,6 +81,25 @@ export function Sidebar({ userEmail }: SidebarProps) {
           );
         })}
       </nav>
+
+      {/* Upgrade prompt */}
+      <div className="px-3 pb-2">
+        <Link
+          href="/settings"
+          className="flex flex-col gap-2 p-3 rounded-xl bg-gradient-to-br from-brand-cyan/10 via-brand-card to-purple-500/10 border border-brand-cyan/20 hover:border-brand-cyan/40 transition-all group"
+        >
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-brand-cyan" />
+            <span className="text-xs font-semibold text-brand-text">Get more interviews</span>
+          </div>
+          <p className="text-[11px] text-brand-muted leading-relaxed">
+            Buy credit packs starting at $8. Practice more, score higher.
+          </p>
+          <span className="text-[11px] font-semibold text-brand-cyan">
+            View pricing &rarr;
+          </span>
+        </Link>
+      </div>
 
       {/* User Info + Sign Out */}
       <div className="px-3 py-4 border-t border-brand-border space-y-1">

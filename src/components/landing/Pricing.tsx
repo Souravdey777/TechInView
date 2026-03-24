@@ -135,40 +135,42 @@ export function Pricing({ defaultRegion = "usd" }: PricingProps) {
             Buy what you need. No subscriptions, no commitments.
           </p>
 
-          {/* Region Toggle */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-brand-border bg-brand-card/60">
-            <span
-              className={cn(
-                "text-sm font-medium transition-colors",
-                !isIndia ? "text-brand-text" : "text-brand-muted"
-              )}
-            >
-              USD ($)
-            </span>
-            <button
-              onClick={() => setIsIndia(!isIndia)}
-              className={cn(
-                "relative w-11 h-6 rounded-full transition-colors",
-                isIndia ? "bg-brand-cyan" : "bg-brand-border"
-              )}
-              aria-label="Toggle India pricing"
-            >
+          {/* Region Toggle — only visible for Indian users */}
+          {defaultRegion === "inr" && (
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-brand-border bg-brand-card/60">
               <span
                 className={cn(
-                  "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform",
-                  isIndia && "translate-x-5"
+                  "text-sm font-medium transition-colors",
+                  !isIndia ? "text-brand-text" : "text-brand-muted"
                 )}
-              />
-            </button>
-            <span
-              className={cn(
-                "text-sm font-medium transition-colors",
-                isIndia ? "text-brand-text" : "text-brand-muted"
-              )}
-            >
-              INR (₹)
-            </span>
-          </div>
+              >
+                USD ($)
+              </span>
+              <button
+                onClick={() => setIsIndia(!isIndia)}
+                className={cn(
+                  "relative w-11 h-6 rounded-full transition-colors",
+                  isIndia ? "bg-brand-cyan" : "bg-brand-border"
+                )}
+                aria-label="Toggle India pricing"
+              >
+                <span
+                  className={cn(
+                    "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform",
+                    isIndia && "translate-x-5"
+                  )}
+                />
+              </button>
+              <span
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  isIndia ? "text-brand-text" : "text-brand-muted"
+                )}
+              >
+                INR (₹)
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

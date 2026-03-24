@@ -16,6 +16,10 @@ import {
   Search,
   BookOpen,
   X,
+  Braces,
+  Network,
+  MonitorSmartphone,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -408,6 +412,64 @@ function InterviewSetupInner() {
             Configure your session and Alex will guide you through the rest.
           </p>
         </div>
+
+        {/* 0 – Interview Type */}
+        <SectionCard title="Interview Type">
+          <div className="grid grid-cols-3 gap-3">
+            {/* DSA — active */}
+            <button
+              className="flex items-start gap-3 rounded-lg border border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30 px-4 py-4 text-left transition-all"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-cyan/10 border border-brand-cyan/30">
+                <Braces className="h-4 w-4 text-brand-cyan" />
+              </div>
+              <div>
+                <span className="text-sm font-semibold text-brand-cyan">DSA / Coding</span>
+                <p className="text-xs text-brand-muted mt-0.5">
+                  Algorithms &amp; data structures
+                </p>
+              </div>
+            </button>
+
+            {/* System Design — coming soon */}
+            <div className="flex items-start gap-3 rounded-lg border border-brand-border px-4 py-4 text-left opacity-50 cursor-not-allowed">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-surface border border-brand-border">
+                <Network className="h-4 w-4 text-brand-muted" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-brand-muted">System Design</span>
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-amber/10 text-brand-amber border border-brand-amber/25">
+                    <Lock className="h-2.5 w-2.5" />
+                    Soon
+                  </span>
+                </div>
+                <p className="text-xs text-brand-muted/60 mt-0.5">
+                  Scalable architecture
+                </p>
+              </div>
+            </div>
+
+            {/* Machine Coding — coming soon */}
+            <div className="flex items-start gap-3 rounded-lg border border-brand-border px-4 py-4 text-left opacity-50 cursor-not-allowed">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-surface border border-brand-border">
+                <MonitorSmartphone className="h-4 w-4 text-brand-muted" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-brand-muted">Machine Coding</span>
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-amber/10 text-brand-amber border border-brand-amber/25">
+                    <Lock className="h-2.5 w-2.5" />
+                    Soon
+                  </span>
+                </div>
+                <p className="text-xs text-brand-muted/60 mt-0.5">
+                  Multi-file IDE projects
+                </p>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
 
         {/* 1 – Problem Selection */}
         <SectionCard title="Problem Selection">
