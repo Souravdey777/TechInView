@@ -17,23 +17,23 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Fetch profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name, interviews_completed")
-    .eq("id", user.id)
-    .single();
+  // Fetch profile and interviews in parallel
+  const [{ data: profile }, { data: interviews }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("display_name, interviews_completed")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("interviews")
+      .select("id, status, language, overall_score, duration_seconds, started_at, completed_at, problem_id, hire_recommendation, problems(title, difficulty, category)")
+      .eq("user_id", user.id)
+      .order("started_at", { ascending: false })
+      .limit(20),
+  ]);
 
   const displayName =
     profile?.display_name ?? user.email?.split("@")[0] ?? "there";
-
-  // Fetch real interview data
-  const { data: interviews } = await supabase
-    .from("interviews")
-    .select("id, status, language, overall_score, duration_seconds, started_at, completed_at, problem_id, hire_recommendation, problems(title, difficulty, category)")
-    .eq("user_id", user.id)
-    .order("started_at", { ascending: false })
-    .limit(20);
 
   const completedInterviews = (interviews || []).filter(
     (i) => i.status === "completed"

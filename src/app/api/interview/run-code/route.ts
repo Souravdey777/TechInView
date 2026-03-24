@@ -123,46 +123,45 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Run against each test case
-    const testResults = [];
+    // Run against all test cases in parallel
+    const testResults = await Promise.all(
+      testCases.map(async (tc, i) => {
+        try {
+          const wrapped = wrapCodeForExecution(language, code, tc.input);
+          const result = await executeCode(
+            config.pistonId,
+            config.version,
+            wrapped.code,
+            wrapped.stdin
+          );
 
-    for (let i = 0; i < testCases.length; i++) {
-      const tc = testCases[i];
-      try {
-        const wrapped = wrapCodeForExecution(language, code, tc.input);
-        const result = await executeCode(
-          config.pistonId,
-          config.version,
-          wrapped.code,
-          wrapped.stdin
-        );
+          const actual = normalizeOutput(result.stdout);
+          const expected = normalizeOutput(tc.expected_output);
+          const passed = actual === expected;
 
-        const actual = normalizeOutput(result.stdout);
-        const expected = normalizeOutput(tc.expected_output);
-        const passed = actual === expected;
-
-        testResults.push({
-          id: `test-${i + 1}`,
-          input: tc.is_hidden ? "Hidden" : tc.input,
-          expected: tc.is_hidden ? "Hidden" : tc.expected_output,
-          actual:
-            tc.is_hidden && !passed
-              ? "Wrong answer"
-              : actual || result.stderr.slice(0, 200) || "No output",
-          passed,
-          isHidden: tc.is_hidden,
-        });
-      } catch {
-        testResults.push({
-          id: `test-${i + 1}`,
-          input: tc.is_hidden ? "Hidden" : tc.input,
-          expected: tc.is_hidden ? "Hidden" : tc.expected_output,
-          actual: "Execution timeout",
-          passed: false,
-          isHidden: tc.is_hidden,
-        });
-      }
-    }
+          return {
+            id: `test-${i + 1}`,
+            input: tc.is_hidden ? "Hidden" : tc.input,
+            expected: tc.is_hidden ? "Hidden" : tc.expected_output,
+            actual:
+              tc.is_hidden && !passed
+                ? "Wrong answer"
+                : actual || result.stderr.slice(0, 200) || "No output",
+            passed,
+            isHidden: tc.is_hidden,
+          };
+        } catch {
+          return {
+            id: `test-${i + 1}`,
+            input: tc.is_hidden ? "Hidden" : tc.input,
+            expected: tc.is_hidden ? "Hidden" : tc.expected_output,
+            actual: "Execution timeout",
+            passed: false,
+            isHidden: tc.is_hidden,
+          };
+        }
+      })
+    );
 
     return NextResponse.json({
       success: true,

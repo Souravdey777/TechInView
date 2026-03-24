@@ -1,9 +1,19 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import Editor, { type OnMount } from "@monaco-editor/react";
+import dynamic from "next/dynamic";
+import type { OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { ChevronDown, Loader2 } from "lucide-react";
+
+const Editor = dynamic(() => import("@monaco-editor/react").then(mod => mod.default), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-brand-deep">
+      <Loader2 className="h-6 w-6 animate-spin text-brand-cyan" />
+    </div>
+  ),
+});
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

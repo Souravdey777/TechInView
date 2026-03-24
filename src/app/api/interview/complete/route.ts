@@ -79,19 +79,19 @@ export async function POST(req: NextRequest) {
           hire_recommendation: scoringResult?.hire_recommendation as "strong_hire" | "hire" | "lean_hire" | "lean_no_hire" | "no_hire" | null ?? null,
         });
 
-        // Save conversation messages
+        // Save conversation messages in parallel
         if (transcript.length > 0) {
-          for (const msg of transcript) {
+          await Promise.all(transcript.map((msg) => {
             const role = msg.role === "interviewer" ? "interviewer"
               : msg.role === "candidate" ? "candidate"
               : "system";
-            await addMessage(
+            return addMessage(
               interviewId,
               role as "interviewer" | "candidate" | "system",
               msg.content,
               msg.timestamp_ms
             );
-          }
+          }));
         }
 
         // Update progress stats for this category

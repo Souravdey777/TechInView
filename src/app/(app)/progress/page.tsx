@@ -64,11 +64,21 @@ export default async function ProgressPage() {
     redirect("/login");
   }
 
-  // Fetch progress data per category from the progress table
-  const { data: progressRows } = await supabase
-    .from("progress")
-    .select("category, problems_attempted, problems_solved, avg_score")
-    .eq("user_id", user.id);
+  // Fetch progress data and trend data in parallel
+  const [{ data: progressRows }, { data: trendInterviews }] = await Promise.all([
+    supabase
+      .from("progress")
+      .select("category, problems_attempted, problems_solved, avg_score")
+      .eq("user_id", user.id),
+    supabase
+      .from("interviews")
+      .select("overall_score, completed_at, started_at")
+      .eq("user_id", user.id)
+      .eq("status", "completed")
+      .not("overall_score", "is", null)
+      .order("completed_at", { ascending: true })
+      .limit(20),
+  ]);
 
   const progressMap = new Map<string, ProgressData>();
   for (const row of progressRows || []) {
@@ -106,16 +116,6 @@ export default async function ProgressPage() {
       });
     }
   }
-
-  // Fetch completed interviews for score trend (last 20)
-  const { data: trendInterviews } = await supabase
-    .from("interviews")
-    .select("overall_score, completed_at, started_at")
-    .eq("user_id", user.id)
-    .eq("status", "completed")
-    .not("overall_score", "is", null)
-    .order("completed_at", { ascending: true })
-    .limit(20);
 
   const trendData = (trendInterviews || []) as InterviewForTrend[];
   const hasTrendData = trendData.length >= 2;
