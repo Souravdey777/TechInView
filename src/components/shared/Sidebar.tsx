@@ -30,10 +30,10 @@ const NAV_ITEMS: NavItem[] = [
 
 type SidebarProps = {
   userEmail: string;
-  isIndia?: boolean;
+  startingPrice?: string;
 };
 
-export function Sidebar({ userEmail, isIndia = false }: SidebarProps) {
+export function Sidebar({ userEmail, startingPrice = "$8" }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useSupabase();
@@ -94,7 +94,7 @@ export function Sidebar({ userEmail, isIndia = false }: SidebarProps) {
             <span className="text-xs font-semibold text-brand-text">Get more interviews</span>
           </div>
           <p className="text-[11px] text-brand-muted leading-relaxed">
-            Buy credit packs starting at {isIndia ? "₹349" : "$8"}. Practice more, score higher.
+            Buy credit packs starting at {startingPrice}. Practice more, score higher.
           </p>
           <span className="text-[11px] font-semibold text-brand-cyan">
             View pricing &rarr;

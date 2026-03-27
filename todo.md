@@ -45,7 +45,7 @@ _Goal: Live on the internet, shareable link_
 ## Phase 5: Monetization
 _Goal: Accept payments_
 
-- [ ] 27. Razorpay checkout for credit packs:
+- [x] 27. Razorpay checkout for credit packs:
   - Free trial: 1 interview, $0 (hook & convert)
   - Single interview: $8 (₹349 India, $4 Brazil/SEA)
   - 3-pack (Popular): $18 (₹799 India, $9 Brazil/SEA) — 25% off per interview

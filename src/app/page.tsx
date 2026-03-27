@@ -18,10 +18,16 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Pricing } from "@/components/landing/Pricing";
+import { getRegionForCountry } from "@/lib/constants";
 
 export default async function LandingPage() {
   const headersList = await headers();
-  const country = headersList.get("x-vercel-ip-country") ?? "US";
+  const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
+  const pricingRegion = getRegionForCountry(country).region === "INR"
+    ? "inr" as const
+    : getRegionForCountry(country).region === "PPP"
+      ? "ppp" as const
+      : "usd" as const;
 
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text overflow-x-hidden">
@@ -469,7 +475,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <Pricing defaultRegion={country === "IN" ? "inr" : "usd"} />
+      <Pricing defaultRegion={pricingRegion} />
 
       {/* ── FAQ ── */}
       <section id="faq" className="py-24 px-4 sm:px-6 bg-brand-deep">

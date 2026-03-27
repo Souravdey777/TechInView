@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/shared/Sidebar";
+import { CREDIT_PACKS, getRegionForCountry } from "@/lib/constants";
 
 export default async function AppLayout({
   children,
@@ -19,14 +20,16 @@ export default async function AppLayout({
 
   const userEmail = user.email ?? "";
   const headersList = headers();
-  const country = headersList.get("x-vercel-ip-country") ?? "US";
-  const isIndia = country === "IN";
+  const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
+  const { region, symbol } = getRegionForCountry(country);
+  const displayKey = region === "INR" ? "inr" : region === "PPP" ? "ppp" : "usd";
+  const startingPrice = `${symbol}${CREDIT_PACKS.single.displayPrices[displayKey]}`;
 
   return (
     <div className="min-h-screen bg-brand-deep">
       {/* Sidebar — hidden on mobile, visible on lg+ */}
       <div className="hidden lg:block">
-        <Sidebar userEmail={userEmail} isIndia={isIndia} />
+        <Sidebar userEmail={userEmail} startingPrice={startingPrice} />
       </div>
 
       {/* Main content area */}

@@ -12,12 +12,9 @@ type PricingFeature = {
 type PricingTier = {
   name: string;
   tagline: string;
-  usd: number;
-  inr: number;
-  originalUsd?: number;
-  originalInr?: number;
-  perInterviewUsd?: number;
-  perInterviewInr?: number;
+  prices: { usd: number; inr: number; ppp: number };
+  originalPrices?: { usd: number; inr: number; ppp: number };
+  perInterview?: { usd: number; inr: number; ppp: number };
   badge?: string;
   saveBadge?: string;
   saveBadgeColor: string;
@@ -30,8 +27,7 @@ const tiers: PricingTier[] = [
   {
     name: "Free Trial",
     tagline: "See what it feels like",
-    usd: 0,
-    inr: 0,
+    prices: { usd: 0, inr: 0, ppp: 0 },
     saveBadge: "TRY IT",
     saveBadgeColor: "bg-brand-card text-brand-muted",
     features: [
@@ -48,8 +44,7 @@ const tiers: PricingTier[] = [
   {
     name: "1 Interview",
     tagline: "One-off practice session",
-    usd: 8,
-    inr: 349,
+    prices: { usd: 8, inr: 349, ppp: 4 },
     saveBadge: "SINGLE",
     saveBadgeColor: "bg-brand-cyan/20 text-brand-cyan",
     features: [
@@ -66,12 +61,9 @@ const tiers: PricingTier[] = [
   {
     name: "3-Pack",
     tagline: "For focused prep sprints",
-    usd: 18,
-    inr: 799,
-    originalUsd: 24,
-    originalInr: 1047,
-    perInterviewUsd: 6,
-    perInterviewInr: 266,
+    prices: { usd: 18, inr: 799, ppp: 9 },
+    originalPrices: { usd: 24, inr: 1047, ppp: 12 },
+    perInterview: { usd: 6, inr: 266, ppp: 3 },
     badge: "Popular",
     saveBadge: "SAVE 25%",
     saveBadgeColor: "bg-brand-green/20 text-brand-green",
@@ -89,12 +81,9 @@ const tiers: PricingTier[] = [
   {
     name: "5-Pack",
     tagline: "For serious candidates",
-    usd: 24,
-    inr: 1099,
-    originalUsd: 40,
-    originalInr: 1745,
-    perInterviewUsd: 4.8,
-    perInterviewInr: 220,
+    prices: { usd: 24, inr: 1099, ppp: 18 },
+    originalPrices: { usd: 40, inr: 1745, ppp: 20 },
+    perInterview: { usd: 4.8, inr: 220, ppp: 3.6 },
     saveBadge: "SAVE 40%",
     saveBadgeColor: "bg-brand-amber/20 text-brand-amber",
     badge: "Best Value",
@@ -111,17 +100,26 @@ const tiers: PricingTier[] = [
   },
 ];
 
+type PricingRegion = "usd" | "inr" | "ppp";
+
 type PricingProps = {
-  defaultRegion?: "usd" | "inr";
+  defaultRegion?: PricingRegion;
+};
+
+const REGION_SYMBOLS: Record<PricingRegion, string> = {
+  usd: "$",
+  inr: "\u20B9",
+  ppp: "$",
 };
 
 export function Pricing({ defaultRegion = "usd" }: PricingProps) {
-  const [isIndia, setIsIndia] = useState(defaultRegion === "inr");
+  const [activeRegion, setActiveRegion] = useState<PricingRegion>(defaultRegion);
 
-  const symbol = isIndia ? "\u20B9" : "$";
+  const symbol = REGION_SYMBOLS[activeRegion];
+  const locale = activeRegion === "inr" ? "en-IN" : "en-US";
 
   function formatPrice(amount: number) {
-    return amount.toLocaleString(isIndia ? "en-IN" : "en-US");
+    return amount.toLocaleString(locale);
   }
 
   return (
@@ -135,36 +133,36 @@ export function Pricing({ defaultRegion = "usd" }: PricingProps) {
             Buy what you need. No subscriptions, no commitments.
           </p>
 
-          {/* Region Toggle — only visible for Indian users */}
+          {/* Region Toggle — visible for Indian users (USD/INR) */}
           {defaultRegion === "inr" && (
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-brand-border bg-brand-card/60">
               <span
                 className={cn(
                   "text-sm font-medium transition-colors",
-                  !isIndia ? "text-brand-text" : "text-brand-muted"
+                  activeRegion === "usd" ? "text-brand-text" : "text-brand-muted"
                 )}
               >
                 USD ($)
               </span>
               <button
-                onClick={() => setIsIndia(!isIndia)}
+                onClick={() => setActiveRegion(activeRegion === "inr" ? "usd" : "inr")}
                 className={cn(
                   "relative w-11 h-6 rounded-full transition-colors",
-                  isIndia ? "bg-brand-cyan" : "bg-brand-border"
+                  activeRegion === "inr" ? "bg-brand-cyan" : "bg-brand-border"
                 )}
                 aria-label="Toggle India pricing"
               >
                 <span
                   className={cn(
                     "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform",
-                    isIndia && "translate-x-5"
+                    activeRegion === "inr" && "translate-x-5"
                   )}
                 />
               </button>
               <span
                 className={cn(
                   "text-sm font-medium transition-colors",
-                  isIndia ? "text-brand-text" : "text-brand-muted"
+                  activeRegion === "inr" ? "text-brand-text" : "text-brand-muted"
                 )}
               >
                 INR (₹)
@@ -175,11 +173,9 @@ export function Pricing({ defaultRegion = "usd" }: PricingProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {tiers.map((tier) => {
-            const price = isIndia ? tier.inr : tier.usd;
-            const originalPrice = isIndia ? tier.originalInr : tier.originalUsd;
-            const perInterview = isIndia
-              ? tier.perInterviewInr
-              : tier.perInterviewUsd;
+            const price = tier.prices[activeRegion];
+            const originalPrice = tier.originalPrices?.[activeRegion];
+            const perInterview = tier.perInterview?.[activeRegion];
 
             return (
               <div
@@ -282,9 +278,14 @@ export function Pricing({ defaultRegion = "usd" }: PricingProps) {
 
         <p className="text-center text-brand-muted text-sm mt-8">
           Credits never expire.{" "}
-          {isIndia && (
+          {activeRegion === "inr" && (
             <span className="text-brand-cyan">
               You&apos;re seeing India pricing &mdash; up to 50% off.{" "}
+            </span>
+          )}
+          {activeRegion === "ppp" && (
+            <span className="text-brand-cyan">
+              Regional pricing applied &mdash; up to 50% off.{" "}
             </span>
           )}
           No card required for free trial.
