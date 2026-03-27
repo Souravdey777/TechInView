@@ -21,12 +21,17 @@ function getDb() {
 
 export async function getProfile(userId: string): Promise<Profile | undefined> {
   const db = getDb();
-  const results = await db
-    .select()
-    .from(schema.profiles)
-    .where(eq(schema.profiles.id, userId))
-    .limit(1);
-  return results[0];
+  try {
+    const results = await db
+      .select()
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, userId))
+      .limit(1);
+    return results[0];
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`getProfile failed for user ${userId}: ${detail}`);
+  }
 }
 
 export async function updateProfile(

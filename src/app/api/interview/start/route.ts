@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : "Failed to start interview";
-    console.error("Start interview error:", msg);
+    console.error("Start interview error:", error);
     return NextResponse.json(
       { success: false, error: msg },
       { status: 500 }
