@@ -31,84 +31,55 @@ type InterviewPhase =
   | "FOLLOW_UP"
   | "WRAP_UP";
 
+type ChatMessage = {
+  id: string;
+  role: "interviewer" | "candidate";
+  content: string;
+  time: string;
+};
+
+type ScoreDimensionRaw = { score: number; feedback: string };
+
 type InterviewRoomProps = {
   interviewId: string;
 };
 
-// ─── Mock data (replaced by real API data in production) ──────────────────────
+// ─── Phase boundary percentages (fraction of total duration) ─────────────────
+// Calibrated for a 45-minute interview but scale with any maxDuration.
 
-const STARTER_CODE: Record<SupportedLanguage, string> = {
-  python: `def twoSum(nums: list[int], target: int) -> list[int]:
-    # Your solution here
-    pass
-`,
-  javascript: `/**
- * @param {number[]} nums
- * @param {number} target
- * @return {number[]}
- */
-function twoSum(nums, target) {
-    // Your solution here
+const PHASE_BOUNDARIES = {
+  INTRO: 0 / 100,
+  PROBLEM_PRESENTED: 2.2 / 100,
+  CLARIFICATION: 4.4 / 100,
+  APPROACH_DISCUSSION: 11.1 / 100,
+  CODING: 26.7 / 100,
+  TESTING: 71.1 / 100,
+  COMPLEXITY_ANALYSIS: 82.2 / 100,
+  FOLLOW_UP: 88.9 / 100,
+  WRAP_UP: 95.6 / 100,
+} as const;
+
+function phaseFromElapsedFraction(pct: number): InterviewPhase {
+  if (pct < PHASE_BOUNDARIES.PROBLEM_PRESENTED) return "INTRO";
+  if (pct < PHASE_BOUNDARIES.CLARIFICATION) return "PROBLEM_PRESENTED";
+  if (pct < PHASE_BOUNDARIES.APPROACH_DISCUSSION) return "CLARIFICATION";
+  if (pct < PHASE_BOUNDARIES.CODING) return "APPROACH_DISCUSSION";
+  if (pct < PHASE_BOUNDARIES.TESTING) return "CODING";
+  if (pct < PHASE_BOUNDARIES.COMPLEXITY_ANALYSIS) return "TESTING";
+  if (pct < PHASE_BOUNDARIES.FOLLOW_UP) return "COMPLEXITY_ANALYSIS";
+  if (pct < PHASE_BOUNDARIES.WRAP_UP) return "FOLLOW_UP";
+  return "WRAP_UP";
 }
-`,
-  java: `class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        // Your solution here
-        return new int[]{};
-    }
+
+// ─── Helper: extract typed score dimension safely ─────────────────────────────
+
+function extractDimension(
+  scores: Record<string, unknown>,
+  key: string
+): ScoreDimensionRaw {
+  const raw = scores[key] as ScoreDimensionRaw | undefined;
+  return { score: raw?.score ?? 0, feedback: raw?.feedback ?? "" };
 }
-`,
-  cpp: `#include <vector>
-#include <unordered_map>
-using namespace std;
-
-class Solution {
-public:
-    vector<int> twoSum(vector<int>& nums, int target) {
-        // Your solution here
-        return {};
-    }
-};
-`,
-};
-
-const MOCK_PROBLEM = {
-  title: "Two Sum",
-  slug: "two-sum",
-  difficulty: "easy" as const,
-  category: "arrays",
-  description:
-    "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.",
-  examples: [
-    {
-      input: "nums = [2,7,11,15], target = 9",
-      output: "[0,1]",
-      explanation:
-        "Because nums[0] + nums[1] == 9, we return [0, 1].",
-    },
-    {
-      input: "nums = [3,2,4], target = 6",
-      output: "[1,2]",
-    },
-    {
-      input: "nums = [3,3], target = 6",
-      output: "[0,1]",
-    },
-  ],
-  constraints: [
-    "2 <= nums.length <= 10^4",
-    "-10^9 <= nums[i] <= 10^9",
-    "-10^9 <= target <= 10^9",
-    "Only one valid answer exists.",
-  ],
-  starter_code: STARTER_CODE as Record<string, string>,
-  optimal_complexity: { time: "O(n)", space: "O(n)" },
-  hints: [
-    "A brute force O(n²) solution works, but can you do better?",
-    "Think about what complement you need for each number. How could you store what you have seen so far?",
-    "A hash map lets you look up complements in O(1) time.",
-  ],
-};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -122,21 +93,27 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const storeCode = useInterviewStore((s) => s.currentCode);
   const completeInterviewStore = useInterviewStore((s) => s.completeInterview);
 
-  // Derive the active problem — store data or fallback to mock
-  const activeProblem = useMemo(
-    () => storeProblem ?? MOCK_PROBLEM,
-    [storeProblem]
-  );
+  // Guard: if the store has no problem (e.g. hard refresh) redirect to setup
+  // rather than falling back to a hardcoded mock problem silently.
+  useEffect(() => {
+    if (!storeProblem) {
+      router.replace("/interview/setup");
+    }
+  }, [storeProblem, router]);
+
+  // Derive the active problem — always from store after the guard above
+  const activeProblem = useMemo(() => storeProblem, [storeProblem]);
+
   const initialLanguage = (storeConfig?.language ?? "python") as SupportedLanguage;
   const maxDuration = storeConfig?.maxDurationSeconds ?? 45 * 60;
 
   // ── Conversation state ──────────────────────────────────────────────────────
-  type ChatMessage = { role: "interviewer" | "candidate"; content: string; time: string };
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const conversationRef = useRef<{ role: string; content: string; timestamp_ms: number }[]>([]);
   const startTimeRef = useRef(Date.now());
+  const msgCounterRef = useRef(0);
 
   // ── Interview state ──────────────────────────────────────────────────────────
   const [currentPhase, setCurrentPhase] = useState<InterviewPhase>("INTRO");
@@ -146,7 +123,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // ── Code state ───────────────────────────────────────────────────────────────
   const [language, setLanguage] = useState<SupportedLanguage>(initialLanguage);
   const [code, setCode] = useState(
-    storeCode || activeProblem.starter_code[initialLanguage] || STARTER_CODE[initialLanguage]
+    storeCode || activeProblem?.starter_code[initialLanguage] || ""
   );
 
   // ── Test state ───────────────────────────────────────────────────────────────
@@ -221,11 +198,22 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     return `${m}:${s.toString().padStart(2, "0")}`;
   }, []);
 
+  // Use a ref for activeProblem so sendToAI / startInterview always read the
+  // latest value without needing to re-create the callbacks.
+  const activeProblemRef = useRef(activeProblem);
+  useEffect(() => { activeProblemRef.current = activeProblem; }, [activeProblem]);
+
+  // Same for currentPhase and code — needed by sendToAI without dep churn
+  const currentPhaseRef = useRef(currentPhase);
+  useEffect(() => { currentPhaseRef.current = currentPhase; }, [currentPhase]);
+  const codeRef = useRef(code);
+  useEffect(() => { codeRef.current = code; }, [code]);
+
   // ── Send message to AI and speak response ──────────────────────────────────
   const sendToAI = useCallback(async (userMessage: string) => {
-    // Add user message to chat
     const elapsedMs = Date.now() - startTimeRef.current;
-    const userMsg: ChatMessage = { role: "candidate", content: userMessage, time: getTimeStr() };
+    const id = `msg-${++msgCounterRef.current}`;
+    const userMsg: ChatMessage = { id, role: "candidate", content: userMessage, time: getTimeStr() };
     setChatMessages(prev => [...prev, userMsg]);
     conversationRef.current.push({ role: "candidate", content: userMessage, timestamp_ms: elapsedMs });
 
@@ -238,23 +226,23 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         body: JSON.stringify({
           message: userMessage,
           conversationHistory: conversationRef.current.slice(-10),
-          problem: activeProblem,
-          currentPhase,
-          currentCode: code,
+          problem: activeProblemRef.current,
+          currentPhase: currentPhaseRef.current,
+          currentCode: codeRef.current,
           elapsedSeconds: Math.floor((Date.now() - startTimeRef.current) / 1000),
         }),
       });
 
       const data = await res.json();
       if (data.success && data.data?.message) {
-        const aiText = data.data.message;
+        const aiText = data.data.message as string;
         const aiElapsedMs = Date.now() - startTimeRef.current;
-        const aiMsg: ChatMessage = { role: "interviewer", content: aiText, time: getTimeStr() };
+        const aiId = `msg-${++msgCounterRef.current}`;
+        const aiMsg: ChatMessage = { id: aiId, role: "interviewer", content: aiText, time: getTimeStr() };
         setChatMessages(prev => [...prev, aiMsg]);
         conversationRef.current.push({ role: "interviewer", content: aiText, timestamp_ms: aiElapsedMs });
 
         setIsAiThinking(false);
-        // Speak the response using browser TTS
         voice.speakText(aiText);
       } else {
         setIsAiThinking(false);
@@ -262,11 +250,10 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } catch {
       setIsAiThinking(false);
     }
-  }, [currentPhase, code, getTimeStr, voice, activeProblem]);
+  }, [getTimeStr, voice]);
 
   // ── Start interview (triggered by user click to enable audio) ───────────────
   const startInterview = useCallback(async () => {
-    // Unlock browser audio by speaking an empty utterance on user gesture
     if (typeof window !== "undefined") {
       const unlock = new SpeechSynthesisUtterance("");
       window.speechSynthesis.speak(unlock);
@@ -276,6 +263,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     setIsTimerRunning(true);
     startTimeRef.current = Date.now();
     setIsAiThinking(true);
+    msgCounterRef.current = 0;
 
     try {
       const res = await fetch("/api/interview/chat", {
@@ -284,7 +272,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         body: JSON.stringify({
           message: "The interview is starting. Please introduce yourself and the problem.",
           conversationHistory: [],
-          problem: activeProblem,
+          problem: activeProblemRef.current,
           currentPhase: "INTRO",
           currentCode: "",
           elapsedSeconds: 0,
@@ -292,9 +280,10 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       });
       const data = await res.json();
       if (data.success && data.data?.message) {
-        const aiText = data.data.message;
-        setChatMessages([{ role: "interviewer", content: aiText, time: "0:00" }]);
-        conversationRef.current.push({ role: "interviewer", content: aiText, timestamp_ms: 0 });
+        const aiText = data.data.message as string;
+        const initId = `msg-${++msgCounterRef.current}`;
+        setChatMessages([{ id: initId, role: "interviewer", content: aiText, time: "0:00" }]);
+        conversationRef.current = [{ role: "interviewer", content: aiText, timestamp_ms: 0 }];
         setIsAiThinking(false);
         voice.speakText(aiText);
       } else {
@@ -303,8 +292,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } catch {
       setIsAiThinking(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [voice]);
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
@@ -359,13 +347,15 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const handleLanguageChange = useCallback(
     (newLang: SupportedLanguage) => {
       setLanguage(newLang);
-      // Preserve code if user has edited beyond the starter; otherwise swap template
-      const currentStarter = activeProblem.starter_code[language] ?? STARTER_CODE[language];
+      const problem = activeProblemRef.current;
+      if (!problem) return;
+      // Preserve code if user has edited; otherwise swap to the new starter
+      const currentStarter = problem.starter_code[language] ?? "";
       if (code === currentStarter) {
-        setCode(activeProblem.starter_code[newLang] ?? STARTER_CODE[newLang]);
+        setCode(problem.starter_code[newLang] ?? "");
       }
     },
-    [code, language, activeProblem]
+    [code, language]
   );
 
   const handleRunCode = useCallback(async () => {
@@ -376,7 +366,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       const res = await fetch("/api/interview/run-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, code, interviewId, problemSlug: activeProblem.slug }),
+        body: JSON.stringify({ language, code, interviewId, problemSlug: activeProblemRef.current?.slug }),
       });
 
       const json = await res.json();
@@ -396,12 +386,15 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } finally {
       setIsRunningTests(false);
     }
-  }, [language, code, interviewId, activeProblem.slug]);
+  }, [language, code, interviewId]);
+
+  // Use a ref so the timer effect always calls the latest version of
+  // handleEndInterview without needing to restart the interval.
+  const handleEndInterviewRef = useRef<() => Promise<void>>(async () => {});
 
   const handleEndInterview = useCallback(async () => {
     setIsScoring(true);
 
-    // Stop voice
     voice.stopListening();
     voice.stopSpeaking();
 
@@ -413,16 +406,17 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
     const passed = testResults.filter((t) => t.passed).length;
     const total = testResults.length;
+    const problem = activeProblemRef.current;
 
-    // Call the complete API with full data for AI scoring
-    let scoringData: {
+    type ScoringData = {
       overall_score?: number;
-      scores?: Record<string, { score: number; feedback: string }>;
+      scores?: Record<string, unknown>;
       hire_recommendation?: string;
       summary?: string;
       key_strengths?: string[];
       areas_to_improve?: string[];
-    } | null = null;
+    };
+    let scoringData: ScoringData | null = null;
 
     try {
       const res = await fetch("/api/interview/complete", {
@@ -435,47 +429,34 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           transcript,
           testsPassed: passed,
           testsTotal: total,
-          problem: {
-            title: activeProblem.title,
-            description: activeProblem.description,
-            difficulty: activeProblem.difficulty,
-            category: activeProblem.category,
-            optimal_complexity: activeProblem.optimal_complexity ?? { time: "Unknown", space: "Unknown" },
-          },
+          problem: problem
+            ? {
+                title: problem.title,
+                description: problem.description,
+                difficulty: problem.difficulty,
+                category: problem.category,
+                optimal_complexity: problem.optimal_complexity ?? { time: "Unknown", space: "Unknown" },
+              }
+            : null,
         }),
       });
 
       const json = await res.json();
       if (json.success && json.data?.scoring) {
-        scoringData = json.data.scoring;
+        scoringData = json.data.scoring as ScoringData;
       }
     } catch {
-      // Scoring failed — will navigate with null scores, results page uses mock fallback
+      // Scoring failed — navigate anyway; results page handles null scores
     }
 
-    // Map scoring data into the store shape
-    const storeScores = scoringData?.scores
+    const rawScores = scoringData?.scores;
+    const storeScores = rawScores
       ? {
-          problem_solving: {
-            score: (scoringData.scores.problem_solving as { score: number; feedback: string }).score,
-            feedback: (scoringData.scores.problem_solving as { score: number; feedback: string }).feedback,
-          },
-          code_quality: {
-            score: (scoringData.scores.code_quality as { score: number; feedback: string }).score,
-            feedback: (scoringData.scores.code_quality as { score: number; feedback: string }).feedback,
-          },
-          communication: {
-            score: (scoringData.scores.communication as { score: number; feedback: string }).score,
-            feedback: (scoringData.scores.communication as { score: number; feedback: string }).feedback,
-          },
-          technical_knowledge: {
-            score: (scoringData.scores.technical_knowledge as { score: number; feedback: string }).score,
-            feedback: (scoringData.scores.technical_knowledge as { score: number; feedback: string }).feedback,
-          },
-          testing: {
-            score: (scoringData.scores.testing as { score: number; feedback: string }).score,
-            feedback: (scoringData.scores.testing as { score: number; feedback: string }).feedback,
-          },
+          problem_solving: extractDimension(rawScores, "problem_solving"),
+          code_quality: extractDimension(rawScores, "code_quality"),
+          communication: extractDimension(rawScores, "communication"),
+          technical_knowledge: extractDimension(rawScores, "technical_knowledge"),
+          testing: extractDimension(rawScores, "testing"),
         }
       : null;
 
@@ -492,13 +473,16 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       areasToImprove: scoringData?.areas_to_improve ?? null,
       testsPassed: passed,
       testsTotal: total,
-      problemTitle: activeProblem.title,
-      problemDifficulty: activeProblem.difficulty,
-      problemCategory: activeProblem.category,
+      problemTitle: problem?.title ?? "Unknown",
+      problemDifficulty: problem?.difficulty ?? "medium",
+      problemCategory: problem?.category ?? "arrays",
     });
 
     router.push(`/results/${interviewId}`);
-  }, [interviewId, code, language, router, testResults, activeProblem, completeInterviewStore, voice]);
+  }, [interviewId, code, language, router, testResults, completeInterviewStore, voice]);
+
+  // Keep the ref in sync with the latest callback
+  useEffect(() => { handleEndInterviewRef.current = handleEndInterview; }, [handleEndInterview]);
 
   // ── Timer countdown ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -508,7 +492,9 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          handleEndInterview();
+          // Call via ref so we always invoke the latest version of the handler
+          // without needing to re-create this interval when deps change.
+          void handleEndInterviewRef.current();
           return 0;
         }
         return prev - 1;
@@ -516,54 +502,21 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     }, 1000);
 
     return () => clearInterval(interval);
-  // handleEndInterview is stable (useCallback with fixed deps); intentionally
-  // omitted to avoid restarting the interval when other state changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasStarted, isTimerRunning]);
 
   // ── Phase transitions based on elapsed time ──────────────────────────────────
   useEffect(() => {
     if (!hasStarted) return;
-
     const elapsed = maxDuration - timeLeft;
     const pct = elapsed / maxDuration;
-
-    // Phase boundaries as fractions of total duration (calibrated for 45 min)
-    // INTRO:               0%  – 2.2%   (0–60s of 2700)
-    // PROBLEM_PRESENTED:   2.2% – 4.4%  (60–120s)
-    // CLARIFICATION:       4.4% – 11.1% (120–300s)
-    // APPROACH_DISCUSSION: 11.1% – 26.7%(300–720s)
-    // CODING:              26.7% – 71.1%(720–1920s)
-    // TESTING:             71.1% – 82.2%(1920–2220s)
-    // COMPLEXITY_ANALYSIS: 82.2% – 88.9%(2220–2400s)
-    // FOLLOW_UP:           88.9% – 95.6%(2400–2580s)
-    // WRAP_UP:             95.6% – 100% (2580–2700s)
-
-    let nextPhase: InterviewPhase;
-    if (pct < 2.2 / 100) {
-      nextPhase = "INTRO";
-    } else if (pct < 4.4 / 100) {
-      nextPhase = "PROBLEM_PRESENTED";
-    } else if (pct < 11.1 / 100) {
-      nextPhase = "CLARIFICATION";
-    } else if (pct < 26.7 / 100) {
-      nextPhase = "APPROACH_DISCUSSION";
-    } else if (pct < 71.1 / 100) {
-      nextPhase = "CODING";
-    } else if (pct < 82.2 / 100) {
-      nextPhase = "TESTING";
-    } else if (pct < 88.9 / 100) {
-      nextPhase = "COMPLEXITY_ANALYSIS";
-    } else if (pct < 95.6 / 100) {
-      nextPhase = "FOLLOW_UP";
-    } else {
-      nextPhase = "WRAP_UP";
-    }
-
+    const nextPhase = phaseFromElapsedFraction(pct);
     setCurrentPhase((prev) => (prev !== nextPhase ? nextPhase : prev));
   }, [timeLeft, hasStarted, maxDuration]);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
+
+  // Render nothing while the store redirect is in flight
+  if (!activeProblem) return null;
 
   // Scoring overlay — shown while AI evaluates the interview
   if (isScoring) {
@@ -571,20 +524,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-30" />
         <div className="absolute w-[400px] h-[400px] rounded-full bg-brand-cyan/5 blur-[100px] animate-pulse" />
-        <style>{`
-          @keyframes scoring-progress {
-            0% { width: 0%; }
-            20% { width: 30%; }
-            50% { width: 55%; }
-            80% { width: 80%; }
-            95% { width: 92%; }
-            100% { width: 95%; }
-          }
-          @keyframes scoring-fade-in {
-            0% { opacity: 0; transform: translateY(12px); }
-            100% { opacity: 1; transform: translateY(0); }
-          }
-        `}</style>
         <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">
           {/* Siri orb — thinking state for scoring */}
           <VoiceVisualizer state="thinking" className="h-36 w-36" />
@@ -615,16 +554,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-30" />
         <div className="absolute w-[500px] h-[500px] rounded-full bg-brand-cyan/4 blur-[120px]" />
-        <style>{`
-          @keyframes start-fade-up {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes start-btn-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(34,211,238,0.15), 0 0 60px rgba(34,211,238,0.05); }
-            50% { box-shadow: 0 0 30px rgba(34,211,238,0.3), 0 0 80px rgba(34,211,238,0.1); }
-          }
-        `}</style>
         <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">
           {/* Siri orb — idle state for start screen */}
           <div style={{ animation: "start-fade-up 0.8s ease-out both" }}>
@@ -783,7 +712,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
 // ─── Transcript panel ─────────────────────────────────────────────────────────
 
-function TranscriptPanel({ messages, isThinking }: { messages: { role: "interviewer" | "candidate"; content: string; time: string }[]; isThinking: boolean }) {
+function TranscriptPanel({ messages, isThinking }: { messages: ChatMessage[]; isThinking: boolean }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -800,9 +729,9 @@ function TranscriptPanel({ messages, isThinking }: { messages: { role: "intervie
 
   return (
     <div className="space-y-3 pb-4">
-      {messages.map((msg, i) => (
+      {messages.map((msg) => (
         <div
-          key={i}
+          key={msg.id}
           className={cn(
             "flex gap-2",
             msg.role === "candidate" ? "flex-row-reverse" : "flex-row"

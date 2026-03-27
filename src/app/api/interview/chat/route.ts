@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
-const getClient = () => new Anthropic();
+// Module-level singleton — reused across requests in the same serverless instance
+const anthropic = new Anthropic();
 
 export async function POST(request: Request) {
   try {
@@ -10,8 +11,6 @@ export async function POST(request: Request) {
     if (!message) {
       return NextResponse.json({ success: false, error: "Message is required" }, { status: 400 });
     }
-
-    const client = getClient();
 
     // Build system prompt
     const systemPrompt = buildSystemPrompt(problem, currentPhase, currentCode, elapsedSeconds);
@@ -25,7 +24,7 @@ export async function POST(request: Request) {
       { role: "user" as const, content: message },
     ];
 
-    const response = await client.messages.create({
+    const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 300,
       system: systemPrompt,

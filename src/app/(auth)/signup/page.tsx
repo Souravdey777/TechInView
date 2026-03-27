@@ -9,20 +9,25 @@ type OAuthProvider = "google" | "github";
 
 export default function SignupPage() {
   const { supabase } = useSupabase();
-  const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(
-    null
-  );
+  const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleOAuth = async (provider: OAuthProvider) => {
     setLoadingProvider(provider);
+    setError(null);
     try {
-      await supabase.auth.signInWithOAuth({
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/callback`,
         },
       });
+      if (oauthError) {
+        setError(oauthError.message);
+        setLoadingProvider(null);
+      }
     } catch {
+      setError("Something went wrong. Please try again.");
       setLoadingProvider(null);
     }
   };
@@ -46,6 +51,12 @@ export default function SignupPage() {
           <p className="text-brand-muted text-sm text-center mb-8">
             Start with 1 free interview per week
           </p>
+
+          {error && (
+            <div className="mb-4 rounded-lg border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm text-brand-danger">
+              {error}
+            </div>
+          )}
 
           <div className="flex flex-col gap-3">
             {/* Google */}

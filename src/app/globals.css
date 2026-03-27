@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
-
 @layer base {
   :root {
     --background: 220 20% 3%;
@@ -149,4 +147,30 @@
 /* Focus ring */
 :focus-visible {
   @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Interview room — start overlay animations */
+@keyframes start-fade-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes start-btn-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(34,211,238,0.15), 0 0 60px rgba(34,211,238,0.05); }
+  50% { box-shadow: 0 0 30px rgba(34,211,238,0.3), 0 0 80px rgba(34,211,238,0.1); }
+}
+
+/* Interview room — scoring overlay animations */
+@keyframes scoring-progress {
+  0% { width: 0%; }
+  20% { width: 30%; }
+  50% { width: 55%; }
+  80% { width: 80%; }
+  95% { width: 92%; }
+  100% { width: 95%; }
+}
+
+@keyframes scoring-fade-in {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
 }

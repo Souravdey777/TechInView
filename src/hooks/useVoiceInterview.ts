@@ -117,13 +117,49 @@ export function useVoiceInterview() {
     return transcriptRef.current;
   }, []);
 
+  // Cache the best available en-US voice so we don't re-scan on every utterance
+  const preferredVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+
+  const getPreferredVoice = useCallback((): SpeechSynthesisVoice | null => {
+    if (typeof window === "undefined") return null;
+    if (preferredVoiceRef.current) return preferredVoiceRef.current;
+
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return null;
+
+    // Priority order: natural/premium en-US voices that sound human
+    const preferred = [
+      "Google US English",
+      "Samantha",          // macOS
+      "Alex",              // macOS (older)
+      "Microsoft David - English (United States)",
+      "Microsoft Zira - English (United States)",
+    ];
+
+    for (const name of preferred) {
+      const match = voices.find((v) => v.name === name);
+      if (match) { preferredVoiceRef.current = match; return match; }
+    }
+
+    // Fallback: first en-US voice available
+    const enUs = voices.find((v) => v.lang === "en-US");
+    if (enUs) { preferredVoiceRef.current = enUs; return enUs; }
+
+    return null;
+  }, []);
+
   // Text-to-speech
   const speakText = useCallback((text: string) => {
     if (typeof window === "undefined") return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
+    utterance.rate = 0.95;
     utterance.pitch = 1.0;
+    utterance.lang = "en-US";
+
+    const voice = getPreferredVoice();
+    if (voice) utterance.voice = voice;
+
     utterance.onstart = () => {
       setIsSpeaking(true);
       setVoiceState("speaking");
@@ -137,13 +173,25 @@ export function useVoiceInterview() {
       setVoiceState("idle");
     };
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [getPreferredVoice]);
 
   const stopSpeaking = useCallback(() => {
     if (typeof window !== "undefined") window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setVoiceState("idle");
   }, []);
+
+  // Warm up the voice cache once voices are available.
+  // Chrome loads voices asynchronously; the voiceschanged event fires when ready.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const populate = () => { getPreferredVoice(); };
+    window.speechSynthesis.addEventListener("voiceschanged", populate);
+    populate(); // also try immediately (Firefox / Safari have voices synchronously)
+    return () => {
+      window.speechSynthesis.removeEventListener("voiceschanged", populate);
+    };
+  }, [getPreferredVoice]);
 
   // Cleanup
   useEffect(() => {
