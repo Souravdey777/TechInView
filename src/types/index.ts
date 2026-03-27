@@ -20,8 +20,8 @@ export type Profile = {
   experience_level: ExperienceLevel | null;
   preferred_language: SupportedLanguage | null;
   plan: UserPlan;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
+  razorpay_customer_id: string | null;
+  razorpay_subscription_id: string | null;
   interviews_completed: number;
   created_at: string;
 };
