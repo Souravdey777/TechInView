@@ -10,7 +10,7 @@ import type {
 // ─── Profile ─────────────────────────────────────────────────────────────────
 
 export type ExperienceLevel = "junior" | "mid" | "senior" | "staff";
-export type UserPlan = "free" | "starter" | "pro";
+export type UserPlan = "free" | "paid";
 
 export type Profile = {
   id: string;
@@ -20,6 +20,9 @@ export type Profile = {
   experience_level: ExperienceLevel | null;
   preferred_language: SupportedLanguage | null;
   plan: UserPlan;
+  interview_credits: number;
+  has_used_free_trial: boolean;
+  country_code: string | null;
   razorpay_customer_id: string | null;
   razorpay_subscription_id: string | null;
   interviews_completed: number;

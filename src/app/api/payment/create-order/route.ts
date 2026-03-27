@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOrder } from "@/lib/razorpay";
 import { createClient } from "@/lib/supabase/server";
+import { CREDIT_PACKS, getRegionForCountry } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
-
-const CREDIT_PACKS: Record<
-  string,
-  { credits: number; amount_inr: number; label: string }
-> = {
-  single: { credits: 1, amount_inr: 34900, label: "1 Interview" },
-  "3pack": { credits: 3, amount_inr: 79900, label: "3-Pack" },
-  "5pack": { credits: 5, amount_inr: 109900, label: "5-Pack" },
-};
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,9 +19,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { pack } = (await req.json()) as { pack: string };
-    const creditPack = CREDIT_PACKS[pack];
+    const { pack, country_code } = (await req.json()) as {
+      pack: string;
+      country_code?: string;
+    };
 
+    const creditPack = CREDIT_PACKS[pack];
     if (!creditPack) {
       return NextResponse.json(
         { success: false, error: "Invalid credit pack" },
@@ -37,9 +32,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const country = country_code ?? "US";
+    const { region, currency } = getRegionForCountry(country);
+    const amount = creditPack.prices[region];
+
     const order = await createOrder(
-      creditPack.amount_inr,
-      "INR",
+      amount,
+      currency,
       `receipt_${user.id}_${Date.now()}`,
       {
         userId: user.id,

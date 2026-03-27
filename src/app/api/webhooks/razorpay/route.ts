@@ -1,7 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/razorpay";
+import {
+  getPaymentByRazorpayId,
+  insertPayment,
+  incrementCredits,
+  updateProfile,
+} from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
+
+type RazorpayPaymentEntity = {
+  id: string;
+  order_id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  customer_id?: string;
+  notes: Record<string, string>;
+};
 
 type RazorpayWebhookPayload = {
   entity: string;
@@ -9,8 +25,7 @@ type RazorpayWebhookPayload = {
   event: string;
   contains: string[];
   payload: {
-    payment?: { entity: Record<string, unknown> };
-    subscription?: { entity: Record<string, unknown> };
+    payment?: { entity: RazorpayPaymentEntity };
   };
   created_at: number;
 };
@@ -48,46 +63,45 @@ export async function POST(req: NextRequest) {
     switch (event.event) {
       case "payment.captured": {
         const payment = event.payload.payment?.entity;
+        if (!payment) break;
 
-        // TODO: Provision access for the paid user:
-        //   1. Extract userId from payment.notes.userId
-        //   2. Extract orderId from payment.order_id
-        //   3. Determine credit pack from the order amount
-        //   4. Credit interview_credits in profiles table
-        //   5. Store razorpay_customer_id if available
-        void payment;
+        const existing = await getPaymentByRazorpayId(payment.id);
+        if (existing) break;
+
+        const { userId, pack, credits: creditsStr } = payment.notes;
+        const credits = parseInt(creditsStr, 10);
+
+        if (!userId || !pack || !credits) {
+          console.error("[razorpay-webhook] Missing notes on payment:", payment.id);
+          break;
+        }
+
+        await insertPayment({
+          user_id: userId,
+          razorpay_order_id: payment.order_id,
+          razorpay_payment_id: payment.id,
+          pack,
+          credits,
+          amount: payment.amount,
+          currency: payment.currency,
+        });
+
+        await incrementCredits(userId, credits);
+
+        if (payment.customer_id) {
+          await updateProfile(userId, {
+            razorpay_customer_id: payment.customer_id,
+          });
+        }
+
         break;
       }
 
       case "payment.failed": {
         const payment = event.payload.payment?.entity;
-
-        // TODO: Handle failed payment:
-        //   1. Log the failure for debugging
-        //   2. Optionally notify the user
-        void payment;
-        break;
-      }
-
-      case "subscription.activated": {
-        const subscription = event.payload.subscription?.entity;
-
-        // TODO: Activate subscription:
-        //   1. Look up profile by razorpay_customer_id
-        //   2. Set plan to the appropriate tier
-        //   3. Store razorpay_subscription_id
-        void subscription;
-        break;
-      }
-
-      case "subscription.cancelled": {
-        const subscription = event.payload.subscription?.entity;
-
-        // TODO: Downgrade the user:
-        //   1. Look up profile by razorpay_customer_id
-        //   2. Set plan = "free"
-        //   3. Clear razorpay_subscription_id
-        void subscription;
+        if (payment) {
+          console.error("[razorpay-webhook] Payment failed:", payment.id, payment.notes);
+        }
         break;
       }
 

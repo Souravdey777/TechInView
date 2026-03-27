@@ -23,7 +23,7 @@ export const experienceLevelEnum = pgEnum("experience_level", [
   "staff",
 ]);
 
-export const planEnum = pgEnum("plan", ["free", "starter", "pro"]);
+export const planEnum = pgEnum("plan", ["free", "paid"]);
 
 export const difficultyEnum = pgEnum("difficulty", ["easy", "medium", "hard"]);
 
@@ -58,6 +58,9 @@ export const profiles = pgTable("profiles", {
   experience_level: experienceLevelEnum("experience_level"),
   preferred_language: text("preferred_language"),
   plan: planEnum("plan").default("free").notNull(),
+  interview_credits: integer("interview_credits").default(1).notNull(),
+  has_used_free_trial: boolean("has_used_free_trial").default(false).notNull(),
+  country_code: text("country_code"),
   razorpay_customer_id: text("razorpay_customer_id"),
   razorpay_subscription_id: text("razorpay_subscription_id"),
   interviews_completed: integer("interviews_completed").default(0).notNull(),
@@ -156,11 +159,31 @@ export const progress = pgTable(
   })
 );
 
+export const payments = pgTable("payments", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  user_id: uuid("user_id")
+    .references(() => profiles.id, { onDelete: "cascade" })
+    .notNull(),
+  razorpay_order_id: text("razorpay_order_id").notNull(),
+  razorpay_payment_id: text("razorpay_payment_id").unique().notNull(),
+  pack: text("pack").notNull(),
+  credits: integer("credits").notNull(),
+  amount: integer("amount").notNull(),
+  currency: text("currency").notNull(),
+  status: text("status").default("captured").notNull(),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .default(sql`now()`)
+    .notNull(),
+});
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const profilesRelations = relations(profiles, ({ many }) => ({
   interviews: many(interviews),
   progress: many(progress),
+  payments: many(payments),
 }));
 
 export const problemsRelations = relations(problems, ({ many }) => ({
@@ -193,6 +216,13 @@ export const progressRelations = relations(progress, ({ one }) => ({
   }),
 }));
 
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [payments.user_id],
+    references: [profiles.id],
+  }),
+}));
+
 // ─── Inferred Types ───────────────────────────────────────────────────────────
 
 export type Profile = InferSelectModel<typeof profiles>;
@@ -209,3 +239,6 @@ export type NewMessage = InferInsertModel<typeof messages>;
 
 export type Progress = InferSelectModel<typeof progress>;
 export type NewProgress = InferInsertModel<typeof progress>;
+
+export type Payment = InferSelectModel<typeof payments>;
+export type NewPayment = InferInsertModel<typeof payments>;

@@ -74,3 +74,65 @@ export const DIFFICULTY_CONFIG: Record<DifficultyLevel, { label: string; color: 
   medium: { label: "Medium", color: "text-brand-amber", bgColor: "bg-brand-amber/10" },
   hard: { label: "Hard", color: "text-brand-rose", bgColor: "bg-brand-rose/10" },
 };
+
+// ─── Pricing & Credit Packs ─────────────────────────────────────────────────
+
+export type PricingRegion = "USD" | "INR" | "PPP";
+
+export type CreditPack = {
+  id: string;
+  label: string;
+  credits: number;
+  badge?: string;
+  prices: Record<PricingRegion, number>;
+  displayPrices: Record<"usd" | "inr" | "ppp", number>;
+};
+
+export const CREDIT_PACKS: Record<string, CreditPack> = {
+  single: {
+    id: "single",
+    label: "1 Interview",
+    credits: 1,
+    prices: { USD: 800, INR: 34900, PPP: 400 },
+    displayPrices: { usd: 8, inr: 349, ppp: 4 },
+  },
+  "3pack": {
+    id: "3pack",
+    label: "3-Pack",
+    credits: 3,
+    badge: "Popular",
+    prices: { USD: 1800, INR: 79900, PPP: 900 },
+    displayPrices: { usd: 18, inr: 799, ppp: 9 },
+  },
+  "5pack": {
+    id: "5pack",
+    label: "5-Pack",
+    credits: 5,
+    badge: "Best Value",
+    prices: { USD: 2400, INR: 109900, PPP: 1800 },
+    displayPrices: { usd: 24, inr: 1099, ppp: 18 },
+  },
+};
+
+export const PACK_IDS = Object.keys(CREDIT_PACKS) as (keyof typeof CREDIT_PACKS)[];
+
+const PPP_COUNTRIES = new Set([
+  "BR", "MX", "CO", "AR", "CL", "PE",
+  "SG", "MY", "ID", "PH", "TH", "VN",
+  "PL", "RO", "HU", "CZ", "TR",
+  "NG", "KE", "ZA", "EG",
+]);
+
+export function getRegionForCountry(countryCode: string): {
+  region: PricingRegion;
+  currency: string;
+  symbol: string;
+} {
+  if (countryCode === "IN") {
+    return { region: "INR", currency: "INR", symbol: "\u20B9" };
+  }
+  if (PPP_COUNTRIES.has(countryCode)) {
+    return { region: "PPP", currency: "USD", symbol: "$" };
+  }
+  return { region: "USD", currency: "USD", symbol: "$" };
+}

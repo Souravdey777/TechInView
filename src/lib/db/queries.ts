@@ -3,7 +3,7 @@ import postgres from "postgres";
 import * as schema from "./schema";
 import { eq, and, ilike, sql, desc, asc } from "drizzle-orm";
 
-import type { Profile, Problem, Interview, Message, Progress } from "./schema";
+import type { Profile, Problem, Interview, Message, Progress, Payment } from "./schema";
 
 // ─── DB Connection (lazy) ─────────────────────────────────────────────────────
 
@@ -257,4 +257,51 @@ export async function getUserProgress(userId: string): Promise<Progress[]> {
     .from(schema.progress)
     .where(eq(schema.progress.user_id, userId))
     .orderBy(asc(schema.progress.category));
+}
+
+// ─── Payment Queries ─────────────────────────────────────────────────────────
+
+export async function getPaymentByRazorpayId(
+  razorpayPaymentId: string
+): Promise<Payment | undefined> {
+  const db = getDb();
+  const results = await db
+    .select()
+    .from(schema.payments)
+    .where(eq(schema.payments.razorpay_payment_id, razorpayPaymentId))
+    .limit(1);
+  return results[0];
+}
+
+export async function insertPayment(data: {
+  user_id: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  pack: string;
+  credits: number;
+  amount: number;
+  currency: string;
+  status?: string;
+}): Promise<Payment> {
+  const db = getDb();
+  const results = await db
+    .insert(schema.payments)
+    .values(data)
+    .returning();
+  return results[0];
+}
+
+export async function incrementCredits(
+  userId: string,
+  amount: number
+): Promise<Profile | undefined> {
+  const db = getDb();
+  const results = await db
+    .update(schema.profiles)
+    .set({
+      interview_credits: sql`${schema.profiles.interview_credits} + ${amount}`,
+    })
+    .where(eq(schema.profiles.id, userId))
+    .returning();
+  return results[0];
 }

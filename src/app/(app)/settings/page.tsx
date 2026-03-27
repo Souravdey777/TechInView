@@ -3,12 +3,20 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { cn } from "@/lib/utils";
 import { SettingsForm } from "@/components/dashboard/SettingsForm";
+import { RazorpayCheckout } from "@/components/shared/RazorpayCheckout";
+import { CREDIT_PACKS, PACK_IDS, getRegionForCountry } from "@/lib/constants";
 import {
   User,
   CreditCard,
   AlertTriangle,
   Ticket,
 } from "lucide-react";
+
+const PACK_COLORS: Record<string, string> = {
+  single: "brand-cyan",
+  "3pack": "brand-green",
+  "5pack": "brand-amber",
+};
 
 export default async function SettingsPage() {
   const supabase = createClient();
@@ -31,20 +39,10 @@ export default async function SettingsPage() {
   const interviewsCompleted = profile?.interviews_completed ?? 0;
 
   const headersList = headers();
-  const country = headersList.get("x-vercel-ip-country") ?? "US";
-  const isIndia = country === "IN";
+  const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
+  const { region, symbol } = getRegionForCountry(country);
 
-  const packs = isIndia
-    ? [
-        { name: "1 Interview", price: "₹349", credits: 1, color: "brand-cyan" },
-        { name: "3-Pack", price: "₹799", credits: 3, badge: "Save 25%", color: "brand-green" },
-        { name: "5-Pack", price: "₹1099", credits: 5, badge: "Save 40%", color: "brand-amber" },
-      ]
-    : [
-        { name: "1 Interview", price: "$8", credits: 1, color: "brand-cyan" },
-        { name: "3-Pack", price: "$18", credits: 3, badge: "Save 25%", color: "brand-green" },
-        { name: "5-Pack", price: "$24", credits: 5, badge: "Save 40%", color: "brand-amber" },
-      ];
+  const displayKey = region === "INR" ? "inr" : region === "PPP" ? "ppp" : "usd";
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
@@ -54,7 +52,7 @@ export default async function SettingsPage() {
           Settings
         </h1>
         <p className="text-brand-muted text-sm">
-          Manage your profile, preferences, and subscription.
+          Manage your profile, preferences, and billing.
         </p>
       </div>
 
@@ -103,43 +101,58 @@ export default async function SettingsPage() {
 
           {/* Credit packs */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {packs.map((pack) => (
-              <div
-                key={pack.name}
-                className="rounded-xl border border-brand-border bg-brand-surface p-4 flex flex-col gap-3"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-brand-text">{pack.name}</span>
-                  {pack.badge && (
-                    <span className={cn(
-                      "text-[10px] font-semibold px-2 py-0.5 rounded-full",
-                      pack.color === "brand-green" ? "bg-brand-green/15 text-brand-green" : "bg-brand-amber/15 text-brand-amber"
-                    )}>
-                      {pack.badge}
-                    </span>
-                  )}
-                </div>
-                <span className="text-xl font-bold text-brand-text">{pack.price}</span>
-                <button
-                  type="button"
-                  disabled
-                  className={cn(
-                    "px-3 py-2 rounded-lg text-xs font-semibold border transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                    `bg-${pack.color}/10 border-${pack.color}/30 text-${pack.color}`
-                  )}
+            {PACK_IDS.map((packId) => {
+              const pack = CREDIT_PACKS[packId];
+              const color = PACK_COLORS[packId] ?? "brand-cyan";
+              const price = pack.displayPrices[displayKey];
+
+              return (
+                <div
+                  key={packId}
+                  className="rounded-xl border border-brand-border bg-brand-surface p-4 flex flex-col gap-3"
                 >
-                  Buy Credits
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-brand-text">{pack.label}</span>
+                    {pack.badge && (
+                      <span className={cn(
+                        "text-[10px] font-semibold px-2 py-0.5 rounded-full",
+                        color === "brand-green" ? "bg-brand-green/15 text-brand-green" : "bg-brand-amber/15 text-brand-amber"
+                      )}>
+                        {pack.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xl font-bold text-brand-text">
+                    {symbol}{price.toLocaleString(region === "INR" ? "en-IN" : "en-US")}
+                  </span>
+                  <RazorpayCheckout
+                    packId={packId}
+                    countryCode={country}
+                    userName={profile?.display_name ?? undefined}
+                    userEmail={user.email ?? undefined}
+                    className={cn(
+                      "px-3 py-2 rounded-lg text-xs font-semibold border transition-colors",
+                      color === "brand-cyan" && "bg-brand-cyan/10 border-brand-cyan/30 text-brand-cyan hover:bg-brand-cyan/20",
+                      color === "brand-green" && "bg-brand-green/10 border-brand-green/30 text-brand-green hover:bg-brand-green/20",
+                      color === "brand-amber" && "bg-brand-amber/10 border-brand-amber/30 text-brand-amber hover:bg-brand-amber/20",
+                    )}
+                  >
+                    Buy Credits
+                  </RazorpayCheckout>
+                </div>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-2">
             <CreditCard className="w-3.5 h-3.5 text-brand-muted" />
             <p className="text-brand-muted text-xs">
-              Payments coming soon. Credits never expire.
-              {isIndia && (
+              Credits never expire. Secure payments via Razorpay.
+              {region === "INR" && (
                 <span className="text-brand-cyan ml-1">India pricing applied.</span>
+              )}
+              {region === "PPP" && (
+                <span className="text-brand-cyan ml-1">Regional pricing applied.</span>
               )}
             </p>
           </div>
