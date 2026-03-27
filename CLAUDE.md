@@ -31,7 +31,7 @@
 | TTS (Text→Speech)  | Deepgram Aura 2 (streaming)            | latest     |
 | Code Editor        | Monaco Editor (@monaco-editor/react) | latest    |
 | Code Execution     | Piston API (self-hosted or public)  | latest     |
-| Payments           | Stripe (Checkout + Customer Portal) | latest     |
+| Payments           | Razorpay (Inline Checkout + Webhooks) | latest   |
 | Analytics          | PostHog                             | latest     |
 | Voice Transport    | WebSocket (native) + Web Audio API  | -          |
 | Deployment         | Vercel (frontend + API) + Railway (WebSocket server) | - |
@@ -95,8 +95,12 @@ techinview/
 │   │       ├── scoring/
 │   │       │   └── route.ts           # POST: Run AI scoring on completed interview
 │   │       │
+│   │       ├── payment/
+│   │       │   ├── create-order/route.ts  # POST: Create Razorpay order
+│   │       │   └── verify/route.ts        # POST: Verify Razorpay payment
+│   │       │
 │   │       └── webhooks/
-│   │           └── stripe/route.ts    # Stripe webhook handler
+│   │           └── razorpay/route.ts  # Razorpay webhook handler
 │   │
 │   ├── components/
 │   │   ├── interview/
@@ -165,7 +169,7 @@ techinview/
 │   │   │   └── middleware.ts          # Auth middleware for protected routes
 │   │   │
 │   │   ├── piston.ts                 # Code execution API client
-│   │   ├── stripe.ts                 # Stripe helpers
+│   │   ├── razorpay.ts               # Razorpay helpers
 │   │   ├── utils.ts                  # General utilities
 │   │   └── constants.ts              # App-wide constants
 │   │
@@ -226,13 +230,11 @@ DEEPGRAM_VOICE_MODEL=aura-2-asteria-en   # Pre-selected voice for "Alex"
 # Piston (Code Execution)
 PISTON_API_URL=https://emkc.org/api/v2/piston  # Public, or self-hosted URL
 
-# Stripe
-STRIPE_SECRET_KEY=sk_...
-STRIPE_PUBLISHABLE_KEY=pk_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_SINGLE=price_...          # 1 interview — $8
-STRIPE_PRICE_3PACK=price_...           # 3-pack — $18
-STRIPE_PRICE_5PACK=price_...           # 5-pack — $24
+# Razorpay
+RAZORPAY_KEY_ID=rzp_...
+RAZORPAY_KEY_SECRET=...
+RAZORPAY_WEBHOOK_SECRET=...
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_...
 
 # PostHog
 NEXT_PUBLIC_POSTHOG_KEY=phc_...
@@ -261,7 +263,7 @@ All tables live in Supabase PostgreSQL. Use Drizzle for type-safe queries.
 - `preferred_language` (text) — "python", "javascript", "java", "cpp"
 - `interview_credits` (int, default 1) — remaining paid interview credits
 - `has_used_free_trial` (boolean, default false)
-- `stripe_customer_id`
+- `razorpay_customer_id`
 - `country_code` (text) — for PPP pricing (detected via IP)
 - `interviews_completed` (int, default 0)
 - `created_at`
@@ -574,7 +576,9 @@ cd voice-server && pnpm install && pnpm dev  # port 8080
 | POST   | `/api/interview/complete`  | End interview, trigger scoring      |
 | POST   | `/api/scoring`             | Run AI scoring (async)              |
 | WS     | `wss://voice-server/voice` | Bidirectional audio streaming       |
-| POST   | `/api/webhooks/stripe`     | Stripe payment webhooks             |
+| POST   | `/api/payment/create-order`| Create Razorpay order               |
+| POST   | `/api/payment/verify`      | Verify Razorpay payment             |
+| POST   | `/api/webhooks/razorpay`   | Razorpay payment webhooks           |
 
 ---
 
@@ -614,7 +618,7 @@ cd voice-server && pnpm install && pnpm dev  # port 8080
 - [ ] Voice pipeline working: Chrome + Safari
 - [ ] Code execution: Python + JavaScript minimum
 - [ ] Scoring generates valid results
-- [ ] Stripe checkout for credit packs (1 interview $8, 3-pack $18, 5-pack $24) with PPP pricing
+- [ ] Razorpay checkout for credit packs (1 interview $8, 3-pack $18, 5-pack $24) with PPP pricing
 - [ ] Landing page with demo video/GIF
 - [ ] Error boundaries on every route
 - [ ] PostHog tracking (interview_started, completed, code_run, payment)

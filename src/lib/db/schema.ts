@@ -58,8 +58,8 @@ export const profiles = pgTable("profiles", {
   experience_level: experienceLevelEnum("experience_level"),
   preferred_language: text("preferred_language"),
   plan: planEnum("plan").default("free").notNull(),
-  stripe_customer_id: text("stripe_customer_id"),
-  stripe_subscription_id: text("stripe_subscription_id"),
+  razorpay_customer_id: text("razorpay_customer_id"),
+  razorpay_subscription_id: text("razorpay_subscription_id"),
   interviews_completed: integer("interviews_completed").default(0).notNull(),
   created_at: timestamp("created_at", { withTimezone: true })
     .default(sql`now()`)

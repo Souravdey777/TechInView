@@ -137,7 +137,7 @@ export default async function SettingsPage() {
           <div className="flex items-center gap-2">
             <CreditCard className="w-3.5 h-3.5 text-brand-muted" />
             <p className="text-brand-muted text-xs">
-              Stripe payments coming soon. Credits never expire.
+              Payments coming soon. Credits never expire.
               {isIndia && (
                 <span className="text-brand-cyan ml-1">India pricing applied.</span>
               )}

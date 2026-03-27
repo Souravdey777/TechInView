@@ -45,13 +45,13 @@ _Goal: Live on the internet, shareable link_
 ## Phase 5: Monetization
 _Goal: Accept payments_
 
-- [ ] 27. Stripe checkout for credit packs:
+- [ ] 27. Razorpay checkout for credit packs:
   - Free trial: 1 interview, $0 (hook & convert)
   - Single interview: $8 (₹349 India, $4 Brazil/SEA)
   - 3-pack (Popular): $18 (₹799 India, $9 Brazil/SEA) — 25% off per interview
   - 5-pack (Best Value): $24 (₹1099 India, $18 Brazil/SEA) — 40% off per interview
 - [ ] 28. PPP pricing — detect country via Vercel `x-vercel-ip-country` header, show localized prices
-- [ ] 29. Wire Stripe webhook to credit user's interview balance in DB
+- [ ] 29. Wire Razorpay webhook to credit user's interview balance in DB
 - [ ] 30. Implement freemium tier restrictions:
   - No advanced report (basic score only, no detailed feedback breakdown)
   - No advanced persona (default "Alex" only, no FAANG-specific voices)

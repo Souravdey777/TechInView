@@ -63,7 +63,7 @@ After each interview, a 5-dimension scoring engine evaluates your performance an
 | Text-to-Speech | ElevenLabs Turbo v2.5 (streaming) |
 | Code Editor | Monaco Editor |
 | Code Execution | Piston API (sandboxed) |
-| Payments | Stripe |
+| Payments | Razorpay |
 | Voice Transport | WebSocket + Web Audio API |
 | Deployment | Vercel (frontend) + Railway (WebSocket server) |
 
@@ -83,7 +83,7 @@ The voice pipeline streams at every stage — Deepgram returns interim transcrip
 
 - Node.js 18+
 - pnpm 9+
-- API keys for: Supabase, Anthropic, Deepgram, ElevenLabs, Stripe
+- API keys for: Supabase, Anthropic, Deepgram, ElevenLabs, Razorpay
 
 ### Setup
 
