@@ -114,6 +114,7 @@ export const interviews = pgTable("interviews", {
   scores: jsonb("scores"),
   feedback_summary: text("feedback_summary"),
   hire_recommendation: hireRecommendationEnum("hire_recommendation"),
+  is_free_trial: boolean("is_free_trial").default(false).notNull(),
   started_at: timestamp("started_at", { withTimezone: true })
     .default(sql`now()`)
     .notNull(),

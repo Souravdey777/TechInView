@@ -20,10 +20,12 @@ import {
   Network,
   MonitorSmartphone,
   Lock,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useInterviewStore } from "@/stores/interview-store";
+import { useSupabase } from "@/hooks/useSupabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,7 +43,7 @@ type Category =
   | "heap"
   | "backtracking";
 type Language = "python" | "javascript" | "java" | "cpp";
-type Duration = 30 | 45;
+type Duration = 20 | 30 | 45;
 type MicStatus = "idle" | "checking" | "granted" | "denied";
 type ProblemMode = "random" | "specific";
 
@@ -198,6 +200,7 @@ function InterviewSetupInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initFromSetup = useInterviewStore((s) => s.initFromSetup);
+  const { supabase, user } = useSupabase();
 
   const [form, setForm] = useState<SetupFormState>({
     difficulty: "medium",
@@ -208,6 +211,30 @@ function InterviewSetupInner() {
   const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+
+  // Freemium state
+  const [isFreeTrialUser, setIsFreeTrialUser] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("interview_credits, has_used_free_trial")
+        .eq("id", user.id)
+        .single();
+      if (data) {
+        setCredits(data.interview_credits ?? 0);
+        const isFreeTrial = !(data.has_used_free_trial ?? false);
+        setIsFreeTrialUser(isFreeTrial);
+        if (isFreeTrial) {
+          setForm((f) => ({ ...f, difficulty: "easy", duration: 20 as Duration }));
+          setProblemMode("random");
+        }
+      }
+    })();
+  }, [user, supabase]);
 
   // Problem selection state
   const [problemMode, setProblemMode] = useState<ProblemMode>("random");
@@ -413,6 +440,34 @@ function InterviewSetupInner() {
           </p>
         </div>
 
+        {/* Free trial banner */}
+        {isFreeTrialUser && (
+          <div className="flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
+            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" />
+            <div>
+              <p className="text-sm font-semibold text-brand-text">Free Trial Interview</p>
+              <p className="text-xs text-brand-muted mt-1">
+                Your free trial includes a 20-minute session with easy problems and a basic score report.
+                Purchase credits to unlock all difficulties, 45-minute sessions, and detailed AI feedback.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* No credits warning */}
+        {credits !== null && credits <= 0 && (
+          <div className="flex items-start gap-3 rounded-xl border border-brand-rose/30 bg-brand-rose/5 px-5 py-4">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-rose" />
+            <div>
+              <p className="text-sm font-semibold text-brand-text">No Credits Remaining</p>
+              <p className="text-xs text-brand-muted mt-1">
+                You need interview credits to start a session.{" "}
+                <a href="/settings" className="text-brand-cyan hover:underline">Buy credits</a> to continue practicing.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* 0 – Interview Type */}
         <SectionCard title="Interview Type">
           <div className="grid grid-cols-3 gap-3">
@@ -510,9 +565,11 @@ function InterviewSetupInner() {
 
             {/* Specific option */}
             <button
-              onClick={() => setProblemMode("specific")}
+              onClick={() => !isFreeTrialUser && setProblemMode("specific")}
+              disabled={isFreeTrialUser}
               className={cn(
                 "flex flex-1 items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150",
+                isFreeTrialUser && "opacity-50 cursor-not-allowed",
                 problemMode === "specific"
                   ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
                   : "border-brand-border hover:border-brand-subtle"
@@ -535,6 +592,9 @@ function InterviewSetupInner() {
                 <span className="text-sm font-medium text-brand-text">
                   Choose Specific
                 </span>
+                {isFreeTrialUser && (
+                  <Lock className="h-3 w-3 text-brand-muted" />
+                )}
               </div>
             </button>
           </div>
@@ -665,23 +725,35 @@ function InterviewSetupInner() {
         {/* 2 – Difficulty */}
         <SectionCard title="Difficulty">
           <div className={cn("flex gap-3", isSpecificSelected && "opacity-40 pointer-events-none")}>
-            {DIFFICULTIES.map((d) => (
-              <button
-                key={d.value}
-                disabled={isSpecificSelected}
-                onClick={() => setForm((f) => ({ ...f, difficulty: d.value }))}
-                className={cn(
-                  "flex-1 rounded-lg border px-4 py-3 text-sm font-semibold transition-all duration-150",
-                  form.difficulty === d.value ? d.activeColor : d.color
-                )}
-              >
-                {d.label}
-              </button>
-            ))}
+            {DIFFICULTIES.map((d) => {
+              const lockedByTrial = isFreeTrialUser && d.value !== "easy";
+              return (
+                <button
+                  key={d.value}
+                  disabled={isSpecificSelected || lockedByTrial}
+                  onClick={() => !lockedByTrial && setForm((f) => ({ ...f, difficulty: d.value }))}
+                  className={cn(
+                    "relative flex-1 rounded-lg border px-4 py-3 text-sm font-semibold transition-all duration-150",
+                    lockedByTrial && "opacity-40 cursor-not-allowed",
+                    form.difficulty === d.value ? d.activeColor : d.color
+                  )}
+                >
+                  {d.label}
+                  {lockedByTrial && (
+                    <Lock className="absolute top-1.5 right-1.5 h-3 w-3 text-brand-muted" />
+                  )}
+                </button>
+              );
+            })}
           </div>
           {isSpecificSelected && (
             <p className="mt-2 text-xs text-brand-amber">
               Locked to {selectedProblem?.difficulty} — determined by the selected problem.
+            </p>
+          )}
+          {isFreeTrialUser && !isSpecificSelected && (
+            <p className="mt-2 text-xs text-brand-amber">
+              Free trial is limited to easy problems. Buy credits to unlock medium and hard.
             </p>
           )}
         </SectionCard>
@@ -737,27 +809,43 @@ function InterviewSetupInner() {
 
         {/* 5 – Duration */}
         <SectionCard title="Session Duration">
-          <div className="flex gap-3">
-            {([30, 45] as Duration[]).map((d) => (
-              <button
-                key={d}
-                onClick={() => setForm((f) => ({ ...f, duration: d }))}
-                className={cn(
-                  "flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold transition-all duration-150",
-                  form.duration === d
-                    ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan"
-                    : "border-brand-border text-brand-muted hover:border-brand-subtle hover:text-brand-text"
-                )}
-              >
-                <Clock className="h-4 w-4" />
-                <span>{d} min</span>
-              </button>
-            ))}
-          </div>
-          <p className="mt-3 text-xs text-brand-muted">
-            45 minutes mirrors a real FAANG interview loop. Choose 30 min for a
-            focused practice round.
-          </p>
+          {isFreeTrialUser ? (
+            <>
+              <div className="flex gap-3">
+                <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-brand-cyan px-4 py-3 text-sm font-semibold">
+                  <Clock className="h-4 w-4" />
+                  <span>20 min</span>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-brand-amber">
+                Free trial sessions are capped at 20 minutes. Buy credits for 30 or 45-minute sessions.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="flex gap-3">
+                {([30, 45] as Duration[]).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setForm((f) => ({ ...f, duration: d }))}
+                    className={cn(
+                      "flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold transition-all duration-150",
+                      form.duration === d
+                        ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan"
+                        : "border-brand-border text-brand-muted hover:border-brand-subtle hover:text-brand-text"
+                    )}
+                  >
+                    <Clock className="h-4 w-4" />
+                    <span>{d} min</span>
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-brand-muted">
+                45 minutes mirrors a real FAANG interview loop. Choose 30 min for a
+                focused practice round.
+              </p>
+            </>
+          )}
         </SectionCard>
 
         {/* 6 – Mic Check */}
@@ -842,7 +930,8 @@ function InterviewSetupInner() {
             onClick={handleStartInterview}
             disabled={
               isCreating ||
-              (problemMode === "specific" && !selectedProblem)
+              (problemMode === "specific" && !selectedProblem) ||
+              (credits !== null && credits <= 0)
             }
             className="w-full gap-2 text-base font-semibold"
           >

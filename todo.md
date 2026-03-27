@@ -50,9 +50,9 @@ _Goal: Accept payments_
   - Single interview: $8 (₹349 India, $4 Brazil/SEA)
   - 3-pack (Popular): $18 (₹799 India, $9 Brazil/SEA) — 25% off per interview
   - 5-pack (Best Value): $24 (₹1099 India, $18 Brazil/SEA) — 40% off per interview
-- [ ] 28. PPP pricing — detect country via Vercel `x-vercel-ip-country` header, show localized prices
-- [ ] 29. Wire Razorpay webhook to credit user's interview balance in DB
-- [ ] 30. Implement freemium tier restrictions:
+- [x] 28. PPP pricing — detect country via Vercel `x-vercel-ip-country` header, show localized prices
+- [x] 29. Wire Razorpay webhook to credit user's interview balance in DB
+- [x] 30. Implement freemium tier restrictions:
   - No advanced report (basic score only, no detailed feedback breakdown)
   - No advanced persona (default "Alex" only, no FAANG-specific voices)
   - 20-min interview cap (instead of 45 min)

@@ -128,7 +128,8 @@ export async function createInterview(
   userId: string,
   problemId: string,
   language: string,
-  maxDuration = 2700
+  maxDuration = 2700,
+  isFreeTrial = false
 ): Promise<Interview> {
   const db = getDb();
   const results = await db
@@ -138,6 +139,7 @@ export async function createInterview(
       problem_id: problemId,
       language,
       max_duration_seconds: maxDuration,
+      is_free_trial: isFreeTrial,
       status: "in_progress",
     })
     .returning();
@@ -302,6 +304,25 @@ export async function incrementCredits(
       interview_credits: sql`${schema.profiles.interview_credits} + ${amount}`,
     })
     .where(eq(schema.profiles.id, userId))
+    .returning();
+  return results[0];
+}
+
+export async function decrementCredits(
+  userId: string
+): Promise<Profile | undefined> {
+  const db = getDb();
+  const results = await db
+    .update(schema.profiles)
+    .set({
+      interview_credits: sql`GREATEST(${schema.profiles.interview_credits} - 1, 0)`,
+    })
+    .where(
+      and(
+        eq(schema.profiles.id, userId),
+        sql`${schema.profiles.interview_credits} > 0`
+      )
+    )
     .returning();
   return results[0];
 }

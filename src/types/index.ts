@@ -100,6 +100,7 @@ export type Interview = {
   scores: Record<ScoringDimension, InterviewScore> | null;
   feedback_summary: string | null;
   hire_recommendation: HireRecommendation | null;
+  is_free_trial: boolean;
   started_at: string;
   completed_at: string | null;
 };

@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, Loader2, FileQuestion } from "lucide-react";
+import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, Loader2, FileQuestion, Lock, Sparkles } from "lucide-react";
 import { ScoreSummary } from "@/components/results/ScoreSummary";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
 import { FeedbackCard } from "@/components/results/FeedbackCard";
@@ -126,6 +126,7 @@ export default function ResultsPage() {
   const [dbResult, setDbResult] = useState<typeof storeResult>(null);
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
+  const [isFreeTrial, setIsFreeTrial] = useState(false);
 
   const storeMatchesPage = storeResult?.interviewId === pageId;
   const result = storeMatchesPage ? storeResult : dbResult;
@@ -142,38 +143,42 @@ export default function ResultsPage() {
           .eq("id", pageId)
           .single();
 
-        if (interview && interview.overall_score != null) {
-          const scores = interview.scores as Record<string, { score: number; feedback: string }> | null;
-          const prob = interview.problems as unknown as { title: string; difficulty: string; category: string } | null;
-          const msgs = (interview.messages as unknown as { role: string; content: string; timestamp_ms: number }[]) || [];
+        if (interview) {
+          setIsFreeTrial(interview.is_free_trial === true);
 
-          setDbResult({
-            interviewId: interview.id,
-            finalCode: interview.final_code ?? "",
-            language: interview.language ?? "python",
-            transcript: msgs.map((m) => ({
-              role: m.role as "interviewer" | "candidate" | "system",
-              content: m.content,
-              timestamp_ms: m.timestamp_ms,
-            })),
-            overallScore: interview.overall_score,
-            scores: scores ? {
-              problem_solving: scores.problem_solving ?? { score: 0, feedback: "" },
-              code_quality: scores.code_quality ?? { score: 0, feedback: "" },
-              communication: scores.communication ?? { score: 0, feedback: "" },
-              technical_knowledge: scores.technical_knowledge ?? { score: 0, feedback: "" },
-              testing: scores.testing ?? { score: 0, feedback: "" },
-            } : null,
-            hireRecommendation: interview.hire_recommendation,
-            summary: interview.feedback_summary,
-            keyStrengths: null,
-            areasToImprove: null,
-            testsPassed: interview.tests_passed ?? 0,
-            testsTotal: interview.tests_total ?? 0,
-            problemTitle: prob?.title ?? "Interview",
-            problemDifficulty: prob?.difficulty ?? "medium",
-            problemCategory: prob?.category ?? "arrays",
-          });
+          if (interview.overall_score != null) {
+            const scores = interview.scores as Record<string, { score: number; feedback: string }> | null;
+            const prob = interview.problems as unknown as { title: string; difficulty: string; category: string } | null;
+            const msgs = (interview.messages as unknown as { role: string; content: string; timestamp_ms: number }[]) || [];
+
+            setDbResult({
+              interviewId: interview.id,
+              finalCode: interview.final_code ?? "",
+              language: interview.language ?? "python",
+              transcript: msgs.map((m) => ({
+                role: m.role as "interviewer" | "candidate" | "system",
+                content: m.content,
+                timestamp_ms: m.timestamp_ms,
+              })),
+              overallScore: interview.overall_score,
+              scores: scores ? {
+                problem_solving: scores.problem_solving ?? { score: 0, feedback: "" },
+                code_quality: scores.code_quality ?? { score: 0, feedback: "" },
+                communication: scores.communication ?? { score: 0, feedback: "" },
+                technical_knowledge: scores.technical_knowledge ?? { score: 0, feedback: "" },
+                testing: scores.testing ?? { score: 0, feedback: "" },
+              } : null,
+              hireRecommendation: interview.hire_recommendation,
+              summary: interview.feedback_summary,
+              keyStrengths: null,
+              areasToImprove: null,
+              testsPassed: interview.tests_passed ?? 0,
+              testsTotal: interview.tests_total ?? 0,
+              problemTitle: prob?.title ?? "Interview",
+              problemDifficulty: prob?.difficulty ?? "medium",
+              problemCategory: prob?.category ?? "arrays",
+            });
+          }
         }
       } catch {
         // Failed to fetch — will show NoResultState
@@ -183,6 +188,23 @@ export default function ResultsPage() {
       }
     })();
   }, [pageId, storeMatchesPage, fetched, supabase]);
+
+  // For store-based results, also fetch is_free_trial from DB
+  useEffect(() => {
+    if (!storeMatchesPage) return;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("interviews")
+          .select("is_free_trial")
+          .eq("id", pageId)
+          .single();
+        if (data) setIsFreeTrial(data.is_free_trial === true);
+      } catch {
+        // Ignore — defaults to false (full access)
+      }
+    })();
+  }, [storeMatchesPage, pageId, supabase]);
 
   // Loading state while fetching from DB
   if (!storeMatchesPage && loading) {
@@ -315,15 +337,43 @@ export default function ResultsPage() {
           </section>
         )}
 
-        {/* ── Section 2: Radar Chart (only if scores exist) ── */}
-        {hasScores && radarData.length > 0 && (
+        {/* ── Free trial upgrade CTA (shown instead of detailed sections) ── */}
+        {isFreeTrial && hasScores && (
+          <section className="mb-6 r-anim-4">
+            <div className="rounded-xl border border-brand-cyan/30 bg-gradient-to-br from-brand-cyan/5 to-brand-card p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-cyan/10 border border-brand-cyan/20">
+                <Sparkles className="h-6 w-6 text-brand-cyan" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-brand-text flex items-center gap-2">
+                  <Lock className="h-3.5 w-3.5 text-brand-muted" />
+                  Detailed Feedback Locked
+                </h3>
+                <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
+                  Your free trial includes the overall score and hire recommendation above.
+                  Purchase credits to unlock the 5-dimension radar chart, per-dimension feedback,
+                  key strengths, and areas to improve.
+                </p>
+              </div>
+              <Link
+                href="/settings"
+                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
+              >
+                Buy Credits
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* ── Section 2: Radar Chart (only if scores exist and not free trial) ── */}
+        {!isFreeTrial && hasScores && radarData.length > 0 && (
           <section className="mb-6 r-anim-4">
             <ScoreRadar scores={radarData} />
           </section>
         )}
 
-        {/* ── Section 3: Feedback Cards (only if scores exist) ── */}
-        {hasScores && feedbackCards.length > 0 && (
+        {/* ── Section 3: Feedback Cards (only if scores exist and not free trial) ── */}
+        {!isFreeTrial && hasScores && feedbackCards.length > 0 && (
           <section className="mb-6 r-anim-5">
             <h2 className="text-base font-semibold text-brand-text mb-4">
               Dimension Breakdown
@@ -343,8 +393,8 @@ export default function ResultsPage() {
           </section>
         )}
 
-        {/* ── Section 3b: Key Strengths & Areas to Improve (only if provided) ── */}
-        {hasScores && (keyStrengths || areasToImprove) && (
+        {/* ── Section 3b: Key Strengths & Areas to Improve (only if provided and not free trial) ── */}
+        {!isFreeTrial && hasScores && (keyStrengths || areasToImprove) && (
           <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {keyStrengths && keyStrengths.length > 0 && (
               <div className="rounded-xl border border-brand-border bg-brand-card p-5 r-anim-sl">
