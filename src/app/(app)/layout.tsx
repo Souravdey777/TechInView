@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/shared/Sidebar";
 
@@ -17,12 +18,15 @@ export default async function AppLayout({
   }
 
   const userEmail = user.email ?? "";
+  const headersList = headers();
+  const country = headersList.get("x-vercel-ip-country") ?? "US";
+  const isIndia = country === "IN";
 
   return (
     <div className="min-h-screen bg-brand-deep">
       {/* Sidebar — hidden on mobile, visible on lg+ */}
       <div className="hidden lg:block">
-        <Sidebar userEmail={userEmail} />
+        <Sidebar userEmail={userEmail} isIndia={isIndia} />
       </div>
 
       {/* Main content area */}

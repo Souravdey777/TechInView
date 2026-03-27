@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { cn } from "@/lib/utils";
 import { SettingsForm } from "@/components/dashboard/SettingsForm";
 import {
@@ -28,6 +29,22 @@ export default async function SettingsPage() {
   const credits = profile?.interview_credits ?? 1;
   const hasUsedTrial = profile?.has_used_free_trial ?? false;
   const interviewsCompleted = profile?.interviews_completed ?? 0;
+
+  const headersList = headers();
+  const country = headersList.get("x-vercel-ip-country") ?? "US";
+  const isIndia = country === "IN";
+
+  const packs = isIndia
+    ? [
+        { name: "1 Interview", price: "₹349", credits: 1, color: "brand-cyan" },
+        { name: "3-Pack", price: "₹799", credits: 3, badge: "Save 25%", color: "brand-green" },
+        { name: "5-Pack", price: "₹1099", credits: 5, badge: "Save 40%", color: "brand-amber" },
+      ]
+    : [
+        { name: "1 Interview", price: "$8", credits: 1, color: "brand-cyan" },
+        { name: "3-Pack", price: "$18", credits: 3, badge: "Save 25%", color: "brand-green" },
+        { name: "5-Pack", price: "$24", credits: 5, badge: "Save 40%", color: "brand-amber" },
+      ];
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
@@ -86,11 +103,7 @@ export default async function SettingsPage() {
 
           {/* Credit packs */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { name: "1 Interview", price: "$8", credits: 1, color: "brand-cyan" },
-              { name: "3-Pack", price: "$18", credits: 3, badge: "Save 25%", color: "brand-green" },
-              { name: "5-Pack", price: "$24", credits: 5, badge: "Save 40%", color: "brand-amber" },
-            ].map((pack) => (
+            {packs.map((pack) => (
               <div
                 key={pack.name}
                 className="rounded-xl border border-brand-border bg-brand-surface p-4 flex flex-col gap-3"
@@ -125,6 +138,9 @@ export default async function SettingsPage() {
             <CreditCard className="w-3.5 h-3.5 text-brand-muted" />
             <p className="text-brand-muted text-xs">
               Stripe payments coming soon. Credits never expire.
+              {isIndia && (
+                <span className="text-brand-cyan ml-1">India pricing applied.</span>
+              )}
             </p>
           </div>
         </div>
