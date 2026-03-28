@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: message, debug: String(errDetail) },
+      { success: false, error: message },
       { status: 500 }
     );
   }

@@ -111,9 +111,12 @@ export async function POST(req: NextRequest) {
         new_balance: updatedProfile?.interview_credits ?? credits,
       },
     });
-  } catch {
+  } catch (error: unknown) {
+    console.error("Payment verify error:", error);
+    const message =
+      error instanceof Error ? error.message : "Payment verification failed";
     return NextResponse.json(
-      { success: false, error: "Payment verification failed" },
+      { success: false, error: message },
       { status: 500 }
     );
   }
