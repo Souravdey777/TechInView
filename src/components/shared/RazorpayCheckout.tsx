@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import confetti from "canvas-confetti";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
@@ -144,6 +145,26 @@ export function RazorpayCheckout({
 
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
+              const end = Date.now() + 800;
+              const frame = () => {
+                confetti({
+                  particleCount: 3,
+                  angle: 60,
+                  spread: 55,
+                  origin: { x: 0, y: 0.7 },
+                  colors: ["#22d3ee", "#34d399", "#fbbf24"],
+                });
+                confetti({
+                  particleCount: 3,
+                  angle: 120,
+                  spread: 55,
+                  origin: { x: 1, y: 0.7 },
+                  colors: ["#22d3ee", "#34d399", "#fbbf24"],
+                });
+                if (Date.now() < end) requestAnimationFrame(frame);
+              };
+              frame();
+
               toast({
                 title: "Payment successful!",
                 description: `${verifyData.data.credits} credit${verifyData.data.credits > 1 ? "s" : ""} added to your account.`,

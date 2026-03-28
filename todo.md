@@ -67,28 +67,32 @@ _Goal: Understand usage, iterate_
 
 ## Phase 7: Onboarding
 
-- [ ] 33. User onboarding flow — first-time setup wizard (name, target company, experience level, preferred language)
+- [x] 33. User onboarding flow — first-time setup wizard (name, target company, experience level, preferred language)
+
+## Phase 8: Pre-Beta Launch
+
+- [x] 34. Problems & Progress pages should be locked for non-paid users
+- [ ] 35. Problem bank expansion (70+ problems)
+- [ ] 36. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
 
 ## Phase 8: Beta Launch (March 30)
 
-- [ ] 34. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Alex", each with distinct personality and interview style
-- [ ] 35. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
-- [ ] 36. Problem bank expansion (50+ problems)
 - [ ] 37. Sales and Marketing Plan
+- [ ] 38. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Alex", each with distinct personality and interview style
 
 ## Phase 9: Voice Upgrade
 _Goal: Replace browser APIs with production-quality voice_
 
-- [ ] 38. Integrate Deepgram Nova-2 for server-side STT (replace browser SpeechRecognition)
-- [ ] 39. Integrate Deepgram Aura 2 for TTS (replace browser SpeechSynthesis)
-- [ ] 40. Deploy voice-server to Railway
-- [ ] 41. Wire WebSocket voice pipeline: Browser → Railway → Deepgram STT/Claude/Deepgram TTS → Browser
-- [ ] 42. Interruption handling — stop Alex when user starts speaking
+- [ ] 39. Integrate Deepgram Nova-2 for server-side STT (replace browser SpeechRecognition)
+- [ ] 40. Integrate Deepgram Aura 2 for TTS (replace browser SpeechSynthesis)
+- [ ] 41. Deploy voice-server to Railway
+- [ ] 42. Wire WebSocket voice pipeline: Browser → Railway → Deepgram STT/Claude/Deepgram TTS → Browser
+- [ ] 43. Interruption handling — stop Alex when user starts speaking
 
 ## Pre-V1 Launch
 _Ship before going live_
 
-- [ ] 43. Referral program for influencers — custom referral links, tracking, commission/credit payouts
+- [ ] 44. Referral program for influencers — custom referral links, tracking, commission/credit payouts
 
 ## Post-V1 Roadmap
 _After launch & initial traction_

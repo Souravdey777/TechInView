@@ -23,6 +23,22 @@ export async function GET(request: NextRequest) {
         captureServerEvent(user.id, "user_signed_up", {
           provider: user.app_metadata?.provider,
         });
+
+        // Check if profile is incomplete — send new users to onboarding
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("target_company, experience_level, preferred_language")
+          .eq("id", user.id)
+          .single();
+
+        const needsOnboarding =
+          !profile?.target_company ||
+          !profile?.experience_level ||
+          !profile?.preferred_language;
+
+        if (needsOnboarding) {
+          return NextResponse.redirect(`${origin}/onboarding`);
+        }
       }
       return NextResponse.redirect(`${origin}${next}`);
     }

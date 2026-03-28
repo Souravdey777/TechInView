@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,9 @@ import {
   Star,
   AlertCircle,
   LineChart,
+  Lock,
+  CreditCard,
+  ArrowRight,
 } from "lucide-react";
 import { ScoreTrendChart } from "@/components/dashboard/ScoreTrendChart";
 import { InterviewTypeTabs } from "@/components/shared/InterviewTypeTabs";
@@ -63,6 +67,63 @@ export default async function ProgressPage() {
 
   if (!user) {
     redirect("/login");
+  }
+
+  const { count: paymentCount } = await supabase
+    .from("payments")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
+  const isPaidUser = (paymentCount ?? 0) > 0;
+
+  if (!isPaidUser) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+        <div>
+          <h1 className="text-2xl font-bold font-heading text-brand-text mb-1">
+            Your Progress
+          </h1>
+          <p className="text-brand-muted text-sm">
+            Track your improvement across all problem categories.
+          </p>
+        </div>
+
+        <div className="relative">
+          {/* Blurred placeholder */}
+          <div className="pointer-events-none select-none blur-sm opacity-40 space-y-6">
+            <div className="bg-brand-card rounded-xl border border-brand-border p-8 min-h-[220px]" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-brand-card rounded-xl border border-brand-border p-4 h-28" />
+              ))}
+            </div>
+          </div>
+
+          {/* Lock overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-brand-card/95 backdrop-blur-sm border border-brand-border rounded-2xl p-8 max-w-sm text-center shadow-2xl">
+              <div className="w-14 h-14 rounded-full bg-brand-amber/10 border border-brand-amber/20 flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-7 h-7 text-brand-amber" />
+              </div>
+              <h2 className="text-lg font-bold text-brand-text mb-2">
+                Unlock Progress Tracking
+              </h2>
+              <p className="text-brand-muted text-sm mb-6">
+                Purchase interview credits to track your scores, see category breakdowns, and identify your strengths and weaknesses.
+              </p>
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-cyan text-brand-deep font-semibold text-sm rounded-lg hover:bg-brand-cyan/90 transition-all shadow-lg shadow-brand-cyan/20"
+              >
+                <CreditCard className="w-4 h-4" />
+                Buy Credits
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Fetch progress data and trend data in parallel

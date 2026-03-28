@@ -97,10 +97,14 @@ export async function POST(req: NextRequest) {
 
     const updatedProfile = await incrementCredits(user.id, credits);
 
+    const profileUpdates: Record<string, unknown> = {
+      has_used_free_trial: true,
+    };
     const customerId = (payment as unknown as Record<string, unknown>).customer_id as string | undefined;
     if (customerId) {
-      await updateProfile(user.id, { razorpay_customer_id: customerId });
+      profileUpdates.razorpay_customer_id = customerId;
     }
+    await updateProfile(user.id, profileUpdates);
 
     captureServerEvent(user.id, "payment_completed", {
       pack,

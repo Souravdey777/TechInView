@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { InterviewHistory } from "@/components/dashboard/InterviewHistory";
-import { ArrowRight, Mic, Zap, Braces, Network, MonitorSmartphone, Lock, CreditCard } from "lucide-react";
+import { ArrowRight, Mic, Zap, Braces, Network, MonitorSmartphone, Lock, CreditCard, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +36,7 @@ export default async function DashboardPage() {
     profile?.display_name ?? user.email?.split("@")[0] ?? "there";
   const credits = profile?.interview_credits ?? 0;
   const hasCredits = credits > 0;
+  const isFreeTrialUser = hasCredits && !(profile?.has_used_free_trial ?? false);
 
   const completedInterviews = (interviews || []).filter(
     (i) => i.status === "completed"
@@ -188,7 +189,50 @@ export default async function DashboardPage() {
       />
 
       {/* Quick Start CTA */}
-      {hasCredits ? (
+      {isFreeTrialUser ? (
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-green/10 via-brand-card to-brand-card rounded-xl border border-brand-green/25 p-6">
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-brand-green/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative flex items-start justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-brand-green" />
+                <span className="text-brand-green text-xs font-semibold uppercase tracking-widest">
+                  Free Trial
+                </span>
+              </div>
+              <h2 className="text-xl font-bold font-heading text-brand-text mb-2">
+                Try Your First Interview Free
+              </h2>
+              <p className="text-brand-muted text-sm mb-4 max-w-md">
+                You have 1 free trial interview with Alex. It&apos;s a 20-minute
+                easy-level session with a basic score report.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/interview/setup"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-green text-brand-deep font-semibold text-sm rounded-lg hover:bg-brand-green/90 transition-all duration-150 shadow-lg shadow-brand-green/20"
+                >
+                  <Mic className="w-4 h-4" />
+                  Start Free Interview
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/settings"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 border border-brand-cyan/30 text-brand-cyan text-sm font-medium rounded-lg hover:bg-brand-cyan/5 transition-colors"
+                >
+                  Upgrade for full access
+                </Link>
+              </div>
+              <p className="text-brand-muted text-xs mt-3">
+                Upgrade to unlock all difficulties, 45-min sessions, and detailed AI feedback.
+              </p>
+            </div>
+            <div className="hidden sm:flex items-center justify-center w-20 h-20 rounded-2xl bg-brand-green/10 border border-brand-green/20 shrink-0">
+              <Sparkles className="w-9 h-9 text-brand-green opacity-60" />
+            </div>
+          </div>
+        </div>
+      ) : hasCredits ? (
         <div className="relative overflow-hidden bg-gradient-to-br from-brand-cyan/10 via-brand-card to-brand-card rounded-xl border border-brand-cyan/25 p-6">
           <div className="absolute -top-12 -right-12 w-48 h-48 bg-brand-cyan/5 rounded-full blur-3xl pointer-events-none" />
           <div className="relative flex items-start justify-between gap-6">

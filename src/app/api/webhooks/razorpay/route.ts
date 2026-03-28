@@ -88,11 +88,13 @@ export async function POST(req: NextRequest) {
 
         await incrementCredits(userId, credits);
 
+        const profileUpdates: Record<string, unknown> = {
+          has_used_free_trial: true,
+        };
         if (payment.customer_id) {
-          await updateProfile(userId, {
-            razorpay_customer_id: payment.customer_id,
-          });
+          profileUpdates.razorpay_customer_id = payment.customer_id;
         }
+        await updateProfile(userId, profileUpdates);
 
         break;
       }

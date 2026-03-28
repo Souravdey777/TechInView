@@ -8,6 +8,7 @@ const PROTECTED_PATHS = [
   "/problems",
   "/progress",
   "/settings",
+  "/onboarding",
 ];
 
 function isProtectedPath(pathname: string): boolean {
@@ -71,6 +72,34 @@ export async function updateSession(request: NextRequest) {
     dashboardUrl.pathname = "/dashboard";
     dashboardUrl.search = "";
     return NextResponse.redirect(dashboardUrl);
+  }
+
+  // Onboarding redirect: check if profile is incomplete
+  if (user && (isProtectedPath(pathname) || pathname === "/onboarding")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("target_company, experience_level, preferred_language")
+      .eq("id", user.id)
+      .single();
+
+    const isIncomplete =
+      !profile?.target_company ||
+      !profile?.experience_level ||
+      !profile?.preferred_language;
+
+    if (isIncomplete && pathname !== "/onboarding") {
+      const onboardingUrl = request.nextUrl.clone();
+      onboardingUrl.pathname = "/onboarding";
+      onboardingUrl.search = "";
+      return NextResponse.redirect(onboardingUrl);
+    }
+
+    if (!isIncomplete && pathname === "/onboarding") {
+      const dashboardUrl = request.nextUrl.clone();
+      dashboardUrl.pathname = "/dashboard";
+      dashboardUrl.search = "";
+      return NextResponse.redirect(dashboardUrl);
+    }
   }
 
   return supabaseResponse;
