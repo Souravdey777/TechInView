@@ -1,0 +1,76 @@
+{
+  "title": "Palindrome Partitioning",
+  "slug": "palindrome-partitioning",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": ["amazon", "google", "meta", "bloomberg", "microsoft", "uber"],
+  "description": "Given a string `s`, partition `s` such that every substring of the partition is a **palindrome**. Return all possible palindrome partitionings of `s`.\n\n**Example 1:**\n```\nInput: s = \"aab\"\nOutput: [[\"a\",\"a\",\"b\"],[\"aa\",\"b\"]]\nExplanation: Both [\"a\",\"a\",\"b\"] and [\"aa\",\"b\"] are valid partitions where every part is a palindrome.\n```\n\n**Example 2:**\n```\nInput: s = \"a\"\nOutput: [[\"a\"]]\nExplanation: A single character is always a palindrome.\n```",
+  "examples": [
+    {
+      "input": "s = \"aab\"",
+      "output": "[[\"a\",\"a\",\"b\"],[\"aa\",\"b\"]]",
+      "explanation": "\"a\", \"a\", \"b\" are all palindromes. \"aa\" and \"b\" are also both palindromes."
+    },
+    {
+      "input": "s = \"a\"",
+      "output": "[[\"a\"]]",
+      "explanation": "A single character string has only one partition, and it is a palindrome."
+    },
+    {
+      "input": "s = \"aba\"",
+      "output": "[[\"a\",\"b\",\"a\"],[\"aba\"]]",
+      "explanation": "Both individual characters and the full string \"aba\" are palindromes."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 16",
+    "s contains only lowercase English letters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def partition(self, s: str) -> list[list[str]]:\n        # Write your solution here\n        pass",
+    "javascript": "function partition(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<String>> partition(String s) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<string>> partition(string s) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"aab\"",
+      "expected_output": "[[\"a\",\"a\",\"b\"],[\"aa\",\"b\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "[[\"a\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aba\"",
+      "expected_output": "[[\"a\",\"b\",\"a\"],[\"aba\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aabb\"",
+      "expected_output": "[[\"a\",\"a\",\"b\",\"b\"],[\"a\",\"a\",\"bb\"],[\"aa\",\"b\",\"b\"],[\"aa\",\"bb\"]]",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abcba\"",
+      "expected_output": "[[\"a\",\"b\",\"c\",\"b\",\"a\"],[\"a\",\"bcb\",\"a\"],[\"abcba\"]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "We use backtracking to explore all possible ways to partition the string. Starting from index 0, we try every possible prefix substring s[start..end]. If that prefix is a palindrome, we add it to the current partition and recursively partition the remaining string s[end+1..]. When start reaches the end of the string, we've found a valid partition and add a copy to the results. The palindrome check can be done naively in O(n) for each substring, or we can precompute a 2D DP table where dp[i][j] indicates whether s[i..j] is a palindrome, reducing each check to O(1). The DP table is filled by noting that s[i..j] is a palindrome if s[i] == s[j] and s[i+1..j-1] is a palindrome (or j - i <= 2). Even with the DP optimization, the overall time complexity remains O(n * 2^n) because there can be up to 2^(n-1) possible partitions (each of the n-1 gaps between characters is either a cut or not), and each partition takes O(n) to copy. The space complexity is O(n) for the recursion stack depth, plus O(n^2) if using the DP palindrome table.",
+  "hints": [
+    "Think about where to place cuts in the string. Between each pair of adjacent characters, you either cut or don't — this gives up to 2^(n-1) possible partitions.",
+    "Use backtracking: starting from index i, try every substring s[i..j]. If s[i..j] is a palindrome, add it to the current partition and recurse from index j+1.",
+    "To speed up palindrome checks, precompute a 2D boolean table dp[i][j] that stores whether s[i..j] is a palindrome. Fill it using the relation: dp[i][j] = (s[i] == s[j]) and dp[i+1][j-1]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * 2^n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "What is the minimum number of cuts needed to partition the string such that every part is a palindrome (Palindrome Partitioning II)?",
+    "How would you optimize the palindrome checking using Manacher's algorithm or expand-around-center instead of a DP table?"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "title": "Top K Frequent Elements",
+  "slug": "top-k-frequent-elements",
+  "difficulty": "medium",
+  "category": "heap",
+  "company_tags": ["amazon", "meta", "google", "apple", "microsoft", "bloomberg", "oracle", "uber"],
+  "description": "Given an integer array `nums` and an integer `k`, return the `k` most frequent elements. You may return the answer in **any order**.\n\nIt is guaranteed that the answer is unique.\n\n**Example 1:**\n```\nInput: nums = [1,1,1,2,2,3], k = 2\nOutput: [1,2]\nExplanation: 1 appears 3 times and 2 appears 2 times. The two most frequent elements are 1 and 2.\n```\n\n**Example 2:**\n```\nInput: nums = [1], k = 1\nOutput: [1]\nExplanation: There is only one element, so it is the most frequent.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,1,1,2,2,3], k = 2",
+      "output": "[1,2]",
+      "explanation": "1 appears 3 times and 2 appears 2 times. The two most frequent elements are 1 and 2."
+    },
+    {
+      "input": "nums = [1], k = 1",
+      "output": "[1]",
+      "explanation": "There is only one element, so it is the most frequent."
+    },
+    {
+      "input": "nums = [4,4,4,1,1,2,2,2,3], k = 2",
+      "output": "[4,2]",
+      "explanation": "4 appears 3 times and 2 appears 3 times. Both are among the top 2 most frequent."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-10^4 <= nums[i] <= 10^4",
+    "k is in the range [1, the number of unique elements in the array]",
+    "It is guaranteed that the answer is unique"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def topKFrequent(self, nums: list[int], k: int) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function topKFrequent(nums, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] topKFrequent(int[] nums, int k) {\n        // Write your solution here\n        return new int[]{};\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,1,1,2,2,3], k = 2",
+      "expected_output": "[1,2]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1], k = 1",
+      "expected_output": "[1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,4,4,1,1,2,2,2,3], k = 2",
+      "expected_output": "[4,2]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,5,5,5,1,1,1,2,2,3], k = 3",
+      "expected_output": "[5,1,2]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [3,3,3,1,1,1,2,2,2,4], k = 1",
+      "expected_output": "[3]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "First, count the frequency of each element using a hash map in O(n) time. Then we need to find the k elements with the highest frequencies. One approach is to use a min-heap of size k: iterate through the frequency map, push each element onto the heap, and if the heap exceeds size k, pop the minimum-frequency element. This gives O(n log k) time. The optimal O(n) approach uses bucket sort: create an array of buckets where index i holds all elements with frequency i. Since the maximum frequency is n, we create n+1 buckets. Then iterate from the highest bucket downward, collecting elements until we have k. This avoids any sorting or heap operations entirely. The bucket sort approach runs in O(n) time and O(n) space.",
+  "hints": [
+    "Start by counting the frequency of each element using a hash map. Now the problem reduces to finding the k keys with the highest values.",
+    "Consider using a min-heap of size k to track the top k frequent elements. What should you compare when pushing to the heap?",
+    "For an O(n) solution, think about bucket sort. If you create buckets indexed by frequency, what is the maximum possible frequency? How would you collect the top k from these buckets?"
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "What if the input is a stream of numbers and you need to return the top k frequent elements at any point in time?",
+    "How would you modify your solution if the answer is not guaranteed to be unique, and you need to handle ties consistently?"
+  ]
+}

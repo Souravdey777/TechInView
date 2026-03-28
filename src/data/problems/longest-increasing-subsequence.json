@@ -1,0 +1,71 @@
+{
+  "title": "Longest Increasing Subsequence",
+  "slug": "longest-increasing-subsequence",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "apple", "uber"],
+  "description": "Given an integer array `nums`, return the length of the **longest strictly increasing subsequence**.\n\nA **subsequence** is a sequence that can be derived from an array by deleting some or no elements without changing the order of the remaining elements.\n\n**Example 1:**\n```\nInput: nums = [10,9,2,5,3,7,101,18]\nOutput: 4\nExplanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.\n```\n\n**Example 2:**\n```\nInput: nums = [0,1,0,3,2,3]\nOutput: 4\nExplanation: The longest increasing subsequence is [0,1,2,3].\n```\n\n**Example 3:**\n```\nInput: nums = [7,7,7,7,7,7,7]\nOutput: 1\nExplanation: All elements are the same, so the longest strictly increasing subsequence has length 1.\n```",
+  "examples": [
+    {
+      "input": "nums = [10,9,2,5,3,7,101,18]",
+      "output": "4",
+      "explanation": "The longest increasing subsequence is [2,3,7,101] with length 4. Other valid LIS include [2,5,7,101] and [2,5,7,18]."
+    },
+    {
+      "input": "nums = [0,1,0,3,2,3]",
+      "output": "4",
+      "explanation": "One valid LIS is [0,1,2,3]. Note that elements don't need to be contiguous."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 2500",
+    "−10^4 <= nums[i] <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def lengthOfLIS(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function lengthOfLIS(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int lengthOfLIS(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int lengthOfLIS(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [10,9,2,5,3,7,101,18]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,1,0,3,2,3]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7,7,7,7,7,7,7]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,3,6,7,9,4,10,5,6]",
+      "expected_output": "6",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [3,5,6,2,5,4,19,5,6,7,12]",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The classic O(n^2) DP approach defines dp[i] as the length of the longest increasing subsequence ending at index i. For each i, check all j < i: if nums[j] < nums[i], then dp[i] = max(dp[i], dp[j] + 1). The answer is max(dp). However, the optimal O(n log n) approach uses patience sorting: maintain a 'tails' array where tails[k] is the smallest tail element of all increasing subsequences of length k+1. For each number in nums, use binary search to find the position where it should be placed in tails. If it's larger than all elements, append it (extending the longest subsequence). Otherwise, replace the first element in tails that is >= the current number. The length of tails at the end is the LIS length. This works because we're greedily keeping the smallest possible tail for each subsequence length, maximizing the chance of extending it later.",
+  "hints": [
+    "Start with the O(n^2) approach: for each element, look at all previous elements. If a previous element is smaller, you can extend that subsequence. Define dp[i] as the LIS length ending at index i.",
+    "To optimize to O(n log n), think about maintaining an array of the smallest tail elements for subsequences of each length. When you see a new number, where should it go in this array?",
+    "Use binary search on the tails array: if the new number is larger than all tails, append it. Otherwise, replace the first tail that is >= the new number. The final length of the tails array is your answer."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Can you reconstruct the actual longest increasing subsequence, not just its length?",
+    "How would you solve this if the subsequence needed to be non-decreasing instead of strictly increasing?"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "title": "Merge K Sorted Lists",
+  "slug": "merge-k-sorted-lists",
+  "difficulty": "hard",
+  "category": "linked-lists",
+  "company_tags": ["amazon", "google", "meta", "microsoft", "uber", "bloomberg", "apple"],
+  "description": "You are given an array of `k` linked lists `lists`, each linked list is sorted in ascending order.\n\nMerge all the linked lists into one sorted linked list and return it.\n\n**Example 1:**\n```\nInput: lists = [[1,4,5],[1,3,4],[2,6]]\nOutput: [1,1,2,3,4,4,5,6]\nExplanation: The linked lists are:\n  1 -> 4 -> 5\n  1 -> 3 -> 4\n  2 -> 6\nMerging them into one sorted list: 1 -> 1 -> 2 -> 3 -> 4 -> 4 -> 5 -> 6\n```\n\n**Example 2:**\n```\nInput: lists = []\nOutput: []\n```\n\n**Example 3:**\n```\nInput: lists = [[]]\nOutput: []\n```",
+  "examples": [
+    {
+      "input": "lists = [[1,4,5],[1,3,4],[2,6]]",
+      "output": "[1,1,2,3,4,4,5,6]",
+      "explanation": "All three sorted linked lists are merged into a single sorted linked list by repeatedly picking the smallest available node."
+    },
+    {
+      "input": "lists = []",
+      "output": "[]",
+      "explanation": "The input is an empty array of lists, so the result is an empty list."
+    },
+    {
+      "input": "lists = [[]]",
+      "output": "[]",
+      "explanation": "The input contains one empty linked list, so the result is an empty list."
+    }
+  ],
+  "constraints": [
+    "k == lists.length",
+    "0 <= k <= 10^4",
+    "0 <= lists[i].length <= 500",
+    "-10^4 <= lists[i][j] <= 10^4",
+    "lists[i] is sorted in ascending order.",
+    "The sum of lists[i].length will not exceed 10^4."
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def mergeKLists(self, lists: list[ListNode | None]) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction mergeKLists(lists) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode mergeKLists(ListNode[] lists) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "lists = [[1,4,5],[1,3,4],[2,6]]",
+      "expected_output": "[1,1,2,3,4,4,5,6]",
+      "is_hidden": false
+    },
+    {
+      "input": "lists = []",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "lists = [[]]",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "lists = [[1],[2],[3],[4],[5]]",
+      "expected_output": "[1,2,3,4,5]",
+      "is_hidden": true
+    },
+    {
+      "input": "lists = [[-2,-1,0],[0,1,2],[-3,5,10]]",
+      "expected_output": "[-3,-2,-1,0,0,1,2,5,10]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force approach collects all node values into an array, sorts them, and builds a new list — O(N log N) time and O(N) space. A better approach merges lists one by one, but this is O(kN) in the worst case. The optimal solutions are: (1) Min-heap approach — push the head of each list into a min-heap keyed by node value. Pop the smallest, append it to the result, and push its next node into the heap. The heap always contains at most k elements, so each push/pop is O(log k). Total time is O(N log k) where N is the total number of nodes. Space is O(k) for the heap. (2) Divide and conquer — recursively merge pairs of lists, halving the number of lists each round. This takes O(log k) rounds, each processing all N nodes, giving O(N log k) time and O(1) extra space (or O(log k) for recursion stack). Both approaches are optimal and commonly expected in interviews.",
+  "hints": [
+    "A brute-force approach would be to compare the head of every list each time you pick the next node. How could you speed up finding the minimum among k heads?",
+    "Use a min-heap (priority queue) to efficiently track the smallest current node across all k lists. Each insertion and extraction is O(log k).",
+    "Alternatively, think of this like merge sort: pair up the lists and merge each pair, then repeat with the merged results. How many rounds does this take?"
+  ],
+  "optimal_complexity": {
+    "time": "O(N log k)",
+    "space": "O(k)"
+  },
+  "follow_up_questions": [
+    "What are the trade-offs between the min-heap approach and the divide-and-conquer approach? When would you prefer one over the other?",
+    "How would you solve this problem if the lists were stored on disk and couldn't all fit in memory at once?"
+  ]
+}

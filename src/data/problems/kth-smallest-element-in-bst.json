@@ -1,0 +1,72 @@
+{
+  "title": "Kth Smallest Element in a BST",
+  "slug": "kth-smallest-element-in-bst",
+  "difficulty": "medium",
+  "category": "trees",
+  "company_tags": ["amazon", "meta", "google", "uber", "bloomberg", "oracle"],
+  "description": "Given the `root` of a binary search tree, and an integer `k`, return the `kth` smallest value (**1-indexed**) of all the values of the nodes in the tree.\n\n**Example 1:**\n```\n    3\n   / \\\n  1   4\n   \\\n    2\n\nInput: root = [3,1,4,null,2], k = 1\nOutput: 1\n```\n\n**Example 2:**\n```\n        5\n       / \\\n      3   6\n     / \\\n    2   4\n   /\n  1\n\nInput: root = [5,3,6,2,4,null,null,1], k = 3\nOutput: 3\n```",
+  "examples": [
+    {
+      "input": "root = [3,1,4,null,2], k = 1",
+      "output": "1",
+      "explanation": "The sorted values in the BST are [1, 2, 3, 4]. The 1st smallest element is 1."
+    },
+    {
+      "input": "root = [5,3,6,2,4,null,null,1], k = 3",
+      "output": "3",
+      "explanation": "The sorted values in the BST are [1, 2, 3, 4, 5, 6]. The 3rd smallest element is 3."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is n.",
+    "1 <= k <= n <= 10^4",
+    "0 <= Node.val <= 10^4"
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def kthSmallest(self, root: TreeNode | None, k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction kthSmallest(root, k) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int kthSmallest(TreeNode root, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int kthSmallest(TreeNode* root, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [3,1,4,null,2], k = 1",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [5,3,6,2,4,null,null,1], k = 3",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1], k = 1",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [3,1,4,null,2], k = 4",
+      "expected_output": "4",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [5,3,6,2,4,null,null,1], k = 6",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The key insight is that an inorder traversal of a BST visits nodes in ascending sorted order. So the kth smallest element is simply the kth node visited during an inorder traversal. The iterative approach uses a stack: push all left children onto the stack, then pop a node, decrement k, and if k reaches 0 that node's value is the answer. Otherwise, move to the right child and repeat. This is more efficient than collecting all values because you can stop early after visiting exactly k nodes. The time complexity is O(H + k) where H is the tree height — you first descend to the leftmost node (O(H)), then visit k nodes. Space is O(H) for the stack. The recursive approach works similarly but is slightly less clean for early termination.",
+  "hints": [
+    "What property does an inorder traversal of a BST have? How does that help you find the kth smallest element?",
+    "Inorder traversal of a BST visits nodes in ascending order. So the kth node visited is the kth smallest. You don't need to traverse the entire tree — stop as soon as you've visited k nodes.",
+    "Use an iterative inorder traversal with a stack. Push all left children, then pop and decrement k. When k reaches 0, return that node's value. If k > 0, move to the right child and continue."
+  ],
+  "optimal_complexity": {
+    "time": "O(H + k)",
+    "space": "O(H)"
+  },
+  "follow_up_questions": [
+    "If the BST is modified often (insert/delete) and you need to find the kth smallest frequently, how would you optimize? Consider augmenting the tree nodes with subtree size counts.",
+    "How would you find the kth largest element instead? What simple modification to the traversal order would achieve this?"
+  ]
+}

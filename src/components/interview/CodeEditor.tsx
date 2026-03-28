@@ -6,7 +6,7 @@ import type { OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { ChevronDown, Loader2 } from "lucide-react";
 
-const Editor = dynamic(() => import("@monaco-editor/react").then(mod => mod.default), {
+const Editor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center bg-brand-deep">

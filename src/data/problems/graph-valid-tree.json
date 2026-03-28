@@ -1,0 +1,80 @@
+{
+  "title": "Graph Valid Tree",
+  "slug": "graph-valid-tree",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": ["google", "amazon", "meta", "linkedin", "microsoft", "uber"],
+  "description": "You have a graph of `n` nodes labeled from `0` to `n - 1`. You are given an integer `n` and a list of `edges` where `edges[i] = [ai, bi]` indicates that there is an undirected edge between nodes `ai` and `bi` in the graph.\n\nReturn `true` *if the edges of the given graph make up a valid tree, and* `false` *otherwise*.\n\nA valid tree must satisfy two conditions:\n1. The graph is **fully connected** (there is a path between every pair of nodes).\n2. The graph has **no cycles**.\n\n**Example 1:**\n```\nInput: n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]\nOutput: true\nExplanation: The graph forms a valid tree:\n    0\n   /|\\\n  1 2 3\n  |\n  4\nAll nodes are connected and there are no cycles.\n```\n\n**Example 2:**\n```\nInput: n = 5, edges = [[0,1],[1,2],[2,3],[1,3],[1,4]]\nOutput: false\nExplanation: There is a cycle: 1 -> 2 -> 3 -> 1.\nEven though all nodes are connected, the cycle makes it not a valid tree.\n```\n\n**Example 3:**\n```\nInput: n = 4, edges = [[0,1],[2,3]]\nOutput: false\nExplanation: The graph has two disconnected components:\n{0, 1} and {2, 3}. A valid tree must be fully connected.\n```",
+  "examples": [
+    {
+      "input": "n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]",
+      "output": "true",
+      "explanation": "The 5 nodes are all connected through node 0, and there are exactly 4 edges (n-1), forming a valid tree with no cycles."
+    },
+    {
+      "input": "n = 5, edges = [[0,1],[1,2],[2,3],[1,3],[1,4]]",
+      "output": "false",
+      "explanation": "Nodes 1, 2, and 3 form a cycle (1-2-3-1). A tree cannot contain any cycles."
+    },
+    {
+      "input": "n = 4, edges = [[0,1],[2,3]]",
+      "output": "false",
+      "explanation": "The graph is disconnected — nodes {0,1} and {2,3} are in separate components. A tree must be a single connected component."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 2000",
+    "0 <= edges.length <= 5000",
+    "edges[i].length == 2",
+    "0 <= ai, bi < n",
+    "ai != bi",
+    "There are no self-loops or repeated edges."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def validTree(self, n: int, edges: list[list[int]]) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function validTree(n, edges) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean validTree(int n, int[][] edges) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool validTree(int n, vector<vector<int>>& edges) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 5, edges = [[0,1],[1,2],[2,3],[1,3],[1,4]]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 4, edges = [[0,1],[2,3]]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, edges = []",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 6, edges = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A graph is a valid tree if and only if it has exactly n - 1 edges and is fully connected (or equivalently, has n - 1 edges and no cycles). The quickest check is: if the number of edges is not exactly n - 1, return false immediately. Then verify connectivity using either DFS/BFS or Union-Find. With DFS/BFS: build an adjacency list, start from node 0, and traverse all reachable nodes. If the count of visited nodes equals n, the graph is connected and therefore a valid tree (since we already verified n - 1 edges). With Union-Find: initialize n disjoint sets. For each edge, union the two nodes. If they already belong to the same set, a cycle exists — return false. After processing all edges, check that there is exactly one connected component. Union-Find with path compression and union by rank gives nearly O(V + E) amortized time. Both approaches use O(V + E) space for the adjacency list or parent array.",
+  "hints": [
+    "A tree with n nodes always has exactly n - 1 edges. Can you use this property as a quick initial check before doing any graph traversal?",
+    "After confirming the edge count is n - 1, you just need to verify the graph is connected. Use BFS or DFS from any node and check if you can reach all n nodes.",
+    "Alternatively, use Union-Find (Disjoint Set Union). Process each edge: if two nodes are already in the same set, there's a cycle. After all edges, verify there's exactly one component."
+  ],
+  "optimal_complexity": {
+    "time": "O(V + E)",
+    "space": "O(V)"
+  },
+  "follow_up_questions": [
+    "How would you extend this to check if a directed graph forms a valid rooted tree (arborescence)? What additional conditions would you need to verify?",
+    "If edges were added one at a time in a stream, how would you efficiently determine after each edge whether the graph is still a valid tree?"
+  ]
+}

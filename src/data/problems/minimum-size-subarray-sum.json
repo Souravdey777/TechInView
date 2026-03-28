@@ -1,0 +1,77 @@
+{
+  "title": "Minimum Size Subarray Sum",
+  "slug": "minimum-size-subarray-sum",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": ["meta", "google", "amazon", "microsoft", "bloomberg", "goldman-sachs"],
+  "description": "Given an array of positive integers `nums` and a positive integer `target`, return the **minimal length** of a subarray whose sum is greater than or equal to `target`. If there is no such subarray, return `0` instead.\n\nA **subarray** is a contiguous non-empty sequence of elements within an array.\n\n**Example 1:**\n```\nInput: target = 7, nums = [2,3,1,2,4,3]\nOutput: 2\nExplanation: The subarray [4,3] has the minimal length under the problem constraint.\n```\n\n**Example 2:**\n```\nInput: target = 4, nums = [1,4,4]\nOutput: 1\nExplanation: The subarray [4] already meets the target.\n```\n\n**Example 3:**\n```\nInput: target = 11, nums = [1,1,1,1,1,1,1,1]\nOutput: 0\nExplanation: No subarray sums to 11 or more.\n```",
+  "examples": [
+    {
+      "input": "target = 7, nums = [2,3,1,2,4,3]",
+      "output": "2",
+      "explanation": "The subarray [4,3] has sum 7 which is >= target, and its length 2 is the smallest possible."
+    },
+    {
+      "input": "target = 4, nums = [1,4,4]",
+      "output": "1",
+      "explanation": "The single element [4] already meets the target of 4."
+    },
+    {
+      "input": "target = 11, nums = [1,1,1,1,1,1,1,1]",
+      "output": "0",
+      "explanation": "The total sum of the array is 8 which is less than 11, so no valid subarray exists."
+    }
+  ],
+  "constraints": [
+    "1 <= target <= 10^9",
+    "1 <= nums.length <= 10^5",
+    "1 <= nums[i] <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minSubArrayLen(self, target: int, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minSubArrayLen(target, nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minSubArrayLen(int target, int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minSubArrayLen(int target, vector<int>& nums) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "target = 7, nums = [2,3,1,2,4,3]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "target = 4, nums = [1,4,4]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "target = 11, nums = [1,1,1,1,1,1,1,1]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "target = 15, nums = [5,1,3,5,10,7,4,9,2,8]",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "target = 6, nums = [10,2,3]",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force approach tries every subarray in O(n²) time. The optimal solution uses a sliding window (two-pointer) technique. Maintain a left pointer and expand the right pointer one element at a time, adding nums[right] to a running sum. Whenever the running sum becomes >= target, record the window length (right - left + 1) as a candidate answer, then shrink the window from the left by subtracting nums[left] and incrementing left. Keep shrinking as long as the sum remains >= target, updating the minimum length each time. Since all elements are positive, shrinking the window always decreases the sum, which guarantees correctness. Both pointers move at most n times total, so the algorithm runs in O(n) time with O(1) extra space. If no valid window is found after processing the entire array, return 0.",
+  "hints": [
+    "Since all numbers are positive, adding more elements to a subarray always increases the sum. How can you use this monotonic property?",
+    "Use two pointers to represent a sliding window. Expand the right pointer to grow the sum, and shrink the left pointer when the sum meets the target.",
+    "Maintain a running sum with left and right pointers. When sum >= target, update the minimum length and move left forward. When sum < target, move right forward. Both pointers only move forward, giving O(n) total."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "If the array could contain negative numbers, would the sliding window approach still work? What alternative approach would you use?",
+    "Can you solve this in O(n log n) time using binary search on prefix sums? When might that approach be preferred?"
+  ]
+}

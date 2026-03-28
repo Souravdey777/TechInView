@@ -1,0 +1,79 @@
+{
+  "title": "Clone Graph",
+  "slug": "clone-graph",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": ["meta", "google", "amazon", "bloomberg", "uber"],
+  "description": "Given a reference of a node in a **connected** undirected graph, return a [deep copy](https://en.wikipedia.org/wiki/Object_copying#Deep_copy) (clone) of the graph.\n\nEach node in the graph contains a value (`val`) and a list of its neighbors (`neighbors`).\n\n```\nclass Node {\n    public int val;\n    public List<Node> neighbors;\n}\n```\n\n**Test case format:**\n\nFor simplicity, each node's value is the same as the node's index (1-indexed). For example, the first node with `val == 1`, the second node with `val == 2`, and so on. The graph is represented in the test case using an adjacency list.\n\nAn adjacency list is a collection of unordered lists used to represent a finite graph. Each list describes the set of neighbors of a node in the graph.\n\nThe given node will always be the first node with `val = 1`. You must return the copy of the given node as a reference to the cloned graph.\n\n**Example 1:**\n```\nInput: adjList = [[2,4],[1,3],[2,4],[1,3]]\nOutput: [[2,4],[1,3],[2,4],[1,3]]\nExplanation: There are 4 nodes in the graph.\n1st node (val = 1)'s neighbors are 2nd node (val = 2) and 4th node (val = 4).\n2nd node (val = 2)'s neighbors are 1st node (val = 1) and 3rd node (val = 3).\n3rd node (val = 3)'s neighbors are 2nd node (val = 2) and 4th node (val = 4).\n4th node (val = 4)'s neighbors are 1st node (val = 1) and 3rd node (val = 3).\n```\n\n**Example 2:**\n```\nInput: adjList = [[]]\nOutput: [[]]\nExplanation: The graph consists of a single node with val = 1 and no neighbors.\n```\n\n**Example 3:**\n```\nInput: adjList = []\nOutput: []\nExplanation: The graph is empty (no nodes).\n```",
+  "examples": [
+    {
+      "input": "adjList = [[2,4],[1,3],[2,4],[1,3]]",
+      "output": "[[2,4],[1,3],[2,4],[1,3]]",
+      "explanation": "There are 4 nodes forming a cycle: 1-2-3-4-1. Each node is cloned with its neighbors correctly referencing the new cloned nodes, not the originals."
+    },
+    {
+      "input": "adjList = [[]]",
+      "output": "[[]]",
+      "explanation": "The graph has a single node with val = 1 and no neighbors. The clone is a new node with val = 1 and an empty neighbors list."
+    },
+    {
+      "input": "adjList = []",
+      "output": "[]",
+      "explanation": "The graph is empty (null input), so the output is also null/empty."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the graph is in the range [0, 100].",
+    "1 <= Node.val <= 100",
+    "Node.val is unique for each node.",
+    "There are no repeated edges and no self-loops in the graph.",
+    "The graph is connected and all nodes can be visited starting from the given node."
+  ],
+  "starter_code": {
+    "python": "class Node:\n    def __init__(self, val: int = 0, neighbors: list['Node'] | None = None):\n        self.val = val\n        self.neighbors = neighbors if neighbors is not None else []\n\nclass Solution:\n    def cloneGraph(self, node: Node | None) -> Node | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a Node.\n// function Node(val, neighbors) {\n//     this.val = val === undefined ? 0 : val;\n//     this.neighbors = neighbors === undefined ? [] : neighbors;\n// }\n\nfunction cloneGraph(node) {\n    // Write your solution here\n}",
+    "java": "/*\nclass Node {\n    public int val;\n    public List<Node> neighbors;\n    public Node(int val) { this.val = val; this.neighbors = new ArrayList<>(); }\n}\n*/\n\nclass Solution {\n    public Node cloneGraph(Node node) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/*\nclass Node {\npublic:\n    int val;\n    vector<Node*> neighbors;\n    Node(int _val) : val(_val), neighbors(vector<Node*>()) {}\n};\n*/\n\nclass Solution {\npublic:\n    Node* cloneGraph(Node* node) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "adjList = [[2,4],[1,3],[2,4],[1,3]]",
+      "expected_output": "[[2,4],[1,3],[2,4],[1,3]]",
+      "is_hidden": false
+    },
+    {
+      "input": "adjList = [[]]",
+      "expected_output": "[[]]",
+      "is_hidden": false
+    },
+    {
+      "input": "adjList = []",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "adjList = [[2],[1,3],[2]]",
+      "expected_output": "[[2],[1,3],[2]]",
+      "is_hidden": true
+    },
+    {
+      "input": "adjList = [[2,3,4],[1,3],[1,2],[1]]",
+      "expected_output": "[[2,3,4],[1,3],[1,2],[1]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use BFS or DFS with a hash map that maps each original node to its clone. Start by creating a clone of the given node and adding it to the map. Then traverse the graph: for each node, iterate through its neighbors. If a neighbor hasn't been cloned yet, create its clone and add it to the map, then add the cloned neighbor to the current clone's neighbors list. BFS uses a queue to process nodes level by level, while DFS uses recursion or an explicit stack. The hash map serves two purposes: tracking visited nodes to avoid infinite loops in cyclic graphs, and providing O(1) lookup to connect cloned neighbors. Both approaches visit every node and edge exactly once, giving O(V + E) time complexity and O(V) space for the hash map (excluding the output graph itself).",
+  "hints": [
+    "Think about what data structure you need to keep track of nodes you've already cloned. How do you avoid cloning the same node twice in a graph with cycles?",
+    "Use a hash map (dictionary) to map each original node to its clone. When you visit a node, check if it's already in the map before creating a new clone.",
+    "Start BFS/DFS from the given node. For each node you process, iterate through its neighbors. If a neighbor isn't in your hash map, clone it and add it to the map and your traversal queue/stack. Then connect the cloned neighbor to the current clone's neighbors list."
+  ],
+  "optimal_complexity": {
+    "time": "O(V + E)",
+    "space": "O(V)"
+  },
+  "follow_up_questions": [
+    "How would you clone a directed graph that might have disconnected components? What changes to the algorithm would be needed?",
+    "If the graph were extremely large and couldn't fit in memory, how would you approach cloning it using external storage or streaming?"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "Daily Temperatures",
+  "slug": "daily-temperatures",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "bloomberg", "linkedin", "adobe"],
+  "description": "Given an array of integers `temperatures` represents the daily temperatures, return an array `answer` such that `answer[i]` is the **number of days** you have to wait after the `i`th day to get a warmer temperature. If there is no future day for which this is possible, keep `answer[i] == 0` instead.\n\n**Example 1:**\n```\nInput: temperatures = [73,74,75,71,69,72,76,73]\nOutput: [1,1,4,2,1,1,0,0]\nExplanation: For day 0 (73°), the next warmer day is day 1 (74°), so answer[0] = 1.\nFor day 2 (75°), the next warmer day is day 6 (76°), so answer[2] = 4.\nThe last two days have no warmer future day, so they remain 0.\n```\n\n**Example 2:**\n```\nInput: temperatures = [30,40,50,60]\nOutput: [1,1,1,0]\nExplanation: Each day's next warmer temperature is the very next day, except the last day.\n```\n\n**Example 3:**\n```\nInput: temperatures = [30,60,90]\nOutput: [1,1,0]\n```",
+  "examples": [
+    {
+      "input": "temperatures = [73,74,75,71,69,72,76,73]",
+      "output": "[1,1,4,2,1,1,0,0]",
+      "explanation": "For day 0 (73°), the next warmer day is day 1 (74°). For day 2 (75°), the next warmer day is day 6 (76°). The last two days have no warmer future day."
+    },
+    {
+      "input": "temperatures = [30,40,50,60]",
+      "output": "[1,1,1,0]",
+      "explanation": "Each day's next warmer temperature is the very next day, except the last day which has no warmer future day."
+    },
+    {
+      "input": "temperatures = [30,60,90]",
+      "output": "[1,1,0]",
+      "explanation": "Day 0 waits 1 day for 60°, day 1 waits 1 day for 90°, and day 2 has no warmer day ahead."
+    }
+  ],
+  "constraints": [
+    "1 <= temperatures.length <= 10^5",
+    "30 <= temperatures[i] <= 100"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def dailyTemperatures(self, temperatures: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function dailyTemperatures(temperatures) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] dailyTemperatures(int[] temperatures) {\n        // Write your solution here\n        return new int[]{};\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> dailyTemperatures(vector<int>& temperatures) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "temperatures = [73,74,75,71,69,72,76,73]",
+      "expected_output": "[1,1,4,2,1,1,0,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "temperatures = [30,40,50,60]",
+      "expected_output": "[1,1,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "temperatures = [30,60,90]",
+      "expected_output": "[1,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "temperatures = [89,62,70,58,47,47,46,76,100,70]",
+      "expected_output": "[8,1,5,4,3,2,1,1,0,0]",
+      "is_hidden": true
+    },
+    {
+      "input": "temperatures = [55,55,55,55,55]",
+      "expected_output": "[0,0,0,0,0]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force approach checks every future day for each day, resulting in O(n²) time. The optimal solution uses a monotonic decreasing stack that stores indices of days whose answer hasn't been determined yet. Iterate through the temperatures array from left to right. For each day, while the stack is not empty and the current temperature is warmer than the temperature at the index on top of the stack, pop the top index and set its answer to the difference between the current index and the popped index. Then push the current index onto the stack. The stack maintains a decreasing order of temperatures because any day that finds a warmer day gets popped immediately. Days remaining in the stack at the end have no warmer future day and keep their default answer of 0. This processes each index at most twice (once pushed, once popped), giving O(n) time and O(n) space for the stack.",
+  "hints": [
+    "The brute-force approach checks every future day for each position. Can you avoid redundant comparisons by remembering which days are still waiting for a warmer temperature?",
+    "Consider using a stack to keep track of indices of days that haven't found a warmer day yet. What property should the temperatures in the stack maintain?",
+    "Use a monotonic decreasing stack of indices. For each new day, pop all stack entries whose temperature is less than the current day's temperature — the current day is their answer."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you solve this if you needed to find the number of days until a *colder* temperature instead of a warmer one?",
+    "Can you solve this problem using O(1) extra space (excluding the output array) by iterating from right to left?"
+  ]
+}

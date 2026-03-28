@@ -1,0 +1,78 @@
+{
+  "title": "Remove Nth Node From End of List",
+  "slug": "remove-nth-node-from-end",
+  "difficulty": "medium",
+  "category": "linked-lists",
+  "company_tags": ["meta", "amazon", "google", "apple", "microsoft", "bloomberg"],
+  "description": "Given the `head` of a linked list, remove the `n`th node from the end of the list and return its head.\n\n**Example 1:**\n```\nInput: head = [1,2,3,4,5], n = 2\nOutput: [1,2,3,5]\nExplanation: After removing the 2nd node from the end, the list becomes [1,2,3,5].\n```\n\n**Example 2:**\n```\nInput: head = [1], n = 1\nOutput: []\nExplanation: The only node is removed, resulting in an empty list.\n```\n\n**Example 3:**\n```\nInput: head = [1,2], n = 1\nOutput: [1]\nExplanation: After removing the last node, the list becomes [1].\n```",
+  "examples": [
+    {
+      "input": "head = [1,2,3,4,5], n = 2",
+      "output": "[1,2,3,5]",
+      "explanation": "The 2nd node from the end is 4. After removing it, the linked list becomes 1 -> 2 -> 3 -> 5."
+    },
+    {
+      "input": "head = [1], n = 1",
+      "output": "[]",
+      "explanation": "There is only one node in the list and it is removed, resulting in an empty list."
+    },
+    {
+      "input": "head = [1,2], n = 1",
+      "output": "[1]",
+      "explanation": "The 1st node from the end is 2. After removing it, the linked list becomes just [1]."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the list is sz.",
+    "1 <= sz <= 30",
+    "0 <= Node.val <= 100",
+    "1 <= n <= sz"
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def removeNthFromEnd(self, head: ListNode | None, n: int) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction removeNthFromEnd(head, n) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode removeNthFromEnd(ListNode head, int n) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* removeNthFromEnd(ListNode* head, int n) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "head = [1,2,3,4,5], n = 2",
+      "expected_output": "[1,2,3,5]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1], n = 1",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1,2], n = 1",
+      "expected_output": "[1]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1,2,3,4,5], n = 5",
+      "expected_output": "[2,3,4,5]",
+      "is_hidden": true
+    },
+    {
+      "input": "head = [1,2,3], n = 3",
+      "expected_output": "[2,3]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A naive two-pass approach first counts the total length L, then removes the (L - n + 1)th node from the beginning. The optimal one-pass solution uses two pointers with a gap of n between them. Create a dummy node pointing to head to handle edge cases (like removing the head itself). Advance the fast pointer n + 1 steps from the dummy. Then move both fast and slow together until fast reaches null. At that point, slow is right before the node to remove, so set slow.next = slow.next.next. The dummy node trick avoids special-casing when the head needs to be removed. Time complexity is O(n) with a single pass, and space complexity is O(1).",
+  "hints": [
+    "One approach is to first find the length of the list, then calculate which node to remove from the beginning. But can you do it in one pass?",
+    "Use two pointers separated by a gap of n nodes. When the leading pointer reaches the end, the trailing pointer is right before the target node.",
+    "Use a dummy node before head so that even if the head itself needs to be removed, the logic stays the same. Advance the fast pointer n+1 steps from dummy, then move both pointers until fast is null."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Could you do this in one pass? What trade-offs does the one-pass approach have compared to the two-pass approach?",
+    "How would you handle the case where n is larger than the length of the list, even though the constraints guarantee it won't happen?"
+  ]
+}

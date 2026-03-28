@@ -1,0 +1,73 @@
+{
+  "title": "Minimum Window Substring",
+  "slug": "minimum-window-substring",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": ["meta", "amazon", "google", "microsoft", "linkedin", "uber", "bloomberg"],
+  "description": "Given two strings `s` and `t` of lengths `m` and `n` respectively, return the **minimum window substring** of `s` such that every character in `t` (including duplicates) is included in the window. If there is no such substring, return the empty string `\"\"`.\n\nThe testcases will be generated such that the answer is **unique**.\n\n**Example 1:**\n```\nInput: s = \"ADOBECODEBANC\", t = \"ABC\"\nOutput: \"BANC\"\nExplanation: The minimum window substring \"BANC\" includes 'A', 'B', and 'C' from string t.\n```\n\n**Example 2:**\n```\nInput: s = \"a\", t = \"a\"\nOutput: \"a\"\nExplanation: The entire string s is the minimum window.\n```\n\n**Example 3:**\n```\nInput: s = \"a\", t = \"aa\"\nOutput: \"\"\nExplanation: Both 'a's from t must be included in the window. Since s only has one 'a', return empty string.\n```",
+  "examples": [
+    {
+      "input": "s = \"ADOBECODEBANC\", t = \"ABC\"",
+      "output": "\"BANC\"",
+      "explanation": "The minimum window substring \"BANC\" (indices 9-12) contains all characters from t: 'A', 'B', and 'C'."
+    },
+    {
+      "input": "s = \"a\", t = \"a\"",
+      "output": "\"a\"",
+      "explanation": "The entire string s is the smallest window that contains all characters of t."
+    }
+  ],
+  "constraints": [
+    "m == s.length",
+    "n == t.length",
+    "1 <= m, n <= 10^5",
+    "s and t consist of uppercase and lowercase English letters."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minWindow(self, s: str, t: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function minWindow(s, t) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String minWindow(String s, String t) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string minWindow(string s, string t) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"ADOBECODEBANC\", t = \"ABC\"",
+      "expected_output": "\"BANC\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\", t = \"a\"",
+      "expected_output": "\"a\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\", t = \"aa\"",
+      "expected_output": "\"\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"cabwefgewcwaefgcf\", t = \"cae\"",
+      "expected_output": "\"cwae\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"bba\", t = \"ab\"",
+      "expected_output": "\"ba\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use a sliding window with two pointers and two hash maps. First, build a frequency map of all characters in t (need_map). Then use a left and right pointer to define a window over s, maintaining a window_map of character counts within the current window. Track a 'formed' counter that counts how many unique characters in t have their required frequency met in the window. Expand the right pointer to grow the window until all characters are satisfied (formed == required). Then shrink from the left to find the minimum valid window, updating the answer whenever a smaller valid window is found. Each character is visited at most twice (once by right, once by left), giving O(m + n) time. The key optimization is using the 'formed' variable to avoid comparing full maps on every step.",
+  "hints": [
+    "Think about using a sliding window. How can you efficiently check whether your current window contains all required characters from t?",
+    "Use a hash map to count character frequencies in t. Maintain another hash map for the current window. Track how many distinct characters have met their required count.",
+    "Expand the right pointer until all characters are satisfied, then contract the left pointer to minimize the window. Update the result whenever you find a smaller valid window."
+  ],
+  "optimal_complexity": {
+    "time": "O(m + n)",
+    "space": "O(m + n)"
+  },
+  "follow_up_questions": [
+    "Could you find all minimum window substrings if there were multiple windows of the same minimum length?",
+    "How would you adapt this solution if you needed the minimum window containing all characters of t in the same order (as a subsequence)?"
+  ]
+}

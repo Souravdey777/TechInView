@@ -31,6 +31,8 @@ const CATEGORY_LABELS: Record<ProblemCategory, string> = {
   "binary-search": "Binary Search",
   heap: "Heap / PQ",
   backtracking: "Backtracking",
+  "sliding-window": "Sliding Window",
+  trie: "Trie",
 };
 
 function DifficultyBadge({ difficulty }: { difficulty: DifficultyLevel }) {

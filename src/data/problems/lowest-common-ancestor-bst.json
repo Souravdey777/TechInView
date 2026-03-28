@@ -1,0 +1,79 @@
+{
+  "title": "Lowest Common Ancestor of a Binary Search Tree",
+  "slug": "lowest-common-ancestor-bst",
+  "difficulty": "medium",
+  "category": "trees",
+  "company_tags": ["amazon", "meta", "microsoft", "linkedin", "apple"],
+  "description": "Given a binary search tree (BST), find the lowest common ancestor (LCA) node of two given nodes in the BST.\n\nAccording to the definition of LCA on Wikipedia: \"The lowest common ancestor is defined between two nodes `p` and `q` as the lowest node in `T` that has both `p` and `q` as descendants (where we allow **a node to be a descendant of itself**).\"\n\n**Example 1:**\n```\n        6\n       / \\\n      2   8\n     / \\ / \\\n    0  4 7  9\n      / \\\n     3   5\n\nInput: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8\nOutput: 6\nExplanation: The LCA of nodes 2 and 8 is 6.\n```\n\n**Example 2:**\n```\n        6\n       / \\\n      2   8\n     / \\ / \\\n    0  4 7  9\n      / \\\n     3   5\n\nInput: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4\nOutput: 2\nExplanation: The LCA of nodes 2 and 4 is 2, since a node can be a descendant of itself.\n```\n\n**Example 3:**\n```\nInput: root = [2,1], p = 2, q = 1\nOutput: 2\n```",
+  "examples": [
+    {
+      "input": "root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8",
+      "output": "6",
+      "explanation": "The LCA of nodes 2 and 8 is 6. Node 2 is in the left subtree and node 8 is in the right subtree, so the root (6) is their lowest common ancestor."
+    },
+    {
+      "input": "root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4",
+      "output": "2",
+      "explanation": "The LCA of nodes 2 and 4 is 2. Node 4 is a descendant of node 2, and a node can be a descendant of itself according to the LCA definition."
+    },
+    {
+      "input": "root = [2,1], p = 2, q = 1",
+      "output": "2",
+      "explanation": "The root node 2 is the ancestor of node 1, and since a node is its own descendant, the LCA is 2."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [2, 10^5].",
+    "-10^9 <= Node.val <= 10^9",
+    "All Node.val are unique.",
+    "p != q",
+    "p and q will exist in the BST."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def lowestCommonAncestor(self, root: TreeNode | None, p: TreeNode, q: TreeNode) -> TreeNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction lowestCommonAncestor(root, p, q) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [2,1], p = 2, q = 1",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [6,2,8,0,4,7,9,null,null,3,5], p = 3, q = 5",
+      "expected_output": "4",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [6,2,8,0,4,7,9,null,null,3,5], p = 0, q = 9",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Since this is a BST (not a generic binary tree), we can exploit the BST ordering property to find the LCA efficiently without visiting every node. Starting from the root, compare both p and q values against the current node. If both p.val and q.val are less than the current node's value, the LCA must be in the left subtree — move left. If both are greater, the LCA must be in the right subtree — move right. Otherwise, the current node is the split point where p and q diverge into different subtrees (or one of them equals the current node), making it the LCA. The iterative approach uses O(1) space and O(h) time where h is the height of the tree. For a balanced BST this is O(log n), but O(n) in the worst case for a skewed tree.",
+  "hints": [
+    "This is a BST, not a generic binary tree. How can you use the BST ordering property to determine which subtree the LCA is in?",
+    "If both p and q are smaller than the current node, they must both be in the left subtree. If both are larger, they must both be in the right subtree. What happens when they split?",
+    "The LCA is the first node where p and q diverge into different subtrees, or where the current node equals p or q. Iterate from root: go left if both < node, go right if both > node, otherwise return node."
+  ],
+  "optimal_complexity": {
+    "time": "O(h)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would the solution change if this were a generic binary tree instead of a BST? What would the time complexity be?",
+    "If you needed to answer many LCA queries on the same tree, how could you preprocess the tree to answer each query in O(log n) or even O(1) time?"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "title": "Koko Eating Bananas",
+  "slug": "koko-eating-bananas",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": ["google", "amazon", "meta", "uber", "goldman-sachs", "adobe"],
+  "description": "Koko loves to eat bananas. There are `n` piles of bananas, the `i`-th pile has `piles[i]` bananas. The guards have gone and will come back in `h` hours.\n\nKoko can decide her bananas-per-hour eating speed of `k`. Each hour, she chooses some pile of bananas and eats `k` bananas from that pile. If the pile has less than `k` bananas, she eats all of them instead and will not eat any more bananas during this hour.\n\nKoko likes to eat slowly but still wants to finish eating all the bananas before the guards return.\n\nReturn the minimum integer `k` such that she can eat all the bananas within `h` hours.\n\n**Example 1:**\n```\nInput: piles = [3,6,7,11], h = 8\nOutput: 4\nExplanation: At speed k=4, Koko eats [1,2,2,3] hours per pile = 8 hours total.\n```\n\n**Example 2:**\n```\nInput: piles = [30,11,23,4,20], h = 5\nOutput: 30\nExplanation: At speed k=30, Koko eats [1,1,1,1,1] hours per pile = 5 hours total.\n```\n\n**Example 3:**\n```\nInput: piles = [30,11,23,4,20], h = 6\nOutput: 23\nExplanation: At speed k=23, Koko eats [2,1,1,1,1] hours per pile = 6 hours total.\n```",
+  "examples": [
+    {
+      "input": "piles = [3,6,7,11], h = 8",
+      "output": "4",
+      "explanation": "At speed k=4, Koko takes ceil(3/4)+ceil(6/4)+ceil(7/4)+ceil(11/4) = 1+2+2+3 = 8 hours."
+    },
+    {
+      "input": "piles = [30,11,23,4,20], h = 5",
+      "output": "30",
+      "explanation": "At speed k=30, each pile takes 1 hour, totaling 5 hours."
+    },
+    {
+      "input": "piles = [30,11,23,4,20], h = 6",
+      "output": "23",
+      "explanation": "At speed k=23, the hours are ceil(30/23)+ceil(11/23)+ceil(23/23)+ceil(4/23)+ceil(20/23) = 2+1+1+1+1 = 6."
+    }
+  ],
+  "constraints": [
+    "1 <= piles.length <= 10^4",
+    "piles.length <= h <= 10^9",
+    "1 <= piles[i] <= 10^9"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minEatingSpeed(self, piles: list[int], h: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minEatingSpeed(piles, h) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minEatingSpeed(int[] piles, int h) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minEatingSpeed(vector<int>& piles, int h) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "piles = [3,6,7,11], h = 8",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "piles = [30,11,23,4,20], h = 5",
+      "expected_output": "30",
+      "is_hidden": false
+    },
+    {
+      "input": "piles = [30,11,23,4,20], h = 6",
+      "expected_output": "23",
+      "is_hidden": false
+    },
+    {
+      "input": "piles = [1,1,1,1,1,1,1,1,1,1], h = 10",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "piles = [1000000000], h = 2",
+      "expected_output": "500000000",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "This is a classic 'binary search on the answer' problem. The minimum possible speed is 1 and the maximum useful speed is max(piles) (eating the largest pile in one hour). For a given speed k, we can compute the total hours needed by summing ceil(pile / k) for each pile. If total hours <= h, the speed is feasible. We want the minimum feasible speed, so binary search on k in [1, max(piles)]. Set left = 1, right = max(piles). At each step, compute mid and check if mid is a feasible speed. If feasible, try a smaller speed (right = mid). If not feasible, we need a faster speed (left = mid + 1). When left == right, that's the answer. Time complexity is O(n * log(max(piles))) where n is the number of piles, and space is O(1).",
+  "hints": [
+    "If Koko can finish at speed k, she can also finish at any speed greater than k. This monotonic property suggests binary search.",
+    "Binary search on the eating speed k between 1 and max(piles). For each candidate speed, calculate the total hours needed.",
+    "For each pile, the hours needed at speed k is ceil(pile / k), which can be computed as (pile + k - 1) / k using integer arithmetic. Sum these up and compare with h."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * log(max(piles)))",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "What if Koko could eat from multiple piles in a single hour? How would that change the problem?",
+    "How would you handle the case where h is exactly equal to the number of piles? What's the minimum speed in that scenario?"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "title": "Implement Trie (Prefix Tree)",
+  "slug": "implement-trie",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": ["google", "amazon", "microsoft", "meta", "uber", "oracle", "bloomberg"],
+  "description": "A **trie** (pronounced \"try\") or **prefix tree** is a tree data structure used to efficiently store and retrieve keys in a dataset of strings. There are various applications of this data structure, such as autocomplete and spellchecker.\n\nImplement the `Trie` class:\n\n- `Trie()` — Initializes the trie object.\n- `void insert(String word)` — Inserts the string `word` into the trie.\n- `boolean search(String word)` — Returns `true` if the string `word` is in the trie (i.e., was inserted before), and `false` otherwise.\n- `boolean startsWith(String prefix)` — Returns `true` if there is a previously inserted string `word` that has the prefix `prefix`, and `false` otherwise.\n\n**Example 1:**\n```\nInput:\n[\"Trie\", \"insert\", \"search\", \"search\", \"startsWith\", \"insert\", \"search\"]\n[[], [\"apple\"], [\"apple\"], [\"app\"], [\"app\"], [\"app\"], [\"app\"]]\nOutput: [null, null, true, false, true, null, true]\nExplanation:\nTrie trie = new Trie();\ntrie.insert(\"apple\");   // Inserts \"apple\" into the trie\ntrie.search(\"apple\");   // Returns true\ntrie.search(\"app\");     // Returns false (\"app\" was not inserted)\ntrie.startsWith(\"app\"); // Returns true (\"apple\" starts with \"app\")\ntrie.insert(\"app\");     // Inserts \"app\" into the trie\ntrie.search(\"app\");     // Returns true (\"app\" is now in the trie)\n```",
+  "examples": [
+    {
+      "input": "[\"Trie\", \"insert\", \"search\", \"search\", \"startsWith\", \"insert\", \"search\"]\n[[], [\"apple\"], [\"apple\"], [\"app\"], [\"app\"], [\"app\"], [\"app\"]]",
+      "output": "[null, null, true, false, true, null, true]",
+      "explanation": "After inserting \"apple\", searching for \"apple\" returns true but \"app\" returns false since it wasn't inserted. startsWith(\"app\") returns true because \"apple\" has prefix \"app\". After inserting \"app\", searching for \"app\" returns true."
+    }
+  ],
+  "constraints": [
+    "1 <= word.length, prefix.length <= 2000",
+    "word and prefix consist only of lowercase English letters",
+    "At most 3 * 10^4 calls in total will be made to insert, search, and startsWith"
+  ],
+  "starter_code": {
+    "python": "class Trie:\n    def __init__(self) -> None:\n        # Write your solution here\n        pass\n\n    def insert(self, word: str) -> None:\n        # Write your solution here\n        pass\n\n    def search(self, word: str) -> bool:\n        # Write your solution here\n        pass\n\n    def startsWith(self, prefix: str) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "class Trie {\n    constructor() {\n        // Write your solution here\n    }\n\n    insert(word) {\n        // Write your solution here\n    }\n\n    search(word) {\n        // Write your solution here\n    }\n\n    startsWith(prefix) {\n        // Write your solution here\n    }\n}",
+    "java": "class Trie {\n    public Trie() {\n        // Write your solution here\n    }\n\n    public void insert(String word) {\n        // Write your solution here\n    }\n\n    public boolean search(String word) {\n        // Write your solution here\n        return false;\n    }\n\n    public boolean startsWith(String prefix) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Trie {\npublic:\n    Trie() {\n        // Write your solution here\n    }\n\n    void insert(string word) {\n        // Write your solution here\n    }\n\n    bool search(string word) {\n        // Write your solution here\n    }\n\n    bool startsWith(string prefix) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "operations = [\"Trie\",\"insert\",\"search\",\"search\",\"startsWith\",\"insert\",\"search\"], args = [[],[\"apple\"],[\"apple\"],[\"app\"],[\"app\"],[\"app\"],[\"app\"]]",
+      "expected_output": "[null,null,true,false,true,null,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "operations = [\"Trie\",\"insert\",\"search\",\"startsWith\"], args = [[],[\"hello\"],[\"hell\"],[\"hell\"]]",
+      "expected_output": "[null,null,false,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "operations = [\"Trie\",\"insert\",\"insert\",\"search\",\"search\",\"startsWith\"], args = [[],[\"bat\"],[\"ball\"],[\"bat\"],[\"bal\"],[\"ba\"]]",
+      "expected_output": "[null,null,null,true,false,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "operations = [\"Trie\",\"insert\",\"insert\",\"insert\",\"search\",\"startsWith\",\"startsWith\",\"search\"], args = [[],[\"abc\"],[\"abd\"],[\"abcde\"],[\"abcde\"],[\"abc\"],[\"abx\"],[\"ab\"]]",
+      "expected_output": "[null,null,null,null,true,true,false,false]",
+      "is_hidden": true
+    },
+    {
+      "input": "operations = [\"Trie\",\"insert\",\"search\",\"insert\",\"search\",\"search\"], args = [[],[\"a\"],[\"a\"],[\"ab\"],[\"a\"],[\"ab\"]]",
+      "expected_output": "[null,null,true,null,true,true]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A trie is built from nodes where each node contains a map (or fixed-size array of 26 entries for lowercase letters) of children and a boolean flag indicating whether a complete word ends at that node. For insert, traverse from the root character by character, creating new child nodes as needed, and mark the final node as a word end. For search, traverse character by character — if any character is missing from the children, return false; if all characters are found, return true only if the final node is marked as a word end. For startsWith, the logic is identical to search except you return true as soon as all prefix characters are found, regardless of the word-end flag. Each operation takes O(m) time where m is the length of the word or prefix, since you traverse at most m nodes. The total space is O(n * m) in the worst case where n is the number of inserted words and m is the average word length, though shared prefixes reduce actual usage significantly.",
+  "hints": [
+    "Think of each node in the trie as having up to 26 children (one per lowercase letter) and a flag to mark if a word ends there.",
+    "For insert, walk through the word character by character from the root. If a child for the current character doesn't exist, create it. After processing all characters, mark the last node as a word end.",
+    "For search vs startsWith: both traverse the trie the same way. The only difference is that search requires the final node to be marked as a word end, while startsWith just needs all prefix characters to exist."
+  ],
+  "optimal_complexity": {
+    "time": "O(m) per operation, where m is the word/prefix length",
+    "space": "O(n * m) total, where n is the number of words inserted"
+  },
+  "follow_up_questions": [
+    "How would you extend the trie to support a delete operation that removes a previously inserted word?",
+    "How would you implement a wildcard search where '.' matches any single character (like in a regex)?"
+  ]
+}

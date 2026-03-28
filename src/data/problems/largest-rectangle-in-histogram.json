@@ -1,0 +1,76 @@
+{
+  "title": "Largest Rectangle in Histogram",
+  "slug": "largest-rectangle-in-histogram",
+  "difficulty": "hard",
+  "category": "stacks-queues",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "apple", "bloomberg", "adobe", "uber"],
+  "description": "Given an array of integers `heights` representing the histogram's bar height where the width of each bar is `1`, return the area of the **largest rectangle** in the histogram.\n\n**Example 1:**\n```\nInput: heights = [2,1,5,6,2,3]\nOutput: 10\nExplanation: The largest rectangle has area = 5 * 2 = 10,\nformed by heights[2] = 5 and heights[3] = 6.\n  ┌───┐\n  │   │\n  │ ┌─┤\n  │ │ │     ┌───┐\n┌─┤ │ │ ┌───┤   │\n│ │ │ │ │   │   │\n└─┴─┴─┴─┴───┴───┘\n 2  1  5  6  2  3\n```\n\n**Example 2:**\n```\nInput: heights = [2,4]\nOutput: 4\nExplanation: The largest rectangle is formed by the single bar heights[1] = 4 with area = 4 * 1 = 4.\n```\n\n**Example 3:**\n```\nInput: heights = [2,1,2]\nOutput: 3\nExplanation: The largest rectangle spans all three bars with height 1, giving area = 1 * 3 = 3.\n```",
+  "examples": [
+    {
+      "input": "heights = [2,1,5,6,2,3]",
+      "output": "10",
+      "explanation": "The largest rectangle is formed by bars at indices 2 and 3 (heights 5 and 6), giving area = 5 * 2 = 10."
+    },
+    {
+      "input": "heights = [2,4]",
+      "output": "4",
+      "explanation": "The single bar at index 1 with height 4 forms the largest rectangle with area = 4 * 1 = 4."
+    },
+    {
+      "input": "heights = [2,1,2]",
+      "output": "3",
+      "explanation": "The rectangle spanning all three bars with height 1 gives area = 1 * 3 = 3, which is the largest."
+    }
+  ],
+  "constraints": [
+    "1 <= heights.length <= 10^5",
+    "0 <= heights[i] <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def largestRectangleArea(self, heights: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function largestRectangleArea(heights) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int largestRectangleArea(int[] heights) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "heights = [2,1,5,6,2,3]",
+      "expected_output": "10",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [2,4]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [2,1,2]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [1,1,1,1,1,1,1]",
+      "expected_output": "7",
+      "is_hidden": true
+    },
+    {
+      "input": "heights = [6,5,4,3,2,1]",
+      "expected_output": "12",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force approach considers every pair of bars and computes the area of the rectangle formed between them using the minimum height, resulting in O(n²) time. The optimal approach uses a monotonic increasing stack of indices. Iterate through the heights array. For each bar, while the stack is not empty and the current bar's height is less than the height at the top of the stack, pop the top index. The popped bar's height is the limiting height of a rectangle. The width of this rectangle extends from the current index (exclusive) back to the new top of the stack (exclusive) — if the stack is empty after popping, the width extends to the beginning of the array. Calculate the area and update the maximum. After iterating through all bars, process any remaining indices in the stack the same way, using the array length as the right boundary. The key insight is that each bar is pushed and popped at most once, so the total work is O(n). The stack maintains increasing heights, ensuring that when a bar is popped, we know exactly how far left and right it can extend as the shortest bar. Space complexity is O(n) for the stack.",
+  "hints": [
+    "For each bar, the largest rectangle using that bar as the shortest bar extends left and right until a shorter bar is found. How can you efficiently find these boundaries?",
+    "Consider using a stack that maintains bars in increasing order of height. When you encounter a bar shorter than the top of the stack, you've found the right boundary for the top bar.",
+    "Use a monotonic increasing stack of indices. When popping index i due to a shorter bar at index j, the rectangle width is j - stack.top() - 1 (or j if the stack is empty). Don't forget to process remaining stack elements after the loop."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you use this algorithm as a subroutine to solve the 'Maximal Rectangle' problem in a binary matrix?",
+    "Can you solve this problem using a divide-and-conquer approach? What would the time complexity be, and how does it compare to the stack-based solution?"
+  ]
+}

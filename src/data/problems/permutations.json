@@ -1,0 +1,77 @@
+{
+  "title": "Permutations",
+  "slug": "permutations",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": ["meta", "amazon", "google", "microsoft", "bloomberg", "linkedin", "apple"],
+  "description": "Given an array `nums` of distinct integers, return all the possible permutations. You can return the answer in **any order**.\n\n**Example 1:**\n```\nInput: nums = [1,2,3]\nOutput: [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]\nExplanation: There are 3! = 6 permutations of [1,2,3].\n```\n\n**Example 2:**\n```\nInput: nums = [0,1]\nOutput: [[0,1],[1,0]]\nExplanation: There are 2 permutations of [0,1].\n```\n\n**Example 3:**\n```\nInput: nums = [1]\nOutput: [[1]]\nExplanation: A single element has only one permutation.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3]",
+      "output": "[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]",
+      "explanation": "All 6 permutations of [1,2,3] are listed."
+    },
+    {
+      "input": "nums = [0,1]",
+      "output": "[[0,1],[1,0]]",
+      "explanation": "There are 2 permutations of a 2-element array."
+    },
+    {
+      "input": "nums = [1]",
+      "output": "[[1]]",
+      "explanation": "A single element has exactly one permutation."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 6",
+    "-10 <= nums[i] <= 10",
+    "All the integers of nums are unique"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def permute(self, nums: list[int]) -> list[list[int]]:\n        # Write your solution here\n        pass",
+    "javascript": "function permute(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<Integer>> permute(int[] nums) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3]",
+      "expected_output": "[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,1]",
+      "expected_output": "[[0,1],[1,0]]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "[[1]]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3,4]",
+      "expected_output": "[[1,2,3,4],[1,2,4,3],[1,3,2,4],[1,3,4,2],[1,4,2,3],[1,4,3,2],[2,1,3,4],[2,1,4,3],[2,3,1,4],[2,3,4,1],[2,4,1,3],[2,4,3,1],[3,1,2,4],[3,1,4,2],[3,2,1,4],[3,2,4,1],[3,4,1,2],[3,4,2,1],[4,1,2,3],[4,1,3,2],[4,2,1,3],[4,2,3,1],[4,3,1,2],[4,3,2,1]]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [-1,0,1]",
+      "expected_output": "[[-1,0,1],[-1,1,0],[0,-1,1],[0,1,-1],[1,-1,0],[1,0,-1]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The classic approach uses backtracking. We build each permutation one element at a time by choosing from the remaining unused elements. One efficient technique is the swap-based approach: at each recursion level, we swap the current index with every index from the current position to the end, recurse on the next position, then swap back (backtrack). This avoids the need for a visited set or extra data structures. Alternatively, we can maintain a boolean visited array and build a current permutation by iterating through all elements and picking unvisited ones. The swap approach is slightly more space-efficient. At each of the n positions, we have decreasing choices (n, n-1, n-2, ..., 1), giving n! total permutations. Each permutation takes O(n) to copy into the result, so the total time complexity is O(n! * n) and space complexity is O(n!) to store all permutations, plus O(n) recursion depth.",
+  "hints": [
+    "Think about building a permutation position by position. At each position, which elements are still available to place?",
+    "You can use a 'used' boolean array to track which elements have already been placed, or you can swap elements in-place to avoid extra space.",
+    "Backtracking with swaps: at index i, swap nums[i] with each nums[j] where j >= i, recurse on i+1, then swap back. When i equals the array length, you have a complete permutation."
+  ],
+  "optimal_complexity": {
+    "time": "O(n! * n)",
+    "space": "O(n!)"
+  },
+  "follow_up_questions": [
+    "How would you handle duplicate elements in the array (Permutations II) while avoiding duplicate permutations?",
+    "Can you generate the next permutation in lexicographic order in O(n) time without generating all permutations?"
+  ]
+}

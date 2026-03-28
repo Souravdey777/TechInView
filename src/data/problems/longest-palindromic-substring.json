@@ -1,0 +1,71 @@
+{
+  "title": "Longest Palindromic Substring",
+  "slug": "longest-palindromic-substring",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": ["amazon", "microsoft", "google", "meta", "adobe", "oracle"],
+  "description": "Given a string `s`, return the **longest palindromic substring** in `s`.\n\nA **palindrome** is a string that reads the same forward and backward.\n\n**Example 1:**\n```\nInput: s = \"babad\"\nOutput: \"bab\"\nExplanation: \"aba\" is also a valid answer.\n```\n\n**Example 2:**\n```\nInput: s = \"cbbd\"\nOutput: \"bb\"\n```\n\n**Example 3:**\n```\nInput: s = \"a\"\nOutput: \"a\"\n```",
+  "examples": [
+    {
+      "input": "s = \"babad\"",
+      "output": "\"bab\"",
+      "explanation": "\"bab\" is a palindromic substring of length 3. \"aba\" is also a valid answer."
+    },
+    {
+      "input": "s = \"cbbd\"",
+      "output": "\"bb\"",
+      "explanation": "\"bb\" is the longest palindromic substring with length 2."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 1000",
+    "s consist of only digits and English letters."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def longestPalindrome(self, s: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function longestPalindrome(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String longestPalindrome(String s) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"babad\"",
+      "expected_output": "\"bab\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"cbbd\"",
+      "expected_output": "\"bb\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "\"a\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"ac\"",
+      "expected_output": "\"a\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"aacabdkacaa\"",
+      "expected_output": "\"aca\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use the expand-around-center technique. For each index i in the string, treat it as the center of a potential palindrome and expand outward in both directions while characters match. You need to handle both odd-length palindromes (single center at i) and even-length palindromes (center between i and i+1). For each center, expand left and right pointers while s[left] == s[right], tracking the longest palindrome found. There are 2n-1 possible centers (n single characters + n-1 gaps between characters), and each expansion takes O(n) in the worst case, giving O(n^2) time overall with O(1) space since we only track start index and max length. Manacher's algorithm achieves O(n) but is rarely expected in interviews.",
+  "hints": [
+    "A brute force approach checks all substrings — that's O(n^3). Can you do better by thinking about how palindromes are structured symmetrically around a center?",
+    "Try expanding outward from each possible center. Remember that palindromes can have odd length (single center character) or even length (center between two characters).",
+    "For each index i, expand around center for both (i, i) and (i, i+1). Track the longest palindrome found. This gives O(n^2) time with O(1) extra space."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you solve this in O(n) time using Manacher's algorithm? What insight does it use to avoid redundant expansions?",
+    "How would you modify your solution to return all longest palindromic substrings if there are multiple with the same maximum length?"
+  ]
+}

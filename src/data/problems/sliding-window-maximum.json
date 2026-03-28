@@ -1,0 +1,77 @@
+{
+  "title": "Sliding Window Maximum",
+  "slug": "sliding-window-maximum",
+  "difficulty": "hard",
+  "category": "sliding-window",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "bloomberg", "uber", "apple"],
+  "description": "You are given an array of integers `nums` and an integer `k` representing the size of a sliding window. The window moves from the very left of the array to the very right, one position at a time. Return an array of the maximum value in each window position.\n\n**Example 1:**\n```\nInput: nums = [1,3,-1,-3,5,3,6,7], k = 3\nOutput: [3,3,5,5,6,7]\nExplanation:\nWindow position                Max\n---------------               -----\n[1  3  -1] -3  5  3  6  7      3\n 1 [3  -1  -3] 5  3  6  7      3\n 1  3 [-1  -3  5] 3  6  7      5\n 1  3  -1 [-3  5  3] 6  7      5\n 1  3  -1  -3 [5  3  6] 7      6\n 1  3  -1  -3  5 [3  6  7]     7\n```\n\n**Example 2:**\n```\nInput: nums = [1], k = 1\nOutput: [1]\nExplanation: The only window contains the single element 1.\n```\n\n**Example 3:**\n```\nInput: nums = [9,11], k = 2\nOutput: [11]\nExplanation: The single window [9,11] has maximum 11.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,3,-1,-3,5,3,6,7], k = 3",
+      "output": "[3,3,5,5,6,7]",
+      "explanation": "As the window slides from left to right, the maximum in each window of size 3 is [3,3,5,5,6,7]."
+    },
+    {
+      "input": "nums = [1], k = 1",
+      "output": "[1]",
+      "explanation": "The only window contains the single element 1."
+    },
+    {
+      "input": "nums = [9,11], k = 2",
+      "output": "[11]",
+      "explanation": "The single window [9,11] has maximum 11."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-10^4 <= nums[i] <= 10^4",
+    "1 <= k <= nums.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxSlidingWindow(self, nums: list[int], k: int) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function maxSlidingWindow(nums, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] maxSlidingWindow(int[] nums, int k) {\n        // Write your solution here\n        return new int[]{};\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> maxSlidingWindow(vector<int>& nums, int k) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,3,-1,-3,5,3,6,7], k = 3",
+      "expected_output": "[3,3,5,5,6,7]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1], k = 1",
+      "expected_output": "[1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [9,11], k = 2",
+      "expected_output": "[11]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,-2,3,1,5,-1,2], k = 4",
+      "expected_output": "[4,5,5,5]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [7,7,7,7,7], k = 3",
+      "expected_output": "[7,7,7]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A naive approach checks every window by scanning all k elements to find the max, giving O(n*k) time. The optimal solution uses a monotonic decreasing deque (double-ended queue) that stores indices of elements in decreasing order of their values. For each new element: (1) remove indices from the front of the deque if they fall outside the current window, (2) remove indices from the back while the corresponding values are less than or equal to the current element — these can never be the maximum for any future window, (3) add the current index to the back. The front of the deque always holds the index of the maximum element in the current window. Once the window has reached size k (i.e., index >= k-1), record nums[deque.front()] as the answer for that window. Each element is added and removed from the deque at most once, so the total work across all elements is O(n) time with O(k) space for the deque.",
+  "hints": [
+    "A brute-force approach scans each window for the max in O(k) time. Can you maintain a data structure that tracks the window maximum more efficiently as the window slides?",
+    "Consider a deque (double-ended queue) that keeps elements in decreasing order. When a new element enters the window, what elements in the deque can you safely discard?",
+    "Maintain a monotonic decreasing deque of indices. Remove from the back any index whose value is <= the current element. Remove from the front any index outside the window. The front always holds the current window's maximum."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(k)"
+  },
+  "follow_up_questions": [
+    "How would you solve this if you also needed the minimum of each sliding window simultaneously?",
+    "Can you solve this problem using a balanced BST or a max-heap? What would be the time complexity trade-offs?"
+  ]
+}

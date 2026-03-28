@@ -1,0 +1,68 @@
+{
+  "title": "LRU Cache",
+  "slug": "lru-cache",
+  "difficulty": "medium",
+  "category": "linked-lists",
+  "company_tags": ["amazon", "google", "meta", "microsoft", "apple", "bloomberg", "linkedin", "uber", "goldman-sachs"],
+  "description": "Design a data structure that follows the constraints of a **Least Recently Used (LRU)** cache.\n\nImplement the `LRUCache` class:\n\n- `LRUCache(int capacity)` — Initialize the LRU cache with **positive** size `capacity`.\n- `int get(int key)` — Return the value of the `key` if the key exists, otherwise return `-1`.\n- `void put(int key, int value)` — Update the value of the `key` if the key exists. Otherwise, add the `key-value` pair to the cache. If the number of keys exceeds the `capacity` from this operation, **evict** the least recently used key.\n\nThe functions `get` and `put` must each run in **O(1)** average time complexity.\n\n**Example 1:**\n```\nInput:\n[\"LRUCache\", \"put\", \"put\", \"get\", \"put\", \"get\", \"put\", \"get\", \"get\", \"get\"]\n[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]\nOutput:\n[null, null, null, 1, null, -1, null, -1, 3, 4]\n\nExplanation:\nLRUCache cache = new LRUCache(2);\ncache.put(1, 1); // cache is {1=1}\ncache.put(2, 2); // cache is {1=1, 2=2}\ncache.get(1);     // return 1\ncache.put(3, 3); // LRU key was 2, evicts key 2, cache is {1=1, 3=3}\ncache.get(2);     // returns -1 (not found)\ncache.put(4, 4); // LRU key was 1, evicts key 1, cache is {4=4, 3=3}\ncache.get(1);     // return -1 (not found)\ncache.get(3);     // return 3\ncache.get(4);     // return 4\n```",
+  "examples": [
+    {
+      "input": "[\"LRUCache\", \"put\", \"put\", \"get\", \"put\", \"get\", \"put\", \"get\", \"get\", \"get\"]\n[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]",
+      "output": "[null, null, null, 1, null, -1, null, -1, 3, 4]",
+      "explanation": "After put(1,1) and put(2,2), the cache holds {1=1, 2=2}. get(1) returns 1 and makes key 1 most recent. put(3,3) evicts key 2 (least recently used). get(2) returns -1. put(4,4) evicts key 1. get(1) returns -1, get(3) returns 3, get(4) returns 4."
+    }
+  ],
+  "constraints": [
+    "1 <= capacity <= 3000",
+    "0 <= key <= 10^4",
+    "0 <= value <= 10^5",
+    "At most 2 * 10^5 calls will be made to get and put."
+  ],
+  "starter_code": {
+    "python": "class LRUCache:\n    def __init__(self, capacity: int):\n        # Write your solution here\n        pass\n\n    def get(self, key: int) -> int:\n        # Write your solution here\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        # Write your solution here\n        pass",
+    "javascript": "function LRUCache(capacity) {\n    // Write your solution here\n}\n\nLRUCache.prototype.get = function(key) {\n    // Write your solution here\n};\n\nLRUCache.prototype.put = function(key, value) {\n    // Write your solution here\n};",
+    "java": "class LRUCache {\n    public LRUCache(int capacity) {\n        // Write your solution here\n    }\n\n    public int get(int key) {\n        // Write your solution here\n        return -1;\n    }\n\n    public void put(int key, int value) {\n        // Write your solution here\n    }\n}",
+    "cpp": "class LRUCache {\npublic:\n    LRUCache(int capacity) {\n        // Write your solution here\n    }\n\n    int get(int key) {\n        // Write your solution here\n        return -1;\n    }\n\n    void put(int key, int value) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"LRUCache\", \"put\", \"put\", \"get\", \"put\", \"get\", \"put\", \"get\", \"get\", \"get\"]\n[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]",
+      "expected_output": "[null, null, null, 1, null, -1, null, -1, 3, 4]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"LRUCache\", \"put\", \"get\"]\n[[1], [1, 42], [1]]",
+      "expected_output": "[null, null, 42]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"LRUCache\", \"put\", \"put\", \"get\", \"get\"]\n[[2], [1, 10], [2, 20], [1], [2]]",
+      "expected_output": "[null, null, null, 10, 20]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"LRUCache\", \"put\", \"put\", \"put\", \"get\", \"get\"]\n[[2], [1, 1], [2, 2], [3, 3], [1], [3]]",
+      "expected_output": "[null, null, null, null, -1, 3]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"LRUCache\", \"put\", \"put\", \"get\", \"put\", \"put\", \"get\"]\n[[2], [2, 1], [2, 2], [2], [1, 1], [4, 1], [2]]",
+      "expected_output": "[null, null, null, 2, null, null, -1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The key insight is that we need O(1) access by key (hash map) and O(1) insertion/removal of the least recently used item (doubly linked list). Combine both: maintain a hash map from key to doubly-linked-list node, and a doubly linked list ordered by recency. The most recently used node is at the head, and the least recently used is at the tail. For get(key): look up the node in the hash map, move it to the head of the list, and return its value. For put(key, value): if the key exists, update its value and move it to the head. If it doesn't exist, create a new node, add it to the head, and insert it into the hash map. If the cache exceeds capacity, remove the tail node from both the list and the hash map. Using dummy head and tail sentinel nodes simplifies edge cases. Both operations are O(1) time, and the space complexity is O(capacity).",
+  "hints": [
+    "You need two things: fast lookup by key and fast identification of the least recently used item. What data structures provide O(1) for each?",
+    "A hash map gives O(1) lookup. A doubly linked list lets you add/remove nodes in O(1) if you have a reference to the node. How can you combine them?",
+    "Store key-to-node mappings in a hash map. Keep a doubly linked list ordered by recency. On access, move the node to the front. On eviction, remove from the back. Use dummy head/tail sentinels to simplify edge cases."
+  ],
+  "optimal_complexity": {
+    "time": "O(1)",
+    "space": "O(capacity)"
+  },
+  "follow_up_questions": [
+    "How would you modify this design to support an LRU cache with a time-to-live (TTL) for each entry?",
+    "How would you make this LRU cache thread-safe for concurrent access in a multi-threaded environment?"
+  ]
+}

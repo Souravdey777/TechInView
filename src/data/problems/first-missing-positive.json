@@ -1,0 +1,76 @@
+{
+  "title": "First Missing Positive",
+  "slug": "first-missing-positive",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": ["google", "amazon", "microsoft", "meta", "apple", "uber", "oracle"],
+  "description": "Given an unsorted integer array `nums`, return the **smallest missing positive integer**.\n\nYou must implement an algorithm that runs in **O(n)** time and uses **O(1)** auxiliary space.\n\n**Example 1:**\n```\nInput: nums = [1,2,0]\nOutput: 3\nExplanation: The numbers in the range [1,2] are all present, so the smallest missing positive is 3.\n```\n\n**Example 2:**\n```\nInput: nums = [3,4,-1,1]\nOutput: 2\nExplanation: 1 is present but 2 is missing, so the answer is 2.\n```\n\n**Example 3:**\n```\nInput: nums = [7,8,9,11,12]\nOutput: 1\nExplanation: The smallest positive integer 1 is missing.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,0]",
+      "output": "3",
+      "explanation": "1 and 2 are present. The smallest missing positive is 3."
+    },
+    {
+      "input": "nums = [3,4,-1,1]",
+      "output": "2",
+      "explanation": "1 is present but 2 is not, so the answer is 2."
+    },
+    {
+      "input": "nums = [7,8,9,11,12]",
+      "output": "1",
+      "explanation": "1 is not in the array, so it is the smallest missing positive."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-2^31 <= nums[i] <= 2^31 - 1"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def firstMissingPositive(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function firstMissingPositive(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int firstMissingPositive(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,0]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,4,-1,1]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7,8,9,11,12]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,2,3,4,5,6,7,8,9,10]",
+      "expected_output": "11",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The answer must lie in the range [1, n+1] where n is the array length, because at most n distinct positive integers can be present. The key insight is to use the array itself as a hash map by placing each value v in the range [1, n] at index v-1. Iterate through the array and for each element, if it is a positive integer in [1, n] and not already in its correct position, swap it to its target index. Use a while loop (not if) for each position to handle chains of misplaced elements. After this cyclic sort pass, scan the array: the first index i where nums[i] != i+1 gives the answer i+1. If all positions are correct, the answer is n+1. Each element is swapped at most once to its final position, so the total work across all swaps is O(n). The algorithm modifies the input array in-place, using O(1) auxiliary space.",
+  "hints": [
+    "The answer is always in the range [1, n+1] where n is the array length. Why? Because even if the array contained all integers from 1 to n, the answer would be n+1.",
+    "Can you use the array itself as a hash table? Think about what it would mean if every value v in [1, n] were placed at index v-1.",
+    "Perform a cyclic sort: for each index, repeatedly swap nums[i] to its correct position nums[i]-1 until the current element is out of range or already in place. Then scan for the first index where nums[i] != i+1."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve this if you were not allowed to modify the input array, but still needed O(n) time?",
+    "Can you extend this approach to find the first k missing positive integers efficiently?"
+  ]
+}

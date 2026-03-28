@@ -1,0 +1,76 @@
+{
+  "title": "Kth Largest Element in an Array",
+  "slug": "kth-largest-element",
+  "difficulty": "medium",
+  "category": "heap",
+  "company_tags": ["meta", "amazon", "google", "microsoft", "apple", "linkedin", "uber", "bloomberg"],
+  "description": "Given an integer array `nums` and an integer `k`, return the **kth largest** element in the array.\n\nNote that it is the kth largest element in the sorted order, not the kth distinct element.\n\nCan you solve it without sorting?\n\n**Example 1:**\n```\nInput: nums = [3,2,1,5,6,4], k = 2\nOutput: 5\nExplanation: The sorted array is [1,2,3,4,5,6]. The 2nd largest element is 5.\n```\n\n**Example 2:**\n```\nInput: nums = [3,2,3,1,2,4,5,5,6], k = 4\nOutput: 4\nExplanation: The sorted array is [1,2,2,3,3,4,5,5,6]. The 4th largest element is 4.\n```",
+  "examples": [
+    {
+      "input": "nums = [3,2,1,5,6,4], k = 2",
+      "output": "5",
+      "explanation": "The sorted array is [1,2,3,4,5,6]. The 2nd largest element is 5."
+    },
+    {
+      "input": "nums = [3,2,3,1,2,4,5,5,6], k = 4",
+      "output": "4",
+      "explanation": "The sorted array is [1,2,2,3,3,4,5,5,6]. The 4th largest element is 4."
+    },
+    {
+      "input": "nums = [1], k = 1",
+      "output": "1",
+      "explanation": "There is only one element, so the 1st largest is 1."
+    }
+  ],
+  "constraints": [
+    "1 <= k <= nums.length <= 10^5",
+    "-10^4 <= nums[i] <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findKthLargest(self, nums: list[int], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findKthLargest(nums, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int findKthLargest(int[] nums, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findKthLargest(vector<int>& nums, int k) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [3,2,1,5,6,4], k = 2",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,2,3,1,2,4,5,5,6], k = 4",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1], k = 1",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7,6,5,4,3,2,1], k = 5",
+      "expected_output": "3",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [2,2,2,2,2], k = 3",
+      "expected_output": "2",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "There are multiple approaches to this problem. The simplest is sorting in O(n log n), but we can do better. A min-heap of size k maintains the k largest elements seen so far — iterate through the array, push each element onto the heap, and if the heap size exceeds k, pop the minimum. After processing all elements, the heap's top is the kth largest. This runs in O(n log k) time and O(k) space. The optimal average-case approach is Quickselect, a partition-based algorithm similar to Quicksort. Pick a random pivot, partition the array so elements greater than the pivot are on the left and smaller on the right. If the pivot lands at index k-1, we found our answer. Otherwise, recurse into the appropriate half. This gives O(n) average time and O(1) space, though worst case is O(n²) without randomization.",
+  "hints": [
+    "Think about what happens if you sort the array — the answer would be at index n - k. Can you find that element without fully sorting?",
+    "Consider using a min-heap of size k. As you iterate through the array, what invariant does the heap maintain?",
+    "For an O(n) average solution, look into the Quickselect algorithm. It's like Quicksort but only recurses into one partition — the one containing the kth largest element."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you guarantee O(n) worst-case time complexity? Look into the Median of Medians algorithm.",
+    "If the array were a continuous stream of numbers, how would you efficiently find the kth largest at any point?"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "Reorganize String",
+  "slug": "reorganize-string",
+  "difficulty": "medium",
+  "category": "heap",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "bloomberg", "apple", "uber"],
+  "description": "Given a string `s`, rearrange the characters of `s` so that any two adjacent characters are **not the same**.\n\nReturn any valid rearrangement of `s`, or return `\"\"` if not possible.\n\n**Example 1:**\n```\nInput: s = \"aab\"\nOutput: \"aba\"\nExplanation: We can rearrange \"aab\" to \"aba\" where no two adjacent characters are the same.\n```\n\n**Example 2:**\n```\nInput: s = \"aaab\"\nOutput: \"\"\nExplanation: It is not possible to rearrange \"aaab\" so that no two adjacent characters are the same.\n```",
+  "examples": [
+    {
+      "input": "s = \"aab\"",
+      "output": "\"aba\"",
+      "explanation": "We can rearrange \"aab\" to \"aba\" where no two adjacent characters are the same."
+    },
+    {
+      "input": "s = \"aaab\"",
+      "output": "\"\"",
+      "explanation": "It is not possible to rearrange the string so that no two adjacent characters are the same."
+    },
+    {
+      "input": "s = \"aabb\"",
+      "output": "\"abab\"",
+      "explanation": "We can alternate the characters: \"abab\" or \"baba\" are both valid."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 500",
+    "s consists of lowercase English letters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def reorganizeString(self, s: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function reorganizeString(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String reorganizeString(String s) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string reorganizeString(string s) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"aab\"",
+      "expected_output": "\"aba\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aaab\"",
+      "expected_output": "\"\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aabb\"",
+      "expected_output": "\"abab\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aaabbbccc\"",
+      "expected_output": "\"abcabcabc\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "\"a\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "First, check if a valid rearrangement is possible: if any character's frequency exceeds (n + 1) / 2 where n is the string length, return empty string. The greedy approach uses a max-heap ordered by character frequency. At each step, pop the character with the highest remaining frequency and append it to the result. To avoid placing the same character adjacently, hold back the previously used character and only re-insert it into the heap after placing a different character. Specifically, pop the top character, append it, decrement its count, then push the previously held-back character (if its count > 0) back into the heap. If the heap is empty but we still have a held-back character with remaining count, it means we cannot form a valid string. Since there are at most 26 distinct characters, each heap operation is O(log 26) = O(1), making the overall time complexity O(n) and space O(1) for the 26-character frequency array and heap.",
+  "hints": [
+    "When is it impossible to rearrange the string? Think about the maximum frequency any single character can have relative to the string length.",
+    "Greedily place the most frequent character first. What data structure lets you always pick the character with the highest remaining count?",
+    "Use a max-heap and alternate characters. After placing a character, hold it back for one round before reinserting it into the heap to prevent adjacent duplicates."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you modify this solution if the constraint was that the same character must be at least k positions apart instead of just not adjacent?",
+    "Can you solve this problem using an even-odd index placement strategy instead of a heap? What are the trade-offs?"
+  ]
+}

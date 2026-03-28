@@ -9,6 +9,7 @@ type StartInterviewBody = {
   category?: string;
   language: string;
   maxDurationSeconds?: number;
+  problemSlug?: string;
 };
 
 export async function POST(req: NextRequest) {
@@ -29,6 +30,7 @@ export async function POST(req: NextRequest) {
     const {
       getProfile,
       getRandomProblem,
+      getProblemBySlug,
       createInterview,
       decrementCredits,
       updateProfile,
@@ -57,7 +59,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const problem = await getRandomProblem(difficulty, category);
+    let problem;
+
+    if (body.problemSlug) {
+      problem = await getProblemBySlug(body.problemSlug);
+    }
+
+    if (!problem) {
+      problem = await getRandomProblem(difficulty, category);
+    }
 
     if (!problem) {
       return NextResponse.json(

@@ -1,0 +1,78 @@
+{
+  "title": "Combination Sum",
+  "slug": "combination-sum",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": ["amazon", "meta", "google", "microsoft", "bloomberg", "adobe", "uber"],
+  "description": "Given an array of **distinct** integers `candidates` and a target integer `target`, return a list of all **unique combinations** of `candidates` where the chosen numbers sum to `target`. You may return the combinations in **any order**.\n\nThe **same** number may be chosen from `candidates` an **unlimited number of times**. Two combinations are unique if the frequency of at least one of the chosen numbers is different.\n\nThe test cases are generated such that the number of unique combinations that sum up to `target` is less than `150` combinations for the given input.\n\n**Example 1:**\n```\nInput: candidates = [2,3,6,7], target = 7\nOutput: [[2,2,3],[7]]\nExplanation:\n2 and 3 are candidates, and 2 + 2 + 3 = 7. Note that 2 can be used multiple times.\n7 is a candidate, and 7 = 7.\nThese are the only two combinations.\n```\n\n**Example 2:**\n```\nInput: candidates = [2,3,5], target = 8\nOutput: [[2,2,2,2],[2,3,3],[3,5]]\nExplanation: 2, 3, and 5 are candidates. All combinations that sum to 8 are listed.\n```\n\n**Example 3:**\n```\nInput: candidates = [2], target = 1\nOutput: []\nExplanation: No combination of 2s can sum to 1.\n```",
+  "examples": [
+    {
+      "input": "candidates = [2,3,6,7], target = 7",
+      "output": "[[2,2,3],[7]]",
+      "explanation": "2 + 2 + 3 = 7 and 7 = 7 are the only two combinations that sum to the target."
+    },
+    {
+      "input": "candidates = [2,3,5], target = 8",
+      "output": "[[2,2,2,2],[2,3,3],[3,5]]",
+      "explanation": "All three unique combinations that sum to 8 using the given candidates."
+    },
+    {
+      "input": "candidates = [2], target = 1",
+      "output": "[]",
+      "explanation": "No combination of 2s can produce a sum of 1."
+    }
+  ],
+  "constraints": [
+    "1 <= candidates.length <= 30",
+    "2 <= candidates[i] <= 40",
+    "All elements of candidates are distinct",
+    "1 <= target <= 40"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def combinationSum(self, candidates: list[int], target: int) -> list[list[int]]:\n        # Write your solution here\n        pass",
+    "javascript": "function combinationSum(candidates, target) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<Integer>> combinationSum(int[] candidates, int target) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "candidates = [2,3,6,7], target = 7",
+      "expected_output": "[[2,2,3],[7]]",
+      "is_hidden": false
+    },
+    {
+      "input": "candidates = [2,3,5], target = 8",
+      "expected_output": "[[2,2,2,2],[2,3,3],[3,5]]",
+      "is_hidden": false
+    },
+    {
+      "input": "candidates = [2], target = 1",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "candidates = [1,2], target = 4",
+      "expected_output": "[[1,1,1,1],[1,1,2],[2,2]]",
+      "is_hidden": true
+    },
+    {
+      "input": "candidates = [3,5,8], target = 11",
+      "expected_output": "[[3,3,5],[3,8]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "This problem is solved with backtracking and pruning. We explore combinations by recursively choosing candidates and subtracting from the remaining target. The key insight to avoid duplicate combinations is to only consider candidates from the current index onward (not from the beginning), which ensures combinations like [2,3] and [3,2] aren't both generated. Since the same number can be reused, when we pick a candidate at index i, we recurse with the same index i (not i+1). If the remaining target becomes 0, we've found a valid combination. If it goes negative, we prune that branch. Sorting the candidates array first enables an additional optimization: if the current candidate exceeds the remaining target, we can break out of the loop early since all subsequent candidates will be even larger. The time complexity is O(n^(T/M)) where T is the target and M is the minimum candidate value, representing the maximum depth of the recursion tree. Space complexity is O(T/M) for the recursion stack depth.",
+  "hints": [
+    "Think recursively: at each step, you choose a candidate and subtract it from the target. When the target reaches 0, you've found a valid combination.",
+    "To avoid duplicate combinations like [2,3] and [3,2], only consider candidates starting from the current index onward. Since reuse is allowed, you can pick the same index again.",
+    "Sort the candidates first. If the current candidate is greater than the remaining target, you can skip all remaining candidates (they're even larger) — this is the pruning step."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^(T/M))",
+    "space": "O(T/M)"
+  },
+  "follow_up_questions": [
+    "How would you modify the solution if each candidate could only be used once (Combination Sum II)?",
+    "What if the candidates array could contain duplicates and you needed to avoid duplicate combinations in the output?"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "title": "String to Integer (atoi)",
+  "slug": "string-to-integer-atoi",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": ["amazon", "microsoft", "apple", "google", "meta", "bloomberg", "goldman-sachs"],
+  "description": "Implement the `myAtoi(string s)` function, which converts a string to a 32-bit signed integer.\n\nThe algorithm for `myAtoi(string s)` is as follows:\n\n1. **Whitespace**: Ignore any leading whitespace (`\" \"`).\n2. **Signedness**: Determine the sign by checking if the next character is `'-'` or `'+'`, assuming positivity if neither present.\n3. **Conversion**: Read the integer by skipping leading zeros and stopping at the first non-digit character or at the end of the string.\n4. **Rounding**: If the integer is out of the 32-bit signed integer range `[-2^31, 2^31 - 1]`, clamp the integer to remain in the range.\n\nReturn the integer as the final result.\n\n**Example 1:**\n```\nInput: s = \"42\"\nOutput: 42\nExplanation: The underlined characters are what is read in and the caret is the current reader position.\nStep 1: \"42\" (no characters read because there is no leading whitespace)\nStep 2: \"42\" (no characters read because there is neither a '-' nor '+')\nStep 3: \"42\" (\"42\" is read in)\n```\n\n**Example 2:**\n```\nInput: s = \"   -042\"\nOutput: -42\nExplanation:\nStep 1: \"   -042\" (leading whitespace is read and ignored)\nStep 2: \"   -042\" ('-' is read, so the result should be negative)\nStep 3: \"   -042\" (\"042\" is read in, leading zeros ignored: 42)\n```\n\n**Example 3:**\n```\nInput: s = \"1337c0d3\"\nOutput: 1337\nExplanation: Conversion stops at 'c' which is not a digit.\n```\n\n**Example 4:**\n```\nInput: s = \"0-1\"\nOutput: 0\nExplanation: '0' is read, then '-' stops conversion.\n```\n\n**Example 5:**\n```\nInput: s = \"words and 987\"\nOutput: 0\nExplanation: The first non-whitespace character is 'w', which is not a digit or '+'/'-'. Conversion cannot be performed.\n```",
+  "examples": [
+    {
+      "input": "s = \"   -042\"",
+      "output": "-42",
+      "explanation": "Leading whitespace is skipped, '-' sets the sign to negative, \"042\" is read as 42, giving -42."
+    },
+    {
+      "input": "s = \"1337c0d3\"",
+      "output": "1337",
+      "explanation": "Digits \"1337\" are read. Conversion stops at 'c' which is not a digit."
+    }
+  ],
+  "constraints": [
+    "0 <= s.length <= 200",
+    "s consists of English letters (lower-case and upper-case), digits (0-9), ' ', '+', '-', and '.'."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def myAtoi(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function myAtoi(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int myAtoi(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int myAtoi(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"42\"",
+      "expected_output": "42",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"   -042\"",
+      "expected_output": "-42",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"1337c0d3\"",
+      "expected_output": "1337",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"words and 987\"",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"-91283472332\"",
+      "expected_output": "-2147483648",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Process the string in a single linear pass with clear state handling. First, skip all leading whitespace characters. Then check for an optional '+' or '-' sign to determine the sign of the result. Next, iterate through consecutive digit characters, building the number by multiplying the running result by 10 and adding the current digit. The critical detail is overflow handling: before each multiplication, check whether the current result would exceed INT_MAX (2^31 - 1 = 2147483647) after the operation. If result > INT_MAX/10, or result == INT_MAX/10 and the current digit > 7, clamp to INT_MAX or INT_MIN based on the sign. Stop immediately when a non-digit character is encountered. This approach runs in O(n) time with O(1) space, processing each character at most once.",
+  "hints": [
+    "Break the problem into clear steps: skip whitespace, handle sign, read digits, handle overflow. Tackle each step independently.",
+    "For overflow detection, check before you multiply: if the current number is greater than INT_MAX / 10, or equal to INT_MAX / 10 and the next digit is greater than 7, you need to clamp.",
+    "Use a single index variable to walk through the string. Process whitespace, then sign, then digits sequentially — stop at the first non-digit character during the digit phase."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you extend this to handle floating-point numbers (e.g., \"3.14\" or \"-0.5e10\")?",
+    "Could you implement this using a finite state machine? What states and transitions would you define?"
+  ]
+}

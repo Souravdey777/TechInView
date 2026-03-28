@@ -1,0 +1,76 @@
+{
+  "title": "Maximum Subarray",
+  "slug": "maximum-subarray",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "bloomberg", "linkedin", "apple"],
+  "description": "Given an integer array `nums`, find the subarray with the largest sum, and return its sum.\n\nA **subarray** is a contiguous non-empty sequence of elements within an array.\n\n**Example 1:**\n```\nInput: nums = [-2,1,-3,4,-1,2,1,-5,4]\nOutput: 6\nExplanation: The subarray [4,-1,2,1] has the largest sum 6.\n```\n\n**Example 2:**\n```\nInput: nums = [1]\nOutput: 1\nExplanation: The subarray [1] has the largest sum 1.\n```\n\n**Example 3:**\n```\nInput: nums = [5,4,-1,7,8]\nOutput: 23\nExplanation: The subarray [5,4,-1,7,8] has the largest sum 23.\n```",
+  "examples": [
+    {
+      "input": "nums = [-2,1,-3,4,-1,2,1,-5,4]",
+      "output": "6",
+      "explanation": "The subarray [4,-1,2,1] has the largest sum 6."
+    },
+    {
+      "input": "nums = [1]",
+      "output": "1",
+      "explanation": "The subarray [1] has the largest sum 1."
+    },
+    {
+      "input": "nums = [5,4,-1,7,8]",
+      "output": "23",
+      "explanation": "The subarray [5,4,-1,7,8] has the largest sum 23."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-10^4 <= nums[i] <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxSubArray(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxSubArray(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxSubArray(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxSubArray(vector<int>& nums) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [-2,1,-3,4,-1,2,1,-5,4]",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,4,-1,7,8]",
+      "expected_output": "23",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-1,-2,-3,-4]",
+      "expected_output": "-1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,2,-1,3,-2,4,-3,5]",
+      "expected_output": "12",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force approach checks every possible subarray in O(n²) or O(n³) time, which is too slow for large inputs. The optimal solution uses Kadane's algorithm: maintain two variables — currentSum (the maximum subarray sum ending at the current position) and maxSum (the global maximum seen so far). For each element, decide whether to extend the previous subarray or start a new one by computing currentSum = max(nums[i], currentSum + nums[i]). Then update maxSum = max(maxSum, currentSum). The intuition is that if the running sum becomes negative, it's better to discard it and start fresh from the current element, because a negative prefix can only decrease the sum of any future subarray. This greedy approach processes each element exactly once, giving O(n) time and O(1) space.",
+  "hints": [
+    "Think about what happens when you're building a running sum and it drops below zero. Is it ever worth keeping a negative running sum?",
+    "At each position, you have two choices: either extend the subarray ending at the previous position, or start a new subarray at the current element. Which choice gives a larger sum?",
+    "Maintain a running sum (currentSum) and a global maximum (maxSum). Set currentSum = max(nums[i], currentSum + nums[i]) and update maxSum accordingly at each step."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you solve this using divide and conquer in O(n log n) time? How would you combine results from the left and right halves?",
+    "How would you modify your solution to return the actual subarray (start and end indices) instead of just the sum?"
+  ]
+}

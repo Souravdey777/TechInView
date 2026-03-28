@@ -1,0 +1,70 @@
+{
+  "title": "Unique Paths",
+  "slug": "unique-paths",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "bloomberg", "apple"],
+  "description": "There is a robot on an `m x n` grid. The robot is initially located at the **top-left corner** (i.e., `grid[0][0]`). The robot tries to move to the **bottom-right corner** (i.e., `grid[m - 1][n - 1]`). The robot can only move either **down** or **right** at any point in time.\n\nGiven the two integers `m` and `n`, return the number of possible **unique paths** that the robot can take to reach the bottom-right corner.\n\n**Example 1:**\n```\nInput: m = 3, n = 7\nOutput: 28\nExplanation: From the top-left corner, there are a total of 28 unique paths to reach the bottom-right corner.\n```\n\n**Example 2:**\n```\nInput: m = 3, n = 2\nOutput: 3\nExplanation: From the top-left corner, there are a total of 3 ways to reach the bottom-right corner:\n1. Right -> Down -> Down\n2. Down -> Down -> Right\n3. Down -> Right -> Down\n```\n\n**Example 3:**\n```\nInput: m = 1, n = 1\nOutput: 1\nExplanation: The robot is already at the destination.\n```",
+  "examples": [
+    {
+      "input": "m = 3, n = 7",
+      "output": "28",
+      "explanation": "The robot must make exactly 2 moves down and 6 moves right (in any order), giving C(8,2) = 28 unique paths."
+    },
+    {
+      "input": "m = 3, n = 2",
+      "output": "3",
+      "explanation": "Three paths: RDD, DRD, DDR (where R = right, D = down)."
+    }
+  ],
+  "constraints": [
+    "1 <= m, n <= 100"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def uniquePaths(self, m: int, n: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function uniquePaths(m, n) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int uniquePaths(int m, int n) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "m = 3, n = 7",
+      "expected_output": "28",
+      "is_hidden": false
+    },
+    {
+      "input": "m = 3, n = 2",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "m = 1, n = 1",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "m = 7, n = 3",
+      "expected_output": "28",
+      "is_hidden": true
+    },
+    {
+      "input": "m = 10, n = 10",
+      "expected_output": "48620",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use dynamic programming. Create a 2D dp table where dp[i][j] represents the number of unique paths to reach cell (i, j). The first row and first column are all 1s since there's only one way to reach any cell in the top row (all right moves) or left column (all down moves). For every other cell, dp[i][j] = dp[i-1][j] + dp[i][j-1] because the robot can only arrive from above or from the left. The answer is dp[m-1][n-1]. Space optimization: since each row only depends on the current and previous row, you can use a 1D array of size n. Initialize it to all 1s, then for each row from 1 to m-1, update left to right: dp[j] += dp[j-1]. This reduces space from O(m*n) to O(n). Alternatively, this is a combinatorics problem: the robot makes exactly (m-1) down moves and (n-1) right moves, so the answer is C(m+n-2, m-1).",
+  "hints": [
+    "How many ways can you reach a cell (i, j)? The robot can only come from the cell above (i-1, j) or the cell to the left (i, j-1).",
+    "Build a 2D table where dp[i][j] = dp[i-1][j] + dp[i][j-1]. The entire first row and first column should be 1. The answer is dp[m-1][n-1].",
+    "You can optimize space to O(n) by using a single row array. Process row by row: for each cell, add the value from the cell to its left. Alternatively, use the combinatorial formula C(m+n-2, m-1)."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "What if some cells in the grid are obstacles that the robot cannot pass through? How would you modify your solution?",
+    "Can you solve this in O(min(m, n)) time using the combinatorial formula C(m+n-2, m-1)?"
+  ]
+}

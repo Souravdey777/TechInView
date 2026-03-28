@@ -1,0 +1,72 @@
+{
+  "title": "Longest Common Prefix",
+  "slug": "longest-common-prefix",
+  "difficulty": "easy",
+  "category": "strings",
+  "company_tags": ["google", "amazon", "apple", "adobe", "microsoft"],
+  "description": "Write a function to find the **longest common prefix** string amongst an array of strings.\n\nIf there is no common prefix, return an empty string `\"\"`.\n\n**Example 1:**\n```\nInput: strs = [\"flower\",\"flow\",\"flight\"]\nOutput: \"fl\"\nExplanation: \"fl\" is the longest common prefix shared by all three strings.\n```\n\n**Example 2:**\n```\nInput: strs = [\"dog\",\"racecar\",\"car\"]\nOutput: \"\"\nExplanation: There is no common prefix among the input strings.\n```\n\n**Example 3:**\n```\nInput: strs = [\"interspecies\",\"interstellar\",\"interstate\"]\nOutput: \"inters\"\nExplanation: \"inters\" is the longest prefix common to all three strings.\n```",
+  "examples": [
+    {
+      "input": "strs = [\"flower\",\"flow\",\"flight\"]",
+      "output": "\"fl\"",
+      "explanation": "All three strings start with \"fl\". The third string diverges at index 2 ('i' vs 'o'), so the longest common prefix is \"fl\"."
+    },
+    {
+      "input": "strs = [\"dog\",\"racecar\",\"car\"]",
+      "output": "\"\"",
+      "explanation": "There is no character that all three strings share at index 0 ('d' vs 'r' vs 'c'), so the common prefix is empty."
+    }
+  ],
+  "constraints": [
+    "1 <= strs.length <= 200",
+    "0 <= strs[i].length <= 200",
+    "strs[i] consists of only lowercase English letters."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def longestCommonPrefix(self, strs: list[str]) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function longestCommonPrefix(strs) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String longestCommonPrefix(String[] strs) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "strs = [\"flower\",\"flow\",\"flight\"]",
+      "expected_output": "\"fl\"",
+      "is_hidden": false
+    },
+    {
+      "input": "strs = [\"dog\",\"racecar\",\"car\"]",
+      "expected_output": "\"\"",
+      "is_hidden": false
+    },
+    {
+      "input": "strs = [\"interspecies\",\"interstellar\",\"interstate\"]",
+      "expected_output": "\"inters\"",
+      "is_hidden": false
+    },
+    {
+      "input": "strs = [\"a\"]",
+      "expected_output": "\"a\"",
+      "is_hidden": true
+    },
+    {
+      "input": "strs = [\"cir\",\"car\"]",
+      "expected_output": "\"c\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use vertical scanning: iterate character by character across all strings simultaneously. For each column index i, check if the character at position i is the same across all strings. If any string has ended (i >= length) or has a different character at position i, return the prefix built so far (s[0..i-1]). If you make it through all characters of the first string without a mismatch, the entire first string is the common prefix. This approach is optimal because it does at most n * m character comparisons where n is the number of strings and m is the length of the shortest string, and it short-circuits as soon as a mismatch is found. It uses O(1) extra space beyond the output string.",
+  "hints": [
+    "Start simple: compare characters at the same position across all strings. When do you stop?",
+    "Pick any string as a reference (e.g., the first one). For each character position, check if all other strings have the same character at that position.",
+    "Iterate column by column (vertical scanning). Stop when you hit the end of any string or find a mismatch. The prefix up to that point is your answer."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * m)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve this using a Trie data structure? What are the trade-offs compared to vertical scanning?",
+    "If the array of strings were sorted, how could you optimize the solution to only compare two strings?"
+  ]
+}

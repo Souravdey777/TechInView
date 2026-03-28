@@ -1,0 +1,77 @@
+{
+  "title": "Find Peak Element",
+  "slug": "find-peak-element",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "apple", "uber"],
+  "description": "A peak element is an element that is strictly greater than its neighbors.\n\nGiven a **0-indexed** integer array `nums`, find a peak element, and return its index. If the array contains multiple peaks, return the index to **any** of the peaks.\n\nYou may imagine that `nums[-1] = nums[n] = -∞`. In other words, an element is always considered to be strictly greater than a neighbor that is outside the array.\n\nYou must write an algorithm that runs in `O(log n)` time.\n\n**Example 1:**\n```\nInput: nums = [1,2,3,1]\nOutput: 2\nExplanation: 3 is a peak element and your function should return the index 2.\n```\n\n**Example 2:**\n```\nInput: nums = [1,2,1,3,5,6,4]\nOutput: 5\nExplanation: Your function can return either index 1 (where the peak element is 2) or index 5 (where the peak element is 6).\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3,1]",
+      "output": "2",
+      "explanation": "3 is a peak element at index 2."
+    },
+    {
+      "input": "nums = [1,2,1,3,5,6,4]",
+      "output": "5",
+      "explanation": "6 is a peak element at index 5. Index 1 (value 2) is also a valid answer."
+    },
+    {
+      "input": "nums = [1]",
+      "output": "0",
+      "explanation": "Since nums[-1] and nums[1] are both -∞, nums[0] = 1 is a peak."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 1000",
+    "-2^31 <= nums[i] <= 2^31 - 1",
+    "nums[i] != nums[i + 1] for all valid i."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findPeakElement(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findPeakElement(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int findPeakElement(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findPeakElement(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3,1]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,1,3,5,6,4]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,2,1]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,6,5,4,3,2,1]",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Binary search works here because of the guarantee that nums[-1] = nums[n] = -∞ and no two adjacent elements are equal. This means a peak must always exist. At each step, compute mid and compare nums[mid] with nums[mid + 1]. If nums[mid] < nums[mid + 1], the values are increasing toward the right, so a peak must exist in the right half — set left = mid + 1. If nums[mid] > nums[mid + 1], the values are decreasing, so a peak exists at mid or to the left — set right = mid. When left == right, that index is a peak. The intuition is that we always move toward the direction of increasing values, which is guaranteed to lead to a peak due to the -∞ boundary conditions. This gives O(log n) time and O(1) space.",
+  "hints": [
+    "You don't need to find all peaks — just any one. The boundary condition nums[-1] = nums[n] = -∞ guarantees at least one peak exists.",
+    "If nums[mid] < nums[mid + 1], there must be a peak somewhere to the right (values are going up). Why?",
+    "Use binary search: compare nums[mid] with nums[mid + 1]. Move toward the larger neighbor. Since boundaries are -∞, you'll always converge to a peak."
+  ],
+  "optimal_complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you find ALL peak elements in the array? What's the time complexity for that?",
+    "Can you extend this to a 2D matrix — finding a peak element where the value is greater than all four neighbors?"
+  ]
+}

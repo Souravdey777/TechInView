@@ -31,6 +31,8 @@ const CATEGORY_LABELS: Record<ProblemCategory, string> = {
   "binary-search": "Binary Search",
   heap: "Heap / PQ",
   backtracking: "Backtracking",
+  "sliding-window": "Sliding Window",
+  trie: "Trie",
 };
 
 const CATEGORY_ICONS: Record<ProblemCategory, string> = {
@@ -44,6 +46,8 @@ const CATEGORY_ICONS: Record<ProblemCategory, string> = {
   "binary-search": "⌕",
   heap: "△",
   backtracking: "↺",
+  "sliding-window": "⇥",
+  trie: "⊤",
 };
 
 type ProgressData = {

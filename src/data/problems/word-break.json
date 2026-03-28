@@ -1,0 +1,74 @@
+{
+  "title": "Word Break",
+  "slug": "word-break",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": ["amazon", "google", "meta", "microsoft", "bloomberg", "apple", "uber"],
+  "description": "Given a string `s` and a dictionary of strings `wordDict`, return `true` if `s` can be segmented into a space-separated sequence of one or more dictionary words.\n\nNote that the same word in the dictionary may be reused multiple times in the segmentation.\n\n**Example 1:**\n```\nInput: s = \"leetcode\", wordDict = [\"leet\",\"code\"]\nOutput: true\nExplanation: Return true because \"leetcode\" can be segmented as \"leet code\".\n```\n\n**Example 2:**\n```\nInput: s = \"applepenapple\", wordDict = [\"apple\",\"pen\"]\nOutput: true\nExplanation: Return true because \"applepenapple\" can be segmented as \"apple pen apple\". Note that you are allowed to reuse a dictionary word.\n```\n\n**Example 3:**\n```\nInput: s = \"catsandog\", wordDict = [\"cats\",\"dog\",\"sand\",\"and\",\"cat\"]\nOutput: false\nExplanation: No valid segmentation exists for \"catsandog\".\n```",
+  "examples": [
+    {
+      "input": "s = \"leetcode\", wordDict = [\"leet\",\"code\"]",
+      "output": "true",
+      "explanation": "\"leetcode\" can be split as \"leet\" + \"code\", both of which are in the dictionary."
+    },
+    {
+      "input": "s = \"applepenapple\", wordDict = [\"apple\",\"pen\"]",
+      "output": "true",
+      "explanation": "\"applepenapple\" can be split as \"apple\" + \"pen\" + \"apple\". Dictionary words can be reused."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 300",
+    "1 <= wordDict.length <= 1000",
+    "1 <= wordDict[i].length <= 20",
+    "s and wordDict[i] consist of only lowercase English letters",
+    "All the strings of wordDict are unique"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def wordBreak(self, s: str, wordDict: list[str]) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function wordBreak(s, wordDict) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean wordBreak(String s, List<String> wordDict) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool wordBreak(string s, vector<string>& wordDict) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"leetcode\", wordDict = [\"leet\",\"code\"]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"applepenapple\", wordDict = [\"apple\",\"pen\"]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"catsandog\", wordDict = [\"cats\",\"dog\",\"sand\",\"and\",\"cat\"]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"cars\", wordDict = [\"car\",\"ca\",\"rs\"]",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\", wordDict = [\"a\",\"aa\",\"aaa\",\"aaaa\",\"aaaaa\"]",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use bottom-up dynamic programming. Define dp[i] as whether the substring s[0..i-1] can be segmented using dictionary words. Initialize dp[0] = true (empty string is trivially segmentable). For each position i from 1 to n, check every position j from 0 to i-1: if dp[j] is true and s[j..i-1] exists in the dictionary (use a HashSet for O(1) lookup), then dp[i] = true. The final answer is dp[n]. To optimize, instead of checking all j values, you can iterate over words in the dictionary and check if s ends with that word at position i. The worst-case time complexity is O(n^2 * m) where n is the string length and m is the average word length for substring comparison, though using a hash set reduces the inner check. Space is O(n) for the dp array plus O(total characters in wordDict) for the set.",
+  "hints": [
+    "Think about this problem in terms of subproblems: if you know that s[0..j-1] can be segmented, and s[j..i-1] is a word in the dictionary, what can you say about s[0..i-1]?",
+    "Define dp[i] = true if s[0..i-1] can be broken into dictionary words. For each i, check all possible last words ending at position i. Use a set for O(1) word lookups.",
+    "Build dp bottom-up from dp[0] = true. For each i from 1 to n, for each j from 0 to i-1, if dp[j] is true and s[j:i] is in the word set, set dp[i] = true and break. Return dp[n]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2 * m)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you modify this to return all possible segmentations (like Word Break II)?",
+    "Could you use a Trie instead of a HashSet for the dictionary to improve performance when the dictionary is very large?"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "title": "Trapping Rain Water",
+  "slug": "trapping-rain-water",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "goldman-sachs", "apple", "bloomberg"],
+  "description": "Given `n` non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.\n\n**Example 1:**\n```\nInput: height = [0,1,0,2,1,0,1,3,2,1,2,1]\nOutput: 6\nExplanation: The elevation map is represented by array [0,1,0,2,1,0,1,3,2,1,2,1].\nIn this case, 6 units of rain water are being trapped.\n```\n\n**Example 2:**\n```\nInput: height = [4,2,0,3,2,5]\nOutput: 9\nExplanation: 9 units of rain water are trapped between the bars.\n```",
+  "examples": [
+    {
+      "input": "height = [0,1,0,2,1,0,1,3,2,1,2,1]",
+      "output": "6",
+      "explanation": "Water fills the valleys between bars. The total trapped water is 6 units."
+    },
+    {
+      "input": "height = [4,2,0,3,2,5]",
+      "output": "9",
+      "explanation": "Water fills the gaps between the tall bars on each side, trapping 9 units total."
+    },
+    {
+      "input": "height = [1,0,1]",
+      "output": "1",
+      "explanation": "One unit of water is trapped between the two bars of height 1."
+    }
+  ],
+  "constraints": [
+    "n == height.length",
+    "1 <= n <= 2 * 10^4",
+    "0 <= height[i] <= 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def trap(self, height: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function trap(height) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int trap(int[] height) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "height = [0,1,0,2,1,0,1,3,2,1,2,1]",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "height = [4,2,0,3,2,5]",
+      "expected_output": "9",
+      "is_hidden": false
+    },
+    {
+      "input": "height = [1,0,1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "height = [0,0,0,0]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "height = [5,4,1,2]",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The water trapped above each bar depends on the minimum of the maximum height to its left and the maximum height to its right, minus the bar's own height. A brute-force approach computes left-max and right-max for every position in O(n²). A better approach precomputes prefix-max and suffix-max arrays in O(n) time and O(n) space. The optimal two-pointer approach achieves O(n) time with O(1) space: maintain two pointers (left and right) starting at the ends, along with left_max and right_max. At each step, process the side with the smaller max. If left_max <= right_max, the water at the left pointer is determined by left_max (since right_max is at least as large), so add left_max - height[left] and advance left. Otherwise, process the right pointer symmetrically. This works because the water level at any position is bounded by the smaller of the two maxima, and the pointer on the smaller side always has a valid bound.",
+  "hints": [
+    "For each bar, the water it can hold equals min(max_height_to_left, max_height_to_right) - current_height. How can you efficiently compute the left and right maximums?",
+    "You could precompute prefix maximums and suffix maximums in two passes. But can you do it in a single pass with constant extra space?",
+    "Use two pointers from both ends. Track the running max from each side. Always process the pointer whose running max is smaller — that side's water level is fully determined regardless of what's on the other side."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve this problem if the elevation map were 2D (Trapping Rain Water II)?",
+    "Can you solve this using a monotonic stack? What are the trade-offs compared to the two-pointer approach?"
+  ]
+}

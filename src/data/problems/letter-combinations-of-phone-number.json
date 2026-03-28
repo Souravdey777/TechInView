@@ -1,0 +1,76 @@
+{
+  "title": "Letter Combinations of a Phone Number",
+  "slug": "letter-combinations-of-phone-number",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": ["amazon", "google", "meta", "microsoft", "uber", "oracle", "apple"],
+  "description": "Given a string containing digits from `2-9` inclusive, return all possible letter combinations that the number could represent. Return the answer in **any order**.\n\nA mapping of digits to letters (just like on the telephone buttons) is given below. Note that 1 does not map to any letters.\n\n```\n2 → abc    3 → def    4 → ghi    5 → jkl\n6 → mno    7 → pqrs   8 → tuv    9 → wxyz\n```\n\n**Example 1:**\n```\nInput: digits = \"23\"\nOutput: [\"ad\",\"ae\",\"af\",\"bd\",\"be\",\"bf\",\"cd\",\"ce\",\"cf\"]\nExplanation: Digit 2 maps to \"abc\" and digit 3 maps to \"def\". All 3 × 3 = 9 combinations are listed.\n```\n\n**Example 2:**\n```\nInput: digits = \"\"\nOutput: []\nExplanation: An empty input has no combinations.\n```\n\n**Example 3:**\n```\nInput: digits = \"2\"\nOutput: [\"a\",\"b\",\"c\"]\nExplanation: Digit 2 maps to three letters: a, b, and c.\n```",
+  "examples": [
+    {
+      "input": "digits = \"23\"",
+      "output": "[\"ad\",\"ae\",\"af\",\"bd\",\"be\",\"bf\",\"cd\",\"ce\",\"cf\"]",
+      "explanation": "Digit 2 maps to 'abc' and digit 3 maps to 'def', producing 9 combinations."
+    },
+    {
+      "input": "digits = \"\"",
+      "output": "[]",
+      "explanation": "No digits means no possible letter combinations."
+    },
+    {
+      "input": "digits = \"2\"",
+      "output": "[\"a\",\"b\",\"c\"]",
+      "explanation": "A single digit 2 maps to three letters."
+    }
+  ],
+  "constraints": [
+    "0 <= digits.length <= 4",
+    "digits[i] is a digit in the range ['2', '9']"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def letterCombinations(self, digits: str) -> list[str]:\n        # Write your solution here\n        pass",
+    "javascript": "function letterCombinations(digits) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<String> letterCombinations(String digits) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<string> letterCombinations(string digits) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "digits = \"23\"",
+      "expected_output": "[\"ad\",\"ae\",\"af\",\"bd\",\"be\",\"bf\",\"cd\",\"ce\",\"cf\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "digits = \"\"",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "digits = \"2\"",
+      "expected_output": "[\"a\",\"b\",\"c\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "digits = \"79\"",
+      "expected_output": "[\"pw\",\"px\",\"py\",\"pz\",\"qw\",\"qx\",\"qy\",\"qz\",\"rw\",\"rx\",\"ry\",\"rz\",\"sw\",\"sx\",\"sy\",\"sz\"]",
+      "is_hidden": true
+    },
+    {
+      "input": "digits = \"234\"",
+      "expected_output": "[\"adg\",\"adh\",\"adi\",\"aeg\",\"aeh\",\"aei\",\"afg\",\"afh\",\"afi\",\"bdg\",\"bdh\",\"bdi\",\"beg\",\"beh\",\"bei\",\"bfg\",\"bfh\",\"bfi\",\"cdg\",\"cdh\",\"cdi\",\"ceg\",\"ceh\",\"cei\",\"cfg\",\"cfh\",\"cfi\"]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "This is a straightforward backtracking problem. First, create a mapping from each digit to its corresponding letters (e.g., '2' → 'abc', '7' → 'pqrs'). Then recursively build combinations one character at a time: for the current digit in the input string, iterate through all its mapped letters, append each letter to the current combination, and recurse on the next digit. When the current combination's length equals the input digits' length, add it to the results. The base case for an empty input string should return an empty list. An iterative BFS-like approach also works: start with an empty string in a queue, and for each digit, extend every existing string in the queue with each mapped letter. Both approaches produce the same result. The time complexity is O(4^n) where n is the number of digits, since each digit maps to at most 4 letters (digits 7 and 9). The space complexity is O(n) for the recursion depth, not counting the output.",
+  "hints": [
+    "Create a hash map that maps each digit character to its corresponding letters (e.g., '2' → 'abc').",
+    "Use backtracking: process one digit at a time, and for each letter that digit maps to, add it to the current combination and recurse on the remaining digits.",
+    "The base case is when your current combination has the same length as the input digits string — at that point, add the combination to your result list."
+  ],
+  "optimal_complexity": {
+    "time": "O(4^n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you modify this to also handle digit 1 (which maps to no letters) and digit 0 gracefully?",
+    "If you needed to check whether any combination forms a valid English word, how would you integrate a dictionary lookup efficiently?"
+  ]
+}

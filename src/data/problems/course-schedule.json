@@ -1,0 +1,79 @@
+{
+  "title": "Course Schedule",
+  "slug": "course-schedule",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": ["amazon", "meta", "microsoft", "google", "apple", "bloomberg"],
+  "description": "There are a total of `numCourses` courses you have to take, labeled from `0` to `numCourses - 1`. You are given an array `prerequisites` where `prerequisites[i] = [ai, bi]` indicates that you **must** take course `bi` first if you want to take course `ai`.\n\nFor example, the pair `[0, 1]`, indicates that to take course `0` you have to first take course `1`.\n\nReturn `true` if you can finish all courses. Otherwise, return `false`.\n\n**Example 1:**\n```\nInput: numCourses = 2, prerequisites = [[1,0]]\nOutput: true\nExplanation: There are 2 courses to take. To take course 1 you should have\nfinished course 0. So it is possible.\n```\n\n**Example 2:**\n```\nInput: numCourses = 2, prerequisites = [[1,0],[0,1]]\nOutput: false\nExplanation: There are 2 courses to take. To take course 1 you should have\nfinished course 0, and to take course 0 you should also have finished\ncourse 1. So it is impossible.\n```\n\n**Example 3:**\n```\nInput: numCourses = 4, prerequisites = [[1,0],[2,1],[3,2]]\nOutput: true\nExplanation: There are 4 courses forming a linear chain: 0 → 1 → 2 → 3.\nTake them in order 0, 1, 2, 3.\n```",
+  "examples": [
+    {
+      "input": "numCourses = 2, prerequisites = [[1,0]]",
+      "output": "true",
+      "explanation": "There are 2 courses. To take course 1, you must first finish course 0. This is achievable by taking course 0 first, then course 1."
+    },
+    {
+      "input": "numCourses = 2, prerequisites = [[1,0],[0,1]]",
+      "output": "false",
+      "explanation": "Course 1 requires course 0, and course 0 requires course 1. This creates a circular dependency (cycle), making it impossible to finish all courses."
+    },
+    {
+      "input": "numCourses = 4, prerequisites = [[1,0],[2,1],[3,2]]",
+      "output": "true",
+      "explanation": "The courses form a linear dependency chain 0 → 1 → 2 → 3 with no cycles. Take them in order: 0, 1, 2, 3."
+    }
+  ],
+  "constraints": [
+    "1 <= numCourses <= 2000",
+    "0 <= prerequisites.length <= 5000",
+    "prerequisites[i].length == 2",
+    "0 <= ai, bi < numCourses",
+    "All the pairs prerequisites[i] are unique."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def canFinish(self, numCourses: int, prerequisites: list[list[int]]) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function canFinish(numCourses, prerequisites) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean canFinish(int numCourses, int[][] prerequisites) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "numCourses = 2, prerequisites = [[1,0]]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "numCourses = 2, prerequisites = [[1,0],[0,1]]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "numCourses = 4, prerequisites = [[1,0],[2,1],[3,2]]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "numCourses = 5, prerequisites = [[1,0],[2,0],[3,1],[3,2],[4,3]]",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "numCourses = 3, prerequisites = [[0,1],[1,2],[2,0]]",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "This problem reduces to detecting a cycle in a directed graph. Build an adjacency list from the prerequisites, where an edge from bi to ai means course bi must be taken before ai. Then use either BFS (Kahn's algorithm for topological sort) or DFS to detect cycles. With Kahn's algorithm: compute the in-degree of every node, add all nodes with in-degree 0 to a queue, and process them by decrementing the in-degree of their neighbors. If a neighbor's in-degree reaches 0, add it to the queue. If the total number of processed nodes equals numCourses, there is no cycle and all courses can be completed. With DFS: use a three-color marking (unvisited, in-progress, visited). If during DFS you encounter a node that is in-progress, a cycle exists. Both approaches run in O(V + E) time where V is numCourses and E is the number of prerequisites, and O(V + E) space for the adjacency list and auxiliary data structures.",
+  "hints": [
+    "Model this as a directed graph where each prerequisite [a, b] creates an edge from b to a. The question becomes: does this directed graph contain a cycle?",
+    "Try Kahn's algorithm (BFS-based topological sort). Start with all courses that have no prerequisites (in-degree 0). Process them and reduce the in-degree of dependent courses. If you can process all courses, there's no cycle.",
+    "Alternatively, use DFS with three states for each node: unvisited, currently being explored (in the current DFS path), and fully explored. If you revisit a node that's currently being explored, you've found a cycle."
+  ],
+  "optimal_complexity": {
+    "time": "O(V + E)",
+    "space": "O(V + E)"
+  },
+  "follow_up_questions": [
+    "If you needed to return one valid order in which to take all the courses (not just whether it's possible), how would you modify your solution?",
+    "What if some courses have a minimum time to complete and can be taken in parallel? How would you find the minimum total time to finish all courses?"
+  ]
+}

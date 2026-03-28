@@ -1,0 +1,78 @@
+{
+  "title": "Binary Search",
+  "slug": "binary-search",
+  "difficulty": "easy",
+  "category": "binary-search",
+  "company_tags": ["google", "amazon", "microsoft", "apple", "bloomberg"],
+  "description": "Given a sorted array of integers `nums` in ascending order and an integer `target`, write a function to search `target` in `nums`. If `target` exists, return its index. Otherwise, return `-1`.\n\nYou must write an algorithm with `O(log n)` runtime complexity.\n\n**Example 1:**\n```\nInput: nums = [-1,0,3,5,9,12], target = 9\nOutput: 4\nExplanation: 9 exists in nums and its index is 4.\n```\n\n**Example 2:**\n```\nInput: nums = [-1,0,3,5,9,12], target = 2\nOutput: -1\nExplanation: 2 does not exist in nums so return -1.\n```",
+  "examples": [
+    {
+      "input": "nums = [-1,0,3,5,9,12], target = 9",
+      "output": "4",
+      "explanation": "9 exists in nums and its index is 4."
+    },
+    {
+      "input": "nums = [-1,0,3,5,9,12], target = 2",
+      "output": "-1",
+      "explanation": "2 does not exist in nums so return -1."
+    },
+    {
+      "input": "nums = [5], target = 5",
+      "output": "0",
+      "explanation": "5 exists in nums and its index is 0."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^4",
+    "-10^4 < nums[i], target < 10^4",
+    "All the integers in nums are unique.",
+    "nums is sorted in ascending order."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def search(self, nums: list[int], target: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function search(nums, target) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int search(int[] nums, int target) {\n        // Write your solution here\n        return -1;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        // Write your solution here\n        return -1;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [-1,0,3,5,9,12], target = 9",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-1,0,3,5,9,12], target = 2",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5], target = 5",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3,4,5,6,7,8,9,10], target = 10",
+      "expected_output": "9",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [-100,-50,-20,-10,0,5,15,30], target = -50",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Binary search works by maintaining two pointers, left and right, that define the current search range. At each step, compute the middle index and compare nums[mid] with the target. If they are equal, return mid. If target is less than nums[mid], narrow the search to the left half by setting right = mid - 1. If target is greater, narrow to the right half by setting left = mid + 1. Repeat until left exceeds right, at which point the target is not in the array and we return -1. This halves the search space each iteration, giving O(log n) time complexity with O(1) space since we only use a few variables.",
+  "hints": [
+    "Since the array is sorted, you don't need to check every element. Think about how you can eliminate half the array in each step.",
+    "Compare the target with the middle element. Based on the comparison, which half of the array can you discard?",
+    "Maintain left and right pointers. Compute mid = left + (right - left) / 2 to avoid overflow. Adjust left or right based on comparison with target."
+  ],
+  "optimal_complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you modify this to find the leftmost (first) occurrence of the target if duplicates were allowed?",
+    "Can you implement this recursively? What would the space complexity be then?"
+  ]
+}

@@ -42,7 +42,9 @@ type Category =
   | "stacks-queues"
   | "binary-search"
   | "heap"
-  | "backtracking";
+  | "backtracking"
+  | "sliding-window"
+  | "trie";
 type Language = "python" | "javascript" | "java" | "cpp";
 type Duration = 20 | 30 | 45;
 type MicStatus = "idle" | "checking" | "granted" | "denied";
@@ -105,6 +107,8 @@ const CATEGORIES: { value: Category; label: string }[] = [
   { value: "binary-search", label: "Binary Search" },
   { value: "heap", label: "Heap / Priority Queue" },
   { value: "backtracking", label: "Backtracking" },
+  { value: "sliding-window", label: "Sliding Window" },
+  { value: "trie", label: "Trie" },
 ];
 
 const LANGUAGES: { value: Language; label: string; ext: string }[] = [

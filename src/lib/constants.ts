@@ -63,6 +63,7 @@ export const HIRE_RECOMMENDATION_CONFIG: Record<HireRecommendation, { label: str
 export const PROBLEM_CATEGORIES = [
   "arrays", "strings", "trees", "graphs", "dp",
   "linked-lists", "stacks-queues", "binary-search", "heap", "backtracking",
+  "sliding-window", "trie",
 ] as const;
 export type ProblemCategory = (typeof PROBLEM_CATEGORIES)[number];
 

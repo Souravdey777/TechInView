@@ -1,0 +1,77 @@
+{
+  "title": "Min Stack",
+  "slug": "min-stack",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": ["amazon", "google", "microsoft", "bloomberg", "apple", "uber"],
+  "description": "Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.\n\nImplement the `MinStack` class:\n\n- `MinStack()` initializes the stack object.\n- `void push(int val)` pushes the element `val` onto the stack.\n- `void pop()` removes the element on the top of the stack.\n- `int top()` gets the top element of the stack.\n- `int getMin()` retrieves the minimum element in the stack.\n\nYou must implement a solution with `O(1)` time complexity for each function.\n\n**Example 1:**\n```\nInput:\n[\"MinStack\",\"push\",\"push\",\"push\",\"getMin\",\"pop\",\"top\",\"getMin\"]\n[[],[-2],[0],[-3],[],[],[],[]]\nOutput: [null,null,null,null,-3,null,0,-2]\nExplanation:\nMinStack minStack = new MinStack();\nminStack.push(-2);\nminStack.push(0);\nminStack.push(-3);\nminStack.getMin(); // return -3\nminStack.pop();\nminStack.top();    // return 0\nminStack.getMin(); // return -2\n```\n\n**Example 2:**\n```\nInput:\n[\"MinStack\",\"push\",\"push\",\"getMin\",\"pop\",\"getMin\"]\n[[],[1],[0],[],[],[]]\nOutput: [null,null,null,0,null,1]\nExplanation:\nMinStack minStack = new MinStack();\nminStack.push(1);\nminStack.push(0);\nminStack.getMin(); // return 0\nminStack.pop();\nminStack.getMin(); // return 1\n```",
+  "examples": [
+    {
+      "input": "[\"MinStack\",\"push\",\"push\",\"push\",\"getMin\",\"pop\",\"top\",\"getMin\"], [[],[-2],[0],[-3],[],[],[],[]]",
+      "output": "[null,null,null,null,-3,null,0,-2]",
+      "explanation": "After pushing -2, 0, -3: getMin returns -3. After popping -3: top returns 0 and getMin returns -2."
+    },
+    {
+      "input": "[\"MinStack\",\"push\",\"push\",\"getMin\",\"pop\",\"getMin\"], [[],[1],[0],[],[],[]]",
+      "output": "[null,null,null,0,null,1]",
+      "explanation": "After pushing 1 and 0: getMin returns 0. After popping 0: getMin returns 1."
+    },
+    {
+      "input": "[\"MinStack\",\"push\",\"push\",\"push\",\"getMin\",\"pop\",\"getMin\",\"pop\",\"getMin\"], [[],[2],[1],[3],[],[],[],[],[]]",
+      "output": "[null,null,null,null,1,null,1,null,2]",
+      "explanation": "After pushing 2, 1, 3: getMin returns 1. After popping 3: getMin still returns 1. After popping 1: getMin returns 2."
+    }
+  ],
+  "constraints": [
+    "-2^31 <= val <= 2^31 - 1",
+    "Methods pop, top and getMin operations will always be called on non-empty stacks.",
+    "At most 3 * 10^4 calls will be made to push, pop, top, and getMin."
+  ],
+  "starter_code": {
+    "python": "class MinStack:\n    def __init__(self):\n        # Initialize your data structure here\n        pass\n\n    def push(self, val: int) -> None:\n        pass\n\n    def pop(self) -> None:\n        pass\n\n    def top(self) -> int:\n        pass\n\n    def getMin(self) -> int:\n        pass",
+    "javascript": "function MinStack() {\n    // Initialize your data structure here\n}\n\nMinStack.prototype.push = function(val) {\n    // Write your solution here\n};\n\nMinStack.prototype.pop = function() {\n    // Write your solution here\n};\n\nMinStack.prototype.top = function() {\n    // Write your solution here\n};\n\nMinStack.prototype.getMin = function() {\n    // Write your solution here\n};",
+    "java": "class MinStack {\n    public MinStack() {\n        // Initialize your data structure here\n    }\n\n    public void push(int val) {\n        // Write your solution here\n    }\n\n    public void pop() {\n        // Write your solution here\n    }\n\n    public int top() {\n        // Write your solution here\n        return 0;\n    }\n\n    public int getMin() {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class MinStack {\npublic:\n    MinStack() {\n        // Initialize your data structure here\n    }\n\n    void push(int val) {\n        // Write your solution here\n    }\n\n    void pop() {\n        // Write your solution here\n    }\n\n    int top() {\n        // Write your solution here\n        return 0;\n    }\n\n    int getMin() {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"MinStack\",\"push\",\"push\",\"push\",\"getMin\",\"pop\",\"top\",\"getMin\"], [[],[-2],[0],[-3],[],[],[],[]]",
+      "expected_output": "[null,null,null,null,-3,null,0,-2]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MinStack\",\"push\",\"push\",\"getMin\",\"pop\",\"getMin\"], [[],[1],[0],[],[],[]]",
+      "expected_output": "[null,null,null,0,null,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MinStack\",\"push\",\"push\",\"push\",\"getMin\",\"pop\",\"getMin\",\"pop\",\"getMin\"], [[],[2],[1],[3],[],[],[],[],[]]",
+      "expected_output": "[null,null,null,null,1,null,1,null,2]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MinStack\",\"push\",\"push\",\"push\",\"push\",\"getMin\",\"pop\",\"pop\",\"getMin\"], [[],[5],[3],[1],[4],[],[],[],[]]",
+      "expected_output": "[null,null,null,null,null,1,null,null,3]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"MinStack\",\"push\",\"push\",\"push\",\"getMin\",\"pop\",\"getMin\",\"pop\",\"getMin\"], [[],[-1],[-1],[-1],[],[],[],[],[]]",
+      "expected_output": "[null,null,null,null,-1,null,-1,null,-1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The naive approach would be to scan the entire stack for the minimum on every getMin call, giving O(n) time. The optimal approach uses two stacks: a main stack to store all values, and a min stack that tracks the current minimum at each level. When pushing a value, push it onto the main stack, and also push it onto the min stack if it is less than or equal to the current minimum (the top of the min stack). When popping, pop from the main stack, and if the popped value equals the top of the min stack, pop from the min stack as well. The top operation returns the top of the main stack, and getMin returns the top of the min stack. This guarantees O(1) time for all four operations. The space complexity is O(n) in the worst case when elements are pushed in decreasing order, causing every element to also be stored in the min stack.",
+  "hints": [
+    "Think about what extra information you need to store alongside each element to know the minimum at any point in time.",
+    "What if you maintained a second stack that only tracks the minimum values? When should you push to and pop from this auxiliary stack?",
+    "Push to the min stack whenever the new value is less than or equal to the current minimum. Pop from the min stack whenever the value being popped from the main stack equals the min stack's top."
+  ],
+  "optimal_complexity": {
+    "time": "O(1)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Can you implement the MinStack using only a single stack instead of two? (Hint: store encoded values that capture both the value and the min.)",
+    "How would you extend this design to also support getMax in O(1) time?"
+  ]
+}

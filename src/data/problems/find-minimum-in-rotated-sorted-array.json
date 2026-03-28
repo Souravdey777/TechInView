@@ -1,0 +1,79 @@
+{
+  "title": "Find Minimum in Rotated Sorted Array",
+  "slug": "find-minimum-in-rotated-sorted-array",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "bloomberg", "goldman-sachs"],
+  "description": "Suppose an array of length `n` sorted in ascending order is **rotated** between `1` and `n` times. For example, the array `nums = [0,1,2,4,5,6,7]` might become:\n\n- `[4,5,6,7,0,1,2]` if it was rotated 4 times.\n- `[0,1,2,4,5,6,7]` if it was rotated 7 times.\n\nNotice that **rotating** an array `[a[0], a[1], a[2], ..., a[n-1]]` 1 time results in the array `[a[n-1], a[0], a[1], a[2], ..., a[n-2]]`.\n\nGiven the sorted rotated array `nums` of **unique** elements, return the minimum element of this array.\n\nYou must write an algorithm that runs in `O(log n)` time.\n\n**Example 1:**\n```\nInput: nums = [3,4,5,1,2]\nOutput: 1\nExplanation: The original array was [1,2,3,4,5] rotated 3 times.\n```\n\n**Example 2:**\n```\nInput: nums = [4,5,6,7,0,1,2]\nOutput: 0\nExplanation: The original array was [0,1,2,4,5,6,7] and it was rotated 4 times.\n```\n\n**Example 3:**\n```\nInput: nums = [11,13,15,17]\nOutput: 11\nExplanation: The original array was [11,13,15,17] and it was rotated 4 times (full rotation).\n```",
+  "examples": [
+    {
+      "input": "nums = [3,4,5,1,2]",
+      "output": "1",
+      "explanation": "The original array was [1,2,3,4,5] rotated 3 times."
+    },
+    {
+      "input": "nums = [4,5,6,7,0,1,2]",
+      "output": "0",
+      "explanation": "The original array was [0,1,2,4,5,6,7] and it was rotated 4 times."
+    },
+    {
+      "input": "nums = [11,13,15,17]",
+      "output": "11",
+      "explanation": "The original array was [11,13,15,17] and it was rotated 4 times (full rotation)."
+    }
+  ],
+  "constraints": [
+    "n == nums.length",
+    "1 <= n <= 5000",
+    "-5000 <= nums[i] <= 5000",
+    "All the integers of nums are unique.",
+    "nums is sorted and rotated between 1 and n times."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findMin(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findMin(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int findMin(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findMin(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [3,4,5,1,2]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,5,6,7,0,1,2]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [11,13,15,17]",
+      "expected_output": "11",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,1]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [7,8,1,2,3,4,5,6]",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Use binary search to find the inflection point where the rotation occurs. Maintain left and right pointers. At each step, compute mid. If nums[mid] > nums[right], the minimum must be in the right half (the rotation point is to the right), so set left = mid + 1. If nums[mid] <= nums[right], the right half is sorted and the minimum is at mid or to the left, so set right = mid. Continue until left == right, which gives the index of the minimum element. The key insight is that comparing nums[mid] with nums[right] tells us which half contains the inflection point. This runs in O(log n) time with O(1) space.",
+  "hints": [
+    "The minimum element is the only element that is smaller than its predecessor. If no such element exists, the array wasn't rotated and the first element is the minimum.",
+    "Think about binary search. If nums[mid] > nums[right], what does that tell you about where the minimum is?",
+    "Compare nums[mid] with nums[right]. If nums[mid] > nums[right], the minimum is in the right half (set left = mid + 1). Otherwise, the minimum is at mid or in the left half (set right = mid)."
+  ],
+  "optimal_complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "What if the array contains duplicates? How would you handle the case where nums[mid] == nums[right]?",
+    "Can you also return the number of times the array was rotated using the same approach?"
+  ]
+}

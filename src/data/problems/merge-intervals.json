@@ -1,0 +1,77 @@
+{
+  "title": "Merge Intervals",
+  "slug": "merge-intervals",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": ["google", "meta", "amazon", "bloomberg", "microsoft", "linkedin", "uber"],
+  "description": "Given an array of `intervals` where `intervals[i] = [start_i, end_i]`, merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.\n\n**Example 1:**\n```\nInput: intervals = [[1,3],[2,6],[8,10],[15,18]]\nOutput: [[1,6],[8,10],[15,18]]\nExplanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].\n```\n\n**Example 2:**\n```\nInput: intervals = [[1,4],[4,5]]\nOutput: [[1,5]]\nExplanation: Intervals [1,4] and [4,5] are considered overlapping since they share the endpoint 4.\n```",
+  "examples": [
+    {
+      "input": "intervals = [[1,3],[2,6],[8,10],[15,18]]",
+      "output": "[[1,6],[8,10],[15,18]]",
+      "explanation": "Intervals [1,3] and [2,6] overlap, so they are merged into [1,6]. The remaining intervals do not overlap."
+    },
+    {
+      "input": "intervals = [[1,4],[4,5]]",
+      "output": "[[1,5]]",
+      "explanation": "Intervals [1,4] and [4,5] share the endpoint 4, so they are merged into [1,5]."
+    },
+    {
+      "input": "intervals = [[1,4],[0,4]]",
+      "output": "[[0,4]]",
+      "explanation": "The two intervals overlap completely, merging into [0,4]."
+    }
+  ],
+  "constraints": [
+    "1 <= intervals.length <= 10^4",
+    "intervals[i].length == 2",
+    "0 <= start_i <= end_i <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def merge(self, intervals: list[list[int]]) -> list[list[int]]:\n        # Write your solution here\n        pass",
+    "javascript": "function merge(intervals) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[][] merge(int[][] intervals) {\n        // Write your solution here\n        return new int[][]{};\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "intervals = [[1,3],[2,6],[8,10],[15,18]]",
+      "expected_output": "[[1,6],[8,10],[15,18]]",
+      "is_hidden": false
+    },
+    {
+      "input": "intervals = [[1,4],[4,5]]",
+      "expected_output": "[[1,5]]",
+      "is_hidden": false
+    },
+    {
+      "input": "intervals = [[1,4],[0,4]]",
+      "expected_output": "[[0,4]]",
+      "is_hidden": false
+    },
+    {
+      "input": "intervals = [[1,4],[0,0]]",
+      "expected_output": "[[0,0],[1,4]]",
+      "is_hidden": true
+    },
+    {
+      "input": "intervals = [[2,3],[4,5],[6,7],[8,9],[1,10]]",
+      "expected_output": "[[1,10]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The key insight is that once intervals are sorted by their start time, overlapping intervals will be adjacent. First, sort the intervals array by the start value in O(n log n). Then iterate through the sorted intervals while maintaining a result list. For each interval, check if it overlaps with the last interval in the result (i.e., the current interval's start is less than or equal to the last result interval's end). If they overlap, merge them by updating the end of the last result interval to the maximum of both ends. If they don't overlap, simply append the current interval to the result. This greedy approach works because sorting guarantees we only need to compare with the most recently added interval. The time complexity is O(n log n) dominated by sorting, and space complexity is O(n) for the output array.",
+  "hints": [
+    "If the intervals were sorted by their start times, how would that simplify detecting overlaps?",
+    "After sorting, two consecutive intervals overlap if the second interval's start is less than or equal to the first interval's end. How would you merge them?",
+    "Maintain a result list. For each interval, either merge it with the last interval in the result (by extending the end) or append it as a new non-overlapping interval."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you efficiently insert a new interval into an already sorted and merged list of intervals?",
+    "If intervals were arriving as a stream, how would you maintain a merged set in real time?"
+  ]
+}

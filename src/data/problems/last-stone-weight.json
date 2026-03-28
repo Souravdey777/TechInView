@@ -1,0 +1,76 @@
+{
+  "title": "Last Stone Weight",
+  "slug": "last-stone-weight",
+  "difficulty": "easy",
+  "category": "heap",
+  "company_tags": ["google", "amazon", "adobe", "microsoft", "bloomberg"],
+  "description": "You are given an array of integers `stones` where `stones[i]` is the weight of the `i`th stone.\n\nWe are playing a game with the stones. On each turn, we choose the **heaviest two stones** and smash them together. Suppose the heaviest two stones have weights `x` and `y` with `x <= y`. The result of this smash is:\n\n- If `x == y`, both stones are destroyed, and\n- If `x != y`, the stone of weight `x` is destroyed, and the stone of weight `y` has new weight `y - x`.\n\nAt the end of the game, there is **at most one** stone left.\n\nReturn the weight of the last remaining stone. If there are no stones left, return `0`.\n\n**Example 1:**\n```\nInput: stones = [2,7,4,1,8,1]\nOutput: 1\nExplanation:\nWe combine 7 and 8 to get 1, so the array becomes [2,4,1,1,1].\nWe combine 2 and 4 to get 2, so the array becomes [2,1,1,1].\nWe combine 2 and 1 to get 1, so the array becomes [1,1,1].\nWe combine 1 and 1 to get 0, so the array becomes [1].\nThe last remaining stone has weight 1.\n```\n\n**Example 2:**\n```\nInput: stones = [1]\nOutput: 1\nExplanation: There is only one stone, so it is the last remaining stone.\n```",
+  "examples": [
+    {
+      "input": "stones = [2,7,4,1,8,1]",
+      "output": "1",
+      "explanation": "Smash 8 and 7 to get 1. Then 4 and 2 to get 2. Then 2 and 1 to get 1. Then 1 and 1 to get 0. Last stone is 1."
+    },
+    {
+      "input": "stones = [1]",
+      "output": "1",
+      "explanation": "There is only one stone, so it is the last remaining stone."
+    },
+    {
+      "input": "stones = [3,3]",
+      "output": "0",
+      "explanation": "Both stones have equal weight. Smashing them destroys both, leaving no stones. Return 0."
+    }
+  ],
+  "constraints": [
+    "1 <= stones.length <= 30",
+    "1 <= stones[i] <= 1000"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def lastStoneWeight(self, stones: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function lastStoneWeight(stones) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int lastStoneWeight(int[] stones) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int lastStoneWeight(vector<int>& stones) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "stones = [2,7,4,1,8,1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [3,3]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [10,4,2,10]",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "stones = [1,1,1,1,1]",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "This problem is a direct simulation using a max-heap (priority queue). Insert all stone weights into a max-heap. Then, while the heap has more than one stone, extract the two largest stones. If they are equal, both are destroyed (don't insert anything back). If they differ, insert the difference (y - x) back into the heap. When the loop ends, if the heap is empty return 0, otherwise return the remaining stone's weight. In Python, since heapq is a min-heap, negate all values to simulate a max-heap. The time complexity is O(n log n) because we perform at most n extractions and insertions, each taking O(log n). Space complexity is O(n) for the heap. This is a great introductory heap problem because the simulation directly maps to priority queue operations.",
+  "hints": [
+    "You need to repeatedly find the two heaviest stones. What data structure efficiently gives you the maximum element?",
+    "Use a max-heap (priority queue). On each turn, extract the two largest elements, compute the result, and insert it back if non-zero.",
+    "In Python, heapq is a min-heap. You can simulate a max-heap by negating all values when inserting and extracting."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "What if instead of smashing the two heaviest, you could choose any two stones? What is the minimum possible weight of the last stone? (Hint: this becomes a subset sum / knapsack problem.)",
+    "How would you solve this if the stone weights could be very large (up to 10^18) and you needed to optimize for fewer heap operations?"
+  ]
+}

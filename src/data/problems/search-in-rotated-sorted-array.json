@@ -1,0 +1,79 @@
+{
+  "title": "Search in Rotated Sorted Array",
+  "slug": "search-in-rotated-sorted-array",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "bloomberg", "uber", "linkedin"],
+  "description": "There is an integer array `nums` sorted in ascending order (with **distinct** values). Prior to being passed to your function, `nums` is possibly rotated at an unknown pivot index `k` (`1 <= k < nums.length`) such that the resulting array is `[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]` (0-indexed).\n\nFor example, `[0,1,2,4,5,6,7]` might be rotated at pivot index 3 and become `[4,5,6,7,0,1,2]`.\n\nGiven the array `nums` **after** the possible rotation and an integer `target`, return the index of `target` if it is in `nums`, or `-1` if it is not in `nums`.\n\nYou must write an algorithm with `O(log n)` runtime complexity.\n\n**Example 1:**\n```\nInput: nums = [4,5,6,7,0,1,2], target = 0\nOutput: 4\nExplanation: 0 is found at index 4.\n```\n\n**Example 2:**\n```\nInput: nums = [4,5,6,7,0,1,2], target = 3\nOutput: -1\nExplanation: 3 is not in the array, so return -1.\n```\n\n**Example 3:**\n```\nInput: nums = [1], target = 0\nOutput: -1\n```",
+  "examples": [
+    {
+      "input": "nums = [4,5,6,7,0,1,2], target = 0",
+      "output": "4",
+      "explanation": "0 is found at index 4."
+    },
+    {
+      "input": "nums = [4,5,6,7,0,1,2], target = 3",
+      "output": "-1",
+      "explanation": "3 is not in the array, so return -1."
+    },
+    {
+      "input": "nums = [1], target = 0",
+      "output": "-1",
+      "explanation": "0 is not in the array."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 5000",
+    "-10^4 <= nums[i] <= 10^4",
+    "All values of nums are unique.",
+    "nums is an ascending array that is possibly rotated.",
+    "-10^4 <= target <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def search(self, nums: list[int], target: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function search(nums, target) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int search(int[] nums, int target) {\n        // Write your solution here\n        return -1;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        // Write your solution here\n        return -1;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [4,5,6,7,0,1,2], target = 0",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,5,6,7,0,1,2], target = 3",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1], target = 0",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,4,5,6,7,1,2], target = 1",
+      "expected_output": "5",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [5,1,2,3,4], target = 4",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The key insight is that even though the array is rotated, at least one half of the array (divided at mid) is always sorted. Use binary search with left and right pointers. At each step, compute mid and check if nums[mid] equals the target. If not, determine which half is sorted: if nums[left] <= nums[mid], the left half is sorted — check if the target falls within [nums[left], nums[mid]], and if so, search left; otherwise search right. If the right half is sorted (nums[mid] <= nums[right]), check if the target falls within [nums[mid], nums[right]], and if so, search right; otherwise search left. This maintains O(log n) time because we eliminate half the search space each iteration, with O(1) space.",
+  "hints": [
+    "Even though the array is rotated, one half of it (split at mid) is always sorted. Can you figure out which half?",
+    "If the left half is sorted (nums[left] <= nums[mid]), check if the target lies in that range. If it does, search left; otherwise search right.",
+    "Compare nums[left] with nums[mid] to determine the sorted half. Then check if target falls in the sorted half's range to decide which direction to search."
+  ],
+  "optimal_complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "What if the array could contain duplicates? How would that affect your algorithm's worst-case time complexity?",
+    "Can you find the rotation pivot index first, then do a standard binary search on the correct half?"
+  ]
+}

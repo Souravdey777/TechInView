@@ -1,0 +1,76 @@
+{
+  "title": "Binary Tree Right Side View",
+  "slug": "binary-tree-right-side-view",
+  "difficulty": "medium",
+  "category": "trees",
+  "company_tags": ["meta", "amazon", "bloomberg", "microsoft", "google", "adobe"],
+  "description": "Given the `root` of a binary tree, imagine yourself standing on the **right side** of it. Return the values of the nodes you can see ordered from top to bottom.\n\n**Example 1:**\n```\n    1\n   / \\\n  2   3\n   \\   \\\n    5   4\n\nInput: root = [1,2,3,null,5,null,4]\nOutput: [1,3,4]\nExplanation: From the right side, you see nodes 1, 3, and 4.\n```\n\n**Example 2:**\n```\n  1\n   \\\n    3\n\nInput: root = [1,null,3]\nOutput: [1,3]\n```\n\n**Example 3:**\n```\nInput: root = []\nOutput: []\n```",
+  "examples": [
+    {
+      "input": "root = [1,2,3,null,5,null,4]",
+      "output": "[1,3,4]",
+      "explanation": "At level 0, the rightmost node is 1. At level 1, the rightmost node is 3. At level 2, the rightmost node is 4."
+    },
+    {
+      "input": "root = [1,null,3]",
+      "output": "[1,3]",
+      "explanation": "At level 0, the rightmost node is 1. At level 1, the rightmost node is 3."
+    },
+    {
+      "input": "root = []",
+      "output": "[]",
+      "explanation": "An empty tree has no visible nodes from any side."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [0, 100].",
+    "-100 <= Node.val <= 100"
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def rightSideView(self, root: TreeNode | None) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction rightSideView(root) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public List<Integer> rightSideView(TreeNode root) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    vector<int> rightSideView(TreeNode* root) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [1,2,3,null,5,null,4]",
+      "expected_output": "[1,3,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1,null,3]",
+      "expected_output": "[1,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = []",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1,2,3,4]",
+      "expected_output": "[1,3,4]",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [1,2,3,4,null,null,null,5]",
+      "expected_output": "[1,3,4,5]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The most straightforward approach is BFS (level-order traversal). Use a queue to process nodes level by level. For each level, the last node processed is the rightmost node visible from the right side — add its value to the result. Initialize the queue with the root, then for each level, record the queue size, process all nodes at that level (adding their children to the queue), and append the last node's value. An alternative DFS approach traverses right-first: do a modified preorder traversal visiting right before left, and track the current depth. If the depth equals the result array length, this is the first node seen at this depth from the right — add it. Both approaches are O(n) time and O(n) space in the worst case.",
+  "hints": [
+    "Think about which node is visible at each level of the tree. How can you determine the 'rightmost' node at each depth?",
+    "BFS (level-order traversal) naturally groups nodes by level. For each level, the last node in the queue is the one visible from the right side.",
+    "Use a queue for BFS. For each level, record the queue size, iterate through all nodes at that level, and add the last node's value to your result list."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you return the left side view instead? What minimal change to your solution would achieve this?",
+    "Can you solve this with DFS instead of BFS? What traversal order would you use, and how would you track which nodes to include?"
+  ]
+}

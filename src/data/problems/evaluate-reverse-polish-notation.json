@@ -1,0 +1,78 @@
+{
+  "title": "Evaluate Reverse Polish Notation",
+  "slug": "evaluate-reverse-polish-notation",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": ["amazon", "google", "microsoft", "linkedin", "bloomberg", "oracle"],
+  "description": "You are given an array of strings `tokens` that represents an arithmetic expression in [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation).\n\nEvaluate the expression and return an integer that represents the value of the expression.\n\nNote that:\n\n- The valid operators are `'+'`, `'-'`, `'*'`, and `'/'`.\n- Each operand may be an integer or another expression.\n- The division between two integers always **truncates toward zero**.\n- There will not be any division by zero.\n- The input represents a valid arithmetic expression in reverse polish notation.\n- The answer and all the intermediate calculations can be represented in a **32-bit** integer.\n\n**Example 1:**\n```\nInput: tokens = [\"2\",\"1\",\"+\",\"3\",\"*\"]\nOutput: 9\nExplanation: ((2 + 1) * 3) = 9\n```\n\n**Example 2:**\n```\nInput: tokens = [\"4\",\"13\",\"5\",\"/\",\"+\"]\nOutput: 6\nExplanation: (4 + (13 / 5)) = (4 + 2) = 6\n```\n\n**Example 3:**\n```\nInput: tokens = [\"10\",\"6\",\"9\",\"3\",\"+\",\"-11\",\"*\",\"/\",\"*\",\"17\",\"+\",\"5\",\"+\"]\nOutput: 22\nExplanation: ((10 * (6 / ((9 + 3) * -11))) + 17 + 5)\n= ((10 * (6 / (12 * -11))) + 17 + 5)\n= ((10 * (6 / -132)) + 17 + 5)\n= ((10 * 0) + 17 + 5)\n= 22\n```",
+  "examples": [
+    {
+      "input": "tokens = [\"2\",\"1\",\"+\",\"3\",\"*\"]",
+      "output": "9",
+      "explanation": "((2 + 1) * 3) = 9"
+    },
+    {
+      "input": "tokens = [\"4\",\"13\",\"5\",\"/\",\"+\"]",
+      "output": "6",
+      "explanation": "(4 + (13 / 5)) = (4 + 2) = 6. Division truncates toward zero."
+    },
+    {
+      "input": "tokens = [\"10\",\"6\",\"9\",\"3\",\"+\",\"-11\",\"*\",\"/\",\"*\",\"17\",\"+\",\"5\",\"+\"]",
+      "output": "22",
+      "explanation": "((10 * (6 / ((9 + 3) * -11))) + 17 + 5) = ((10 * 0) + 17 + 5) = 22"
+    }
+  ],
+  "constraints": [
+    "1 <= tokens.length <= 10^4",
+    "tokens[i] is either an operator: \"+\", \"-\", \"*\", or \"/\", or an integer in the range [-200, 200].",
+    "The input represents a valid arithmetic expression in reverse polish notation.",
+    "The answer and all intermediate calculations can be represented in a 32-bit integer."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def evalRPN(self, tokens: list[str]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function evalRPN(tokens) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int evalRPN(String[] tokens) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int evalRPN(vector<string>& tokens) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "tokens = [\"2\",\"1\",\"+\",\"3\",\"*\"]",
+      "expected_output": "9",
+      "is_hidden": false
+    },
+    {
+      "input": "tokens = [\"4\",\"13\",\"5\",\"/\",\"+\"]",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "tokens = [\"10\",\"6\",\"9\",\"3\",\"+\",\"-11\",\"*\",\"/\",\"*\",\"17\",\"+\",\"5\",\"+\"]",
+      "expected_output": "22",
+      "is_hidden": false
+    },
+    {
+      "input": "tokens = [\"3\",\"4\",\"+\",\"2\",\"*\",\"7\",\"/\"]",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "tokens = [\"5\",\"1\",\"2\",\"+\",\"4\",\"*\",\"+\",\"3\",\"-\"]",
+      "expected_output": "14",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Reverse Polish Notation is naturally suited for stack-based evaluation. Iterate through each token in the array. If the token is a number, push it onto the stack. If the token is an operator (+, -, *, /), pop the top two elements from the stack — the first popped element is the right operand and the second is the left operand. Apply the operator to these two operands and push the result back onto the stack. The key detail is the order of operands: since the stack is LIFO, the first pop gives the second operand and the second pop gives the first operand, which matters for subtraction and division. For division, truncate toward zero (in Python, use int(a / b) instead of a // b to handle negative numbers correctly). After processing all tokens, the single remaining element on the stack is the final result. Time complexity is O(n) since each token is processed exactly once, and space complexity is O(n) for the stack in the worst case.",
+  "hints": [
+    "In Reverse Polish Notation, operators come after their operands. What data structure lets you easily access the most recent operands when you encounter an operator?",
+    "Use a stack: push numbers onto it, and when you see an operator, pop two numbers, apply the operation, and push the result back.",
+    "Be careful with the operand order when popping — the first popped value is the right operand. Also, for division, remember to truncate toward zero, not floor."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you convert an infix expression (e.g., \"(2 + 1) * 3\") to Reverse Polish Notation using the Shunting Yard algorithm?",
+    "How would you extend this evaluator to support additional operators like exponentiation (^) or modulo (%)?"
+  ]
+}

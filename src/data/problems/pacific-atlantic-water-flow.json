@@ -1,0 +1,73 @@
+{
+  "title": "Pacific Atlantic Water Flow",
+  "slug": "pacific-atlantic-water-flow",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": ["google", "amazon", "meta", "bloomberg", "uber", "oracle"],
+  "description": "There is an `m x n` rectangular island that borders both the **Pacific Ocean** and **Atlantic Ocean**. The Pacific Ocean touches the island's left and top edges, and the Atlantic Ocean touches the island's right and bottom edges.\n\nThe island is partitioned into a grid of square cells. You are given an `m x n` integer matrix `heights` where `heights[r][c]` represents the height above sea level of the cell at coordinate `(r, c)`.\n\nThe island receives a lot of rain, and the rain water can flow to neighboring cells directly north, south, east, and west if the neighboring cell's height is **less than or equal to** the current cell's height. Water can flow from any cell adjacent to an ocean into the ocean.\n\nReturn *a 2D list of grid coordinates* `result` *where* `result[i] = [ri, ci]` *denotes that rain water can flow from cell* `(ri, ci)` *to both the Pacific and Atlantic oceans*.\n\n**Example 1:**\n```\nInput: heights = [[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]]\nOutput: [[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]\nExplanation: The following cells can flow to both oceans:\n[0,4]: left/up to Pacific, right/down to Atlantic\n[1,3]: left/up to Pacific, right/down to Atlantic\n[1,4]: directly adjacent to both oceans\n[2,2]: left/up to Pacific, right/down to Atlantic\n[3,0]: directly adjacent to Pacific, down to Atlantic via [4,0]\n[3,1]: left/up to Pacific, down to Atlantic\n[4,0]: directly adjacent to both oceans\n```\n\n**Example 2:**\n```\nInput: heights = [[1]]\nOutput: [[0,0]]\nExplanation: The single cell can flow to both oceans since it borders both.\n```",
+  "examples": [
+    {
+      "input": "heights = [[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]]",
+      "output": "[[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]",
+      "explanation": "These 7 cells can reach both oceans. For example, cell [2,2] with height 5 can flow left/up to reach the Pacific (top/left edges) and right/down to reach the Atlantic (bottom/right edges)."
+    },
+    {
+      "input": "heights = [[1]]",
+      "output": "[[0,0]]",
+      "explanation": "A single cell island borders both oceans, so water from it can flow to both."
+    }
+  ],
+  "constraints": [
+    "m == heights.length",
+    "n == heights[r].length",
+    "1 <= m, n <= 200",
+    "0 <= heights[r][c] <= 100000"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def pacificAtlantic(self, heights: list[list[int]]) -> list[list[int]]:\n        # Write your solution here\n        pass",
+    "javascript": "function pacificAtlantic(heights) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<Integer>> pacificAtlantic(int[][] heights) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "heights = [[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]]",
+      "expected_output": "[[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [[1]]",
+      "expected_output": "[[0,0]]",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [[1,2],[3,4]]",
+      "expected_output": "[[0,1],[1,0],[1,1]]",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [[10,10,10],[10,1,10],[10,10,10]]",
+      "expected_output": "[[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]]",
+      "is_hidden": true
+    },
+    {
+      "input": "heights = [[1,1],[1,1],[1,1]]",
+      "expected_output": "[[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Instead of checking from each cell whether it can reach both oceans (which would be O((m*n)^2)), reverse the problem: start from the ocean borders and work inward. Create two boolean matrices — one for cells reachable from the Pacific and one for cells reachable from the Atlantic. For the Pacific, start BFS/DFS from all cells in the first row and first column. For the Atlantic, start from all cells in the last row and last column. When traversing, move to a neighbor only if its height is greater than or equal to the current cell (since we're going in reverse — from ocean to source). After both traversals, the answer is all cells marked true in both matrices. This approach visits each cell at most twice (once per ocean), giving O(m * n) time complexity. Space complexity is O(m * n) for the two boolean matrices and the BFS queues or DFS call stacks.",
+  "hints": [
+    "Instead of starting from each cell and checking if it can reach both oceans, think about starting from the oceans and working backwards. Which cells can the Pacific ocean 'reach' going uphill?",
+    "Do two separate BFS/DFS traversals: one starting from all Pacific border cells (top row + left column) and one from all Atlantic border cells (bottom row + right column). Move to neighbors with height >= current height (reverse flow).",
+    "After both traversals, find the intersection — cells that appear in both the Pacific-reachable set and the Atlantic-reachable set. These are your answer."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n)",
+    "space": "O(m * n)"
+  },
+  "follow_up_questions": [
+    "How would you solve this if water could also flow diagonally? What changes to the algorithm and complexity would be needed?",
+    "If the heights matrix were dynamically updated (cells changing height), how would you efficiently recompute the result without running the full algorithm from scratch?"
+  ]
+}

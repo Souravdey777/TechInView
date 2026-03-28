@@ -1,0 +1,71 @@
+{
+  "title": "Serialize and Deserialize Binary Tree",
+  "slug": "serialize-and-deserialize-binary-tree",
+  "difficulty": "hard",
+  "category": "trees",
+  "company_tags": ["google", "amazon", "meta", "microsoft", "uber", "linkedin"],
+  "description": "Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.\n\nDesign an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.\n\n**Clarification:** The input/output format is the same as how LeetCode serializes a binary tree. You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.\n\n**Example 1:**\n```\n    1\n   / \\\n  2   3\n     / \\\n    4   5\n\nInput: root = [1,2,3,null,null,4,5]\nOutput: [1,2,3,null,null,4,5]\n```\n\n**Example 2:**\n```\nInput: root = []\nOutput: []\n```",
+  "examples": [
+    {
+      "input": "root = [1,2,3,null,null,4,5]",
+      "output": "[1,2,3,null,null,4,5]",
+      "explanation": "The tree is serialized into a string representation and then deserialized back into the exact same tree structure."
+    },
+    {
+      "input": "root = []",
+      "output": "[]",
+      "explanation": "An empty tree serializes to an empty representation and deserializes back to null/None."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [0, 10^4].",
+    "-1000 <= Node.val <= 1000"
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Codec:\n    def serialize(self, root: TreeNode | None) -> str:\n        \"\"\"Encodes a tree to a single string.\"\"\"\n        # Write your solution here\n        pass\n\n    def deserialize(self, data: str) -> TreeNode | None:\n        \"\"\"Decodes your encoded data to tree.\"\"\"\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction serialize(root) {\n    // Write your solution here\n}\n\nfunction deserialize(data) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Codec {\n    public String serialize(TreeNode root) {\n        // Write your solution here\n        return \"\";\n    }\n\n    public TreeNode deserialize(String data) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Codec {\npublic:\n    string serialize(TreeNode* root) {\n        // Write your solution here\n        return \"\";\n    }\n\n    TreeNode* deserialize(string data) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [1,2,3,null,null,4,5]",
+      "expected_output": "[1,2,3,null,null,4,5]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = []",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1]",
+      "expected_output": "[1]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1,2,3,4,5,6,7]",
+      "expected_output": "[1,2,3,4,5,6,7]",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [5,2,null,1,3]",
+      "expected_output": "[5,2,null,1,3]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "There are multiple valid approaches. The most intuitive is preorder DFS with null markers: traverse the tree in preorder (root, left, right), appending each node's value to a string and using a sentinel like 'null' for empty children. To deserialize, split the string by the delimiter, then recursively reconstruct: read the next value — if it's the sentinel, return null; otherwise create a node with that value, then recursively build its left and right children. BFS (level-order) also works well: serialize by processing nodes level by level using a queue, including null markers for missing children. To deserialize, read values and use a queue to assign children to each parent node. Both approaches are O(n) time and O(n) space. The key insight is that you need null markers to uniquely reconstruct the tree — without them, a preorder or level-order sequence alone is ambiguous.",
+  "hints": [
+    "Think about tree traversals. Which traversal, combined with null markers for missing children, would let you uniquely reconstruct the tree?",
+    "Try preorder DFS: visit root, then left, then right. For each null child, write a sentinel value like 'N'. The string '1,2,N,N,3,4,N,N,5,N,N' encodes the tree uniquely.",
+    "For deserialization, use an iterator or index over the serialized tokens. Read the next token: if it's the sentinel, return null. Otherwise, create a node, then recursively build node.left and node.right from the remaining tokens."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you serialize and deserialize a binary search tree more efficiently, without needing null markers?",
+    "If memory is a concern, could you serialize the tree to a compact binary format instead of a string? What trade-offs would that involve?"
+  ]
+}
