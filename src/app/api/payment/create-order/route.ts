@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     const order = await createOrder(
       amount,
       currency,
-      `receipt_${user.id}_${Date.now()}`,
+      `rcpt_${user.id.slice(0, 8)}_${Date.now()}`,
       {
         userId: user.id,
         pack,
