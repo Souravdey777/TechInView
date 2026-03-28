@@ -58,12 +58,27 @@ export async function POST(req: NextRequest) {
         credits: creditPack.credits,
       },
     });
-  } catch (error) {
-    console.error("Create order error:", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to create order";
+  } catch (error: unknown) {
+    const errDetail =
+      error instanceof Error
+        ? { message: error.message, stack: error.stack }
+        : error;
+    console.error("Create order error:", JSON.stringify(errDetail, null, 2));
+    
+    let message = "Failed to create order";
+    if (error instanceof Error) {
+      message = error.message;
+    } else if (
+      typeof error === "object" &&
+      error !== null &&
+      "error" in error
+    ) {
+      const razorpayErr = error as { error: { description?: string } };
+      message = razorpayErr.error?.description ?? message;
+    }
+
     return NextResponse.json(
-      { success: false, error: message },
+      { success: false, error: message, debug: String(errDetail) },
       { status: 500 }
     );
   }
