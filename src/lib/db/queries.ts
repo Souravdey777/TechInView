@@ -5,13 +5,17 @@ import { eq, and, ilike, sql, desc, asc } from "drizzle-orm";
 
 import type { Profile, Problem, Interview, Message, Progress, Payment } from "./schema";
 
-// ─── DB Connection (lazy) ─────────────────────────────────────────────────────
+// ─── DB Connection (lazy, serverless-safe) ───────────────────────────────────
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
 function getDb() {
   if (!_db) {
-    const client = postgres(process.env.DATABASE_URL!);
+    const client = postgres(process.env.DATABASE_URL!, {
+      prepare: false,
+      idle_timeout: 20,
+      max: 1,
+    });
     _db = drizzle(client, { schema });
   }
   return _db;
@@ -28,8 +32,14 @@ export async function getProfile(userId: string): Promise<Profile | undefined> {
       .where(eq(schema.profiles.id, userId))
       .limit(1);
     return results[0];
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
+  } catch (error: unknown) {
+    const err = error as Record<string, unknown>;
+    const detail = [
+      err?.message ?? String(error),
+      err?.code ? `code=${err.code}` : null,
+      err?.detail ? `detail=${err.detail}` : null,
+      err?.hint ? `hint=${err.hint}` : null,
+    ].filter(Boolean).join(" | ");
     throw new Error(`getProfile failed for user ${userId}: ${detail}`);
   }
 }
