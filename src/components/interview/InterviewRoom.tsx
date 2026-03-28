@@ -371,7 +371,21 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Code execution failed");
-      setTestResults(json.data?.test_results ?? []);
+
+      const results: TestResult[] = json.data?.test_results ?? [];
+
+      if (results.length === 0 && json.data?.message) {
+        results.push({
+          id: "info",
+          input: "",
+          expected: "",
+          actual: json.data.message,
+          passed: false,
+          isHidden: false,
+        });
+      }
+
+      setTestResults(results);
     } catch {
       setTestResults([
         {

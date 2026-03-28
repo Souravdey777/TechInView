@@ -10,30 +10,112 @@ type TestCase = {
   is_hidden: boolean;
 };
 
+/**
+ * Parse a test-case input string like `nums = [2,7,11,15], target = 9`
+ * into an ordered list of {name, value} pairs.
+ */
+function parseTestInput(input: string): { name: string; value: string }[] {
+  const params: { name: string; value: string }[] = [];
+  let rest = input.trim();
+
+  while (rest.length > 0) {
+    const eqIdx = rest.indexOf("=");
+    if (eqIdx === -1) break;
+
+    const name = rest.slice(0, eqIdx).trim();
+    rest = rest.slice(eqIdx + 1).trimStart();
+
+    let depth = 0;
+    let inStr: string | null = null;
+    let i = 0;
+
+    for (; i < rest.length; i++) {
+      const ch = rest[i];
+      if (inStr) {
+        if (ch === inStr && rest[i - 1] !== "\\") inStr = null;
+        continue;
+      }
+      if (ch === '"' || ch === "'") { inStr = ch; continue; }
+      if (ch === "[" || ch === "{" || ch === "(") { depth++; continue; }
+      if (ch === "]" || ch === "}" || ch === ")") { depth--; continue; }
+      if (ch === "," && depth === 0) break;
+    }
+
+    params.push({ name, value: rest.slice(0, i).trim() });
+    rest = rest.slice(i + 1).trimStart();
+  }
+
+  return params;
+}
+
 function wrapCodeForExecution(
   language: string,
   userCode: string,
   stdin: string
 ): { code: string; stdin: string } {
-  // Generic stdin-based execution: user code runs with test input as stdin.
-  // The test case `input` is passed as stdin and stdout is compared to `expected_output`.
-  // Problem starter code should read from stdin and print to stdout.
-  // For function-based problems (LeetCode style), we rely on the user providing
-  // a main block or use the wrapping below for common patterns.
-
-  switch (language) {
-    case "python":
-      // Run user code as-is with stdin provided. User code is expected to
-      // read stdin and print the result.
-      return { code: userCode, stdin };
-
-    case "javascript":
-      // Run user code as-is with stdin provided via process.stdin.
-      return { code: userCode, stdin };
-
-    default:
-      return { code: userCode, stdin };
+  const params = parseTestInput(stdin);
+  if (params.length === 0) {
+    return { code: userCode, stdin: "" };
   }
+
+  const argValues = params.map((p) => p.value);
+
+  if (language === "python") {
+    const hasSolutionClass = /class\s+Solution\b/.test(userCode);
+    const fnMatch = userCode.match(
+      /def\s+(\w+)\s*\(\s*self\s*,/
+    ) ?? userCode.match(
+      /def\s+(\w+)\s*\(/
+    );
+    const fnName = fnMatch?.[1];
+
+    if (!fnName) {
+      return { code: userCode, stdin: "" };
+    }
+
+    const callArgs = argValues.join(", ");
+    const driver = hasSolutionClass
+      ? `\n__result = Solution().${fnName}(${callArgs})\n`
+      : `\n__result = ${fnName}(${callArgs})\n`;
+
+    const printer = [
+      "if isinstance(__result, bool):",
+      "    print(str(__result).lower())",
+      "elif isinstance(__result, list):",
+      "    import json",
+      "    print(json.dumps(__result))",
+      "else:",
+      "    print(__result)",
+    ].join("\n");
+
+    return { code: userCode + "\n" + driver + printer, stdin: "" };
+  }
+
+  if (language === "javascript") {
+    const fnMatch = userCode.match(
+      /(?:function|const|let|var)\s+(\w+)/
+    );
+    const fnName = fnMatch?.[1];
+
+    if (!fnName) {
+      return { code: userCode, stdin: "" };
+    }
+
+    const callArgs = argValues.join(", ");
+    const driver = [
+      "",
+      `const __result = ${fnName}(${callArgs});`,
+      "if (typeof __result === 'boolean') {",
+      "  console.log(__result ? 'true' : 'false');",
+      "} else {",
+      "  console.log(JSON.stringify(__result));",
+      "}",
+    ].join("\n");
+
+    return { code: userCode + driver, stdin: "" };
+  }
+
+  return { code: userCode, stdin: "" };
 }
 
 function normalizeOutput(s: string): string {
@@ -87,22 +169,54 @@ export async function POST(req: NextRequest) {
       testCases = bodyTestCases as TestCase[];
     }
 
-    // First, do a raw syntax-check run with no stdin
-    const rawResult = await executeCode(config.pistonId, config.version, code);
-
-    if (rawResult.stderr && rawResult.exit_code !== 0) {
+    // No test cases: do a plain run and return the output
+    if (testCases.length === 0) {
+      const rawResult = await executeCode(config.pistonId, config.version, code);
       return NextResponse.json({
         success: true,
         data: {
           stdout: rawResult.stdout,
           stderr: rawResult.stderr,
           exit_code: rawResult.exit_code,
+          test_results: rawResult.stderr && rawResult.exit_code !== 0
+            ? [{
+                id: "compile-error",
+                input: "",
+                expected: "",
+                actual: rawResult.stderr.slice(0, 500),
+                passed: false,
+                isHidden: false,
+              }]
+            : [],
+          message: rawResult.exit_code === 0
+            ? "Code executed successfully. No test cases available for comparison."
+            : undefined,
+        },
+      });
+    }
+
+    // Run the first test case to catch syntax/compile errors early
+    const firstWrapped = wrapCodeForExecution(language, code, testCases[0].input);
+    const firstResult = await executeCode(
+      config.pistonId,
+      config.version,
+      firstWrapped.code,
+      firstWrapped.stdin
+    );
+
+    if (firstResult.stderr && firstResult.exit_code !== 0) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          stdout: firstResult.stdout,
+          stderr: firstResult.stderr,
+          exit_code: firstResult.exit_code,
           test_results: [
             {
               id: "compile-error",
               input: "",
               expected: "",
-              actual: rawResult.stderr.slice(0, 500),
+              actual: firstResult.stderr.slice(0, 500),
               passed: false,
               isHidden: false,
             },
@@ -111,23 +225,24 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // No test cases: just return the raw run result
-    if (testCases.length === 0) {
-      return NextResponse.json({
-        success: true,
-        data: {
-          stdout: rawResult.stdout,
-          stderr: rawResult.stderr,
-          exit_code: rawResult.exit_code,
-          test_results: [],
-          message: "Code executed successfully. No test cases available for comparison.",
-        },
-      });
-    }
+    // Build the first test result, then run remaining in parallel
+    const firstActual = normalizeOutput(firstResult.stdout);
+    const firstExpected = normalizeOutput(testCases[0].expected_output);
+    const firstPassed = firstActual === firstExpected;
+    const tc0 = testCases[0];
+    const firstTestResult = {
+      id: "test-1",
+      input: tc0.is_hidden ? "Hidden" : tc0.input,
+      expected: tc0.is_hidden ? "Hidden" : tc0.expected_output,
+      actual: tc0.is_hidden && !firstPassed
+        ? "Wrong answer"
+        : firstActual || firstResult.stderr.slice(0, 200) || "No output",
+      passed: firstPassed,
+      isHidden: tc0.is_hidden,
+    };
 
-    // Run against all test cases in parallel
-    const testResults = await Promise.all(
-      testCases.map(async (tc, i) => {
+    const remainingResults = await Promise.all(
+      testCases.slice(1).map(async (tc, i) => {
         try {
           const wrapped = wrapCodeForExecution(language, code, tc.input);
           const result = await executeCode(
@@ -142,7 +257,7 @@ export async function POST(req: NextRequest) {
           const passed = actual === expected;
 
           return {
-            id: `test-${i + 1}`,
+            id: `test-${i + 2}`,
             input: tc.is_hidden ? "Hidden" : tc.input,
             expected: tc.is_hidden ? "Hidden" : tc.expected_output,
             actual:
@@ -154,7 +269,7 @@ export async function POST(req: NextRequest) {
           };
         } catch {
           return {
-            id: `test-${i + 1}`,
+            id: `test-${i + 2}`,
             input: tc.is_hidden ? "Hidden" : tc.input,
             expected: tc.is_hidden ? "Hidden" : tc.expected_output,
             actual: "Execution timeout",
@@ -164,6 +279,8 @@ export async function POST(req: NextRequest) {
         }
       })
     );
+
+    const testResults = [firstTestResult, ...remainingResults];
 
     try {
       const supabase = createClient();
@@ -183,9 +300,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        stdout: rawResult.stdout,
-        stderr: rawResult.stderr,
-        exit_code: rawResult.exit_code,
+        stdout: firstResult.stdout,
+        stderr: firstResult.stderr,
+        exit_code: firstResult.exit_code,
         test_results: testResults,
       },
     });
