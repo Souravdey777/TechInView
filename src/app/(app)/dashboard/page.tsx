@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { InterviewHistory } from "@/components/dashboard/InterviewHistory";
-import { ArrowRight, Mic, Zap, Braces, Network, MonitorSmartphone, Lock } from "lucide-react";
+import { ArrowRight, Mic, Zap, Braces, Network, MonitorSmartphone, Lock, CreditCard } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export default async function DashboardPage() {
   const [{ data: profile }, { data: interviews }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("display_name, interviews_completed")
+      .select("display_name, interviews_completed, interview_credits, has_used_free_trial")
       .eq("id", user.id)
       .single(),
     supabase
@@ -34,6 +34,8 @@ export default async function DashboardPage() {
 
   const displayName =
     profile?.display_name ?? user.email?.split("@")[0] ?? "there";
+  const credits = profile?.interview_credits ?? 0;
+  const hasCredits = credits > 0;
 
   const completedInterviews = (interviews || []).filter(
     (i) => i.status === "completed"
@@ -115,20 +117,32 @@ export default async function DashboardPage() {
 
       {/* Interview Types */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* DSA — active */}
-        <Link
-          href="/interview/setup"
-          className="flex items-center gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-4 py-3.5 transition-all hover:border-brand-cyan/50 hover:bg-brand-cyan/8 group"
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-cyan/10 border border-brand-cyan/25">
-            <Braces className="w-4 h-4 text-brand-cyan" />
+        {/* DSA — active / disabled when no credits */}
+        {hasCredits ? (
+          <Link
+            href="/interview/setup"
+            className="flex items-center gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-4 py-3.5 transition-all hover:border-brand-cyan/50 hover:bg-brand-cyan/8 group"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-cyan/10 border border-brand-cyan/25">
+              <Braces className="w-4 h-4 text-brand-cyan" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-brand-text">DSA / Coding</p>
+              <p className="text-[11px] text-brand-muted truncate">Algorithms &amp; data structures</p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-brand-cyan opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 rounded-xl border border-brand-border px-4 py-3.5 opacity-60 cursor-not-allowed">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-surface border border-brand-border">
+              <Braces className="w-4 h-4 text-brand-muted" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-brand-muted">DSA / Coding</p>
+              <p className="text-[11px] text-brand-muted/60 truncate">No credits remaining</p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-brand-text">DSA / Coding</p>
-            <p className="text-[11px] text-brand-muted truncate">Algorithms &amp; data structures</p>
-          </div>
-          <ArrowRight className="w-4 h-4 text-brand-cyan opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-        </Link>
+        )}
 
         {/* System Design — coming soon */}
         <div className="flex items-center gap-3 rounded-xl border border-brand-border px-4 py-3.5 opacity-50 cursor-not-allowed">
@@ -174,38 +188,72 @@ export default async function DashboardPage() {
       />
 
       {/* Quick Start CTA */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-brand-cyan/10 via-brand-card to-brand-card rounded-xl border border-brand-cyan/25 p-6">
-        <div className="absolute -top-12 -right-12 w-48 h-48 bg-brand-cyan/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Zap className="w-5 h-5 text-brand-cyan" />
-              <span className="text-brand-cyan text-xs font-semibold uppercase tracking-widest">
-                Quick Start
-              </span>
+      {hasCredits ? (
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-cyan/10 via-brand-card to-brand-card rounded-xl border border-brand-cyan/25 p-6">
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-brand-cyan/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative flex items-start justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="w-5 h-5 text-brand-cyan" />
+                <span className="text-brand-cyan text-xs font-semibold uppercase tracking-widest">
+                  Quick Start
+                </span>
+              </div>
+              <h2 className="text-xl font-bold font-heading text-brand-text mb-2">
+                Start a New Mock Interview
+              </h2>
+              <p className="text-brand-muted text-sm mb-5 max-w-md">
+                Practice with an AI interviewer named Alex. Solve DSA problems
+                with voice interaction, live code execution, and FAANG-calibrated
+                scoring.
+              </p>
+              <Link
+                href="/interview/setup"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-cyan text-brand-deep font-semibold text-sm rounded-lg hover:bg-brand-cyan/90 transition-all duration-150 shadow-lg shadow-brand-cyan/20"
+              >
+                <Mic className="w-4 h-4" />
+                Start Interview
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-            <h2 className="text-xl font-bold font-heading text-brand-text mb-2">
-              Start a New Mock Interview
-            </h2>
-            <p className="text-brand-muted text-sm mb-5 max-w-md">
-              Practice with an AI interviewer named Alex. Solve DSA problems
-              with voice interaction, live code execution, and FAANG-calibrated
-              scoring.
-            </p>
-            <Link
-              href="/interview/setup"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-cyan text-brand-deep font-semibold text-sm rounded-lg hover:bg-brand-cyan/90 transition-all duration-150 shadow-lg shadow-brand-cyan/20"
-            >
-              <Mic className="w-4 h-4" />
-              Start Interview
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="hidden sm:flex items-center justify-center w-20 h-20 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 shrink-0">
-            <Mic className="w-9 h-9 text-brand-cyan opacity-60" />
+            <div className="hidden sm:flex items-center justify-center w-20 h-20 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 shrink-0">
+              <Mic className="w-9 h-9 text-brand-cyan opacity-60" />
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-amber/5 via-brand-card to-brand-card rounded-xl border border-brand-amber/25 p-6">
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-brand-amber/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative flex items-start justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <CreditCard className="w-5 h-5 text-brand-amber" />
+                <span className="text-brand-amber text-xs font-semibold uppercase tracking-widest">
+                  No Credits
+                </span>
+              </div>
+              <h2 className="text-xl font-bold font-heading text-brand-text mb-2">
+                You&apos;re out of interview credits
+              </h2>
+              <p className="text-brand-muted text-sm mb-5 max-w-md">
+                Purchase a credit pack to continue practicing with Alex. Keep
+                sharpening your skills and land your dream offer.
+              </p>
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-amber text-brand-deep font-semibold text-sm rounded-lg hover:bg-brand-amber/90 transition-all duration-150 shadow-lg shadow-brand-amber/20"
+              >
+                <CreditCard className="w-4 h-4" />
+                Buy Credits
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="hidden sm:flex items-center justify-center w-20 h-20 rounded-2xl bg-brand-amber/10 border border-brand-amber/20 shrink-0">
+              <CreditCard className="w-9 h-9 text-brand-amber opacity-60" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Recent Interviews */}
       <div>
