@@ -59,29 +59,36 @@ _Goal: Accept payments_
   - Only 2 easy problems available (randomly picks one at runtime)
   - Enforce in `/api/interview/start` + interview room UI
 
-## Phase 6: Voice Upgrade
-_Goal: Replace browser APIs with production-quality voice_
-
-- [ ] 31. Integrate Deepgram Nova-2 for server-side STT (replace browser SpeechRecognition)
-- [ ] 32. Integrate Deepgram Aura 2 for TTS (replace browser SpeechSynthesis)
-- [ ] 33. Deploy voice-server to Railway
-- [ ] 34. Wire WebSocket voice pipeline: Browser → Railway → Deepgram STT/Claude/Deepgram TTS → Browser
-- [ ] 35. Interruption handling — stop Alex when user starts speaking
-
-## Phase 7: Analytics & Growth
+## Phase 6: Analytics & Growth
 _Goal: Understand usage, iterate_
 
-- [ ] 36. PostHog integration (interview_started, completed, code_run, payment events)
-- [ ] 37. Track conversion funnel: landing → signup → first interview → payment
+- [ ] 31. PostHog integration (interview_started, completed, code_run, payment events)
+- [ ] 32. Track conversion funnel: landing → signup → first interview → payment
+
+## Phase 7: Onboarding
+
+- [ ] 33. User onboarding flow — first-time setup wizard (name, target company, experience level, preferred language)
+
+## Phase 8: Beta Launch (March 30)
+
+- [ ] 34. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Alex", each with distinct personality and interview style
+- [ ] 35. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
+- [ ] 36. Problem bank expansion (50+ problems)
+- [ ] 37. Sales and Marketing Plan
+
+## Phase 9: Voice Upgrade
+_Goal: Replace browser APIs with production-quality voice_
+
+- [ ] 38. Integrate Deepgram Nova-2 for server-side STT (replace browser SpeechRecognition)
+- [ ] 39. Integrate Deepgram Aura 2 for TTS (replace browser SpeechSynthesis)
+- [ ] 40. Deploy voice-server to Railway
+- [ ] 41. Wire WebSocket voice pipeline: Browser → Railway → Deepgram STT/Claude/Deepgram TTS → Browser
+- [ ] 42. Interruption handling — stop Alex when user starts speaking
 
 ## Pre-V1 Launch
 _Ship before going live_
 
-- [ ] 38. User onboarding flow — first-time setup wizard (name, target company, experience level, preferred language)
-- [ ] 39. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
-- [ ] 40. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Alex", each with distinct personality and interview style
-- [ ] 41. Referral program for influencers — custom referral links, tracking, commission/credit payouts
-- [ ] Problem bank expansion (50+ problems)
+- [ ] 43. Referral program for influencers — custom referral links, tracking, commission/credit payouts
 
 ## Post-V1 Roadmap
 _After launch & initial traction_

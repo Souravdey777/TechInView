@@ -58,9 +58,12 @@ export async function POST(req: NextRequest) {
         credits: creditPack.credits,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("Create order error:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to create order";
     return NextResponse.json(
-      { success: false, error: "Failed to create order" },
+      { success: false, error: message },
       { status: 500 }
     );
   }
