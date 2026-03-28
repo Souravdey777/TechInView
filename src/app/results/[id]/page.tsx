@@ -5,12 +5,13 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, Loader2, FileQuestion, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, Loader2, FileQuestion, Lock, Sparkles, MessageSquare } from "lucide-react";
 import { ScoreSummary } from "@/components/results/ScoreSummary";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
 import { FeedbackCard } from "@/components/results/FeedbackCard";
 import { TranscriptReview } from "@/components/results/TranscriptReview";
 import { CodeReview } from "@/components/results/CodeReview";
+import { InterviewFeedback } from "@/components/results/InterviewFeedback";
 import { SCORING_DIMENSIONS } from "@/lib/constants";
 import type { HireRecommendation } from "@/lib/constants";
 import { useInterviewStore } from "@/stores/interview-store";
@@ -128,8 +129,21 @@ export default function ResultsPage() {
   const [fetched, setFetched] = useState(false);
   const [isFreeTrial, setIsFreeTrial] = useState(false);
 
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackAutoShown, setFeedbackAutoShown] = useState(false);
+
   const storeMatchesPage = storeResult?.interviewId === pageId;
   const result = storeMatchesPage ? storeResult : dbResult;
+
+  // Auto-open feedback dialog 3s after results load (only once per page visit)
+  useEffect(() => {
+    if (feedbackAutoShown || !result || !pageId) return;
+    const timer = setTimeout(() => {
+      setFeedbackOpen(true);
+      setFeedbackAutoShown(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [result, pageId, feedbackAutoShown]);
 
   useEffect(() => {
     if (storeMatchesPage || fetched) return;
@@ -451,16 +465,33 @@ export default function ResultsPage() {
         {/* ── CTA: Practice Again ── */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-brand-border r-anim-8">
           <p className="text-sm text-brand-muted">Ready to improve your score?</p>
-          <Link
-            href="/interview/setup"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Practice Again
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setFeedbackOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-brand-border text-sm text-brand-text hover:bg-brand-card transition-colors"
+            >
+              <MessageSquare className="h-4 w-4 text-brand-muted" />
+              Leave Feedback
+            </button>
+            <Link
+              href="/interview/setup"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Practice Again
+            </Link>
+          </div>
         </div>
 
       </div>
+
+      {/* Post-interview feedback dialog */}
+      <InterviewFeedback
+        interviewId={pageId}
+        open={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
+      />
     </main>
   );
 }

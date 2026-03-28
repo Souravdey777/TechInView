@@ -160,6 +160,25 @@ export const progress = pgTable(
   })
 );
 
+export const interviewFeedback = pgTable("interview_feedback", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  interview_id: uuid("interview_id")
+    .references(() => interviews.id, { onDelete: "cascade" })
+    .notNull()
+    .unique(),
+  user_id: uuid("user_id")
+    .references(() => profiles.id, { onDelete: "cascade" })
+    .notNull(),
+  rating: integer("rating").notNull(),
+  went_well: text("went_well"),
+  to_improve: text("to_improve"),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .default(sql`now()`)
+    .notNull(),
+});
+
 export const payments = pgTable("payments", {
   id: uuid("id")
     .primaryKey()
@@ -201,6 +220,7 @@ export const interviewsRelations = relations(interviews, ({ one, many }) => ({
     references: [problems.id],
   }),
   messages: many(messages),
+  feedback: one(interviewFeedback),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -213,6 +233,17 @@ export const messagesRelations = relations(messages, ({ one }) => ({
 export const progressRelations = relations(progress, ({ one }) => ({
   profile: one(profiles, {
     fields: [progress.user_id],
+    references: [profiles.id],
+  }),
+}));
+
+export const interviewFeedbackRelations = relations(interviewFeedback, ({ one }) => ({
+  interview: one(interviews, {
+    fields: [interviewFeedback.interview_id],
+    references: [interviews.id],
+  }),
+  profile: one(profiles, {
+    fields: [interviewFeedback.user_id],
     references: [profiles.id],
   }),
 }));
@@ -243,3 +274,6 @@ export type NewProgress = InferInsertModel<typeof progress>;
 
 export type Payment = InferSelectModel<typeof payments>;
 export type NewPayment = InferInsertModel<typeof payments>;
+
+export type InterviewFeedback = InferSelectModel<typeof interviewFeedback>;
+export type NewInterviewFeedback = InferInsertModel<typeof interviewFeedback>;

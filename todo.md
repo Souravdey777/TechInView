@@ -72,8 +72,8 @@ _Goal: Understand usage, iterate_
 ## Phase 8: Pre-Beta Launch
 
 - [x] 34. Problems & Progress pages should be locked for non-paid users
-- [ ] 35. Problem bank expansion (70+ problems)
-- [ ] 36. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
+- [x] 35. Problem bank expansion (70+ problems)
+- [x] 36. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
 
 ## Phase 8: Beta Launch (March 30)
 

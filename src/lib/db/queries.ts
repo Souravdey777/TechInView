@@ -3,7 +3,7 @@ import postgres from "postgres";
 import * as schema from "./schema";
 import { eq, and, ilike, sql, desc, asc } from "drizzle-orm";
 
-import type { Profile, Problem, Interview, Message, Progress, Payment } from "./schema";
+import type { Profile, Problem, Interview, Message, Progress, Payment, InterviewFeedback } from "./schema";
 
 // ─── DB Connection (lazy, serverless-safe) ───────────────────────────────────
 
@@ -339,5 +339,42 @@ export async function decrementCredits(
       )
     )
     .returning();
+  return results[0];
+}
+
+// ─── Interview Feedback Queries ──────────────────────────────────────────────
+
+export async function insertInterviewFeedback(data: {
+  interview_id: string;
+  user_id: string;
+  rating: number;
+  went_well?: string;
+  to_improve?: string;
+}): Promise<InterviewFeedback> {
+  const db = getDb();
+  const results = await db
+    .insert(schema.interviewFeedback)
+    .values(data)
+    .onConflictDoUpdate({
+      target: schema.interviewFeedback.interview_id,
+      set: {
+        rating: data.rating,
+        went_well: data.went_well ?? null,
+        to_improve: data.to_improve ?? null,
+      },
+    })
+    .returning();
+  return results[0];
+}
+
+export async function getInterviewFeedback(
+  interviewId: string
+): Promise<InterviewFeedback | undefined> {
+  const db = getDb();
+  const results = await db
+    .select()
+    .from(schema.interviewFeedback)
+    .where(eq(schema.interviewFeedback.interview_id, interviewId))
+    .limit(1);
   return results[0];
 }
