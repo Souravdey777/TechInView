@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sora, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
+import { PostHogProvider } from "@/components/providers/PostHogProvider";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -79,8 +80,10 @@ export default function RootLayout({
       <body
         className={`${sora.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
-        <div>{children}</div>
-        <Toaster />
+        <PostHogProvider>
+          <div>{children}</div>
+          <Toaster />
+        </PostHogProvider>
       </body>
     </html>
   );

@@ -22,6 +22,7 @@ import {
   Lock,
   Sparkles,
 } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useInterviewStore } from "@/stores/interview-store";
@@ -199,6 +200,7 @@ function SetupSkeleton() {
 function InterviewSetupInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const posthog = usePostHog();
   const initFromSetup = useInterviewStore((s) => s.initFromSetup);
   const { supabase, user } = useSupabase();
 
@@ -347,6 +349,14 @@ function InterviewSetupInner() {
   async function handleStartInterview() {
     setIsCreating(true);
     setCreateError(null);
+    posthog?.capture("interview_setup_started", {
+      difficulty: form.difficulty,
+      category: form.category,
+      language: form.language,
+      duration: form.duration,
+      problem_mode: problemMode,
+      is_free_trial: isFreeTrialUser,
+    });
     try {
       const body: Record<string, unknown> = {
         difficulty: form.difficulty,

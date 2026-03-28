@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeCode } from "@/lib/piston";
 import { LANGUAGE_CONFIG, type SupportedLanguage } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 type TestCase = {
   input: string;
@@ -162,6 +164,21 @@ export async function POST(req: NextRequest) {
         }
       })
     );
+
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const passed = testResults.filter((t) => t.passed).length;
+        captureServerEvent(user.id, "code_executed", {
+          language,
+          tests_passed: passed,
+          tests_total: testResults.length,
+        });
+      }
+    } catch {
+      // analytics should never block the response
+    }
 
     return NextResponse.json({
       success: true,

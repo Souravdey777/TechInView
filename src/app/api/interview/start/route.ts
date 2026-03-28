@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 const FREE_TRIAL_MAX_DURATION = 1200; // 20 minutes
 
@@ -83,6 +84,17 @@ export async function POST(req: NextRequest) {
       }
     } else {
       interviewId = `demo-${Date.now()}`;
+    }
+
+    if (user) {
+      captureServerEvent(user.id, "interview_started", {
+        difficulty: problem.difficulty,
+        category: problem.category,
+        language,
+        is_free_trial: isFreeInterview,
+        problem_title: problem.title,
+        interview_id: interviewId,
+      });
     }
 
     return NextResponse.json({

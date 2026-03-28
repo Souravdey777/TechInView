@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createOrder } from "@/lib/razorpay";
 import { createClient } from "@/lib/supabase/server";
 import { CREDIT_PACKS, getRegionForCountry } from "@/lib/constants";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,15 @@ export async function POST(req: NextRequest) {
         credits: String(creditPack.credits),
       }
     );
+
+    captureServerEvent(user.id, "payment_initiated", {
+      pack,
+      amount,
+      currency,
+      region,
+      credits: creditPack.credits,
+      order_id: order.id,
+    });
 
     return NextResponse.json({
       success: true,

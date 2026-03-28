@@ -7,6 +7,7 @@ import {
   incrementCredits,
   updateProfile,
 } from "@/lib/db/queries";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 export const dynamic = "force-dynamic";
 
@@ -100,6 +101,15 @@ export async function POST(req: NextRequest) {
     if (customerId) {
       await updateProfile(user.id, { razorpay_customer_id: customerId });
     }
+
+    captureServerEvent(user.id, "payment_completed", {
+      pack,
+      credits,
+      amount: payment.amount,
+      currency: payment.currency,
+      payment_id: razorpay_payment_id,
+      order_id: razorpay_order_id,
+    });
 
     return NextResponse.json({
       success: true,

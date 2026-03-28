@@ -62,8 +62,8 @@ _Goal: Accept payments_
 ## Phase 6: Analytics & Growth
 _Goal: Understand usage, iterate_
 
-- [ ] 31. PostHog integration (interview_started, completed, code_run, payment events)
-- [ ] 32. Track conversion funnel: landing → signup → first interview → payment
+- [x] 31. PostHog integration (interview_started, completed, code_run, payment events)
+- [x] 32. Track conversion funnel: landing → signup → first interview → payment
 
 ## Phase 7: Onboarding
 

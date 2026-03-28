@@ -30,6 +30,8 @@
     "drizzle-orm": "^0.45.1",
     "lucide-react": "^0.577.0",
     "next": "14.2.35",
+    "posthog-js": "^1.364.1",
+    "posthog-node": "^5.28.8",
     "razorpay": "^2.9.6",
     "react": "^18",
     "react-dom": "^18",

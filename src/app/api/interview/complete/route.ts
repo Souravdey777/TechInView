@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { scoreInterview } from "@/lib/ai/scorer";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 type CompleteInterviewBody = {
   interviewId: string;
@@ -104,6 +105,22 @@ export async function POST(req: NextRequest) {
         // Log but don't fail — user still gets results
         console.error("Failed to save interview to DB:", dbError);
       }
+    }
+
+    if (user) {
+      const durationSeconds = transcript.length > 0
+        ? Math.floor(transcript[transcript.length - 1].timestamp_ms / 1000)
+        : 0;
+      captureServerEvent(user.id, "interview_completed", {
+        interview_id: interviewId,
+        overall_score: scoringResult?.overall_score ?? null,
+        hire_recommendation: scoringResult?.hire_recommendation ?? null,
+        duration_seconds: durationSeconds,
+        tests_passed: testsPassed,
+        tests_total: testsTotal,
+        difficulty: problem.difficulty,
+        category: problem.category,
+      });
     }
 
     return NextResponse.json({
