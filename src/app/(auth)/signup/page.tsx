@@ -2,27 +2,35 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { cn } from "@/lib/utils";
+import { BETA_INVITE_CODE, BETA_CREDITS } from "@/lib/constants";
 
 type OAuthProvider = "google" | "github";
 
 export default function SignupPage() {
   const { supabase } = useSupabase();
   const posthog = usePostHog();
+  const searchParams = useSearchParams();
+  const ref = searchParams.get("ref");
+  const isBeta = ref === BETA_INVITE_CODE;
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleOAuth = async (provider: OAuthProvider) => {
     setLoadingProvider(provider);
     setError(null);
-    posthog?.capture("signup_clicked", { provider });
+    posthog?.capture("signup_clicked", { provider, ref: ref ?? undefined });
     try {
+      const callbackUrl = new URL("/callback", window.location.origin);
+      if (ref) callbackUrl.searchParams.set("ref", ref);
+
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/callback`,
+          redirectTo: callbackUrl.toString(),
         },
       });
       if (oauthError) {
@@ -51,9 +59,21 @@ export default function SignupPage() {
           <h1 className="text-xl font-bold text-brand-text text-center mb-2">
             Create your account
           </h1>
-          <p className="text-brand-muted text-sm text-center mb-8">
-            Start with 1 free interview per week
-          </p>
+          {isBeta ? (
+            <div className="flex flex-col items-center gap-2 mb-8">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 px-3 py-1 text-xs font-semibold text-brand-cyan">
+                Beta Invite
+              </span>
+              <p className="text-brand-muted text-sm text-center">
+                You&apos;ve been invited! Sign up for{" "}
+                <span className="text-brand-cyan font-semibold">{BETA_CREDITS} free interviews</span>
+              </p>
+            </div>
+          ) : (
+            <p className="text-brand-muted text-sm text-center mb-8">
+              Start with 1 free interview per week
+            </p>
+          )}
 
           {error && (
             <div className="mb-4 rounded-lg border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm text-brand-danger">
@@ -132,7 +152,7 @@ export default function SignupPage() {
         <p className="text-center text-brand-muted text-sm mt-6">
           Already have an account?{" "}
           <Link
-            href="/login"
+            href={ref ? `/login?ref=${ref}` : "/login"}
             className="text-brand-cyan hover:underline"
           >
             Sign in

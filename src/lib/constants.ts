@@ -49,6 +49,9 @@ export type ScoringDimension = keyof typeof SCORING_DIMENSIONS;
 export const MAX_INTERVIEW_DURATION = 2700;
 export const FREE_INTERVIEWS_PER_WEEK = 1;
 
+export const BETA_INVITE_CODE = "beta";
+export const BETA_CREDITS = 3;
+
 export const HIRE_RECOMMENDATIONS = ["strong_hire", "hire", "lean_hire", "lean_no_hire", "no_hire"] as const;
 export type HireRecommendation = (typeof HIRE_RECOMMENDATIONS)[number];
 

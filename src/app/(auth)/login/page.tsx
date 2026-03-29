@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,8 @@ type OAuthProvider = "google" | "github";
 export default function LoginPage() {
   const { supabase } = useSupabase();
   const posthog = usePostHog();
+  const searchParams = useSearchParams();
+  const ref = searchParams.get("ref");
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,10 +22,13 @@ export default function LoginPage() {
     setError(null);
     posthog?.capture("login_clicked", { provider });
     try {
+      const callbackUrl = new URL("/callback", window.location.origin);
+      if (ref) callbackUrl.searchParams.set("ref", ref);
+
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/callback`,
+          redirectTo: callbackUrl.toString(),
         },
       });
       if (oauthError) {
@@ -128,7 +134,7 @@ export default function LoginPage() {
         <p className="text-center text-brand-muted text-sm mt-6">
           Don&apos;t have an account?{" "}
           <Link
-            href="/signup"
+            href={ref ? `/signup?ref=${ref}` : "/signup"}
             className="text-brand-cyan hover:underline"
           >
             Sign up
