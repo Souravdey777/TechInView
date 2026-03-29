@@ -3,12 +3,36 @@ import { createClient } from "@/lib/supabase/server";
 import { insertInterviewFeedback, getInterviewFeedback } from "@/lib/db/queries";
 import { captureServerEvent } from "@/lib/posthog/server";
 
+const RATING_KEYS = [
+  "realism",
+  "ai_quality",
+  "problem_fit",
+  "scoring_accuracy",
+  "overall",
+] as const;
+
+type Ratings = Record<(typeof RATING_KEYS)[number], number> & { nps: number };
+
 type FeedbackBody = {
   interviewId: string;
-  rating: number;
+  ratings: Ratings;
   wentWell?: string;
   toImprove?: string;
 };
+
+function validateRatings(ratings: unknown): ratings is Ratings {
+  if (!ratings || typeof ratings !== "object") return false;
+  const r = ratings as Record<string, unknown>;
+
+  for (const key of RATING_KEYS) {
+    const val = r[key];
+    if (typeof val !== "number" || val < 1 || val > 5) return false;
+  }
+
+  if (typeof r.nps !== "number" || r.nps < 1 || r.nps > 10) return false;
+
+  return true;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,11 +49,22 @@ export async function POST(req: NextRequest) {
     }
 
     const body = (await req.json()) as FeedbackBody;
-    const { interviewId, rating, wentWell, toImprove } = body;
+    const { interviewId, ratings, wentWell, toImprove } = body;
 
-    if (!interviewId || typeof rating !== "number" || rating < 1 || rating > 5) {
+    if (!interviewId) {
       return NextResponse.json(
-        { success: false, error: "interviewId and rating (1-5) are required" },
+        { success: false, error: "interviewId is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!validateRatings(ratings)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "ratings object is required with realism, ai_quality, problem_fit, scoring_accuracy, overall (1-5) and nps (1-10)",
+        },
         { status: 400 }
       );
     }
@@ -37,14 +72,20 @@ export async function POST(req: NextRequest) {
     const feedback = await insertInterviewFeedback({
       interview_id: interviewId,
       user_id: user.id,
-      rating,
+      rating: ratings.overall,
+      ratings,
       went_well: wentWell?.trim() || undefined,
       to_improve: toImprove?.trim() || undefined,
     });
 
     captureServerEvent(user.id, "interview_feedback_submitted", {
       interview_id: interviewId,
-      rating,
+      realism_rating: ratings.realism,
+      ai_quality_rating: ratings.ai_quality,
+      problem_fit_rating: ratings.problem_fit,
+      scoring_accuracy_rating: ratings.scoring_accuracy,
+      overall_rating: ratings.overall,
+      nps_score: ratings.nps,
       has_went_well: !!wentWell?.trim(),
       has_to_improve: !!toImprove?.trim(),
     });

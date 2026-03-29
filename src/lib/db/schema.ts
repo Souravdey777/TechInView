@@ -172,6 +172,7 @@ export const interviewFeedback = pgTable("interview_feedback", {
     .references(() => profiles.id, { onDelete: "cascade" })
     .notNull(),
   rating: integer("rating").notNull(),
+  ratings: jsonb("ratings"),
   went_well: text("went_well"),
   to_improve: text("to_improve"),
   created_at: timestamp("created_at", { withTimezone: true })

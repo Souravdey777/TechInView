@@ -348,6 +348,7 @@ export async function insertInterviewFeedback(data: {
   interview_id: string;
   user_id: string;
   rating: number;
+  ratings?: Record<string, number>;
   went_well?: string;
   to_improve?: string;
 }): Promise<InterviewFeedback> {
@@ -359,6 +360,7 @@ export async function insertInterviewFeedback(data: {
       target: schema.interviewFeedback.interview_id,
       set: {
         rating: data.rating,
+        ratings: data.ratings ?? null,
         went_well: data.went_well ?? null,
         to_improve: data.to_improve ?? null,
       },

@@ -5,13 +5,13 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, Loader2, FileQuestion, Lock, Sparkles, MessageSquare } from "lucide-react";
+import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, Loader2, FileQuestion, Lock, Sparkles } from "lucide-react";
 import { ScoreSummary } from "@/components/results/ScoreSummary";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
 import { FeedbackCard } from "@/components/results/FeedbackCard";
 import { TranscriptReview } from "@/components/results/TranscriptReview";
 import { CodeReview } from "@/components/results/CodeReview";
-import { InterviewFeedback } from "@/components/results/InterviewFeedback";
+import { InterviewReviewGate } from "@/components/results/InterviewReviewGate";
 import { SCORING_DIMENSIONS } from "@/lib/constants";
 import type { HireRecommendation } from "@/lib/constants";
 import { useInterviewStore } from "@/stores/interview-store";
@@ -122,28 +122,29 @@ export default function ResultsPage() {
   const storeProblem = useInterviewStore((s) => s.problem);
   const { supabase } = useSupabase();
 
-  // If the store result matches this page's ID, use it directly
-  // Otherwise, fetch from DB
   const [dbResult, setDbResult] = useState<typeof storeResult>(null);
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [isFreeTrial, setIsFreeTrial] = useState(false);
 
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [feedbackAutoShown, setFeedbackAutoShown] = useState(false);
+  const [feedbackCompleted, setFeedbackCompleted] = useState<boolean | null>(null);
 
   const storeMatchesPage = storeResult?.interviewId === pageId;
   const result = storeMatchesPage ? storeResult : dbResult;
 
-  // Auto-open feedback dialog 3s after results load (only once per page visit)
+  // Check if feedback already exists for this interview
   useEffect(() => {
-    if (feedbackAutoShown || !result || !pageId) return;
-    const timer = setTimeout(() => {
-      setFeedbackOpen(true);
-      setFeedbackAutoShown(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [result, pageId, feedbackAutoShown]);
+    if (!pageId) return;
+    (async () => {
+      try {
+        const res = await fetch(`/api/interview/feedback?interviewId=${pageId}`);
+        const json = await res.json();
+        setFeedbackCompleted(json.success && json.data != null);
+      } catch {
+        setFeedbackCompleted(false);
+      }
+    })();
+  }, [pageId]);
 
   useEffect(() => {
     if (storeMatchesPage || fetched) return;
@@ -220,8 +221,8 @@ export default function ResultsPage() {
     })();
   }, [storeMatchesPage, pageId, supabase]);
 
-  // Loading state while fetching from DB
-  if (!storeMatchesPage && loading) {
+  // Loading state while checking feedback or fetching from DB
+  if (feedbackCompleted === null || (!storeMatchesPage && loading)) {
     return (
       <main className="min-h-screen bg-brand-deep text-brand-text flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -235,6 +236,16 @@ export default function ResultsPage() {
   // No result found
   if (!result) {
     return <NoResultState />;
+  }
+
+  // Mandatory review gate — must submit feedback before viewing report
+  if (!feedbackCompleted) {
+    return (
+      <InterviewReviewGate
+        interviewId={pageId}
+        onComplete={() => setFeedbackCompleted(true)}
+      />
+    );
   }
 
   // Derive display values
@@ -465,33 +476,16 @@ export default function ResultsPage() {
         {/* ── CTA: Practice Again ── */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-brand-border r-anim-8">
           <p className="text-sm text-brand-muted">Ready to improve your score?</p>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setFeedbackOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-brand-border text-sm text-brand-text hover:bg-brand-card transition-colors"
-            >
-              <MessageSquare className="h-4 w-4 text-brand-muted" />
-              Leave Feedback
-            </button>
-            <Link
-              href="/interview/setup"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Practice Again
-            </Link>
-          </div>
+          <Link
+            href="/interview/setup"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Practice Again
+          </Link>
         </div>
 
       </div>
-
-      {/* Post-interview feedback dialog */}
-      <InterviewFeedback
-        interviewId={pageId}
-        open={feedbackOpen}
-        onOpenChange={setFeedbackOpen}
-      />
     </main>
   );
 }
