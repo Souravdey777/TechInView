@@ -20,7 +20,11 @@ import {
 import { Pricing } from "@/components/landing/Pricing";
 import { getRegionForCountry } from "@/lib/constants";
 
-export default async function LandingPage() {
+type LandingPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function LandingPage({ searchParams }: LandingPageProps) {
   const headersList = await headers();
   const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
   const pricingRegion = getRegionForCountry(country).region === "INR"
@@ -28,6 +32,10 @@ export default async function LandingPage() {
     : getRegionForCountry(country).region === "PPP"
       ? "ppp" as const
       : "usd" as const;
+
+  const params = await searchParams;
+  const ref = typeof params.ref === "string" ? params.ref : undefined;
+  const signupHref = ref ? `/signup?ref=${ref}` : "/login";
 
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text overflow-x-hidden">
@@ -67,7 +75,7 @@ export default async function LandingPage() {
             </Link>
           </div>
           <Link
-            href="/login"
+            href={signupHref}
             className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
           >
             Get Started
@@ -110,7 +118,7 @@ export default async function LandingPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in stagger-2">
             <Link
-              href="/login"
+              href={signupHref}
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-brand-cyan text-brand-deep font-semibold text-base hover:bg-cyan-300 transition-all hover:scale-105 glow-cyan"
             >
               Start Free Interview
@@ -475,7 +483,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <Pricing defaultRegion={pricingRegion} />
+      <Pricing defaultRegion={pricingRegion} refParam={ref} />
 
       {/* ── FAQ ── */}
       <section id="faq" className="py-24 px-4 sm:px-6 bg-brand-deep">
@@ -551,7 +559,7 @@ export default async function LandingPage() {
             No scheduling, no awkward peer matching, no waiting. Just you, your AI interviewer, and a problem to solve.
           </p>
           <Link
-            href="/login"
+            href={signupHref}
             className="group inline-flex items-center justify-center gap-2 px-10 py-4 rounded-xl bg-brand-cyan text-brand-deep font-semibold text-lg hover:bg-cyan-300 transition-all hover:scale-105 glow-cyan"
           >
             Start Your Free Interview

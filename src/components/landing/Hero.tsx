@@ -2,13 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export function Hero() {
-  const ref = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const searchParams = useSearchParams();
+  const refParam = searchParams.get("ref");
+  const ctaHref = refParam ? `/signup?ref=${refParam}` : "/login";
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
+    const el = sectionRef.current;
     if (!el) return;
 
     const observer = new IntersectionObserver(
@@ -27,7 +31,7 @@ export function Hero() {
 
   return (
     <section
-      ref={ref}
+      ref={sectionRef}
       className="relative overflow-hidden pt-24 pb-32 px-6"
     >
       {/* Gradient mesh background */}
@@ -65,7 +69,7 @@ export function Hero() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/login"
+            href={ctaHref}
             className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-brand-cyan text-brand-deep font-semibold text-base hover:bg-cyan-300 transition-all hover:scale-105 glow-cyan"
           >
             Start Free Interview

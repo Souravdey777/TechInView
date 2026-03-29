@@ -104,6 +104,7 @@ type PricingRegion = "usd" | "inr" | "ppp";
 
 type PricingProps = {
   defaultRegion?: PricingRegion;
+  refParam?: string;
 };
 
 const REGION_SYMBOLS: Record<PricingRegion, string> = {
@@ -112,7 +113,8 @@ const REGION_SYMBOLS: Record<PricingRegion, string> = {
   ppp: "$",
 };
 
-export function Pricing({ defaultRegion = "usd" }: PricingProps) {
+export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
+  const ctaHref = refParam ? `/signup?ref=${refParam}` : "/login";
   const [activeRegion, setActiveRegion] = useState<PricingRegion>(defaultRegion);
 
   const symbol = REGION_SYMBOLS[activeRegion];
@@ -261,7 +263,7 @@ export function Pricing({ defaultRegion = "usd" }: PricingProps) {
                 </ul>
 
                 <Link
-                  href="/login"
+                  href={ctaHref}
                   className={cn(
                     "mt-auto inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold text-sm transition-all",
                     tier.ctaVariant === "primary"

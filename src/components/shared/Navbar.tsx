@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Cpu, Menu, X, ArrowRight } from "lucide-react";
 
@@ -24,6 +24,10 @@ type NavbarProps = {
 export function Navbar({ isLoggedIn = false }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const refParam = searchParams.get("ref");
+  const loginHref = refParam ? `/login?ref=${refParam}` : "/login";
+  const signupHref = refParam ? `/signup?ref=${refParam}` : "/signup";
 
   const closeMobile = () => setMobileOpen(false);
 
@@ -81,13 +85,13 @@ export function Navbar({ isLoggedIn = false }: NavbarProps) {
           ) : (
             <>
               <Link
-                href="/login"
+                href={loginHref}
                 className="px-3 py-1.5 text-sm font-medium text-brand-muted hover:text-brand-text transition-colors"
               >
                 Log in
               </Link>
               <Link
-                href="/signup"
+                href={signupHref}
                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-brand-cyan text-brand-deep text-sm font-semibold rounded-lg hover:bg-brand-cyan/90 transition-colors shadow-sm shadow-brand-cyan/20"
               >
                 Get Started
@@ -139,14 +143,14 @@ export function Navbar({ isLoggedIn = false }: NavbarProps) {
               ) : (
                 <>
                   <Link
-                    href="/login"
+                    href={loginHref}
                     onClick={closeMobile}
                     className="flex items-center justify-center px-4 py-2.5 rounded-lg border border-brand-border text-brand-muted text-sm font-medium hover:text-brand-text hover:border-brand-border/80 transition-colors"
                   >
                     Log in
                   </Link>
                   <Link
-                    href="/signup"
+                    href={signupHref}
                     onClick={closeMobile}
                     className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-cyan text-brand-deep text-sm font-semibold rounded-lg hover:bg-brand-cyan/90 transition-colors"
                   >
