@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Ticket,
 } from "lucide-react";
+import { DeleteAccountButton } from "@/components/dashboard/DeleteAccountButton";
 
 const PACK_COLORS: Record<string, string> = {
   single: "brand-cyan",
@@ -177,13 +178,7 @@ export default async function SettingsPage() {
               action cannot be undone.
             </p>
           </div>
-          <button
-            type="button"
-            disabled
-            className="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold text-brand-rose border border-brand-rose/30 bg-brand-rose/5 hover:bg-brand-rose/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Delete Account
-          </button>
+          <DeleteAccountButton />
         </div>
       </section>
     </div>
