@@ -310,7 +310,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         }
       }, 300);
     } else {
-      // Stop Alex from speaking if he's talking
+      // Stop Tia from speaking if he's talking
       voice.stopSpeaking();
       voice.setTranscript("");
       voice.startListening();
@@ -543,7 +543,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           <VoiceVisualizer state="thinking" className="h-36 w-36" />
 
           <div style={{ animation: "scoring-fade-in 0.6s ease-out 0.2s both" }}>
-            <h1 className="text-2xl font-bold text-brand-text">Alex is reviewing your performance</h1>
+            <h1 className="text-2xl font-bold text-brand-text">Tia is reviewing your performance</h1>
             <p className="text-brand-muted text-sm mt-2 leading-relaxed">Evaluating problem solving, code quality, communication, technical knowledge, and testing.</p>
           </div>
           <div className="w-full space-y-2.5" style={{ animation: "scoring-fade-in 0.6s ease-out 0.5s both" }}>
@@ -577,7 +577,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           <div style={{ animation: "start-fade-up 0.8s ease-out 0.15s both" }}>
             <h1 className="text-3xl font-bold text-brand-text tracking-tight">Ready to begin?</h1>
             <p className="text-brand-muted text-sm mt-3 leading-relaxed">
-              Alex, your AI interviewer, will introduce the problem and guide you through a{" "}
+              Tia, your AI interviewer, will introduce the problem and guide you through a{" "}
               <span className="text-brand-text font-medium">{Math.round(maxDuration / 60)}-minute</span> mock interview.
             </p>
           </div>
@@ -736,7 +736,7 @@ function TranscriptPanel({ messages, isThinking }: { messages: ChatMessage[]; is
   if (messages.length === 0 && !isThinking) {
     return (
       <p className="text-center text-[10px] text-brand-muted pt-8">
-        Alex will start the conversation shortly...
+        Tia will start the conversation shortly...
       </p>
     );
   }

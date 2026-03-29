@@ -19,7 +19,7 @@
 
 ## What is TechInView?
 
-TechInView is an AI-powered mock interview platform that simulates realistic DSA coding interviews using voice. An AI interviewer named **Alex** speaks with you in real-time while you solve problems in a live code editor — just like a real phone screen.
+TechInView is an AI-powered mock interview platform that simulates realistic DSA coding interviews using voice. An AI interviewer named **Tia** speaks with you in real-time while you solve problems in a live code editor — just like a real phone screen.
 
 After each interview, a 5-dimension scoring engine evaluates your performance and tells you whether you'd get a Hire or No-Hire, with detailed, actionable feedback.
 

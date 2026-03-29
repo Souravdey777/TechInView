@@ -7,7 +7,7 @@ _Goal: One full interview from start to scored results_
 - [x] 2. Wire `/api/interview/start` to select random problem from DB based on difficulty/category
 - [x] 3. Load test cases dynamically from the selected problem (not hardcoded Two Sum)
 - [x] 4. Timer actually counts down during interview
-- [x] 5. Phase transitions — Alex advances through INTRO → PROBLEM → CODING → etc. based on time/conversation
+- [x] 5. Phase transitions — Tia advances through INTRO → PROBLEM → CODING → etc. based on time/conversation
 - [x] 6. Wire real AI scoring on "End Interview" — call `scoreInterview()` from `src/lib/ai/scorer.ts`
 - [x] 7. Results page reads from Zustand store + displays real AI-generated scores, radar chart, feedback
 - [x] 8. Save completed interview + scores to DB (interviews table)
@@ -54,7 +54,7 @@ _Goal: Accept payments_
 - [x] 29. Wire Razorpay webhook to credit user's interview balance in DB
 - [x] 30. Implement freemium tier restrictions:
   - No advanced report (basic score only, no detailed feedback breakdown)
-  - No advanced persona (default "Alex" only, no FAANG-specific voices)
+  - No advanced persona (default "Tia" only, no FAANG-specific voices)
   - 20-min interview cap (instead of 45 min)
   - Only 2 easy problems available (randomly picks one at runtime)
   - Enforce in `/api/interview/start` + interview room UI
@@ -78,7 +78,7 @@ _Goal: Understand usage, iterate_
 ## Phase 8: Beta Launch (March 30)
 
 - [ ] 37. Sales and Marketing Plan
-- [ ] 38. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Alex", each with distinct personality and interview style
+- [ ] 38. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Tia", each with distinct personality and interview style
 
 ## Phase 9: Voice Upgrade
 _Goal: Replace browser APIs with production-quality voice_
@@ -87,7 +87,7 @@ _Goal: Replace browser APIs with production-quality voice_
 - [ ] 40. Integrate Deepgram Aura 2 for TTS (replace browser SpeechSynthesis)
 - [ ] 41. Deploy voice-server to Railway
 - [ ] 42. Wire WebSocket voice pipeline: Browser → Railway → Deepgram STT/Claude/Deepgram TTS → Browser
-- [ ] 43. Interruption handling — stop Alex when user starts speaking
+- [ ] 43. Interruption handling — stop Tia when user starts speaking
 
 ## Pre-V1 Launch
 _Ship before going live_

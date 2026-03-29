@@ -85,7 +85,7 @@ function buildSystemPrompt(
       phaseInstruction = "Respond naturally as an interviewer.";
   }
 
-  return `You are Alex, a senior technical interviewer at a top tech company (FAANG-level). You are conducting a live coding interview.
+  return `You are Tia, a senior technical interviewer at a top tech company (FAANG-level). You are conducting a live coding interview.
 
 Your personality:
 - Friendly but professional

@@ -67,7 +67,7 @@ const STATE_LABELS: Record<VoiceState, string> = {
   idle: "Ready",
   listening: "Listening...",
   thinking: "Thinking...",
-  speaking: "Alex is speaking",
+  speaking: "Tia is speaking",
 };
 
 const STATE_COLORS: Record<VoiceState, string> = {
@@ -130,7 +130,7 @@ export function VoicePanel({
       <div className="flex flex-col items-center gap-1 py-3">
         <VoiceVisualizer state={voiceState} className="h-32 w-32" />
         <div className="text-center mt-1">
-          <p className="text-sm font-semibold text-brand-text">Alex</p>
+          <p className="text-sm font-semibold text-brand-text">Tia</p>
           <p className="text-[11px] text-brand-muted">AI Interviewer</p>
         </div>
       </div>

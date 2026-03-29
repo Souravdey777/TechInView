@@ -13,7 +13,7 @@ const features: Feature[] = [
     icon: <Mic className="w-6 h-6 text-brand-cyan" />,
     title: "Voice-powered AI interviewer",
     description:
-      "Speak naturally with Alex, your AI interviewer. Real-time STT and TTS create an authentic conversational interview experience with under 1.5s latency.",
+      "Speak naturally with Tia, your AI interviewer. Real-time STT and TTS create an authentic conversational interview experience with under 1.5s latency.",
     iconBg: "bg-brand-cyan/10",
     iconColor: "text-brand-cyan",
   },

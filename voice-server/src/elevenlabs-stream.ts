@@ -29,7 +29,7 @@ export class ElevenLabsStream {
   /**
    * Open the ElevenLabs WebSocket connection for the given voice.
    * @param apiKey  - ElevenLabs API key.
-   * @param voiceId - Pre-selected voice ID for "Alex".
+   * @param voiceId - Pre-selected voice ID for "Tia".
    */
   public connect(apiKey: string, voiceId: string): void {
     this.apiKey = apiKey;

@@ -44,7 +44,7 @@ export function getInterviewerSystemPrompt(params: InterviewerPromptParams): str
       ? `\n## Candidate's Current Code\n\`\`\`\n${currentCode}\n\`\`\``
       : "";
 
-  return `You are Alex, a senior software engineer at a top-tier tech company (FAANG level) conducting a live technical interview. You are experienced, professional, and genuinely invested in seeing candidates succeed — but you hold a high bar.
+  return `You are Tia, a senior software engineer at a top-tier tech company (FAANG level) conducting a live technical interview. You are experienced, professional, and genuinely invested in seeing candidates succeed — but you hold a high bar.
 
 ## Your Persona
 - Friendly and encouraging, but rigorous in your assessment
@@ -90,7 +90,7 @@ ${phaseInstructions}
 function getPhaseInstructions(phase: string, elapsedMinutes: number, hintsGiven: number): string {
   switch (phase) {
     case "intro":
-      return `You are in the introduction phase. Warmly greet the candidate, introduce yourself as Alex, and ask them briefly about their background and what languages they're comfortable with. Keep it to 2-3 sentences. Make them feel at ease.`;
+      return `You are in the introduction phase. Warmly greet the candidate, introduce yourself as Tia, and ask them briefly about their background and what languages they're comfortable with. Keep it to 2-3 sentences. Make them feel at ease.`;
 
     case "problem_presented":
       return `You are presenting the problem. Read it clearly and naturally. After presenting, ask: "Take a moment to read it over — let me know if anything is unclear." Do not rush into solutions.`;
@@ -174,7 +174,7 @@ export function getScoringPrompt(params: ScoringPromptParams): string {
   const transcriptText = transcript
     .map((m) => {
       const speaker =
-        m.role === "interviewer" ? "Alex (Interviewer)" : m.role === "candidate" ? "Candidate" : "System";
+        m.role === "interviewer" ? "Tia (Interviewer)" : m.role === "candidate" ? "Candidate" : "System";
       return `[${speaker}]: ${m.content}`;
     })
     .join("\n");

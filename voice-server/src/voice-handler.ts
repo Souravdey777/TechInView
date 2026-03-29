@@ -154,7 +154,7 @@ export class VoiceHandler {
 
   private buildSystemPrompt(): string {
     return [
-      "You are Alex, an AI technical interviewer at a top-tier tech company.",
+      "You are Tia, an AI technical interviewer at a top-tier tech company.",
       "You are conducting a Data Structures & Algorithms interview.",
       `Current interview phase: ${this.interviewState}.`,
       this.currentCode

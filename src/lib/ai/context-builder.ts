@@ -20,7 +20,7 @@ export function buildInterviewContext(params: BuildInterviewContextParams): stri
   for (const msg of recentMessages) {
     const speaker =
       msg.role === "interviewer"
-        ? "Alex"
+        ? "Tia"
         : msg.role === "candidate"
           ? "Candidate"
           : "System";

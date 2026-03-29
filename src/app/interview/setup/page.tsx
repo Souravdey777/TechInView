@@ -450,7 +450,7 @@ function InterviewSetupInner() {
             Set Up Your Interview
           </h1>
           <p className="mt-1 text-sm text-brand-muted">
-            Configure your session and Alex will guide you through the rest.
+            Configure your session and Tia will guide you through the rest.
           </p>
         </div>
 
@@ -871,7 +871,7 @@ function InterviewSetupInner() {
               </p>
               <p className="text-xs text-brand-muted">
                 TechInView uses your mic for real-time voice interaction with
-                Alex.
+                Tia.
               </p>
             </div>
             <button
@@ -967,7 +967,7 @@ function InterviewSetupInner() {
             </p>
           )}
           <p className="mt-3 text-center text-xs text-brand-muted">
-            By starting, you agree that Alex (our AI interviewer) will record
+            By starting, you agree that Tia (our AI interviewer) will record
             and analyze your session.
           </p>
         </div>
