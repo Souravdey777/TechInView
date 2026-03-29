@@ -2,12 +2,6 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 
-declare global {
-  interface Window {
-    SpeechRecognition?: unknown;
-    webkitSpeechRecognition?: unknown;
-  }
-}
 import { Mic, MicOff, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VoiceVisualizer, MicVisualizer, type VoiceState } from "./VoiceVisualizer";
@@ -67,7 +61,7 @@ const STATE_LABELS: Record<VoiceState, string> = {
   idle: "Ready",
   listening: "Listening...",
   thinking: "Thinking...",
-  speaking: "Alex is speaking",
+  speaking: "Tia is speaking",
 };
 
 const STATE_COLORS: Record<VoiceState, string> = {
@@ -87,10 +81,10 @@ export function VoicePanel({
   onSendText,
 }: VoicePanelProps) {
   const [textOpen, setTextOpen] = useState(true);
-  const [speechSupported, setSpeechSupported] = useState(false);
+  const [micSupported, setMicSupported] = useState(false);
 
   useEffect(() => {
-    setSpeechSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition));
+    setMicSupported(typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia);
   }, []);
   const [draft, setDraft] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -130,7 +124,7 @@ export function VoicePanel({
       <div className="flex flex-col items-center gap-1 py-3">
         <VoiceVisualizer state={voiceState} className="h-32 w-32" />
         <div className="text-center mt-1">
-          <p className="text-sm font-semibold text-brand-text">Alex</p>
+          <p className="text-sm font-semibold text-brand-text">Tia</p>
           <p className="text-[11px] text-brand-muted">AI Interviewer</p>
         </div>
       </div>
@@ -141,10 +135,10 @@ export function VoicePanel({
           <MicVisualizer isActive={isMicEnabled} className="absolute inset-0" />
           <button
             onClick={onToggleMic}
-            disabled={!speechSupported}
+            disabled={!micSupported}
             className={cn(
               "relative z-10 flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300",
-              !speechSupported
+              !micSupported
                 ? "bg-brand-card border border-brand-border text-brand-muted cursor-not-allowed opacity-50"
                 : isMicEnabled
                 ? "bg-brand-cyan/20 text-brand-cyan border-2 border-brand-cyan shadow-[0_0_20px_rgba(34,211,238,0.3)]"
@@ -159,10 +153,10 @@ export function VoicePanel({
             )}
           </button>
         </div>
-        {!speechSupported && (
+        {!micSupported && (
           <span className="text-[10px] text-brand-muted">Mic not supported — use text input below</span>
         )}
-        {speechSupported && (
+        {micSupported && (
           <span className="text-[10px] text-brand-muted mt-0.5">
             {isMicEnabled ? "Tap to stop" : "Tap to speak"}
           </span>

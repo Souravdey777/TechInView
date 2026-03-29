@@ -1,6 +1,11 @@
+import { config } from "dotenv";
+import { resolve } from "path";
 import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { VoiceHandler } from "./voice-handler.js";
+
+config({ path: resolve(import.meta.dirname, "../../.env.local") });
+config({ path: resolve(import.meta.dirname, "../../.env") });
 
 const PORT = parseInt(process.env.PORT ?? "8080", 10);
 

@@ -131,7 +131,7 @@ export function useVoiceInterview() {
     const preferred = [
       "Google US English",
       "Samantha",          // macOS
-      "Alex",              // macOS (older)
+      "Tia",              // macOS (older)
       "Microsoft David - English (United States)",
       "Microsoft Zira - English (United States)",
     ];

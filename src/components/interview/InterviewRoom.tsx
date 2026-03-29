@@ -13,7 +13,7 @@ import { Timer } from "./Timer";
 import { InterviewControls } from "./InterviewControls";
 import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useVoiceInterview } from "@/hooks/useVoiceInterview";
+import { useVoiceWebSocket } from "@/hooks/useVoiceWebSocket";
 import { useInterviewStore } from "@/stores/interview-store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -85,7 +85,6 @@ function extractDimension(
 
 export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const router = useRouter();
-  const voice = useVoiceInterview();
 
   // ── Read setup config from Zustand store ───────────────────────────────────
   const storeConfig = useInterviewStore((s) => s.setupConfig);
@@ -133,9 +132,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // ── Scoring state ──────────────────────────────────────────────────────────
   const [isScoring, setIsScoring] = useState(false);
 
-  // ── Derived voice state for UI ──────────────────────────────────────────────
-  const voiceState: VoiceState = isAiThinking ? "thinking" : voice.voiceState as VoiceState;
-  const [isMicEnabled, setIsMicEnabled] = useState(false);
+  // ── Mic state (derived from voice hook) ────────────────────────────────────
 
   // ── Resizable panel state ─────────────────────────────────────────────────
   const MIN_PANEL = 300;
@@ -198,151 +195,98 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     return `${m}:${s.toString().padStart(2, "0")}`;
   }, []);
 
-  // Use a ref for activeProblem so sendToAI / startInterview always read the
-  // latest value without needing to re-create the callbacks.
+  // Use a ref for activeProblem so startInterview always reads the latest value
   const activeProblemRef = useRef(activeProblem);
   useEffect(() => { activeProblemRef.current = activeProblem; }, [activeProblem]);
 
-  // Same for currentPhase and code — needed by sendToAI without dep churn
+  // ── Voice WebSocket hook with callbacks ────────────────────────────────────
+  const voice = useVoiceWebSocket({
+    onTranscriptFinal: (text: string) => {
+      const elapsedMs = Date.now() - startTimeRef.current;
+      const id = `msg-${++msgCounterRef.current}`;
+      setChatMessages(prev => [...prev, { id, role: "candidate", content: text, time: getTimeStr() }]);
+      conversationRef.current.push({ role: "candidate", content: text, timestamp_ms: elapsedMs });
+    },
+    onAiTextComplete: (text: string) => {
+      const elapsedMs = Date.now() - startTimeRef.current;
+      const id = `msg-${++msgCounterRef.current}`;
+      setChatMessages(prev => [...prev, { id, role: "interviewer", content: text, time: getTimeStr() }]);
+      conversationRef.current.push({ role: "interviewer", content: text, timestamp_ms: elapsedMs });
+      setIsAiThinking(false);
+    },
+    onAiTextPartial: () => {
+      setIsAiThinking(false);
+    },
+    onError: (source: string, message: string) => {
+      console.error(`Voice error (${source}): ${message}`);
+      setIsAiThinking(false);
+    },
+  });
+
+  // Derive voice state for UI
+  const voiceState: VoiceState = isAiThinking ? "thinking" : voice.voiceState as VoiceState;
+
+  // WebSocket auto-connects inside the hook — no manual connect needed
+
+  // ── Send phase updates to voice server ─────────────────────────────────────
   const currentPhaseRef = useRef(currentPhase);
-  useEffect(() => { currentPhaseRef.current = currentPhase; }, [currentPhase]);
+  useEffect(() => {
+    if (currentPhaseRef.current !== currentPhase) {
+      currentPhaseRef.current = currentPhase;
+      voice.sendStateUpdate(currentPhase);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPhase]);
+
+  // ── Send code updates to voice server every 3 turns ────────────────────────
   const codeRef = useRef(code);
   useEffect(() => { codeRef.current = code; }, [code]);
-
-  // ── Send message to AI and speak response ──────────────────────────────────
-  const sendToAI = useCallback(async (userMessage: string) => {
-    const elapsedMs = Date.now() - startTimeRef.current;
-    const id = `msg-${++msgCounterRef.current}`;
-    const userMsg: ChatMessage = { id, role: "candidate", content: userMessage, time: getTimeStr() };
-    setChatMessages(prev => [...prev, userMsg]);
-    conversationRef.current.push({ role: "candidate", content: userMessage, timestamp_ms: elapsedMs });
-
-    setIsAiThinking(true);
-
-    try {
-      const res = await fetch("/api/interview/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMessage,
-          conversationHistory: conversationRef.current.slice(-10),
-          problem: activeProblemRef.current,
-          currentPhase: currentPhaseRef.current,
-          currentCode: codeRef.current,
-          elapsedSeconds: Math.floor((Date.now() - startTimeRef.current) / 1000),
-        }),
-      });
-
-      const data = await res.json();
-      if (data.success && data.data?.message) {
-        const aiText = data.data.message as string;
-        const aiElapsedMs = Date.now() - startTimeRef.current;
-        const aiId = `msg-${++msgCounterRef.current}`;
-        const aiMsg: ChatMessage = { id: aiId, role: "interviewer", content: aiText, time: getTimeStr() };
-        setChatMessages(prev => [...prev, aiMsg]);
-        conversationRef.current.push({ role: "interviewer", content: aiText, timestamp_ms: aiElapsedMs });
-
-        setIsAiThinking(false);
-        voice.speakText(aiText);
-      } else {
-        setIsAiThinking(false);
-      }
-    } catch {
-      setIsAiThinking(false);
+  const turnCountRef = useRef(0);
+  useEffect(() => {
+    turnCountRef.current = chatMessages.filter(m => m.role === "candidate").length;
+    if (turnCountRef.current > 0 && turnCountRef.current % 3 === 0) {
+      voice.sendCodeUpdate(codeRef.current, language);
     }
-  }, [getTimeStr, voice]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatMessages.length]);
 
-  // ── Start interview (triggered by user click to enable audio) ───────────────
+  // ── Start interview (triggered by user click) ──────────────────────────────
   const startInterview = useCallback(async () => {
-    if (typeof window !== "undefined") {
-      const unlock = new SpeechSynthesisUtterance("");
-      window.speechSynthesis.speak(unlock);
-    }
-
     setHasStarted(true);
     setIsTimerRunning(true);
     startTimeRef.current = Date.now();
     setIsAiThinking(true);
     msgCounterRef.current = 0;
 
-    try {
-      const res = await fetch("/api/interview/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: "The interview is starting. Please introduce yourself and the problem.",
-          conversationHistory: [],
-          problem: activeProblemRef.current,
-          currentPhase: "INTRO",
-          currentCode: "",
-          elapsedSeconds: 0,
-        }),
+    const problem = activeProblemRef.current;
+    if (problem) {
+      await voice.startInterview({
+        title: problem.title,
+        description: problem.description,
+        solution_approach: problem.solution_approach,
+        constraints: problem.constraints,
       });
-      const data = await res.json();
-      if (data.success && data.data?.message) {
-        const aiText = data.data.message as string;
-        const initId = `msg-${++msgCounterRef.current}`;
-        setChatMessages([{ id: initId, role: "interviewer", content: aiText, time: "0:00" }]);
-        conversationRef.current = [{ role: "interviewer", content: aiText, timestamp_ms: 0 }];
-        setIsAiThinking(false);
-        voice.speakText(aiText);
-      } else {
-        setIsAiThinking(false);
-      }
-    } catch {
-      setIsAiThinking(false);
     }
   }, [voice]);
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
   const handleToggleMic = useCallback(() => {
-    if (isMicEnabled) {
-      // Manually stopping — grab transcript and send
+    if (voice.isListening) {
       voice.stopListening();
-      setIsMicEnabled(false);
-      // Small delay to let final onresult fire before reading
-      setTimeout(() => {
-        const spokenText = voice.getTranscript().trim();
-        if (spokenText) {
-          sendToAI(spokenText);
-          voice.setTranscript("");
-        }
-      }, 300);
     } else {
-      // Stop Alex from speaking if he's talking
-      voice.stopSpeaking();
-      voice.setTranscript("");
       voice.startListening();
-      setIsMicEnabled(true);
     }
-  }, [isMicEnabled, voice, sendToAI]);
-
-  // Auto-send when speech recognition ends naturally (user stops talking)
-  // This fires when continuous=false recognition auto-stops after silence
-  const prevListeningRef = useRef(false);
-  useEffect(() => {
-    const wasListening = prevListeningRef.current;
-    prevListeningRef.current = voice.isListening;
-
-    // Transition from listening → not listening
-    if (wasListening && !voice.isListening && isMicEnabled) {
-      setIsMicEnabled(false);
-      // Small delay to let final transcript settle
-      setTimeout(() => {
-        const spokenText = voice.getTranscript().trim();
-        if (spokenText && !isAiThinking) {
-          sendToAI(spokenText);
-          voice.setTranscript("");
-        }
-      }, 300);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voice.isListening]);
+  }, [voice]);
 
   const handleSendText = useCallback((text: string) => {
-    sendToAI(text);
-  }, [sendToAI]);
+    const elapsedMs = Date.now() - startTimeRef.current;
+    const id = `msg-${++msgCounterRef.current}`;
+    setChatMessages(prev => [...prev, { id, role: "candidate", content: text, time: getTimeStr() }]);
+    conversationRef.current.push({ role: "candidate", content: text, timestamp_ms: elapsedMs });
+    setIsAiThinking(true);
+    voice.sendTextInput(text);
+  }, [getTimeStr, voice]);
 
   const handleLanguageChange = useCallback(
     (newLang: SupportedLanguage) => {
@@ -411,8 +355,9 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
     voice.stopListening();
     voice.stopSpeaking();
+    voice.disconnect();
 
-    const transcript = conversationRef.current.map((msg) => ({
+    const transcriptData = conversationRef.current.map((msg) => ({
       role: msg.role as "interviewer" | "candidate" | "system",
       content: msg.content,
       timestamp_ms: msg.timestamp_ms,
@@ -440,7 +385,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           interviewId,
           finalCode: code,
           language,
-          transcript,
+          transcript: transcriptData,
           testsPassed: passed,
           testsTotal: total,
           problem: problem
@@ -478,7 +423,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       interviewId,
       finalCode: code,
       language,
-      transcript,
+      transcript: transcriptData,
       overallScore: scoringData?.overall_score ?? null,
       scores: storeScores,
       hireRecommendation: scoringData?.hire_recommendation ?? null,
@@ -543,7 +488,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           <VoiceVisualizer state="thinking" className="h-36 w-36" />
 
           <div style={{ animation: "scoring-fade-in 0.6s ease-out 0.2s both" }}>
-            <h1 className="text-2xl font-bold text-brand-text">Alex is reviewing your performance</h1>
+            <h1 className="text-2xl font-bold text-brand-text">Tia is reviewing your performance</h1>
             <p className="text-brand-muted text-sm mt-2 leading-relaxed">Evaluating problem solving, code quality, communication, technical knowledge, and testing.</p>
           </div>
           <div className="w-full space-y-2.5" style={{ animation: "scoring-fade-in 0.6s ease-out 0.5s both" }}>
@@ -577,7 +522,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           <div style={{ animation: "start-fade-up 0.8s ease-out 0.15s both" }}>
             <h1 className="text-3xl font-bold text-brand-text tracking-tight">Ready to begin?</h1>
             <p className="text-brand-muted text-sm mt-3 leading-relaxed">
-              Alex, your AI interviewer, will introduce the problem and guide you through a{" "}
+              Tia, your AI interviewer, will introduce the problem and guide you through a{" "}
               <span className="text-brand-text font-medium">{Math.round(maxDuration / 60)}-minute</span> mock interview.
             </p>
           </div>
@@ -639,7 +584,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             <VoicePanel
               voiceState={voiceState}
               currentPhase={currentPhase}
-              isMicEnabled={isMicEnabled}
+              isMicEnabled={voice.isListening}
               onToggleMic={handleToggleMic}
               onSendText={handleSendText}
             />
@@ -736,7 +681,7 @@ function TranscriptPanel({ messages, isThinking }: { messages: ChatMessage[]; is
   if (messages.length === 0 && !isThinking) {
     return (
       <p className="text-center text-[10px] text-brand-muted pt-8">
-        Alex will start the conversation shortly...
+        Tia will start the conversation shortly...
       </p>
     );
   }

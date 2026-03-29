@@ -7,7 +7,7 @@
 
 ## Project Overview
 
-**TechInView.ai** is a solo-built AI mock interview platform that conducts realistic DSA coding interviews using voice. An AI interviewer (named "Alex") speaks with candidates in real-time while they solve problems in a live code editor. Post-interview, a 5-dimension scoring engine evaluates performance and provides actionable feedback.
+**TechInView.ai** is a solo-built AI mock interview platform that conducts realistic DSA coding interviews using voice. An AI interviewer (named "Tia") speaks with candidates in real-time while they solve problems in a live code editor. Post-interview, a 5-dimension scoring engine evaluates performance and provides actionable feedback.
 
 **Target users:** Software engineers preparing for FAANG/top-tier tech interviews.
 **V1 scope:** DSA interviews only. Voice-based. Public launch + demand validation.
@@ -225,7 +225,7 @@ DEEPGRAM_API_KEY=...
 
 # Deepgram (shared key for both STT and TTS)
 # DEEPGRAM_API_KEY already set above — used for both Nova-2 STT and Aura TTS
-DEEPGRAM_VOICE_MODEL=aura-2-asteria-en   # Pre-selected voice for "Alex"
+DEEPGRAM_VOICE_MODEL=aura-2-asteria-en   # Pre-selected voice for "Tia"
 
 # Piston (Code Execution)
 PISTON_API_URL=https://emkc.org/api/v2/piston  # Public, or self-hosted URL
@@ -386,7 +386,7 @@ Each Claude call includes:
     │
     │    On sentence boundary detected:
     ├──→ [Deepgram Aura Streaming TTS]
-    │        Aura 2 model (e.g. aura-2-asteria-en), pre-selected "Alex" voice
+    │        Aura 2 model (e.g. aura-2-asteria-en/aura-2-juno-en), pre-selected "Tia" voice
     │        Stream audio chunks back immediately
     │
     │    Audio chunks:

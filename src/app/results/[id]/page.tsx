@@ -93,7 +93,7 @@ function ScoringUnavailableCard({ reason }: { reason: "in_progress" | "failed" }
           <div>
             <h3 className="text-sm font-semibold text-brand-text">Scoring In Progress</h3>
             <p className="text-xs text-brand-muted mt-1">
-              Alex is still evaluating your performance. Please check back shortly.
+              Tia is still evaluating your performance. Please check back shortly.
             </p>
           </div>
         </>

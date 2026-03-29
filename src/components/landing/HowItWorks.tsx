@@ -19,7 +19,7 @@ const steps: Step[] = [
   },
   {
     number: 2,
-    title: "Interview with Alex",
+    title: "Interview with Tia",
     description:
       "Conduct a full 45-minute mock interview. Discuss your approach verbally, write code in the editor, and answer follow-up questions.",
     borderColor: "border-brand-green",

@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { getInterviewerSystemPrompt } from "./prompts";
 
-const MODEL = "claude-sonnet-4-20250514";
+const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 300;
 const ROLLING_WINDOW = 10; // keep last N turns in context
 
@@ -76,7 +76,9 @@ export class InterviewerEngine {
     // Keep only the last ROLLING_WINDOW turns to manage context length
     const recentHistory = this.conversationHistory.slice(-ROLLING_WINDOW);
 
-    // Stream response from Claude
+    // Stream response from Claude with automatic prompt caching.
+    // The system prompt prefix (persona + problem) is stable across turns,
+    // so Anthropic caches it — subsequent calls pay only 10% of input cost.
     let fullResponse = "";
 
     const stream = this.client.messages.stream({
@@ -84,6 +86,7 @@ export class InterviewerEngine {
       max_tokens: MAX_TOKENS,
       system: systemPrompt,
       messages: recentHistory,
+      cache_control: { type: "ephemeral" },
     });
 
     for await (const event of stream) {

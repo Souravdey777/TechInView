@@ -62,7 +62,7 @@ export function Hero() {
         </h1>
 
         <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto mb-10">
-          Practice DSA problems with Alex, your AI interviewer. Real-time voice
+          Practice DSA problems with Tia, your AI interviewer. Real-time voice
           interaction, live code editor, and FAANG-calibrated scoring &mdash;
           all in one place.
         </p>

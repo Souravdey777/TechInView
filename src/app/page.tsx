@@ -111,7 +111,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
 
           <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto mb-10 animate-fade-in stagger-1 leading-relaxed">
             Practice DSA problems with voice-powered AI interviewers that talk,
-            listen, and score you like real engineers. Start with Alex, the
+            listen, and score you like real engineers. Start with Tia, the
             generalist, or choose a FAANG-specific persona. 45 minutes.
             5-dimension feedback. Zero awkwardness.
           </p>
@@ -158,7 +158,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               <div className="flex items-center gap-2 px-4 py-2.5 border-b border-brand-border bg-brand-deep/40">
                 <span className="text-[10px] text-brand-muted mr-1">Interviewer:</span>
                 {[
-                  { name: "Alex", company: "Default", active: true },
+                  { name: "Tia", company: "Default", active: true },
                   { name: "Sundar", company: "Google", active: false },
                   { name: "Priya", company: "Meta", active: false },
                   { name: "James", company: "Amazon", active: false },
@@ -188,7 +188,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                       <Volume2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-brand-text">Alex <span className="text-[10px] font-normal text-brand-muted">(Default)</span></p>
+                      <p className="text-sm font-semibold text-brand-text">Tia <span className="text-[10px] font-normal text-brand-muted">(Default)</span></p>
                       <p className="text-[10px] text-brand-green flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
                         Speaking...
@@ -208,7 +208,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                   {/* Transcript mock */}
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20">
-                      <p className="text-brand-cyan text-[10px] font-medium mb-0.5">Alex</p>
+                      <p className="text-brand-cyan text-[10px] font-medium mb-0.5">Tia</p>
                       <p className="text-brand-text leading-relaxed">&ldquo;Walk me through your approach before you start coding.&rdquo;</p>
                     </div>
                     <div className="p-2 rounded-lg bg-brand-surface border border-brand-border">
@@ -298,7 +298,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 icon: Mic,
                 color: "cyan",
                 title: "Voice-powered AI interviewer",
-                desc: "Speak naturally with your AI interviewer. Start with Alex (generalist) or pick a FAANG persona — each with a unique voice and interview style. Under 1.5s latency.",
+                desc: "Speak naturally with your AI interviewer. Start with Tia (generalist) or pick a FAANG persona — each with a unique voice and interview style. Under 1.5s latency.",
               },
               {
                 icon: Code2,
@@ -390,7 +390,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 step: "2",
                 color: "green",
                 title: "Interview with your AI",
-                desc: "Use Alex the generalist, or pick a FAANG persona — Google, Meta, Amazon, Apple, or Netflix. 45-minute voice interview with live coding and follow-ups.",
+                desc: "Use Tia the generalist, or pick a FAANG persona — Google, Meta, Amazon, Apple, or Netflix. 45-minute voice interview with live coding and follow-ups.",
                 detail: "Real-time voice + live code execution",
               },
               {

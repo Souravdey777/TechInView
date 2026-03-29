@@ -204,7 +204,7 @@ export default async function DashboardPage() {
                 Try Your First Interview Free
               </h2>
               <p className="text-brand-muted text-sm mb-4 max-w-md">
-                You have 1 free trial interview with Alex. It&apos;s a 20-minute
+                You have 1 free trial interview with Tia. It&apos;s a 20-minute
                 easy-level session with a basic score report.
               </p>
               <div className="flex flex-wrap items-center gap-3">
@@ -247,7 +247,7 @@ export default async function DashboardPage() {
                 Start a New Mock Interview
               </h2>
               <p className="text-brand-muted text-sm mb-5 max-w-md">
-                Practice with an AI interviewer named Alex. Solve DSA problems
+                Practice with an AI interviewer named Tia. Solve DSA problems
                 with voice interaction, live code execution, and FAANG-calibrated
                 scoring.
               </p>
@@ -280,7 +280,7 @@ export default async function DashboardPage() {
                 You&apos;re out of interview credits
               </h2>
               <p className="text-brand-muted text-sm mb-5 max-w-md">
-                Purchase a credit pack to continue practicing with Alex. Keep
+                Purchase a credit pack to continue practicing with Tia. Keep
                 sharpening your skills and land your dream offer.
               </p>
               <Link

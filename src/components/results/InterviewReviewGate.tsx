@@ -24,7 +24,7 @@ const RATING_QUESTIONS: { key: RatingKey; label: string; description: string }[]
   {
     key: "ai_quality",
     label: "AI Interviewer Quality",
-    description: "How was Alex at asking questions, giving hints, and guiding the session?",
+    description: "How was Tia at asking questions, giving hints, and guiding the session?",
   },
   {
     key: "problem_fit",
