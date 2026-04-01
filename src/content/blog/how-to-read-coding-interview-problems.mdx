@@ -1,0 +1,85 @@
+---
+title: "How to Read a Coding Interview Problem (Without Burning 20 Minutes)"
+description: "Learn how to approach LeetCode and whiteboard problems: a 5-step read framework, red flags, and how it pairs with vocal mock interviews."
+date: "2026-04-15"
+keyword: "how to approach leetcode problems"
+tags:
+  - coding interview problem solving
+  - leetcode tips
+  - interview problem clarification
+  - DSA interview strategy
+---
+
+If you want to master **how to approach LeetCode problems** in a real interview, stop treating “read the prompt” as passive scanning. Strong candidates spend **two to four minutes** extracting **constraints, invariants, and test philosophy** before they commit to an algorithm. Weak candidates jump to code and rewrite half their solution when the interviewer says, “What about duplicates?”
+
+This framework matches how **voice interviewers** probe—same phases we discuss in [coding interview communication](/blog/coding-interview-communication) and [FAANG scoring](/blog/faang-interview-scoring).
+
+## The five-pass read (under four minutes)
+
+### Pass 1 — Restate in your own words (30–45 seconds)
+
+One or two sentences. No code. Forces alignment with the interviewer.
+
+### Pass 2 — I/O contract (45 seconds)
+
+- Types, ranges, **empty** inputs, **negative** numbers, **duplicates**
+- Return type: indices vs values, all solutions vs one
+- **Mutate input** allowed?
+
+Write **two tiny examples** you will trace later—including a **weird** one.
+
+### Pass 3 — Brute force sanity (30 seconds)
+
+Name the obvious O(n²) or exponential baseline in one line. It anchors **correctness** before optimization—excellent **signal** in scoring rubrics.
+
+### Pass 4 — Pattern guess (60 seconds)
+
+Tag mentally: **two pointers**, **prefix sum**, **graph**, **binary search on answer**, etc. If unsure, say: “I see a subarray property → sliding window candidate; I’ll verify with an example.”
+
+### Pass 5 — Complexity target (30 seconds)
+
+State what “good enough” looks like: “We likely need O(n) or O(n log n) because …” Tie to [time complexity](/blog/time-complexity-cheat-sheet) when you articulate **why**.
+
+## Red flags in problem statements
+
+| Phrase / situation | Ask |
+|--------------------|-----|
+| “Sorted array” | Duplicates? Multiple valid windows? |
+| “Find any” vs “find all” | Output size explosion? |
+| Graph | Directed? DAG? Disconnected? |
+| String matching | Case sensitivity? Unicode? |
+| “In-place” | Return value still needed? |
+
+Silence here costs more than **polite questions**.
+
+## After the read: verbal plan before keys
+
+Spend **60–90 seconds** on:
+
+1. Algorithm name + **why it fits**
+2. **Failure modes** (overflow, off-by-one)
+3. **Test strategy** (edge cases first)
+
+This is the bridge between **reading** and **coding under pressure**—see [live coding under pressure](/blog/coding-interview-pressure-live-coding).
+
+## Tie-in: classic example
+
+For “two integers sum to target,” our [Two Sum guide](/blog/two-sum-interview) shows how **clarifying indices vs values** changes your entire approach. That is **pass 2** in the wild.
+
+## FAQ
+
+### Is it OK to ask “optimal complexity”?
+
+Yes, if phrased collaboratively: “Is there a target complexity you want me to hit?” Some interviewers volunteer hints.
+
+### What if I mis-read?
+
+Pause, **acknowledge**, and **revise plan**—interviewers score **recovery** highly.
+
+### How do I practice reads?
+
+Use **timed reads only** (no code) for 10 problems/week—then do **full mocks** with [TechInView](/login) to practice **speaking** the five passes aloud.
+
+---
+
+**Summary:** **How to approach LeetCode problems** in interviews is a **repeatable read**: restate, contract, brute baseline, pattern tag, complexity target—then **verbalize** before coding. Pair with **communication** drills and **mock interviews** for real loop fidelity.

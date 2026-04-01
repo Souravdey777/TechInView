@@ -1,0 +1,95 @@
+---
+title: "How to Think Out Loud in a Coding Interview"
+description: "A practical framework for coding interview communication—what to say, when to pause, and how interviewers interpret silence."
+date: "2026-03-28"
+keyword: "coding interview communication"
+---
+
+Most candidates fail interviews for two reasons: they cannot explain their thinking, or they explain *everything* without structure. Interviewers are not mind readers. **Coding interview communication** is how you prove you can work on a real team—where ambiguity, trade-offs, and code reviews happen every day.
+
+This guide gives you a repeatable rhythm: clarify, plan, narrate while coding, and close with complexity and tests. Use it on LeetCode, in peer mocks, and in **AI mock interviews** where you can rehearse the same cadence without burning social capital.
+
+## Why communication matters as much as the answer
+
+Hiring committees rarely debate whether you memorized a trick. They ask:
+
+- Can this person **decompose** a vague problem?
+- Will they **surface assumptions** before writing code?
+- Do they **respond to hints** without defensiveness?
+- Can they **reason about trade-offs** under time pressure?
+
+Your code editor shows syntax. Your voice (or typed explanation in some formats) shows judgment. Strong **coding interview communication** signals seniority even on mid-level problems.
+
+## The four-phase script
+
+### 1. Clarify before you solve
+
+Spend 60–120 seconds confirming the problem. You are not stalling—you are de-risking.
+
+Say things like:
+
+- "Can the input be empty? What should I return?"
+- "Are elements unique? Can there be duplicates?"
+- "Do we care about index order, or only existence?"
+- "Should I optimize for time, space, or readability?"
+
+Write down two or three concrete examples on the whiteboard or in comments. Interviewers mentally check whether you **match their expectations** before you invest ten minutes in the wrong invariant.
+
+### 2. State a plan in plain English
+
+Before typing, give a **high-level algorithm** in 3–5 sentences.
+
+Template:
+
+1. "First I'll … because …"
+2. "That gives me …"
+3. "The bottleneck is … so overall …"
+
+If you know multiple approaches, name them briefly: "Brute force would be …, but we can do better with … because …" This is where **thinking out loud** earns credit—you show you see the landscape, not just one path.
+
+### 3. Narrate while coding—lightly
+
+While coding, alternate between:
+
+- **Intent**: "I'm tracking seen values in a hash map so lookup is O(1)."
+- **Micro-decisions**: "I'll use inclusive bounds here so I don't off-by-one."
+- **Short silence** when doing mechanical typing—do not read every keystroke.
+
+If you go quiet for more than ~20–30 seconds, drop a one-liner: "Still wiring the loop; one sec." Silence makes interviewers wonder if you are stuck.
+
+### 4. Test and analyze out loud
+
+Walk through your smallest example line by line. Then state **time and space complexity** and mention one realistic optimization or failure mode ("If the array were sorted, we could binary search …").
+
+## Common mistakes (and fixes)
+
+| Mistake | Fix |
+|--------|-----|
+| Jumping into code immediately | Force a 30-second plan out loud |
+| Apologizing constantly | Replace "sorry" with "Let me restate …" |
+| Mumbling or trailing off | End sentences; use numbered steps |
+| Ignoring hints | Echo the hint: "So you're suggesting I …" |
+| Over-explaining trivia | Explain *why*, not every keystroke |
+
+## Thinking out loud without rambling
+
+Use **signposting**:
+
+- "There are two parts: building the structure, then querying it."
+- "I'll handle the edge case first so the main loop stays clean."
+
+Pause deliberately after each signpost. Interviewers use those pauses to steer you.
+
+## How AI mock interviews help
+
+Platforms like TechInView simulate **time pressure**, **follow-up questions**, and **phase changes** (clarification → approach → coding). That trains **coding interview communication** in a loop: speak, get interrupted, recover, continue. It is closer to reality than silently solving in a tab.
+
+## Checklist before you click "Run"
+
+- [ ] I repeated the problem in my own words.
+- [ ] I stated time/space target before coding.
+- [ ] I verbalized non-trivial data structure choices.
+- [ ] I traced at least one example.
+- [ ] I stated complexity and one extension idea.
+
+Master the script once; reuse it on every problem. Communication is a muscle—reps matter more than talent.
