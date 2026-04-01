@@ -1,0 +1,91 @@
+---
+title: "Software Engineer Take-Home Assignments: What Reviewers Actually Score"
+description: "Take-home assignment tips for developers: scope control, README, tests, and trade-offs that move you forward—plus how it differs from live coding interviews."
+date: "2026-04-12"
+keyword: "software engineer take home assignment"
+tags:
+  - coding assignment interview
+  - developer homework interview
+  - take home test tips
+  - interview project scope
+---
+
+A **software engineer take home assignment** is not a mini hackathon—it is a **sampling** of how you **scope**, **document**, **test**, and **ship** when nobody is watching. Reviewers commonly spend **15–30 minutes** on your submission; **first impressions** from README and project shape matter as much as clever code.
+
+**Format note:** Take-homes differ from **live coding interviews** (time-boxed, spoken reasoning). TechInView targets **voice DSA rounds** with **live execution**—[practice here](/login). Use this guide when the employer sends a **repo brief** instead.
+
+## What reviewers score (implicit rubric)
+
+| Signal | Weak | Strong |
+|--------|------|--------|
+| Scope | Kitchen-sink features | Clear MVP + “if I had more time” |
+| README | Missing run steps | **One-command** run, assumptions, trade-offs |
+| Tests | None / flaky | **Happy + edge** paths, fast CI locally |
+| Code shape | God files | **Modules** with obvious boundaries |
+| Ops realism | Hard-coded secrets | **Env** config, sample `.env.example` |
+| Honesty | Perfect polish claims | **Known limits** + next steps |
+
+This overlaps with **problem solving** and **code quality** dimensions in [FAANG-style scoring](/blog/faang-interview-scoring)—adapted for **async** review.
+
+## Day-zero checklist (before you code)
+
+1. **Restate requirements** in README (bullet MVP vs optional).
+2. **Time-box** exploration (e.g. 90 minutes) before irreversible choices.
+3. Pick **boring** stack unless brief demands novelty—**reviewer friction** is a cost.
+4. Define **one** success metric: e.g. “CLI completes in &lt;2s on sample input.”
+
+## Scope control under ambiguity
+
+- **Ask** one concise email if blocked (“May I assume single-user?”)—don’t stall.
+- Ship **vertical slice** early: end-to-end path working beats **half-built layers**.
+- Use **feature flags** or stubs for stretch goals—**document** them.
+
+## README template (minimal viable)
+
+```text
+## What this does (1 paragraph)
+## How to run
+## How to test
+## Trade-offs & limits
+## If I had 3 more hours
+```
+
+## Testing that reads well
+
+- Name tests for **behavior**, not method names.
+- Include **boundary** cases called out in the brief.
+- If UI is required, **one** deterministic E2E or screenshot **GIF** helps—don’t over-invest without guidance.
+
+## Common failure modes
+
+- **Secret API keys** in git history
+- **Non-deterministic** tests (flaky timers, network)
+- **Undocumented** ports/env vars
+- **Over-engineering** DI frameworks for a 4-hour task
+
+## How this pairs with interview loops
+
+Many companies use **take-home + live coding**. Skills transfer:
+
+- **Clear communication** in README ↔ [thinking out loud](/blog/coding-interview-communication) in live rounds
+- **Complexity awareness** ↔ [time complexity habits](/blog/time-complexity-cheat-sheet)
+
+After you submit, shift energy to **live** practice—[AI mock interviews](/blog/ai-mock-interview-2026) help if you are **rusty** speaking while coding.
+
+## FAQ
+
+### Should I add Docker?
+
+Only if brief suggests deployability or team uses it—otherwise **README + scripts** may suffice.
+
+### Is copy-pasting from Stack Overflow OK?
+
+**Understand every line** you ship; reviewers **will** ask in follow-ups.
+
+### What if I run out of time?
+
+Submit **working MVP** + honest **README** section—**partial excellence** beats **broken breadth**.
+
+---
+
+**Summary:** Win **software engineer take home assignment** reviews with **tight scope**, **runnable docs**, **meaningful tests**, and **explicit trade-offs**—then prepare **live coding** separately for the next round.

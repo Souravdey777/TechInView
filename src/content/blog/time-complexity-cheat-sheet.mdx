@@ -1,0 +1,108 @@
+---
+title: "How to Analyze Time Complexity (With Examples)"
+description: "A practical time complexity cheat sheet for interviews—rules, loops, recursion, amortization, and patterns that trip people up."
+date: "2026-03-22"
+keyword: "time complexity cheat sheet"
+---
+
+People searching for a **time complexity cheat sheet** rarely want heavy math—they want fast, correct answers in interviews. This guide is that: rules you can apply while talking, plus examples that mirror real questions.
+
+## Big-O in one sentence
+
+**Big-O describes how runtime grows as input size *n* grows**—worst case unless the interviewer specifies average or amortized.
+
+You are comparing **dominant terms** and dropping constants and lower-order pieces: O(3n² + 100n) → O(n²).
+
+## Core building blocks
+
+| Pattern | Complexity | Notes |
+|--------|------------|--------|
+| Single loop over n | O(n) | |
+| Nested loops, each up to n | O(n²) | Triple nested → O(n³) |
+| Binary search / halving | O(log n) | |
+| Sorting comparison-based | O(n log n) | |
+| Scan all pairs | O(n²) | |
+| Subsets of n elements | O(2ⁿ) | |
+| Permutations | O(n!) | |
+
+## Loops with changing bounds
+
+**Example:** `for i in range(n): for j in range(i, n):`  
+Inner iterations: (n-1) + (n-2) + … ≈ n(n-1)/2 → **O(n²)**.
+
+**Example:** `i = 1; while i < n: i *= 2` → **O(log n)** iterations.
+
+Always ask: does the inner work depend on the outer index in a way that sums to n², n log n, or something else?
+
+## Recursion and trees
+
+For recursive DFS on a **binary tree** with n nodes:
+
+- Each node visited once → **O(n)** time, **O(h)** stack space where h is height (O(log n) balanced, O(n) skewed).
+
+For **memoized** DP where each state computed once and work per state is O(1):
+
+- Time ≈ **O(number of states)**.
+
+## Hash map and set operations
+
+Average case:
+
+- Insert / lookup / delete: **O(1)** expected.
+
+Worst case (rare in interviews unless discussed):
+
+- **O(n)** if many collisions—mention only if the interviewer probes implementation details.
+
+## Sorting + scanning
+
+Sort then one linear pass: **O(n log n)** dominates.
+
+## Amortized analysis
+
+**Dynamic array push:** occasional resize is expensive, but spread over many pushes → **amortized O(1)** per append.
+
+**Union-Find with path compression:** nearly **O(α(n))** per op in practice—often treated as "inverse Ackermann, effectively constant" in interviews.
+
+Say the word **amortized** when you use a structure whose single operation worst case differs from the long-run average.
+
+## Graphs
+
+- **BFS/DFS:** O(V + E) with adjacency list.
+- **Dijkstra with binary heap:** O((V + E) log V) typical statement level.
+
+## What to say out loud (template)
+
+1. "The dominant work is …"
+2. "We visit each … once, so …"
+3. "Sorting dominates at O(n log n), then the scan is linear."
+
+That three-line habit satisfies most interviewers reviewing your **time complexity cheat sheet** mental model.
+
+## Frequent mistakes
+
+- Confusing **O(n log n)** sort with **O(n)** counting sort assumptions—counting sort is not comparison-based and needs bounded key ranges.
+- Reporting **O(1)** for building a frequency map from an unsized stream—you must read the input at least once → **O(n)**.
+- Ignoring **output size**: generating all subsets is O(2ⁿ) *output*, not O(n).
+
+## Space complexity
+
+Count **extra** structures: arrays, maps, recursion stack, implicit sort space.
+
+- In-place sort: often **O(1)** or **O(log n)** auxiliary depending on algorithm.
+- Memo table sized by states: **O(states)**.
+
+## Tie it to communication
+
+Interviewers grade **whether you can derive complexity from your actual code**, not whether you recite a table. After implementation, walk loop by loop and name the product of bounds—that is the living **time complexity cheat sheet**.
+
+## Quick reference card (print mentally)
+
+- Single pass → O(n)
+- Divide by two each step → O(log n)
+- Nested full scans → O(n²)
+- Sort → O(n log n)
+- Graph traversal (adj list) → O(V + E)
+- Bitmask DP over subsets → often O(n · 2ⁿ)
+
+Drill one new problem daily with "state complexity out loud" and this becomes automatic.

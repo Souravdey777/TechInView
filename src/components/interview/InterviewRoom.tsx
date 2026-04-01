@@ -275,6 +275,9 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     if (voice.isListening) {
       voice.stopListening();
     } else {
+      // Stop Tia from speaking if he's talking
+      voice.stopSpeaking();
+      voice.setTranscript("");
       voice.startListening();
     }
   }, [voice]);

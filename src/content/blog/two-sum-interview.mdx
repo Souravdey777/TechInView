@@ -1,0 +1,91 @@
+---
+title: "The Complete Guide to Two Sum (All 3 Approaches)"
+description: "Brute force, two-pointer, and hash map solutions for Two Sum—complexity, when each applies, and exactly what to say in an interview."
+date: "2026-03-26"
+keyword: "two sum interview"
+---
+
+**Two Sum** is the "hello world" of technical interviews. That does not make it trivial—interviewers use it to see whether you communicate trade-offs, catch constraints, and avoid hidden pitfalls. If someone searches **two sum interview**, they want a single reference: all standard approaches, complexities, and narrative scripts.
+
+> **Problem (classic form):** Given an integer array `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] == target`. Assume exactly one solution exists and you may not use the same element twice.
+
+Variants exist (sorted array, return values instead of indices, all pairs). Always clarify which variant you have.
+
+## Approach 1: Brute force
+
+Try every pair `(i, j)` where `i < j`.
+
+```python
+def two_sum(nums, target):
+    n = len(nums)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if nums[i] + nums[j] == target:
+                return [i, j]
+```
+
+- **Time:** O(n²)
+- **Space:** O(1) extra
+
+**When to mention it:** Open with "The naive approach checks all pairs—quadratic time, constant space—then we can improve."
+
+This establishes you are not jumping to the trick without showing baseline reasoning—a strong **two sum interview** signal.
+
+## Approach 2: Sort + two pointers (values, not original indices)
+
+Sort a copy of the array with `(value, original_index)` pairs. Use left and right pointers, moving inward based on whether `sum < target` or `sum > target`.
+
+- **Time:** O(n log n) for sorting
+- **Space:** O(n) for pairs (or O(log n) to O(n) sort space depending on implementation)
+
+**Caveat:** If the question requires **original indices**, you must preserve them through the sort. If duplicates are allowed with distinct indices, your walk logic must still respect "not the same element."
+
+**When it shines:** Sorted input variant, or when the interviewer bans hash maps.
+
+## Approach 3: Hash map (the interview default)
+
+One pass: for each `num`, check if `complement = target - num` was seen; if yes, return stored index and current index; else store `num -> index`.
+
+```python
+def two_sum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+```
+
+- **Time:** O(n) average
+- **Space:** O(n) for the map
+
+**What to say:** "I'm trading space for time: each lookup is O(1) expected, single pass."
+
+### Pitfall: duplicate values
+
+If `nums = [3, 3]` and `target = 6`, storing `value -> index` overwrites earlier indices. The usual pattern still works because you check **before** inserting the current index—so the complement lookup hits the previous occurrence.
+
+## Comparison table
+
+| Approach | Time | Extra space | Notes |
+|---------|------|-------------|--------|
+| Brute force | O(n²) | O(1) | Baseline |
+| Sort + two pointers | O(n log n) | O(n) typical | Sorted variant / no extra DS |
+| Hash map | O(n) | O(n) | Default for unsorted + indices |
+
+## Follow-ups you should expect
+
+- **All pairs** that sum to target (avoid duplicates in output).
+- **Sorted array** and **O(n)** time with O(1) space (two pointers on the original array).
+- **3Sum / 4Sum** reduction (sort + fix one element + two pointers is a common pattern).
+- **Data too large for one machine** (external sort, map-reduce sketch—rare in phone screens).
+
+## Closing the **two sum interview** loop
+
+1. Clarify duplicates, sortedness, and return type.
+2. State brute force, then improve.
+3. Implement hash map (or the variant-appropriate solution).
+4. Trace a short example.
+5. State complexity and mention when two-pointer wins.
+
+Two Sum is not about the five lines of code. It is about showing structured thinking—the same structure you will reuse on harder graph and DP problems.

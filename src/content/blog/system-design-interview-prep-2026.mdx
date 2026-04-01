@@ -1,0 +1,81 @@
+---
+title: "System Design Interview Prep in 2026: What to Study First (Before You Drown in Diagrams)"
+description: "A practical system design interview prep order for 2026—foundations, trade-offs, and drills—plus how it fits next to coding interview practice."
+date: "2026-04-17"
+keyword: "system design interview prep"
+tags:
+  - software architecture interview
+  - distributed systems interview
+  - tech interview 2026
+  - backend interview prep
+---
+
+**System design interview prep** in 2026 still rewards **clear trade-offs** over pretty boxes. Candidates drown when they jump straight to Kafka and Kubernetes without owning **requirements, capacity, and data models**. This guide gives you a **first-90-hours** order that mirrors how strong interviewers probe—and clarifies how this sits beside **coding interview preparation**.
+
+**Honest product note:** TechInView today focuses on **voice DSA rounds** with live coding. System design is **adjacent prep** for many full loops; use this article to sequence study, then pair **coding mocks** (e.g. [communication](/blog/coding-interview-communication), [complexity](/blog/time-complexity-cheat-sheet)) for the rounds where you type under time pressure.
+
+## Week 1–2: Vocabulary that earns credit
+
+Before drawing anything, be fluent in:
+
+- **Latency vs throughput**, **availability vs consistency** (CAP at a high level), **idempotency**, **exactly-once illusions**
+- **Strong vs eventual consistency** with a concrete user-visible example
+- **Synchronous vs async** boundaries (queues, outbox pattern at concept level)
+
+Interviewers want to hear **when** you choose each—not textbook definitions.
+
+## Week 3–4: The five-question opener
+
+Open every practice session by answering, out loud:
+
+1. **Functional requirements** (MVP vs later)
+2. **Non-functional**: scale, latency, durability, compliance (if relevant)
+3. **Traffic & storage back-of-napkin** (orders of magnitude)
+4. **API / data model** sketch
+5. **Bottleneck** you expect first
+
+This mirrors how **FAANG-style** loops probe depth—see [what interviewers score](/blog/faang-interview-scoring) for the parallel **coding** rubric.
+
+## Week 5–6: Core building blocks (depth over buzzwords)
+
+Study each enough to **compare alternatives**:
+
+| Topic | Know cold |
+|-------|-----------|
+| Load balancing | Layer 4 vs 7, sticky sessions trade-offs |
+| Caching | TTL, invalidation, cache-aside vs read-through |
+| Databases | OLTP vs OLAP, indexes, sharding vs federation |
+| Messaging | At-least-once + dedup vs ordering needs |
+| Search | When inverted indexes beat SQL |
+
+Pick **two** deep dives (e.g. Postgres + Redis, or Kafka basics) aligned to your target role.
+
+## Week 7–8: Drills that feel like interviews
+
+- **45-minute** sessions: 10 min clarifying, 25 min design, 10 min deep dive (“what if partition?”).
+- Record yourself; cut filler words.
+- End every session with **three trade-offs you’d revisit in production**.
+
+## How this pairs with coding rounds
+
+Most loops still include **algorithms + implementation**. Do not pause DSA entirely while learning SD—use a **split schedule** (e.g. three SD nights, four DSA nights) unless your loop is SD-only.
+
+For DSA communication under pressure, our [live coding pressure guide](/blog/coding-interview-pressure-live-coding) and [problem-reading framework](/blog/how-to-read-coding-interview-problems) complement system design **narrative** skills.
+
+## FAQ
+
+### Do I need to know Kubernetes?
+
+Often **no** at the conceptual level; knowing **what** orchestration solves (deploy, rollouts, health) is enough unless the role is platform.
+
+### What if I’m frontend-focused?
+
+Emphasize **API contracts**, **client performance**, **SSR/CDN**, **real-time** (WebSockets), and **design systems** at scale—still structured trade-offs.
+
+### Should I use AI for mock system design?
+
+Use AI for **Socratic follow-ups** and **trade-off challenges**, but validate against **canonical references** and peer review—hallucinated quotas break interviews.
+
+---
+
+**Summary:** **System design interview prep** in 2026 starts with **requirements and trade-offs**, then **building blocks**, then **timed verbal drills**—not diagrams for their own sake. Keep **coding interview preparation** in parallel until you know your loop mix.
