@@ -34,65 +34,71 @@ export function MarketingNav({ signupHref = "/login" }: MarketingNavProps) {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 bg-brand-deep/80 backdrop-blur-md border-b border-brand-border">
-      <nav
-        className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4"
-        aria-label="Primary"
-      >
-        <Link href="/" className="flex items-center gap-1 shrink-0">
-          <span className="text-xl font-bold font-heading text-brand-text tracking-tight">
-            TechInView
-          </span>
-          <span className="text-brand-cyan text-2xl leading-none">.</span>
-        </Link>
+    <>
+      {/* Sibling of header: backdrop-filter on header traps fixed descendants to header height. */}
+      <header className="sticky top-0 z-50 bg-brand-deep/80 backdrop-blur-md border-b border-brand-border">
+        <nav
+          className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4"
+          aria-label="Primary"
+        >
+          <Link href="/" className="flex items-center gap-1 shrink-0">
+            <span className="text-xl font-bold font-heading text-brand-text tracking-tight">
+              TechInView
+            </span>
+            <span className="text-brand-cyan text-2xl leading-none">.</span>
+          </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((l) => (
+          <div className="hidden md:flex items-center gap-8">
+            {navLinks.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="text-sm text-brand-muted hover:text-brand-text transition-colors"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
-              key={l.href}
-              href={l.href}
-              className="text-sm text-brand-muted hover:text-brand-text transition-colors"
+              href="/login"
+              className="hidden sm:inline-flex text-sm text-brand-muted hover:text-brand-text transition-colors px-2"
             >
-              {l.label}
+              Log in
             </Link>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/login"
-            className="hidden sm:inline-flex text-sm text-brand-muted hover:text-brand-text transition-colors px-2"
-          >
-            Log in
-          </Link>
-          <Link
-            href={signupHref}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
-          >
-            Get Started
-          </Link>
-          <button
-            type="button"
-            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-brand-border text-brand-text hover:bg-brand-card transition-colors"
-            onClick={() => setOpen(true)}
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            aria-label="Open menu"
-          >
-            <Menu className="h-5 w-5" aria-hidden />
-          </button>
-        </div>
-      </nav>
+            <Link
+              href={signupHref}
+              className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
+            >
+              Get Started
+            </Link>
+            <button
+              type="button"
+              className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-brand-border text-brand-text hover:bg-brand-card transition-colors"
+              onClick={() => setOpen(true)}
+              aria-expanded={open}
+              aria-controls="mobile-nav"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" aria-hidden />
+            </button>
+          </div>
+        </nav>
+      </header>
 
       <div
         id="mobile-nav"
         className={cn(
-          "md:hidden fixed inset-0 z-[60] bg-brand-deep/95 backdrop-blur-lg transition-opacity duration-200",
+          "md:hidden fixed inset-0 z-[100] flex min-h-0 flex-col bg-brand-deep transition-opacity duration-200",
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         aria-hidden={!open}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
       >
-        <div className="flex h-16 items-center justify-between px-4 border-b border-brand-border">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-brand-border px-4">
           <span className="text-sm font-semibold text-brand-muted">Menu</span>
           <button
             type="button"
@@ -103,7 +109,7 @@ export function MarketingNav({ signupHref = "/login" }: MarketingNavProps) {
             <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
-        <div className="flex flex-col p-4 gap-1">
+        <div className="min-h-0 flex-1 overflow-y-auto flex flex-col gap-1 p-4">
           {navLinks.map((l) => (
             <Link
               key={l.href}
@@ -123,6 +129,6 @@ export function MarketingNav({ signupHref = "/login" }: MarketingNavProps) {
           </Link>
         </div>
       </div>
-    </header>
+    </>
   );
 }
