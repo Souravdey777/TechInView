@@ -12,11 +12,13 @@ import {
   Trophy,
   MessageSquare,
   Star,
-  Volume2,
   Play,
   ChevronRight,
 } from "lucide-react";
 import { MarketingNav } from "@/components/landing/MarketingNav";
+import { LandingReveal } from "@/components/landing/LandingReveal";
+import { LandingTiaPreview } from "@/components/landing/LandingTiaPreview";
+import { MarketingFooter } from "@/components/landing/MarketingFooter";
 import { Pricing } from "@/components/landing/Pricing";
 import { getRegionForCountry } from "@/lib/constants";
 
@@ -39,10 +41,16 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
 
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text overflow-x-hidden">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-brand-cyan focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-deep focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:ring-offset-2 focus:ring-offset-brand-deep"
+      >
+        Skip to content
+      </a>
       <MarketingNav signupHref={signupHref} />
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden pt-20 pb-32 px-4 sm:px-6">
+      <section className="relative overflow-hidden pt-20 pb-28 sm:pb-32 px-4 sm:px-6">
         {/* Gradient mesh background */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -56,48 +64,48 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
 
         <div className="relative max-w-5xl mx-auto text-center">
           {/* Status pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 text-xs text-brand-cyan mb-8 animate-fade-in">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 text-xs text-brand-cyan mb-8 animate-fade-in motion-reduce:animate-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse motion-reduce:animate-none" />
             AI-powered mock interviews &mdash; now in beta
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] text-brand-text mb-6 animate-fade-in">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] text-brand-text mb-6 animate-fade-in text-balance">
             Stop guessing.
             <br />
-            <span className="text-shimmer">Start interviewing.</span>
+            <span className="text-shimmer motion-reduce:animate-none">Start interviewing.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto mb-10 animate-fade-in stagger-1 leading-relaxed">
+          <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto mb-10 animate-fade-in stagger-1 leading-relaxed motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0">
             Practice DSA problems with voice-powered AI interviewers that talk,
             listen, and score you like real engineers. Start with Tia, the
             generalist, or choose a FAANG-specific persona. 45 minutes.
             5-dimension feedback. Zero awkwardness.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in stagger-2">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center animate-fade-in stagger-2 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0">
             <Link
               href={signupHref}
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-brand-cyan text-brand-deep font-semibold text-base hover:bg-cyan-300 transition-all hover:scale-105 glow-cyan"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-brand-cyan text-brand-deep font-semibold text-base hover:bg-cyan-300 transition-colors sm:transition-transform sm:hover:scale-[1.02] glow-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
             >
               Start Free Interview
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <a
+            <Link
               href="#how-it-works"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-brand-border text-brand-text font-semibold text-base hover:bg-brand-card transition-colors"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-brand-border text-brand-text font-semibold text-base hover:bg-brand-card hover:border-brand-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/50 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
             >
-              <Play className="w-4 h-4 text-brand-cyan" />
+              <Play className="w-4 h-4 text-brand-cyan shrink-0" />
               See How It Works
-            </a>
+            </Link>
           </div>
 
-          <p className="mt-5 text-xs text-brand-muted animate-fade-in stagger-3">
+          <p className="mt-5 text-xs text-brand-muted animate-fade-in stagger-3 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0">
             1 free trial interview &mdash; no credit card required
           </p>
 
           {/* ── Product Preview Mock ── */}
-          <div className="mt-16 animate-fade-in stagger-4">
-            <div className="relative mx-auto max-w-4xl rounded-xl border border-brand-border bg-brand-card/50 overflow-hidden shadow-2xl shadow-brand-cyan/5">
+          <div className="mt-14 sm:mt-16 animate-fade-in stagger-4 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0">
+            <div className="relative mx-auto max-w-4xl rounded-2xl border border-brand-border/80 bg-brand-card/60 overflow-hidden shadow-[0_24px_80px_-20px_rgba(0,0,0,0.55)] shadow-brand-cyan/[0.07] ring-1 ring-white/[0.04]">
               {/* Browser chrome */}
               <div className="flex items-center gap-2 px-4 py-3 border-b border-brand-border bg-brand-surface/80">
                 <div className="flex gap-1.5">
@@ -113,8 +121,8 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               </div>
 
               {/* Persona selector bar */}
-              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-brand-border bg-brand-deep/40">
-                <span className="text-[10px] text-brand-muted mr-1">Interviewer:</span>
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 border-b border-brand-border bg-brand-deep/40 overflow-x-auto [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
+                <span className="text-[10px] text-brand-muted shrink-0">Interviewer:</span>
                 {[
                   { name: "Tia", company: "Default", active: true },
                   { name: "Sundar", company: "Google", active: false },
@@ -125,10 +133,10 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 ].map((p) => (
                   <div
                     key={p.name}
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors ${
+                    className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors whitespace-nowrap ${
                       p.active
                         ? "bg-brand-cyan/15 border-brand-cyan/40 text-brand-cyan"
-                        : "border-brand-border text-brand-muted hover:border-brand-muted/50"
+                        : "border-brand-border text-brand-muted"
                     }`}
                   >
                     {p.name} <span className="opacity-60">({p.company})</span>
@@ -137,47 +145,28 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               </div>
 
               {/* Mock interview room */}
-              <div className="grid grid-cols-5 min-h-[320px] sm:min-h-[400px]">
+              <div className="grid grid-cols-1 lg:grid-cols-5 min-h-[280px] lg:min-h-[400px]">
                 {/* Left: Voice + Problem panel */}
-                <div className="col-span-2 border-r border-brand-border p-4 sm:p-6 flex flex-col gap-4">
-                  {/* AI Avatar */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-cyan to-cyan-600 flex items-center justify-center">
-                      <Volume2 className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-brand-text">Tia <span className="text-[10px] font-normal text-brand-muted">(Default)</span></p>
-                      <p className="text-[10px] text-brand-green flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
-                        Speaking...
+                <div className="lg:col-span-2 border-b lg:border-b-0 lg:border-r border-brand-border p-4 sm:p-6 flex flex-col gap-4">
+                  <LandingTiaPreview />
+                  <div className="flex min-h-0 flex-1 flex-col gap-2.5 text-xs">
+                    <div className="rounded-lg border border-brand-cyan/25 bg-brand-cyan/[0.07] p-2.5 ring-1 ring-brand-cyan/10">
+                      <p className="mb-0.5 text-[10px] font-medium text-brand-muted">You</p>
+                      <p className="text-[10px] font-medium leading-relaxed text-brand-text sm:text-[11px]">
+                        &ldquo;Let&apos;s start—I&apos;m ready for the free round.&rdquo;
                       </p>
                     </div>
-                  </div>
-                  {/* Voice visualizer mock */}
-                  <div className="flex items-end justify-center gap-[3px] h-8">
-                    {[16, 24, 32, 20, 28, 36, 22, 30, 18, 26, 34, 20, 28, 24].map((h, i) => (
-                      <div
-                        key={i}
-                        className="w-1 rounded-full bg-brand-cyan/70 animate-voice-bar"
-                        style={{ height: `${h}px`, animationDelay: `${i * 0.08}s` }}
-                      />
-                    ))}
-                  </div>
-                  {/* Transcript mock */}
-                  <div className="flex-1 space-y-2.5 text-xs">
-                    <div className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20">
-                      <p className="text-brand-cyan text-[10px] font-medium mb-0.5">Tia</p>
-                      <p className="text-brand-text leading-relaxed">&ldquo;Walk me through your approach before you start coding.&rdquo;</p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-brand-surface border border-brand-border">
-                      <p className="text-brand-muted text-[10px] font-medium mb-0.5">You</p>
-                      <p className="text-brand-text leading-relaxed">&ldquo;I&apos;d use a hash map to store values we&apos;ve seen...&rdquo;</p>
+                    <div className="rounded-lg border border-brand-cyan/20 bg-brand-cyan/10 p-2.5">
+                      <p className="mb-0.5 text-[10px] font-medium text-brand-cyan">Tia</p>
+                      <p className="text-[10px] leading-relaxed text-brand-text sm:text-[11px]">
+                        &ldquo;Love it. I&apos;ll walk you through a real DSA round—voice, code, and feedback at the end. Whenever you&apos;re ready, start your free interview and we&apos;ll jump in.&rdquo;
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Right: Code editor mock */}
-                <div className="col-span-3 p-4 sm:p-6 flex flex-col gap-3">
+                <div className="lg:col-span-3 p-4 sm:p-6 flex flex-col gap-3 min-h-[220px] lg:min-h-0">
                   {/* Editor tabs */}
                   <div className="flex items-center gap-3">
                     <div className="px-3 py-1 rounded-md bg-brand-deep border border-brand-border text-[10px] text-brand-cyan font-mono">
@@ -202,12 +191,19 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                     </div>
                   </div>
                   {/* Test results mock */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                     <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-green/20 text-brand-green">PASS</span>
                     <span className="text-[10px] text-brand-muted font-mono">Test 1: [2,7,11,15], target=9</span>
                     <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-green/20 text-brand-green">PASS</span>
                     <span className="text-[10px] text-brand-muted font-mono">Test 2: [3,2,4], target=6</span>
                   </div>
+                  <Link
+                    href={signupHref}
+                    className="mock-preview-cta group mt-1 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-brand-cyan/35 bg-brand-deep/90 px-4 py-2.5 text-center text-xs font-semibold text-brand-cyan transition-colors hover:bg-brand-cyan/10 hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
+                  >
+                    Start free interview
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -217,29 +213,30 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
         </div>
       </section>
 
+      <main id="main">
       {/* ── Social Proof Stats ── */}
       <section className="py-12 px-4 sm:px-6 border-y border-brand-border bg-brand-surface/50">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+        <LandingReveal className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
           {[
             { value: "500+", label: "Mock interviews conducted", icon: MessageSquare },
             { value: "<1.5s", label: "Voice response latency", icon: Zap },
             { value: "4.8/5", label: "Average user rating", icon: Star },
             { value: "20+", label: "DSA problem categories", icon: Brain },
           ].map((stat) => (
-            <div key={stat.label} className="text-center">
+            <div key={stat.label} className="text-center rounded-xl py-2 md:py-0">
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-brand-cyan/10 mb-3">
                 <stat.icon className="w-5 h-5 text-brand-cyan" />
               </div>
-              <p className="text-2xl sm:text-3xl font-bold text-brand-text">{stat.value}</p>
-              <p className="text-xs text-brand-muted mt-1">{stat.label}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-brand-text tabular-nums">{stat.value}</p>
+              <p className="text-xs text-brand-muted mt-1 leading-snug max-w-[11rem] mx-auto">{stat.label}</p>
             </div>
           ))}
-        </div>
+        </LandingReveal>
       </section>
 
       {/* ── Features (6 cards, 2 rows) ── */}
       <section id="features" className="py-24 px-4 sm:px-6 bg-brand-deep">
-        <div className="max-w-6xl mx-auto">
+        <LandingReveal className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-brand-cyan mb-3 tracking-wide uppercase">Features</p>
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -299,7 +296,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               return (
                 <div
                   key={feature.title}
-                  className={`glass-card p-7 flex flex-col gap-4 transition-all duration-300 ${c.border} hover:-translate-y-1`}
+                  className={`glass-card p-7 flex flex-col gap-4 transition-all duration-300 ${c.border} hover:-translate-y-1 motion-reduce:hover:translate-y-0`}
                 >
                   <div className={`w-11 h-11 rounded-lg ${c.bg} flex items-center justify-center`}>
                     <feature.icon className={`w-5 h-5 ${c.text}`} />
@@ -314,12 +311,12 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               );
             })}
           </div>
-        </div>
+        </LandingReveal>
       </section>
 
       {/* ── How It Works ── */}
       <section id="how-it-works" className="py-24 px-4 sm:px-6 bg-brand-surface">
-        <div className="max-w-5xl mx-auto">
+        <LandingReveal className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-brand-cyan mb-3 tracking-wide uppercase">How it works</p>
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -331,8 +328,8 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            {/* Connector line */}
-            <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-px">
+            {/* Connector line: aligns with circle centers (card p-7 + half of w-14/h-14) */}
+            <div className="hidden md:block absolute top-14 left-[20%] right-[20%] h-px">
               <div className="h-full bg-gradient-to-r from-brand-cyan/40 via-brand-green/40 to-brand-amber/40" />
             </div>
 
@@ -383,12 +380,12 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               );
             })}
           </div>
-        </div>
+        </LandingReveal>
       </section>
 
       {/* ── What Makes Us Different ── */}
       <section className="py-24 px-4 sm:px-6 bg-brand-deep">
-        <div className="max-w-5xl mx-auto">
+        <LandingReveal className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-brand-cyan mb-3 tracking-wide uppercase">Why TechInView</p>
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -437,15 +434,17 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               </ul>
             </div>
           </div>
-        </div>
+        </LandingReveal>
       </section>
 
       {/* ── Pricing ── */}
-      <Pricing defaultRegion={pricingRegion} refParam={ref} />
+      <LandingReveal>
+        <Pricing defaultRegion={pricingRegion} refParam={ref} />
+      </LandingReveal>
 
       {/* ── FAQ ── */}
       <section id="faq" className="py-24 px-4 sm:px-6 bg-brand-deep">
-        <div className="max-w-3xl mx-auto">
+        <LandingReveal className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-brand-cyan mb-3 tracking-wide uppercase">FAQ</p>
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -494,7 +493,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               </details>
             ))}
           </div>
-        </div>
+        </LandingReveal>
       </section>
 
       {/* ── Final CTA ── */}
@@ -507,18 +506,18 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           }}
           aria-hidden="true"
         />
-        <div className="relative max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-brand-text mb-6 leading-tight">
+        <LandingReveal className="relative max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl md:text-5xl font-bold text-brand-text mb-6 leading-tight text-balance">
             Your next interview is
             <br />
             <span className="text-gradient-cyan">45 minutes away</span>
           </h2>
-          <p className="text-brand-muted text-lg mb-10 max-w-lg mx-auto">
+          <p className="text-brand-muted text-lg mb-10 max-w-lg mx-auto leading-relaxed">
             No scheduling, no awkward peer matching, no waiting. Just you, your AI interviewer, and a problem to solve.
           </p>
           <Link
             href={signupHref}
-            className="group inline-flex items-center justify-center gap-2 px-10 py-4 rounded-xl bg-brand-cyan text-brand-deep font-semibold text-lg hover:bg-cyan-300 transition-all hover:scale-105 glow-cyan"
+            className="group inline-flex items-center justify-center gap-2 px-10 py-4 rounded-xl bg-brand-cyan text-brand-deep font-semibold text-lg hover:bg-cyan-300 transition-colors sm:transition-transform sm:hover:scale-[1.02] glow-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-surface"
           >
             Start Your Free Interview
             <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -526,33 +525,11 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           <p className="mt-4 text-xs text-brand-muted">
             No credit card required &mdash; try it right now
           </p>
-        </div>
+        </LandingReveal>
       </section>
+      </main>
 
-      {/* ── Footer ── */}
-      <footer className="py-12 px-4 sm:px-6 border-t border-brand-border bg-brand-deep">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-1">
-              <span className="font-bold font-heading text-brand-text">
-                TechInView
-              </span>
-              <span className="text-brand-cyan text-xl leading-none">.</span>
-            </div>
-
-            <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-brand-muted">
-              <Link href="#features" className="hover:text-brand-text transition-colors">Features</Link>
-              <Link href="#pricing" className="hover:text-brand-text transition-colors">Pricing</Link>
-              <Link href="#faq" className="hover:text-brand-text transition-colors">FAQ</Link>
-              <Link href="/blog" className="hover:text-brand-text transition-colors">Blog</Link>
-            </div>
-
-            <p className="text-brand-muted text-sm">
-              &copy; {new Date().getFullYear()} TechInView. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter signupHref={signupHref} />
     </div>
   );
 }
