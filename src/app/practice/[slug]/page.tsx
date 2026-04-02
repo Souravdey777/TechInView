@@ -38,33 +38,64 @@ export const revalidate = 3600; // ISR — rebuild every hour
 // SEO Metadata
 // ---------------------------------------------------------------------------
 
+function buildMetaDescription(problem: {
+  title: string;
+  difficulty: string;
+  category: string;
+  description: string;
+  company_tags: string[] | null;
+  optimal_complexity: unknown;
+}) {
+  const companies = (problem.company_tags ?? []).slice(0, 4).join(", ");
+  const complexity = problem.optimal_complexity as OptimalComplexity | null;
+  const complexityStr = complexity?.time
+    ? ` Optimal: ${complexity.time} time.`
+    : "";
+  const catLabel = capitalizeCategory(problem.category);
+
+  // Use first ~100 chars of the problem description as a natural snippet
+  const snippet = problem.description
+    .replace(/[#*`\n]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 100);
+
+  return `${problem.title} (${problem.difficulty}) — ${catLabel}. ${snippet}...${complexityStr}${companies ? ` Asked at ${companies}.` : ""} Practice with a voice AI interviewer on TechInView.`;
+}
+
 export async function generateMetadata({
   params,
 }: PracticeSlugPageProps): Promise<Metadata> {
   const problem = await getProblemBySlug(params.slug);
   if (!problem) return { title: "Problem not found" };
 
-  const title = `${problem.title} — Practice with AI Interviewer | TechInView`;
-  const description = `Practice "${problem.title}" (${problem.difficulty}) in a realistic AI mock interview. Category: ${problem.category}. Companies: ${(problem.company_tags ?? []).join(", ") || "top tech"}. Get scored on 5 dimensions.`;
+  const titleFormatted = problem.title.replace(/-/g, " ");
+  const catLabel = capitalizeCategory(problem.category);
+  const title = `${problem.title} — ${catLabel} Interview Problem | TechInView`;
+  const description = buildMetaDescription(problem);
 
   return {
     title,
     description,
     keywords: [
       problem.title,
-      `${problem.title} interview`,
+      `${titleFormatted} solution`,
+      `${titleFormatted} interview question`,
+      `${titleFormatted} ${problem.difficulty}`,
+      `${catLabel} interview problems`,
       problem.category,
-      problem.difficulty,
-      ...(problem.company_tags ?? []),
+      ...(problem.company_tags ?? []).map((t) => `${t} interview questions`),
       "coding interview practice",
       "AI mock interview",
       "DSA practice",
+      "leetcode alternative",
+      "FAANG interview prep",
       "TechInView",
     ],
     authors: [{ name: "TechInView", url: baseUrl }],
     robots: { index: true, follow: true },
     openGraph: {
-      title: `${problem.title} — AI Mock Interview Practice`,
+      title: `${problem.title} — Practice with AI Interviewer`,
       description,
       type: "article",
       url: `${baseUrl}/practice/${problem.slug}`,
@@ -75,13 +106,13 @@ export async function generateMetadata({
           url: "/og-image.png",
           width: 1200,
           height: 630,
-          alt: `${problem.title} — TechInView`,
+          alt: `Practice ${problem.title} — TechInView`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${problem.title} — AI Mock Interview`,
+      title: `${problem.title} — ${catLabel} Problem | TechInView`,
       description,
       images: ["/og-image.png"],
     },
@@ -146,54 +177,75 @@ export default async function PracticeSlugPage({
     .slice(0, 4);
 
   // JSON-LD structured data
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "LearningResource",
-        name: problem.title,
-        description: problem.description.slice(0, 200),
-        url: `${baseUrl}/practice/${problem.slug}`,
-        educationalLevel: problem.difficulty,
-        learningResourceType: "Practice Problem",
-        about: {
-          "@type": "Thing",
-          name: capitalizeCategory(problem.category),
-        },
-        provider: {
-          "@type": "Organization",
-          name: "TechInView",
-          url: baseUrl,
-        },
+  const catLabel = capitalizeCategory(problem.category);
+  const pageUrl = `${baseUrl}/practice/${problem.slug}`;
+
+  const graph: Record<string, unknown>[] = [
+    {
+      "@type": "LearningResource",
+      "@id": pageUrl,
+      name: problem.title,
+      headline: `${problem.title} — ${catLabel} Interview Problem`,
+      description: buildMetaDescription(problem),
+      url: pageUrl,
+      educationalLevel: problem.difficulty,
+      learningResourceType: "Practice Problem",
+      inLanguage: "en",
+      isAccessibleForFree: true,
+      teaches: `${catLabel} data structures and algorithms`,
+      about: [
+        { "@type": "Thing", name: catLabel },
+        { "@type": "Thing", name: "Coding Interview Preparation" },
+      ],
+      ...(companyTags.length > 0 && {
+        keywords: companyTags.join(", "),
+      }),
+      provider: {
+        "@type": "Organization",
+        name: "TechInView",
+        url: baseUrl,
+        logo: `${baseUrl}/og-image.png`,
       },
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: baseUrl,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Practice Problems",
-            item: `${baseUrl}/practice`,
-          },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: problem.title,
-            item: `${baseUrl}/practice/${problem.slug}`,
-          },
-        ],
-      },
-    ],
-  };
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Practice Problems",
+          item: `${baseUrl}/practice`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: problem.title,
+          item: pageUrl,
+        },
+      ],
+    },
+  ];
+
+  // FAQPage schema from examples — helps Google show rich results
+  if (examples.length > 0) {
+    graph.push({
+      "@type": "FAQPage",
+      mainEntity: examples.map((ex, i) => ({
+        "@type": "Question",
+        name: `Example ${i + 1}: What is the output for input ${ex.input}?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `Output: ${ex.output}${ex.explanation ? `. ${ex.explanation}` : ""}`,
+        },
+      })),
+    });
+  }
+
+  const jsonLd = { "@context": "https://schema.org", "@graph": graph };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <article className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -396,6 +448,6 @@ export default async function PracticeSlugPage({
           </ul>
         </nav>
       )}
-    </div>
+    </article>
   );
 }

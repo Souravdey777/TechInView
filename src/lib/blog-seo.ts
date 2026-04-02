@@ -21,6 +21,7 @@ export function buildBlogPostingAndBreadcrumbJsonLd(input: {
   dateModified?: string;
   keywords: string[];
   wordCount: number;
+  readingTimeMinutes?: number;
 }) {
   const pageUrl = absoluteUrl(input.baseUrl, `/blog/${input.slug}`);
   const imageUrl = absoluteUrl(input.baseUrl, DEFAULT_OG_IMAGE_PATH);
@@ -61,6 +62,9 @@ export function buildBlogPostingAndBreadcrumbJsonLd(input: {
     articleSection: "Interview preparation",
     keywords: input.keywords.join(", "),
     wordCount: input.wordCount,
+    ...(input.readingTimeMinutes && {
+      timeRequired: `PT${input.readingTimeMinutes}M`,
+    }),
     isPartOf: {
       "@type": "Blog",
       "@id": absoluteUrl(input.baseUrl, "/blog#blog"),

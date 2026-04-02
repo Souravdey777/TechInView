@@ -7,7 +7,6 @@ import { Calendar, Clock, Tag } from "lucide-react";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import {
   buildBlogPostingAndBreadcrumbJsonLd,
-  DEFAULT_OG_IMAGE_PATH,
   wordCountFromMarkdownBody,
 } from "@/lib/blog-seo";
 import { getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/blog";
@@ -57,12 +56,6 @@ export function generateMetadata({ params }: BlogPostPageProps): Metadata {
   }
   const url = `${baseUrl}/blog/${post.slug}`;
   const keywords = buildPostKeywords(post);
-  const ogImage = {
-    url: DEFAULT_OG_IMAGE_PATH,
-    width: 1200,
-    height: 630,
-    alt: post.title,
-  };
 
   return {
     title: `${post.title} — TechInView Blog`,
@@ -80,13 +73,13 @@ export function generateMetadata({ params }: BlogPostPageProps): Metadata {
       url,
       siteName: "TechInView",
       locale: "en_US",
-      images: [ogImage],
+      // OG image auto-discovered from co-located opengraph-image.tsx
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: [DEFAULT_OG_IMAGE_PATH],
+      // Twitter image auto-discovered from co-located opengraph-image.tsx
     },
     alternates: { canonical: `/blog/${post.slug}` },
   };
@@ -121,6 +114,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     dateModified: post.updated,
     keywords,
     wordCount,
+    readingTimeMinutes: post.readingTimeMinutes,
   });
 
   return (

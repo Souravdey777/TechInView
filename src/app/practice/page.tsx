@@ -76,12 +76,28 @@ export default async function PracticePage() {
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "CollectionPage",
+        "@id": `${baseUrl}/practice`,
+        name: "Practice DSA Interview Problems",
+        description:
+          "Browse 70+ DSA coding interview problems — arrays, trees, graphs, DP, and more. Practice each one with a voice AI interviewer.",
+        url: `${baseUrl}/practice`,
+        inLanguage: "en",
+        isPartOf: { "@type": "WebSite", "@id": baseUrl, name: "TechInView" },
+        provider: {
+          "@type": "Organization",
+          name: "TechInView",
+          url: baseUrl,
+          logo: `${baseUrl}/og-image.png`,
+        },
+      },
+      {
         "@type": "ItemList",
         name: "DSA Interview Practice Problems",
         description:
           "Coding interview problems for FAANG preparation with AI mock interviews",
         numberOfItems: counts.total,
-        itemListElement: problems.slice(0, 30).map((p, i) => ({
+        itemListElement: problems.map((p, i) => ({
           "@type": "ListItem",
           position: i + 1,
           url: `${baseUrl}/practice/${p.slug}`,
@@ -91,17 +107,41 @@ export default async function PracticePage() {
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: baseUrl,
-          },
+          { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
           {
             "@type": "ListItem",
             position: 2,
             name: "Practice Problems",
             item: `${baseUrl}/practice`,
+          },
+        ],
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: "How does TechInView's AI mock interview work?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Pick any DSA problem, then start a voice interview. The AI interviewer asks clarifying questions, evaluates your approach, watches you code in a live editor, and scores you on 5 dimensions — problem solving, code quality, communication, technical knowledge, and testing.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "What coding interview topics are covered?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: `TechInView covers ${counts.total} problems across arrays, strings, trees, graphs, dynamic programming, linked lists, stacks & queues, binary search, heaps, backtracking, sliding window, and tries — with ${counts.easy} easy, ${counts.medium} medium, and ${counts.hard} hard problems.`,
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Is TechInView free to try?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes. You get a free AI mock interview to experience the full voice-based interview, live coding, and 5-dimension scoring. No credit card required.",
+            },
           },
         ],
       },
