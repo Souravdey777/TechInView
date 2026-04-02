@@ -39,8 +39,8 @@ _Goal: Live on the internet, shareable link_
 - [x] 22. Deploy frontend to Vercel
 - [x] 23. Set up production env vars on Vercel
 - [x] 24. Update Supabase auth redirect URLs to production domain
-- [ ] 25. Configure custom domain (techinview.dev)
-- [ ] 26. Smoke test full flow on production
+- [x] 25. Configure custom domain (techinview.dev)
+- [x] 26. Smoke test full flow on production
 
 ## Phase 5: Monetization
 _Goal: Accept payments_
