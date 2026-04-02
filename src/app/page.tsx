@@ -508,9 +508,9 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
         />
         <LandingReveal className="relative max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-brand-text mb-6 leading-tight text-balance">
-            Your next interview is
+            A full 45-minute mock interview,
             <br />
-            <span className="text-gradient-cyan">45 minutes away</span>
+            <span className="text-gradient-cyan">ready when you are</span>
           </h2>
           <p className="text-brand-muted text-lg mb-10 max-w-lg mx-auto leading-relaxed">
             No scheduling, no awkward peer matching, no waiting. Just you, your AI interviewer, and a problem to solve.
