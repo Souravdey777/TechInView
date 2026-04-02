@@ -2,6 +2,8 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 import { eq, and, ilike, inArray, sql, desc, asc } from "drizzle-orm";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 import type { Profile, Problem, Interview, Message, Progress, Payment, InterviewFeedback } from "./schema";
 
@@ -65,7 +67,7 @@ export type ProblemFilters = {
   search?: string;
 };
 
-export async function getProblems(
+async function _getProblems(
   filters?: ProblemFilters
 ): Promise<Problem[]> {
   const db = getDb();
@@ -96,7 +98,17 @@ export async function getProblems(
   return query;
 }
 
-export async function getProblemBySlug(
+/** Cached across requests for 1 hour; deduped within a single request via React cache. */
+export const getProblems = cache(
+  (filters?: ProblemFilters) =>
+    unstable_cache(
+      () => _getProblems(filters),
+      ["problems", JSON.stringify(filters ?? {})],
+      { revalidate: 3600 }
+    )()
+);
+
+async function _getProblemBySlug(
   slug: string
 ): Promise<Problem | undefined> {
   const db = getDb();
@@ -107,6 +119,16 @@ export async function getProblemBySlug(
     .limit(1);
   return results[0];
 }
+
+/** Cached across requests for 1 hour; deduped within a single request via React cache. */
+export const getProblemBySlug = cache(
+  (slug: string) =>
+    unstable_cache(
+      () => _getProblemBySlug(slug),
+      ["problem-by-slug", slug],
+      { revalidate: 3600 }
+    )()
+);
 
 export async function getRandomProblem(
   difficulty?: "easy" | "medium" | "hard",
