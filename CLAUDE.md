@@ -11,7 +11,7 @@
 
 **Target users:** Software engineers preparing for FAANG/top-tier tech interviews.
 **V1 scope:** DSA interviews only. Voice-based. Public launch + demand validation.
-**Domain:** techinview.ai
+**Domain:** techinview.dev
 
 ---
 
@@ -244,7 +244,7 @@ NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 NEXT_PUBLIC_VOICE_WS_URL=wss://techinview-voice.up.railway.app
 
 # App
-NEXT_PUBLIC_APP_URL=https://techinview.ai
+NEXT_PUBLIC_APP_URL=https://techinview.dev
 ```
 
 ---

@@ -3,7 +3,7 @@ import { getAllPosts } from "@/lib/blog";
 import { getProblems } from "@/lib/db/queries";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
   const posts = getAllPosts();
 
   const blogEntries: MetadataRoute.Sitemap = [

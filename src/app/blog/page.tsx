@@ -4,7 +4,7 @@ import { Calendar, Clock, Tag } from "lucide-react";
 import { buildBlogIndexJsonLd, DEFAULT_OG_IMAGE_PATH } from "@/lib/blog-seo";
 import { getAllPosts } from "@/lib/blog";
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
 export const metadata: Metadata = {
   title: "Interview Prep Blog — Coding & FAANG Guides | TechInView",

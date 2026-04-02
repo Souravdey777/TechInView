@@ -4,7 +4,7 @@ import { Zap } from "lucide-react";
 import { getProblems } from "@/lib/db/queries";
 import { PracticeGrid } from "@/components/practice/PracticeGrid";
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
 export const revalidate = 3600;
 

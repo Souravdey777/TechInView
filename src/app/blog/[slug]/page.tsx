@@ -17,7 +17,7 @@ type BlogPostPageProps = {
 };
 
 const baseUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai";
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
 function buildPostKeywords(post: {
   keyword: string;

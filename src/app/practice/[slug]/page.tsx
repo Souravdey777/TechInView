@@ -21,7 +21,7 @@ type PracticeSlugPageProps = {
   params: { slug: string };
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
 // ---------------------------------------------------------------------------
 // SSG

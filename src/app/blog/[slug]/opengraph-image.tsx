@@ -167,7 +167,7 @@ export default function OgImage({ params }: { params: { slug: string } }) {
               letterSpacing: "0.05em",
             }}
           >
-            techinview.ai/blog
+            techinview.dev/blog
           </span>
         </div>
       </div>

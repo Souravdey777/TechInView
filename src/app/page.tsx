@@ -115,7 +115,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 </div>
                 <div className="flex-1 mx-8">
                   <div className="mx-auto max-w-sm h-6 rounded-md bg-brand-deep/80 border border-brand-border flex items-center justify-center">
-                    <span className="text-[10px] text-brand-muted">techinview.ai/interview/abc-123</span>
+                    <span className="text-[10px] text-brand-muted">techinview.dev/interview/abc-123</span>
                   </div>
                 </div>
               </div>

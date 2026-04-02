@@ -9,7 +9,7 @@ function escapeXml(text: string): string {
 }
 
 export function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
   const blogUrl = `${baseUrl.replace(/\/$/, "")}/blog`;
   const selfUrl = `${blogUrl}/rss.xml`;
   const posts = getAllPosts().slice(0, 100);

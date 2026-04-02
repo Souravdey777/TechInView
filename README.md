@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://techinview.ai">Website</a> &middot;
+  <a href="https://techinview.dev">Website</a> &middot;
   <a href="#features">Features</a> &middot;
   <a href="#tech-stack">Tech Stack</a> &middot;
   <a href="#getting-started">Getting Started</a>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MarketingNav } from "@/components/landing/MarketingNav";
 import { MarketingFooter } from "@/components/landing/MarketingFooter";
 
-const site = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai";
+const site = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
 export const metadata: Metadata = {
   alternates: {

@@ -34,12 +34,12 @@ export const metadata: Metadata = {
   authors: [{ name: "TechInView" }],
   creator: "TechInView",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai"
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev"
   ),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://techinview.ai",
+    url: "https://techinview.dev",
     siteName: "TechInView",
     title: "TechInView — AI Mock Interview Platform",
     description:

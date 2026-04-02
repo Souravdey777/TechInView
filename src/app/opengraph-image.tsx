@@ -174,7 +174,7 @@ export default function OgImage() {
               letterSpacing: "0.05em",
             }}
           >
-            techinview.ai
+            techinview.dev
           </span>
           <div
             style={{
