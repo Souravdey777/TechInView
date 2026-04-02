@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
-import { eq, and, ilike, sql, desc, asc } from "drizzle-orm";
+import { eq, and, ilike, inArray, sql, desc, asc } from "drizzle-orm";
 
 import type { Profile, Problem, Interview, Message, Progress, Payment, InterviewFeedback } from "./schema";
 
@@ -135,6 +135,20 @@ export async function getRandomProblem(
   }
 
   return (await query)[0];
+}
+
+export async function getRelatedProblems(
+  categories: string[],
+  limit = 4
+): Promise<Problem[]> {
+  if (categories.length === 0) return [];
+  const db = getDb();
+  return db
+    .select()
+    .from(schema.problems)
+    .where(inArray(schema.problems.category, categories))
+    .orderBy(sql`random()`)
+    .limit(limit);
 }
 
 // ─── Interview Queries ────────────────────────────────────────────────────────

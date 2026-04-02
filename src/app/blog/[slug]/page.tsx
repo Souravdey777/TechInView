@@ -10,6 +10,7 @@ import {
   wordCountFromMarkdownBody,
 } from "@/lib/blog-seo";
 import { getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/blog";
+import { RelatedProblems } from "@/components/blog/RelatedProblems";
 
 type BlogPostPageProps = {
   params: { slug: string };
@@ -48,6 +49,8 @@ function formatDate(iso: string) {
 export function generateStaticParams() {
   return getPostSlugs().map((slug) => ({ slug }));
 }
+
+export const revalidate = 3600;
 
 export function generateMetadata({ params }: BlogPostPageProps): Metadata {
   const post = getPostBySlug(params.slug);
@@ -164,6 +167,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           prose-blockquote:border-brand-cyan/40 prose-blockquote:text-brand-muted
           prose-code:text-brand-cyan prose-code:bg-brand-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-mono prose-code:text-[0.9em] prose-code:before:content-none prose-code:after:content-none
           prose-pre:bg-brand-surface prose-pre:border prose-pre:border-brand-border prose-pre:rounded-xl
+          [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none
           prose-hr:border-brand-border
           prose-table:text-sm
           prose-th:text-brand-text prose-td:text-brand-muted
@@ -188,6 +192,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           Start a free interview
         </Link>
       </aside>
+
+      <RelatedProblems keyword={post.keyword} />
 
       {related.length > 0 ? (
         <nav className="mt-14" aria-label="Related posts">

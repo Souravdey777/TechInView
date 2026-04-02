@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
+import { ProblemCard } from "./ProblemCard";
 
 function MDXLink({ href, children, ...rest }: ComponentPropsWithoutRef<"a">) {
   const url = href ?? "";
@@ -28,4 +29,5 @@ function MDXLink({ href, children, ...rest }: ComponentPropsWithoutRef<"a">) {
 
 export const mdxComponents = {
   a: MDXLink,
+  ProblemCard,
 };
