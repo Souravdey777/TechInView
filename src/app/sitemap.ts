@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/blog";
+import { getProblems } from "@/lib/db/queries";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.ai";
   const posts = getAllPosts();
 
@@ -17,6 +18,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(p.updated ?? p.date),
       changeFrequency: "monthly" as const,
       priority: 0.75,
+    })),
+  ];
+
+  // Practice problem pages
+  const problems = await getProblems();
+  const practiceEntries: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/practice`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    ...problems.map((p) => ({
+      url: `${baseUrl}/practice/${p.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
     })),
   ];
 
@@ -40,5 +58,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     ...blogEntries,
+    ...practiceEntries,
   ];
 }

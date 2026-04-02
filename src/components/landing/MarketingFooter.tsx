@@ -12,7 +12,10 @@ const productLinks = [
   { href: "/#faq", label: "FAQ" },
 ] as const;
 
-const resourceLinks = [{ href: "/blog", label: "Blog" }] as const;
+const resourceLinks = [
+  { href: "/practice", label: "Practice Problems" },
+  { href: "/blog", label: "Blog" },
+] as const;
 
 export function MarketingFooter({ signupHref }: MarketingFooterProps) {
   const year = new Date().getFullYear();
