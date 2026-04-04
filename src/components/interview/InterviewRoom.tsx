@@ -15,21 +15,16 @@ import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useVoiceInterview } from "@/hooks/useVoiceInterview";
 import { useInterviewStore } from "@/stores/interview-store";
+import {
+  type InterviewPhase,
+  phaseFromElapsedFraction,
+  clampPhaseToTimeFloor,
+  parseInterviewPhase,
+} from "@/lib/interview-phases";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type SupportedLanguage = "python" | "javascript" | "java" | "cpp";
-
-type InterviewPhase =
-  | "INTRO"
-  | "PROBLEM_PRESENTED"
-  | "CLARIFICATION"
-  | "APPROACH_DISCUSSION"
-  | "CODING"
-  | "TESTING"
-  | "COMPLEXITY_ANALYSIS"
-  | "FOLLOW_UP"
-  | "WRAP_UP";
 
 type ChatMessage = {
   id: string;
@@ -43,33 +38,6 @@ type ScoreDimensionRaw = { score: number; feedback: string };
 type InterviewRoomProps = {
   interviewId: string;
 };
-
-// ─── Phase boundary percentages (fraction of total duration) ─────────────────
-// Calibrated for a 45-minute interview but scale with any maxDuration.
-
-const PHASE_BOUNDARIES = {
-  INTRO: 0 / 100,
-  PROBLEM_PRESENTED: 2.2 / 100,
-  CLARIFICATION: 4.4 / 100,
-  APPROACH_DISCUSSION: 11.1 / 100,
-  CODING: 26.7 / 100,
-  TESTING: 71.1 / 100,
-  COMPLEXITY_ANALYSIS: 82.2 / 100,
-  FOLLOW_UP: 88.9 / 100,
-  WRAP_UP: 95.6 / 100,
-} as const;
-
-function phaseFromElapsedFraction(pct: number): InterviewPhase {
-  if (pct < PHASE_BOUNDARIES.PROBLEM_PRESENTED) return "INTRO";
-  if (pct < PHASE_BOUNDARIES.CLARIFICATION) return "PROBLEM_PRESENTED";
-  if (pct < PHASE_BOUNDARIES.APPROACH_DISCUSSION) return "CLARIFICATION";
-  if (pct < PHASE_BOUNDARIES.CODING) return "APPROACH_DISCUSSION";
-  if (pct < PHASE_BOUNDARIES.TESTING) return "CODING";
-  if (pct < PHASE_BOUNDARIES.COMPLEXITY_ANALYSIS) return "TESTING";
-  if (pct < PHASE_BOUNDARIES.FOLLOW_UP) return "COMPLEXITY_ANALYSIS";
-  if (pct < PHASE_BOUNDARIES.WRAP_UP) return "FOLLOW_UP";
-  return "WRAP_UP";
-}
 
 // ─── Helper: extract typed score dimension safely ─────────────────────────────
 
@@ -209,6 +177,21 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const codeRef = useRef(code);
   useEffect(() => { codeRef.current = code; }, [code]);
 
+  const applyPhaseAfterTurn = useCallback(
+    (apiPhase: unknown) => {
+      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const pct = Math.min(1, Math.max(0, elapsed / maxDuration));
+      const timePhase = phaseFromElapsedFraction(pct);
+      const parsed = parseInterviewPhase(apiPhase);
+      if (parsed) {
+        setCurrentPhase(clampPhaseToTimeFloor(parsed, timePhase));
+      } else {
+        setCurrentPhase((prev) => clampPhaseToTimeFloor(prev, timePhase));
+      }
+    },
+    [maxDuration]
+  );
+
   // ── Send message to AI and speak response ──────────────────────────────────
   const sendToAI = useCallback(async (userMessage: string) => {
     const elapsedMs = Date.now() - startTimeRef.current;
@@ -230,6 +213,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           currentPhase: currentPhaseRef.current,
           currentCode: codeRef.current,
           elapsedSeconds: Math.floor((Date.now() - startTimeRef.current) / 1000),
+          maxDurationSeconds: maxDuration,
         }),
       });
 
@@ -242,6 +226,8 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         setChatMessages(prev => [...prev, aiMsg]);
         conversationRef.current.push({ role: "interviewer", content: aiText, timestamp_ms: aiElapsedMs });
 
+        applyPhaseAfterTurn(data.data.phase);
+
         setIsAiThinking(false);
         voice.speakText(aiText);
       } else {
@@ -250,7 +236,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } catch {
       setIsAiThinking(false);
     }
-  }, [getTimeStr, voice]);
+  }, [getTimeStr, voice, maxDuration, applyPhaseAfterTurn]);
 
   // ── Start interview (triggered by user click to enable audio) ───────────────
   const startInterview = useCallback(async () => {
@@ -273,6 +259,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           currentPhase: "INTRO",
           currentCode: "",
           elapsedSeconds: 0,
+          maxDurationSeconds: maxDuration,
         }),
       });
       const data = await res.json();
@@ -281,6 +268,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         const initId = `msg-${++msgCounterRef.current}`;
         setChatMessages([{ id: initId, role: "interviewer", content: aiText, time: "0:00" }]);
         conversationRef.current = [{ role: "interviewer", content: aiText, timestamp_ms: 0 }];
+        applyPhaseAfterTurn(data.data.phase);
         setIsAiThinking(false);
         voice.speakText(aiText);
       } else {
@@ -289,7 +277,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } catch {
       setIsAiThinking(false);
     }
-  }, [voice]);
+  }, [voice, maxDuration, applyPhaseAfterTurn]);
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
@@ -515,13 +503,13 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     return () => clearInterval(interval);
   }, [hasStarted, isTimerRunning]);
 
-  // ── Phase transitions based on elapsed time ──────────────────────────────────
+  // ── Time floor: never show an earlier phase than elapsed time implies ─────────
   useEffect(() => {
     if (!hasStarted) return;
     const elapsed = maxDuration - timeLeft;
     const pct = elapsed / maxDuration;
-    const nextPhase = phaseFromElapsedFraction(pct);
-    setCurrentPhase((prev) => (prev !== nextPhase ? nextPhase : prev));
+    const timePhase = phaseFromElapsedFraction(pct);
+    setCurrentPhase((prev) => clampPhaseToTimeFloor(prev, timePhase));
   }, [timeLeft, hasStarted, maxDuration]);
 
   // ─── Render ──────────────────────────────────────────────────────────────────

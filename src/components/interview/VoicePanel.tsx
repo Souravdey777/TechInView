@@ -11,19 +11,7 @@ declare global {
 import { Mic, MicOff, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VoiceVisualizer, MicVisualizer, type VoiceState } from "./VoiceVisualizer";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type InterviewPhase =
-  | "INTRO"
-  | "PROBLEM_PRESENTED"
-  | "CLARIFICATION"
-  | "APPROACH_DISCUSSION"
-  | "CODING"
-  | "TESTING"
-  | "COMPLEXITY_ANALYSIS"
-  | "FOLLOW_UP"
-  | "WRAP_UP";
+import { type InterviewPhase, PHASE_LABELS } from "@/lib/interview-phases";
 
 type VoicePanelProps = {
   voiceState: VoiceState;
@@ -31,20 +19,6 @@ type VoicePanelProps = {
   isMicEnabled: boolean;
   onToggleMic: () => void;
   onSendText: (text: string) => void;
-};
-
-// ─── Phase label map ──────────────────────────────────────────────────────────
-
-const PHASE_LABELS: Record<InterviewPhase, string> = {
-  INTRO: "Introduction",
-  PROBLEM_PRESENTED: "Problem",
-  CLARIFICATION: "Clarification",
-  APPROACH_DISCUSSION: "Approach",
-  CODING: "Coding",
-  TESTING: "Testing",
-  COMPLEXITY_ANALYSIS: "Complexity",
-  FOLLOW_UP: "Follow-up",
-  WRAP_UP: "Wrap-up",
 };
 
 const PHASE_COLORS: Record<InterviewPhase, string> = {

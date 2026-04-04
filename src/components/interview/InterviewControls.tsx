@@ -12,19 +12,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type InterviewPhase =
-  | "INTRO"
-  | "PROBLEM_PRESENTED"
-  | "CLARIFICATION"
-  | "APPROACH_DISCUSSION"
-  | "CODING"
-  | "TESTING"
-  | "COMPLEXITY_ANALYSIS"
-  | "FOLLOW_UP"
-  | "WRAP_UP";
+import {
+  type InterviewPhase,
+  PHASE_ORDER,
+  PHASE_STEP,
+  PHASE_LABELS,
+} from "@/lib/interview-phases";
 
 type SupportedLanguage = "python" | "javascript" | "java" | "cpp";
 
@@ -37,42 +30,6 @@ type InterviewControlsProps = {
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const PHASE_LABELS: Record<InterviewPhase, string> = {
-  INTRO: "Introduction",
-  PROBLEM_PRESENTED: "Problem",
-  CLARIFICATION: "Clarification",
-  APPROACH_DISCUSSION: "Approach",
-  CODING: "Coding",
-  TESTING: "Testing",
-  COMPLEXITY_ANALYSIS: "Complexity",
-  FOLLOW_UP: "Follow-up",
-  WRAP_UP: "Wrap-up",
-};
-
-const PHASE_STEP: Record<InterviewPhase, number> = {
-  INTRO: 1,
-  PROBLEM_PRESENTED: 2,
-  CLARIFICATION: 3,
-  APPROACH_DISCUSSION: 4,
-  CODING: 5,
-  TESTING: 6,
-  COMPLEXITY_ANALYSIS: 7,
-  FOLLOW_UP: 8,
-  WRAP_UP: 9,
-};
-
-const PHASE_ORDER: InterviewPhase[] = [
-  "INTRO",
-  "PROBLEM_PRESENTED",
-  "CLARIFICATION",
-  "APPROACH_DISCUSSION",
-  "CODING",
-  "TESTING",
-  "COMPLEXITY_ANALYSIS",
-  "FOLLOW_UP",
-  "WRAP_UP",
-];
 
 const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   python: "Python",
