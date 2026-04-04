@@ -84,7 +84,7 @@ _Goal: Understand usage, iterate_
 _Goal: Replace browser APIs with production-quality voice_
 
 - [ ] 39. Integrate Deepgram Nova-2 for server-side STT (replace browser SpeechRecognition)
-- [ ] 40. Integrate Deepgram Aura 2 for TTS (replace browser SpeechSynthesis)
+- [x] 40. Integrate Deepgram Aura 2 for TTS (replace browser SpeechSynthesis)
 - [ ] 41. Deploy voice-server to Railway
 - [ ] 42. Wire WebSocket voice pipeline: Browser → Railway → Deepgram STT/Claude/Deepgram TTS → Browser
 - [ ] 43. Interruption handling — stop Tia when user starts speaking

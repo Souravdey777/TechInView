@@ -1,7 +1,8 @@
 "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
+import { splitTextForTts } from "@/lib/voice/split-for-tts";
 
-// Web Speech API types
+// Web Speech API types (STT — browser SpeechRecognition until Deepgram Nova-2)
 type SpeechRecognitionType = {
   new (): SpeechRecognitionInstance;
 };
@@ -25,10 +26,13 @@ type SpeechRecognitionInstance = {
   abort: () => void;
 };
 
-// SpeechRecognition & webkitSpeechRecognition are declared in lib.dom.d.ts.
-// We cast at usage to our local SpeechRecognitionType.
-
 type VoiceState = "idle" | "listening" | "thinking" | "speaking";
+
+function getAudioContextCtor(): (typeof AudioContext) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as { webkitAudioContext?: typeof AudioContext };
+  return window.AudioContext ?? w.webkitAudioContext ?? null;
+}
 
 export function useVoiceInterview() {
   const [voiceState, setVoiceState] = useState<VoiceState>("idle");
@@ -37,6 +41,53 @@ export function useVoiceInterview() {
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const transcriptRef = useRef("");
+
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  /** When Web Audio decode fails, we fall back to this element (must pause on stop). */
+  const fallbackAudioRef = useRef<HTMLAudioElement | null>(null);
+  const playAbortRef = useRef<AbortController | null>(null);
+
+  const getOrCreateAudioContext = useCallback((): AudioContext | null => {
+    if (typeof window === "undefined") return null;
+    if (audioContextRef.current) return audioContextRef.current;
+    const Ctor = getAudioContextCtor();
+    if (!Ctor) return null;
+    audioContextRef.current = new Ctor();
+    return audioContextRef.current;
+  }, []);
+
+  /**
+   * Call from a user gesture (e.g. "Start interview") so playback works on Safari/iOS.
+   */
+  const prepareAudioPlayback = useCallback(async () => {
+    const ctx = getOrCreateAudioContext();
+    if (!ctx) return;
+    try {
+      await ctx.resume();
+    } catch {
+      /* ignore */
+    }
+  }, [getOrCreateAudioContext]);
+
+  const stopSpeaking = useCallback(() => {
+    playAbortRef.current?.abort();
+    playAbortRef.current = null;
+    try {
+      sourceRef.current?.stop();
+    } catch {
+      /* already stopped */
+    }
+    sourceRef.current = null;
+    try {
+      fallbackAudioRef.current?.pause();
+    } catch {
+      /* ignore */
+    }
+    fallbackAudioRef.current = null;
+    setIsSpeaking(false);
+    setVoiceState("idle");
+  }, []);
 
   // Start listening — non-continuous mode so it auto-stops after silence
   const startListening = useCallback(() => {
@@ -117,81 +168,184 @@ export function useVoiceInterview() {
     return transcriptRef.current;
   }, []);
 
-  // Cache the best available en-US voice so we don't re-scan on every utterance
-  const preferredVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  // Text-to-speech via Deepgram Aura 2: sentence chunks + prefetch next chunk while playing (lower latency).
+  const speakText = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (typeof window === "undefined" || !trimmed) return;
 
-  const getPreferredVoice = useCallback((): SpeechSynthesisVoice | null => {
-    if (typeof window === "undefined") return null;
-    if (preferredVoiceRef.current) return preferredVoiceRef.current;
+      stopSpeaking();
 
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length === 0) return null;
+      const ctx = getOrCreateAudioContext();
+      if (!ctx) {
+        console.warn("Web Audio API not available for TTS.");
+        return;
+      }
 
-    // Priority order: natural/premium en-US voices that sound human
-    const preferred = [
-      "Google US English",
-      "Samantha",          // macOS
-      "Tia",              // macOS (older)
-      "Microsoft David - English (United States)",
-      "Microsoft Zira - English (United States)",
-    ];
+      await prepareAudioPlayback();
 
-    for (const name of preferred) {
-      const match = voices.find((v) => v.name === name);
-      if (match) { preferredVoiceRef.current = match; return match; }
-    }
+      const chunks = splitTextForTts(trimmed);
+      if (chunks.length === 0) return;
 
-    // Fallback: first en-US voice available
-    const enUs = voices.find((v) => v.lang === "en-US");
-    if (enUs) { preferredVoiceRef.current = enUs; return enUs; }
+      const ac = new AbortController();
+      playAbortRef.current = ac;
 
-    return null;
-  }, []);
-
-  // Text-to-speech
-  const speakText = useCallback((text: string) => {
-    if (typeof window === "undefined") return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.95;
-    utterance.pitch = 1.0;
-    utterance.lang = "en-US";
-
-    const voice = getPreferredVoice();
-    if (voice) utterance.voice = voice;
-
-    utterance.onstart = () => {
       setIsSpeaking(true);
       setVoiceState("speaking");
-    };
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      setVoiceState("idle");
-    };
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      setVoiceState("idle");
-    };
-    window.speechSynthesis.speak(utterance);
-  }, [getPreferredVoice]);
 
-  const stopSpeaking = useCallback(() => {
-    if (typeof window !== "undefined") window.speechSynthesis.cancel();
-    setIsSpeaking(false);
-    setVoiceState("idle");
-  }, []);
+      type ChunkPayload = { data: ArrayBuffer; mimeType: string };
 
-  // Warm up the voice cache once voices are available.
-  // Chrome loads voices asynchronously; the voiceschanged event fires when ready.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const populate = () => { getPreferredVoice(); };
-    window.speechSynthesis.addEventListener("voiceschanged", populate);
-    populate(); // also try immediately (Firefox / Safari have voices synchronously)
-    return () => {
-      window.speechSynthesis.removeEventListener("voiceschanged", populate);
-    };
-  }, [getPreferredVoice]);
+      const fetchChunk = async (index: number): Promise<ChunkPayload> => {
+        const res = await fetch("/api/voice/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: chunks[index] }),
+          signal: ac.signal,
+          ...(index === 0 ? ({ priority: "high" } as RequestInit) : {}),
+        });
+        if (!res.ok) {
+          let detail = "";
+          try {
+            const j = (await res.json()) as { error?: string };
+            detail = j.error ?? "";
+          } catch {
+            /* ignore */
+          }
+          throw new Error(detail || `TTS HTTP ${res.status}`);
+        }
+        const mimeType = res.headers.get("content-type") ?? "audio/mpeg";
+        const data = await res.arrayBuffer();
+        return { data, mimeType };
+      };
+
+      /** Keep two chunks in flight so chunk 1 is often ready before chunk 0 finishes playing. */
+      const inFlight = new Map<number, Promise<ChunkPayload>>();
+      const ensureFetched = (idx: number) => {
+        if (idx < 0 || idx >= chunks.length) return;
+        if (!inFlight.has(idx)) {
+          inFlight.set(idx, fetchChunk(idx));
+        }
+      };
+
+      const playBlobWithHtmlAudio = (data: ArrayBuffer, mimeType: string): Promise<void> =>
+        new Promise((resolve) => {
+          if (ac.signal.aborted) {
+            resolve();
+            return;
+          }
+          const blob = new Blob([data], { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio();
+          fallbackAudioRef.current = audio;
+
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            ac.signal.removeEventListener("abort", onAbort);
+            URL.revokeObjectURL(url);
+            if (fallbackAudioRef.current === audio) fallbackAudioRef.current = null;
+            resolve();
+          };
+
+          function onAbort() {
+            audio.pause();
+            finish();
+          }
+
+          ac.signal.addEventListener("abort", onAbort);
+          audio.onended = () => {
+            finish();
+          };
+          audio.onerror = () => {
+            console.warn("HTMLAudioElement playback error for TTS chunk");
+            finish();
+          };
+
+          audio.src = url;
+          void audio.play().catch((err) => {
+            console.warn("TTS audio.play() failed:", err);
+            finish();
+          });
+        });
+
+      const playBuffer = (audioBuffer: AudioBuffer): Promise<void> =>
+        new Promise((resolve) => {
+          if (ac.signal.aborted) {
+            resolve();
+            return;
+          }
+
+          const src = ctx.createBufferSource();
+          src.buffer = audioBuffer;
+          src.connect(ctx.destination);
+
+          let settled = false;
+          function finish() {
+            if (settled) return;
+            settled = true;
+            ac.signal.removeEventListener("abort", onAbort);
+            resolve();
+          }
+          function onAbort() {
+            try {
+              src.stop();
+            } catch {
+              /* ignore */
+            }
+            finish();
+          }
+
+          ac.signal.addEventListener("abort", onAbort);
+          src.onended = () => {
+            sourceRef.current = null;
+            finish();
+          };
+          sourceRef.current = src;
+          src.start(0);
+        });
+
+      try {
+        ensureFetched(0);
+        ensureFetched(1);
+
+        for (let i = 0; i < chunks.length; i++) {
+          ensureFetched(i);
+          const { data: buf, mimeType } = await inFlight.get(i)!;
+          inFlight.delete(i);
+
+          ensureFetched(i + 2);
+
+          if (ac.signal.aborted) return;
+
+          try {
+            const audioBuffer = await ctx.decodeAudioData(buf.slice(0));
+            if (ac.signal.aborted) return;
+            await playBuffer(audioBuffer);
+          } catch (decodeErr) {
+            if (!mimeType.includes("mpeg") && !mimeType.includes("mp3")) {
+              console.warn("decodeAudioData failed, using <audio> fallback:", decodeErr);
+            }
+            if (ac.signal.aborted) return;
+            await playBlobWithHtmlAudio(buf, mimeType);
+          }
+
+          if (ac.signal.aborted) return;
+        }
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        if (e instanceof Error && e.name === "AbortError") return;
+        console.warn("Aura TTS playback failed:", e);
+      } finally {
+        if (!ac.signal.aborted) {
+          setIsSpeaking(false);
+          setVoiceState("idle");
+          sourceRef.current = null;
+        }
+      }
+    },
+    [stopSpeaking, getOrCreateAudioContext, prepareAudioPlayback]
+  );
 
   // Cleanup
   useEffect(() => {
@@ -199,7 +353,18 @@ export function useVoiceInterview() {
       if (recognitionRef.current) {
         try { recognitionRef.current.abort(); } catch { /* ignore */ }
       }
-      if (typeof window !== "undefined") window.speechSynthesis.cancel();
+      playAbortRef.current?.abort();
+      try {
+        sourceRef.current?.stop();
+      } catch {
+        /* ignore */
+      }
+      try {
+        fallbackAudioRef.current?.pause();
+      } catch {
+        /* ignore */
+      }
+      audioContextRef.current?.close().catch(() => {});
     };
   }, []);
 
@@ -212,6 +377,7 @@ export function useVoiceInterview() {
     stopListening,
     speakText,
     stopSpeaking,
+    prepareAudioPlayback,
     setTranscript,
     getTranscript,
   };

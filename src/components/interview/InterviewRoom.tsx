@@ -254,10 +254,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   // ── Start interview (triggered by user click to enable audio) ───────────────
   const startInterview = useCallback(async () => {
-    if (typeof window !== "undefined") {
-      const unlock = new SpeechSynthesisUtterance("");
-      window.speechSynthesis.speak(unlock);
-    }
+    await voice.prepareAudioPlayback();
 
     setHasStarted(true);
     setIsTimerRunning(true);
