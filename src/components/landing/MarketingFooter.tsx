@@ -14,6 +14,7 @@ const productLinks = [
 
 const resourceLinks = [
   { href: "/practice", label: "Practice Problems" },
+  { href: "/how-ai-evaluates", label: "How AI evaluates you" },
   { href: "/blog", label: "Blog" },
 ] as const;
 

@@ -72,10 +72,13 @@ export function FeedbackCard({ dimension, score, weight, feedback }: FeedbackCar
           indicatorClassName={getProgressIndicatorClass(score)}
         />
 
-        {/* Feedback text */}
-        <div className="flex gap-2.5 mt-auto pt-1">
-          <MessageSquare className="h-4 w-4 text-brand-muted flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-brand-muted leading-relaxed">{feedback}</p>
+        {/* Grid keeps wrapped lines aligned in the text column (not under the icon). */}
+        <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 pt-3">
+          <MessageSquare
+            className="h-4 w-4 shrink-0 text-brand-muted translate-y-[3px]"
+            aria-hidden
+          />
+          <p className="text-sm text-brand-muted leading-relaxed min-w-0">{feedback}</p>
         </div>
       </CardContent>
     </Card>
