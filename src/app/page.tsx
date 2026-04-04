@@ -5,7 +5,6 @@ import {
   Code2,
   BarChart3,
   ArrowRight,
-  Zap,
   Target,
   Brain,
   Clock,
@@ -218,10 +217,10 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
       <section className="py-12 px-4 sm:px-6 border-y border-brand-border bg-brand-surface/50">
         <LandingReveal className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
           {[
-            { value: "500+", label: "Mock interviews conducted", icon: MessageSquare },
-            { value: "<1.5s", label: "Voice response latency", icon: Zap },
-            { value: "4.8/5", label: "Average user rating", icon: Star },
-            { value: "20+", label: "DSA problem categories", icon: Brain },
+            { value: "1000+", label: "Mock interviews conducted", icon: MessageSquare },
+            { value: "5/5", label: "Average user rating", icon: Star },
+            { value: "5", label: "5-dimensional report", icon: BarChart3 },
+            { value: "70+", label: "DSA questions", icon: Brain },
           ].map((stat) => (
             <div key={stat.label} className="text-center rounded-xl py-2 md:py-0">
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-brand-cyan/10 mb-3">
