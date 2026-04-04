@@ -15,15 +15,15 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 /** Longer copy for the rubric cards; keys must match SCORING_DIMENSIONS. */
 const DIMENSION_EXPLANATIONS: Record<ScoringDimension, string> = {
   problem_solving:
-    "We look at whether you clarify requirements and constraints, propose a reasonable approach, and reason about edge cases (empty input, duplicates, bounds) before leaning on code. Strong scores usually mean you can defend why your approach fits the problem and adjust when the interviewer pushes back.",
+    "TechInView evaluates whether you clarify requirements and constraints, propose a reasonable approach, and reason about edge cases (empty input, duplicates, bounds) before leaning on code. Strong scores usually mean you can defend why your approach fits the problem and adjust when Tia pushes back like a real interviewer.",
   code_quality:
-    "This is about how readable and maintainable your solution is: naming, structure, control flow, and whether you avoid needless complexity. Idiomatic use of your language and small refactors when you notice smell all help—interviewers care that someone else could review or extend your code.",
+    "TechInView scores how readable and maintainable your solution is in the session editor: naming, structure, control flow, and whether you avoid needless complexity. Idiomatic use of your language and small refactors when you notice smell help—panels care that someone else could review or extend your code.",
   communication:
-    "Voice interviews reward thinking out loud: explaining your plan, narrating trade-offs, and reacting when you get hints or corrections. You do not need a polished speech—structured, honest explanation (including when you are stuck) scores better than long silence.",
+    "In TechInView AI interviews, Tia hears how you explain your plan, narrate trade-offs, and respond to hints. You do not need a polished speech—structured, honest explanation (including when you are stuck) scores better than long silence.",
   technical_knowledge:
-    "Here we focus on depth: correct time and space complexity, why your data structures fit the constraints, and how you compare alternatives (e.g. extra space vs. in-place). Calibrated follow-ups and crisp answers when discussing bottlenecks or optimizations matter.",
+    "TechInView weights depth in your answers: correct time and space complexity, why your data structures fit the constraints, and how you compare alternatives (e.g. extra space vs. in-place). Calibrated follow-ups and crisp answers when discussing bottlenecks or optimizations matter.",
   testing:
-    "We credit walking through examples, calling out edge cases, and checking your logic when something fails—whether you run tests in the editor or trace by hand. Proactively testing corner cases and fixing bugs when output is wrong looks stronger than only happy-path code.",
+    "TechInView credits walking through examples, calling out edge cases, and checking your logic when something fails—whether you run tests in the built-in editor or trace by hand. Proactively testing corner cases and fixing bugs when output is wrong looks stronger than only happy-path code.",
 };
 
 const HIRE_TIER_ORDER: HireRecommendation[] = [
@@ -44,23 +44,25 @@ function hireScoreRangeLabel(rec: HireRecommendation, index: number): string {
 }
 
 export const metadata: Metadata = {
-  title: "How the AI Evaluates You — FAANG-Style Scoring | TechInView",
+  title: "How TechInView Evaluates You — AI Interview Scoring | TechInView",
   description:
-    "See how TechInView scores mock interviews: five weighted dimensions, overall score, hire recommendation bands, and a sample report you can browse before you practice.",
+    "TechInView (TIV): how AI mock interviews are scored after you talk with Tia—five weighted dimensions, overall score, hire bands, and a sample report before you practice.",
   keywords: [
+    "TechInView",
+    "TIV",
+    "Tia AI interviewer",
     "AI interview scoring",
     "mock interview feedback",
     "FAANG interview rubric",
     "coding interview evaluation",
-    "TechInView",
   ],
   authors: [{ name: "TechInView", url: baseUrl }],
   robots: { index: true, follow: true },
   alternates: { canonical: "/how-ai-evaluates" },
   openGraph: {
-    title: "How the AI Evaluates You — TechInView",
+    title: "How TechInView Evaluates You",
     description:
-      "Five weighted dimensions, hire recommendation bands, and a sample post-interview report.",
+      "TechInView scoring: five weighted dimensions, hire recommendation bands, and a sample post-interview report from a Tia session.",
     type: "website",
     url: `${baseUrl}/how-ai-evaluates`,
     siteName: "TechInView",
@@ -70,15 +72,15 @@ export const metadata: Metadata = {
         url: DEFAULT_OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: "TechInView — How AI evaluates your interview",
+        alt: "TechInView — How AI interview scoring works",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "How the AI Evaluates You — TechInView",
+    title: "How TechInView Evaluates You",
     description:
-      "Five dimensions, weighted overall score, hire bands, and a sample report.",
+      "TechInView: five dimensions, weighted overall score, hire bands, and a sample Tia interview report.",
     images: [DEFAULT_OG_IMAGE_PATH],
   },
 };
@@ -97,14 +99,18 @@ export default function HowAiEvaluatesPage() {
             Resources
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
-            How the AI evaluates you
+            How TechInView Evaluates You
           </h1>
+          <p className="mt-3 text-xs text-brand-muted sm:text-sm">
+            TechInView (TIV) — AI DSA mock interviews with Tia, your AI interviewer.
+          </p>
           <p className="mt-4 text-sm leading-relaxed text-brand-muted sm:text-base">
-            After each voice interview, our model reviews your conversation and the
-            code you wrote in the session. Each dimension is scored from 0–100. Your{" "}
-            <strong className="font-medium text-brand-text">overall score</strong> is
-            the weighted sum of those five scores. That overall maps to a hire-style
-            recommendation so you can see where you stand relative to a strong loop.
+            When you finish a session on TechInView, our scoring model reviews what you
+            said to Tia and the code you wrote in the interview editor. Each dimension is
+            scored from 0–100. Your{" "}
+            <strong className="font-medium text-brand-text">overall score</strong> is the
+            weighted sum of those five scores. That overall maps to a hire-style
+            recommendation so you can benchmark yourself against a strong loop.
           </p>
         </header>
 
@@ -116,8 +122,9 @@ export default function HowAiEvaluatesPage() {
             The five dimensions
           </h2>
           <p className="text-sm text-brand-muted mb-6 max-w-2xl">
-            Weights mirror how many FAANG-style panels emphasize problem solving and
-            code, while still rewarding communication, depth, and testing.
+            TechInView&apos;s rubric weights mirror how many FAANG-style panels emphasize
+            problem solving and code, while still rewarding communication, depth, and
+            testing in an AI interview.
           </p>
           <ul className="grid gap-4 sm:grid-cols-2">
             {(Object.keys(SCORING_DIMENSIONS) as ScoringDimension[]).map((key) => {
@@ -161,8 +168,8 @@ export default function HowAiEvaluatesPage() {
             Hire recommendation bands
           </h2>
           <p className="text-sm text-brand-muted mb-6 max-w-2xl">
-            The label is derived from your overall score (after weighting), not from a
-            single dimension.
+            On TechInView, your hire recommendation comes from your weighted overall
+            score—not from any single dimension in isolation.
           </p>
           <ul className="space-y-3 max-w-xl">
             {HIRE_TIER_ORDER.map((rec, i) => {
@@ -192,16 +199,16 @@ export default function HowAiEvaluatesPage() {
             Sample report
           </h2>
           <p className="text-sm text-brand-muted mb-8 max-w-2xl">
-            Below is a static example of the summary, radar chart, and per-dimension
-            cards. A real session also includes your transcript and code review on the
-            results page after you finish.
+            Below is a static preview of what TechInView shows after a Tia interview:
+            summary, radar chart, and per-dimension cards. A real run also includes your
+            transcript and code review on your TechInView results page.
           </p>
           <SampleReportPreview />
         </section>
 
         <div className="flex flex-col items-start gap-4 border-t border-brand-border pt-10 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-brand-muted">
-            Ready to get your own report?
+            Ready for your own TechInView report?
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

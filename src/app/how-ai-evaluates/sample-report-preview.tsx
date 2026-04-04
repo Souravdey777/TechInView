@@ -30,7 +30,7 @@ const SAMPLE_FEEDBACK: Record<ScoringDimension, string> = {
   code_quality:
     "Naming was clear and the loop structure was easy to follow. Minor nit: extracting the swap into a small helper would match common style for readability in longer solutions.",
   communication:
-    "You explained your thinking at a steady pace. A few pauses were long; briefly narrating what you are stuck on helps the interviewer coach you faster.",
+    "You explained your thinking at a steady pace. A few pauses were long; briefly narrating what you are stuck on helps Tia coach you faster.",
   technical_knowledge:
     "Time and space complexity were correct. You mentioned stability trade-offs when relevant; deepening one sentence on why the hash map beats sorting for this constraint would strengthen the answer.",
   testing:
@@ -51,8 +51,8 @@ export function SampleReportPreview() {
         role="note"
       >
         <span className="font-semibold text-brand-amber">Sample only.</span>{" "}
-        This report is for illustration; your real report reflects your interview
-        and includes your transcript and code review.
+        This preview mirrors TechInView results after an AI interview; your real report
+        reflects your session and includes transcript and code review.
       </div>
 
       <ScoreSummary
