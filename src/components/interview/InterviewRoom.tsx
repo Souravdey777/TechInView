@@ -14,6 +14,7 @@ import { InterviewControls } from "./InterviewControls";
 import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useVoiceInterview } from "@/hooks/useVoiceInterview";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   type InterviewPhase,
@@ -54,20 +55,24 @@ function extractDimension(
 export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const router = useRouter();
   const voice = useVoiceInterview();
+  const hasHydrated = useHasHydrated();
 
   // ── Read setup config from Zustand store ───────────────────────────────────
   const storeConfig = useInterviewStore((s) => s.setupConfig);
   const storeProblem = useInterviewStore((s) => s.problem);
   const storeCode = useInterviewStore((s) => s.currentCode);
   const completeInterviewStore = useInterviewStore((s) => s.completeInterview);
+  const addMessageToStore = useInterviewStore((s) => s.addMessage);
+  const setRoomStartedAtMs = useInterviewStore((s) => s.setRoomStartedAtMs);
+  const setRoomPhaseInStore = useInterviewStore((s) => s.setRoomPhase);
+  const setTestResultsInStore = useInterviewStore((s) => s.setTestResults);
 
-  // Guard: if the store has no problem (e.g. hard refresh) redirect to setup
-  // rather than falling back to a hardcoded mock problem silently.
+  // Guard: wait for hydration before deciding to redirect
   useEffect(() => {
-    if (!storeProblem) {
+    if (hasHydrated && !storeProblem) {
       router.replace("/interview/setup");
     }
-  }, [storeProblem, router]);
+  }, [hasHydrated, storeProblem, router]);
 
   // Derive the active problem — always from store after the guard above
   const activeProblem = useMemo(() => storeProblem, [storeProblem]);
@@ -79,9 +84,11 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isResuming, setIsResuming] = useState(false);
   const conversationRef = useRef<{ role: string; content: string; timestamp_ms: number }[]>([]);
   const startTimeRef = useRef(Date.now());
   const msgCounterRef = useRef(0);
+  const hasRestoredRef = useRef(false);
 
   // ── Interview state ──────────────────────────────────────────────────────────
   const [currentPhase, setCurrentPhase] = useState<InterviewPhase>("INTRO");
@@ -175,7 +182,13 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const currentPhaseRef = useRef(currentPhase);
   useEffect(() => { currentPhaseRef.current = currentPhase; }, [currentPhase]);
   const codeRef = useRef(code);
-  useEffect(() => { codeRef.current = code; }, [code]);
+  const setCodeInStore = useInterviewStore((s) => s.setCode);
+  useEffect(() => {
+    codeRef.current = code;
+    // Debounce persisting code to sessionStorage (avoids write on every keystroke)
+    const timer = setTimeout(() => setCodeInStore(code), 500);
+    return () => clearTimeout(timer);
+  }, [code, setCodeInStore]);
 
   const applyPhaseAfterTurn = useCallback(
     (apiPhase: unknown) => {
@@ -184,12 +197,18 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       const timePhase = phaseFromElapsedFraction(pct);
       const parsed = parseInterviewPhase(apiPhase);
       if (parsed) {
-        setCurrentPhase(clampPhaseToTimeFloor(parsed, timePhase));
+        const clamped = clampPhaseToTimeFloor(parsed, timePhase);
+        setCurrentPhase(clamped);
+        setRoomPhaseInStore(clamped);
       } else {
-        setCurrentPhase((prev) => clampPhaseToTimeFloor(prev, timePhase));
+        setCurrentPhase((prev) => {
+          const clamped = clampPhaseToTimeFloor(prev, timePhase);
+          setRoomPhaseInStore(clamped);
+          return clamped;
+        });
       }
     },
-    [maxDuration]
+    [maxDuration, setRoomPhaseInStore]
   );
 
   // ── Send message to AI and speak response ──────────────────────────────────
@@ -199,6 +218,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     const userMsg: ChatMessage = { id, role: "candidate", content: userMessage, time: getTimeStr() };
     setChatMessages(prev => [...prev, userMsg]);
     conversationRef.current.push({ role: "candidate", content: userMessage, timestamp_ms: elapsedMs });
+    addMessageToStore({ role: "candidate", content: userMessage, timestamp_ms: elapsedMs });
 
     setIsAiThinking(true);
 
@@ -225,6 +245,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         const aiMsg: ChatMessage = { id: aiId, role: "interviewer", content: aiText, time: getTimeStr() };
         setChatMessages(prev => [...prev, aiMsg]);
         conversationRef.current.push({ role: "interviewer", content: aiText, timestamp_ms: aiElapsedMs });
+        addMessageToStore({ role: "interviewer", content: aiText, timestamp_ms: aiElapsedMs });
 
         applyPhaseAfterTurn(data.data.phase);
 
@@ -236,7 +257,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } catch {
       setIsAiThinking(false);
     }
-  }, [getTimeStr, voice, maxDuration, applyPhaseAfterTurn]);
+  }, [getTimeStr, voice, maxDuration, applyPhaseAfterTurn, addMessageToStore]);
 
   // ── Start interview (triggered by user click to enable audio) ───────────────
   const startInterview = useCallback(async () => {
@@ -244,7 +265,10 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
     setHasStarted(true);
     setIsTimerRunning(true);
-    startTimeRef.current = Date.now();
+    const now = Date.now();
+    startTimeRef.current = now;
+    setRoomStartedAtMs(now);
+    setRoomPhaseInStore("INTRO");
     setIsAiThinking(true);
     msgCounterRef.current = 0;
 
@@ -268,6 +292,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         const initId = `msg-${++msgCounterRef.current}`;
         setChatMessages([{ id: initId, role: "interviewer", content: aiText, time: "0:00" }]);
         conversationRef.current = [{ role: "interviewer", content: aiText, timestamp_ms: 0 }];
+        addMessageToStore({ role: "interviewer", content: aiText, timestamp_ms: 0 });
         applyPhaseAfterTurn(data.data.phase);
         setIsAiThinking(false);
         voice.speakText(aiText);
@@ -277,7 +302,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } catch {
       setIsAiThinking(false);
     }
-  }, [voice, maxDuration, applyPhaseAfterTurn]);
+  }, [voice, maxDuration, applyPhaseAfterTurn, setRoomStartedAtMs, setRoomPhaseInStore, addMessageToStore]);
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
@@ -371,8 +396,12 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       }
 
       setTestResults(results);
+      setTestResultsInStore(results.map((r) => ({
+        id: r.id, input: r.input, expected: r.expected,
+        actual: r.actual ?? "", passed: r.passed, isHidden: r.isHidden,
+      })));
     } catch {
-      setTestResults([
+      const errorResults: TestResult[] = [
         {
           id: "error",
           input: "",
@@ -381,11 +410,16 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           passed: false,
           isHidden: false,
         },
-      ]);
+      ];
+      setTestResults(errorResults);
+      setTestResultsInStore(errorResults.map((r) => ({
+        id: r.id, input: r.input, expected: r.expected,
+        actual: r.actual ?? "", passed: r.passed, isHidden: r.isHidden,
+      })));
     } finally {
       setIsRunningTests(false);
     }
-  }, [language, code, interviewId]);
+  }, [language, code, interviewId, setTestResultsInStore]);
 
   // Use a ref so the timer effect always calls the latest version of
   // handleEndInterview without needing to restart the interval.
@@ -483,6 +517,109 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // Keep the ref in sync with the latest callback
   useEffect(() => { handleEndInterviewRef.current = handleEndInterview; }, [handleEndInterview]);
 
+  // ── Restore session from persisted store on hydration (reload resilience) ───
+  useEffect(() => {
+    if (!hasHydrated || hasRestoredRef.current) return;
+    hasRestoredRef.current = true;
+
+    const state = useInterviewStore.getState();
+    const {
+      roomStartedAtMs,
+      interviewId: storeInterviewId,
+      isInterviewActive,
+      messages: storeMessages,
+      roomPhase,
+      testResults: storeTestResults,
+      currentCode: storeCodeSnap,
+    } = state;
+
+    // Debug: remove after confirming reload works
+    console.log("[reload-restore]", {
+      hasHydrated,
+      roomStartedAtMs,
+      storeInterviewId,
+      interviewId,
+      isInterviewActive,
+      messagesLen: storeMessages.length,
+      roomPhase,
+    });
+
+    if (
+      !roomStartedAtMs ||
+      storeInterviewId !== interviewId ||
+      !isInterviewActive ||
+      storeMessages.length === 0
+    ) {
+      return;
+    }
+
+    // Calculate remaining time from wall-clock
+    const elapsedMs = Date.now() - roomStartedAtMs;
+    const elapsedSec = Math.floor(elapsedMs / 1000);
+    const remaining = Math.max(0, maxDuration - elapsedSec);
+
+    // Restore conversationRef (needed by handleEndInterview for transcript)
+    conversationRef.current = storeMessages.map((m) => ({
+      role: m.role,
+      content: m.content,
+      timestamp_ms: m.timestamp_ms,
+    }));
+
+    if (remaining <= 0) {
+      // Time expired while page was closed — auto-end via timer effect
+      setHasStarted(true);
+      setTimeLeft(0);
+      setIsTimerRunning(true);
+      startTimeRef.current = roomStartedAtMs;
+      return;
+    }
+
+    // Restore chat messages for the transcript panel
+    const restoredChat: ChatMessage[] = storeMessages
+      .filter((m) => m.role !== "system")
+      .map((m, i) => {
+        const totalSec = Math.floor(m.timestamp_ms / 1000);
+        const min = Math.floor(totalSec / 60);
+        const sec = totalSec % 60;
+        return {
+          id: `msg-${i + 1}`,
+          role: m.role as "interviewer" | "candidate",
+          content: m.content,
+          time: `${min}:${sec.toString().padStart(2, "0")}`,
+        };
+      });
+    setChatMessages(restoredChat);
+    msgCounterRef.current = restoredChat.length;
+
+    // Restore timing
+    startTimeRef.current = roomStartedAtMs;
+    setTimeLeft(remaining);
+
+    // Restore phase
+    const parsed = roomPhase ? parseInterviewPhase(roomPhase) : null;
+    if (parsed) setCurrentPhase(parsed);
+
+    // Restore test results
+    if (storeTestResults.length > 0) setTestResults(storeTestResults);
+
+    // Restore code state + ref
+    if (storeCodeSnap) {
+      setCode(storeCodeSnap);
+      codeRef.current = storeCodeSnap;
+    }
+
+    // Show resume overlay — user must click to unlock audio context (Safari)
+    setIsResuming(true);
+  }, [hasHydrated, interviewId, maxDuration]);
+
+  // ── Resume interview (after reload) — no intro API call ────────────────────
+  const resumeInterview = useCallback(async () => {
+    await voice.prepareAudioPlayback();
+    setHasStarted(true);
+    setIsTimerRunning(true);
+    setIsResuming(false);
+  }, [voice]);
+
   // ── Timer countdown ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!hasStarted || !isTimerRunning) return;
@@ -514,8 +651,8 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
-  // Render nothing while the store redirect is in flight
-  if (!activeProblem) return null;
+  // Render nothing until hydration completes or while redirect is in flight
+  if (!hasHydrated || !activeProblem) return null;
 
   // Scoring overlay — shown while AI evaluates the interview
   if (isScoring) {
@@ -560,22 +697,33 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           </div>
 
           <div style={{ animation: "start-fade-up 0.8s ease-out 0.15s both" }}>
-            <h1 className="text-3xl font-bold text-brand-text tracking-tight">Ready to begin?</h1>
+            <h1 className="text-3xl font-bold text-brand-text tracking-tight">
+              {isResuming ? "Resume your interview" : "Ready to begin?"}
+            </h1>
             <p className="text-brand-muted text-sm mt-3 leading-relaxed">
-              Tia, your AI interviewer, will introduce the problem and guide you through a{" "}
-              <span className="text-brand-text font-medium">{Math.round(maxDuration / 60)}-minute</span> mock interview.
+              {isResuming ? (
+                <>Your session is still active. You have approximately{" "}
+                <span className="text-brand-text font-medium">{Math.ceil(timeLeft / 60)} minute{Math.ceil(timeLeft / 60) !== 1 ? "s" : ""}</span> remaining.</>
+              ) : (
+                <>Tia, your AI interviewer, will introduce the problem and guide you through a{" "}
+                <span className="text-brand-text font-medium">{Math.round(maxDuration / 60)}-minute</span> mock interview.</>
+              )}
             </p>
           </div>
-          <div className="flex items-center justify-center gap-6 text-[11px] text-brand-muted" style={{ animation: "start-fade-up 0.8s ease-out 0.3s both" }}>
-            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-cyan/60" />Voice conversation</span>
-            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-green/60" />Live coding</span>
-            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-amber/60" />AI scoring</span>
-          </div>
-          <button onClick={startInterview} className="flex items-center gap-2 rounded-xl bg-brand-cyan px-10 py-3.5 text-base font-semibold text-brand-deep transition-all hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98]" style={{ animation: "start-fade-up 0.8s ease-out 0.45s both, start-btn-glow 3s ease-in-out infinite" }}>
-            Start Interview
+          {!isResuming && (
+            <div className="flex items-center justify-center gap-6 text-[11px] text-brand-muted" style={{ animation: "start-fade-up 0.8s ease-out 0.3s both" }}>
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-cyan/60" />Voice conversation</span>
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-green/60" />Live coding</span>
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-amber/60" />AI scoring</span>
+            </div>
+          )}
+          <button onClick={isResuming ? resumeInterview : startInterview} className="flex items-center gap-2 rounded-xl bg-brand-cyan px-10 py-3.5 text-base font-semibold text-brand-deep transition-all hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98]" style={{ animation: "start-fade-up 0.8s ease-out 0.45s both, start-btn-glow 3s ease-in-out infinite" }}>
+            {isResuming ? "Resume Interview" : "Start Interview"}
           </button>
           <p className="text-xs text-brand-muted/60" style={{ animation: "start-fade-up 0.8s ease-out 0.6s both" }}>
-            Make sure your speakers are on &middot; You can also type responses
+            {isResuming
+              ? "Click resume to continue where you left off"
+              : "Make sure your speakers are on \u00b7 You can also type responses"}
           </p>
         </div>
       </div>

@@ -97,6 +97,10 @@ type InterviewStore = {
   textInputMode: boolean;
   startedAt: string | null;
 
+  // Room snapshot (persisted for reload resilience)
+  roomStartedAtMs: number | null;
+  roomPhase: string | null;
+
   // Results (populated after interview ends)
   interviewResult: InterviewResult | null;
 
@@ -120,6 +124,10 @@ type InterviewStore = {
   setTestResults: (results: StoreTestResult[]) => void;
   toggleTextInput: () => void;
 
+  // Actions — room snapshot (reload resilience)
+  setRoomStartedAtMs: (ms: number) => void;
+  setRoomPhase: (phase: string) => void;
+
   // Actions — end interview & store results
   completeInterview: (result: InterviewResult) => void;
 
@@ -139,6 +147,8 @@ const INITIAL_STATE = {
   isInterviewActive: false,
   textInputMode: false,
   startedAt: null,
+  roomStartedAtMs: null,
+  roomPhase: null,
   interviewResult: null,
 };
 
@@ -165,6 +175,8 @@ export const useInterviewStore = create<InterviewStore>()(
           messages: [],
           testResults: [],
           interviewResult: null,
+          roomStartedAtMs: null,
+          roomPhase: null,
         }),
 
       // ── Interview ──────────────────────────────────────────────────────────
@@ -184,12 +196,18 @@ export const useInterviewStore = create<InterviewStore>()(
       toggleTextInput: () =>
         set((state) => ({ textInputMode: !state.textInputMode })),
 
+      // ── Room snapshot (reload resilience) ──────────────────────────────────
+      setRoomStartedAtMs: (ms) => set({ roomStartedAtMs: ms }),
+      setRoomPhase: (phase) => set({ roomPhase: phase }),
+
       // ── Complete ───────────────────────────────────────────────────────────
       completeInterview: (result) =>
         set({
           isInterviewActive: false,
           currentPhase: "completed",
           interviewResult: result,
+          roomStartedAtMs: null,
+          roomPhase: null,
         }),
 
       // ── Reset ──────────────────────────────────────────────────────────────
@@ -214,6 +232,9 @@ export const useInterviewStore = create<InterviewStore>()(
         isInterviewActive: state.isInterviewActive,
         messages: state.messages,
         interviewResult: state.interviewResult,
+        roomStartedAtMs: state.roomStartedAtMs,
+        roomPhase: state.roomPhase,
+        testResults: state.testResults,
       }),
     }
   )
