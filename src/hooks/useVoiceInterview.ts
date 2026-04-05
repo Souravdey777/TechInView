@@ -176,22 +176,31 @@ export function useVoiceInterview() {
 
       stopSpeaking();
 
+      // Mark as busy so the caller can clear isAiThinking without
+      // the orb flickering to "idle".  The actual "speaking" state
+      // is deferred until the first audio chunk starts playing.
+      setIsSpeaking(true);
+      setVoiceState("thinking");
+
       const ctx = getOrCreateAudioContext();
       if (!ctx) {
         console.warn("Web Audio API not available for TTS.");
+        setIsSpeaking(false);
+        setVoiceState("idle");
         return;
       }
 
       await prepareAudioPlayback();
 
       const chunks = splitTextForTts(trimmed);
-      if (chunks.length === 0) return;
+      if (chunks.length === 0) {
+        setIsSpeaking(false);
+        setVoiceState("idle");
+        return;
+      }
 
       const ac = new AbortController();
       playAbortRef.current = ac;
-
-      setIsSpeaking(true);
-      setVoiceState("speaking");
 
       type ChunkPayload = { data: ArrayBuffer; mimeType: string };
 
@@ -227,6 +236,14 @@ export function useVoiceInterview() {
         }
       };
 
+      let firstChunkStarted = false;
+      const markSpeaking = () => {
+        if (!firstChunkStarted) {
+          firstChunkStarted = true;
+          setVoiceState("speaking");
+        }
+      };
+
       const playBlobWithHtmlAudio = (data: ArrayBuffer, mimeType: string): Promise<void> =>
         new Promise((resolve) => {
           if (ac.signal.aborted) {
@@ -254,6 +271,7 @@ export function useVoiceInterview() {
           }
 
           ac.signal.addEventListener("abort", onAbort);
+          audio.onplay = () => markSpeaking();
           audio.onended = () => {
             finish();
           };
@@ -303,6 +321,7 @@ export function useVoiceInterview() {
           };
           sourceRef.current = src;
           src.start(0);
+          markSpeaking();
         });
 
       try {

@@ -249,8 +249,8 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
         applyPhaseAfterTurn(data.data.phase);
 
-        setIsAiThinking(false);
         voice.speakText(aiText);
+        setIsAiThinking(false);
       } else {
         setIsAiThinking(false);
       }
@@ -294,8 +294,8 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         conversationRef.current = [{ role: "interviewer", content: aiText, timestamp_ms: 0 }];
         addMessageToStore({ role: "interviewer", content: aiText, timestamp_ms: 0 });
         applyPhaseAfterTurn(data.data.phase);
-        setIsAiThinking(false);
         voice.speakText(aiText);
+        setIsAiThinking(false);
       } else {
         setIsAiThinking(false);
       }
