@@ -100,6 +100,8 @@ type InterviewStore = {
   // Room snapshot (persisted for reload resilience)
   roomStartedAtMs: number | null;
   roomPhase: string | null;
+  roomLanguage: string | null;
+  codePerLanguage: Record<string, string>;
 
   // Results (populated after interview ends)
   interviewResult: InterviewResult | null;
@@ -127,6 +129,8 @@ type InterviewStore = {
   // Actions — room snapshot (reload resilience)
   setRoomStartedAtMs: (ms: number) => void;
   setRoomPhase: (phase: string) => void;
+  setRoomLanguage: (lang: string) => void;
+  setCodeForLanguage: (lang: string, code: string) => void;
 
   // Actions — end interview & store results
   completeInterview: (result: InterviewResult) => void;
@@ -149,6 +153,8 @@ const INITIAL_STATE = {
   startedAt: null,
   roomStartedAtMs: null,
   roomPhase: null,
+  roomLanguage: null,
+  codePerLanguage: {},
   interviewResult: null,
 };
 
@@ -177,6 +183,8 @@ export const useInterviewStore = create<InterviewStore>()(
           interviewResult: null,
           roomStartedAtMs: null,
           roomPhase: null,
+          roomLanguage: null,
+          codePerLanguage: {},
         }),
 
       // ── Interview ──────────────────────────────────────────────────────────
@@ -199,6 +207,11 @@ export const useInterviewStore = create<InterviewStore>()(
       // ── Room snapshot (reload resilience) ──────────────────────────────────
       setRoomStartedAtMs: (ms) => set({ roomStartedAtMs: ms }),
       setRoomPhase: (phase) => set({ roomPhase: phase }),
+      setRoomLanguage: (lang) => set({ roomLanguage: lang }),
+      setCodeForLanguage: (lang, code) =>
+        set((state) => ({
+          codePerLanguage: { ...state.codePerLanguage, [lang]: code },
+        })),
 
       // ── Complete ───────────────────────────────────────────────────────────
       completeInterview: (result) =>
@@ -208,6 +221,8 @@ export const useInterviewStore = create<InterviewStore>()(
           interviewResult: result,
           roomStartedAtMs: null,
           roomPhase: null,
+          roomLanguage: null,
+          codePerLanguage: {},
         }),
 
       // ── Reset ──────────────────────────────────────────────────────────────
@@ -234,6 +249,8 @@ export const useInterviewStore = create<InterviewStore>()(
         interviewResult: state.interviewResult,
         roomStartedAtMs: state.roomStartedAtMs,
         roomPhase: state.roomPhase,
+        roomLanguage: state.roomLanguage,
+        codePerLanguage: state.codePerLanguage,
         testResults: state.testResults,
       }),
     }

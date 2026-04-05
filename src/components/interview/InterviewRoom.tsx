@@ -65,6 +65,8 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const addMessageToStore = useInterviewStore((s) => s.addMessage);
   const setRoomStartedAtMs = useInterviewStore((s) => s.setRoomStartedAtMs);
   const setRoomPhaseInStore = useInterviewStore((s) => s.setRoomPhase);
+  const setRoomLanguageInStore = useInterviewStore((s) => s.setRoomLanguage);
+  const setCodeForLanguage = useInterviewStore((s) => s.setCodeForLanguage);
   const setTestResultsInStore = useInterviewStore((s) => s.setTestResults);
 
   // Guard: wait for hydration before deciding to redirect
@@ -186,9 +188,12 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   useEffect(() => {
     codeRef.current = code;
     // Debounce persisting code to sessionStorage (avoids write on every keystroke)
-    const timer = setTimeout(() => setCodeInStore(code), 500);
+    const timer = setTimeout(() => {
+      setCodeInStore(code);
+      setCodeForLanguage(language, code);
+    }, 500);
     return () => clearTimeout(timer);
-  }, [code, setCodeInStore]);
+  }, [code, language, setCodeInStore, setCodeForLanguage]);
 
   const applyPhaseAfterTurn = useCallback(
     (apiPhase: unknown) => {
@@ -356,16 +361,19 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   const handleLanguageChange = useCallback(
     (newLang: SupportedLanguage) => {
+      // Save current language's code before switching
+      setCodeForLanguage(language, code);
+
       setLanguage(newLang);
+      setRoomLanguageInStore(newLang);
+
+      // Load saved code for the new language, or fall back to starter stub
       const problem = activeProblemRef.current;
-      if (!problem) return;
-      // Preserve code if user has edited; otherwise swap to the new starter
-      const currentStarter = problem.starter_code[language] ?? "";
-      if (code === currentStarter) {
-        setCode(problem.starter_code[newLang] ?? "");
-      }
+      const saved = useInterviewStore.getState().codePerLanguage[newLang];
+      const newCode = saved ?? problem?.starter_code[newLang] ?? "";
+      setCode(newCode);
     },
-    [code, language]
+    [code, language, setRoomLanguageInStore, setCodeForLanguage]
   );
 
   const handleRunCode = useCallback(async () => {
@@ -529,6 +537,8 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       isInterviewActive,
       messages: storeMessages,
       roomPhase,
+      roomLanguage,
+      codePerLanguage: storedCodePerLang,
       testResults: storeTestResults,
       currentCode: storeCodeSnap,
     } = state;
@@ -602,10 +612,18 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     // Restore test results
     if (storeTestResults.length > 0) setTestResults(storeTestResults);
 
-    // Restore code state + ref
-    if (storeCodeSnap) {
-      setCode(storeCodeSnap);
-      codeRef.current = storeCodeSnap;
+    // Restore language selection
+    const restoredLang = roomLanguage as SupportedLanguage | null;
+    if (restoredLang) {
+      setLanguage(restoredLang);
+    }
+
+    // Restore code state + ref — prefer per-language code for the active language
+    const activeLang = restoredLang ?? initialLanguage;
+    const restoredCode = storedCodePerLang[activeLang] ?? storeCodeSnap;
+    if (restoredCode) {
+      setCode(restoredCode);
+      codeRef.current = restoredCode;
     }
 
     // Show resume overlay — user must click to unlock audio context (Safari)
