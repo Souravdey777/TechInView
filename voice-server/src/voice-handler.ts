@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import { streamWithSentenceCallbacks } from "./claude-stream.js";
 import { DeepgramStream } from "./deepgram-stream.js";
 import { ElevenLabsStream } from "./elevenlabs-stream.js";
+import { normalizeSttTranscript } from "./normalize-stt-transcript.js";
 
 type MessageRole = "interviewer" | "candidate" | "system";
 
@@ -67,11 +68,11 @@ export class VoiceHandler {
     this.deepgram.onTranscript = (transcript: string, isFinal: boolean) => {
       if (!isFinal) {
         // Forward interim transcript so UI can show live captions
-        this.sendJson({ type: "transcript_interim", text: transcript });
+        this.sendJson({ type: "transcript_interim", text: normalizeSttTranscript(transcript) });
         return;
       }
 
-      const trimmed = transcript.trim();
+      const trimmed = normalizeSttTranscript(transcript).trim();
       if (!trimmed) return;
 
       console.log(`[voice-handler] Final transcript: "${trimmed}"`);

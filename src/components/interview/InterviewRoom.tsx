@@ -333,8 +333,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     }
   }, [isMicEnabled, voice, sendToAI]);
 
-  // Auto-send when speech recognition ends naturally (user stops talking)
-  // This fires when continuous=false recognition auto-stops after silence
+  // Auto-send when recognition stops (debounced silence in hook, or manual stop)
   const prevListeningRef = useRef(false);
   useEffect(() => {
     const wasListening = prevListeningRef.current;

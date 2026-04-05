@@ -1,5 +1,6 @@
 "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
+import { normalizeSttTranscript } from "@/lib/voice/normalize-stt-transcript";
 import { splitTextForTts } from "@/lib/voice/split-for-tts";
 
 // Web Speech API types (STT — browser SpeechRecognition until Deepgram Nova-2)
@@ -21,12 +22,17 @@ type SpeechRecognitionInstance = {
   onstart: (() => void) | null;
   onend: (() => void) | null;
   onerror: ((event: { error: string }) => void) | null;
+  /** Non-standard; supported in Chromium for long-form dictation. */
+  maxAlternatives?: number;
   start: () => void;
   stop: () => void;
   abort: () => void;
 };
 
 type VoiceState = "idle" | "listening" | "thinking" | "speaking";
+
+/** Pause longer than this after the last word before we stop recognition and auto-send (continuous mode). */
+const SILENCE_END_MS = 2400;
 
 function getAudioContextCtor(): (typeof AudioContext) | null {
   if (typeof window === "undefined") return null;
@@ -41,6 +47,22 @@ export function useVoiceInterview() {
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const transcriptRef = useRef("");
+  /** Final segments accumulated across `onresult` events (continuous recognition). */
+  const finalsRef = useRef("");
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearSilenceTimer = useCallback(() => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+  }, []);
+
+  const setTranscriptSynced = useCallback((value: string) => {
+    transcriptRef.current = value;
+    if (value === "") finalsRef.current = "";
+    setTranscript(value);
+  }, []);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -89,9 +111,11 @@ export function useVoiceInterview() {
     setVoiceState("idle");
   }, []);
 
-  // Start listening — non-continuous mode so it auto-stops after silence
+  // Continuous mode + debounced silence: `continuous=false` stops after tiny pauses and feels like the mic "drops" mid-sentence.
   const startListening = useCallback(() => {
     if (typeof window === "undefined") return;
+
+    clearSilenceTimer();
 
     // Stop any existing recognition
     if (recognitionRef.current) {
@@ -104,31 +128,51 @@ export function useVoiceInterview() {
     if (!SpeechRecognitionCtor) return;
 
     const recognition = new SpeechRecognitionCtor();
-    recognition.continuous = false; // Stop after user pauses speaking
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = "en-US";
+    try {
+      recognition.maxAlternatives = 1;
+    } catch {
+      /* optional */
+      console.warn("SpeechRecognition.maxAlternatives not supported");
+    }
 
-    // Track full transcript across results
     transcriptRef.current = "";
+    finalsRef.current = "";
+
+    const scheduleSilenceEnd = () => {
+      clearSilenceTimer();
+      silenceTimerRef.current = setTimeout(() => {
+        silenceTimerRef.current = null;
+        const rec = recognitionRef.current;
+        if (rec) {
+          try {
+            rec.stop();
+          } catch {
+            /* ignore */
+          }
+        }
+      }, SILENCE_END_MS);
+    };
 
     recognition.onresult = (event) => {
-      let interimTranscript = "";
-      let finalTranscript = "";
-
-      for (let i = 0; i < event.results.length; i++) {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
+        const piece = normalizeSttTranscript(result[0].transcript);
         if (result.isFinal) {
-          finalTranscript += result[0].transcript;
+          finalsRef.current += piece;
         } else {
-          interimTranscript += result[0].transcript;
+          interim += piece;
         }
       }
 
-      // Update with whatever we have — final takes priority
-      const current = finalTranscript || interimTranscript;
-      if (current) {
-        transcriptRef.current = current;
-        setTranscript(current);
+      const combined = (finalsRef.current + interim).trim();
+      if (combined) {
+        transcriptRef.current = combined;
+        setTranscript(combined);
+        scheduleSilenceEnd();
       }
     };
 
@@ -138,30 +182,31 @@ export function useVoiceInterview() {
     };
 
     recognition.onend = () => {
+      clearSilenceTimer();
       setIsListening(false);
       setVoiceState("idle");
-      // Recognition ended naturally (user stopped talking)
-      // The transcript is already set via onresult
     };
 
     recognition.onerror = (event) => {
       console.warn("Speech recognition error:", event.error);
+      clearSilenceTimer();
       setIsListening(false);
       setVoiceState("idle");
     };
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, []);
+  }, [clearSilenceTimer]);
 
   // Stop listening manually
   const stopListening = useCallback(() => {
+    clearSilenceTimer();
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch { /* ignore */ }
     }
     setIsListening(false);
     setVoiceState("idle");
-  }, []);
+  }, [clearSilenceTimer]);
 
   // Get the current transcript (use ref for synchronous access)
   const getTranscript = useCallback(() => {
@@ -369,6 +414,10 @@ export function useVoiceInterview() {
   // Cleanup
   useEffect(() => {
     return () => {
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
       if (recognitionRef.current) {
         try { recognitionRef.current.abort(); } catch { /* ignore */ }
       }
@@ -397,7 +446,7 @@ export function useVoiceInterview() {
     speakText,
     stopSpeaking,
     prepareAudioPlayback,
-    setTranscript,
+    setTranscript: setTranscriptSynced,
     getTranscript,
   };
 }
