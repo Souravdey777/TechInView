@@ -7,14 +7,17 @@ export type VoiceState = "idle" | "listening" | "thinking" | "speaking";
 type VoiceVisualizerProps = {
   state: VoiceState;
   className?: string;
+  /** Multiplies all animation durations — use >1 for slower, ambient background use */
+  slowFactor?: number;
 };
 
 /**
  * Siri-style fluid orb — smooth iridescent sphere with swirling
  * color gradients that blend and morph organically.
  */
-export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
+export function VoiceVisualizer({ state, className, slowFactor = 1 }: VoiceVisualizerProps) {
   const isActive = state !== "idle";
+  const s = (base: number) => `${base * slowFactor}s`;
 
   return (
     <div className={cn("relative flex items-center justify-center", className)}>
@@ -76,8 +79,8 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
             ? "radial-gradient(circle, rgba(251,191,36,0.3) 0%, rgba(251,146,60,0.15) 50%, transparent 70%)"
             : "radial-gradient(circle, rgba(52,211,153,0.35) 0%, rgba(34,211,238,0.2) 50%, transparent 70%)",
           animation: isActive
-            ? `siri-glow-active ${state === "speaking" ? "1.5s" : "2.5s"} ease-in-out infinite`
-            : "siri-glow-pulse 5s ease-in-out infinite",
+            ? `siri-glow-active ${state === "speaking" ? s(1.5) : s(2.5)} ease-in-out infinite`
+            : `siri-glow-pulse ${s(5)} ease-in-out infinite`,
         }}
       />
 
@@ -88,14 +91,14 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
             className="absolute w-[72px] h-[72px] rounded-full"
             style={{
               border: state === "listening" ? "1.5px solid rgba(34,211,238,0.3)" : "1.5px solid rgba(52,211,153,0.3)",
-              animation: "siri-ring-expand 2.5s ease-out infinite",
+              animation: `siri-ring-expand ${s(2.5)} ease-out infinite`,
             }}
           />
           <div
             className="absolute w-[72px] h-[72px] rounded-full"
             style={{
               border: state === "listening" ? "1px solid rgba(139,92,246,0.25)" : "1px solid rgba(34,211,238,0.25)",
-              animation: "siri-ring-expand 2.5s ease-out 0.8s infinite",
+              animation: `siri-ring-expand ${s(2.5)} ease-out ${s(0.8)} infinite`,
             }}
           />
         </>
@@ -106,8 +109,8 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
         className="relative z-10 w-[76px] h-[76px] overflow-hidden"
         style={{
           animation: isActive
-            ? `siri-morph-active ${state === "speaking" ? "3s" : state === "thinking" ? "4s" : "3.5s"} ease-in-out infinite`
-            : "siri-morph 6s ease-in-out infinite",
+            ? `siri-morph-active ${state === "speaking" ? s(3) : state === "thinking" ? s(4) : s(3.5)} ease-in-out infinite`
+            : `siri-morph ${s(6)} ease-in-out infinite`,
           borderRadius: "42% 58% 50% 50% / 50% 42% 58% 50%",
         }}
       >
@@ -137,7 +140,7 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
               ? "conic-gradient(from 0deg, transparent 0%, rgba(251,191,36,0.4) 15%, transparent 30%, rgba(251,146,60,0.3) 50%, transparent 65%, rgba(251,191,36,0.35) 80%, transparent 100%)"
               : "conic-gradient(from 0deg, transparent 0%, rgba(52,211,153,0.45) 15%, transparent 30%, rgba(34,211,238,0.35) 50%, transparent 65%, rgba(110,231,183,0.4) 80%, transparent 100%)",
             filter: "blur(8px)",
-            animation: `siri-rotate-1 ${isActive ? (state === "speaking" ? "3s" : "5s") : "10s"} linear infinite`,
+            animation: `siri-rotate-1 ${isActive ? (state === "speaking" ? s(3) : s(5)) : s(10)} linear infinite`,
           }}
         />
 
@@ -153,7 +156,7 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
               ? "conic-gradient(from 120deg, transparent 0%, rgba(251,146,60,0.3) 20%, transparent 40%, rgba(251,191,36,0.25) 60%, transparent 80%, rgba(245,158,11,0.25) 95%, transparent 100%)"
               : "conic-gradient(from 120deg, transparent 0%, rgba(34,211,238,0.35) 20%, transparent 40%, rgba(52,211,153,0.3) 60%, transparent 80%, rgba(20,184,166,0.3) 95%, transparent 100%)",
             filter: "blur(6px)",
-            animation: `siri-rotate-2 ${isActive ? (state === "speaking" ? "4s" : "7s") : "14s"} linear infinite`,
+            animation: `siri-rotate-2 ${isActive ? (state === "speaking" ? s(4) : s(7)) : s(14)} linear infinite`,
           }}
         />
 
@@ -169,7 +172,7 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
               ? "conic-gradient(from 240deg, transparent 0%, rgba(251,191,36,0.25) 25%, transparent 50%, rgba(251,146,60,0.2) 75%, transparent 100%)"
               : "conic-gradient(from 240deg, transparent 0%, rgba(110,231,183,0.3) 25%, transparent 50%, rgba(52,211,153,0.25) 75%, transparent 100%)",
             filter: "blur(5px)",
-            animation: `siri-rotate-1 ${isActive ? (state === "speaking" ? "2s" : "4s") : "8s"} linear infinite`,
+            animation: `siri-rotate-1 ${isActive ? (state === "speaking" ? s(2) : s(4)) : s(8)} linear infinite`,
           }}
         />
 
@@ -185,7 +188,7 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
               ? "radial-gradient(circle, rgba(251,191,36,0.25) 0%, rgba(251,146,60,0.08) 50%, transparent 70%)"
               : "radial-gradient(circle, rgba(52,211,153,0.3) 0%, rgba(34,211,238,0.1) 50%, transparent 70%)",
             filter: "blur(3px)",
-            animation: `siri-glow-pulse ${isActive ? "2s" : "5s"} ease-in-out infinite`,
+            animation: `siri-glow-pulse ${isActive ? s(2) : s(5)} ease-in-out infinite`,
           }}
         />
 

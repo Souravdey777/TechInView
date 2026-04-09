@@ -194,6 +194,23 @@
   @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
 }
 
+/* Scroll indicator dot */
+@keyframes scroll-dot {
+  0%   { transform: translateY(0); opacity: 0.8; }
+  60%  { transform: translateY(10px); opacity: 0.1; }
+  100% { transform: translateY(0); opacity: 0.8; }
+}
+
+/* Landing waveform bars */
+.waveform-bar {
+  transform-origin: bottom center;
+}
+
+@keyframes waveform-bar {
+  0%, 100% { transform: scaleY(1); }
+  50%       { transform: scaleY(0.1); }
+}
+
 /* Interview room — start overlay animations */
 @keyframes start-fade-up {
   0% { opacity: 0; transform: translateY(20px); }

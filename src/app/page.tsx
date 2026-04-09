@@ -13,7 +13,9 @@ import {
   Star,
   Play,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
+import { VoiceVisualizer } from "@/components/interview/VoiceVisualizer";
 import { MarketingNav } from "@/components/landing/MarketingNav";
 import { LandingReveal } from "@/components/landing/LandingReveal";
 import { LandingTiaPreview } from "@/components/landing/LandingTiaPreview";
@@ -50,22 +52,99 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden pt-20 pb-28 sm:pb-32 px-4 sm:px-6">
-        {/* Gradient mesh background */}
+        {/* Atmospheric gradient — teal bloom upper-right, faint green lower-left */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34,211,238,0.14) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 60%, rgba(52,211,153,0.06) 0%, transparent 50%)",
+              "radial-gradient(ellipse 55% 55% at 70% -5%, rgba(34,211,238,0.22) 0%, rgba(52,211,153,0.07) 42%, transparent 65%), radial-gradient(ellipse 30% 28% at 12% 88%, rgba(52,211,153,0.06) 0%, transparent 55%)",
           }}
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none" aria-hidden="true" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.35] pointer-events-none" aria-hidden="true" />
+
+        {/* ── Background orb — VoiceVisualizer as hero atmosphere ── */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ opacity: 0.18 }}
+          aria-hidden="true"
+        >
+          <div style={{ transform: "scale(20)", transformOrigin: "center" }}>
+            <VoiceVisualizer state="idle" className="w-32 h-32" slowFactor={4} />
+          </div>
+        </div>
+
+        {/* ── Floating metric nodes — left ── */}
+        <div className="hidden xl:flex flex-col gap-12 absolute left-5 top-56 z-0" aria-hidden="true">
+          {/* Node: Tia */}
+          <div className="flex items-center" style={{ animation: "float 5s ease-in-out 0s infinite" }}>
+            <div className="glass-card px-3.5 py-3 flex items-center gap-2.5 border-brand-border/50">
+              <div className="relative shrink-0">
+                <div className="w-7 h-7 rounded-lg border border-brand-border/60 bg-brand-deep flex items-center justify-center">
+                  <Mic className="w-3 h-3 text-brand-cyan" />
+                </div>
+                <span className="absolute -top-px -right-px block w-1.5 h-1.5 rounded-full bg-brand-green" />
+              </div>
+              <div>
+                <p className="text-[10px] text-brand-muted leading-none mb-0.5">AI Interviewer</p>
+                <p className="text-xs font-semibold text-brand-text">Tia</p>
+              </div>
+            </div>
+            <div className="w-12 h-px bg-gradient-to-r from-brand-border/40 to-transparent shrink-0" />
+          </div>
+          {/* Node: Problem */}
+          <div className="flex items-center ml-7" style={{ animation: "float 6s ease-in-out 1.1s infinite" }}>
+            <div className="glass-card px-3.5 py-3 flex items-center gap-2.5 border-brand-border/50">
+              <div className="w-7 h-7 rounded-lg border border-brand-border/60 bg-brand-deep flex items-center justify-center shrink-0">
+                <Code2 className="w-3 h-3 text-brand-green" />
+              </div>
+              <div>
+                <p className="text-[10px] text-brand-muted leading-none mb-0.5">Problem</p>
+                <p className="text-xs font-semibold text-brand-text">Two Sum</p>
+                <p className="text-[9px] text-brand-muted/60 tabular-nums mt-0.5">19,346 solved</p>
+              </div>
+            </div>
+            <div className="w-12 h-px bg-gradient-to-r from-brand-border/40 to-transparent shrink-0" />
+          </div>
+        </div>
+
+        {/* ── Floating metric nodes — right ── */}
+        <div className="hidden xl:flex flex-col gap-12 absolute right-5 top-56 z-0" aria-hidden="true">
+          {/* Node: Score */}
+          <div className="flex items-center" style={{ animation: "float 5.5s ease-in-out 0.5s infinite" }}>
+            <div className="w-12 h-px bg-gradient-to-l from-brand-border/40 to-transparent shrink-0" />
+            <div className="glass-card px-3.5 py-3 flex items-center gap-2.5 border-brand-border/50">
+              <div className="w-7 h-7 rounded-lg border border-brand-border/60 bg-brand-deep flex items-center justify-center shrink-0">
+                <BarChart3 className="w-3 h-3 text-brand-amber" />
+              </div>
+              <div>
+                <p className="text-[10px] text-brand-muted leading-none mb-0.5">Avg Score</p>
+                <p className="text-xs font-semibold text-brand-text tabular-nums">2,945</p>
+              </div>
+            </div>
+          </div>
+          {/* Node: Verdict */}
+          <div className="flex items-center mr-7" style={{ animation: "float 6.5s ease-in-out 1.6s infinite" }}>
+            <div className="w-12 h-px bg-gradient-to-l from-brand-border/40 to-transparent shrink-0" />
+            <div className="glass-card px-3.5 py-3 flex items-center gap-2.5 border-brand-border/50">
+              <div className="w-7 h-7 rounded-lg border border-brand-border/60 bg-brand-deep flex items-center justify-center shrink-0">
+                <Trophy className="w-3 h-3 text-brand-rose" />
+              </div>
+              <div>
+                <p className="text-[10px] text-brand-muted leading-none mb-0.5">Verdict</p>
+                <p className="text-xs font-semibold text-brand-green">Strong Hire</p>
+                <p className="text-[9px] text-brand-muted/60 tabular-nums mt-0.5">440 this week</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="relative max-w-5xl mx-auto text-center">
           {/* Status pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 text-xs text-brand-cyan mb-8 animate-fade-in motion-reduce:animate-none">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 text-xs text-brand-cyan mb-8 animate-fade-in motion-reduce:animate-none hover:bg-brand-cyan/10 transition-colors cursor-default">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse motion-reduce:animate-none" />
-            AI-powered mock interviews &mdash; now in beta
+            Beta access open · First interview free
+            <ChevronRight className="w-3 h-3 opacity-60" />
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] text-brand-text mb-6 animate-fade-in text-balance">
@@ -206,36 +285,110 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 </div>
               </div>
             </div>
-            {/* Glow under the preview */}
-            <div className="mx-auto max-w-2xl h-px bg-gradient-to-r from-transparent via-brand-cyan/40 to-transparent mt-8" />
+            {/* Voice waveform — decorative audio visualization */}
+            <div className="mt-8 flex items-end justify-center gap-[3px] h-9 opacity-[0.22]" aria-hidden="true">
+              {[0.25,0.4,0.6,0.8,0.55,1,0.7,0.85,0.95,0.75,1,0.65,0.9,1,0.8,0.7,0.6,0.85,0.5,0.4,0.65,0.3,0.2].map((h, i) => (
+                <div
+                  key={i}
+                  className="waveform-bar w-[3px] rounded-full bg-brand-cyan"
+                  style={{
+                    height: `${h * 100}%`,
+                    animationName: "waveform-bar",
+                    animationDuration: `${0.55 + (i % 7) * 0.11}s`,
+                    animationDelay: `${(i % 5) * 0.11}s`,
+                    animationTimingFunction: "ease-in-out",
+                    animationIterationCount: "infinite",
+                  }}
+                />
+              ))}
+            </div>
           </div>
+        </div>
+
+        {/* Scroll indicator — animated mouse */}
+        <div className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2" aria-hidden="true">
+          <div className="w-5 h-9 rounded-full border border-brand-border/40 flex items-start justify-center pt-1.5">
+            <div className="w-[3px] h-[6px] rounded-full bg-brand-muted/40" style={{ animation: "scroll-dot 2.2s ease-in-out infinite" }} />
+          </div>
+          <span className="text-[9px] text-brand-muted/30 tracking-[0.25em] uppercase">Scroll</span>
         </div>
       </section>
 
+      {/* ── Company trust bar ── */}
+      <div className="border-b border-brand-border/40 py-8 px-4 sm:px-8 bg-brand-deep">
+        <p className="text-center text-[10px] text-brand-muted/30 mb-7 tracking-[0.3em] uppercase font-medium">Engineers prepare here for</p>
+        <div className="flex items-center justify-center gap-10 sm:gap-16 flex-wrap">
+          {[
+            { name: "Google",    style: "font-bold tracking-tight" },
+            { name: "Meta",      style: "font-bold tracking-wide" },
+            { name: "Amazon",    style: "font-bold tracking-tight" },
+            { name: "Apple",     style: "font-semibold tracking-widest" },
+            { name: "Microsoft", style: "font-bold tracking-tight" },
+            { name: "Netflix",   style: "font-black tracking-widest" },
+            { name: "Bloomberg", style: "font-bold tracking-tight" },
+          ].map((co) => (
+            <span
+              key={co.name}
+              className={`text-brand-subtle/40 text-xl sm:text-2xl hover:text-brand-muted/60 transition-colors duration-300 cursor-default ${co.style}`}
+            >
+              {co.name}
+            </span>
+          ))}
+        </div>
+      </div>
+
       <main id="main">
       {/* ── Social Proof Stats ── */}
-      <section className="py-12 px-4 sm:px-6 border-y border-brand-border bg-brand-surface/50">
-        <LandingReveal className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+      <section className="py-16 px-4 sm:px-6 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-border/60 to-transparent" aria-hidden="true" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-brand-border/60 to-transparent" aria-hidden="true" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(34,211,238,0.045) 0%, transparent 70%)" }}
+          aria-hidden="true"
+        />
+        <LandingReveal className="relative max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {[
-            { value: "1000+", label: "Mock interviews conducted", icon: MessageSquare },
-            { value: "5/5", label: "Average user rating", icon: Star },
-            { value: "5", label: "5-dimensional report", icon: BarChart3 },
-            { value: "70+", label: "DSA questions", icon: Brain },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center rounded-xl py-2 md:py-0">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-brand-cyan/10 mb-3">
-                <stat.icon className="w-5 h-5 text-brand-cyan" />
+            { value: "1,000+", label: "Mock interviews conducted", icon: MessageSquare, color: "cyan" },
+            { value: "5 / 5",  label: "Average user rating",       icon: Star,          color: "amber" },
+            { value: "5-dim",  label: "Scoring dimensions",        icon: BarChart3,     color: "green" },
+            { value: "70+",    label: "DSA questions",             icon: Brain,         color: "rose"  },
+          ].map((stat) => {
+            const cMap = {
+              cyan:  { icon: "text-brand-cyan",  bg: "bg-brand-cyan/10",  glow: "0 0 28px rgba(34,211,238,0.18)" },
+              amber: { icon: "text-brand-amber", bg: "bg-brand-amber/10", glow: "0 0 28px rgba(251,191,36,0.18)" },
+              green: { icon: "text-brand-green", bg: "bg-brand-green/10", glow: "0 0 28px rgba(52,211,153,0.18)" },
+              rose:  { icon: "text-brand-rose",  bg: "bg-brand-rose/10",  glow: "0 0 28px rgba(244,114,182,0.18)" },
+            };
+            const c = cMap[stat.color as keyof typeof cMap];
+            return (
+              <div key={stat.label} className="flex flex-col items-center text-center gap-3">
+                <div
+                  className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center mb-1`}
+                  style={{ boxShadow: c.glow }}
+                >
+                  <stat.icon className={`w-5 h-5 ${c.icon}`} />
+                </div>
+                <p className="text-3xl sm:text-4xl font-bold text-brand-text tabular-nums">{stat.value}</p>
+                <p className="text-xs text-brand-muted leading-snug max-w-[10rem]">{stat.label}</p>
               </div>
-              <p className="text-2xl sm:text-3xl font-bold text-brand-text tabular-nums">{stat.value}</p>
-              <p className="text-xs text-brand-muted mt-1 leading-snug max-w-[11rem] mx-auto">{stat.label}</p>
-            </div>
-          ))}
+            );
+          })}
         </LandingReveal>
       </section>
 
       {/* ── Features (6 cards, 2 rows) ── */}
-      <section id="features" className="py-24 px-4 sm:px-6 bg-brand-deep">
-        <LandingReveal className="max-w-6xl mx-auto">
+      <section id="features" className="py-24 px-4 sm:px-6 bg-brand-deep relative overflow-hidden">
+        {/* Atmospheric bloom — upper left teal, lower right green */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 45% 40% at 5% 15%, rgba(34,211,238,0.06) 0%, transparent 65%), radial-gradient(ellipse 35% 35% at 95% 85%, rgba(52,211,153,0.05) 0%, transparent 65%)",
+          }}
+          aria-hidden="true"
+        />
+        <LandingReveal className="relative max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-brand-cyan mb-3 tracking-wide uppercase">Features</p>
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -286,17 +439,24 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               },
             ].map((feature) => {
               const colorMap = {
-                cyan: { bg: "bg-brand-cyan/10", text: "text-brand-cyan", border: "hover:border-brand-cyan/30" },
-                green: { bg: "bg-brand-green/10", text: "text-brand-green", border: "hover:border-brand-green/30" },
-                amber: { bg: "bg-brand-amber/10", text: "text-brand-amber", border: "hover:border-brand-amber/30" },
-                rose: { bg: "bg-brand-rose/10", text: "text-brand-rose", border: "hover:border-brand-rose/30" },
+                cyan:  { bg: "bg-brand-cyan/10",  text: "text-brand-cyan",  border: "border-brand-border hover:border-brand-cyan/35",  topLine: "rgba(34,211,238,0.5)",  hoverGlow: "0 8px 32px -8px rgba(34,211,238,0.18), 0 0 0 1px rgba(34,211,238,0.1)" },
+                green: { bg: "bg-brand-green/10", text: "text-brand-green", border: "border-brand-border hover:border-brand-green/35", topLine: "rgba(52,211,153,0.5)",  hoverGlow: "0 8px 32px -8px rgba(52,211,153,0.18), 0 0 0 1px rgba(52,211,153,0.1)" },
+                amber: { bg: "bg-brand-amber/10", text: "text-brand-amber", border: "border-brand-border hover:border-brand-amber/35", topLine: "rgba(251,191,36,0.5)", hoverGlow: "0 8px 32px -8px rgba(251,191,36,0.18), 0 0 0 1px rgba(251,191,36,0.1)" },
+                rose:  { bg: "bg-brand-rose/10",  text: "text-brand-rose",  border: "border-brand-border hover:border-brand-rose/35",  topLine: "rgba(244,114,182,0.5)",hoverGlow: "0 8px 32px -8px rgba(244,114,182,0.18), 0 0 0 1px rgba(244,114,182,0.1)" },
               };
               const c = colorMap[feature.color as keyof typeof colorMap];
               return (
                 <div
                   key={feature.title}
-                  className={`glass-card p-7 flex flex-col gap-4 transition-all duration-300 ${c.border} hover:-translate-y-1 motion-reduce:hover:translate-y-0`}
+                  className={`group relative bg-brand-card/80 backdrop-blur-sm rounded-xl border ${c.border} p-7 flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1 motion-reduce:hover:translate-y-0 overflow-hidden`}
+                  style={{ ["--hover-glow" as string]: c.hoverGlow }}
                 >
+                  {/* Top accent line */}
+                  <div
+                    className="absolute top-0 left-6 right-6 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ background: `linear-gradient(90deg, transparent, ${c.topLine}, transparent)` }}
+                    aria-hidden="true"
+                  />
                   <div className={`w-11 h-11 rounded-lg ${c.bg} flex items-center justify-center`}>
                     <feature.icon className={`w-5 h-5 ${c.text}`} />
                   </div>
@@ -314,8 +474,14 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
       </section>
 
       {/* ── How It Works ── */}
-      <section id="how-it-works" className="py-24 px-4 sm:px-6 bg-brand-surface">
-        <LandingReveal className="max-w-5xl mx-auto">
+      <section id="how-it-works" className="py-24 px-4 sm:px-6 bg-brand-surface relative overflow-hidden">
+        {/* Soft center bloom */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 55% 45% at 50% 60%, rgba(34,211,238,0.04) 0%, transparent 70%)" }}
+          aria-hidden="true"
+        />
+        <LandingReveal className="relative max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-brand-cyan mb-3 tracking-wide uppercase">How it works</p>
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -327,9 +493,10 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            {/* Connector line: aligns with circle centers (card p-7 + half of w-14/h-14) */}
-            <div className="hidden md:block absolute top-14 left-[20%] right-[20%] h-px">
-              <div className="h-full bg-gradient-to-r from-brand-cyan/40 via-brand-green/40 to-brand-amber/40" />
+            {/* Glowing connector line — sits behind the circles */}
+            <div className="hidden md:block absolute top-[3.375rem] left-[calc(16.67%+28px)] right-[calc(16.67%+28px)] h-px z-0">
+              <div className="h-full bg-gradient-to-r from-brand-cyan/50 via-brand-green/50 to-brand-amber/50" style={{ filter: "blur(0.5px)" }} />
+              <div className="absolute inset-0 bg-gradient-to-r from-brand-cyan/20 via-brand-green/20 to-brand-amber/20 blur-sm" />
             </div>
 
             {[
@@ -356,15 +523,26 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               },
             ].map((item) => {
               const colorMap = {
-                cyan: { border: "border-brand-cyan", bg: "bg-brand-cyan/10", text: "text-brand-cyan" },
-                green: { border: "border-brand-green", bg: "bg-brand-green/10", text: "text-brand-green" },
-                amber: { border: "border-brand-amber", bg: "bg-brand-amber/10", text: "text-brand-amber" },
+                cyan:  { border: "border-brand-cyan/60",  bg: "bg-brand-cyan/10",  text: "text-brand-cyan",  glow: "0 0 28px rgba(34,211,238,0.25)",  cardBorder: "hover:border-brand-cyan/30" },
+                green: { border: "border-brand-green/60", bg: "bg-brand-green/10", text: "text-brand-green", glow: "0 0 28px rgba(52,211,153,0.25)",  cardBorder: "hover:border-brand-green/30" },
+                amber: { border: "border-brand-amber/60", bg: "bg-brand-amber/10", text: "text-brand-amber", glow: "0 0 28px rgba(251,191,36,0.25)", cardBorder: "hover:border-brand-amber/30" },
               };
               const c = colorMap[item.color as keyof typeof colorMap];
               return (
-                <div key={item.step} className="glass-card p-7 flex flex-col items-center text-center gap-4">
-                  <div className={`w-14 h-14 rounded-full border-2 ${c.border} ${c.bg} flex items-center justify-center ${c.text} font-bold text-xl relative z-10`}>
-                    {item.step}
+                <div key={item.step} className={`glass-card p-7 flex flex-col items-center text-center gap-4 transition-all duration-300 ${c.cardBorder} hover:-translate-y-1 motion-reduce:hover:translate-y-0`}>
+                  <div className="relative z-10">
+                    <div
+                      className={`w-14 h-14 rounded-full border-2 ${c.border} ${c.bg} flex items-center justify-center ${c.text} font-bold text-xl`}
+                      style={{ boxShadow: c.glow }}
+                    >
+                      {item.step}
+                    </div>
+                    {/* Pulse ring */}
+                    <div
+                      className={`absolute inset-0 rounded-full border ${c.border} opacity-40`}
+                      style={{ animation: `siri-ring-expand 2.5s ease-out ${Number(item.step) * 0.4}s infinite` }}
+                      aria-hidden="true"
+                    />
                   </div>
                   <h3 className="text-lg font-semibold text-brand-text">
                     {item.title}
@@ -383,8 +561,13 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
       </section>
 
       {/* ── What Makes Us Different ── */}
-      <section className="py-24 px-4 sm:px-6 bg-brand-deep">
-        <LandingReveal className="max-w-5xl mx-auto">
+      <section className="py-24 px-4 sm:px-6 bg-brand-deep relative overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 50% 50% at 75% 55%, rgba(34,211,238,0.06) 0%, transparent 65%)" }}
+          aria-hidden="true"
+        />
+        <LandingReveal className="relative max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-brand-cyan mb-3 tracking-wide uppercase">Why TechInView</p>
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
@@ -395,11 +578,16 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Comparison card */}
-            <div className="glass-card p-7">
-              <p className="text-sm font-semibold text-brand-muted mb-5 uppercase tracking-wide">Traditional prep</p>
-              <ul className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            {/* Traditional prep — muted/rejected look */}
+            <div className="relative bg-brand-card/50 backdrop-blur-sm rounded-xl border border-brand-border/60 p-7 overflow-hidden">
+              {/* Faint red top accent */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-rose/20 to-transparent" aria-hidden="true" />
+              <div className="flex items-center gap-2.5 mb-6">
+                <div className="w-1.5 h-1.5 rounded-full bg-brand-rose/40" />
+                <p className="text-sm font-semibold text-brand-muted/70 uppercase tracking-wide">Traditional prep</p>
+              </div>
+              <ul className="space-y-3.5">
                 {[
                   "Solve problems in silence",
                   "No feedback on communication",
@@ -407,17 +595,25 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                   "No time pressure simulation",
                   "Hope you can explain your code",
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-brand-muted">
-                    <span className="mt-0.5 text-brand-muted">&times;</span>
+                  <li key={item} className="flex items-start gap-3 text-sm text-brand-muted/60">
+                    <span className="mt-0.5 shrink-0 w-4 h-4 rounded-full border border-brand-rose/25 flex items-center justify-center text-brand-rose/50 text-[10px] font-bold">&times;</span>
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="glass-card p-7 border-brand-cyan/30 glow-cyan">
-              <p className="text-sm font-semibold text-brand-cyan mb-5 uppercase tracking-wide">TechInView</p>
-              <ul className="space-y-3">
+            {/* TechInView — glowing card */}
+            <div className="relative bg-brand-card/80 backdrop-blur-sm rounded-xl border border-brand-cyan/35 p-7 overflow-hidden" style={{ boxShadow: "0 0 40px rgba(34,211,238,0.08), 0 0 80px rgba(34,211,238,0.04), inset 0 1px 0 rgba(34,211,238,0.1)" }}>
+              {/* Cyan top accent */}
+              <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-brand-cyan/60 to-transparent" aria-hidden="true" />
+              {/* Subtle bg tint */}
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-cyan/[0.03] to-transparent pointer-events-none" aria-hidden="true" />
+              <div className="relative flex items-center gap-2.5 mb-6">
+                <div className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                <p className="text-sm font-semibold text-brand-cyan uppercase tracking-wide">TechInView</p>
+              </div>
+              <ul className="relative space-y-3.5">
                 {[
                   "Talk through your approach out loud",
                   "AI evaluates how well you communicate",
@@ -425,8 +621,8 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                   "Real 45-minute countdown with phase transitions",
                   "Instant feedback with Hire/No-Hire verdict",
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-brand-text">
-                    <span className="mt-0.5 text-brand-green">&#10003;</span>
+                  <li key={item} className="flex items-start gap-3 text-sm text-brand-text">
+                    <span className="mt-0.5 shrink-0 w-4 h-4 rounded-full bg-brand-green/15 border border-brand-green/40 flex items-center justify-center text-brand-green text-[10px] font-bold">&#10003;</span>
                     {item}
                   </li>
                 ))}
@@ -442,16 +638,21 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
       </LandingReveal>
 
       {/* ── FAQ ── */}
-      <section id="faq" className="py-24 px-4 sm:px-6 bg-brand-deep">
-        <LandingReveal className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
+      <section id="faq" className="py-24 px-4 sm:px-6 bg-brand-deep relative overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 50% 40% at 50% 30%, rgba(34,211,238,0.03) 0%, transparent 70%)" }}
+          aria-hidden="true"
+        />
+        <LandingReveal className="relative max-w-3xl mx-auto">
+          <div className="text-center mb-14">
             <p className="text-sm font-semibold text-brand-cyan mb-3 tracking-wide uppercase">FAQ</p>
             <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
               Common questions
             </h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {[
               {
                 q: "How realistic is the AI interviewer?",
@@ -480,14 +681,14 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             ].map((faq) => (
               <details
                 key={faq.q}
-                className="group glass-card overflow-hidden"
+                className="group bg-brand-card/60 backdrop-blur-sm border border-brand-border/70 rounded-xl overflow-hidden transition-colors duration-200 hover:border-brand-border open:border-brand-cyan/20"
               >
-                <summary className="flex items-center justify-between p-5 cursor-pointer text-brand-text font-medium text-sm hover:text-brand-cyan transition-colors list-none">
+                <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-brand-text font-medium text-sm hover:text-brand-cyan group-open:text-brand-cyan transition-colors list-none">
                   {faq.q}
-                  <ChevronRight className="w-4 h-4 text-brand-muted transition-transform group-open:rotate-90 shrink-0 ml-4" />
+                  <ChevronDown className="w-4 h-4 text-brand-muted group-open:text-brand-cyan transition-transform duration-200 group-open:rotate-180 shrink-0 ml-4" />
                 </summary>
-                <div className="px-5 pb-5 text-sm text-brand-muted leading-relaxed">
-                  {faq.a}
+                <div className="px-5 pb-5 pt-0 text-sm text-brand-muted leading-relaxed border-t border-brand-border/40">
+                  <div className="pt-4">{faq.a}</div>
                 </div>
               </details>
             ))}
@@ -496,20 +697,28 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="py-24 px-4 sm:px-6 bg-brand-surface relative overflow-hidden">
+      <section className="py-28 px-4 sm:px-6 bg-brand-surface relative overflow-hidden">
+        {/* Stronger atmospheric glow — teal bloom center */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(34,211,238,0.08) 0%, transparent 70%)",
+              "radial-gradient(ellipse 70% 60% at 50% 55%, rgba(34,211,238,0.1) 0%, rgba(52,211,153,0.04) 45%, transparent 70%)",
           }}
           aria-hidden="true"
         />
+        {/* Top separator */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent" aria-hidden="true" />
+
         <LandingReveal className="relative max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/25 bg-brand-cyan/5 text-xs text-brand-cyan mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+            First interview is free
+          </div>
           <h2 className="text-3xl md:text-5xl font-bold text-brand-text mb-6 leading-tight text-balance">
             A full 45-minute mock interview,
             <br />
-            <span className="text-gradient-cyan">ready when you are</span>
+            <span className="text-shimmer motion-reduce:animate-none">ready when you are</span>
           </h2>
           <p className="text-brand-muted text-lg mb-10 max-w-lg mx-auto leading-relaxed">
             No scheduling, no awkward peer matching, no waiting. Just you, your AI interviewer, and a problem to solve.
@@ -524,6 +733,23 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           <p className="mt-4 text-xs text-brand-muted">
             No credit card required &mdash; try it right now
           </p>
+          {/* Decorative waveform bars */}
+          <div className="mt-14 flex items-end justify-center gap-[3px] h-7 opacity-[0.18]" aria-hidden="true">
+            {[0.3,0.5,0.7,0.9,0.6,1,0.75,0.85,1,0.7,0.9,0.6,0.45,0.6,0.9,0.7,1,0.85,0.75,1,0.6,0.9,0.5,0.35,0.2].map((h, i) => (
+              <div
+                key={i}
+                className="waveform-bar w-[2px] rounded-full bg-brand-cyan"
+                style={{
+                  height: `${h * 100}%`,
+                  animationName: "waveform-bar",
+                  animationDuration: `${0.6 + (i % 7) * 0.1}s`,
+                  animationDelay: `${(i % 6) * 0.09}s`,
+                  animationTimingFunction: "ease-in-out",
+                  animationIterationCount: "infinite",
+                }}
+              />
+            ))}
+          </div>
         </LandingReveal>
       </section>
       </main>
