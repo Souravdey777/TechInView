@@ -75,7 +75,7 @@ _Goal: Understand usage, iterate_
 - [x] 35. Problem bank expansion (70+ problems)
 - [x] 36. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
 
-## Phase 8: Beta Launch (April 7, 2026)
+## Phase 8: Beta Launch (March 30)
 
 - [ ] 37. Sales and Marketing Plan
 - [ ] 38. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Tia", each with distinct personality and interview style
