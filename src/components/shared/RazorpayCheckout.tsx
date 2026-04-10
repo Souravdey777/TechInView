@@ -124,7 +124,7 @@ export function RazorpayCheckout({
         amount,
         currency,
         name: "TechInView",
-        description: `${pack_label} — Interview Credits`,
+        description: `${pack_label} — Interview Pack`,
         order_id,
         prefill: {
           name: userName,
@@ -167,7 +167,7 @@ export function RazorpayCheckout({
 
               toast({
                 title: "Payment successful!",
-                description: `${verifyData.data.credits} credit${verifyData.data.credits > 1 ? "s" : ""} added to your account.`,
+                description: `${verifyData.data.credits} full interview credit${verifyData.data.credits > 1 ? "s" : ""} added to your account.`,
                 variant: "success",
               });
               router.refresh();

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { captureServerEvent } from "@/lib/posthog/server";
-
-const FREE_TRIAL_MAX_DURATION = 1200; // 20 minutes
+import {
+  FREE_TRIAL_DURATION_SECONDS,
+  FULL_INTERVIEW_DURATION_SECONDS,
+} from "@/lib/constants";
 
 type StartInterviewBody = {
   difficulty?: string;
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
     } = await import("@/lib/db/queries");
 
     let isFreeInterview = false;
-    let maxDuration = body.maxDurationSeconds ?? 2700;
+    let maxDuration = FULL_INTERVIEW_DURATION_SECONDS;
     let difficulty = body.difficulty as "easy" | "medium" | "hard" | undefined;
     const category = body.category;
 
@@ -46,7 +48,10 @@ export async function POST(req: NextRequest) {
 
       if (!profile || profile.interview_credits <= 0) {
         return NextResponse.json(
-          { success: false, error: "No interview credits remaining. Purchase credits to continue." },
+          {
+            success: false,
+            error: "No interview credits remaining. Buy an interview pack to continue.",
+          },
           { status: 403 }
         );
       }
@@ -55,7 +60,7 @@ export async function POST(req: NextRequest) {
 
       if (isFreeInterview) {
         difficulty = "easy";
-        maxDuration = FREE_TRIAL_MAX_DURATION;
+        maxDuration = FREE_TRIAL_DURATION_SECONDS;
       }
     }
 

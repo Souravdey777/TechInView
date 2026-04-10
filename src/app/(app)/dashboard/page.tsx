@@ -204,8 +204,8 @@ export default async function DashboardPage() {
                 Try Your First Interview Free
               </h2>
               <p className="text-brand-muted text-sm mb-4 max-w-md">
-                You have 1 free trial interview with Tia. It&apos;s a 20-minute
-                easy-level session with a basic score report.
+                You have 1 free voice trial with Tia. It&apos;s a 5-minute
+                easy-level session with a basic score summary.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Link
@@ -224,7 +224,7 @@ export default async function DashboardPage() {
                 </Link>
               </div>
               <p className="text-brand-muted text-xs mt-3">
-                Upgrade to unlock all difficulties, 45-min sessions, and detailed AI feedback.
+                Upgrade to unlock full 45-minute interviews, all difficulties, and detailed AI feedback.
               </p>
             </div>
             <div className="hidden sm:flex items-center justify-center w-20 h-20 rounded-2xl bg-brand-green/10 border border-brand-green/20 shrink-0">
@@ -280,7 +280,7 @@ export default async function DashboardPage() {
                 You&apos;re out of interview credits
               </h2>
               <p className="text-brand-muted text-sm mb-5 max-w-md">
-                Purchase a credit pack to continue practicing with Tia. Keep
+                Choose an interview pack to continue practicing with Tia. Keep
                 sharpening your skills and land your dream offer.
               </p>
               <Link
@@ -288,7 +288,7 @@ export default async function DashboardPage() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-amber text-brand-deep font-semibold text-sm rounded-lg hover:bg-brand-amber/90 transition-all duration-150 shadow-lg shadow-brand-amber/20"
               >
                 <CreditCard className="w-4 h-4" />
-                Buy Credits
+                View Packs
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>

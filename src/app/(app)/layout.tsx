@@ -2,7 +2,11 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/shared/Sidebar";
-import { CREDIT_PACKS, getRegionForCountry } from "@/lib/constants";
+import {
+  CREDIT_PACKS,
+  getDisplayPricingKey,
+  getRegionForCountry,
+} from "@/lib/constants";
 
 export default async function AppLayout({
   children,
@@ -22,7 +26,7 @@ export default async function AppLayout({
   const headersList = headers();
   const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
   const { region, symbol } = getRegionForCountry(country);
-  const displayKey = region === "INR" ? "inr" : region === "PPP" ? "ppp" : "usd";
+  const displayKey = getDisplayPricingKey(region);
   const startingPrice = `${symbol}${CREDIT_PACKS.single.displayPrices[displayKey]}`;
 
   return (

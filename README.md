@@ -108,13 +108,7 @@ pnpm seed
 pnpm dev
 ```
 
-For the voice pipeline, start the WebSocket server in a separate terminal:
-
-```bash
-cd voice-server
-pnpm install
-pnpm dev
-```
+Voice interviews now run through the browser-based Deepgram Voice Agent flow. The app mints a short-lived token from `/api/voice/deepgram-token` and streams audio directly from the interview room.
 
 ### Scripts
 
@@ -127,7 +121,6 @@ pnpm dev
 | `pnpm db:push` | Push schema to database |
 | `pnpm db:studio` | Open Drizzle Studio |
 | `pnpm seed` | Seed DSA problem bank |
-| `pnpm test:voice` | Test voice pipeline (CLI) |
 
 ## Scoring System
 

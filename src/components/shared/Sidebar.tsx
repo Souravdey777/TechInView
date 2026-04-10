@@ -33,7 +33,7 @@ type SidebarProps = {
   startingPrice?: string;
 };
 
-export function Sidebar({ userEmail, startingPrice = "$8" }: SidebarProps) {
+export function Sidebar({ userEmail, startingPrice = "$19" }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useSupabase();
@@ -87,14 +87,14 @@ export function Sidebar({ userEmail, startingPrice = "$8" }: SidebarProps) {
       <div className="px-3 pb-2">
         <Link
           href="/settings"
-          className="flex flex-col gap-2 p-3 rounded-xl bg-gradient-to-br from-brand-cyan/10 via-brand-card to-purple-500/10 border border-brand-cyan/20 hover:border-brand-cyan/40 transition-all group"
+          className="flex flex-col gap-2 p-3 rounded-xl bg-gradient-to-br from-brand-cyan/10 via-brand-card to-brand-green/10 border border-brand-cyan/20 hover:border-brand-cyan/40 transition-all group"
         >
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-brand-cyan" />
             <span className="text-xs font-semibold text-brand-text">Get more interviews</span>
           </div>
           <p className="text-[11px] text-brand-muted leading-relaxed">
-            Buy credit packs starting at {startingPrice}. Practice more, score higher.
+            Buy interview packs starting at {startingPrice}. Practice more, score higher.
           </p>
           <span className="text-[11px] font-semibold text-brand-cyan">
             View pricing &rarr;

@@ -1,13 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
-
-declare global {
-  interface Window {
-    SpeechRecognition?: unknown;
-    webkitSpeechRecognition?: unknown;
-  }
-}
 import { Mic, MicOff, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VoiceVisualizer, MicVisualizer, type VoiceState } from "./VoiceVisualizer";
@@ -17,6 +10,7 @@ type VoicePanelProps = {
   voiceState: VoiceState;
   currentPhase: InterviewPhase;
   isMicEnabled: boolean;
+  errorMessage?: string | null;
   onToggleMic: () => void;
   onSendText: (text: string) => void;
 };
@@ -57,14 +51,17 @@ export function VoicePanel({
   voiceState,
   currentPhase,
   isMicEnabled,
+  errorMessage,
   onToggleMic,
   onSendText,
 }: VoicePanelProps) {
   const [textOpen, setTextOpen] = useState(true);
-  const [speechSupported, setSpeechSupported] = useState(false);
+  const [micSupported, setMicSupported] = useState(false);
 
   useEffect(() => {
-    setSpeechSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition));
+    const hasGetUserMedia =
+      typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
+    setMicSupported(hasGetUserMedia);
   }, []);
   const [draft, setDraft] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -100,6 +97,12 @@ export function VoicePanel({
         </span>
       </div>
 
+      {errorMessage && (
+        <div className="rounded-lg border border-brand-rose/30 bg-brand-rose/10 px-3 py-2 text-[11px] leading-relaxed text-brand-rose">
+          {errorMessage}
+        </div>
+      )}
+
       {/* Orb visualizer — the hero element */}
       <div className="flex flex-col items-center gap-1 py-3">
         <VoiceVisualizer state={voiceState} className="h-32 w-32" />
@@ -115,10 +118,10 @@ export function VoicePanel({
           <MicVisualizer isActive={isMicEnabled} className="absolute inset-0" />
           <button
             onClick={onToggleMic}
-            disabled={!speechSupported}
+            disabled={!micSupported}
             className={cn(
               "relative z-10 flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300",
-              !speechSupported
+              !micSupported
                 ? "bg-brand-card border border-brand-border text-brand-muted cursor-not-allowed opacity-50"
                 : isMicEnabled
                 ? "bg-brand-cyan/20 text-brand-cyan border-2 border-brand-cyan shadow-[0_0_20px_rgba(34,211,238,0.3)]"
@@ -133,12 +136,12 @@ export function VoicePanel({
             )}
           </button>
         </div>
-        {!speechSupported && (
+        {!micSupported && (
           <span className="text-[10px] text-brand-muted">Mic not supported — use text input below</span>
         )}
-        {speechSupported && (
+        {micSupported && (
           <span className="text-[10px] text-brand-muted mt-0.5">
-            {isMicEnabled ? "Tap to stop" : "Tap to speak"}
+            {isMicEnabled ? "Tap to mute" : "Tap to unmute"}
           </span>
         )}
       </div>

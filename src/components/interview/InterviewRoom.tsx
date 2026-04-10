@@ -13,7 +13,11 @@ import { Timer } from "./Timer";
 import { InterviewControls } from "./InterviewControls";
 import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useVoiceInterview } from "@/hooks/useVoiceInterview";
+import {
+  useDeepgramVoiceAgent,
+  type DeepgramVoiceAgentSettings,
+  type AgentFunctionDef,
+} from "@/hooks/useDeepgramVoiceAgent";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
@@ -22,6 +26,7 @@ import {
   clampPhaseToTimeFloor,
   parseInterviewPhase,
 } from "@/lib/interview-phases";
+import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,6 +45,8 @@ type InterviewRoomProps = {
   interviewId: string;
 };
 
+const MAX_AGENT_CONTEXT_MESSAGES = 20;
+
 // ─── Helper: extract typed score dimension safely ─────────────────────────────
 
 function extractDimension(
@@ -54,7 +61,6 @@ function extractDimension(
 
 export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const router = useRouter();
-  const voice = useVoiceInterview();
   const hasHydrated = useHasHydrated();
 
   // ── Read setup config from Zustand store ───────────────────────────────────
@@ -84,9 +90,10 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   // ── Conversation state ──────────────────────────────────────────────────────
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [isAiThinking, setIsAiThinking] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
+  const [isConnectingVoice, setIsConnectingVoice] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const conversationRef = useRef<{ role: string; content: string; timestamp_ms: number }[]>([]);
   const startTimeRef = useRef(Date.now());
   const msgCounterRef = useRef(0);
@@ -110,9 +117,8 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // ── Scoring state ──────────────────────────────────────────────────────────
   const [isScoring, setIsScoring] = useState(false);
 
-  // ── Derived voice state for UI ──────────────────────────────────────────────
-  const voiceState: VoiceState = isAiThinking ? "thinking" : voice.voiceState as VoiceState;
-  const [isMicEnabled, setIsMicEnabled] = useState(false);
+  // ── Mic mute state (mic streams continuously; this mutes/unmutes) ──────────
+  const [isMicEnabled, setIsMicEnabled] = useState(true);
 
   // ── Resizable panel state ─────────────────────────────────────────────────
   const MIN_PANEL = 300;
@@ -167,27 +173,20 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     };
   }, [isDragging]);
 
-  // ── Helper: get elapsed time string ─────────────────────────────────────────
-  const getTimeStr = useCallback(() => {
-    const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-    const m = Math.floor(elapsed / 60);
-    const s = elapsed % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  }, []);
-
-  // Use a ref for activeProblem so sendToAI / startInterview always read the
-  // latest value without needing to re-create the callbacks.
+  // Use a ref for activeProblem so callbacks always read the latest value.
   const activeProblemRef = useRef(activeProblem);
   useEffect(() => { activeProblemRef.current = activeProblem; }, [activeProblem]);
 
-  // Same for currentPhase and code — needed by sendToAI without dep churn
   const currentPhaseRef = useRef(currentPhase);
   useEffect(() => { currentPhaseRef.current = currentPhase; }, [currentPhase]);
   const codeRef = useRef(code);
+  const languageRef = useRef(language);
+  useEffect(() => { languageRef.current = language; }, [language]);
+  const testResultsRef = useRef(testResults);
+  useEffect(() => { testResultsRef.current = testResults; }, [testResults]);
   const setCodeInStore = useInterviewStore((s) => s.setCode);
   useEffect(() => {
     codeRef.current = code;
-    // Debounce persisting code to sessionStorage (avoids write on every keystroke)
     const timer = setTimeout(() => {
       setCodeInStore(code);
       setCodeForLanguage(language, code);
@@ -195,168 +194,226 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     return () => clearTimeout(timer);
   }, [code, language, setCodeInStore, setCodeForLanguage]);
 
-  const applyPhaseAfterTurn = useCallback(
-    (apiPhase: unknown) => {
+  // ── Deepgram Voice Agent ──────────────────────────────────────────────────
+
+  const agentFunctions = useMemo<AgentFunctionDef[]>(
+    () => [
+      {
+        name: "get_current_code",
+        description: "Retrieve the candidate's current code from the editor",
+        parameters: { type: "object", properties: {}, required: [] },
+      },
+      {
+        name: "run_tests",
+        description: "Execute the candidate's code against test cases and return pass/fail results",
+        parameters: { type: "object", properties: {}, required: [] },
+      },
+      {
+        name: "get_interview_state",
+        description: "Get current interview state including phase, time remaining, and test summary",
+        parameters: { type: "object", properties: {}, required: [] },
+      },
+    ],
+    [],
+  );
+
+  const agentContextMessages = useMemo(
+    () =>
+      chatMessages.slice(-MAX_AGENT_CONTEXT_MESSAGES).map((message) => ({
+        role: message.role === "interviewer" ? ("assistant" as const) : ("user" as const),
+        content: message.content,
+      })),
+    [chatMessages],
+  );
+
+  const hasCandidateCode = code.trim().length > 0;
+
+  // Ref to break circular dependency: onConnected callback needs agent.injectUserMessage,
+  // but agent is the return of the same hook. The ref is updated after hook returns.
+  const agentInjectRef = useRef<(text: string) => void>(() => {});
+
+  const agentSettings = useMemo<DeepgramVoiceAgentSettings>(
+    () => ({
+      systemPrompt: buildVoiceSystemPrompt(
+        activeProblem,
+        currentPhase,
+        hasCandidateCode,
+        Math.round(maxDuration / 60),
+      ),
+      functions: agentFunctions,
+      contextMessages: agentContextMessages,
+    }),
+    [activeProblem, currentPhase, hasCandidateCode, maxDuration, agentFunctions, agentContextMessages],
+  );
+
+  const applyPhaseFromAgent = useCallback(
+    (aiPhase: InterviewPhase) => {
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const pct = Math.min(1, Math.max(0, elapsed / maxDuration));
       const timePhase = phaseFromElapsedFraction(pct);
-      const parsed = parseInterviewPhase(apiPhase);
-      if (parsed) {
-        const clamped = clampPhaseToTimeFloor(parsed, timePhase);
-        setCurrentPhase(clamped);
-        setRoomPhaseInStore(clamped);
-      } else {
-        setCurrentPhase((prev) => {
-          const clamped = clampPhaseToTimeFloor(prev, timePhase);
-          setRoomPhaseInStore(clamped);
-          return clamped;
-        });
-      }
+      const clamped = clampPhaseToTimeFloor(aiPhase, timePhase);
+      setCurrentPhase(clamped);
+      setRoomPhaseInStore(clamped);
     },
-    [maxDuration, setRoomPhaseInStore]
+    [maxDuration, setRoomPhaseInStore],
   );
 
-  // ── Send message to AI and speak response ──────────────────────────────────
-  const sendToAI = useCallback(async (userMessage: string) => {
-    const elapsedMs = Date.now() - startTimeRef.current;
-    const id = `msg-${++msgCounterRef.current}`;
-    const userMsg: ChatMessage = { id, role: "candidate", content: userMessage, time: getTimeStr() };
-    setChatMessages(prev => [...prev, userMsg]);
-    conversationRef.current.push({ role: "candidate", content: userMessage, timestamp_ms: elapsedMs });
-    addMessageToStore({ role: "candidate", content: userMessage, timestamp_ms: elapsedMs });
+  const agent = useDeepgramVoiceAgent(agentSettings, {
+    onTranscript: useCallback(
+      (text: string, role: "user" | "agent") => {
+        const elapsedMs = Date.now() - startTimeRef.current;
+        const chatRole = role === "agent" ? "interviewer" : "candidate";
+        const id = `msg-${++msgCounterRef.current}`;
+        const elapsed = Math.floor(elapsedMs / 1000);
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        const time = `${m}:${s.toString().padStart(2, "0")}`;
 
-    setIsAiThinking(true);
+        const chatMsg: ChatMessage = { id, role: chatRole, content: text, time };
+        setChatMessages((prev) => [...prev, chatMsg]);
+        conversationRef.current.push({ role: chatRole, content: text, timestamp_ms: elapsedMs });
+        addMessageToStore({ role: chatRole, content: text, timestamp_ms: elapsedMs });
+      },
+      [addMessageToStore],
+    ),
 
-    try {
-      const res = await fetch("/api/interview/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMessage,
-          conversationHistory: conversationRef.current.slice(-10),
-          problem: activeProblemRef.current,
-          currentPhase: currentPhaseRef.current,
-          currentCode: codeRef.current,
-          elapsedSeconds: Math.floor((Date.now() - startTimeRef.current) / 1000),
-          maxDurationSeconds: maxDuration,
-        }),
-      });
+    onFunctionCall: useCallback(
+      async (name: string) => {
+        switch (name) {
+          case "get_current_code":
+            return { language: languageRef.current, code: codeRef.current };
 
-      const data = await res.json();
-      if (data.success && data.data?.message) {
-        const aiText = data.data.message as string;
-        const aiElapsedMs = Date.now() - startTimeRef.current;
-        const aiId = `msg-${++msgCounterRef.current}`;
-        const aiMsg: ChatMessage = { id: aiId, role: "interviewer", content: aiText, time: getTimeStr() };
-        setChatMessages(prev => [...prev, aiMsg]);
-        conversationRef.current.push({ role: "interviewer", content: aiText, timestamp_ms: aiElapsedMs });
-        addMessageToStore({ role: "interviewer", content: aiText, timestamp_ms: aiElapsedMs });
+          case "run_tests": {
+            const res = await fetch("/api/interview/run-code", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                language: languageRef.current,
+                code: codeRef.current,
+                interviewId,
+                problemSlug: activeProblemRef.current?.slug,
+              }),
+            });
+            const json = await res.json();
+            if (!json.success) return { error: json.error || "Execution failed" };
+            const results: TestResult[] = json.data?.test_results ?? [];
+            setTestResults(results);
+            setTestResultsInStore(
+              results.map((r) => ({
+                id: r.id, input: r.input, expected: r.expected,
+                actual: r.actual ?? "", passed: r.passed, isHidden: r.isHidden,
+              })),
+            );
+            const passed = results.filter((r) => r.passed).length;
+            return {
+              passed,
+              total: results.length,
+              summary: `${passed}/${results.length} tests passed`,
+            };
+          }
 
-        applyPhaseAfterTurn(data.data.phase);
+          case "get_interview_state": {
+            const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+            const remaining = Math.max(0, maxDuration - elapsed);
+            const tr = testResultsRef.current;
+            return {
+              phase: currentPhaseRef.current,
+              elapsedSeconds: elapsed,
+              remainingSeconds: remaining,
+              testsPassed: tr.filter((t) => t.passed).length,
+              testsTotal: tr.length,
+            };
+          }
 
-        voice.speakText(aiText);
-        setIsAiThinking(false);
-      } else {
-        setIsAiThinking(false);
+          default:
+            return { error: `Unknown function: ${name}` };
+        }
+      },
+      [interviewId, maxDuration, setTestResultsInStore],
+    ),
+
+    onPhaseChange: applyPhaseFromAgent,
+
+    onError: useCallback((err: Error) => {
+      console.error("[interview-room] Agent error:", err.message);
+      setIsConnectingVoice(false);
+      setVoiceError(err.message);
+    }, []),
+
+    onConnected: useCallback(() => {
+      setIsConnectingVoice(false);
+      setVoiceError(null);
+      if (conversationRef.current.length === 0) {
+        startTimeRef.current = Date.now();
+        // Trigger the opening turn only for brand-new sessions. Resumes/reconnects
+        // already carry transcript history via agent context.
+        agentInjectRef.current(
+          "The interview is starting. Please introduce yourself and the problem.",
+        );
       }
-    } catch {
-      setIsAiThinking(false);
-    }
-  }, [getTimeStr, voice, maxDuration, applyPhaseAfterTurn, addMessageToStore]);
+    }, []),
+  });
 
-  // ── Start interview (triggered by user click to enable audio) ───────────────
+  // Keep the ref in sync with the latest injectUserMessage
+  useEffect(() => {
+    agentInjectRef.current = agent.injectUserMessage;
+  }, [agent.injectUserMessage]);
+
+  const voiceState: VoiceState = agent.voiceState;
+
+  // ── Start interview (connect voice agent) ─────────────────────────────────
   const startInterview = useCallback(async () => {
-    await voice.prepareAudioPlayback();
-
-    setHasStarted(true);
-    setIsTimerRunning(true);
-    const now = Date.now();
-    startTimeRef.current = now;
-    setRoomStartedAtMs(now);
-    setRoomPhaseInStore("INTRO");
-    setIsAiThinking(true);
     msgCounterRef.current = 0;
+    setVoiceError(null);
+    setIsConnectingVoice(true);
 
     try {
-      const res = await fetch("/api/interview/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: "The interview is starting. Please introduce yourself and the problem.",
-          conversationHistory: [],
-          problem: activeProblemRef.current,
-          currentPhase: "INTRO",
-          currentCode: "",
-          elapsedSeconds: 0,
-          maxDurationSeconds: maxDuration,
-        }),
-      });
-      const data = await res.json();
-      if (data.success && data.data?.message) {
-        const aiText = data.data.message as string;
-        const initId = `msg-${++msgCounterRef.current}`;
-        setChatMessages([{ id: initId, role: "interviewer", content: aiText, time: "0:00" }]);
-        conversationRef.current = [{ role: "interviewer", content: aiText, timestamp_ms: 0 }];
-        addMessageToStore({ role: "interviewer", content: aiText, timestamp_ms: 0 });
-        applyPhaseAfterTurn(data.data.phase);
-        voice.speakText(aiText);
-        setIsAiThinking(false);
-      } else {
-        setIsAiThinking(false);
-      }
-    } catch {
-      setIsAiThinking(false);
+      await agent.connect();
+      const now = startTimeRef.current;
+      startTimeRef.current = now;
+      setHasStarted(true);
+      setIsTimerRunning(true);
+      setRoomStartedAtMs(now);
+      setRoomPhaseInStore("INTRO");
+      // onConnected callback injects the greeting via agentInjectRef
+    } catch (error) {
+      setIsConnectingVoice(false);
+      setIsTimerRunning(false);
+      setHasStarted(false);
+      setVoiceError(
+        error instanceof Error ? error.message : "Unable to start the voice interview",
+      );
     }
-  }, [voice, maxDuration, applyPhaseAfterTurn, setRoomStartedAtMs, setRoomPhaseInStore, addMessageToStore]);
+  }, [agent, setRoomStartedAtMs, setRoomPhaseInStore]);
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
   const handleToggleMic = useCallback(() => {
     if (isMicEnabled) {
-      // Manually stopping — grab transcript and send
-      voice.stopListening();
+      agent.mute();
       setIsMicEnabled(false);
-      // Small delay to let final onresult fire before reading
-      setTimeout(() => {
-        const spokenText = voice.getTranscript().trim();
-        if (spokenText) {
-          sendToAI(spokenText);
-          voice.setTranscript("");
-        }
-      }, 300);
     } else {
-      // Stop Tia from speaking if he's talking
-      voice.stopSpeaking();
-      voice.setTranscript("");
-      voice.startListening();
+      agent.stopSpeaking();
+      agent.unmute();
       setIsMicEnabled(true);
     }
-  }, [isMicEnabled, voice, sendToAI]);
+  }, [isMicEnabled, agent]);
 
-  // Auto-send when recognition stops (debounced silence in hook, or manual stop)
-  const prevListeningRef = useRef(false);
-  useEffect(() => {
-    const wasListening = prevListeningRef.current;
-    prevListeningRef.current = voice.isListening;
-
-    // Transition from listening → not listening
-    if (wasListening && !voice.isListening && isMicEnabled) {
-      setIsMicEnabled(false);
-      // Small delay to let final transcript settle
-      setTimeout(() => {
-        const spokenText = voice.getTranscript().trim();
-        if (spokenText && !isAiThinking) {
-          sendToAI(spokenText);
-          voice.setTranscript("");
-        }
-      }, 300);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voice.isListening]);
-
-  const handleSendText = useCallback((text: string) => {
-    sendToAI(text);
-  }, [sendToAI]);
+  const handleSendText = useCallback(
+    (text: string) => {
+      const elapsedMs = Date.now() - startTimeRef.current;
+      const id = `msg-${++msgCounterRef.current}`;
+      const elapsed = Math.floor(elapsedMs / 1000);
+      const m = Math.floor(elapsed / 60);
+      const s = elapsed % 60;
+      const time = `${m}:${s.toString().padStart(2, "0")}`;
+      setChatMessages((prev) => [...prev, { id, role: "candidate", content: text, time }]);
+      conversationRef.current.push({ role: "candidate", content: text, timestamp_ms: elapsedMs });
+      addMessageToStore({ role: "candidate", content: text, timestamp_ms: elapsedMs });
+      agent.injectUserMessage(text);
+    },
+    [agent, addMessageToStore],
+  );
 
   const handleLanguageChange = useCallback(
     (newLang: SupportedLanguage) => {
@@ -407,6 +464,15 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         id: r.id, input: r.input, expected: r.expected,
         actual: r.actual ?? "", passed: r.passed, isHidden: r.isHidden,
       })));
+
+      // Inject test results into the agent for context
+      if (agent.isConnected) {
+        const passed = results.filter((r) => r.passed).length;
+        agent.injectAgentMessage(
+          `[System: Candidate ran their code. ${passed}/${results.length} tests passed. ` +
+          `Language: ${language}. Code:\n${code}]`,
+        );
+      }
     } catch {
       const errorResults: TestResult[] = [
         {
@@ -426,7 +492,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } finally {
       setIsRunningTests(false);
     }
-  }, [language, code, interviewId, setTestResultsInStore]);
+  }, [language, code, interviewId, setTestResultsInStore, agent]);
 
   // Use a ref so the timer effect always calls the latest version of
   // handleEndInterview without needing to restart the interval.
@@ -435,8 +501,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const handleEndInterview = useCallback(async () => {
     setIsScoring(true);
 
-    voice.stopListening();
-    voice.stopSpeaking();
+    agent.disconnect();
 
     const transcript = conversationRef.current.map((msg) => ({
       role: msg.role as "interviewer" | "candidate" | "system",
@@ -519,7 +584,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     });
 
     router.push(`/results/${interviewId}`);
-  }, [interviewId, code, language, router, testResults, completeInterviewStore, voice]);
+  }, [interviewId, code, language, router, testResults, completeInterviewStore, agent]);
 
   // Keep the ref in sync with the latest callback
   useEffect(() => { handleEndInterviewRef.current = handleEndInterview; }, [handleEndInterview]);
@@ -627,15 +692,27 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
     // Show resume overlay — user must click to unlock audio context (Safari)
     setIsResuming(true);
-  }, [hasHydrated, interviewId, maxDuration]);
+  }, [hasHydrated, initialLanguage, interviewId, maxDuration]);
 
-  // ── Resume interview (after reload) — no intro API call ────────────────────
+  // ── Resume interview (after reload) — reconnect voice agent ─────────────────
   const resumeInterview = useCallback(async () => {
-    await voice.prepareAudioPlayback();
-    setHasStarted(true);
-    setIsTimerRunning(true);
-    setIsResuming(false);
-  }, [voice]);
+    setVoiceError(null);
+    setIsConnectingVoice(true);
+
+    try {
+      await agent.connect();
+      setHasStarted(true);
+      setIsTimerRunning(true);
+      setIsResuming(false);
+    } catch (error) {
+      setIsConnectingVoice(false);
+      setIsTimerRunning(false);
+      setHasStarted(false);
+      setVoiceError(
+        error instanceof Error ? error.message : "Unable to reconnect to the voice agent",
+      );
+    }
+  }, [agent]);
 
   // ── Timer countdown ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -665,6 +742,23 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     const timePhase = phaseFromElapsedFraction(pct);
     setCurrentPhase((prev) => clampPhaseToTimeFloor(prev, timePhase));
   }, [timeLeft, hasStarted, maxDuration]);
+
+  // ── Periodic code snapshot injection (every 60s during coding phases) ──────
+  useEffect(() => {
+    if (!hasStarted || !agent.isConnected) return;
+    const CODING_PHASES = new Set(["CODING", "TESTING", "COMPLEXITY_ANALYSIS"]);
+
+    const interval = setInterval(() => {
+      if (!CODING_PHASES.has(currentPhaseRef.current)) return;
+      const currentCode = codeRef.current?.trim();
+      if (!currentCode) return;
+      agent.injectAgentMessage(
+        `[System: Code snapshot — ${languageRef.current}]\n${currentCode}`,
+      );
+    }, 60_000);
+
+    return () => clearInterval(interval);
+  }, [hasStarted, agent]);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
@@ -734,9 +828,31 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
               <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-amber/60" />AI scoring</span>
             </div>
           )}
-          <button onClick={isResuming ? resumeInterview : startInterview} className="flex items-center gap-2 rounded-xl bg-brand-cyan px-10 py-3.5 text-base font-semibold text-brand-deep transition-all hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98]" style={{ animation: "start-fade-up 0.8s ease-out 0.45s both, start-btn-glow 3s ease-in-out infinite" }}>
-            {isResuming ? "Resume Interview" : "Start Interview"}
+          <button
+            onClick={isResuming ? resumeInterview : startInterview}
+            disabled={isConnectingVoice}
+            className={cn(
+              "flex items-center gap-2 rounded-xl px-10 py-3.5 text-base font-semibold text-brand-deep transition-all",
+              isConnectingVoice
+                ? "cursor-wait bg-brand-cyan/70"
+                : "bg-brand-cyan hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98]",
+            )}
+            style={{ animation: "start-fade-up 0.8s ease-out 0.45s both, start-btn-glow 3s ease-in-out infinite" }}
+          >
+            {isConnectingVoice
+              ? "Connecting..."
+              : isResuming
+                ? "Resume Interview"
+                : "Start Interview"}
           </button>
+          {voiceError && (
+            <p
+              className="max-w-sm text-center text-xs leading-relaxed text-brand-rose"
+              style={{ animation: "start-fade-up 0.8s ease-out 0.52s both" }}
+            >
+              {voiceError}
+            </p>
+          )}
           <p className="text-xs text-brand-muted/60" style={{ animation: "start-fade-up 0.8s ease-out 0.6s both" }}>
             {isResuming
               ? "Click resume to continue where you left off"
@@ -790,6 +906,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
               voiceState={voiceState}
               currentPhase={currentPhase}
               isMicEnabled={isMicEnabled}
+              errorMessage={voiceError}
               onToggleMic={handleToggleMic}
               onSendText={handleSendText}
             />
@@ -818,7 +935,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 value="transcript"
                 className="flex-1 overflow-y-auto mt-2"
               >
-                <TranscriptPanel messages={chatMessages} isThinking={isAiThinking} />
+                <TranscriptPanel messages={chatMessages} isThinking={voiceState === "thinking"} />
               </TabsContent>
             </Tabs>
           </div>

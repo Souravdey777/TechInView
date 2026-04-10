@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import {
+  CREDIT_PACKS,
+  FREE_TRIAL_DURATION_MINUTES,
+  FULL_INTERVIEW_DURATION_MINUTES,
+  PACK_IDS,
+  type CreditPackId,
+} from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 type PricingFeature = {
@@ -23,83 +30,6 @@ type PricingTier = {
   ctaVariant: "default" | "primary";
 };
 
-const tiers: PricingTier[] = [
-  {
-    name: "Free Trial",
-    tagline: "See what it feels like",
-    prices: { usd: 0, inr: 0, ppp: 0 },
-    saveBadge: "TRY IT",
-    saveBadgeColor: "bg-brand-card text-brand-muted",
-    features: [
-      { text: "1 interview", included: true },
-      { text: "20-min session", included: true },
-      { text: "Easy problems only", included: true },
-      { text: "Basic score report", included: true },
-      { text: "Advanced report", included: false },
-      { text: "FAANG personas", included: false },
-    ],
-    ctaText: "Try Free",
-    ctaVariant: "default",
-  },
-  {
-    name: "1 Interview",
-    tagline: "One-off practice session",
-    prices: { usd: 8, inr: 349, ppp: 4 },
-    saveBadge: "SINGLE",
-    saveBadgeColor: "bg-brand-cyan/20 text-brand-cyan",
-    features: [
-      { text: "1 full interview", included: true },
-      { text: "45-min session", included: true },
-      { text: "All difficulties", included: true },
-      { text: "Advanced AI report", included: true },
-      { text: "All 4 languages", included: true },
-      { text: "FAANG personas", included: false },
-    ],
-    ctaText: "Buy Now",
-    ctaVariant: "default",
-  },
-  {
-    name: "3-Pack",
-    tagline: "For focused prep sprints",
-    prices: { usd: 18, inr: 799, ppp: 9 },
-    originalPrices: { usd: 24, inr: 1047, ppp: 12 },
-    perInterview: { usd: 6, inr: 266, ppp: 3 },
-    badge: "Popular",
-    saveBadge: "SAVE 25%",
-    saveBadgeColor: "bg-brand-green/20 text-brand-green",
-    features: [
-      { text: "3 full interviews", included: true },
-      { text: "45-min sessions", included: true },
-      { text: "All difficulties", included: true },
-      { text: "Advanced AI report", included: true },
-      { text: "All 4 languages", included: true },
-      { text: "Progress tracking", included: true },
-    ],
-    ctaText: "Buy 3-Pack",
-    ctaVariant: "primary",
-  },
-  {
-    name: "5-Pack",
-    tagline: "For serious candidates",
-    prices: { usd: 24, inr: 1099, ppp: 18 },
-    originalPrices: { usd: 40, inr: 1745, ppp: 20 },
-    perInterview: { usd: 4.8, inr: 220, ppp: 3.6 },
-    saveBadge: "SAVE 40%",
-    saveBadgeColor: "bg-brand-amber/20 text-brand-amber",
-    badge: "Best Value",
-    features: [
-      { text: "5 full interviews", included: true },
-      { text: "45-min sessions", included: true },
-      { text: "All difficulties", included: true },
-      { text: "Advanced AI report", included: true },
-      { text: "All 4 languages", included: true },
-      { text: "Progress tracking", included: true },
-    ],
-    ctaText: "Buy 5-Pack",
-    ctaVariant: "default",
-  },
-];
-
 type PricingRegion = "usd" | "inr" | "ppp";
 
 type PricingProps = {
@@ -113,6 +43,112 @@ const REGION_SYMBOLS: Record<PricingRegion, string> = {
   ppp: "$",
 };
 
+const FREE_TIER: PricingTier = {
+  name: "Free Trial",
+  tagline: "Test the voice workflow before you commit",
+  prices: { usd: 0, inr: 0, ppp: 0 },
+  saveBadge: "TRY IT",
+  saveBadgeColor: "bg-brand-card text-brand-muted",
+  features: [
+    { text: `1 x ${FREE_TRIAL_DURATION_MINUTES}-minute voice trial`, included: true },
+    { text: "Easy problem + live coding", included: true },
+    { text: "Basic score summary", included: true },
+    { text: "All difficulties", included: false },
+    { text: "Detailed 5-dimension report", included: false },
+    { text: "Specific problem selection", included: false },
+  ],
+  ctaText: "Start Free",
+  ctaVariant: "default",
+};
+
+const TIER_CONFIG: Record<
+  CreditPackId,
+  Omit<PricingTier, "name" | "prices" | "originalPrices" | "perInterview">
+> = {
+  single: {
+    tagline: "One full mock interview, no subscription",
+    saveBadge: "STARTER",
+    saveBadgeColor: "bg-brand-cyan/20 text-brand-cyan",
+    features: [
+      { text: `1 x ${FULL_INTERVIEW_DURATION_MINUTES}-minute full interview`, included: true },
+      { text: "All difficulties", included: true },
+      { text: "Detailed AI report", included: true },
+      { text: "Transcript + scorecard", included: true },
+      { text: "All 4 languages", included: true },
+      { text: "Specific problem selection", included: true },
+    ],
+    ctaText: "Buy 1 Interview",
+    ctaVariant: "default",
+  },
+  "3pack": {
+    tagline: "Best for active prep weeks",
+    badge: "Popular",
+    saveBadgeColor: "bg-brand-green/20 text-brand-green",
+    features: [
+      { text: `3 x ${FULL_INTERVIEW_DURATION_MINUTES}-minute full interviews`, included: true },
+      { text: "All difficulties", included: true },
+      { text: "Detailed AI report", included: true },
+      { text: "Transcript + scorecard", included: true },
+      { text: "Progress tracking", included: true },
+      { text: "Specific problem selection", included: true },
+    ],
+    ctaText: "Buy 3 Interviews",
+    ctaVariant: "primary",
+  },
+  "6pack": {
+    tagline: "For serious interview loops and repeat practice",
+    badge: "Best Value",
+    saveBadgeColor: "bg-brand-amber/20 text-brand-amber",
+    features: [
+      { text: `6 x ${FULL_INTERVIEW_DURATION_MINUTES}-minute full interviews`, included: true },
+      { text: "All difficulties", included: true },
+      { text: "Detailed AI report", included: true },
+      { text: "Transcript + scorecard", included: true },
+      { text: "Progress tracking", included: true },
+      { text: "Best effective price per round", included: true },
+    ],
+    ctaText: "Buy 6 Interviews",
+    ctaVariant: "default",
+  },
+};
+
+const SINGLE_PRICES = CREDIT_PACKS.single.displayPrices;
+
+const tiers: PricingTier[] = [
+  FREE_TIER,
+  ...PACK_IDS.map((packId) => {
+    const pack = CREDIT_PACKS[packId];
+    const config = TIER_CONFIG[packId];
+    const hasBundleDiscount = pack.credits > 1;
+    const originalPrices = hasBundleDiscount
+      ? {
+          usd: SINGLE_PRICES.usd * pack.credits,
+          inr: SINGLE_PRICES.inr * pack.credits,
+          ppp: SINGLE_PRICES.ppp * pack.credits,
+        }
+      : undefined;
+    const saveBadge = hasBundleDiscount
+      ? `SAVE ${Math.round((1 - pack.displayPrices.usd / (SINGLE_PRICES.usd * pack.credits)) * 100)}%`
+      : config.saveBadge;
+    const perInterview = hasBundleDiscount
+      ? {
+          usd: Number((pack.displayPrices.usd / pack.credits).toFixed(2)),
+          inr: Number((pack.displayPrices.inr / pack.credits).toFixed(2)),
+          ppp: Number((pack.displayPrices.ppp / pack.credits).toFixed(2)),
+        }
+      : undefined;
+
+    return {
+      name: pack.label,
+      prices: pack.displayPrices,
+      originalPrices,
+      perInterview,
+      saveBadge,
+      ...config,
+    };
+  }),
+];
+
 export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
   const ctaHref = refParam ? `/signup?ref=${refParam}` : "/login";
   const [activeRegion, setActiveRegion] = useState<PricingRegion>(defaultRegion);
@@ -121,7 +157,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
   const locale = activeRegion === "inr" ? "en-IN" : "en-US";
 
   function formatPrice(amount: number) {
-    return amount.toLocaleString(locale);
+    return amount.toLocaleString(locale, { maximumFractionDigits: 2 });
   }
 
   return (
@@ -129,13 +165,12 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-brand-text mb-4">
-            Pay per interview, not per month
+            Buy interview packs, not a subscription
           </h2>
           <p className="text-brand-muted text-lg mb-8">
-            Buy what you need. No subscriptions, no commitments.
+            Start with a 5-minute trial, then unlock full mock interviews when you&apos;re ready.
           </p>
 
-          {/* Region Toggle — visible for Indian users (USD/INR) */}
           {defaultRegion === "inr" && (
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-brand-border bg-brand-card/60">
               <span
@@ -184,8 +219,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                 key={tier.name}
                 className={cn(
                   "glass-card p-7 flex flex-col gap-5 relative",
-                  tier.ctaVariant === "primary" &&
-                    "border-brand-cyan/40 glow-cyan"
+                  tier.ctaVariant === "primary" && "border-brand-cyan/40 glow-cyan"
                 )}
               >
                 {tier.badge && (
@@ -243,16 +277,12 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                       key={feature.text}
                       className={cn(
                         "flex items-center gap-2",
-                        feature.included
-                          ? "text-brand-text"
-                          : "text-brand-muted"
+                        feature.included ? "text-brand-text" : "text-brand-muted"
                       )}
                     >
                       <span
                         className={
-                          feature.included
-                            ? "text-brand-green"
-                            : "text-brand-muted"
+                          feature.included ? "text-brand-green" : "text-brand-muted"
                         }
                       >
                         {feature.included ? "\u2713" : "\u2013"}
@@ -279,15 +309,15 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
         </div>
 
         <p className="text-center text-brand-muted text-sm mt-8">
-          Credits never expire.{" "}
+          One-time packs. No subscription.{" "}
           {activeRegion === "inr" && (
             <span className="text-brand-cyan">
-              You&apos;re seeing India pricing &mdash; up to 50% off.{" "}
+              You&apos;re seeing India pricing.{" "}
             </span>
           )}
           {activeRegion === "ppp" && (
             <span className="text-brand-cyan">
-              Regional pricing applied &mdash; up to 50% off.{" "}
+              Regional pricing applied.{" "}
             </span>
           )}
           No card required for free trial.

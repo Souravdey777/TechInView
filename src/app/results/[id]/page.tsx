@@ -376,7 +376,7 @@ export default function ResultsPage() {
                 </h3>
                 <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
                   Your free trial includes the overall score and hire recommendation above.
-                  Purchase credits to unlock the 5-dimension radar chart, per-dimension feedback,
+                  Purchase an interview pack to unlock the 5-dimension radar chart, per-dimension feedback,
                   key strengths, and areas to improve.
                 </p>
               </div>
@@ -384,7 +384,7 @@ export default function ResultsPage() {
                 href="/settings"
                 className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
               >
-                Buy Credits
+                View Packs
               </Link>
             </div>
           </section>

@@ -99,7 +99,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </div>
 
           <p className="mt-5 text-xs text-brand-muted animate-fade-in stagger-3 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0">
-            1 free trial interview &mdash; no credit card required
+            1 free 5-minute voice trial &mdash; no credit card required
           </p>
 
           {/* ── Product Preview Mock ── */}
@@ -463,11 +463,11 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               },
               {
                 q: "How long does each interview take?",
-                a: "Paid interviews are 45 minutes — the standard length for a real FAANG coding round. Free trial interviews are 20 minutes.",
+                a: "Paid interviews are 45 minutes — the standard length for a real FAANG coding round. The free trial is a 5-minute voice session so you can test the workflow before buying a pack.",
               },
               {
-                q: "Do credits expire?",
-                a: "No. Credits never expire. Buy them when you need them, use them whenever you're ready.",
+                q: "Do I need a subscription?",
+                a: "No. TechInView uses one-time interview packs. Start with the free trial, then buy a single interview, a 3-pack, or a 6-pack when you need more practice.",
               },
               {
                 q: "Can I use this on my phone?",
@@ -522,7 +522,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Link>
           <p className="mt-4 text-xs text-brand-muted">
-            No credit card required &mdash; try it right now
+            No credit card required &mdash; start the 5-minute trial right now
           </p>
         </LandingReveal>
       </section>

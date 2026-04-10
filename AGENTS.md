@@ -1,4 +1,4 @@
-# CLAUDE.md — TechInView.ai
+# AGENTS.md — TechInView.ai
 
 > Voice-powered AI mock interview platform for software engineers.
 > DSA rounds with real-time voice interaction, live code execution, and FAANG-calibrated scoring.
@@ -27,7 +27,7 @@
 | Database           | Supabase PostgreSQL                 | latest     |
 | ORM                | Drizzle ORM                         | latest     |
 | STT (Speech→Text)  | Deepgram Nova-2 (streaming)         | latest     |
-| LLM (AI Brain)     | Claude Sonnet 4 (Anthropic API)     | claude-sonnet-4-20250514 |
+| LLM (AI Brain)     | Codex Sonnet 4 (Anthropic API)     | Codex-sonnet-4-20250514 |
 | TTS (Text→Speech)  | Deepgram Aura 2 (streaming)            | latest     |
 | Code Editor        | Monaco Editor (@monaco-editor/react) | latest    |
 | Code Execution     | Piston API (self-hosted or public)  | latest     |
@@ -43,7 +43,7 @@
 
 ```
 techinview/
-├── CLAUDE.md                          # This file — project bible
+├── AGENTS.md                          # This file — project bible
 ├── .env.local                         # Local env vars (NEVER commit)
 ├── .env.example                       # Template for env vars
 ├── next.config.ts
@@ -148,7 +148,7 @@ techinview/
 │   │
 │   ├── lib/
 │   │   ├── ai/
-│   │   │   ├── interviewer.ts         # Claude system prompts + conversation manager
+│   │   │   ├── interviewer.ts         # Codex system prompts + conversation manager
 │   │   │   ├── scorer.ts             # Post-interview scoring prompts
 │   │   │   ├── prompts.ts            # All prompt templates (centralized)
 │   │   │   └── context-builder.ts    # Build dynamic context from interview state
@@ -199,7 +199,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
-# Anthropic (Claude)
+# Anthropic (Codex)
 ANTHROPIC_API_KEY=sk-ant-...
 
 # Deepgram (STT)
@@ -328,11 +328,11 @@ State transitions are managed by `useInterviewState.ts` hook. The AI interviewer
 2. **Pass current code as context every 3-4 turns** — not every message (saves tokens).
 3. **Use the solution_approach field** so the AI knows the optimal path and can guide toward it.
 4. **Separate the interviewer prompt from the scorer prompt** — different system prompts, different calls.
-5. **Stream everything** — Claude streaming, Deepgram TTS streaming. Never wait for full responses.
+5. **Stream everything** — Codex streaming, Deepgram TTS streaming. Never wait for full responses.
 
 ### Context Window Management
 
-Each Claude call includes:
+Each Codex call includes:
 - System prompt (~800 tokens, static)
 - Problem description + solution approach (~500 tokens, static)
 - Last 10 conversation turns (~2000 tokens, rolling window)
@@ -340,7 +340,7 @@ Each Claude call includes:
 - Interview state metadata (~100 tokens)
 
 **Total per call: ~4000 tokens input, ~150 tokens output**
-**Estimated 15-20 Claude calls per 45-min interview**
+**Estimated 15-20 Codex calls per 45-min interview**
 
 ---
 
@@ -361,7 +361,7 @@ Each Claude call includes:
     │        Returns interim + final transcripts
     │
     │    On final transcript:
-    ├──→ [Claude Streaming API]
+    ├──→ [Codex Streaming API]
     │        Conversation history + current code + interview state
     │        max_tokens=300 (keep short for voice)
     │        Stream response token by token
@@ -386,13 +386,13 @@ Each Claude call includes:
 |--------------------------|-----------|----------------|
 | Mic → Deepgram STT       | 100ms     | 300ms          |
 | Deepgram processing      | 200ms     | 500ms          |
-| Claude first token       | 300ms     | 800ms          |
+| Codex first token       | 300ms     | 800ms          |
 | Deepgram TTS first byte  | 200ms     | 500ms          |
 | **Total perceived delay** | **~800ms** | **<2000ms**   |
 
 ### Critical Implementation Details
 
-1. **Sentence-level TTS**: Don't wait for Claude's full response. Detect sentence boundaries and send each sentence to Deepgram Aura 2 immediately.
+1. **Sentence-level TTS**: Don't wait for Codex's full response. Detect sentence boundaries and send each sentence to Deepgram Aura 2 immediately.
 2. **Interruption handling**: When Deepgram VAD detects user speech, immediately stop TTS playback and flush the audio buffer.
 3. **Silence detection**: If no speech for >90s during CODING phase, AI offers encouragement. If >120s in APPROACH phase, AI offers a hint.
 4. **Echo cancellation**: Enable `echoCancellation: true` in `getUserMedia` constraints.

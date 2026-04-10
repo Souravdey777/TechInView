@@ -4,7 +4,13 @@ import { headers } from "next/headers";
 import { cn } from "@/lib/utils";
 import { SettingsForm } from "@/components/dashboard/SettingsForm";
 import { RazorpayCheckout } from "@/components/shared/RazorpayCheckout";
-import { CREDIT_PACKS, PACK_IDS, getRegionForCountry } from "@/lib/constants";
+import {
+  CREDIT_PACKS,
+  FULL_INTERVIEW_DURATION_MINUTES,
+  PACK_IDS,
+  getDisplayPricingKey,
+  getRegionForCountry,
+} from "@/lib/constants";
 import {
   User,
   CreditCard,
@@ -16,7 +22,7 @@ import { DeleteAccountButton } from "@/components/dashboard/DeleteAccountButton"
 const PACK_COLORS: Record<string, string> = {
   single: "brand-cyan",
   "3pack": "brand-green",
-  "5pack": "brand-amber",
+  "6pack": "brand-amber",
 };
 
 export default async function SettingsPage() {
@@ -42,8 +48,7 @@ export default async function SettingsPage() {
   const headersList = headers();
   const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
   const { region, symbol } = getRegionForCountry(country);
-
-  const displayKey = region === "INR" ? "inr" : region === "PPP" ? "ppp" : "usd";
+  const displayKey = getDisplayPricingKey(region);
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
@@ -74,19 +79,19 @@ export default async function SettingsPage() {
         />
       </section>
 
-      {/* Interview Credits Section */}
+      {/* Interview Packs Section */}
       <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-border">
           <Ticket className="w-4 h-4 text-brand-cyan" />
           <h2 className="text-sm font-semibold text-brand-text">
-            Interview Credits
+            Interview Packs
           </h2>
         </div>
         <div className="p-6 space-y-5">
           {/* Credits balance */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-brand-muted text-sm">Available credits</p>
+              <p className="text-brand-muted text-sm">Available interview credits</p>
               <p className="text-xs text-brand-muted mt-0.5">
                 {interviewsCompleted} interview{interviewsCompleted !== 1 ? "s" : ""} completed
                 {!hasUsedTrial && credits > 0 && " · Free trial available"}
@@ -123,6 +128,9 @@ export default async function SettingsPage() {
                       </span>
                     )}
                   </div>
+                  <p className="text-xs text-brand-muted">
+                    {pack.credits} x {FULL_INTERVIEW_DURATION_MINUTES}-minute full interview{pack.credits > 1 ? "s" : ""}
+                  </p>
                   <span className="text-xl font-bold text-brand-text">
                     {symbol}{price.toLocaleString(region === "INR" ? "en-IN" : "en-US")}
                   </span>
@@ -138,7 +146,7 @@ export default async function SettingsPage() {
                       color === "brand-amber" && "bg-brand-amber/10 border-brand-amber/30 text-brand-amber hover:bg-brand-amber/20",
                     )}
                   >
-                    Buy Credits
+                    Buy Pack
                   </RazorpayCheckout>
                 </div>
               );
@@ -148,7 +156,7 @@ export default async function SettingsPage() {
           <div className="flex items-center gap-2">
             <CreditCard className="w-3.5 h-3.5 text-brand-muted" />
             <p className="text-brand-muted text-xs">
-              Credits never expire. Secure payments via Razorpay.
+              One-time packs. No subscription. Secure payments via Razorpay.
               {region === "INR" && (
                 <span className="text-brand-cyan ml-1">India pricing applied.</span>
               )}

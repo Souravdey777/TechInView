@@ -46,7 +46,11 @@ export const SCORING_DIMENSIONS = {
 
 export type ScoringDimension = keyof typeof SCORING_DIMENSIONS;
 
-export const MAX_INTERVIEW_DURATION = 2700;
+export const FULL_INTERVIEW_DURATION_MINUTES = 45;
+export const FULL_INTERVIEW_DURATION_SECONDS = FULL_INTERVIEW_DURATION_MINUTES * 60;
+export const FREE_TRIAL_DURATION_MINUTES = 5;
+export const FREE_TRIAL_DURATION_SECONDS = FREE_TRIAL_DURATION_MINUTES * 60;
+export const MAX_INTERVIEW_DURATION = FULL_INTERVIEW_DURATION_SECONDS;
 export const FREE_INTERVIEWS_PER_WEEK = 1;
 
 export const BETA_INVITE_CODE = "beta";
@@ -82,43 +86,45 @@ export const DIFFICULTY_CONFIG: Record<DifficultyLevel, { label: string; color: 
 // ─── Pricing & Credit Packs ─────────────────────────────────────────────────
 
 export type PricingRegion = "USD" | "INR" | "PPP";
+export type DisplayPricingRegion = "usd" | "inr" | "ppp";
+export type CreditPackId = "single" | "3pack" | "6pack";
 
 export type CreditPack = {
-  id: string;
+  id: CreditPackId;
   label: string;
   credits: number;
   badge?: string;
   prices: Record<PricingRegion, number>;
-  displayPrices: Record<"usd" | "inr" | "ppp", number>;
+  displayPrices: Record<DisplayPricingRegion, number>;
 };
 
-export const CREDIT_PACKS: Record<string, CreditPack> = {
+export const CREDIT_PACKS: Record<CreditPackId, CreditPack> = {
   single: {
     id: "single",
     label: "1 Interview",
     credits: 1,
-    prices: { USD: 800, INR: 34900, PPP: 400 },
-    displayPrices: { usd: 8, inr: 349, ppp: 4 },
+    prices: { USD: 1900, INR: 79900, PPP: 900 },
+    displayPrices: { usd: 19, inr: 799, ppp: 9 },
   },
   "3pack": {
     id: "3pack",
-    label: "3-Pack",
+    label: "3 Interviews",
     credits: 3,
     badge: "Popular",
-    prices: { USD: 1800, INR: 79900, PPP: 900 },
-    displayPrices: { usd: 18, inr: 799, ppp: 9 },
+    prices: { USD: 4900, INR: 199900, PPP: 2200 },
+    displayPrices: { usd: 49, inr: 1999, ppp: 22 },
   },
-  "5pack": {
-    id: "5pack",
-    label: "5-Pack",
-    credits: 5,
+  "6pack": {
+    id: "6pack",
+    label: "6 Interviews",
+    credits: 6,
     badge: "Best Value",
-    prices: { USD: 2400, INR: 109900, PPP: 1800 },
-    displayPrices: { usd: 24, inr: 1099, ppp: 18 },
+    prices: { USD: 8900, INR: 369900, PPP: 4000 },
+    displayPrices: { usd: 89, inr: 3699, ppp: 40 },
   },
 };
 
-export const PACK_IDS = Object.keys(CREDIT_PACKS) as (keyof typeof CREDIT_PACKS)[];
+export const PACK_IDS: CreditPackId[] = ["single", "3pack", "6pack"];
 
 const PPP_COUNTRIES = new Set([
   "BR", "MX", "CO", "AR", "CL", "PE",
@@ -139,4 +145,12 @@ export function getRegionForCountry(countryCode: string): {
     return { region: "PPP", currency: "USD", symbol: "$" };
   }
   return { region: "USD", currency: "USD", symbol: "$" };
+}
+
+export function getDisplayPricingKey(
+  region: PricingRegion
+): DisplayPricingRegion {
+  if (region === "INR") return "inr";
+  if (region === "PPP") return "ppp";
+  return "usd";
 }

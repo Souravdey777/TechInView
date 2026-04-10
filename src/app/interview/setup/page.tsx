@@ -27,6 +27,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useInterviewStore } from "@/stores/interview-store";
 import { useSupabase } from "@/hooks/useSupabase";
+import {
+  FREE_TRIAL_DURATION_MINUTES,
+  FULL_INTERVIEW_DURATION_MINUTES,
+} from "@/lib/constants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -46,7 +50,9 @@ type Category =
   | "sliding-window"
   | "trie";
 type Language = "python" | "javascript" | "java" | "cpp";
-type Duration = 20 | 30 | 45;
+type Duration =
+  | typeof FREE_TRIAL_DURATION_MINUTES
+  | typeof FULL_INTERVIEW_DURATION_MINUTES;
 type MicStatus = "idle" | "checking" | "granted" | "denied";
 type ProblemMode = "random" | "specific";
 
@@ -212,7 +218,7 @@ function InterviewSetupInner() {
     difficulty: "medium",
     category: "any",
     language: "python",
-    duration: 45,
+    duration: FULL_INTERVIEW_DURATION_MINUTES,
   });
   const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const [isCreating, setIsCreating] = useState(false);
@@ -235,7 +241,11 @@ function InterviewSetupInner() {
         const isFreeTrial = !(data.has_used_free_trial ?? false);
         setIsFreeTrialUser(isFreeTrial);
         if (isFreeTrial) {
-          setForm((f) => ({ ...f, difficulty: "easy", duration: 20 as Duration }));
+          setForm((f) => ({
+            ...f,
+            difficulty: "easy",
+            duration: FREE_TRIAL_DURATION_MINUTES as Duration,
+          }));
           setProblemMode("random");
         }
       }
@@ -461,8 +471,8 @@ function InterviewSetupInner() {
             <div>
               <p className="text-sm font-semibold text-brand-text">Free Trial Interview</p>
               <p className="text-xs text-brand-muted mt-1">
-                Your free trial includes a 20-minute session with easy problems and a basic score report.
-                Purchase credits to unlock all difficulties, 45-minute sessions, and detailed AI feedback.
+                Your free trial includes a {FREE_TRIAL_DURATION_MINUTES}-minute voice session with an easy problem and a basic score summary.
+                Buy an interview pack to unlock full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, all difficulties, and detailed AI feedback.
               </p>
             </div>
           </div>
@@ -476,7 +486,7 @@ function InterviewSetupInner() {
               <p className="text-sm font-semibold text-brand-text">No Credits Remaining</p>
               <p className="text-xs text-brand-muted mt-1">
                 You need interview credits to start a session.{" "}
-                <a href="/settings" className="text-brand-cyan hover:underline">Buy credits</a> to continue practicing.
+                <a href="/settings" className="text-brand-cyan hover:underline">Buy an interview pack</a> to continue practicing.
               </p>
             </div>
           </div>
@@ -767,7 +777,7 @@ function InterviewSetupInner() {
           )}
           {isFreeTrialUser && !isSpecificSelected && (
             <p className="mt-2 text-xs text-brand-amber">
-              Free trial is limited to easy problems. Buy credits to unlock medium and hard.
+              Free trial is limited to easy problems. Buy a pack to unlock medium and hard.
             </p>
           )}
         </SectionCard>
@@ -828,35 +838,23 @@ function InterviewSetupInner() {
               <div className="flex gap-3">
                 <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-brand-cyan px-4 py-3 text-sm font-semibold">
                   <Clock className="h-4 w-4" />
-                  <span>20 min</span>
+                  <span>{FREE_TRIAL_DURATION_MINUTES} min</span>
                 </div>
               </div>
               <p className="mt-3 text-xs text-brand-amber">
-                Free trial sessions are capped at 20 minutes. Buy credits for 30 or 45-minute sessions.
+                Free trial sessions are capped at {FREE_TRIAL_DURATION_MINUTES} minutes. Upgrade for full {FULL_INTERVIEW_DURATION_MINUTES}-minute interviews.
               </p>
             </>
           ) : (
             <>
               <div className="flex gap-3">
-                {([30, 45] as Duration[]).map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setForm((f) => ({ ...f, duration: d }))}
-                    className={cn(
-                      "flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold transition-all duration-150",
-                      form.duration === d
-                        ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan"
-                        : "border-brand-border text-brand-muted hover:border-brand-subtle hover:text-brand-text"
-                    )}
-                  >
-                    <Clock className="h-4 w-4" />
-                    <span>{d} min</span>
-                  </button>
-                ))}
+                <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-brand-cyan px-4 py-3 text-sm font-semibold">
+                  <Clock className="h-4 w-4" />
+                  <span>{FULL_INTERVIEW_DURATION_MINUTES} min</span>
+                </div>
               </div>
               <p className="mt-3 text-xs text-brand-muted">
-                45 minutes mirrors a real FAANG interview loop. Choose 30 min for a
-                focused practice round.
+                Each paid interview credit unlocks one full {FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.
               </p>
             </>
           )}

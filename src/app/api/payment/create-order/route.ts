@@ -25,15 +25,15 @@ export async function POST(req: NextRequest) {
       country_code?: string;
     };
 
-    const creditPack = CREDIT_PACKS[pack];
+    const creditPack = CREDIT_PACKS[pack as keyof typeof CREDIT_PACKS];
     if (!creditPack) {
       return NextResponse.json(
-        { success: false, error: "Invalid credit pack" },
+        { success: false, error: "Invalid interview pack" },
         { status: 400 }
       );
     }
 
-    const country = country_code ?? "US";
+    const country = country_code?.toUpperCase() ?? "US";
     const { region, currency } = getRegionForCountry(country);
     const amount = creditPack.prices[region];
 
