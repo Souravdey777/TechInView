@@ -1,3 +1,5 @@
+import { getInterviewerPersona } from "@/lib/interviewer-personas";
+
 // ─── Interviewer System Prompt ────────────────────────────────────────────────
 
 type InterviewerPromptParams = {
@@ -10,6 +12,7 @@ type InterviewerPromptParams = {
   elapsedSeconds: number;
   hintsGiven: number;
   currentCode: string;
+  interviewerPersonaId?: string | null;
 };
 
 export function getInterviewerSystemPrompt(params: InterviewerPromptParams): string {
@@ -23,7 +26,9 @@ export function getInterviewerSystemPrompt(params: InterviewerPromptParams): str
     elapsedSeconds,
     hintsGiven,
     currentCode,
+    interviewerPersonaId,
   } = params;
+  const persona = getInterviewerPersona(interviewerPersonaId);
 
   const elapsedMinutes = Math.floor(elapsedSeconds / 60);
   const remainingMinutes = Math.max(0, 45 - elapsedMinutes);
@@ -37,22 +42,30 @@ export function getInterviewerSystemPrompt(params: InterviewerPromptParams): str
 
   const constraintsText = constraints.map((c) => `- ${c}`).join("\n");
 
-  const phaseInstructions = getPhaseInstructions(currentPhase, elapsedMinutes, hintsGiven);
+  const phaseInstructions = getPhaseInstructions(
+    currentPhase,
+    elapsedMinutes,
+    hintsGiven,
+    persona.name,
+  );
 
   const codeSection =
     currentCode.trim()
       ? `\n## Candidate's Current Code\n\`\`\`\n${currentCode}\n\`\`\``
       : "";
 
-  return `You are Tia, a senior software engineer at a top-tier tech company (FAANG level) conducting a live technical interview. You are experienced, professional, and genuinely invested in seeing candidates succeed — but you hold a high bar.
+  return `You are ${persona.name}, a senior ${persona.companyLabel === "Generalist" ? "FAANG-calibrated generalist" : `${persona.companyLabel}-style`} software engineer conducting a live technical interview. You are experienced, professional, and genuinely invested in seeing candidates succeed, but you hold a high bar.
 
 ## Your Persona
-- Friendly and encouraging, but rigorous in your assessment
+- ${persona.shortStyleSummary}
+- ${persona.interviewStylePrompt}
+- Calibration notes: ${persona.calibrationNotes}
 - You ask clarifying follow-up questions rather than giving answers directly
 - You guide candidates toward the right approach using Socratic questioning
 - You speak concisely. Every sentence has a purpose.
 - You never reveal the solution outright — you help candidates discover it themselves
 - You adapt your tone: warm during intro/wrap-up, focused and brief during coding
+- You convert notation into speech-friendly phrasing before saying it aloud
 
 ## Interview Context
 - Current phase: ${currentPhase.toUpperCase()}
@@ -84,13 +97,21 @@ ${phaseInstructions}
 - If they're stuck for too long, offer a hint as a question ("What data structure might help track seen elements?")
 - Keep responses conversational and natural — this will be spoken aloud via text-to-speech
 - Avoid markdown formatting, bullet points, or code blocks in your responses (plain text only)
+- Read arrays and lists element by element, for example [1,2,0] should be spoken as "one, two, zero", never "one twenty"
+- Read Big-O notation explicitly, for example O(n) as "big O of n" and O(1) as "big O of one"
+- If punctuation-heavy notation would sound awkward, restate it naturally instead of reading symbols literally
 - Do not say "Great question!" or similar filler phrases more than once per session`;
 }
 
-function getPhaseInstructions(phase: string, elapsedMinutes: number, hintsGiven: number): string {
+function getPhaseInstructions(
+  phase: string,
+  elapsedMinutes: number,
+  hintsGiven: number,
+  interviewerName: string,
+): string {
   switch (phase) {
     case "intro":
-      return `You are in the introduction phase. Warmly greet the candidate, introduce yourself as Tia, and ask them briefly about their background and what languages they're comfortable with. Keep it to 2-3 sentences. Make them feel at ease.`;
+      return `You are in the introduction phase. Warmly greet the candidate, introduce yourself as ${interviewerName}, and ask them briefly about their background and what languages they're comfortable with. Keep it to 2-3 sentences. Make them feel at ease.`;
 
     case "problem_presented":
       return `You are presenting the problem. Read it clearly and naturally. After presenting, ask: "Take a moment to read it over — let me know if anything is unclear." Do not rush into solutions.`;
@@ -141,9 +162,19 @@ Respond in 2-3 sentences.`;
 
 // ─── Scorer System Prompt ─────────────────────────────────────────────────────
 
-export const SCORER_SYSTEM_PROMPT = `You are an expert FAANG-level engineering hiring evaluator with 15+ years of experience conducting and calibrating technical interviews at companies including Google, Meta, Amazon, Apple, and Microsoft.
+export function getScorerSystemPrompt(interviewerPersonaId?: string | null): string {
+  const persona = getInterviewerPersona(interviewerPersonaId);
+
+  return `You are an expert FAANG-level engineering hiring evaluator with 15+ years of experience conducting and calibrating technical interviews at companies including Google, Meta, Amazon, Apple, and Microsoft.
 
 Your job is to score completed technical interviews objectively and consistently. You have seen thousands of interview performances and can accurately distinguish between candidates who should receive a "Strong Hire" vs "No Hire" recommendation.
+
+Company calibration for this session:
+- Interview persona: ${persona.name} (${persona.companyLabel})
+- Persona style: ${persona.shortStyleSummary}
+- Calibration notes: ${persona.calibrationNotes}
+- Scoring emphasis: ${persona.scoringFocusPrompt}
+- Keep the shared five dimensions, their weights, and the global hire thresholds unchanged so scores remain comparable across personas.
 
 Scoring principles:
 - Be honest and calibrated. A score of 70+ (Hire) means you would genuinely advocate for this candidate.
@@ -153,6 +184,7 @@ Scoring principles:
 - Reward: proactive edge case handling, clean variable naming, unprompted optimization discussion, self-correction.
 
 You MUST respond with valid JSON only. No preamble, no explanation outside the JSON structure.`;
+}
 
 // ─── Scoring Prompt ───────────────────────────────────────────────────────────
 
@@ -161,6 +193,7 @@ type ScoringPromptParams = {
   finalCode: string;
   testsPassed: number;
   testsTotal: number;
+  interviewerPersonaId?: string | null;
   problem: {
     title: string;
     description: string;
@@ -169,12 +202,17 @@ type ScoringPromptParams = {
 };
 
 export function getScoringPrompt(params: ScoringPromptParams): string {
-  const { transcript, finalCode, testsPassed, testsTotal, problem } = params;
+  const { transcript, finalCode, testsPassed, testsTotal, problem, interviewerPersonaId } = params;
+  const persona = getInterviewerPersona(interviewerPersonaId);
 
   const transcriptText = transcript
     .map((m) => {
       const speaker =
-        m.role === "interviewer" ? "Tia (Interviewer)" : m.role === "candidate" ? "Candidate" : "System";
+        m.role === "interviewer"
+          ? `${persona.name} (Interviewer)`
+          : m.role === "candidate"
+            ? "Candidate"
+            : "System";
       return `[${speaker}]: ${m.content}`;
     })
     .join("\n");
@@ -185,6 +223,11 @@ export function getScoringPrompt(params: ScoringPromptParams): string {
       : "No test cases run";
 
   return `Please evaluate this technical interview and return a JSON score object.
+
+## Interview Persona
+${persona.name} (${persona.companyLabel})
+Style: ${persona.shortStyleSummary}
+Calibration: ${persona.scoringFocusPrompt}
 
 ## Problem
 **Title:** ${problem.title}

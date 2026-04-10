@@ -7,10 +7,11 @@ type BuildInterviewContextParams = {
   messages: ContextMessage[];
   currentCode: string;
   turnCount: number;
+  interviewerName?: string;
 };
 
 export function buildInterviewContext(params: BuildInterviewContextParams): string {
-  const { messages, currentCode, turnCount } = params;
+  const { messages, currentCode, turnCount, interviewerName = "Interviewer" } = params;
 
   // Take last 10 messages to manage context window
   const recentMessages = messages.slice(-10);
@@ -20,7 +21,7 @@ export function buildInterviewContext(params: BuildInterviewContextParams): stri
   for (const msg of recentMessages) {
     const speaker =
       msg.role === "interviewer"
-        ? "Tia"
+        ? interviewerName
         : msg.role === "candidate"
           ? "Candidate"
           : "System";

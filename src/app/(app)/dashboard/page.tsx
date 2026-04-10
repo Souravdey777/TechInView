@@ -3,9 +3,50 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { InterviewHistory } from "@/components/dashboard/InterviewHistory";
+import { getDefaultInterviewerPersona, getInterviewerPersona, resolveInterviewerPersona } from "@/lib/interviewer-personas";
 import { ArrowRight, Mic, Zap, Braces, Network, MonitorSmartphone, Lock, CreditCard, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+async function getDashboardInterviews(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+) {
+  const withPersona = await supabase
+    .from("interviews")
+    .select("id, status, language, interviewer_persona, overall_score, duration_seconds, started_at, completed_at, problem_id, hire_recommendation, problems(title, difficulty, category)")
+    .eq("user_id", userId)
+    .order("started_at", { ascending: false })
+    .limit(20);
+
+  if (!withPersona.error) {
+    return withPersona.data ?? [];
+  }
+
+  const isMissingPersonaColumn =
+    withPersona.error.code === "42703" ||
+    withPersona.error.message.toLowerCase().includes("interviewer_persona");
+
+  if (!isMissingPersonaColumn) {
+    throw withPersona.error;
+  }
+
+  const legacy = await supabase
+    .from("interviews")
+    .select("id, status, language, overall_score, duration_seconds, started_at, completed_at, problem_id, hire_recommendation, problems(title, difficulty, category)")
+    .eq("user_id", userId)
+    .order("started_at", { ascending: false })
+    .limit(20);
+
+  if (legacy.error) {
+    throw legacy.error;
+  }
+
+  return (legacy.data ?? []).map((interview) => ({
+    ...interview,
+    interviewer_persona: null,
+  }));
+}
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -21,15 +62,10 @@ export default async function DashboardPage() {
   const [{ data: profile }, { data: interviews }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("display_name, interviews_completed, interview_credits, has_used_free_trial")
+      .select("display_name, interviews_completed, interview_credits, has_used_free_trial, target_company")
       .eq("id", user.id)
       .single(),
-    supabase
-      .from("interviews")
-      .select("id, status, language, overall_score, duration_seconds, started_at, completed_at, problem_id, hire_recommendation, problems(title, difficulty, category)")
-      .eq("user_id", user.id)
-      .order("started_at", { ascending: false })
-      .limit(20),
+    getDashboardInterviews(supabase, user.id).then((data) => ({ data })),
   ]);
 
   const displayName =
@@ -37,6 +73,9 @@ export default async function DashboardPage() {
   const credits = profile?.interview_credits ?? 0;
   const hasCredits = credits > 0;
   const isFreeTrialUser = hasCredits && !(profile?.has_used_free_trial ?? false);
+  const defaultInterviewer = getInterviewerPersona(
+    getDefaultInterviewerPersona(profile?.target_company ?? null, isFreeTrialUser)
+  );
 
   const completedInterviews = (interviews || []).filter(
     (i) => i.status === "completed"
@@ -99,6 +138,7 @@ export default async function DashboardPage() {
       score: i.overall_score as number | null,
       date: new Date(i.started_at).toLocaleDateString(),
       duration: i.duration_seconds as number | null,
+      interviewerPersona: resolveInterviewerPersona(i.interviewer_persona),
       status: i.status as "completed" | "abandoned" | "in_progress",
     };
   });
@@ -247,9 +287,12 @@ export default async function DashboardPage() {
                 Start a New Mock Interview
               </h2>
               <p className="text-brand-muted text-sm mb-5 max-w-md">
-                Practice with an AI interviewer named Tia. Solve DSA problems
-                with voice interaction, live code execution, and FAANG-calibrated
-                scoring.
+                Practice with {defaultInterviewer.name}, your{" "}
+                {defaultInterviewer.companyLabel === "Generalist"
+                  ? "generalist AI interviewer"
+                  : `${defaultInterviewer.companyLabel}-style AI interviewer`}.
+                Solve DSA problems with voice interaction, live code execution, and
+                FAANG-calibrated scoring.
               </p>
               <Link
                 href="/interview/setup"
@@ -280,8 +323,9 @@ export default async function DashboardPage() {
                 You&apos;re out of interview credits
               </h2>
               <p className="text-brand-muted text-sm mb-5 max-w-md">
-                Choose an interview pack to continue practicing with Tia. Keep
-                sharpening your skills and land your dream offer.
+                Choose an interview pack to continue practicing with Tia and the
+                company-specific interviewer personas. Keep sharpening your skills
+                and land your dream offer.
               </p>
               <Link
                 href="/settings"

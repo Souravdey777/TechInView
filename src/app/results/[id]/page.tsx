@@ -16,6 +16,7 @@ import { SCORING_DIMENSIONS } from "@/lib/constants";
 import type { HireRecommendation } from "@/lib/constants";
 import { useInterviewStore } from "@/stores/interview-store";
 import { useSupabase } from "@/hooks/useSupabase";
+import { getInterviewerPersona, resolveInterviewerPersona } from "@/lib/interviewer-personas";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -84,7 +85,13 @@ function NoResultState() {
 
 // ─── Scoring unavailable state ────────────────────────────────────────────────
 
-function ScoringUnavailableCard({ reason }: { reason: "in_progress" | "failed" }) {
+function ScoringUnavailableCard({
+  reason,
+  interviewerName,
+}: {
+  reason: "in_progress" | "failed";
+  interviewerName: string;
+}) {
   return (
     <div className="rounded-xl border border-brand-border bg-brand-card p-8 flex flex-col items-center gap-4 text-center">
       {reason === "in_progress" ? (
@@ -93,7 +100,7 @@ function ScoringUnavailableCard({ reason }: { reason: "in_progress" | "failed" }
           <div>
             <h3 className="text-sm font-semibold text-brand-text">Scoring In Progress</h3>
             <p className="text-xs text-brand-muted mt-1">
-              Tia is still evaluating your performance. Please check back shortly.
+              {interviewerName} is still evaluating your performance. Please check back shortly.
             </p>
           </div>
         </>
@@ -168,6 +175,7 @@ export default function ResultsPage() {
 
             setDbResult({
               interviewId: interview.id,
+              interviewerPersona: resolveInterviewerPersona(interview.interviewer_persona),
               finalCode: interview.final_code ?? "",
               language: interview.language ?? "python",
               transcript: msgs.map((m) => ({
@@ -243,6 +251,11 @@ export default function ResultsPage() {
     return (
       <InterviewReviewGate
         interviewId={pageId}
+        interviewerName={getInterviewerPersona(
+          storeMatchesPage
+            ? storeResult?.interviewerPersona
+            : dbResult?.interviewerPersona
+        ).name}
         onComplete={() => setFeedbackCompleted(true)}
       />
     );
@@ -266,6 +279,9 @@ export default function ResultsPage() {
   const problemTitle = result.problemTitle ?? storeProblem?.title ?? "Interview";
   const problemDifficulty = result.problemDifficulty ?? storeProblem?.difficulty ?? setupConfig?.difficulty ?? "medium";
   const displayLanguage = formatLanguage(codeLanguage);
+  const interviewer = getInterviewerPersona(
+    result.interviewerPersona ?? setupConfig?.interviewerPersona
+  );
 
   // Radar + feedback card data (only built when scores exist)
   const radarData = hasScores && scores
@@ -331,7 +347,7 @@ export default function ResultsPage() {
             Back to Dashboard
           </Link>
           <span className="text-xs text-brand-muted bg-brand-surface border border-brand-border px-3 py-1 rounded-full">
-            {problemTitle} &middot; {capitalize(problemDifficulty)} &middot; {displayLanguage}
+            {interviewer.name} &middot; {problemTitle} &middot; {capitalize(problemDifficulty)} &middot; {displayLanguage}
           </span>
         </div>
 
@@ -358,7 +374,7 @@ export default function ResultsPage() {
           </section>
         ) : (
           <section className="mb-6 r-anim-3">
-            <ScoringUnavailableCard reason="failed" />
+            <ScoringUnavailableCard reason="failed" interviewerName={interviewer.name} />
           </section>
         )}
 
@@ -470,7 +486,7 @@ export default function ResultsPage() {
 
         {/* ── Section 5: Transcript (always shown when messages exist) ── */}
         <section className="mb-10 r-anim-7">
-          <TranscriptReview messages={transcript} />
+          <TranscriptReview messages={transcript} interviewerName={interviewer.name} />
         </section>
 
         {/* ── CTA: Practice Again ── */}

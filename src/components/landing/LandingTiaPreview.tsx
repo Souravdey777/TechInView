@@ -4,8 +4,10 @@ import { useCallback, useRef, useState } from "react";
 import { Pause, Play, Volume2 } from "lucide-react";
 import { VoiceVisualizer } from "@/components/interview/VoiceVisualizer";
 import { cn } from "@/lib/utils";
+import { getInterviewerPersona } from "@/lib/interviewer-personas";
 
 const TIA_SAMPLE_AUDIO_PATH = "/sounds/tia-aura-asteria-sample.wav";
+const DEFAULT_PERSONA = getInterviewerPersona("tia");
 
 export function LandingTiaPreview() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -41,9 +43,9 @@ export function LandingTiaPreview() {
 
       <div className="w-full text-center">
         <p className="text-sm font-semibold text-brand-text">
-          Tia{" "}
+          {DEFAULT_PERSONA.name}{" "}
           <span className="text-[10px] font-normal text-brand-muted">
-            (Default)
+            ({DEFAULT_PERSONA.companyLabel})
           </span>
         </p>
         <p className="text-[11px] text-brand-muted">AI Interviewer</p>
@@ -84,7 +86,11 @@ export function LandingTiaPreview() {
               ? "border-brand-green/40 bg-brand-green/10 text-brand-green hover:bg-brand-green/15"
               : "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/15")
         )}
-        aria-label={playing ? "Pause Tia voice sample" : "Play Tia voice sample"}
+        aria-label={
+          playing
+            ? `Pause ${DEFAULT_PERSONA.name} voice sample`
+            : `Play ${DEFAULT_PERSONA.name} voice sample`
+        }
       >
         {playing ? (
           <Pause className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -92,7 +98,7 @@ export function LandingTiaPreview() {
           <Play className="h-3.5 w-3.5 shrink-0 fill-current" aria-hidden />
         )}
         <Volume2 className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
-        {playing ? "Pause" : "Hear Tia"}
+        {playing ? "Pause" : `Hear ${DEFAULT_PERSONA.name}`}
       </button>
     </div>
   );

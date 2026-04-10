@@ -6,6 +6,7 @@ import type {
   ProblemCategory,
   ScoringDimension,
 } from "@/lib/constants";
+import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 
 // ─── Profile ─────────────────────────────────────────────────────────────────
 
@@ -89,6 +90,7 @@ export type Interview = {
   user_id: string;
   problem_id: string;
   status: InterviewStatus;
+  interviewer_persona: InterviewerPersonaId;
   language: SupportedLanguage;
   duration_seconds: number | null;
   max_duration_seconds: number;

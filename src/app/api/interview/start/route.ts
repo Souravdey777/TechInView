@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { captureServerEvent } from "@/lib/posthog/server";
+import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
 import {
   FREE_TRIAL_DURATION_SECONDS,
   FULL_INTERVIEW_DURATION_SECONDS,
@@ -12,6 +13,7 @@ type StartInterviewBody = {
   language: string;
   maxDurationSeconds?: number;
   problemSlug?: string;
+  interviewerPersona?: string;
 };
 
 export async function POST(req: NextRequest) {
@@ -42,6 +44,7 @@ export async function POST(req: NextRequest) {
     let maxDuration = FULL_INTERVIEW_DURATION_SECONDS;
     let difficulty = body.difficulty as "easy" | "medium" | "hard" | undefined;
     const category = body.category;
+    let targetCompany: string | null = null;
 
     if (user) {
       const profile = await getProfile(user.id);
@@ -56,6 +59,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      targetCompany = profile.target_company ?? null;
       isFreeInterview = !profile.has_used_free_trial;
 
       if (isFreeInterview) {
@@ -63,6 +67,11 @@ export async function POST(req: NextRequest) {
         maxDuration = FREE_TRIAL_DURATION_SECONDS;
       }
     }
+
+    const interviewerPersona = resolveInterviewerPersona(body.interviewerPersona, {
+      isFreeTrial: isFreeInterview,
+      targetCompany,
+    });
 
     let problem;
 
@@ -86,6 +95,7 @@ export async function POST(req: NextRequest) {
       const interview = await createInterview(
         user.id,
         problem.id,
+        interviewerPersona,
         language,
         maxDuration,
         isFreeInterview
@@ -106,6 +116,7 @@ export async function POST(req: NextRequest) {
         difficulty: problem.difficulty,
         category: problem.category,
         language,
+        interviewer_persona: interviewerPersona,
         is_free_trial: isFreeInterview,
         problem_title: problem.title,
         interview_id: interviewId,
@@ -117,6 +128,7 @@ export async function POST(req: NextRequest) {
       data: {
         interviewId,
         isFreeInterview,
+        interviewerPersona,
         problem: {
           id: problem.id,
           title: problem.title,

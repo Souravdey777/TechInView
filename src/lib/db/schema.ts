@@ -41,6 +41,15 @@ export const hireRecommendationEnum = pgEnum("hire_recommendation", [
   "no_hire",
 ]);
 
+export const interviewerPersonaEnum = pgEnum("interviewer_persona", [
+  "tia",
+  "google",
+  "meta",
+  "amazon",
+  "apple",
+  "netflix",
+]);
+
 export const messageRoleEnum = pgEnum("message_role", [
   "interviewer",
   "candidate",
@@ -103,6 +112,9 @@ export const interviews = pgTable("interviews", {
     .references(() => problems.id, { onDelete: "restrict" })
     .notNull(),
   status: interviewStatusEnum("status").default("in_progress").notNull(),
+  interviewer_persona: interviewerPersonaEnum("interviewer_persona")
+    .default("tia")
+    .notNull(),
   language: text("language").notNull(),
   duration_seconds: integer("duration_seconds"),
   max_duration_seconds: integer("max_duration_seconds").default(2700).notNull(),

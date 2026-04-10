@@ -4,6 +4,7 @@ import Link from "next/link";
 import { cn, formatDuration, getScoreColor } from "@/lib/utils";
 import { DIFFICULTY_CONFIG } from "@/lib/constants";
 import type { DifficultyLevel } from "@/lib/constants";
+import { getInterviewerPersona, type InterviewerPersonaId } from "@/lib/interviewer-personas";
 import { Clock, Calendar, ArrowRight, Mic } from "lucide-react";
 
 type InterviewSummary = {
@@ -13,6 +14,7 @@ type InterviewSummary = {
   score: number | null;
   date: string;
   duration: number | null;
+  interviewerPersona: InterviewerPersonaId;
   status: "completed" | "abandoned" | "in_progress";
 };
 
@@ -79,6 +81,7 @@ export function InterviewHistory({ interviews }: InterviewHistoryProps) {
     <div className="space-y-3">
       {interviews.map((interview) => {
         const diffConfig = DIFFICULTY_CONFIG[interview.difficulty];
+        const persona = getInterviewerPersona(interview.interviewerPersona);
         return (
           <Link
             key={interview.id}
@@ -91,6 +94,9 @@ export function InterviewHistory({ interviews }: InterviewHistoryProps) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-brand-text font-medium text-sm truncate">
                     {interview.problemTitle}
+                  </span>
+                  <span className="shrink-0 inline-flex items-center rounded-full border border-brand-cyan/20 bg-brand-cyan/10 px-2 py-0.5 text-[11px] font-medium text-brand-cyan">
+                    {persona.name}
                   </span>
                   <span
                     className={cn(

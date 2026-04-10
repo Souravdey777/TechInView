@@ -4,6 +4,8 @@ import * as schema from "./schema";
 import { eq, and, ilike, inArray, sql, desc, asc } from "drizzle-orm";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
+import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
+import { DEFAULT_INTERVIEWER_PERSONA } from "@/lib/interviewer-personas";
 
 import type { Profile, Problem, Interview, Message, Progress, Payment, InterviewFeedback } from "./schema";
 
@@ -21,6 +23,19 @@ function getDb() {
     _db = drizzle(client, { schema });
   }
   return _db;
+}
+
+function isMissingInterviewerPersonaColumnError(error: unknown): boolean {
+  const err = error as { code?: string; message?: string; detail?: string };
+  const haystack = `${err?.message ?? ""} ${err?.detail ?? ""}`.toLowerCase();
+  return err?.code === "42703" && haystack.includes("interviewer_persona");
+}
+
+function withDefaultInterviewerPersona<T extends Record<string, unknown>>(row: T): Interview {
+  return {
+    ...row,
+    interviewer_persona: DEFAULT_INTERVIEWER_PERSONA,
+  } as unknown as Interview;
 }
 
 // ─── Profile Queries ──────────────────────────────────────────────────────────
@@ -178,35 +193,109 @@ export async function getRelatedProblems(
 export async function createInterview(
   userId: string,
   problemId: string,
+  interviewerPersona: InterviewerPersonaId,
   language: string,
   maxDuration = 2700,
   isFreeTrial = false
 ): Promise<Interview> {
   const db = getDb();
-  const results = await db
-    .insert(schema.interviews)
-    .values({
-      user_id: userId,
-      problem_id: problemId,
-      language,
-      max_duration_seconds: maxDuration,
-      is_free_trial: isFreeTrial,
-      status: "in_progress",
-    })
-    .returning();
-  return results[0];
+  try {
+    const results = await db
+      .insert(schema.interviews)
+      .values({
+        user_id: userId,
+        problem_id: problemId,
+        interviewer_persona: interviewerPersona,
+        language,
+        max_duration_seconds: maxDuration,
+        is_free_trial: isFreeTrial,
+        status: "in_progress",
+      })
+      .returning();
+    return results[0];
+  } catch (error) {
+    if (!isMissingInterviewerPersonaColumnError(error)) {
+      throw error;
+    }
+
+    const results = await db
+      .insert(schema.interviews)
+      .values({
+        user_id: userId,
+        problem_id: problemId,
+        language,
+        max_duration_seconds: maxDuration,
+        is_free_trial: isFreeTrial,
+        status: "in_progress",
+      })
+      .returning({
+        id: schema.interviews.id,
+        user_id: schema.interviews.user_id,
+        problem_id: schema.interviews.problem_id,
+        status: schema.interviews.status,
+        language: schema.interviews.language,
+        duration_seconds: schema.interviews.duration_seconds,
+        max_duration_seconds: schema.interviews.max_duration_seconds,
+        final_code: schema.interviews.final_code,
+        code_passed_tests: schema.interviews.code_passed_tests,
+        tests_passed: schema.interviews.tests_passed,
+        tests_total: schema.interviews.tests_total,
+        overall_score: schema.interviews.overall_score,
+        scores: schema.interviews.scores,
+        feedback_summary: schema.interviews.feedback_summary,
+        hire_recommendation: schema.interviews.hire_recommendation,
+        is_free_trial: schema.interviews.is_free_trial,
+        started_at: schema.interviews.started_at,
+        completed_at: schema.interviews.completed_at,
+      });
+
+    return withDefaultInterviewerPersona(results[0]);
+  }
 }
 
 export async function getInterview(
   interviewId: string
 ): Promise<Interview | undefined> {
   const db = getDb();
-  const results = await db
-    .select()
-    .from(schema.interviews)
-    .where(eq(schema.interviews.id, interviewId))
-    .limit(1);
-  return results[0];
+  try {
+    const results = await db
+      .select()
+      .from(schema.interviews)
+      .where(eq(schema.interviews.id, interviewId))
+      .limit(1);
+    return results[0];
+  } catch (error) {
+    if (!isMissingInterviewerPersonaColumnError(error)) {
+      throw error;
+    }
+
+    const results = await db
+      .select({
+        id: schema.interviews.id,
+        user_id: schema.interviews.user_id,
+        problem_id: schema.interviews.problem_id,
+        status: schema.interviews.status,
+        language: schema.interviews.language,
+        duration_seconds: schema.interviews.duration_seconds,
+        max_duration_seconds: schema.interviews.max_duration_seconds,
+        final_code: schema.interviews.final_code,
+        code_passed_tests: schema.interviews.code_passed_tests,
+        tests_passed: schema.interviews.tests_passed,
+        tests_total: schema.interviews.tests_total,
+        overall_score: schema.interviews.overall_score,
+        scores: schema.interviews.scores,
+        feedback_summary: schema.interviews.feedback_summary,
+        hire_recommendation: schema.interviews.hire_recommendation,
+        is_free_trial: schema.interviews.is_free_trial,
+        started_at: schema.interviews.started_at,
+        completed_at: schema.interviews.completed_at,
+      })
+      .from(schema.interviews)
+      .where(eq(schema.interviews.id, interviewId))
+      .limit(1);
+
+    return results[0] ? withDefaultInterviewerPersona(results[0]) : undefined;
+  }
 }
 
 export async function updateInterview(
@@ -214,12 +303,46 @@ export async function updateInterview(
   data: Partial<Omit<Interview, "id" | "user_id" | "problem_id" | "started_at">>
 ): Promise<Interview | undefined> {
   const db = getDb();
-  const results = await db
-    .update(schema.interviews)
-    .set(data)
-    .where(eq(schema.interviews.id, interviewId))
-    .returning();
-  return results[0];
+  try {
+    const results = await db
+      .update(schema.interviews)
+      .set(data)
+      .where(eq(schema.interviews.id, interviewId))
+      .returning();
+    return results[0];
+  } catch (error) {
+    if (!isMissingInterviewerPersonaColumnError(error)) {
+      throw error;
+    }
+
+    const { interviewer_persona: _ignored, ...legacyData } = data;
+    const results = await db
+      .update(schema.interviews)
+      .set(legacyData)
+      .where(eq(schema.interviews.id, interviewId))
+      .returning({
+        id: schema.interviews.id,
+        user_id: schema.interviews.user_id,
+        problem_id: schema.interviews.problem_id,
+        status: schema.interviews.status,
+        language: schema.interviews.language,
+        duration_seconds: schema.interviews.duration_seconds,
+        max_duration_seconds: schema.interviews.max_duration_seconds,
+        final_code: schema.interviews.final_code,
+        code_passed_tests: schema.interviews.code_passed_tests,
+        tests_passed: schema.interviews.tests_passed,
+        tests_total: schema.interviews.tests_total,
+        overall_score: schema.interviews.overall_score,
+        scores: schema.interviews.scores,
+        feedback_summary: schema.interviews.feedback_summary,
+        hire_recommendation: schema.interviews.hire_recommendation,
+        is_free_trial: schema.interviews.is_free_trial,
+        started_at: schema.interviews.started_at,
+        completed_at: schema.interviews.completed_at,
+      });
+
+    return results[0] ? withDefaultInterviewerPersona(results[0]) : undefined;
+  }
 }
 
 export async function getUserInterviews(
@@ -227,12 +350,46 @@ export async function getUserInterviews(
   limit = 20
 ): Promise<Interview[]> {
   const db = getDb();
-  return db
-    .select()
-    .from(schema.interviews)
-    .where(eq(schema.interviews.user_id, userId))
-    .orderBy(desc(schema.interviews.started_at))
-    .limit(limit);
+  try {
+    return db
+      .select()
+      .from(schema.interviews)
+      .where(eq(schema.interviews.user_id, userId))
+      .orderBy(desc(schema.interviews.started_at))
+      .limit(limit);
+  } catch (error) {
+    if (!isMissingInterviewerPersonaColumnError(error)) {
+      throw error;
+    }
+
+    const rows = await db
+      .select({
+        id: schema.interviews.id,
+        user_id: schema.interviews.user_id,
+        problem_id: schema.interviews.problem_id,
+        status: schema.interviews.status,
+        language: schema.interviews.language,
+        duration_seconds: schema.interviews.duration_seconds,
+        max_duration_seconds: schema.interviews.max_duration_seconds,
+        final_code: schema.interviews.final_code,
+        code_passed_tests: schema.interviews.code_passed_tests,
+        tests_passed: schema.interviews.tests_passed,
+        tests_total: schema.interviews.tests_total,
+        overall_score: schema.interviews.overall_score,
+        scores: schema.interviews.scores,
+        feedback_summary: schema.interviews.feedback_summary,
+        hire_recommendation: schema.interviews.hire_recommendation,
+        is_free_trial: schema.interviews.is_free_trial,
+        started_at: schema.interviews.started_at,
+        completed_at: schema.interviews.completed_at,
+      })
+      .from(schema.interviews)
+      .where(eq(schema.interviews.user_id, userId))
+      .orderBy(desc(schema.interviews.started_at))
+      .limit(limit);
+
+    return rows.map((row) => withDefaultInterviewerPersona(row));
+  }
 }
 
 // ─── Message Queries ──────────────────────────────────────────────────────────

@@ -6,10 +6,9 @@ import { cn } from "@/lib/utils";
 
 type RatingKey = "realism" | "ai_quality" | "problem_fit" | "scoring_accuracy" | "overall";
 
-type Ratings = Record<RatingKey, number> & { nps: number };
-
 type InterviewReviewGateProps = {
   interviewId: string;
+  interviewerName?: string;
   onComplete: () => void;
 };
 
@@ -24,7 +23,7 @@ const RATING_QUESTIONS: { key: RatingKey; label: string; description: string }[]
   {
     key: "ai_quality",
     label: "AI Interviewer Quality",
-    description: "How was Tia at asking questions, giving hints, and guiding the session?",
+    description: "How was the AI interviewer at asking questions, giving hints, and guiding the session?",
   },
   {
     key: "problem_fit",
@@ -126,6 +125,7 @@ function NpsRating({
 
 export function InterviewReviewGate({
   interviewId,
+  interviewerName = "your AI interviewer",
   onComplete,
 }: InterviewReviewGateProps) {
   const [ratings, setRatings] = useState<Record<RatingKey, number>>({
@@ -230,7 +230,11 @@ export function InterviewReviewGate({
                 <h3 className="text-sm font-semibold text-brand-text">
                   {q.label}
                 </h3>
-                <p className="text-xs text-brand-muted mt-0.5">{q.description}</p>
+                <p className="text-xs text-brand-muted mt-0.5">
+                  {q.key === "ai_quality"
+                    ? `How was ${interviewerName} at asking questions, giving hints, and guiding the session?`
+                    : q.description}
+                </p>
               </div>
               <StarRating
                 value={ratings[q.key]}

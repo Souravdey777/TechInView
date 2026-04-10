@@ -27,6 +27,7 @@ import {
   parseInterviewPhase,
 } from "@/lib/interview-phases";
 import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
+import { getInterviewerPersona } from "@/lib/interviewer-personas";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -87,6 +88,10 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   const initialLanguage = (storeConfig?.language ?? "python") as SupportedLanguage;
   const maxDuration = storeConfig?.maxDurationSeconds ?? 45 * 60;
+  const interviewer = useMemo(
+    () => getInterviewerPersona(storeConfig?.interviewerPersona),
+    [storeConfig?.interviewerPersona],
+  );
 
   // ── Conversation state ──────────────────────────────────────────────────────
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -239,11 +244,22 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         currentPhase,
         hasCandidateCode,
         Math.round(maxDuration / 60),
+        interviewer.id,
       ),
+      voiceModel: interviewer.voiceModel,
+      greeting: agentContextMessages.length === 0 ? interviewer.greeting : undefined,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
     }),
-    [activeProblem, currentPhase, hasCandidateCode, maxDuration, agentFunctions, agentContextMessages],
+    [
+      activeProblem,
+      currentPhase,
+      hasCandidateCode,
+      maxDuration,
+      interviewer,
+      agentFunctions,
+      agentContextMessages,
+    ],
   );
 
   const applyPhaseFromAgent = useCallback(
@@ -348,7 +364,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         // Trigger the opening turn only for brand-new sessions. Resumes/reconnects
         // already carry transcript history via agent context.
         agentInjectRef.current(
-          "The interview is starting. Please introduce yourself and the problem.",
+          "The candidate is ready. Continue naturally from your greeting, then introduce the problem and start the interview.",
         );
       }
     }, []),
@@ -529,6 +545,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           interviewId,
+          interviewerPersona: interviewer.id,
           finalCode: code,
           language,
           transcript,
@@ -567,6 +584,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
     completeInterviewStore({
       interviewId,
+      interviewerPersona: interviewer.id,
       finalCode: code,
       language,
       transcript,
@@ -584,7 +602,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     });
 
     router.push(`/results/${interviewId}`);
-  }, [interviewId, code, language, router, testResults, completeInterviewStore, agent]);
+  }, [interviewId, code, language, router, testResults, completeInterviewStore, agent, interviewer.id]);
 
   // Keep the ref in sync with the latest callback
   useEffect(() => { handleEndInterviewRef.current = handleEndInterview; }, [handleEndInterview]);
@@ -776,7 +794,9 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           <VoiceVisualizer state="thinking" className="h-36 w-36" />
 
           <div style={{ animation: "scoring-fade-in 0.6s ease-out 0.2s both" }}>
-            <h1 className="text-2xl font-bold text-brand-text">Tia is reviewing your performance</h1>
+            <h1 className="text-2xl font-bold text-brand-text">
+              {interviewer.name} is reviewing your performance
+            </h1>
             <p className="text-brand-muted text-sm mt-2 leading-relaxed">Evaluating problem solving, code quality, communication, technical knowledge, and testing.</p>
           </div>
           <div className="w-full space-y-2.5" style={{ animation: "scoring-fade-in 0.6s ease-out 0.5s both" }}>
@@ -816,7 +836,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 <>Your session is still active. You have approximately{" "}
                 <span className="text-brand-text font-medium">{Math.ceil(timeLeft / 60)} minute{Math.ceil(timeLeft / 60) !== 1 ? "s" : ""}</span> remaining.</>
               ) : (
-                <>Tia, your AI interviewer, will introduce the problem and guide you through a{" "}
+                <>{interviewer.name}, your {interviewer.companyLabel === "Generalist" ? "AI interviewer" : `${interviewer.companyLabel}-style AI interviewer`}, will introduce the problem and guide you through a{" "}
                 <span className="text-brand-text font-medium">{Math.round(maxDuration / 60)}-minute</span> mock interview.</>
               )}
             </p>
@@ -905,6 +925,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             <VoicePanel
               voiceState={voiceState}
               currentPhase={currentPhase}
+              interviewerName={interviewer.name}
               isMicEnabled={isMicEnabled}
               errorMessage={voiceError}
               onToggleMic={handleToggleMic}
@@ -935,7 +956,11 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 value="transcript"
                 className="flex-1 overflow-y-auto mt-2"
               >
-                <TranscriptPanel messages={chatMessages} isThinking={voiceState === "thinking"} />
+                <TranscriptPanel
+                  messages={chatMessages}
+                  interviewerName={interviewer.name}
+                  isThinking={voiceState === "thinking"}
+                />
               </TabsContent>
             </Tabs>
           </div>
@@ -993,8 +1018,17 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
 // ─── Transcript panel ─────────────────────────────────────────────────────────
 
-function TranscriptPanel({ messages, isThinking }: { messages: ChatMessage[]; isThinking: boolean }) {
+function TranscriptPanel({
+  messages,
+  interviewerName,
+  isThinking,
+}: {
+  messages: ChatMessage[];
+  interviewerName: string;
+  isThinking: boolean;
+}) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const interviewerInitial = interviewerName.charAt(0).toUpperCase() || "A";
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1003,7 +1037,7 @@ function TranscriptPanel({ messages, isThinking }: { messages: ChatMessage[]; is
   if (messages.length === 0 && !isThinking) {
     return (
       <p className="text-center text-[10px] text-brand-muted pt-8">
-        Tia will start the conversation shortly...
+        {interviewerName} will start the conversation shortly...
       </p>
     );
   }
@@ -1026,7 +1060,7 @@ function TranscriptPanel({ messages, isThinking }: { messages: ChatMessage[]; is
                 : "bg-brand-green/20 text-brand-green"
             )}
           >
-            {msg.role === "interviewer" ? "A" : "Y"}
+            {msg.role === "interviewer" ? interviewerInitial : "Y"}
           </div>
           <div
             className={cn(
@@ -1048,7 +1082,7 @@ function TranscriptPanel({ messages, isThinking }: { messages: ChatMessage[]; is
       {isThinking && (
         <div className="flex gap-2">
           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold bg-brand-cyan/20 text-brand-cyan">
-            A
+            {interviewerInitial}
           </div>
           <div className="rounded-xl rounded-tl-none bg-brand-card border border-brand-border px-3 py-2">
             <div className="flex gap-1">

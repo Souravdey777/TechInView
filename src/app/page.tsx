@@ -20,6 +20,7 @@ import { LandingTiaPreview } from "@/components/landing/LandingTiaPreview";
 import { MarketingFooter } from "@/components/landing/MarketingFooter";
 import { Pricing } from "@/components/landing/Pricing";
 import { getRegionForCountry } from "@/lib/constants";
+import { INTERVIEWER_PERSONAS, getInterviewerPersona } from "@/lib/interviewer-personas";
 
 type LandingPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -37,6 +38,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
   const params = await searchParams;
   const ref = typeof params.ref === "string" ? params.ref : undefined;
   const signupHref = ref ? `/signup?ref=${ref}` : "/login";
+  const defaultPersona = getInterviewerPersona("tia");
 
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text overflow-x-hidden">
@@ -76,8 +78,8 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
 
           <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto mb-10 animate-fade-in stagger-1 leading-relaxed motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0">
             Practice DSA problems with voice-powered AI interviewers that talk,
-            listen, and score you like real engineers. Start with Tia, the
-            generalist, or choose a FAANG-specific persona. 45 minutes.
+            listen, and score you like real engineers. Start with {defaultPersona.name},
+            the generalist, or choose a FAANG-specific persona. 45 minutes.
             5-dimension feedback. Zero awkwardness.
           </p>
 
@@ -122,23 +124,16 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               {/* Persona selector bar */}
               <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 border-b border-brand-border bg-brand-deep/40 overflow-x-auto [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
                 <span className="text-[10px] text-brand-muted shrink-0">Interviewer:</span>
-                {[
-                  { name: "Tia", company: "Default", active: true },
-                  { name: "Sundar", company: "Google", active: false },
-                  { name: "Priya", company: "Meta", active: false },
-                  { name: "James", company: "Amazon", active: false },
-                  { name: "Sara", company: "Apple", active: false },
-                  { name: "Dev", company: "Netflix", active: false },
-                ].map((p) => (
+                {INTERVIEWER_PERSONAS.map((persona) => (
                   <div
-                    key={p.name}
+                    key={persona.id}
                     className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors whitespace-nowrap ${
-                      p.active
+                      persona.id === "tia"
                         ? "bg-brand-cyan/15 border-brand-cyan/40 text-brand-cyan"
                         : "border-brand-border text-brand-muted"
                     }`}
                   >
-                    {p.name} <span className="opacity-60">({p.company})</span>
+                    {persona.name} <span className="opacity-60">({persona.companyLabel})</span>
                   </div>
                 ))}
               </div>
@@ -156,7 +151,9 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                       </p>
                     </div>
                     <div className="rounded-lg border border-brand-cyan/20 bg-brand-cyan/10 p-2.5">
-                      <p className="mb-0.5 text-[10px] font-medium text-brand-cyan">Tia</p>
+                      <p className="mb-0.5 text-[10px] font-medium text-brand-cyan">
+                        {defaultPersona.name}
+                      </p>
                       <p className="text-[10px] leading-relaxed text-brand-text sm:text-[11px]">
                         &ldquo;Love it. I&apos;ll walk you through a real DSA round—voice, code, and feedback at the end. Whenever you&apos;re ready, start your free interview and we&apos;ll jump in.&rdquo;
                       </p>
@@ -252,7 +249,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 icon: Mic,
                 color: "cyan",
                 title: "Voice-powered AI interviewer",
-                desc: "Speak naturally with your AI interviewer. Start with Tia (generalist) or pick a FAANG persona — each with a unique voice and interview style. Under 1.5s latency.",
+                desc: `Speak naturally with your AI interviewer. Start with ${defaultPersona.name} (generalist) or pick a FAANG persona — each with a unique voice and interview style. Under 1.5s latency.`,
               },
               {
                 icon: Code2,
@@ -344,7 +341,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 step: "2",
                 color: "green",
                 title: "Interview with your AI",
-                desc: "Use Tia the generalist, or pick a FAANG persona — Google, Meta, Amazon, Apple, or Netflix. 45-minute voice interview with live coding and follow-ups.",
+                desc: `Use ${defaultPersona.name} the generalist, or pick a FAANG persona — Google, Meta, Amazon, Apple, or Netflix. 45-minute voice interview with live coding and follow-ups.`,
                 detail: "Real-time voice + live code execution",
               },
               {

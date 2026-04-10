@@ -17,6 +17,7 @@ export async function POST(request: Request) {
       currentCode,
       elapsedSeconds,
       maxDurationSeconds,
+      interviewerPersona,
     } = body as {
       message?: string;
       conversationHistory?: { role: string; content: string }[];
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
       currentCode?: string;
       elapsedSeconds?: number;
       maxDurationSeconds?: number;
+      interviewerPersona?: string;
     };
 
     if (!message) {
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
       typeof currentCode === "string" ? currentCode : "",
       minutes,
       totalMinutes,
+      interviewerPersona,
     );
 
     const messages: Anthropic.MessageParam[] = [
@@ -117,4 +120,3 @@ function parseModelJson(text: string): { reply: string; phase?: InterviewPhase }
 
   return null;
 }
-

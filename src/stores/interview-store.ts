@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { InterviewPhase } from "@/lib/constants";
+import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 
 // ─── Lightweight types for the store (no heavy imports from @/types) ─────────
 
@@ -57,12 +58,14 @@ type SetupConfig = {
   category: string | null;
   language: string;
   maxDurationSeconds: number;
+  interviewerPersona: InterviewerPersonaId;
 };
 
 // ─── Interview result (populated when interview ends) ────────────────────────
 
 type InterviewResult = {
   interviewId: string;
+  interviewerPersona: InterviewerPersonaId;
   finalCode: string;
   language: string;
   transcript: StoreMessage[];
@@ -114,6 +117,7 @@ type InterviewStore = {
     maxDurationSeconds: number;
     difficulty: string;
     category: string | null;
+    interviewerPersona: InterviewerPersonaId;
     startedAt: string;
   }) => void;
 
@@ -174,6 +178,7 @@ export const useInterviewStore = create<InterviewStore>()(
             category: config.category,
             language: config.language,
             maxDurationSeconds: config.maxDurationSeconds,
+            interviewerPersona: config.interviewerPersona,
           },
           isInterviewActive: true,
           startedAt: config.startedAt,

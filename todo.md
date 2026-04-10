@@ -78,7 +78,7 @@ _Goal: Understand usage, iterate_
 ## Phase 8: Beta Launch (March 30)
 
 - [ ] 37. Sales and Marketing Plan
-- [ ] 38. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Tia", each with distinct personality and interview style
+- [x] 38. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Tia", each with distinct personality and interview style
 
 ## Phase 9: Voice Upgrade (Deepgram Voice Agent API)
 _Goal: Replace browser APIs with production Deepgram Voice Agent — single WebSocket, built-in STT + LLM + TTS (Tia), function calling for code context_
@@ -123,12 +123,13 @@ _Goal: Replace browser APIs with production Deepgram Voice Agent — single WebS
 ## Pre-V1 Launch
 _Ship before going live_
 
+- [ ] Apply production DB migration: `src/lib/db/migrations/0000_add_interviewer_persona.sql` on Supabase (enum + `interviews.interviewer_persona`) after deploy if the column is not live yet
 - [ ] 62. Referral program for influencers — custom referral links, tracking, commission/credit payouts
 
 ## Post-V1 Roadmap
 _After launch & initial traction_
 
-- [ ] Other Company-specific interviewer personas
+- [ ] Additional company interviewer personas (beyond the shipped FAANG-style set)
 - [ ] Problem bank expansion (100+ problems)
 - [ ] Spaced repetition queue
 - [ ] System Design mode (Excalidraw)

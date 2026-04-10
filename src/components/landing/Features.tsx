@@ -1,4 +1,7 @@
 import { Mic, Code2, BarChart3 } from "lucide-react";
+import { getInterviewerPersona } from "@/lib/interviewer-personas";
+
+const DEFAULT_PERSONA = getInterviewerPersona("tia");
 
 type Feature = {
   icon: React.ReactNode;
@@ -13,7 +16,7 @@ const features: Feature[] = [
     icon: <Mic className="w-6 h-6 text-brand-cyan" />,
     title: "Voice-powered AI interviewer",
     description:
-      "Speak naturally with Tia, your AI interviewer. Real-time STT and TTS create an authentic conversational interview experience with under 1.5s latency.",
+      `Speak naturally with ${DEFAULT_PERSONA.name}, the generalist interviewer, or switch to a FAANG-specific persona. Real-time STT and TTS create an authentic conversational interview experience with under 1.5s latency.`,
     iconBg: "bg-brand-cyan/10",
     iconColor: "text-brand-cyan",
   },

@@ -1,7 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { SCORER_SYSTEM_PROMPT, getScoringPrompt } from "./prompts";
+import { getScorerSystemPrompt, getScoringPrompt } from "./prompts";
 import { SCORING_DIMENSIONS } from "@/lib/constants";
+import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { InterviewResult } from "@/types";
 
 const MODEL = "claude-sonnet-4-20250514";
@@ -67,6 +68,7 @@ type ScoreInterviewParams = {
   finalCode: string;
   testsPassed: number;
   testsTotal: number;
+  interviewerPersonaId?: InterviewerPersonaId;
   problem: {
     title: string;
     description: string;
@@ -77,7 +79,7 @@ type ScoreInterviewParams = {
 export async function scoreInterview(
   params: ScoreInterviewParams
 ): Promise<InterviewResult> {
-  const { messages, finalCode, testsPassed, testsTotal, problem } = params;
+  const { messages, finalCode, testsPassed, testsTotal, problem, interviewerPersonaId } = params;
 
   const client = new Anthropic();
 
@@ -89,13 +91,14 @@ export async function scoreInterview(
     finalCode,
     testsPassed,
     testsTotal,
+    interviewerPersonaId,
     problem,
   });
 
   const response = await client.messages.create({
     model: MODEL,
     max_tokens: MAX_TOKENS,
-    system: SCORER_SYSTEM_PROMPT,
+    system: getScorerSystemPrompt(interviewerPersonaId),
     messages: [{ role: "user", content: userPrompt }],
   });
 

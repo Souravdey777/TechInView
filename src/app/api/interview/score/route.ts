@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scoreInterview } from "@/lib/ai/scorer";
+import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
 
 type ScoreRequestBody = {
   transcript: { role: string; content: string }[];
   finalCode: string;
   testsPassed: number;
   testsTotal: number;
+  interviewerPersona?: string;
   problem: {
     title: string;
     description: string;
@@ -39,6 +41,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as ScoreRequestBody;
     const { transcript, finalCode, testsPassed, testsTotal, problem } = body;
+    const interviewerPersona = resolveInterviewerPersona(body.interviewerPersona);
 
     if (!transcript || transcript.length === 0) {
       return NextResponse.json(
@@ -64,6 +67,7 @@ export async function POST(req: NextRequest) {
       finalCode: finalCode || "",
       testsPassed: testsPassed ?? 0,
       testsTotal: testsTotal ?? 0,
+      interviewerPersonaId: interviewerPersona,
       problem: {
         title: problem?.title ?? "Unknown Problem",
         description: problem?.description ?? "",

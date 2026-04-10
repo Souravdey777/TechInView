@@ -31,6 +31,13 @@ import {
   FREE_TRIAL_DURATION_MINUTES,
   FULL_INTERVIEW_DURATION_MINUTES,
 } from "@/lib/constants";
+import {
+  DEFAULT_INTERVIEWER_PERSONA,
+  INTERVIEWER_PERSONAS,
+  getDefaultInterviewerPersona,
+  getInterviewerPersona,
+  type InterviewerPersonaId,
+} from "@/lib/interviewer-personas";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,6 +77,7 @@ type SetupFormState = {
   category: Category;
   language: Language;
   duration: Duration;
+  interviewerPersona: InterviewerPersonaId;
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -219,6 +227,7 @@ function InterviewSetupInner() {
     category: "any",
     language: "python",
     duration: FULL_INTERVIEW_DURATION_MINUTES,
+    interviewerPersona: DEFAULT_INTERVIEWER_PERSONA,
   });
   const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const [isCreating, setIsCreating] = useState(false);
@@ -233,19 +242,26 @@ function InterviewSetupInner() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("interview_credits, has_used_free_trial")
+        .select("interview_credits, has_used_free_trial, target_company")
         .eq("id", user.id)
         .single();
       if (data) {
         setCredits(data.interview_credits ?? 0);
         const isFreeTrial = !(data.has_used_free_trial ?? false);
         setIsFreeTrialUser(isFreeTrial);
+        setForm((f) => ({
+          ...f,
+          difficulty: isFreeTrial ? "easy" : f.difficulty,
+          duration: isFreeTrial
+            ? (FREE_TRIAL_DURATION_MINUTES as Duration)
+            : f.duration,
+          interviewerPersona: isFreeTrial
+            ? DEFAULT_INTERVIEWER_PERSONA
+            : personaTouchedRef.current
+              ? f.interviewerPersona
+              : getDefaultInterviewerPersona(data.target_company ?? null, false),
+        }));
         if (isFreeTrial) {
-          setForm((f) => ({
-            ...f,
-            difficulty: "easy",
-            duration: FREE_TRIAL_DURATION_MINUTES as Duration,
-          }));
           setProblemMode("random");
         }
       }
@@ -262,7 +278,9 @@ function InterviewSetupInner() {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const personaTouchedRef = useRef(false);
   const isSpecificSelected = problemMode === "specific" && selectedProblem !== null;
+  const selectedPersona = getInterviewerPersona(form.interviewerPersona);
 
   // ─── Fetch problems ────────────────────────────────────────────────────────
 
@@ -368,6 +386,7 @@ function InterviewSetupInner() {
       category: form.category,
       language: form.language,
       duration: form.duration,
+      interviewer_persona: form.interviewerPersona,
       problem_mode: problemMode,
       is_free_trial: isFreeTrialUser,
     });
@@ -377,6 +396,7 @@ function InterviewSetupInner() {
         category: form.category === "any" ? null : form.category,
         language: form.language,
         maxDurationSeconds: form.duration * 60,
+        interviewerPersona: form.interviewerPersona,
       };
 
       if (problemMode === "specific" && selectedProblem) {
@@ -397,6 +417,7 @@ function InterviewSetupInner() {
       const data = (await res.json()) as {
         data?: {
           interviewId?: string;
+          interviewerPersona?: InterviewerPersonaId;
           problem?: Record<string, unknown>;
           language?: string;
           maxDuration?: number;
@@ -414,6 +435,7 @@ function InterviewSetupInner() {
         maxDurationSeconds: data.data?.maxDuration ?? form.duration * 60,
         difficulty: form.difficulty,
         category: form.category === "any" ? null : form.category,
+        interviewerPersona: data.data?.interviewerPersona ?? form.interviewerPersona,
         startedAt: data.data?.startedAt ?? new Date().toISOString(),
       });
 
@@ -460,7 +482,7 @@ function InterviewSetupInner() {
             Set Up Your Interview
           </h1>
           <p className="mt-1 text-sm text-brand-muted">
-            Configure your session and Tia will guide you through the rest.
+            Configure your session and {selectedPersona.name} will guide you through the rest.
           </p>
         </div>
 
@@ -471,8 +493,8 @@ function InterviewSetupInner() {
             <div>
               <p className="text-sm font-semibold text-brand-text">Free Trial Interview</p>
               <p className="text-xs text-brand-muted mt-1">
-                Your free trial includes a {FREE_TRIAL_DURATION_MINUTES}-minute voice session with an easy problem and a basic score summary.
-                Buy an interview pack to unlock full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, all difficulties, and detailed AI feedback.
+                Your free trial includes a {FREE_TRIAL_DURATION_MINUTES}-minute voice session with Tia, an easy problem, and a basic score summary.
+                Buy an interview pack to unlock company-specific personas, full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, all difficulties, and detailed AI feedback.
               </p>
             </div>
           </div>
@@ -548,6 +570,70 @@ function InterviewSetupInner() {
               </div>
             </div>
           </div>
+        </SectionCard>
+
+        <SectionCard title="Interviewer Persona">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {INTERVIEWER_PERSONAS.map((persona) => {
+              const isLocked = isFreeTrialUser && persona.id !== DEFAULT_INTERVIEWER_PERSONA;
+              const isSelected = form.interviewerPersona === persona.id;
+
+              return (
+                <button
+                  key={persona.id}
+                  type="button"
+                  disabled={isLocked}
+                  onClick={() => {
+                    if (isLocked) return;
+                    personaTouchedRef.current = true;
+                    setForm((prev) => ({ ...prev, interviewerPersona: persona.id }));
+                  }}
+                  className={cn(
+                    "relative rounded-xl border px-4 py-4 text-left transition-all duration-150",
+                    isLocked && "cursor-not-allowed opacity-50",
+                    isSelected
+                      ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
+                      : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
+                  )}
+                >
+                  {isLocked && (
+                    <Lock className="absolute right-3 top-3 h-3.5 w-3.5 text-brand-muted" />
+                  )}
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-brand-text">
+                        {persona.name}
+                      </p>
+                      <p className="text-xs text-brand-cyan">
+                        {persona.companyLabel}
+                      </p>
+                    </div>
+                    {isSelected && (
+                      <CheckCircle className="h-4 w-4 shrink-0 text-brand-cyan" />
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed text-brand-muted">
+                    {persona.shortStyleSummary}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-3 rounded-lg border border-brand-border bg-brand-surface px-4 py-3">
+            <p className="text-sm font-medium text-brand-text">
+              {selectedPersona.name} · {selectedPersona.companyLabel}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-brand-muted">
+              {selectedPersona.calibrationNotes}
+            </p>
+          </div>
+
+          {isFreeTrialUser && (
+            <p className="mt-3 text-xs text-brand-amber">
+              Free trial sessions are limited to Tia. Upgrade to unlock company-specific interviewer personas.
+            </p>
+          )}
         </SectionCard>
 
         {/* 1 – Problem Selection */}
@@ -869,7 +955,7 @@ function InterviewSetupInner() {
               </p>
               <p className="text-xs text-brand-muted">
                 TechInView uses your mic for real-time voice interaction with
-                Tia.
+                {" "}{selectedPersona.name}.
               </p>
             </div>
             <button
@@ -965,8 +1051,7 @@ function InterviewSetupInner() {
             </p>
           )}
           <p className="mt-3 text-center text-xs text-brand-muted">
-            By starting, you agree that Tia (our AI interviewer) will record
-            and analyze your session.
+            By starting, you agree that {selectedPersona.name} will record and analyze your session.
           </p>
         </div>
       </div>

@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { scoreInterview } from "@/lib/ai/scorer";
 import { captureServerEvent } from "@/lib/posthog/server";
+import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
 
 type CompleteInterviewBody = {
   interviewId: string;
+  interviewerPersona?: string;
   finalCode: string;
   language?: string;
   transcript: { role: string; content: string; timestamp_ms: number }[];
@@ -27,6 +29,7 @@ export async function POST(req: NextRequest) {
 
     const body = (await req.json()) as CompleteInterviewBody;
     const { interviewId, finalCode, transcript, testsPassed, testsTotal, problem } = body;
+    const interviewerPersona = resolveInterviewerPersona(body.interviewerPersona);
 
     if (!interviewId) {
       return NextResponse.json(
@@ -44,6 +47,7 @@ export async function POST(req: NextRequest) {
           finalCode: finalCode || "",
           testsPassed: testsPassed ?? 0,
           testsTotal: testsTotal ?? 0,
+          interviewerPersonaId: interviewerPersona,
           problem: {
             title: problem.title ?? "Unknown Problem",
             description: problem.description ?? "",
@@ -68,6 +72,7 @@ export async function POST(req: NextRequest) {
 
         await updateInterview(interviewId, {
           status: "completed",
+          interviewer_persona: interviewerPersona,
           final_code: finalCode,
           completed_at: new Date(),
           duration_seconds: durationSeconds,
@@ -113,6 +118,7 @@ export async function POST(req: NextRequest) {
         : 0;
       captureServerEvent(user.id, "interview_completed", {
         interview_id: interviewId,
+        interviewer_persona: interviewerPersona,
         overall_score: scoringResult?.overall_score ?? null,
         hire_recommendation: scoringResult?.hire_recommendation ?? null,
         duration_seconds: durationSeconds,

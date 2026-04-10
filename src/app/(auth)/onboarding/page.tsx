@@ -261,7 +261,7 @@ export default function OnboardingPage() {
                   Experience Level
                 </h1>
                 <p className="text-brand-muted text-sm">
-                  This helps Tia calibrate interview difficulty.
+                  This helps us calibrate interview difficulty and preselect the right persona.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">

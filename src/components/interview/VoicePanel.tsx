@@ -9,6 +9,7 @@ import { type InterviewPhase, PHASE_LABELS } from "@/lib/interview-phases";
 type VoicePanelProps = {
   voiceState: VoiceState;
   currentPhase: InterviewPhase;
+  interviewerName: string;
   isMicEnabled: boolean;
   errorMessage?: string | null;
   onToggleMic: () => void;
@@ -31,12 +32,16 @@ const PHASE_COLORS: Record<InterviewPhase, string> = {
 
 // ─── Voice state label ────────────────────────────────────────────────────────
 
-const STATE_LABELS: Record<VoiceState, string> = {
-  idle: "Ready",
-  listening: "Listening...",
-  thinking: "Thinking...",
-  speaking: "Tia is speaking",
-};
+function getStateLabel(voiceState: VoiceState, interviewerName: string): string {
+  const labels: Record<VoiceState, string> = {
+    idle: "Ready",
+    listening: "Listening...",
+    thinking: "Thinking...",
+    speaking: `${interviewerName} is speaking`,
+  };
+
+  return labels[voiceState];
+}
 
 const STATE_COLORS: Record<VoiceState, string> = {
   idle: "text-brand-muted",
@@ -50,6 +55,7 @@ const STATE_COLORS: Record<VoiceState, string> = {
 export function VoicePanel({
   voiceState,
   currentPhase,
+  interviewerName,
   isMicEnabled,
   errorMessage,
   onToggleMic,
@@ -93,7 +99,7 @@ export function VoicePanel({
           {PHASE_LABELS[currentPhase]}
         </span>
         <span className={cn("text-xs font-medium", STATE_COLORS[voiceState])}>
-          {STATE_LABELS[voiceState]}
+          {getStateLabel(voiceState, interviewerName)}
         </span>
       </div>
 
@@ -107,7 +113,7 @@ export function VoicePanel({
       <div className="flex flex-col items-center gap-1 py-3">
         <VoiceVisualizer state={voiceState} className="h-32 w-32" />
         <div className="text-center mt-1">
-          <p className="text-sm font-semibold text-brand-text">Tia</p>
+          <p className="text-sm font-semibold text-brand-text">{interviewerName}</p>
           <p className="text-[11px] text-brand-muted">AI Interviewer</p>
         </div>
       </div>

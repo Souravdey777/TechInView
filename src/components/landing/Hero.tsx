@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { getInterviewerPersona } from "@/lib/interviewer-personas";
+
+const DEFAULT_PERSONA = getInterviewerPersona("tia");
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -62,9 +65,10 @@ export function Hero() {
         </h1>
 
         <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto mb-10">
-          Practice DSA problems with Tia, your AI interviewer. Real-time voice
-          interaction, live code editor, and FAANG-calibrated scoring &mdash;
-          all in one place.
+          Practice DSA problems with {DEFAULT_PERSONA.name}, your generalist AI
+          interviewer, or switch to a company-specific persona. Real-time voice
+          interaction, live code editor, and FAANG-calibrated scoring &mdash; all
+          in one place.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

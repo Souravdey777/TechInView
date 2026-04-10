@@ -12,6 +12,7 @@ type TranscriptMessage = {
 
 type TranscriptReviewProps = {
   messages: TranscriptMessage[];
+  interviewerName?: string;
 };
 
 function formatTimestamp(ms: number): string {
@@ -28,10 +29,10 @@ type RoleConfig = {
   Icon: React.ElementType;
 };
 
-function getRoleConfig(role: string): RoleConfig {
+function getRoleConfig(role: string, interviewerName: string): RoleConfig {
   if (role === "interviewer") {
     return {
-      label: "Interviewer",
+      label: interviewerName,
       badgeClass: "bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30",
       bubbleClass: "bg-brand-surface border border-brand-border",
       Icon: Bot,
@@ -53,7 +54,10 @@ function getRoleConfig(role: string): RoleConfig {
   };
 }
 
-export function TranscriptReview({ messages }: TranscriptReviewProps) {
+export function TranscriptReview({
+  messages,
+  interviewerName = "Interviewer",
+}: TranscriptReviewProps) {
   if (messages.length === 0) {
     return (
       <Card className="w-full">
@@ -89,7 +93,7 @@ export function TranscriptReview({ messages }: TranscriptReviewProps) {
       <CardContent className="p-0">
         <div className="max-h-[500px] overflow-y-auto px-6 pb-6 space-y-3 scrollbar-thin">
           {messages.map((msg, index) => {
-            const config = getRoleConfig(msg.role);
+            const config = getRoleConfig(msg.role, interviewerName);
             const { Icon } = config;
             const isCandidate = msg.role === "candidate";
 
