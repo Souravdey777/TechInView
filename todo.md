@@ -55,9 +55,9 @@ _Goal: Accept payments_
 - [x] 30. Implement freemium tier restrictions:
   - No advanced report (basic score only, no detailed feedback breakdown)
   - No advanced persona (default "Tia" only, no FAANG-specific voices)
-  - 20-min interview cap (instead of 45 min)
-  - Only 2 easy problems available (randomly picks one at runtime)
-  - Enforce in `/api/interview/start` + interview room UI
+  - 5-minute voice trial (instead of a full 45-minute round)
+  - Random easy problem only
+  - Enforce in `/api/interview/start` + setup/dashboard/results UI
 
 ## Phase 6: Analytics & Growth
 _Goal: Understand usage, iterate_
@@ -84,41 +84,41 @@ _Goal: Understand usage, iterate_
 _Goal: Replace browser APIs with production Deepgram Voice Agent — single WebSocket, built-in STT + LLM + TTS (Tia), function calling for code context_
 
 ### 9A. Voice Agent Core Setup
-- [ ] 39. Set up Deepgram Voice Agent WebSocket connection (`wss://agent.deepgram.com/agent`)
-- [ ] 40. Configure agent Settings message:
-  - `agent.listen` → Deepgram Nova-2 / Flux STT
-  - `agent.think` → LLM provider (OpenAI or Anthropic) with interviewer system prompt
+- [x] 39. Set up Deepgram Voice Agent WebSocket connection
+- [x] 40. Configure agent Settings message:
+  - `agent.listen` → Deepgram Flux STT (`v2`)
+  - `agent.think` → Anthropic Sonnet with interviewer system prompt
   - `agent.speak` → Deepgram Aura 2 (Tia voice)
-- [ ] 41. Stream browser mic audio → Voice Agent WebSocket (replace browser SpeechRecognition)
-- [ ] 42. Receive and play agent audio response → browser AudioContext (replace browser SpeechSynthesis)
-- [ ] 43. Handle `ConversationText` events to update live transcript UI for both user and AI messages
+- [x] 41. Stream browser mic audio → Voice Agent WebSocket (replace browser SpeechRecognition)
+- [x] 42. Receive and play agent audio response → browser AudioContext (replace browser SpeechSynthesis)
+- [x] 43. Handle `ConversationText` events to update live transcript UI for both user and AI messages
 
 ### 9B. Function Calling — Code Context
-- [ ] 44. Define `get_current_code` function in agent.think.functions config — returns Monaco editor content
-- [ ] 45. Handle `FunctionCallRequest` (client_side: true) → read `editor.getValue()` → send `FunctionCallResponse` back
-- [ ] 46. Define `run_tests` function — executes code via Piston API, returns pass/fail results to agent
-- [ ] 47. Define `get_interview_state` function — returns time remaining, hints given, current phase, tests passed
+- [x] 44. Define `get_current_code` function in agent.think.functions config — returns Monaco editor content
+- [x] 45. Handle `FunctionCallRequest` (client_side: true) → read `editor.getValue()` → send `FunctionCallResponse` back
+- [x] 46. Define `run_tests` function — executes code via Piston API, returns pass/fail results to agent
+- [x] 47. Define `get_interview_state` function — returns time remaining, hints given, current phase, tests passed
 - [ ] 48. Test: user says "check my code" → agent calls `get_current_code` → responds with code-specific feedback
 
 ### 9C. Background Context Injection
-- [ ] 49. On every "Run Code" click → inject code + test results via `InjectAgentMessage`
-- [ ] 50. Every 60s during coding phase → inject latest code snapshot via `InjectAgentMessage`
-- [ ] 51. On phase transition → update interviewer prompt via `UpdatePrompt` message
-- [ ] 52. Pass interview phase context (intro → approach → coding → testing → wrapup) through prompt updates
+- [x] 49. On every "Run Code" click → inject code + test results via `InjectAgentMessage`
+- [x] 50. Every 60s during coding phase → inject latest code snapshot via `InjectAgentMessage`
+- [x] 51. Refresh interviewer think config when prompt changes via live `UpdateThink`
+- [x] 52. Pass interview phase context (intro → approach → coding → testing → wrapup) through live think updates
 
 ### 9D. Voice UX Polish
 - [ ] 53. Barge-in handling — Voice Agent has built-in interruption detection (verify it works with Tia)
-- [ ] 54. Wire `AgentStartedSpeaking` / `AgentAudioDone` events → update VoiceVisualizer states (listening/thinking/speaking)
-- [ ] 55. Handle `UserStartedSpeaking` event → pause any UI audio, show listening state
+- [x] 54. Wire `AgentStartedSpeaking` / `AgentAudioDone` events → update VoiceVisualizer states (listening/thinking/speaking)
+- [x] 55. Handle `UserStartedSpeaking` event → pause any UI audio, show listening state
 - [ ] 56. Implement WebSocket reconnection on drop — resume with conversation context via `agent.context.messages`
 - [ ] 57. Add fallback: if mic permission denied → show text input, pipe text through `InjectAgentMessage` instead
 
 ### 9E. Remove Old Infra
 - [x] 40. ~~Integrate Deepgram Aura 2 for TTS~~ (now handled by Voice Agent)
-- [ ] 58. Remove browser SpeechRecognition code
-- [ ] 59. Remove browser SpeechSynthesis code
-- [ ] 60. Remove Railway voice-server (no longer needed — Voice Agent handles everything)
-- [ ] 61. Clean up unused hooks: old `useVoiceInterview` browser API version
+- [x] 58. Remove browser SpeechRecognition code
+- [x] 59. Remove browser SpeechSynthesis code
+- [x] 60. Remove Railway voice-server (no longer needed — Voice Agent handles everything)
+- [x] 61. Clean up unused hooks: old `useVoiceInterview` browser API version
 
 ## Pre-V1 Launch
 _Ship before going live_
