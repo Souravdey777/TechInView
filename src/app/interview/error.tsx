@@ -36,7 +36,7 @@ export default function InterviewError({ error, reset }: ErrorProps) {
           Try again
         </button>
         <Link
-          href="/interview/setup"
+          href="/interviews/dsa/setup"
           className="px-4 py-2 rounded-lg border border-brand-border text-sm text-brand-text hover:bg-brand-card transition-colors"
         >
           Return to Setup

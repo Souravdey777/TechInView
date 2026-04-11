@@ -18,11 +18,14 @@ import {
   PHASE_STEP,
   PHASE_LABELS,
 } from "@/lib/interview-phases";
+import type { RoundType } from "@/lib/constants";
+import { getPhaseLabelForRound, ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
 
 type SupportedLanguage = "python" | "javascript" | "java" | "cpp";
 
 type InterviewControlsProps = {
   phase: InterviewPhase;
+  roundType: RoundType;
   language: SupportedLanguage;
   onRunCode: () => void;
   onEndInterview: () => void;
@@ -49,6 +52,7 @@ function getRunShortcutHint(): string {
 
 export function InterviewControls({
   phase,
+  roundType,
   language,
   onRunCode,
   onEndInterview,
@@ -57,6 +61,8 @@ export function InterviewControls({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const step = PHASE_STEP[phase];
   const total = PHASE_ORDER.length;
+  const isCodingRound = roundType === "coding";
+  const phaseLabel = isCodingRound ? PHASE_LABELS[phase] : getPhaseLabelForRound(roundType, phase);
 
   function handleConfirmEnd() {
     setConfirmOpen(false);
@@ -86,7 +92,7 @@ export function InterviewControls({
           </div>
           <span className="text-xs text-brand-muted">
             <span className="font-medium text-brand-text">
-              {PHASE_LABELS[phase]}
+              {phaseLabel}
             </span>{" "}
             &mdash; Step {step}/{total}
           </span>
@@ -95,30 +101,33 @@ export function InterviewControls({
         {/* Center: language badge */}
         <div className="absolute left-1/2 -translate-x-1/2">
           <span className="rounded-md border border-brand-border bg-brand-surface px-2.5 py-1 font-mono text-xs font-medium text-brand-muted">
-            {LANGUAGE_LABELS[language]}
+            {isCodingRound ? LANGUAGE_LABELS[language] : ROUND_TYPE_LABELS[roundType]}
           </span>
         </div>
 
         {/* Right: action buttons + shortcut hint */}
         <div className="flex items-center gap-2">
-          <span className="hidden text-[10px] text-brand-muted sm:block">
-            {getRunShortcutHint()} to run
-          </span>
+          {isCodingRound && (
+            <>
+              <span className="hidden text-[10px] text-brand-muted sm:block">
+                {getRunShortcutHint()} to run
+              </span>
 
-          {/* Run Code */}
-          <button
-            onClick={onRunCode}
-            disabled={isRunning}
-            className={cn(
-              "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all",
-              isRunning
-                ? "cursor-not-allowed border-brand-border text-brand-muted"
-                : "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20 hover:border-brand-green/50"
-            )}
-          >
-            <Play className="h-3.5 w-3.5" />
-            Run
-          </button>
+              <button
+                onClick={onRunCode}
+                disabled={isRunning}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all",
+                  isRunning
+                    ? "cursor-not-allowed border-brand-border text-brand-muted"
+                    : "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20 hover:border-brand-green/50"
+                )}
+              >
+                <Play className="h-3.5 w-3.5" />
+                Run
+              </button>
+            </>
+          )}
 
           {/* End Interview */}
           <button

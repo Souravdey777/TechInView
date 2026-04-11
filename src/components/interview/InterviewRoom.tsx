@@ -2,12 +2,14 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Code2, GripVertical } from "lucide-react";
+import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { VoicePanel } from "./VoicePanel";
 import { CodeEditor } from "./CodeEditor";
 import { ProblemPanel } from "./ProblemPanel";
+import { RoundBriefPanel } from "./RoundBriefPanel";
+import { DiscussionWorkspace } from "./DiscussionWorkspace";
 import { TestRunner, type TestResult } from "./TestRunner";
 import { Timer } from "./Timer";
 import { InterviewControls } from "./InterviewControls";
@@ -28,6 +30,10 @@ import {
 } from "@/lib/interview-phases";
 import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import type { RoundScoreDimension } from "@/lib/constants";
+import { ROUND_SCORING_DIMENSIONS } from "@/lib/constants";
+import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -45,6 +51,11 @@ type ScoreDimensionRaw = { score: number; feedback: string };
 type InterviewRoomProps = {
   interviewId: string;
 };
+
+type InjectUserMessage = (
+  text: string,
+  options?: { suppressTranscript?: boolean },
+) => void;
 
 const MAX_AGENT_CONTEXT_MESSAGES = 20;
 
@@ -67,6 +78,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // ── Read setup config from Zustand store ───────────────────────────────────
   const storeConfig = useInterviewStore((s) => s.setupConfig);
   const storeProblem = useInterviewStore((s) => s.problem);
+  const storeRoundContext = useInterviewStore((s) => s.roundContext);
   const storeCode = useInterviewStore((s) => s.currentCode);
   const completeInterviewStore = useInterviewStore((s) => s.completeInterview);
   const addMessageToStore = useInterviewStore((s) => s.addMessage);
@@ -75,16 +87,20 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const setRoomLanguageInStore = useInterviewStore((s) => s.setRoomLanguage);
   const setCodeForLanguage = useInterviewStore((s) => s.setCodeForLanguage);
   const setTestResultsInStore = useInterviewStore((s) => s.setTestResults);
+  const mode = storeConfig?.mode ?? "general_dsa";
+  const roundType = storeConfig?.roundType ?? "coding";
+  const isCodingRound = roundType === "coding";
 
   // Guard: wait for hydration before deciding to redirect
   useEffect(() => {
-    if (hasHydrated && !storeProblem) {
-      router.replace("/interview/setup");
+    if (hasHydrated && !storeProblem && !storeRoundContext) {
+      router.replace("/interviews/dsa/setup");
     }
-  }, [hasHydrated, storeProblem, router]);
+  }, [hasHydrated, storeProblem, storeRoundContext, router]);
 
   // Derive the active problem — always from store after the guard above
   const activeProblem = useMemo(() => storeProblem, [storeProblem]);
+  const activeRound = useMemo(() => storeRoundContext, [storeRoundContext]);
 
   const initialLanguage = (storeConfig?.language ?? "python") as SupportedLanguage;
   const maxDuration = storeConfig?.maxDurationSeconds ?? 45 * 60;
@@ -114,6 +130,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const [code, setCode] = useState(
     storeCode || activeProblem?.starter_code[initialLanguage] || ""
   );
+  const [notes, setNotes] = useState<Record<string, string>>({});
 
   // ── Test state ───────────────────────────────────────────────────────────────
   const [testResults, setTestResults] = useState<TestResult[]>([]);
@@ -202,24 +219,41 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // ── Deepgram Voice Agent ──────────────────────────────────────────────────
 
   const agentFunctions = useMemo<AgentFunctionDef[]>(
-    () => [
-      {
-        name: "get_current_code",
-        description: "Retrieve the candidate's current code from the editor",
-        parameters: { type: "object", properties: {}, required: [] },
-      },
-      {
-        name: "run_tests",
-        description: "Execute the candidate's code against test cases and return pass/fail results",
-        parameters: { type: "object", properties: {}, required: [] },
-      },
-      {
-        name: "get_interview_state",
-        description: "Get current interview state including phase, time remaining, and test summary",
-        parameters: { type: "object", properties: {}, required: [] },
-      },
-    ],
-    [],
+    () => {
+      const base: AgentFunctionDef[] = [
+        {
+          name: "get_interview_state",
+          description: "Get current interview state including phase, time remaining, and test summary",
+          parameters: { type: "object", properties: {}, required: [] },
+        },
+      ];
+
+      if (isCodingRound) {
+        return [
+          {
+            name: "get_current_code",
+            description: "Retrieve the candidate's current code from the editor",
+            parameters: { type: "object", properties: {}, required: [] },
+          },
+          {
+            name: "run_tests",
+            description: "Execute the candidate's code against test cases and return pass/fail results",
+            parameters: { type: "object", properties: {}, required: [] },
+          },
+          ...base,
+        ];
+      }
+
+      return [
+        {
+          name: "get_workspace_notes",
+          description: "Retrieve the candidate's structured notes from the active round workspace",
+          parameters: { type: "object", properties: {}, required: [] },
+        },
+        ...base,
+      ];
+    },
+    [isCodingRound],
   );
 
   const agentContextMessages = useMemo(
@@ -231,20 +265,28 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     [chatMessages],
   );
 
-  const hasCandidateCode = code.trim().length > 0;
+  const notesRef = useRef(notes);
+  useEffect(() => { notesRef.current = notes; }, [notes]);
+
+  const hasCandidateCode = isCodingRound && code.trim().length > 0;
 
   // Ref to break circular dependency: onConnected callback needs agent.injectUserMessage,
   // but agent is the return of the same hook. The ref is updated after hook returns.
-  const agentInjectRef = useRef<(text: string) => void>(() => {});
+  const agentInjectRef = useRef<InjectUserMessage>(() => {});
 
   const agentSettings = useMemo<DeepgramVoiceAgentSettings>(
     () => ({
       systemPrompt: buildVoiceSystemPrompt(
-        activeProblem,
-        currentPhase,
-        hasCandidateCode,
-        Math.round(maxDuration / 60),
-        interviewer.id,
+        {
+          roundType,
+          problem: activeProblem,
+          roundContext: activeRound,
+          currentPhase,
+          hasCandidateCode,
+          hasWorkspaceNotes: !isCodingRound,
+          totalMinutes: Math.round(maxDuration / 60),
+          interviewerPersonaId: interviewer.id,
+        },
       ),
       voiceModel: interviewer.voiceModel,
       greeting: agentContextMessages.length === 0 ? interviewer.greeting : undefined,
@@ -253,10 +295,13 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     }),
     [
       activeProblem,
+      activeRound,
       currentPhase,
       hasCandidateCode,
+      isCodingRound,
       maxDuration,
       interviewer,
+      roundType,
       agentFunctions,
       agentContextMessages,
     ],
@@ -299,7 +344,16 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           case "get_current_code":
             return { language: languageRef.current, code: codeRef.current };
 
+          case "get_workspace_notes":
+            return {
+              roundType,
+              notes: notesRef.current,
+            };
+
           case "run_tests": {
+            if (!isCodingRound) {
+              return { error: "run_tests is only available for coding rounds" };
+            }
             const res = await fetch("/api/interview/run-code", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -345,7 +399,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             return { error: `Unknown function: ${name}` };
         }
       },
-      [interviewId, maxDuration, setTestResultsInStore],
+      [interviewId, isCodingRound, maxDuration, roundType, setTestResultsInStore],
     ),
 
     onPhaseChange: applyPhaseFromAgent,
@@ -365,6 +419,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         // already carry transcript history via agent context.
         agentInjectRef.current(
           "The candidate is ready. Continue naturally from your greeting, then introduce the problem and start the interview.",
+          { suppressTranscript: true },
         );
       }
     }, []),
@@ -426,7 +481,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       setChatMessages((prev) => [...prev, { id, role: "candidate", content: text, time }]);
       conversationRef.current.push({ role: "candidate", content: text, timestamp_ms: elapsedMs });
       addMessageToStore({ role: "candidate", content: text, timestamp_ms: elapsedMs });
-      agent.injectUserMessage(text);
+      agent.injectUserMessage(text, { suppressTranscript: true });
     },
     [agent, addMessageToStore],
   );
@@ -449,6 +504,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   );
 
   const handleRunCode = useCallback(async () => {
+    if (!isCodingRound) return;
     setIsRunningTests(true);
     setTestResults([]);
 
@@ -508,7 +564,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     } finally {
       setIsRunningTests(false);
     }
-  }, [language, code, interviewId, setTestResultsInStore, agent]);
+  }, [isCodingRound, language, code, interviewId, setTestResultsInStore, agent]);
 
   // Use a ref so the timer effect always calls the latest version of
   // handleEndInterview without needing to restart the interval.
@@ -528,6 +584,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     const passed = testResults.filter((t) => t.passed).length;
     const total = testResults.length;
     const problem = activeProblemRef.current;
+    const round = activeRound;
 
     type ScoringData = {
       overall_score?: number;
@@ -546,6 +603,9 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         body: JSON.stringify({
           interviewId,
           interviewerPersona: interviewer.id,
+          mode,
+          roundType,
+          roundTitle: round?.title ?? problem?.title ?? ROUND_TYPE_LABELS[roundType],
           finalCode: code,
           language,
           transcript,
@@ -560,6 +620,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 optimal_complexity: problem.optimal_complexity ?? { time: "Unknown", space: "Unknown" },
               }
             : null,
+          roundContext: round,
         }),
       });
 
@@ -573,16 +634,16 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
     const rawScores = scoringData?.scores;
     const storeScores = rawScores
-      ? {
-          problem_solving: extractDimension(rawScores, "problem_solving"),
-          code_quality: extractDimension(rawScores, "code_quality"),
-          communication: extractDimension(rawScores, "communication"),
-          technical_knowledge: extractDimension(rawScores, "technical_knowledge"),
-          testing: extractDimension(rawScores, "testing"),
-        }
+      ? Object.keys(rawScores).reduce<Record<string, ScoreDimensionRaw>>((acc, key) => {
+          acc[key] = extractDimension(rawScores, key);
+          return acc;
+        }, {})
       : null;
 
     completeInterviewStore({
+      mode,
+      roundType,
+      roundTitle: round?.title ?? problem?.title ?? ROUND_TYPE_LABELS[roundType],
       interviewId,
       interviewerPersona: interviewer.id,
       finalCode: code,
@@ -599,10 +660,31 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       problemTitle: problem?.title ?? "Unknown",
       problemDifficulty: problem?.difficulty ?? "medium",
       problemCategory: problem?.category ?? "arrays",
+      company: storeConfig?.company ?? null,
+      roleTitle: storeConfig?.roleTitle ?? null,
+      loopName: storeConfig?.loopName ?? null,
+      loopSummary: storeConfig?.loopSummary ?? null,
+      roundContext: round ?? null,
     });
 
     router.push(`/results/${interviewId}`);
-  }, [interviewId, code, language, router, testResults, completeInterviewStore, agent, interviewer.id]);
+  }, [
+    activeRound,
+    agent,
+    code,
+    completeInterviewStore,
+    interviewId,
+    interviewer.id,
+    language,
+    mode,
+    roundType,
+    router,
+    storeConfig?.company,
+    storeConfig?.loopName,
+    storeConfig?.loopSummary,
+    storeConfig?.roleTitle,
+    testResults,
+  ]);
 
   // Keep the ref in sync with the latest callback
   useEffect(() => { handleEndInterviewRef.current = handleEndInterview; }, [handleEndInterview]);
@@ -763,7 +845,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   // ── Periodic code snapshot injection (every 60s during coding phases) ──────
   useEffect(() => {
-    if (!hasStarted || !agent.isConnected) return;
+    if (!hasStarted || !agent.isConnected || !isCodingRound) return;
     const CODING_PHASES = new Set(["CODING", "TESTING", "COMPLEXITY_ANALYSIS"]);
 
     const interval = setInterval(() => {
@@ -776,12 +858,26 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     }, 60_000);
 
     return () => clearInterval(interval);
-  }, [hasStarted, agent]);
+  }, [hasStarted, agent, isCodingRound]);
+
+  const scoringDimensionLabels = useMemo(
+    () =>
+      mode === "targeted_loop"
+        ? (Object.keys(ROUND_SCORING_DIMENSIONS) as RoundScoreDimension[]).map(
+            (key) => ROUND_SCORING_DIMENSIONS[key].label
+          )
+        : ["Problem Solving", "Code Quality", "Communication", "Technical Knowledge", "Testing"],
+    [mode],
+  );
+
+  const handleChangeNote = useCallback((sectionId: string, value: string) => {
+    setNotes((prev) => ({ ...prev, [sectionId]: value }));
+  }, []);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   // Render nothing until hydration completes or while redirect is in flight
-  if (!hasHydrated || !activeProblem) return null;
+  if (!hasHydrated || (!activeProblem && !activeRound)) return null;
 
   // Scoring overlay — shown while AI evaluates the interview
   if (isScoring) {
@@ -797,10 +893,12 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             <h1 className="text-2xl font-bold text-brand-text">
               {interviewer.name} is reviewing your performance
             </h1>
-            <p className="text-brand-muted text-sm mt-2 leading-relaxed">Evaluating problem solving, code quality, communication, technical knowledge, and testing.</p>
+            <p className="text-brand-muted text-sm mt-2 leading-relaxed">
+              Evaluating {scoringDimensionLabels.join(", ").toLowerCase()}.
+            </p>
           </div>
           <div className="w-full space-y-2.5" style={{ animation: "scoring-fade-in 0.6s ease-out 0.5s both" }}>
-            {["Problem Solving", "Code Quality", "Communication", "Technical Knowledge", "Testing"].map((dim, i) => (
+            {scoringDimensionLabels.map((dim, i) => (
               <div key={dim} className="flex items-center gap-3">
                 <span className="text-[11px] text-brand-muted w-32 text-right shrink-0">{dim}</span>
                 <div className="flex-1 h-1.5 rounded-full bg-brand-border overflow-hidden">
@@ -836,15 +934,26 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 <>Your session is still active. You have approximately{" "}
                 <span className="text-brand-text font-medium">{Math.ceil(timeLeft / 60)} minute{Math.ceil(timeLeft / 60) !== 1 ? "s" : ""}</span> remaining.</>
               ) : (
-                <>{interviewer.name}, your {interviewer.companyLabel === "Generalist" ? "AI interviewer" : `${interviewer.companyLabel}-style AI interviewer`}, will introduce the problem and guide you through a{" "}
-                <span className="text-brand-text font-medium">{Math.round(maxDuration / 60)}-minute</span> mock interview.</>
+                <>
+                  {interviewer.name}, your{" "}
+                  {interviewer.companyLabel === "Generalist"
+                    ? "AI interviewer"
+                    : `${interviewer.companyLabel}-style AI interviewer`}, will run this{" "}
+                  <span className="text-brand-text font-medium">
+                    {isCodingRound
+                      ? "coding"
+                      : ROUND_TYPE_LABELS[roundType].toLowerCase()}
+                  </span>{" "}
+                  round over the next{" "}
+                  <span className="text-brand-text font-medium">{Math.round(maxDuration / 60)} minute{Math.round(maxDuration / 60) !== 1 ? "s" : ""}</span>.
+                </>
               )}
             </p>
           </div>
           {!isResuming && (
             <div className="flex items-center justify-center gap-6 text-[11px] text-brand-muted" style={{ animation: "start-fade-up 0.8s ease-out 0.3s both" }}>
               <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-cyan/60" />Voice conversation</span>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-green/60" />Live coding</span>
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-green/60" />{isCodingRound ? "Live coding" : "Structured workspace"}</span>
               <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-amber/60" />AI scoring</span>
             </div>
           )}
@@ -892,12 +1001,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <Code2 className="h-5 w-5 text-brand-cyan" />
-          <span className="text-sm font-semibold tracking-tight text-brand-text">
-            TechInView
-          </span>
-        </div>
+        <BrandLogo size="sm" wordmarkClassName="text-sm" />
 
         {/* Timer */}
         <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
@@ -925,6 +1029,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             <VoicePanel
               voiceState={voiceState}
               currentPhase={currentPhase}
+              roundType={roundType}
               interviewerName={interviewer.name}
               isMicEnabled={isMicEnabled}
               errorMessage={voiceError}
@@ -938,7 +1043,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             <Tabs defaultValue="problem" className="flex flex-1 flex-col overflow-hidden">
               <TabsList className="w-full">
                 <TabsTrigger value="problem" className="flex-1 text-xs">
-                  Problem
+                  {isCodingRound ? "Problem" : "Round Brief"}
                 </TabsTrigger>
                 <TabsTrigger value="transcript" className="flex-1 text-xs">
                   Transcript
@@ -949,7 +1054,16 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 value="problem"
                 className="flex-1 overflow-hidden mt-0"
               >
-                <ProblemPanel problem={{ ...activeProblem, difficulty: activeProblem.difficulty as "easy" | "medium" | "hard" }} />
+                {isCodingRound && activeProblem ? (
+                  <ProblemPanel problem={{ ...activeProblem, difficulty: activeProblem.difficulty as "easy" | "medium" | "hard" }} />
+                ) : activeRound ? (
+                  <RoundBriefPanel
+                    round={activeRound}
+                    company={storeConfig?.company}
+                    roleTitle={storeConfig?.roleTitle}
+                    loopName={storeConfig?.loopName}
+                  />
+                ) : null}
               </TabsContent>
 
               <TabsContent
@@ -983,30 +1097,41 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
         {/* ── Right panel ── */}
         <main className="flex flex-1 flex-col overflow-hidden">
-          {/* Code editor — fills available space above test runner */}
-          <div className="flex-1 overflow-hidden">
-            <CodeEditor
-              language={language}
-              value={code}
-              onChange={setCode}
-              onRunCode={handleRunCode}
-              onLanguageChange={handleLanguageChange}
-            />
-          </div>
+          {isCodingRound ? (
+            <>
+              <div className="flex-1 overflow-hidden">
+                <CodeEditor
+                  language={language}
+                  value={code}
+                  onChange={setCode}
+                  onRunCode={handleRunCode}
+                  onLanguageChange={handleLanguageChange}
+                />
+              </div>
 
-          {/* Test runner — fixed height */}
-          <div className="h-48 shrink-0 overflow-hidden">
-            <TestRunner
-              testResults={testResults}
-              isRunning={isRunningTests}
+              <div className="h-48 shrink-0 overflow-hidden">
+                <TestRunner
+                  testResults={testResults}
+                  isRunning={isRunningTests}
+                />
+              </div>
+            </>
+          ) : activeRound ? (
+            <DiscussionWorkspace
+              round={activeRound}
+              company={storeConfig?.company}
+              roleTitle={storeConfig?.roleTitle}
+              notes={notes}
+              onChangeNote={handleChangeNote}
             />
-          </div>
+          ) : null}
         </main>
       </div>
 
       {/* ── Bottom bar ── */}
       <InterviewControls
         phase={currentPhase}
+        roundType={roundType}
         language={language}
         onRunCode={handleRunCode}
         onEndInterview={handleEndInterview}

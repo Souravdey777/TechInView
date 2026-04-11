@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { InterviewPhase } from "@/lib/constants";
+import type { InterviewMode, RoundType } from "@/lib/constants";
 import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
+import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
 
 // ─── Lightweight types for the store (no heavy imports from @/types) ─────────
 
@@ -43,27 +44,33 @@ type ScoreDimension = {
   feedback: string;
 };
 
-type StoreScores = {
-  problem_solving: ScoreDimension;
-  code_quality: ScoreDimension;
-  communication: ScoreDimension;
-  technical_knowledge: ScoreDimension;
-  testing: ScoreDimension;
-};
+type StoreScores = Record<string, ScoreDimension>;
 
 // ─── Setup config (from the setup page) ──────────────────────────────────────
 
 type SetupConfig = {
+  mode: InterviewMode;
+  roundType: RoundType;
   difficulty: string;
   category: string | null;
   language: string;
   maxDurationSeconds: number;
   interviewerPersona: InterviewerPersonaId;
+  generatedLoopId: string | null;
+  generatedLoopRoundId: string | null;
+  company: string | null;
+  roleTitle: string | null;
+  experienceLevel: string | null;
+  loopName: string | null;
+  loopSummary: LoopSummarySnapshot | null;
 };
 
 // ─── Interview result (populated when interview ends) ────────────────────────
 
 type InterviewResult = {
+  mode: InterviewMode;
+  roundType: RoundType;
+  roundTitle: string;
   interviewId: string;
   interviewerPersona: InterviewerPersonaId;
   finalCode: string;
@@ -80,6 +87,11 @@ type InterviewResult = {
   problemTitle: string;
   problemDifficulty: string;
   problemCategory: string;
+  company: string | null;
+  roleTitle: string | null;
+  loopName: string | null;
+  loopSummary: LoopSummarySnapshot | null;
+  roundContext: RoundContextSnapshot | null;
 };
 
 // ─── Store ───────────────────────────────────────────────────────────────────
@@ -91,8 +103,9 @@ type InterviewStore = {
 
   // Active interview state
   problem: StoreProblem | null;
+  roundContext: RoundContextSnapshot | null;
   messages: StoreMessage[];
-  currentPhase: InterviewPhase;
+  currentPhase: string;
   currentCode: string;
   testResults: StoreTestResult[];
   voiceState: VoiceState;
@@ -112,20 +125,31 @@ type InterviewStore = {
   // Actions — setup
   initFromSetup: (config: {
     interviewId: string;
-    problem: StoreProblem;
+    mode: InterviewMode;
+    roundType: RoundType;
+    problem: StoreProblem | null;
+    roundContext: RoundContextSnapshot | null;
     language: string;
     maxDurationSeconds: number;
     difficulty: string;
     category: string | null;
     interviewerPersona: InterviewerPersonaId;
+    generatedLoopId?: string | null;
+    generatedLoopRoundId?: string | null;
+    company?: string | null;
+    roleTitle?: string | null;
+    experienceLevel?: string | null;
+    loopName?: string | null;
+    loopSummary?: LoopSummarySnapshot | null;
     startedAt: string;
   }) => void;
 
   // Actions — interview
   setProblem: (problem: StoreProblem) => void;
+  setRoundContext: (roundContext: RoundContextSnapshot | null) => void;
   setCode: (code: string) => void;
   addMessage: (message: StoreMessage) => void;
-  setPhase: (phase: InterviewPhase) => void;
+  setPhase: (phase: string) => void;
   setVoiceState: (state: VoiceState) => void;
   setTestResults: (results: StoreTestResult[]) => void;
   toggleTextInput: () => void;
@@ -147,8 +171,9 @@ const INITIAL_STATE = {
   setupConfig: null,
   interviewId: null,
   problem: null,
+  roundContext: null,
   messages: [],
-  currentPhase: "intro" as InterviewPhase,
+  currentPhase: "intro",
   currentCode: "",
   testResults: [],
   voiceState: "idle" as VoiceState,
@@ -172,13 +197,23 @@ export const useInterviewStore = create<InterviewStore>()(
         set({
           interviewId: config.interviewId,
           problem: config.problem,
-          currentCode: config.problem.starter_code[config.language] ?? "",
+          roundContext: config.roundContext,
+          currentCode: config.problem?.starter_code?.[config.language] ?? "",
           setupConfig: {
+            mode: config.mode,
+            roundType: config.roundType,
             difficulty: config.difficulty,
             category: config.category,
             language: config.language,
             maxDurationSeconds: config.maxDurationSeconds,
             interviewerPersona: config.interviewerPersona,
+            generatedLoopId: config.generatedLoopId ?? null,
+            generatedLoopRoundId: config.generatedLoopRoundId ?? null,
+            company: config.company ?? null,
+            roleTitle: config.roleTitle ?? null,
+            experienceLevel: config.experienceLevel ?? null,
+            loopName: config.loopName ?? null,
+            loopSummary: config.loopSummary ?? null,
           },
           isInterviewActive: true,
           startedAt: config.startedAt,
@@ -194,6 +229,8 @@ export const useInterviewStore = create<InterviewStore>()(
 
       // ── Interview ──────────────────────────────────────────────────────────
       setProblem: (problem) => set({ problem }),
+
+      setRoundContext: (roundContext) => set({ roundContext }),
 
       setCode: (code) => set({ currentCode: code }),
 
@@ -247,6 +284,7 @@ export const useInterviewStore = create<InterviewStore>()(
         setupConfig: state.setupConfig,
         interviewId: state.interviewId,
         problem: state.problem,
+        roundContext: state.roundContext,
         currentCode: state.currentCode,
         startedAt: state.startedAt,
         isInterviewActive: state.isInterviewActive,

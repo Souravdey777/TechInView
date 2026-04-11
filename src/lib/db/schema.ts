@@ -50,6 +50,24 @@ export const interviewerPersonaEnum = pgEnum("interviewer_persona", [
   "netflix",
 ]);
 
+export const interviewModeEnum = pgEnum("interview_mode", [
+  "general_dsa",
+  "targeted_loop",
+]);
+
+export const roundTypeEnum = pgEnum("round_type", [
+  "coding",
+  "technical_qa",
+  "behavioral",
+  "hiring_manager",
+  "system_design",
+]);
+
+export const historicalQuestionReviewStatusEnum = pgEnum(
+  "historical_question_review_status",
+  ["reviewed", "staged"]
+);
+
 export const messageRoleEnum = pgEnum("message_role", [
   "interviewer",
   "candidate",
@@ -109,12 +127,20 @@ export const interviews = pgTable("interviews", {
     .references(() => profiles.id, { onDelete: "cascade" })
     .notNull(),
   problem_id: uuid("problem_id")
-    .references(() => problems.id, { onDelete: "restrict" })
-    .notNull(),
+    .references(() => problems.id, { onDelete: "restrict" }),
   status: interviewStatusEnum("status").default("in_progress").notNull(),
   interviewer_persona: interviewerPersonaEnum("interviewer_persona")
     .default("tia")
     .notNull(),
+  mode: interviewModeEnum("mode").default("general_dsa").notNull(),
+  round_type: roundTypeEnum("round_type").default("coding").notNull(),
+  round_title: text("round_title"),
+  generated_loop_id: text("generated_loop_id"),
+  generated_loop_round_id: text("generated_loop_round_id"),
+  company_snapshot: text("company_snapshot"),
+  role_title_snapshot: text("role_title_snapshot"),
+  loop_summary_snapshot: jsonb("loop_summary_snapshot"),
+  round_context_snapshot: jsonb("round_context_snapshot"),
   language: text("language").notNull(),
   duration_seconds: integer("duration_seconds"),
   max_duration_seconds: integer("max_duration_seconds").default(2700).notNull(),
@@ -145,6 +171,71 @@ export const messages = pgTable("messages", {
   audio_url: text("audio_url"),
   timestamp_ms: integer("timestamp_ms").notNull(),
   metadata: jsonb("metadata"),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .default(sql`now()`)
+    .notNull(),
+});
+
+export const generatedLoops = pgTable("generated_loops", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  user_id: uuid("user_id").references(() => profiles.id, { onDelete: "set null" }),
+  mode: interviewModeEnum("mode").default("targeted_loop").notNull(),
+  company: text("company").notNull(),
+  role_title: text("role_title").notNull(),
+  experience_level: experienceLevelEnum("experience_level").notNull(),
+  jd_snapshot: text("jd_snapshot").notNull(),
+  jd_signals: text("jd_signals").array().default(sql`ARRAY[]::text[]`).notNull(),
+  loop_name: text("loop_name").notNull(),
+  summary: text("summary").notNull(),
+  confidence: text("confidence").notNull(),
+  persona_id: interviewerPersonaEnum("persona_id").default("tia").notNull(),
+  similar_company_fallback: boolean("similar_company_fallback").default(false).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .default(sql`now()`)
+    .notNull(),
+});
+
+export const generatedLoopRounds = pgTable("generated_loop_rounds", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  generated_loop_id: uuid("generated_loop_id")
+    .references(() => generatedLoops.id, { onDelete: "cascade" })
+    .notNull(),
+  round_order: integer("round_order").notNull(),
+  round_type: roundTypeEnum("round_type").notNull(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  rationale: text("rationale").notNull(),
+  confidence: text("confidence").notNull(),
+  estimated_minutes: integer("estimated_minutes").notNull(),
+  difficulty: difficultyEnum("difficulty"),
+  focus_areas: text("focus_areas").array().default(sql`ARRAY[]::text[]`).notNull(),
+  prompt: text("prompt").notNull(),
+  historical_question_ids: text("historical_question_ids").array().default(sql`ARRAY[]::text[]`).notNull(),
+  workspace_sections: jsonb("workspace_sections"),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .default(sql`now()`)
+    .notNull(),
+});
+
+export const historicalQuestions = pgTable("historical_questions", {
+  id: text("id").primaryKey(),
+  company: text("company").notNull(),
+  round_type: roundTypeEnum("round_type").notNull(),
+  role_family: text("role_family").notNull(),
+  level_band: experienceLevelEnum("level_band").notNull(),
+  topics: text("topics").array().default(sql`ARRAY[]::text[]`).notNull(),
+  jd_tags: text("jd_tags").array().default(sql`ARRAY[]::text[]`).notNull(),
+  prompt: text("prompt").notNull(),
+  source_label: text("source_label").notNull(),
+  provenance: text("provenance").notNull(),
+  confidence: real("confidence").notNull(),
+  review_status: historicalQuestionReviewStatusEnum("review_status")
+    .default("staged")
+    .notNull(),
   created_at: timestamp("created_at", { withTimezone: true })
     .default(sql`now()`)
     .notNull(),
@@ -217,6 +308,7 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
   interviews: many(interviews),
   progress: many(progress),
   payments: many(payments),
+  generatedLoops: many(generatedLoops),
 }));
 
 export const problemsRelations = relations(problems, ({ many }) => ({
@@ -234,6 +326,21 @@ export const interviewsRelations = relations(interviews, ({ one, many }) => ({
   }),
   messages: many(messages),
   feedback: one(interviewFeedback),
+}));
+
+export const generatedLoopsRelations = relations(generatedLoops, ({ one, many }) => ({
+  profile: one(profiles, {
+    fields: [generatedLoops.user_id],
+    references: [profiles.id],
+  }),
+  rounds: many(generatedLoopRounds),
+}));
+
+export const generatedLoopRoundsRelations = relations(generatedLoopRounds, ({ one }) => ({
+  generatedLoop: one(generatedLoops, {
+    fields: [generatedLoopRounds.generated_loop_id],
+    references: [generatedLoops.id],
+  }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -290,3 +397,12 @@ export type NewPayment = InferInsertModel<typeof payments>;
 
 export type InterviewFeedback = InferSelectModel<typeof interviewFeedback>;
 export type NewInterviewFeedback = InferInsertModel<typeof interviewFeedback>;
+
+export type GeneratedLoop = InferSelectModel<typeof generatedLoops>;
+export type NewGeneratedLoop = InferInsertModel<typeof generatedLoops>;
+
+export type GeneratedLoopRound = InferSelectModel<typeof generatedLoopRounds>;
+export type NewGeneratedLoopRound = InferInsertModel<typeof generatedLoopRounds>;
+
+export type HistoricalQuestion = InferSelectModel<typeof historicalQuestions>;
+export type NewHistoricalQuestion = InferInsertModel<typeof historicalQuestions>;

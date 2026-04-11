@@ -6,8 +6,10 @@
  *  - **chat**: JSON output `{reply, phase}` for the REST /api/interview/chat endpoint
  */
 
+import type { RoundType } from "@/lib/constants";
 import { PHASE_ORDER_PROMPT_LIST } from "@/lib/interview-phases";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import type { RoundContextSnapshot } from "@/lib/loops/types";
 
 export type ProblemPayload = {
   title?: string;
@@ -16,7 +18,20 @@ export type ProblemPayload = {
   follow_up_questions?: string[];
 } | null;
 
-function phaseInstruction(currentPhase: string, problem: ProblemPayload): string {
+type PromptOptions = {
+  roundType: RoundType;
+  problem: ProblemPayload;
+  roundContext?: RoundContextSnapshot | null;
+  currentPhase: string;
+  totalMinutes: number;
+  interviewerPersonaId?: string | null;
+  currentCode?: string;
+  minutesElapsed?: number;
+  hasCandidateCode?: boolean;
+  hasWorkspaceNotes?: boolean;
+};
+
+function codingPhaseInstruction(currentPhase: string, problem: ProblemPayload): string {
   switch (currentPhase) {
     case "INTRO":
       return "You are in the INTRO phase. Introduce yourself warmly, ask about their background briefly, and keep it to 2-3 sentences. Then transition naturally toward presenting the problem.";
@@ -48,10 +63,78 @@ function phaseInstruction(currentPhase: string, problem: ProblemPayload): string
   }
 }
 
+function discussionPhaseInstruction(currentPhase: string, roundType: RoundType): string {
+  if (roundType === "technical_qa") {
+    switch (currentPhase) {
+      case "INTRO":
+        return "Open warmly, confirm the candidate's strongest language and frameworks, and explain that this will be a practical technical Q&A round.";
+      case "PROBLEM_PRESENTED":
+        return "Start the first high-signal technical question. Keep it scoped, concrete, and relevant to the stated language/framework stack.";
+      case "CLARIFICATION":
+        return "Probe for context: ask what assumptions the candidate is making, where they have used the technology, and what constraints matter.";
+      case "APPROACH_DISCUSSION":
+        return "Push the candidate to structure the answer clearly. Ask for tradeoffs, alternatives, and why they would choose one path over another.";
+      case "CODING":
+        return "Use this as the deep technical dive. Ask follow-up questions on internals, failure modes, debugging, runtime behavior, and practical implementation details.";
+      case "TESTING":
+        return "Stress-test the answer with scenarios, edge cases, observability, rollout risks, or performance bottlenecks.";
+      case "COMPLEXITY_ANALYSIS":
+        return "Probe on judgment: ask what they would optimize for in production, what they would defer, and how they would validate their approach.";
+      case "FOLLOW_UP":
+        return "Ask one sharper follow-up that explores adjacent technical depth in the same stack.";
+      case "WRAP_UP":
+        return "Wrap up professionally with one genuine positive note and one realistic improvement area.";
+      default:
+        return "Respond naturally as a technical interviewer.";
+    }
+  }
+
+  switch (currentPhase) {
+    case "INTRO":
+      return "Open warmly, explain how this round will work, and let the candidate settle in before you probe.";
+    case "PROBLEM_PRESENTED":
+      return roundType === "system_design"
+        ? "Present the design prompt clearly, then ask the candidate to clarify scope, requirements, and constraints."
+        : "Present the question prompt clearly, then invite the candidate to take a moment and start with context.";
+    case "CLARIFICATION":
+      return roundType === "system_design"
+        ? "Stay in requirements clarification. Ask for scale assumptions, API expectations, and success criteria."
+        : "Stay in context gathering. Ask who was involved, what the stakes were, and what constraints mattered.";
+    case "APPROACH_DISCUSSION":
+      return roundType === "system_design"
+        ? "Push for a clear high-level design before the candidate dives into details."
+        : "Ask the candidate to structure the answer, make their role clear, and avoid vague storytelling.";
+    case "CODING":
+      return roundType === "system_design"
+        ? "Use this as the architecture deep dive. Probe on components, data flow, interfaces, and critical decisions."
+        : "Use this as the answer deep dive. Ask follow-ups that expose decisions, tradeoffs, and what the candidate did personally.";
+    case "TESTING":
+      return roundType === "system_design"
+        ? "Probe for bottlenecks, edge cases, failure modes, and operational concerns."
+        : "Probe for reflection and signal quality. Ask what was hard, what changed, and how they knew the outcome was good.";
+    case "COMPLEXITY_ANALYSIS":
+      return roundType === "system_design"
+        ? "Probe on tradeoffs, scaling decisions, and what they would do next at higher load."
+        : "Probe on judgment, prioritization, and tradeoffs. Ask what they optimized for and what they would change with more time.";
+    case "FOLLOW_UP":
+      return "Present one sharper follow-up scenario that stresses the same core signal in a new way.";
+    case "WRAP_UP":
+      return "Wrap up professionally with a brief positive note and one realistic improvement area.";
+    default:
+      return "Respond naturally as an interviewer.";
+  }
+}
+
+function phaseInstruction(currentPhase: string, roundType: RoundType, problem: ProblemPayload): string {
+  return roundType === "coding"
+    ? codingPhaseInstruction(currentPhase, problem)
+    : discussionPhaseInstruction(currentPhase, roundType);
+}
+
 function buildPersonaBlock(interviewerPersonaId?: string | null): string {
   const persona = getInterviewerPersona(interviewerPersonaId);
 
-  return `You are ${persona.name}, a ${persona.companyLabel === "Generalist" ? "FAANG-calibrated generalist" : `${persona.companyLabel}-style`} senior technical interviewer conducting a live coding interview.
+  return `You are ${persona.name}, a ${persona.companyLabel === "Generalist" ? "FAANG-calibrated generalist" : `${persona.companyLabel}-style`} senior technical interviewer conducting a live interview.
 
 Your persona:
 - ${persona.shortStyleSummary}
@@ -75,22 +158,44 @@ Description: ${problem.description}
 ${problem.solution_approach ? `\nOptimal Approach (CONFIDENTIAL — guide the candidate toward this but NEVER reveal it directly): ${problem.solution_approach}` : ""}`;
 }
 
-function basePrompt(
-  problem: ProblemPayload,
-  currentPhase: string,
-  currentCode: string,
-  minutesElapsed: number,
-  totalMinutes: number,
-  interviewerPersonaId?: string | null,
-): string {
-  return `${buildPersonaBlock(interviewerPersonaId)}${buildProblemBlock(problem)}
+function buildRoundContextBlock(roundType: RoundType, roundContext?: RoundContextSnapshot | null): string {
+  if (!roundContext || roundType === "coding") return "";
 
-## Current Phase (conversation context): ${currentPhase}
-${phaseInstruction(currentPhase, problem)}
+  const historicalQuestions = roundContext.historicalQuestions
+    .map((question, index) => `${index + 1}. ${question.prompt}`)
+    .join("\n");
 
-## Time: ${minutesElapsed} minute(s) elapsed of a ${totalMinutes}-minute interview
+  const sections = roundContext.workspaceSections
+    .map((section) => `- ${section.label}: ${section.placeholder}`)
+    .join("\n");
+  const sectionsHeading =
+    roundType === "technical_qa" ? "Reference answer anchors:" : "Candidate workspace sections:";
+  const emptySectionsText =
+    roundType === "technical_qa" ? "- No reference anchors" : "- No structured sections";
 
-${currentCode && currentCode.trim() ? `## Candidate's Current Code:\n${currentCode}` : ""}`;
+  return `
+## Round Context
+Title: ${roundContext.title}
+Summary: ${roundContext.summary}
+Focus areas: ${roundContext.focusAreas.join(", ")}
+Interviewer brief: ${roundContext.prompt}
+Historical question examples:
+${historicalQuestions || "- None provided"}
+${sectionsHeading}
+${sections || emptySectionsText}
+`;
+}
+
+function basePrompt(options: PromptOptions): string {
+  return `${buildPersonaBlock(options.interviewerPersonaId)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
+
+## Active Round Type: ${options.roundType}
+## Current Phase (conversation context): ${options.currentPhase}
+${phaseInstruction(options.currentPhase, options.roundType, options.problem)}
+
+## Time: ${options.minutesElapsed ?? 0} minute(s) elapsed of a ${options.totalMinutes}-minute interview
+
+${options.currentCode && options.currentCode.trim() ? `## Candidate's Current Code:\n${options.currentCode}` : ""}`;
 }
 
 /**
@@ -98,27 +203,44 @@ ${currentCode && currentCode.trim() ? `## Candidate's Current Code:\n${currentCo
  * Output is plain spoken text; phase transitions happen via the
  * `set_interview_phase` function call, not JSON.
  */
-export function buildVoiceSystemPrompt(
-  problem: ProblemPayload,
-  currentPhase: string,
-  hasCandidateCode: boolean,
-  totalMinutes: number,
-  interviewerPersonaId?: string | null,
-): string {
-  return `${buildPersonaBlock(interviewerPersonaId)}${buildProblemBlock(problem)}
+export function buildVoiceSystemPrompt(options: PromptOptions): string {
+  const hasWorkspaceNotes =
+    options.hasWorkspaceNotes ??
+    (options.roundType !== "coding" && options.roundType !== "technical_qa");
+  const contextLine =
+    options.roundType === "coding" && options.hasCandidateCode
+      ? "The candidate already has code in the editor."
+      : options.roundType === "coding"
+        ? "The editor may still be empty or only contain starter code."
+        : !hasWorkspaceNotes
+          ? "There is no coding editor or shared notes board in this round. Keep the experience voice-first."
+          : "The candidate may be using the structured notes workspace while answering.";
+  const guidanceLine =
+    options.roundType === "coding"
+      ? "Before you make code-specific claims, debugging suggestions, or testing recommendations, call `get_current_code` in that turn."
+      : !hasWorkspaceNotes
+        ? "Do not reference a notes board or ask the candidate to write things down. Base your follow-ups on the live conversation."
+        : "Before you assume the candidate has already covered an area in the workspace, call `get_workspace_notes` in that turn.";
+  const extraFunctionLines =
+    options.roundType === "coding"
+      ? "- `get_current_code`: Retrieve the candidate's current code from the editor.\n- `run_tests`: Execute the candidate's code against test cases and return results."
+      : !hasWorkspaceNotes
+        ? ""
+        : "- `get_workspace_notes`: Retrieve the candidate's structured notes from the workspace before making claims about what they have already written down.";
 
-## Current Phase (conversation context): ${currentPhase}
-${phaseInstruction(currentPhase, problem)}
+  return `${buildPersonaBlock(options.interviewerPersonaId)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
+
+## Active Round Type: ${options.roundType}
+## Current Phase (conversation context): ${options.currentPhase}
+${phaseInstruction(options.currentPhase, options.roundType, options.problem)}
 
 ## Interview timing
-This is a ${totalMinutes}-minute interview.
+This is a ${options.totalMinutes}-minute interview.
 Use \`get_interview_state\` whenever you need the exact elapsed time, remaining time, current phase, or latest test summary.
 
 ## Candidate code context
-${hasCandidateCode
-    ? "The candidate already has code in the editor."
-    : "The editor may still be empty or only contain starter code."}
-Before you make code-specific claims, debugging suggestions, or testing recommendations, call \`get_current_code\` in that turn.
+${contextLine}
+${guidanceLine}
 
 ## Phase transitions
 When the conversation naturally moves to a new phase, call the \`set_interview_phase\` function with the appropriate phase. Valid phases: ${PHASE_ORDER_PROMPT_LIST}.
@@ -128,8 +250,7 @@ When the conversation naturally moves to a new phase, call the \`set_interview_p
 
 ## Available functions
 - \`set_interview_phase\`: Update the UI phase when the conversation transitions.
-- \`get_current_code\`: Retrieve the candidate's current code from the editor.
-- \`run_tests\`: Execute the candidate's code against test cases and return results.
+${extraFunctionLines}
 - \`get_interview_state\`: Get current interview state (phase, time left, test summary).
 
 ## Output rules
@@ -141,24 +262,10 @@ When you mention arrays, examples, or complexity, say them in spoken English rat
  * System prompt for the REST chat endpoint.
  * Output must be a JSON object `{reply, phase}`.
  */
-export function buildChatSystemPrompt(
-  problem: ProblemPayload,
-  currentPhase: string,
-  currentCode: string,
-  minutesElapsed: number,
-  totalMinutes: number,
-  interviewerPersonaId?: string | null,
-): string {
-  const persona = getInterviewerPersona(interviewerPersonaId);
+export function buildChatSystemPrompt(options: PromptOptions): string {
+  const persona = getInterviewerPersona(options.interviewerPersonaId);
 
-  return `${basePrompt(
-    problem,
-    currentPhase,
-    currentCode,
-    minutesElapsed,
-    totalMinutes,
-    interviewerPersonaId,
-  )}
+  return `${basePrompt(options)}
 
 ## Phase you report (authoritative for the UI after this turn)
 After this reply, set JSON field "phase" to the single phase that best matches where the interview should sit next — one of: ${PHASE_ORDER_PROMPT_LIST}.

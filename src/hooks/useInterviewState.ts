@@ -17,9 +17,12 @@ const PHASE_DESCRIPTIONS: Record<InterviewPhase, string> = {
 
 export function useInterviewState() {
   const store = useInterviewStore();
+  const currentPhase = INTERVIEW_PHASES.includes(store.currentPhase as InterviewPhase)
+    ? (store.currentPhase as InterviewPhase)
+    : "intro";
 
   const advancePhase = () => {
-    const currentIndex = INTERVIEW_PHASES.indexOf(store.currentPhase);
+    const currentIndex = INTERVIEW_PHASES.indexOf(currentPhase);
     const nextIndex = currentIndex + 1;
     if (nextIndex < INTERVIEW_PHASES.length) {
       store.setPhase(INTERVIEW_PHASES[nextIndex]);
@@ -28,8 +31,8 @@ export function useInterviewState() {
 
   const getPhaseInfo = (): { label: string; description: string } => {
     return {
-      label: PHASE_LABELS[store.currentPhase],
-      description: PHASE_DESCRIPTIONS[store.currentPhase],
+      label: PHASE_LABELS[currentPhase],
+      description: PHASE_DESCRIPTIONS[currentPhase],
     };
   };
 
@@ -38,7 +41,7 @@ export function useInterviewState() {
     interviewId: store.interviewId,
     problem: store.problem,
     messages: store.messages,
-    currentPhase: store.currentPhase,
+    currentPhase,
     currentCode: store.currentCode,
     testResults: store.testResults,
     voiceState: store.voiceState,

@@ -1,0 +1,21 @@
+<svg width="720" height="160" viewBox="0 0 720 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="techinview-logo-gradient" x1="24" y1="28" x2="104" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE" />
+      <stop offset="1" stop-color="#34D399" />
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="#10161F" stroke="rgba(34,211,238,0.22)"/>
+  <path d="M48 34H40C31.163 34 24 41.163 24 50V90C24 98.837 31.163 106 40 106H48" stroke="url(#techinview-logo-gradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M80 34H88C96.837 34 104 41.163 104 50V90C104 98.837 96.837 106 88 106H80" stroke="url(#techinview-logo-gradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="48" y="50" width="8" height="28" rx="4" fill="url(#techinview-logo-gradient)"/>
+  <rect x="60" y="40" width="8" height="48" rx="4" fill="url(#techinview-logo-gradient)"/>
+  <rect x="72" y="50" width="8" height="28" rx="4" fill="url(#techinview-logo-gradient)"/>
+  <text x="148" y="77" fill="#E2E8F0" font-size="50" font-weight="700" font-family="Sora, ui-sans-serif, system-ui, sans-serif" letter-spacing="-1.4">
+    TechInView
+  </text>
+  <circle cx="658" cy="88" r="6.5" fill="#22D3EE"/>
+  <text x="150" y="110" fill="#7A8BA3" font-size="18" font-weight="500" font-family="Sora, ui-sans-serif, system-ui, sans-serif" letter-spacing="0.08em">
+    VOICE-FIRST AI INTERVIEWS
+  </text>
+</svg>

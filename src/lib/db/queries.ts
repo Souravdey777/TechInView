@@ -6,6 +6,13 @@ import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import { DEFAULT_INTERVIEWER_PERSONA } from "@/lib/interviewer-personas";
+import type {
+  GeneratedLoop as GeneratedLoopSnapshot,
+  HistoricalQuestion as HistoricalQuestionSnapshot,
+  LoopSummarySnapshot,
+  RoundContextSnapshot,
+} from "@/lib/loops/types";
+import type { InterviewMode, RoundType } from "@/lib/constants";
 
 import type { Profile, Problem, Interview, Message, Progress, Payment, InterviewFeedback } from "./schema";
 
@@ -31,11 +38,49 @@ function isMissingInterviewerPersonaColumnError(error: unknown): boolean {
   return err?.code === "42703" && haystack.includes("interviewer_persona");
 }
 
+function isMissingSchemaObjectError(error: unknown, token: string): boolean {
+  const err = error as { code?: string; message?: string; detail?: string };
+  const haystack = `${err?.message ?? ""} ${err?.detail ?? ""}`.toLowerCase();
+  return (
+    (err?.code === "42703" || err?.code === "42P01" || err?.code === "42704") &&
+    haystack.includes(token.toLowerCase())
+  );
+}
+
 function withDefaultInterviewerPersona<T extends Record<string, unknown>>(row: T): Interview {
   return {
     ...row,
     interviewer_persona: DEFAULT_INTERVIEWER_PERSONA,
+    mode: "general_dsa",
+    round_type: "coding",
+    round_title: null,
+    generated_loop_id: null,
+    generated_loop_round_id: null,
+    company_snapshot: null,
+    role_title_snapshot: null,
+    loop_summary_snapshot: null,
+    round_context_snapshot: null,
   } as unknown as Interview;
+}
+
+function stripRoundAwareInterviewFields(
+  data: Partial<Omit<Interview, "id" | "user_id" | "problem_id" | "started_at">>
+) {
+  const {
+    interviewer_persona: _persona,
+    mode: _mode,
+    round_type: _roundType,
+    round_title: _roundTitle,
+    generated_loop_id: _generatedLoopId,
+    generated_loop_round_id: _generatedLoopRoundId,
+    company_snapshot: _companySnapshot,
+    role_title_snapshot: _roleTitleSnapshot,
+    loop_summary_snapshot: _loopSummarySnapshot,
+    round_context_snapshot: _roundContextSnapshot,
+    ...legacyData
+  } = data;
+
+  return legacyData;
 }
 
 // ─── Profile Queries ──────────────────────────────────────────────────────────
@@ -174,6 +219,44 @@ export async function getRandomProblem(
   return (await query)[0];
 }
 
+export async function getRandomProblemForCompany(options: {
+  company?: string | null;
+  difficulty?: "easy" | "medium" | "hard";
+  categories?: string[];
+}): Promise<Problem | undefined> {
+  const db = getDb();
+  const baseConditions = [];
+
+  if (options.difficulty) {
+    baseConditions.push(eq(schema.problems.difficulty, options.difficulty));
+  }
+
+  if (options.categories && options.categories.length > 0) {
+    baseConditions.push(inArray(schema.problems.category, options.categories));
+  }
+
+  const query = db
+    .select()
+    .from(schema.problems)
+    .orderBy(sql`random()`)
+    .limit(1);
+
+  if (options.company) {
+    const companyMatch = sql`${schema.problems.company_tags} @> ARRAY[${options.company}]::text[]`;
+    const companyResult = baseConditions.length > 0
+      ? await query.where(and(...baseConditions, companyMatch))
+      : await query.where(companyMatch);
+
+    if (companyResult[0]) return companyResult[0];
+  }
+
+  if (baseConditions.length > 0) {
+    return (await query.where(and(...baseConditions)))[0];
+  }
+
+  return (await query)[0];
+}
+
 export async function getRelatedProblems(
   categories: string[],
   limit = 4
@@ -190,15 +273,42 @@ export async function getRelatedProblems(
 
 // ─── Interview Queries ────────────────────────────────────────────────────────
 
-export async function createInterview(
-  userId: string,
-  problemId: string,
-  interviewerPersona: InterviewerPersonaId,
-  language: string,
-  maxDuration = 2700,
-  isFreeTrial = false
-): Promise<Interview> {
+export async function createInterview(params: {
+  userId: string;
+  problemId: string | null;
+  interviewerPersona: InterviewerPersonaId;
+  language: string;
+  maxDuration?: number;
+  isFreeTrial?: boolean;
+  mode?: InterviewMode;
+  roundType?: RoundType;
+  roundTitle?: string | null;
+  generatedLoopId?: string | null;
+  generatedLoopRoundId?: string | null;
+  companySnapshot?: string | null;
+  roleTitleSnapshot?: string | null;
+  loopSummarySnapshot?: LoopSummarySnapshot | null;
+  roundContextSnapshot?: RoundContextSnapshot | null;
+}): Promise<Interview> {
   const db = getDb();
+  const {
+    userId,
+    problemId,
+    interviewerPersona,
+    language,
+    maxDuration = 2700,
+    isFreeTrial = false,
+    mode = "general_dsa",
+    roundType = "coding",
+    roundTitle = null,
+    generatedLoopId = null,
+    generatedLoopRoundId = null,
+    companySnapshot = null,
+    roleTitleSnapshot = null,
+    loopSummarySnapshot = null,
+    roundContextSnapshot = null,
+  } = params;
+
   try {
     const results = await db
       .insert(schema.interviews)
@@ -206,6 +316,15 @@ export async function createInterview(
         user_id: userId,
         problem_id: problemId,
         interviewer_persona: interviewerPersona,
+        mode,
+        round_type: roundType,
+        round_title: roundTitle,
+        generated_loop_id: generatedLoopId,
+        generated_loop_round_id: generatedLoopRoundId,
+        company_snapshot: companySnapshot,
+        role_title_snapshot: roleTitleSnapshot,
+        loop_summary_snapshot: loopSummarySnapshot ?? null,
+        round_context_snapshot: roundContextSnapshot ?? null,
         language,
         max_duration_seconds: maxDuration,
         is_free_trial: isFreeTrial,
@@ -214,7 +333,12 @@ export async function createInterview(
       .returning();
     return results[0];
   } catch (error) {
-    if (!isMissingInterviewerPersonaColumnError(error)) {
+    if (
+      !isMissingInterviewerPersonaColumnError(error) &&
+      !isMissingSchemaObjectError(error, "mode") &&
+      !isMissingSchemaObjectError(error, "round_type") &&
+      !isMissingSchemaObjectError(error, "round_title")
+    ) {
       throw error;
     }
 
@@ -311,11 +435,16 @@ export async function updateInterview(
       .returning();
     return results[0];
   } catch (error) {
-    if (!isMissingInterviewerPersonaColumnError(error)) {
+    if (
+      !isMissingInterviewerPersonaColumnError(error) &&
+      !isMissingSchemaObjectError(error, "mode") &&
+      !isMissingSchemaObjectError(error, "round_type") &&
+      !isMissingSchemaObjectError(error, "round_title")
+    ) {
       throw error;
     }
 
-    const { interviewer_persona: _ignored, ...legacyData } = data;
+    const legacyData = stripRoundAwareInterviewFields(data);
     const results = await db
       .update(schema.interviews)
       .set(legacyData)
@@ -560,6 +689,164 @@ export async function insertInterviewFeedback(data: {
     })
     .returning();
   return results[0];
+}
+
+export async function createGeneratedLoop(params: {
+  userId?: string | null;
+  loop: GeneratedLoopSnapshot;
+}): Promise<{ id: string; rounds: { id: string; order: number }[] } | null> {
+  const db = getDb();
+
+  try {
+    const loopResults = await db
+      .insert(schema.generatedLoops)
+      .values({
+        user_id: params.userId ?? null,
+        mode: params.loop.mode,
+        company: params.loop.company,
+        role_title: params.loop.roleTitle,
+        experience_level: params.loop.experienceLevel,
+        jd_snapshot: params.loop.jdText,
+        jd_signals: params.loop.jdSignals,
+        loop_name: params.loop.loopName,
+        summary: params.loop.summary,
+        confidence: params.loop.confidence,
+        persona_id: params.loop.personaId,
+        similar_company_fallback: params.loop.similarCompanyFallback,
+      })
+      .returning({
+        id: schema.generatedLoops.id,
+      });
+
+    const generatedLoopId = loopResults[0]?.id;
+    if (!generatedLoopId) return null;
+
+    const roundResults = await db
+      .insert(schema.generatedLoopRounds)
+      .values(
+        params.loop.rounds.map((round) => ({
+          generated_loop_id: generatedLoopId,
+          round_order: round.order,
+          round_type: round.roundType,
+          title: round.title,
+          summary: round.summary,
+          rationale: round.rationale,
+          confidence: round.confidence,
+          estimated_minutes: round.estimatedMinutes,
+          difficulty: round.difficulty,
+          focus_areas: round.focusAreas,
+          prompt: round.prompt,
+          historical_question_ids: round.historicalQuestions.map((question) => question.id),
+          workspace_sections: round.workspaceSections,
+        }))
+      )
+      .returning({
+        id: schema.generatedLoopRounds.id,
+        round_order: schema.generatedLoopRounds.round_order,
+      });
+
+    return {
+      id: generatedLoopId,
+      rounds: roundResults.map((round) => ({
+        id: round.id,
+        order: round.round_order,
+      })),
+    };
+  } catch (error) {
+    if (
+      isMissingSchemaObjectError(error, "generated_loops") ||
+      isMissingSchemaObjectError(error, "generated_loop_rounds")
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+export async function getGeneratedLoopById(loopId: string): Promise<{
+  loop: schema.GeneratedLoop;
+  rounds: schema.GeneratedLoopRound[];
+} | null> {
+  const db = getDb();
+
+  try {
+    const loop = await db
+      .select()
+      .from(schema.generatedLoops)
+      .where(eq(schema.generatedLoops.id, loopId))
+      .limit(1);
+
+    if (!loop[0]) return null;
+
+    const rounds = await db
+      .select()
+      .from(schema.generatedLoopRounds)
+      .where(eq(schema.generatedLoopRounds.generated_loop_id, loopId))
+      .orderBy(asc(schema.generatedLoopRounds.round_order));
+
+    return {
+      loop: loop[0],
+      rounds,
+    };
+  } catch (error) {
+    if (
+      isMissingSchemaObjectError(error, "generated_loops") ||
+      isMissingSchemaObjectError(error, "generated_loop_rounds")
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+export async function upsertHistoricalQuestions(
+  questions: HistoricalQuestionSnapshot[]
+): Promise<void> {
+  const db = getDb();
+
+  try {
+    await db
+      .insert(schema.historicalQuestions)
+      .values(
+        questions.map((question) => ({
+          id: question.id,
+          company: question.company,
+          round_type: question.roundType,
+          role_family: question.roleFamily,
+          level_band: question.levelBand,
+          topics: question.topics,
+          jd_tags: question.jdTags,
+          prompt: question.prompt,
+          source_label: question.sourceLabel,
+          provenance: question.provenance,
+          confidence: question.confidence,
+          review_status: question.reviewStatus,
+        }))
+      )
+      .onConflictDoUpdate({
+        target: schema.historicalQuestions.id,
+        set: {
+          company: sql`excluded.company`,
+          round_type: sql`excluded.round_type`,
+          role_family: sql`excluded.role_family`,
+          level_band: sql`excluded.level_band`,
+          topics: sql`excluded.topics`,
+          jd_tags: sql`excluded.jd_tags`,
+          prompt: sql`excluded.prompt`,
+          source_label: sql`excluded.source_label`,
+          provenance: sql`excluded.provenance`,
+          confidence: sql`excluded.confidence`,
+          review_status: sql`excluded.review_status`,
+        },
+      });
+  } catch (error) {
+    if (isMissingSchemaObjectError(error, "historical_questions")) {
+      return;
+    }
+    throw error;
+  }
 }
 
 export async function getInterviewFeedback(

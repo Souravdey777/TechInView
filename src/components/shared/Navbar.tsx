@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Cpu, Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 type NavLink = {
   href: string;
@@ -46,12 +47,11 @@ export function Navbar({ isLoggedIn = false }: NavbarProps) {
           className="flex items-center gap-2 group"
           onClick={closeMobile}
         >
-          <div className="flex items-center justify-center w-7 h-7 rounded-md bg-brand-cyan/10 border border-brand-cyan/30 group-hover:border-brand-cyan/50 transition-colors">
-            <Cpu className="w-3.5 h-3.5 text-brand-cyan" />
-          </div>
-          <span className="text-brand-text font-heading font-semibold text-sm tracking-tight">
-            TechInView<span className="text-brand-cyan">.ai</span>
-          </span>
+          <BrandLogo
+            size="sm"
+            boxClassName="h-7 w-7 rounded-md group-hover:border-brand-cyan/50 transition-colors"
+            wordmarkClassName="text-sm"
+          />
         </Link>
 
         {/* Desktop Nav Links */}

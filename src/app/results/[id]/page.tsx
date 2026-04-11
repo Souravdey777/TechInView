@@ -12,15 +12,17 @@ import { FeedbackCard } from "@/components/results/FeedbackCard";
 import { TranscriptReview } from "@/components/results/TranscriptReview";
 import { CodeReview } from "@/components/results/CodeReview";
 import { InterviewReviewGate } from "@/components/results/InterviewReviewGate";
-import { SCORING_DIMENSIONS } from "@/lib/constants";
-import type { HireRecommendation } from "@/lib/constants";
+import { ROUND_SCORING_DIMENSIONS, SCORING_DIMENSIONS } from "@/lib/constants";
+import type { HireRecommendation, InterviewMode, RoundScoreDimension, RoundType, ScoringDimension } from "@/lib/constants";
 import { useInterviewStore } from "@/stores/interview-store";
 import { useSupabase } from "@/hooks/useSupabase";
 import { getInterviewerPersona, resolveInterviewerPersona } from "@/lib/interviewer-personas";
+import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
+import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-type DimensionKey = "problem_solving" | "code_quality" | "communication" | "technical_knowledge" | "testing";
+type DimensionKey = ScoringDimension | RoundScoreDimension;
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -34,6 +36,16 @@ function formatLanguage(lang: string) {
     cpp: "C++",
   };
   return map[lang] ?? lang;
+}
+
+function getDimensionConfig(mode: InterviewMode) {
+  return mode === "targeted_loop" ? ROUND_SCORING_DIMENSIONS : SCORING_DIMENSIONS;
+}
+
+function getDimensionKeys(mode: InterviewMode): DimensionKey[] {
+  return mode === "targeted_loop"
+    ? (Object.keys(ROUND_SCORING_DIMENSIONS) as RoundScoreDimension[])
+    : (Object.keys(SCORING_DIMENSIONS) as ScoringDimension[]);
 }
 
 // ─── Empty state: no result found in store ────────────────────────────────────
@@ -70,7 +82,7 @@ function NoResultState() {
               Go to Dashboard
             </Link>
             <Link
-              href="/interview/setup"
+              href="/interviews/dsa/setup"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 transition-colors"
             >
               <RefreshCw className="h-4 w-4" />
@@ -174,6 +186,9 @@ export default function ResultsPage() {
             const msgs = (interview.messages as unknown as { role: string; content: string; timestamp_ms: number }[]) || [];
 
             setDbResult({
+              mode: (interview.mode as InterviewMode | null) ?? "general_dsa",
+              roundType: (interview.round_type as RoundType | null) ?? "coding",
+              roundTitle: interview.round_title ?? prob?.title ?? "Interview Round",
               interviewId: interview.id,
               interviewerPersona: resolveInterviewerPersona(interview.interviewer_persona),
               finalCode: interview.final_code ?? "",
@@ -197,9 +212,16 @@ export default function ResultsPage() {
               areasToImprove: null,
               testsPassed: interview.tests_passed ?? 0,
               testsTotal: interview.tests_total ?? 0,
-              problemTitle: prob?.title ?? "Interview",
+              problemTitle: prob?.title ?? interview.round_title ?? "Interview",
               problemDifficulty: prob?.difficulty ?? "medium",
               problemCategory: prob?.category ?? "arrays",
+              company: interview.company_snapshot ?? null,
+              roleTitle: interview.role_title_snapshot ?? null,
+              loopName:
+                (interview.loop_summary_snapshot as LoopSummarySnapshot | null)?.loopName ?? null,
+              loopSummary: (interview.loop_summary_snapshot as LoopSummarySnapshot | null) ?? null,
+              roundContext:
+                (interview.round_context_snapshot as RoundContextSnapshot | null) ?? null,
             });
           }
         }
@@ -269,6 +291,17 @@ export default function ResultsPage() {
   const summary = result.summary;
   const finalCode = result.finalCode;
   const codeLanguage = result.language ?? setupConfig?.language ?? "python";
+  const mode = result.mode ?? setupConfig?.mode ?? "general_dsa";
+  const roundType = result.roundType ?? setupConfig?.roundType ?? "coding";
+  const roundTitle =
+    result.roundTitle ??
+    result.roundContext?.title ??
+    result.problemTitle ??
+    "Interview Round";
+  const company = result.company ?? setupConfig?.company ?? null;
+  const roleTitle = result.roleTitle ?? setupConfig?.roleTitle ?? null;
+  const loopSummary = result.loopSummary ?? setupConfig?.loopSummary ?? null;
+  const roundContext = result.roundContext ?? null;
   const testsPassed = result.testsPassed;
   const testsTotal = result.testsTotal;
   const keyStrengths = result.keyStrengths;
@@ -282,21 +315,39 @@ export default function ResultsPage() {
   const interviewer = getInterviewerPersona(
     result.interviewerPersona ?? setupConfig?.interviewerPersona
   );
+  const dimensionConfig = getDimensionConfig(mode) as Record<
+    DimensionKey,
+    { label: string; weight: number; description: string }
+  >;
+  const dimensionKeys = getDimensionKeys(mode);
+  const shouldShowCodeReview = roundType === "coding" && finalCode.trim().length > 0;
+  const sessionMeta =
+    mode === "targeted_loop"
+      ? [
+          interviewer.name,
+          company,
+          roundTitle,
+          roleTitle,
+          roundType === "coding" ? displayLanguage : ROUND_TYPE_LABELS[roundType],
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : `${interviewer.name} · ${problemTitle} · ${capitalize(problemDifficulty)} · ${displayLanguage}`;
 
   // Radar + feedback card data (only built when scores exist)
   const radarData = hasScores && scores
-    ? (Object.keys(scores) as DimensionKey[]).map((key) => ({
-        dimension: SCORING_DIMENSIONS[key].label,
+    ? dimensionKeys.filter((key) => scores[key]).map((key) => ({
+        dimension: dimensionConfig[key].label,
         score: scores[key].score,
         maxScore: 100,
       }))
     : [];
 
   const feedbackCards = hasScores && scores
-    ? (Object.keys(scores) as DimensionKey[]).map((key) => ({
-        dimension: SCORING_DIMENSIONS[key].label,
+    ? dimensionKeys.filter((key) => scores[key]).map((key) => ({
+        dimension: dimensionConfig[key].label,
         score: scores[key].score,
-        weight: SCORING_DIMENSIONS[key].weight,
+        weight: dimensionConfig[key].weight,
         feedback: scores[key].feedback,
       }))
     : [];
@@ -347,7 +398,7 @@ export default function ResultsPage() {
             Back to Dashboard
           </Link>
           <span className="text-xs text-brand-muted bg-brand-surface border border-brand-border px-3 py-1 rounded-full">
-            {interviewer.name} &middot; {problemTitle} &middot; {capitalize(problemDifficulty)} &middot; {displayLanguage}
+            {sessionMeta}
           </span>
         </div>
 
@@ -358,10 +409,57 @@ export default function ResultsPage() {
           </h1>
           <p className="text-sm text-brand-muted mt-1">
             {hasScores
-              ? "Here\u2019s a detailed breakdown of your performance across all 5 dimensions."
+              ? mode === "targeted_loop"
+                ? "Here\u2019s how you showed up in this round across the shared five interview signals."
+                : "Here\u2019s a detailed breakdown of your performance across all 5 dimensions."
               : "Your interview session has ended. Score breakdown was not available for this session."}
           </p>
         </div>
+
+        {mode === "targeted_loop" && (loopSummary || roundContext) && (
+          <section className="mb-6 r-anim-3">
+            <div className="rounded-xl border border-brand-border bg-brand-card p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
+                    Targeted Loop Context
+                  </p>
+                  <h2 className="mt-2 text-lg font-semibold text-brand-text">
+                    {roundTitle}
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-brand-muted">
+                    {roundContext?.summary ??
+                      `This round was generated for ${company ?? "your target company"} and ${roleTitle ?? "your target role"}.`}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-brand-border bg-brand-surface px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-muted">
+                    Loop
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">
+                    {loopSummary?.loopName ?? "Targeted SWE loop"}
+                  </p>
+                  <p className="mt-1 text-xs text-brand-muted">
+                    {company ?? "Company"} · {roleTitle ?? "Role"}
+                  </p>
+                </div>
+              </div>
+
+              {roundContext?.focusAreas && roundContext.focusAreas.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {roundContext.focusAreas.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ── Section 1: Score Summary (only if scores exist) ── */}
         {hasScores && overallScore !== null && hireRec && summary ? (
@@ -473,7 +571,7 @@ export default function ResultsPage() {
         )}
 
         {/* ── Section 4: Code Review (always shown when code exists) ── */}
-        {finalCode && (
+        {shouldShowCodeReview && (
           <section className="mb-6 r-anim-7">
             <CodeReview
               code={finalCode}
@@ -493,11 +591,11 @@ export default function ResultsPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-brand-border r-anim-8">
           <p className="text-sm text-brand-muted">Ready to improve your score?</p>
           <Link
-            href="/interview/setup"
+            href={mode === "targeted_loop" ? "/prep-plans" : "/interviews/dsa/setup"}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
           >
             <RefreshCw className="h-4 w-4" />
-            Practice Again
+            {mode === "targeted_loop" ? "Practice Another Targeted Round" : "Practice Again"}
           </Link>
         </div>
 

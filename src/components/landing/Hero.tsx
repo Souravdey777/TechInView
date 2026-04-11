@@ -11,7 +11,7 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const searchParams = useSearchParams();
   const refParam = searchParams.get("ref");
-  const ctaHref = refParam ? `/signup?ref=${refParam}` : "/login";
+  const ctaHref = refParam ? `/signup?ref=${refParam}` : "/signup";
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

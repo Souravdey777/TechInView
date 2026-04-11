@@ -1,6 +1,18 @@
 export const SUPPORTED_LANGUAGES = ["python", "javascript", "java", "cpp"] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
+export const INTERVIEW_MODES = ["general_dsa", "targeted_loop"] as const;
+export type InterviewMode = (typeof INTERVIEW_MODES)[number];
+
+export const ROUND_TYPES = [
+  "coding",
+  "technical_qa",
+  "behavioral",
+  "hiring_manager",
+  "system_design",
+] as const;
+export type RoundType = (typeof ROUND_TYPES)[number];
+
 export const LANGUAGE_CONFIG: Record<
   SupportedLanguage,
   { label: string; monacoId: string; pistonId: string; version: string }
@@ -45,6 +57,36 @@ export const SCORING_DIMENSIONS = {
 } as const;
 
 export type ScoringDimension = keyof typeof SCORING_DIMENSIONS;
+
+export const ROUND_SCORING_DIMENSIONS = {
+  problem_solving: {
+    label: "Problem Solving",
+    weight: 0.24,
+    description: "Framing the problem, identifying a strong path, and recovering from weak starts.",
+  },
+  communication: {
+    label: "Communication",
+    weight: 0.20,
+    description: "Structured, legible communication under pressure and through follow-up questions.",
+  },
+  technical_depth: {
+    label: "Technical Depth",
+    weight: 0.22,
+    description: "Technical tradeoffs, domain reasoning, and depth of understanding relevant to the round.",
+  },
+  execution: {
+    label: "Execution",
+    weight: 0.20,
+    description: "Concrete progress during the round, from implementation or articulation through follow-through.",
+  },
+  judgment: {
+    label: "Judgment",
+    weight: 0.14,
+    description: "Decision quality, prioritization, and the ability to choose sensible tradeoffs.",
+  },
+} as const;
+
+export type RoundScoreDimension = keyof typeof ROUND_SCORING_DIMENSIONS;
 
 export const FULL_INTERVIEW_DURATION_MINUTES = 45;
 export const FULL_INTERVIEW_DURATION_SECONDS = FULL_INTERVIEW_DURATION_MINUTES * 60;

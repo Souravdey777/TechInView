@@ -5,6 +5,7 @@ import { cn, formatDuration, getScoreColor } from "@/lib/utils";
 import { DIFFICULTY_CONFIG } from "@/lib/constants";
 import type { DifficultyLevel } from "@/lib/constants";
 import { getInterviewerPersona, type InterviewerPersonaId } from "@/lib/interviewer-personas";
+import { getPracticeResultsHref } from "@/lib/dashboard/models";
 import { Clock, Calendar, ArrowRight, Mic } from "lucide-react";
 
 type InterviewSummary = {
@@ -16,6 +17,7 @@ type InterviewSummary = {
   duration: number | null;
   interviewerPersona: InterviewerPersonaId;
   status: "completed" | "abandoned" | "in_progress";
+  kind?: "dsa" | "technical_qa";
 };
 
 type InterviewHistoryProps = {
@@ -67,7 +69,7 @@ export function InterviewHistory({ interviews }: InterviewHistoryProps) {
           Complete your first mock interview to see your progress here.
         </p>
         <Link
-          href="/interview/setup"
+          href="/interviews/dsa/setup"
           className="inline-flex items-center gap-2 px-4 py-2 bg-brand-cyan text-brand-deep font-semibold text-sm rounded-lg hover:bg-brand-cyan/90 transition-colors"
         >
           Start an Interview
@@ -85,7 +87,7 @@ export function InterviewHistory({ interviews }: InterviewHistoryProps) {
         return (
           <Link
             key={interview.id}
-            href={`/results/${interview.id}`}
+            href={getPracticeResultsHref(interview.kind ?? "dsa", interview.id)}
             className="block bg-brand-card rounded-xl border border-brand-border hover:border-brand-cyan/30 hover:bg-brand-card/80 transition-all duration-150 group"
           >
             <div className="flex items-center gap-4 p-4">

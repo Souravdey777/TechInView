@@ -5,8 +5,12 @@ import type {
   DifficultyLevel,
   ProblemCategory,
   ScoringDimension,
+  InterviewMode,
+  RoundType,
+  RoundScoreDimension,
 } from "@/lib/constants";
 import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
+import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
 
 // ─── Profile ─────────────────────────────────────────────────────────────────
 
@@ -88,9 +92,18 @@ export type InterviewStatus = "in_progress" | "completed" | "abandoned";
 export type Interview = {
   id: string;
   user_id: string;
-  problem_id: string;
+  problem_id: string | null;
   status: InterviewStatus;
   interviewer_persona: InterviewerPersonaId;
+  mode: InterviewMode;
+  round_type: RoundType;
+  round_title: string | null;
+  generated_loop_id: string | null;
+  generated_loop_round_id: string | null;
+  company_snapshot: string | null;
+  role_title_snapshot: string | null;
+  loop_summary_snapshot: LoopSummarySnapshot | null;
+  round_context_snapshot: RoundContextSnapshot | null;
   language: SupportedLanguage;
   duration_seconds: number | null;
   max_duration_seconds: number;
@@ -99,7 +112,7 @@ export type Interview = {
   tests_passed: number | null;
   tests_total: number | null;
   overall_score: number | null;
-  scores: Record<ScoringDimension, InterviewScore> | null;
+  scores: Partial<Record<ScoringDimension | RoundScoreDimension, InterviewScore>> | null;
   feedback_summary: string | null;
   hire_recommendation: HireRecommendation | null;
   is_free_trial: boolean;
@@ -134,7 +147,7 @@ export type InterviewScore = {
 
 export type InterviewResult = {
   overall_score: number;
-  scores: Record<ScoringDimension, InterviewScore>;
+  scores: Partial<Record<ScoringDimension | RoundScoreDimension, InterviewScore>>;
   hire_recommendation: HireRecommendation;
   key_strengths: string[];
   areas_to_improve: string[];

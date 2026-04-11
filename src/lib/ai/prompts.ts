@@ -1,4 +1,6 @@
+import { ROUND_SCORING_DIMENSIONS, type RoundType } from "@/lib/constants";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import type { RoundContextSnapshot } from "@/lib/loops/types";
 
 // ─── Interviewer System Prompt ────────────────────────────────────────────────
 
@@ -302,6 +304,119 @@ Hire recommendation thresholds:
 - lean_hire: 55-69
 - lean_no_hire: 40-54
 - no_hire: 0-39`;
+}
+
+type LoopScoringPromptParams = {
+  transcript: { role: string; content: string }[];
+  finalCode: string;
+  testsPassed: number;
+  testsTotal: number;
+  interviewerPersonaId?: string | null;
+  roundType: RoundType;
+  roundTitle: string;
+  problem?: {
+    title: string;
+    description: string;
+    optimal_complexity?: { time: string; space: string };
+  } | null;
+  roundContext?: RoundContextSnapshot | null;
+};
+
+export function getLoopScoringPrompt(params: LoopScoringPromptParams): string {
+  const {
+    transcript,
+    finalCode,
+    testsPassed,
+    testsTotal,
+    interviewerPersonaId,
+    roundType,
+    roundTitle,
+    problem,
+    roundContext,
+  } = params;
+  const persona = getInterviewerPersona(interviewerPersonaId);
+
+  const transcriptText = transcript
+    .map((m) => {
+      const speaker =
+        m.role === "interviewer"
+          ? `${persona.name} (Interviewer)`
+          : m.role === "candidate"
+            ? "Candidate"
+            : "System";
+      return `[${speaker}]: ${m.content}`;
+    })
+    .join("\n");
+
+  const testSummary =
+    testsTotal > 0
+      ? `${testsPassed}/${testsTotal} test cases passed (${Math.round((testsPassed / testsTotal) * 100)}%)`
+      : "No coding test cases run";
+
+  const dimensionTable = Object.entries(ROUND_SCORING_DIMENSIONS)
+    .map(
+      ([key, value]) =>
+        `| ${key} | ${Math.round(value.weight * 100)}% | ${value.description} |`
+    )
+    .join("\n");
+
+  return `Please evaluate this targeted interview round and return a JSON score object.
+
+## Interview Persona
+${persona.name} (${persona.companyLabel})
+Style: ${persona.shortStyleSummary}
+Calibration: ${persona.scoringFocusPrompt}
+
+## Round
+Type: ${roundType}
+Title: ${roundTitle}
+Summary: ${roundContext?.summary ?? "N/A"}
+Interviewer brief: ${roundContext?.prompt ?? "N/A"}
+Focus areas: ${roundContext?.focusAreas.join(", ") ?? "N/A"}
+
+## Optional Coding Context
+${problem ? `Problem: ${problem.title}\nDescription: ${problem.description}\nOptimal complexity: ${problem.optimal_complexity?.time ?? "Unknown"} / ${problem.optimal_complexity?.space ?? "Unknown"}` : "This round may not include a coding exercise."}
+
+## Coding Test Results
+${testSummary}
+
+## Final Code Submitted
+\`\`\`
+${finalCode || "(no code submitted)"}
+\`\`\`
+
+## Transcript
+${transcriptText}
+
+## Scoring Dimensions
+Score each dimension from 0-100, then I will calculate the weighted overall score.
+
+| Dimension | Weight | What to Evaluate |
+|---|---|---|
+${dimensionTable}
+
+Round-specific calibration:
+- For coding rounds, execution should reflect implementation quality, testing discipline, and recovery from mistakes.
+- For technical Q&A rounds, technical_depth and judgment should reflect command of the chosen stack, tradeoff quality, and the ability to reason through realistic engineering scenarios without hand-waving.
+- For behavioral and hiring manager rounds, execution should reflect how concretely the candidate answered, not coding output.
+- For system design rounds, technical_depth and judgment should reflect design tradeoffs, scaling reasoning, and prioritization quality.
+- Keep the five shared dimensions comparable across rounds.
+
+Return ONLY this JSON structure:
+{
+  "overall_score": <weighted score 0-100, integer>,
+  "dimensions": {
+    "problem_solving": { "score": <0-100>, "feedback": "<specific feedback>" },
+    "communication": { "score": <0-100>, "feedback": "<specific feedback>" },
+    "technical_depth": { "score": <0-100>, "feedback": "<specific feedback>" },
+    "execution": { "score": <0-100>, "feedback": "<specific feedback>" },
+    "judgment": { "score": <0-100>, "feedback": "<specific feedback>" }
+  },
+  "hire_recommendation": "<strong_hire|hire|lean_hire|lean_no_hire|no_hire>",
+  "key_strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
+  "areas_to_improve": ["<area 1>", "<area 2>", "<area 3>"],
+  "summary": "<2-3 sentence narrative summary>"
+}`;
 }
 
 // ─── Hint Prompt ──────────────────────────────────────────────────────────────

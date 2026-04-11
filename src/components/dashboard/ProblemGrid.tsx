@@ -220,7 +220,7 @@ export function ProblemGrid({ problems }: ProblemGridProps) {
               {/* CTA */}
               <div className="mt-auto pt-3 border-t border-brand-border">
                 <Link
-                  href={`/interview/setup?problem=${problem.slug}`}
+                  href={`/interviews/dsa/setup?problem=${problem.slug}`}
                   className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan text-sm font-semibold hover:bg-brand-cyan/20 transition-colors group-hover:border-brand-cyan/40"
                 >
                   Start Interview

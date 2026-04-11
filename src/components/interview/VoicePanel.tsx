@@ -1,15 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect, KeyboardEvent } from "react";
-import { Mic, MicOff, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { ChevronDown, ChevronUp, Mic, MicOff, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VoiceVisualizer, MicVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { type InterviewPhase, PHASE_LABELS } from "@/lib/interview-phases";
+import type { RoundType } from "@/lib/constants";
+import { getPhaseLabelForRound } from "@/lib/loops/round-config";
+import { MicVisualizer, VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 
 type VoicePanelProps = {
   voiceState: VoiceState;
   currentPhase: InterviewPhase;
+  roundType: RoundType;
   interviewerName: string;
+  layout?: "default" | "center-stage";
   isMicEnabled: boolean;
   errorMessage?: string | null;
   onToggleMic: () => void;
@@ -30,8 +34,6 @@ const PHASE_COLORS: Record<InterviewPhase, string> = {
   WRAP_UP: "bg-brand-muted/10 text-brand-muted border-brand-border",
 };
 
-// ─── Voice state label ────────────────────────────────────────────────────────
-
 function getStateLabel(voiceState: VoiceState, interviewerName: string): string {
   const labels: Record<VoiceState, string> = {
     idle: "Ready",
@@ -50,12 +52,12 @@ const STATE_COLORS: Record<VoiceState, string> = {
   speaking: "text-brand-green",
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function VoicePanel({
   voiceState,
   currentPhase,
+  roundType,
   interviewerName,
+  layout = "default",
   isMicEnabled,
   errorMessage,
   onToggleMic,
@@ -63,105 +65,129 @@ export function VoicePanel({
 }: VoicePanelProps) {
   const [textOpen, setTextOpen] = useState(true);
   const [micSupported, setMicSupported] = useState(false);
+  const [draft, setDraft] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isCenterStage = layout === "center-stage";
 
   useEffect(() => {
     const hasGetUserMedia =
       typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
     setMicSupported(hasGetUserMedia);
   }, []);
-  const [draft, setDraft] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function handleSend() {
     const trimmed = draft.trim();
     if (!trimmed) return;
+
     onSendText(trimmed);
     setDraft("");
   }
 
-  function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSend();
     }
   }
 
   return (
-    <div className="flex flex-col gap-2 p-4">
-      {/* Phase badge + state */}
-      <div className="flex items-center justify-between">
+    <div
+      className={cn(
+        "flex flex-col",
+        isCenterStage ? "h-full justify-between gap-4 p-5" : "gap-2 p-4"
+      )}
+    >
+      <div className="flex items-center justify-between gap-3">
         <span
           className={cn(
             "rounded-full border px-3 py-0.5 text-xs font-medium",
             PHASE_COLORS[currentPhase]
           )}
         >
-          {PHASE_LABELS[currentPhase]}
+          {roundType === "coding"
+            ? PHASE_LABELS[currentPhase]
+            : getPhaseLabelForRound(roundType, currentPhase)}
         </span>
         <span className={cn("text-xs font-medium", STATE_COLORS[voiceState])}>
           {getStateLabel(voiceState, interviewerName)}
         </span>
       </div>
 
-      {errorMessage && (
+      {errorMessage ? (
         <div className="rounded-lg border border-brand-rose/30 bg-brand-rose/10 px-3 py-2 text-[11px] leading-relaxed text-brand-rose">
           {errorMessage}
         </div>
-      )}
+      ) : null}
 
-      {/* Orb visualizer — the hero element */}
-      <div className="flex flex-col items-center gap-1 py-3">
-        <VoiceVisualizer state={voiceState} className="h-32 w-32" />
-        <div className="text-center mt-1">
-          <p className="text-sm font-semibold text-brand-text">{interviewerName}</p>
-          <p className="text-[11px] text-brand-muted">AI Interviewer</p>
+      <div
+        className={cn(
+          "flex flex-col items-center",
+          isCenterStage ? "flex-1 justify-center gap-6 py-8" : "gap-1 py-3"
+        )}
+      >
+        <div className="flex flex-col items-center gap-2">
+          <VoiceVisualizer
+            state={voiceState}
+            className={isCenterStage ? "h-40 w-40" : "h-32 w-32"}
+          />
+          <div className="mt-1 text-center">
+            <p
+              className={cn(
+                "font-semibold text-brand-text",
+                isCenterStage ? "text-base" : "text-sm"
+              )}
+            >
+              {interviewerName}
+            </p>
+            <p className="text-[11px] text-brand-muted">AI Interviewer</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-1">
+          <div className="relative">
+            <MicVisualizer isActive={isMicEnabled} className="absolute inset-0" />
+            <button
+              onClick={onToggleMic}
+              disabled={!micSupported}
+              className={cn(
+                "relative z-10 flex items-center justify-center rounded-full transition-all duration-300",
+                isCenterStage ? "h-14 w-14" : "h-12 w-12",
+                !micSupported
+                  ? "cursor-not-allowed border border-brand-border bg-brand-card text-brand-muted opacity-50"
+                  : isMicEnabled
+                    ? "border-2 border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                    : "border border-brand-border bg-brand-card text-brand-muted hover:border-brand-subtle hover:text-brand-text"
+              )}
+              aria-label={isMicEnabled ? "Mute microphone" : "Enable microphone"}
+            >
+              {isMicEnabled ? (
+                <Mic className={cn(isCenterStage ? "h-6 w-6" : "h-5 w-5")} />
+              ) : (
+                <MicOff className={cn(isCenterStage ? "h-6 w-6" : "h-5 w-5")} />
+              )}
+            </button>
+          </div>
+          {!micSupported ? (
+            <span className="text-[10px] text-brand-muted">
+              Mic not supported — use text input below
+            </span>
+          ) : (
+            <span className="mt-0.5 text-[10px] text-brand-muted">
+              {isMicEnabled ? "Tap to mute" : "Tap to unmute"}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Mic button — Siri-style with animated rings */}
-      <div className="flex flex-col items-center gap-1">
-        <div className="relative">
-          <MicVisualizer isActive={isMicEnabled} className="absolute inset-0" />
-          <button
-            onClick={onToggleMic}
-            disabled={!micSupported}
-            className={cn(
-              "relative z-10 flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300",
-              !micSupported
-                ? "bg-brand-card border border-brand-border text-brand-muted cursor-not-allowed opacity-50"
-                : isMicEnabled
-                ? "bg-brand-cyan/20 text-brand-cyan border-2 border-brand-cyan shadow-[0_0_20px_rgba(34,211,238,0.3)]"
-                : "bg-brand-card border border-brand-border text-brand-muted hover:border-brand-subtle hover:text-brand-text"
-            )}
-            aria-label={isMicEnabled ? "Mute microphone" : "Enable microphone"}
-          >
-            {isMicEnabled ? (
-              <Mic className="h-5 w-5" />
-            ) : (
-              <MicOff className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-        {!micSupported && (
-          <span className="text-[10px] text-brand-muted">Mic not supported — use text input below</span>
-        )}
-        {micSupported && (
-          <span className="text-[10px] text-brand-muted mt-0.5">
-            {isMicEnabled ? "Tap to mute" : "Tap to unmute"}
-          </span>
-        )}
-      </div>
-
-      {/* Text fallback toggle */}
-      <div className="border-t border-brand-border pt-2 mt-1">
+      <div className={cn("border-t border-brand-border", isCenterStage ? "pt-4" : "mt-1 pt-2")}>
         <button
           onClick={() => {
-            setTextOpen((v) => !v);
+            setTextOpen((current) => !current);
             if (!textOpen) {
               setTimeout(() => textareaRef.current?.focus(), 50);
             }
           }}
-          className="flex w-full items-center justify-between px-1 text-xs text-brand-muted hover:text-brand-text transition-colors"
+          className="flex w-full items-center justify-between px-1 text-xs text-brand-muted transition-colors hover:text-brand-text"
         >
           <span>Type instead of speaking</span>
           {textOpen ? (
@@ -171,15 +197,15 @@ export function VoicePanel({
           )}
         </button>
 
-        {textOpen && (
+        {textOpen ? (
           <div className="mt-2 flex flex-col gap-2">
             <textarea
               ref={textareaRef}
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={(event) => setDraft(event.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your response... (Enter to send)"
-              rows={3}
+              rows={isCenterStage ? 4 : 3}
               className="w-full resize-none rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5 text-sm text-brand-text placeholder:text-brand-muted/60 focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
             />
             <button
@@ -196,7 +222,7 @@ export function VoicePanel({
               Send
             </button>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

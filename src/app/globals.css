@@ -64,6 +64,28 @@
     @apply bg-brand-card/80 backdrop-blur-sm border border-brand-border rounded-xl;
   }
 
+  .landing-panel {
+    @apply relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.04];
+    backdrop-filter: blur(18px);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.02),
+      0 28px 90px -42px rgba(0, 0, 0, 0.72);
+  }
+
+  .landing-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.3),
+      rgba(255, 255, 255, 0)
+    );
+    pointer-events: none;
+  }
+
   .glow-cyan {
     box-shadow: 0 0 20px rgba(34, 211, 238, 0.15),
                 0 0 60px rgba(34, 211, 238, 0.05);
@@ -77,6 +99,14 @@
   .text-gradient-cyan {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-cyan to-cyan-300;
   }
+}
+
+.landing-aurora {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(34, 211, 238, 0.16), transparent 34%),
+    radial-gradient(circle at 78% 22%, rgba(52, 211, 153, 0.1), transparent 28%),
+    radial-gradient(circle at 58% 76%, rgba(244, 114, 182, 0.09), transparent 26%),
+    linear-gradient(180deg, rgba(7, 8, 10, 0.96) 0%, rgba(13, 16, 23, 0.88) 54%, rgba(7, 8, 10, 1) 100%);
 }
 
 /* Grid dot pattern */

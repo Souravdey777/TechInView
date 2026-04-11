@@ -40,6 +40,10 @@ export type DeepgramVoiceAgentCallbacks = {
   onConnected?: () => void;
 };
 
+type InjectUserMessageOptions = {
+  suppressTranscript?: boolean;
+};
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const INPUT_SAMPLE_RATE = 16000;
@@ -128,6 +132,30 @@ function buildAgentSettings(settings: DeepgramVoiceAgentSettings): AgentV1Settin
   return base;
 }
 
+function normalizeVoiceAgentError(error: unknown): Error {
+  const domError = error instanceof DOMException ? error : null;
+  const message =
+    error instanceof Error ? error.message : typeof error === "string" ? error : "Voice agent error";
+
+  if (
+    domError?.name === "NotAllowedError" ||
+    domError?.name === "SecurityError" ||
+    /permission denied/i.test(message)
+  ) {
+    return new Error("Microphone access is blocked. Allow mic access in your browser and try again.");
+  }
+
+  if (domError?.name === "NotFoundError") {
+    return new Error("No microphone was found. Connect a mic and try again.");
+  }
+
+  if (domError?.name === "NotReadableError") {
+    return new Error("Your microphone is busy in another app. Close the other app and try again.");
+  }
+
+  return error instanceof Error ? error : new Error(message);
+}
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useDeepgramVoiceAgent(
@@ -158,6 +186,7 @@ export function useDeepgramVoiceAgent(
   const welcomeRejectorRef = useRef<((error: Error) => void) | null>(null);
   const isClosingRef = useRef(false);
   const lastThinkSignatureRef = useRef<string | null>(null);
+  const suppressedUserMessagesRef = useRef<string[]>([]);
 
   /** Schedule TTS chunks on a single timeline so there are no gaps between WebSocket frames. */
   const nextPlaybackTimeRef = useRef(0);
@@ -320,6 +349,14 @@ export function useDeepgramVoiceAgent(
     });
   }, [clearWelcomeWaiter]);
 
+  const shouldSuppressUserTranscript = useCallback((text: string) => {
+    const index = suppressedUserMessagesRef.current.findIndex((message) => message === text);
+    if (index === -1) return false;
+
+    suppressedUserMessagesRef.current.splice(index, 1);
+    return true;
+  }, []);
+
   const sendFunctionCallResponse = useCallback((payload: AgentV1SendFunctionCallResponse) => {
     const conn = connectionRef.current;
     if (conn && conn.readyState === WebSocket.OPEN) {
@@ -355,10 +392,10 @@ export function useDeepgramVoiceAgent(
     lastThinkSignatureRef.current = nextSignature;
   }, []);
 
-  const startMicCapture = useCallback(async () => {
-    const ctx = getOrCreateAudioContext();
-    if (ctx.state === "suspended") await ctx.resume();
-    await ensurePcmWorkletLoaded(ctx);
+  const requestMicStream = useCallback(async () => {
+    if (micStreamRef.current) {
+      return micStreamRef.current;
+    }
 
     const baseAudio: MediaTrackConstraints = {
       echoCancellation: true,
@@ -372,10 +409,32 @@ export function useDeepgramVoiceAgent(
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: withVoiceIsolation });
-    } catch {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: baseAudio });
+    } catch (error) {
+      const domError = error instanceof DOMException ? error : null;
+      if (
+        domError?.name === "NotAllowedError" ||
+        domError?.name === "SecurityError" ||
+        domError?.name === "NotFoundError" ||
+        domError?.name === "NotReadableError"
+      ) {
+        throw normalizeVoiceAgentError(error);
+      }
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: baseAudio });
+      } catch (fallbackError) {
+        throw normalizeVoiceAgentError(fallbackError);
+      }
     }
     micStreamRef.current = stream;
+    return stream;
+  }, []);
+
+  const startMicCapture = useCallback(async () => {
+    const stream = await requestMicStream();
+    const ctx = getOrCreateAudioContext();
+    if (ctx.state === "suspended") await ctx.resume();
+    await ensurePcmWorkletLoaded(ctx);
 
     const source = ctx.createMediaStreamSource(stream);
     // No speaker output from the capture chain — avoids echo and keeps AEC reference sane.
@@ -392,7 +451,7 @@ export function useDeepgramVoiceAgent(
     source.connect(workletNode);
     workletNodeRef.current = workletNode;
     setIsListening(true);
-  }, [getOrCreateAudioContext, ensurePcmWorkletLoaded]);
+  }, [ensurePcmWorkletLoaded, getOrCreateAudioContext, requestMicStream]);
 
   const stopMicCapture = useCallback(() => {
     workletNodeRef.current?.disconnect();
@@ -469,6 +528,9 @@ export function useDeepgramVoiceAgent(
 
         case "ConversationText": {
           const ct = event as unknown as { role: string; content: string };
+          if (ct.role !== "assistant" && shouldSuppressUserTranscript(ct.content)) {
+            break;
+          }
           callbacksRef.current.onTranscript(
             ct.content,
             ct.role === "assistant" ? "agent" : "user",
@@ -547,65 +609,68 @@ export function useDeepgramVoiceAgent(
       rejectSettingsApplied,
       resolveSettingsApplied,
       resolveWelcome,
+      shouldSuppressUserTranscript,
     ],
   );
 
   const connect = useCallback(async () => {
-    const tokenRes = await fetch("/api/voice/deepgram-token", { method: "POST" });
-    const tokenJson = (await tokenRes.json()) as {
-      success: boolean;
-      data?: { token: string };
-      error?: string;
-    };
-    if (!tokenJson.success || !tokenJson.data?.token) {
-      throw new Error(tokenJson.error || "Failed to get voice token");
-    }
-    const token = tokenJson.data.token;
-
-    playbackAbortRef.current = new AbortController();
-    isClosingRef.current = false;
-
-    const audioCtx = getOrCreateAudioContext();
-    if (audioCtx.state === "suspended") await audioCtx.resume();
-    await ensurePcmWorkletLoaded(audioCtx);
-
-    const dg = new DeepgramClient({ accessToken: token });
-    const connection = await dg.agent.v1.connect({
-      Authorization: `Bearer ${token}`,
-      reconnectAttempts: 0,
-      connectionTimeoutInSeconds: 10,
-    });
-    const welcomePromise = waitForWelcome();
-    const settingsAppliedPromise = waitForSettingsApplied();
-
-    connection.socket.binaryType = "arraybuffer";
-
-    connection.on("message", handleAgentMessage);
-    connection.on("close", () => {
-      console.warn("[deepgram-agent] connection closed");
-      const error = new Error("Voice agent connection closed");
-      rejectWelcome(error);
-      rejectSettingsApplied(error);
-      setIsConnected(false);
-      stopMicCapture();
-      stopSpeaking();
-      clearKeepalive();
-      lastThinkSignatureRef.current = null;
-      connectionRef.current = null;
-      if (!isClosingRef.current) {
-        callbacksRef.current.onError(error);
-      }
-    });
-    connection.on("error", (err: Error) => {
-      console.error("[deepgram-agent] connection error:", err);
-      const error = err instanceof Error ? err : new Error("Voice agent connection error");
-      rejectWelcome(error);
-      rejectSettingsApplied(error);
-      callbacksRef.current.onError(error);
-    });
-
-    connectionRef.current = connection;
+    let connection: AgentConnection | null = null;
     try {
+      const audioCtx = getOrCreateAudioContext();
+      if (audioCtx.state === "suspended") await audioCtx.resume();
+      await ensurePcmWorkletLoaded(audioCtx);
+      await requestMicStream();
+
+      const tokenRes = await fetch("/api/voice/deepgram-token", { method: "POST" });
+      const tokenJson = (await tokenRes.json()) as {
+        success: boolean;
+        data?: { token: string };
+        error?: string;
+      };
+      if (!tokenJson.success || !tokenJson.data?.token) {
+        throw new Error(tokenJson.error || "Failed to get voice token");
+      }
+      const token = tokenJson.data.token;
+
+      playbackAbortRef.current = new AbortController();
+      isClosingRef.current = false;
+
+      const dg = new DeepgramClient({ accessToken: token });
+      connection = await dg.agent.v1.connect({
+        Authorization: `Bearer ${token}`,
+        reconnectAttempts: 0,
+        connectionTimeoutInSeconds: 10,
+      });
+      const welcomePromise = waitForWelcome();
+      const settingsAppliedPromise = waitForSettingsApplied();
+
+      connection.socket.binaryType = "arraybuffer";
+
+      connection.on("message", handleAgentMessage);
+      connection.on("close", () => {
+        console.warn("[deepgram-agent] connection closed");
+        const error = new Error("Voice agent connection closed");
+        rejectWelcome(error);
+        rejectSettingsApplied(error);
+        setIsConnected(false);
+        stopMicCapture();
+        stopSpeaking();
+        clearKeepalive();
+        lastThinkSignatureRef.current = null;
+        connectionRef.current = null;
+        if (!isClosingRef.current) {
+          callbacksRef.current.onError(error);
+        }
+      });
+      connection.on("error", (err: Error) => {
+        console.error("[deepgram-agent] connection error:", err);
+        const error = err instanceof Error ? err : new Error("Voice agent connection error");
+        rejectWelcome(error);
+        rejectSettingsApplied(error);
+        callbacksRef.current.onError(error);
+      });
+
+      connectionRef.current = connection;
       connection.connect();
 
       await Promise.race([
@@ -644,14 +709,15 @@ export function useDeepgramVoiceAgent(
       clearWelcomeWaiter();
       clearSettingsAppliedWaiter();
       lastThinkSignatureRef.current = null;
+      suppressedUserMessagesRef.current = [];
       if (connectionRef.current === connection) {
         connectionRef.current = null;
       }
-      connection.close();
+      connection?.close();
       setIsConnected(false);
       setIsListening(false);
       setVoiceState("idle");
-      throw error instanceof Error ? error : new Error("Voice agent connection failed");
+      throw normalizeVoiceAgentError(error);
     }
   }, [
     clearSettingsAppliedWaiter,
@@ -666,6 +732,7 @@ export function useDeepgramVoiceAgent(
     stopSpeaking,
     getOrCreateAudioContext,
     ensurePcmWorkletLoaded,
+    requestMicStream,
     waitForWelcome,
     waitForSettingsApplied,
   ]);
@@ -683,12 +750,16 @@ export function useDeepgramVoiceAgent(
       connectionRef.current = null;
     }
     lastThinkSignatureRef.current = null;
+    suppressedUserMessagesRef.current = [];
     setIsConnected(false);
     setIsListening(false);
     setVoiceState("idle");
   }, [stopMicCapture, stopSpeaking, clearKeepalive, rejectWelcome, rejectSettingsApplied]);
 
-  const injectUserMessage = useCallback((text: string) => {
+  const injectUserMessage = useCallback((text: string, options?: InjectUserMessageOptions) => {
+    if (options?.suppressTranscript) {
+      suppressedUserMessagesRef.current.push(text);
+    }
     connectionRef.current?.sendInjectUserMessage({ type: "InjectUserMessage", content: text });
   }, []);
 
@@ -731,6 +802,7 @@ export function useDeepgramVoiceAgent(
       connectionRef.current?.close();
       connectionRef.current = null;
       lastThinkSignatureRef.current = null;
+      suppressedUserMessagesRef.current = [];
       pcmWorkletContextRef.current = null;
       audioCtxRef.current?.close().catch(() => {});
       audioCtxRef.current = null;

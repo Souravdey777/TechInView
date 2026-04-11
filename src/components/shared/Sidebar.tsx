@@ -9,11 +9,12 @@ import {
   TrendingUp,
   Settings2,
   LogOut,
-  Cpu,
   Sparkles,
+  FolderKanban,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupabase } from "@/hooks/useSupabase";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 type NavItem = {
   href: string;
@@ -23,6 +24,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/prep-plans", label: "Prep Plans", icon: FolderKanban },
   { href: "/problems", label: "Problems", icon: BookOpen },
   { href: "/progress", label: "Progress", icon: TrendingUp },
   { href: "/settings", label: "Settings", icon: Settings2 },
@@ -47,28 +49,22 @@ export function Sidebar({ userEmail, startingPrice = "$19" }: SidebarProps) {
     <aside className="fixed left-0 top-0 h-screen w-64 flex flex-col bg-brand-surface border-r border-brand-border z-40">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-6 py-5 border-b border-brand-border">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30">
-          <Cpu className="w-4 h-4 text-brand-cyan" />
-        </div>
-        <span className="text-brand-text font-heading font-semibold text-base tracking-tight">
-          TechInView
-        </span>
+        <BrandLogo size="sm" wordmarkClassName="text-base" />
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const isActive =
-            pathname === href || pathname.startsWith(`${href}/`);
+          const isActive = pathname === href || pathname.startsWith(`${href}/`);
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 border",
                 isActive
-                  ? "bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20"
-                  : "text-brand-muted hover:text-brand-text hover:bg-brand-card border border-transparent"
+                  ? "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20"
+                  : "text-brand-muted hover:text-brand-text hover:bg-brand-card border-transparent"
               )}
             >
               <Icon
@@ -77,7 +73,7 @@ export function Sidebar({ userEmail, startingPrice = "$19" }: SidebarProps) {
                   isActive ? "text-brand-cyan" : "text-brand-muted"
                 )}
               />
-              {label}
+              <span>{label}</span>
             </Link>
           );
         })}

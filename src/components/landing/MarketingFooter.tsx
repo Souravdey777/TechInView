@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Mic, Sparkles } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 type MarketingFooterProps = {
   signupHref: string;
@@ -42,10 +43,9 @@ export function MarketingFooter({ signupHref }: MarketingFooterProps) {
           <div className="lg:col-span-5">
             <Link
               href="/"
-              className="inline-flex items-center gap-1 text-xl font-bold font-heading tracking-tight text-brand-text transition-colors hover:text-brand-cyan"
+              className="inline-flex"
             >
-              TechInView
-              <span className="text-brand-cyan text-2xl leading-none">.</span>
+              <BrandLogo size="sm" wordmarkClassName="text-xl font-bold" />
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-brand-muted">
               Voice-first AI mock interviews for software engineers. Practice DSA

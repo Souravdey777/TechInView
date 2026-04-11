@@ -7,6 +7,7 @@ import { usePostHog } from "posthog-js/react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { cn } from "@/lib/utils";
 import { BETA_INVITE_CODE, BETA_CREDITS } from "@/lib/constants";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 type OAuthProvider = "google" | "github";
 
@@ -47,11 +48,8 @@ export default function SignupPage() {
     <div className="min-h-screen bg-brand-deep flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-1 mb-8">
-          <span className="text-2xl font-bold font-heading text-brand-text tracking-tight">
-            TechInView
-          </span>
-          <span className="text-brand-cyan text-3xl leading-none">.</span>
+        <div className="mb-8 flex items-center justify-center">
+          <BrandLogo size="lg" wordmarkClassName="text-2xl font-bold" />
         </div>
 
         {/* Card */}

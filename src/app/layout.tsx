@@ -33,6 +33,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "TechInView" }],
   creator: "TechInView",
+  icons: {
+    icon: "/images/techinview-mark.svg",
+    shortcut: "/images/techinview-mark.svg",
+    apple: "/images/techinview-mark.svg",
+  },
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev"
   ),

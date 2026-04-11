@@ -1,9 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { getScorerSystemPrompt, getScoringPrompt } from "./prompts";
-import { SCORING_DIMENSIONS } from "@/lib/constants";
+import { getLoopScoringPrompt, getScorerSystemPrompt, getScoringPrompt } from "./prompts";
+import { ROUND_SCORING_DIMENSIONS, SCORING_DIMENSIONS, type InterviewMode, type RoundType } from "@/lib/constants";
 import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { InterviewResult } from "@/types";
+import type { RoundContextSnapshot } from "@/lib/loops/types";
 
 const MODEL = "claude-sonnet-4-20250514";
 const MAX_TOKENS = 1500;
@@ -38,6 +39,29 @@ const ScoringResponseSchema = z.object({
 
 type ScoringResponse = z.infer<typeof ScoringResponseSchema>;
 
+const LoopScoringResponseSchema = z.object({
+  overall_score: z.number().int().min(0).max(100),
+  dimensions: z.object({
+    problem_solving: DimensionScoreSchema,
+    communication: DimensionScoreSchema,
+    technical_depth: DimensionScoreSchema,
+    execution: DimensionScoreSchema,
+    judgment: DimensionScoreSchema,
+  }),
+  hire_recommendation: z.enum([
+    "strong_hire",
+    "hire",
+    "lean_hire",
+    "lean_no_hire",
+    "no_hire",
+  ]),
+  key_strengths: z.array(z.string()).min(1).max(5),
+  areas_to_improve: z.array(z.string()).min(1).max(5),
+  summary: z.string().min(1),
+});
+
+type LoopScoringResponse = z.infer<typeof LoopScoringResponseSchema>;
+
 // ─── Score Calculation ────────────────────────────────────────────────────────
 
 function calculateWeightedScore(dimensions: ScoringResponse["dimensions"]): number {
@@ -47,6 +71,17 @@ function calculateWeightedScore(dimensions: ScoringResponse["dimensions"]): numb
     dimensions.communication.score * SCORING_DIMENSIONS.communication.weight +
     dimensions.technical_knowledge.score * SCORING_DIMENSIONS.technical_knowledge.weight +
     dimensions.testing.score * SCORING_DIMENSIONS.testing.weight;
+
+  return Math.round(weighted);
+}
+
+function calculateLoopWeightedScore(dimensions: LoopScoringResponse["dimensions"]): number {
+  const weighted =
+    dimensions.problem_solving.score * ROUND_SCORING_DIMENSIONS.problem_solving.weight +
+    dimensions.communication.score * ROUND_SCORING_DIMENSIONS.communication.weight +
+    dimensions.technical_depth.score * ROUND_SCORING_DIMENSIONS.technical_depth.weight +
+    dimensions.execution.score * ROUND_SCORING_DIMENSIONS.execution.weight +
+    dimensions.judgment.score * ROUND_SCORING_DIMENSIONS.judgment.weight;
 
   return Math.round(weighted);
 }
@@ -68,32 +103,64 @@ type ScoreInterviewParams = {
   finalCode: string;
   testsPassed: number;
   testsTotal: number;
+  mode?: InterviewMode;
+  roundType?: RoundType;
+  roundTitle?: string;
   interviewerPersonaId?: InterviewerPersonaId;
-  problem: {
+  problem?: {
     title: string;
     description: string;
     optimal_complexity: { time: string; space: string };
-  };
+  } | null;
+  roundContext?: RoundContextSnapshot | null;
 };
 
 export async function scoreInterview(
   params: ScoreInterviewParams
 ): Promise<InterviewResult> {
-  const { messages, finalCode, testsPassed, testsTotal, problem, interviewerPersonaId } = params;
+  const {
+    messages,
+    finalCode,
+    testsPassed,
+    testsTotal,
+    mode = "general_dsa",
+    roundType = "coding",
+    roundTitle = "Interview Round",
+    problem,
+    interviewerPersonaId,
+    roundContext,
+  } = params;
 
   const client = new Anthropic();
 
   // Strip timestamp from messages for the prompt (transcript-only)
   const transcript = messages.map(({ role, content }) => ({ role, content }));
 
-  const userPrompt = getScoringPrompt({
-    transcript,
-    finalCode,
-    testsPassed,
-    testsTotal,
-    interviewerPersonaId,
-    problem,
-  });
+  const userPrompt =
+    mode === "targeted_loop"
+      ? getLoopScoringPrompt({
+          transcript,
+          finalCode,
+          testsPassed,
+          testsTotal,
+          interviewerPersonaId,
+          roundType,
+          roundTitle,
+          problem,
+          roundContext,
+        })
+      : getScoringPrompt({
+          transcript,
+          finalCode,
+          testsPassed,
+          testsTotal,
+          interviewerPersonaId,
+          problem: {
+            title: problem?.title ?? "Unknown Problem",
+            description: problem?.description ?? "",
+            optimal_complexity: problem?.optimal_complexity ?? { time: "Unknown", space: "Unknown" },
+          },
+        });
 
   const response = await client.messages.create({
     model: MODEL,
@@ -124,16 +191,52 @@ export async function scoreInterview(
   }
 
   // Validate with Zod
+  if (mode === "targeted_loop") {
+    const validated = LoopScoringResponseSchema.parse(parsed);
+    const recalculatedScore = calculateLoopWeightedScore(validated.dimensions);
+    const hireRecommendation = deriveHireRecommendation(recalculatedScore);
+
+    return {
+      overall_score: recalculatedScore,
+      scores: {
+        problem_solving: {
+          dimension: "problem_solving",
+          score: validated.dimensions.problem_solving.score,
+          feedback: validated.dimensions.problem_solving.feedback,
+        },
+        communication: {
+          dimension: "communication",
+          score: validated.dimensions.communication.score,
+          feedback: validated.dimensions.communication.feedback,
+        },
+        technical_depth: {
+          dimension: "technical_depth",
+          score: validated.dimensions.technical_depth.score,
+          feedback: validated.dimensions.technical_depth.feedback,
+        },
+        execution: {
+          dimension: "execution",
+          score: validated.dimensions.execution.score,
+          feedback: validated.dimensions.execution.feedback,
+        },
+        judgment: {
+          dimension: "judgment",
+          score: validated.dimensions.judgment.score,
+          feedback: validated.dimensions.judgment.feedback,
+        },
+      },
+      hire_recommendation: hireRecommendation,
+      key_strengths: validated.key_strengths,
+      areas_to_improve: validated.areas_to_improve,
+      summary: validated.summary,
+    };
+  }
+
   const validated = ScoringResponseSchema.parse(parsed);
-
-  // Recalculate weighted overall score from dimension scores for accuracy
   const recalculatedScore = calculateWeightedScore(validated.dimensions);
-
-  // Derive hire recommendation from the calculated score to ensure consistency
   const hireRecommendation = deriveHireRecommendation(recalculatedScore);
 
-  // Shape into InterviewResult
-  const result: InterviewResult = {
+  return {
     overall_score: recalculatedScore,
     scores: {
       problem_solving: {
@@ -167,6 +270,4 @@ export async function scoreInterview(
     areas_to_improve: validated.areas_to_improve,
     summary: validated.summary,
   };
-
-  return result;
 }

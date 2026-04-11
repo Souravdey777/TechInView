@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import Link from "next/link";
+import { useState, useEffect, useRef, useCallback, Suspense, type ChangeEvent, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Mic,
@@ -9,7 +10,6 @@ import {
   XCircle,
   Shuffle,
   Clock,
-  Code2,
   ChevronRight,
   Loader2,
   AlertCircle,
@@ -17,10 +17,14 @@ import {
   BookOpen,
   X,
   Braces,
-  Network,
-  MonitorSmartphone,
   Lock,
   Sparkles,
+  Building2,
+  FileText,
+  FileUp,
+  Target,
+  ListFilter,
+  MessageSquare,
 } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { cn } from "@/lib/utils";
@@ -30,6 +34,8 @@ import { useSupabase } from "@/hooks/useSupabase";
 import {
   FREE_TRIAL_DURATION_MINUTES,
   FULL_INTERVIEW_DURATION_MINUTES,
+  type RoundType,
+  type InterviewMode,
 } from "@/lib/constants";
 import {
   DEFAULT_INTERVIEWER_PERSONA,
@@ -38,6 +44,17 @@ import {
   getInterviewerPersona,
   type InterviewerPersonaId,
 } from "@/lib/interviewer-personas";
+import {
+  buildLoopStartPayload,
+} from "@/lib/loops/generator";
+import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
+import { BrandLogo } from "@/components/shared/BrandLogo";
+import type {
+  GeneratedLoop,
+  GeneratedLoopRound,
+  HistoricalQuestion,
+} from "@/lib/loops/types";
+import type { ExperienceLevel } from "@/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,6 +95,13 @@ type SetupFormState = {
   language: Language;
   duration: Duration;
   interviewerPersona: InterviewerPersonaId;
+};
+
+type TargetedLoopFormState = {
+  company: string;
+  roleTitle: string;
+  experienceLevel: ExperienceLevel;
+  jdText: string;
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -132,6 +156,17 @@ const LANGUAGES: { value: Language; label: string; ext: string }[] = [
   { value: "cpp", label: "C++", ext: ".cpp" },
 ];
 
+const EXPERIENCE_LEVEL_OPTIONS: {
+  value: ExperienceLevel;
+  label: string;
+  description: string;
+}[] = [
+  { value: "junior", label: "Junior", description: "Early-career IC with execution focus." },
+  { value: "mid", label: "Mid", description: "Independent IC expected to deliver cleanly." },
+  { value: "senior", label: "Senior", description: "Ownership, design judgment, and broader scope." },
+  { value: "staff", label: "Staff", description: "High-autonomy architecture and leadership bar." },
+];
+
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 
 function SectionCard({
@@ -140,7 +175,7 @@ function SectionCard({
   className,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
@@ -185,6 +220,109 @@ function CategoryTag({ category }: { category: string }) {
   );
 }
 
+function HistoricalQuestionPreview({ question }: { question: HistoricalQuestion }) {
+  return (
+    <div className="rounded-lg border border-brand-border bg-brand-surface px-4 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-cyan">
+          {ROUND_TYPE_LABELS[question.roundType]}
+        </span>
+        <span className="text-[11px] text-brand-muted">{Math.round(question.confidence * 100)}% confidence</span>
+      </div>
+      <p className="mt-2 text-sm leading-relaxed text-brand-text">{question.prompt}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {question.topics.map((topic) => (
+          <span
+            key={`${question.id}-${topic}`}
+            className="rounded-full border border-brand-border px-2 py-0.5 text-[11px] text-brand-muted"
+          >
+            {topic}
+          </span>
+        ))}
+      </div>
+      <p className="mt-3 text-[11px] leading-relaxed text-brand-muted">{question.sourceLabel}</p>
+    </div>
+  );
+}
+
+function GeneratedLoopRoundCard({
+  round,
+  isStarting,
+  onStart,
+}: {
+  round: GeneratedLoopRound;
+  isStarting: boolean;
+  onStart: (round: GeneratedLoopRound) => void;
+}) {
+  return (
+    <div className="rounded-xl border border-brand-border bg-brand-card p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-brand-cyan/20 bg-brand-cyan/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-cyan">
+              Round {round.order}
+            </span>
+            <span className="rounded-full border border-brand-border px-3 py-1 text-[11px] font-medium text-brand-muted">
+              {ROUND_TYPE_LABELS[round.roundType]}
+            </span>
+            <span className="rounded-full border border-brand-border px-3 py-1 text-[11px] font-medium text-brand-muted">
+              {round.estimatedMinutes} min
+            </span>
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1 text-[11px] font-medium",
+                round.confidence === "high"
+                  ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
+                  : "border-brand-amber/20 bg-brand-amber/10 text-brand-amber"
+              )}
+            >
+              {round.confidence === "high" ? "Company-specific" : "Similar-company fallback"}
+            </span>
+          </div>
+          <h3 className="mt-3 text-lg font-semibold text-brand-text">{round.title}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-brand-muted">{round.summary}</p>
+          <p className="mt-3 text-xs leading-relaxed text-brand-muted">{round.rationale}</p>
+        </div>
+
+        <Button
+          onClick={() => onStart(round)}
+          disabled={isStarting}
+          className="shrink-0"
+        >
+          {isStarting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Launching...
+            </>
+          ) : (
+            <>
+              Start This Round
+              <ChevronRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {round.focusAreas.map((focus) => (
+          <span
+            key={`${round.id}-${focus}`}
+            className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
+          >
+            {focus}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-5 grid gap-3">
+        {round.historicalQuestions.map((question) => (
+          <HistoricalQuestionPreview key={question.id} question={question} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function InterviewSetupPage() {
@@ -200,10 +338,7 @@ function SetupSkeleton() {
     <div className="min-h-screen bg-brand-deep text-brand-text">
       <div className="border-b border-brand-border bg-brand-surface">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <Code2 className="h-5 w-5 text-brand-cyan" />
-            <span className="font-semibold tracking-tight text-brand-text">TechInView</span>
-          </div>
+          <BrandLogo size="sm" wordmarkClassName="text-base" />
         </div>
       </div>
       <div className="mx-auto max-w-3xl space-y-6 px-6 py-10">
@@ -222,6 +357,7 @@ function InterviewSetupInner() {
   const initFromSetup = useInterviewStore((s) => s.initFromSetup);
   const { supabase, user } = useSupabase();
 
+  const [interviewMode, setInterviewMode] = useState<InterviewMode>("general_dsa");
   const [form, setForm] = useState<SetupFormState>({
     difficulty: "medium",
     category: "any",
@@ -229,6 +365,23 @@ function InterviewSetupInner() {
     duration: FULL_INTERVIEW_DURATION_MINUTES,
     interviewerPersona: DEFAULT_INTERVIEWER_PERSONA,
   });
+  const [targetedForm, setTargetedForm] = useState<TargetedLoopFormState>({
+    company: "Google",
+    roleTitle: "Software Engineer",
+    experienceLevel: "mid",
+    jdText: "",
+  });
+  const [generatedLoop, setGeneratedLoop] = useState<GeneratedLoop | null>(null);
+  const [isGeneratingLoop, setIsGeneratingLoop] = useState(false);
+  const [loopError, setLoopError] = useState<string | null>(null);
+  const [isParsingJd, setIsParsingJd] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [showQuestionExplorer, setShowQuestionExplorer] = useState(false);
+  const [historicalQuestions, setHistoricalQuestions] = useState<HistoricalQuestion[]>([]);
+  const [historicalQuestionsLoading, setHistoricalQuestionsLoading] = useState(false);
+  const [historicalQuestionsError, setHistoricalQuestionsError] = useState<string | null>(null);
+  const [questionSearch, setQuestionSearch] = useState("");
+  const [questionTopicFilter, setQuestionTopicFilter] = useState("all");
   const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -242,7 +395,7 @@ function InterviewSetupInner() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("interview_credits, has_used_free_trial, target_company")
+        .select("interview_credits, has_used_free_trial, target_company, experience_level")
         .eq("id", user.id)
         .single();
       if (data) {
@@ -261,12 +414,26 @@ function InterviewSetupInner() {
               ? f.interviewerPersona
               : getDefaultInterviewerPersona(data.target_company ?? null, false),
         }));
+        setTargetedForm((prev) => ({
+          ...prev,
+          company: data.target_company
+            ? data.target_company.charAt(0).toUpperCase() + data.target_company.slice(1)
+            : prev.company,
+          experienceLevel: (data.experience_level as ExperienceLevel | null) ?? prev.experienceLevel,
+        }));
         if (isFreeTrial) {
           setProblemMode("random");
         }
       }
     })();
   }, [user, supabase]);
+
+  useEffect(() => {
+    const requestedMode = searchParams.get("mode");
+    if (requestedMode === "targeted_loop") {
+      router.replace("/prep-plans/new");
+    }
+  }, [router, searchParams]);
 
   // Problem selection state
   const [problemMode, setProblemMode] = useState<ProblemMode>("random");
@@ -277,10 +444,23 @@ function InterviewSetupInner() {
   const [selectedProblem, setSelectedProblem] = useState<ProblemSummary | null>(null);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const personaTouchedRef = useRef(false);
   const isSpecificSelected = problemMode === "specific" && selectedProblem !== null;
   const selectedPersona = getInterviewerPersona(form.interviewerPersona);
+  const targetedPersona = getInterviewerPersona(
+    generatedLoop?.personaId ??
+      getDefaultInterviewerPersona(targetedForm.company.trim().toLowerCase(), false)
+  );
+  const activePersona = interviewMode === "targeted_loop" ? targetedPersona : selectedPersona;
+  const availableQuestionTopics = Array.from(
+    new Set(
+      generatedLoop?.rounds.flatMap((round) =>
+        round.historicalQuestions.flatMap((question) => question.topics)
+      ) ?? []
+    )
+  );
 
   // ─── Fetch problems ────────────────────────────────────────────────────────
 
@@ -376,33 +556,11 @@ function InterviewSetupInner() {
     }
   }
 
-  // ─── Submit ──────────────────────────────────────────────────────────────────
-
-  async function handleStartInterview() {
+  async function launchInterview(body: Record<string, unknown>) {
     setIsCreating(true);
     setCreateError(null);
-    posthog?.capture("interview_setup_started", {
-      difficulty: form.difficulty,
-      category: form.category,
-      language: form.language,
-      duration: form.duration,
-      interviewer_persona: form.interviewerPersona,
-      problem_mode: problemMode,
-      is_free_trial: isFreeTrialUser,
-    });
+
     try {
-      const body: Record<string, unknown> = {
-        difficulty: form.difficulty,
-        category: form.category === "any" ? null : form.category,
-        language: form.language,
-        maxDurationSeconds: form.duration * 60,
-        interviewerPersona: form.interviewerPersona,
-      };
-
-      if (problemMode === "specific" && selectedProblem) {
-        body.problemSlug = selectedProblem.slug;
-      }
-
       const res = await fetch("/api/interview/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -417,8 +575,12 @@ function InterviewSetupInner() {
       const data = (await res.json()) as {
         data?: {
           interviewId?: string;
+          mode?: InterviewMode;
+          roundType?: RoundType;
           interviewerPersona?: InterviewerPersonaId;
-          problem?: Record<string, unknown>;
+          round?: Parameters<typeof initFromSetup>[0]["roundContext"];
+          generatedLoopSummary?: Parameters<typeof initFromSetup>[0]["loopSummary"];
+          problem?: Parameters<typeof initFromSetup>[0]["problem"];
           language?: string;
           maxDuration?: number;
           startedAt?: string;
@@ -430,12 +592,29 @@ function InterviewSetupInner() {
       // Store full setup data in Zustand so InterviewRoom + Results can read it
       initFromSetup({
         interviewId,
-        problem: data.data?.problem as Parameters<typeof initFromSetup>[0]["problem"],
+        mode: data.data?.mode ?? "general_dsa",
+        roundType: data.data?.roundType ?? "coding",
+        problem: data.data?.problem ?? null,
+        roundContext: data.data?.round ?? null,
         language: data.data?.language ?? form.language,
         maxDurationSeconds: data.data?.maxDuration ?? form.duration * 60,
-        difficulty: form.difficulty,
-        category: form.category === "any" ? null : form.category,
+        difficulty: (body.difficulty as Difficulty | undefined) ?? form.difficulty,
+        category:
+          (body.category as string | null | undefined) ??
+          (form.category === "any" ? null : form.category),
         interviewerPersona: data.data?.interviewerPersona ?? form.interviewerPersona,
+        generatedLoopId: (body.generatedLoopId as string | null | undefined) ?? null,
+        generatedLoopRoundId: (body.generatedLoopRoundId as string | null | undefined) ?? null,
+        company:
+          (body.generatedLoopSummary as { company?: string } | null | undefined)?.company ?? null,
+        roleTitle:
+          (body.generatedLoopSummary as { roleTitle?: string } | null | undefined)?.roleTitle ?? null,
+        experienceLevel:
+          (body.generatedLoopSummary as { experienceLevel?: string } | null | undefined)
+            ?.experienceLevel ?? null,
+        loopName:
+          (body.generatedLoopSummary as { loopName?: string } | null | undefined)?.loopName ?? null,
+        loopSummary: data.data?.generatedLoopSummary ?? null,
         startedAt: data.data?.startedAt ?? new Date().toISOString(),
       });
 
@@ -444,9 +623,169 @@ function InterviewSetupInner() {
       setCreateError(
         err instanceof Error ? err.message : "Something went wrong"
       );
+    } finally {
       setIsCreating(false);
     }
   }
+
+  // ─── Submit ──────────────────────────────────────────────────────────────────
+
+  async function handleStartInterview() {
+    posthog?.capture("interview_setup_started", {
+      mode: "general_dsa",
+      difficulty: form.difficulty,
+      category: form.category,
+      language: form.language,
+      duration: form.duration,
+      interviewer_persona: form.interviewerPersona,
+      problem_mode: problemMode,
+      is_free_trial: isFreeTrialUser,
+    });
+
+    const body: Record<string, unknown> = {
+      mode: "general_dsa",
+      roundType: "coding",
+      difficulty: form.difficulty,
+      category: form.category === "any" ? null : form.category,
+      language: form.language,
+      maxDurationSeconds: form.duration * 60,
+      interviewerPersona: form.interviewerPersona,
+    };
+
+    if (problemMode === "specific" && selectedProblem) {
+      body.problemSlug = selectedProblem.slug;
+    }
+
+    await launchInterview(body);
+  }
+
+  async function handleGenerateLoop() {
+    setIsGeneratingLoop(true);
+    setLoopError(null);
+    setGeneratedLoop(null);
+
+    try {
+      const res = await fetch("/api/loops/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(targetedForm),
+      });
+
+      const json = (await res.json()) as {
+        success: boolean;
+        data?: { loop: GeneratedLoop };
+        error?: string;
+      };
+
+      if (!res.ok || !json.success || !json.data?.loop) {
+        throw new Error(json.error ?? "Failed to generate targeted loop");
+      }
+
+      setGeneratedLoop(json.data.loop);
+      setShowQuestionExplorer(false);
+      posthog?.capture("targeted_loop_generated", {
+        company: json.data.loop.company,
+        role_title: json.data.loop.roleTitle,
+        experience_level: json.data.loop.experienceLevel,
+        round_count: json.data.loop.rounds.length,
+        used_fallback: json.data.loop.similarCompanyFallback,
+      });
+    } catch (err) {
+      setLoopError(err instanceof Error ? err.message : "Failed to generate loop");
+    } finally {
+      setIsGeneratingLoop(false);
+    }
+  }
+
+  async function handleUploadJd(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsParsingJd(true);
+    setLoopError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/jd/parse", {
+        method: "POST",
+        body: formData,
+      });
+
+      const json = (await res.json()) as {
+        success: boolean;
+        data?: { fileName: string; jdText: string };
+        error?: string;
+      };
+
+      if (!res.ok || !json.success || !json.data) {
+        throw new Error(json.error ?? "Failed to parse the uploaded JD");
+      }
+
+      setUploadedFileName(json.data.fileName);
+      setTargetedForm((prev) => ({ ...prev, jdText: json.data?.jdText ?? prev.jdText }));
+    } catch (err) {
+      setLoopError(err instanceof Error ? err.message : "Failed to parse the uploaded JD");
+    } finally {
+      setIsParsingJd(false);
+      event.target.value = "";
+    }
+  }
+
+  async function handleStartTargetedRound(round: GeneratedLoopRound) {
+    if (!generatedLoop) return;
+
+    posthog?.capture("targeted_round_started", {
+      company: generatedLoop.company,
+      role_title: generatedLoop.roleTitle,
+      round_type: round.roundType,
+      round_order: round.order,
+    });
+
+    const payload = buildLoopStartPayload(generatedLoop, round, form.language);
+    await launchInterview({
+      ...payload,
+      maxDurationSeconds: round.estimatedMinutes * 60,
+    });
+  }
+
+  const fetchHistoricalQuestions = useCallback(async () => {
+    if (!generatedLoop || !showQuestionExplorer) return;
+
+    setHistoricalQuestionsLoading(true);
+    setHistoricalQuestionsError(null);
+    try {
+      const params = new URLSearchParams({
+        company: generatedLoop.company,
+      });
+      if (questionSearch.trim()) params.set("search", questionSearch.trim());
+      if (questionTopicFilter !== "all") params.set("topic", questionTopicFilter);
+
+      const res = await fetch(`/api/historical-questions?${params.toString()}`);
+      const json = (await res.json()) as {
+        success: boolean;
+        data?: { questions: HistoricalQuestion[] };
+        error?: string;
+      };
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.error ?? "Failed to fetch historical questions");
+      }
+
+      setHistoricalQuestions(json.data?.questions ?? []);
+    } catch (err) {
+      setHistoricalQuestionsError(
+        err instanceof Error ? err.message : "Failed to fetch historical questions"
+      );
+    } finally {
+      setHistoricalQuestionsLoading(false);
+    }
+  }, [generatedLoop, questionSearch, questionTopicFilter, showQuestionExplorer]);
+
+  useEffect(() => {
+    void fetchHistoricalQuestions();
+  }, [fetchHistoricalQuestions]);
 
   // ─── Filtered problems for display ──────────────────────────────────────────
 
@@ -465,12 +804,7 @@ function InterviewSetupInner() {
       {/* Header */}
       <div className="border-b border-brand-border bg-brand-surface">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <Code2 className="h-5 w-5 text-brand-cyan" />
-            <span className="font-semibold tracking-tight text-brand-text">
-              TechInView
-            </span>
-          </div>
+          <BrandLogo size="sm" wordmarkClassName="text-base" />
           <span className="text-sm text-brand-muted">AI Mock Interview</span>
         </div>
       </div>
@@ -482,7 +816,9 @@ function InterviewSetupInner() {
             Set Up Your Interview
           </h1>
           <p className="mt-1 text-sm text-brand-muted">
-            Configure your session and {selectedPersona.name} will guide you through the rest.
+            {interviewMode === "targeted_loop"
+              ? "Paste your JD, generate the likely loop, and start the round you want to practice first."
+              : `Configure your session and ${activePersona.name} will guide you through the rest.`}
           </p>
         </div>
 
@@ -516,62 +852,327 @@ function InterviewSetupInner() {
 
         {/* 0 – Interview Type */}
         <SectionCard title="Interview Type">
-          <div className="grid grid-cols-3 gap-3">
-            {/* DSA — active */}
+          <div className="grid gap-3 md:grid-cols-2">
             <button
-              className="flex items-start gap-3 rounded-lg border border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30 px-4 py-4 text-left transition-all"
+              type="button"
+              onClick={() => setInterviewMode("general_dsa")}
+              className={cn(
+                "flex items-start gap-3 rounded-lg border px-4 py-4 text-left transition-all",
+                interviewMode === "general_dsa"
+                  ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
+                  : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
+              )}
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-cyan/10 border border-brand-cyan/30">
-                <Braces className="h-4 w-4 text-brand-cyan" />
+              <div
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border",
+                  interviewMode === "general_dsa"
+                    ? "border-brand-cyan/30 bg-brand-cyan/10"
+                    : "border-brand-border bg-brand-surface"
+                )}
+              >
+                <Braces className={cn("h-4 w-4", interviewMode === "general_dsa" ? "text-brand-cyan" : "text-brand-muted")} />
               </div>
               <div>
-                <span className="text-sm font-semibold text-brand-cyan">DSA / Coding</span>
+                <span className={cn("text-sm font-semibold", interviewMode === "general_dsa" ? "text-brand-cyan" : "text-brand-text")}>
+                  General DSA Round
+                </span>
                 <p className="text-xs text-brand-muted mt-0.5">
-                  Algorithms &amp; data structures
+                  Pick difficulty, topic, persona, and start a traditional coding interview.
                 </p>
               </div>
             </button>
 
-            {/* System Design — coming soon */}
-            <div className="flex items-start gap-3 rounded-lg border border-brand-border px-4 py-4 text-left opacity-50 cursor-not-allowed">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-surface border border-brand-border">
-                <Network className="h-4 w-4 text-brand-muted" />
+            <button
+              type="button"
+              onClick={() => router.push("/prep-plans/new")}
+              className={cn(
+                "flex items-start gap-3 rounded-lg border px-4 py-4 text-left transition-all",
+                interviewMode === "targeted_loop"
+                  ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
+                  : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border",
+                  interviewMode === "targeted_loop"
+                    ? "border-brand-cyan/30 bg-brand-cyan/10"
+                    : "border-brand-border bg-brand-surface"
+                )}
+              >
+                <Target className={cn("h-4 w-4", interviewMode === "targeted_loop" ? "text-brand-cyan" : "text-brand-muted")} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-brand-muted">System Design</span>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-amber/10 text-brand-amber border border-brand-amber/25">
-                    <Lock className="h-2.5 w-2.5" />
-                    Soon
+                  <span className={cn("text-sm font-semibold", interviewMode === "targeted_loop" ? "text-brand-cyan" : "text-brand-text")}>
+                    Targeted Loop
+                  </span>
+                  <span className="rounded-full border border-brand-green/20 bg-brand-green/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-green">
+                    Company + role + JD
                   </span>
                 </div>
-                <p className="text-xs text-brand-muted/60 mt-0.5">
-                  Scalable architecture
+                <p className="text-xs text-brand-muted mt-0.5">
+                  Generate coding, behavioral, hiring manager, and system design rounds from the job you are actually applying for.
                 </p>
               </div>
-            </div>
-
-            {/* Machine Coding — coming soon */}
-            <div className="flex items-start gap-3 rounded-lg border border-brand-border px-4 py-4 text-left opacity-50 cursor-not-allowed">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-surface border border-brand-border">
-                <MonitorSmartphone className="h-4 w-4 text-brand-muted" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-brand-muted">Machine Coding</span>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-amber/10 text-brand-amber border border-brand-amber/25">
-                    <Lock className="h-2.5 w-2.5" />
-                    Soon
-                  </span>
-                </div>
-                <p className="text-xs text-brand-muted/60 mt-0.5">
-                  Multi-file IDE projects
-                </p>
-              </div>
-            </div>
+            </button>
           </div>
+
+          <p className="mt-4 text-xs leading-relaxed text-brand-muted">
+            Company, role, and JD-based prep planning now lives in <Link href="/prep-plans/new" className="text-brand-cyan hover:underline">Prep Plans</Link>, outside interview setup.
+          </p>
         </SectionCard>
 
+        {interviewMode === "targeted_loop" && (
+          <>
+            <SectionCard title="Target Role">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-brand-muted">
+                    <Building2 className="h-3.5 w-3.5" />
+                    Company
+                  </label>
+                  <input
+                    type="text"
+                    value={targetedForm.company}
+                    onChange={(event) =>
+                      setTargetedForm((prev) => ({ ...prev, company: event.target.value }))
+                    }
+                    placeholder="Google"
+                    className="w-full rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-brand-muted">
+                    <Target className="h-3.5 w-3.5" />
+                    Role Title
+                  </label>
+                  <input
+                    type="text"
+                    value={targetedForm.roleTitle}
+                    onChange={(event) =>
+                      setTargetedForm((prev) => ({ ...prev, roleTitle: event.target.value }))
+                    }
+                    placeholder="Senior Software Engineer"
+                    className="w-full rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-brand-muted">
+                  <ListFilter className="h-3.5 w-3.5" />
+                  Experience Level
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {EXPERIENCE_LEVEL_OPTIONS.map((level) => (
+                    <button
+                      key={level.value}
+                      type="button"
+                      onClick={() =>
+                        setTargetedForm((prev) => ({ ...prev, experienceLevel: level.value }))
+                      }
+                      className={cn(
+                        "rounded-lg border px-4 py-3 text-left transition-all",
+                        targetedForm.experienceLevel === level.value
+                          ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
+                          : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
+                      )}
+                    >
+                      <p className="text-sm font-semibold text-brand-text">{level.label}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-brand-muted">
+                        {level.description}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5 space-y-2">
+                <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-brand-muted">
+                  <FileText className="h-3.5 w-3.5" />
+                  Job Description
+                </label>
+                <textarea
+                  value={targetedForm.jdText}
+                  onChange={(event) =>
+                    setTargetedForm((prev) => ({ ...prev, jdText: event.target.value }))
+                  }
+                  rows={12}
+                  placeholder="Paste the job description here. We’ll use the company, role, and JD signals to assemble a likely interview loop."
+                  className="w-full rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm leading-relaxed text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                />
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-xs text-brand-muted">
+                    {uploadedFileName ? `Uploaded: ${uploadedFileName}` : "Paste the JD or upload a text-based file."}
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".txt,.md,.rtf,.csv,.pdf"
+                      className="hidden"
+                      onChange={handleUploadJd}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isParsingJd}
+                    >
+                      {isParsingJd ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Parsing...
+                        </>
+                      ) : (
+                        <>
+                          <FileUp className="h-4 w-4" />
+                          Upload JD
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleGenerateLoop}
+                      disabled={isGeneratingLoop || targetedForm.jdText.trim().length < 40}
+                    >
+                      {isGeneratingLoop ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Generating loop...
+                        </>
+                      ) : (
+                        <>
+                          Generate Loop
+                          <ChevronRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            {generatedLoop && (
+              <SectionCard title="Likely Interview Loop">
+                <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 px-5 py-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-brand-text">{generatedLoop.loopName}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-brand-muted">
+                        {generatedLoop.summary}
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <span className="rounded-full border border-brand-border px-3 py-1 text-[11px] font-medium text-brand-muted">
+                          {targetedPersona.name} · {targetedPersona.companyLabel}
+                        </span>
+                        {generatedLoop.jdSignals.map((signal) => (
+                          <span
+                            key={signal}
+                            className="rounded-full border border-brand-border px-3 py-1 text-[11px] font-medium text-brand-muted"
+                          >
+                            {signal.replace(/_/g, " ")}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-brand-border bg-brand-surface px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-cyan">
+                        Confidence
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-brand-text">
+                        {generatedLoop.confidence === "high" ? "High confidence" : "Mixed with similar-company signals"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-4">
+                  {generatedLoop.rounds.map((round) => (
+                    <GeneratedLoopRoundCard
+                      key={round.id}
+                      round={round}
+                      isStarting={isCreating}
+                      onStart={handleStartTargetedRound}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-5 border-t border-brand-border pt-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-brand-text">See all reviewed historical questions</p>
+                      <p className="text-xs text-brand-muted mt-1">
+                        Browse the company-specific corpus behind this loop by topic or keyword.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setShowQuestionExplorer((prev) => !prev)}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      {showQuestionExplorer ? "Hide question explorer" : "Open question explorer"}
+                    </Button>
+                  </div>
+
+                  {showQuestionExplorer && (
+                    <div className="mt-4 space-y-4">
+                      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem]">
+                        <input
+                          type="text"
+                          value={questionSearch}
+                          onChange={(event) => setQuestionSearch(event.target.value)}
+                          placeholder="Search by topic, keyword, or question phrasing"
+                          className="w-full rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                        />
+                        <select
+                          value={questionTopicFilter}
+                          onChange={(event) => setQuestionTopicFilter(event.target.value)}
+                          className="rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-text focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                        >
+                          <option value="all">All topics</option>
+                          {availableQuestionTopics.map((topic) => (
+                            <option key={topic} value={topic}>
+                              {topic}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {historicalQuestionsLoading ? (
+                        <div className="flex items-center gap-2 rounded-lg border border-brand-border bg-brand-surface px-4 py-6 text-sm text-brand-muted">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Loading reviewed questions...
+                        </div>
+                      ) : historicalQuestionsError ? (
+                        <div className="rounded-lg border border-brand-rose/20 bg-brand-rose/5 px-4 py-3 text-sm text-brand-rose">
+                          {historicalQuestionsError}
+                        </div>
+                      ) : (
+                        <div className="grid gap-3">
+                          {historicalQuestions.map((question) => (
+                            <HistoricalQuestionPreview key={question.id} question={question} />
+                          ))}
+                          {historicalQuestions.length === 0 && (
+                            <div className="rounded-lg border border-brand-border bg-brand-surface px-4 py-6 text-sm text-brand-muted">
+                              No reviewed questions matched this filter.
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </SectionCard>
+            )}
+          </>
+        )}
+
+        {interviewMode === "general_dsa" && (
+          <>
         <SectionCard title="Interviewer Persona">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {INTERVIEWER_PERSONAS.map((persona) => {
@@ -893,6 +1494,8 @@ function InterviewSetupInner() {
             </p>
           )}
         </SectionCard>
+          </>
+        )}
 
         {/* 4 – Language */}
         <SectionCard title="Coding Language">
@@ -918,6 +1521,7 @@ function InterviewSetupInner() {
         </SectionCard>
 
         {/* 5 – Duration */}
+        {interviewMode === "general_dsa" && (
         <SectionCard title="Session Duration">
           {isFreeTrialUser ? (
             <>
@@ -940,11 +1544,12 @@ function InterviewSetupInner() {
                 </div>
               </div>
               <p className="mt-3 text-xs text-brand-muted">
-                Each paid interview credit unlocks one full {FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.
+              Each paid interview credit unlocks one full {FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.
               </p>
             </>
           )}
         </SectionCard>
+        )}
 
         {/* 6 – Mic Check */}
         <SectionCard title="Microphone Check">
@@ -955,7 +1560,7 @@ function InterviewSetupInner() {
               </p>
               <p className="text-xs text-brand-muted">
                 TechInView uses your mic for real-time voice interaction with
-                {" "}{selectedPersona.name}.
+                {" "}{activePersona.name}.
               </p>
             </div>
             <button
@@ -1020,40 +1625,52 @@ function InterviewSetupInner() {
             <p className="text-sm text-brand-rose">{createError}</p>
           </div>
         )}
+        {loopError && (
+          <div className="flex items-start gap-3 rounded-lg border border-brand-rose/30 bg-brand-rose/5 px-4 py-3">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
+            <p className="text-sm text-brand-rose">{loopError}</p>
+          </div>
+        )}
 
         {/* CTA */}
-        <div className="pt-2 pb-10">
-          <Button
-            size="lg"
-            onClick={handleStartInterview}
-            disabled={
-              isCreating ||
-              (problemMode === "specific" && !selectedProblem) ||
-              (credits !== null && credits <= 0)
-            }
-            className="w-full gap-2 text-base font-semibold"
-          >
-            {isCreating ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Setting up your interview…
-              </>
-            ) : (
-              <>
-                Start Interview
-                <ChevronRight className="h-5 w-5" />
-              </>
+        {interviewMode === "general_dsa" ? (
+          <div className="pt-2 pb-10">
+            <Button
+              size="lg"
+              onClick={handleStartInterview}
+              disabled={
+                isCreating ||
+                (problemMode === "specific" && !selectedProblem) ||
+                (credits !== null && credits <= 0)
+              }
+              className="w-full gap-2 text-base font-semibold"
+            >
+              {isCreating ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Setting up your interview…
+                </>
+              ) : (
+                <>
+                  Start Interview
+                  <ChevronRight className="h-5 w-5" />
+                </>
+              )}
+            </Button>
+            {problemMode === "specific" && !selectedProblem && (
+              <p className="mt-2 text-center text-xs text-brand-amber">
+                Select a problem above to continue.
+              </p>
             )}
-          </Button>
-          {problemMode === "specific" && !selectedProblem && (
-            <p className="mt-2 text-center text-xs text-brand-amber">
-              Select a problem above to continue.
+            <p className="mt-3 text-center text-xs text-brand-muted">
+              By starting, you agree that {activePersona.name} will record and analyze your session.
             </p>
-          )}
-          <p className="mt-3 text-center text-xs text-brand-muted">
-            By starting, you agree that {selectedPersona.name} will record and analyze your session.
-          </p>
-        </div>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-brand-border bg-brand-card px-5 py-4 text-sm text-brand-muted">
+            Generate a targeted loop above, then launch any round directly from the loop cards. The generated rounds will use {activePersona.name} as the interviewer calibration by default.
+          </div>
+        )}
       </div>
     </div>
   );

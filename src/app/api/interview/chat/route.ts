@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { type InterviewPhase, parseInterviewPhase } from "@/lib/interview-phases";
 import { buildChatSystemPrompt, type ProblemPayload } from "@/lib/ai/interviewer-system-prompt";
+import type { RoundType } from "@/lib/constants";
+import type { RoundContextSnapshot } from "@/lib/loops/types";
 
 // Module-level singleton — reused across requests in the same serverless instance
 const anthropic = new Anthropic();
@@ -27,6 +29,8 @@ export async function POST(request: Request) {
       elapsedSeconds?: number;
       maxDurationSeconds?: number;
       interviewerPersona?: string;
+      roundType?: RoundType;
+      roundContext?: RoundContextSnapshot | null;
     };
 
     if (!message) {
@@ -41,14 +45,16 @@ export async function POST(request: Request) {
     const totalMinutes = Math.max(1, Math.round(maxDur / 60));
     const minutes = Math.floor(elapsed / 60);
 
-    const systemPrompt = buildChatSystemPrompt(
-      (problem as ProblemPayload) ?? null,
-      typeof currentPhase === "string" ? currentPhase : "INTRO",
-      typeof currentCode === "string" ? currentCode : "",
-      minutes,
+    const systemPrompt = buildChatSystemPrompt({
+      roundType: body.roundType ?? "coding",
+      problem: (problem as ProblemPayload) ?? null,
+      roundContext: body.roundContext ?? null,
+      currentPhase: typeof currentPhase === "string" ? currentPhase : "INTRO",
+      currentCode: typeof currentCode === "string" ? currentCode : "",
+      minutesElapsed: minutes,
       totalMinutes,
-      interviewerPersona,
-    );
+      interviewerPersonaId: interviewerPersona,
+    });
 
     const messages: Anthropic.MessageParam[] = [
       ...(conversationHistory || []).slice(-10).map((m) => ({

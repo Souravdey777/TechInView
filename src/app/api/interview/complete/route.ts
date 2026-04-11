@@ -3,10 +3,15 @@ import { createClient } from "@/lib/supabase/server";
 import { scoreInterview } from "@/lib/ai/scorer";
 import { captureServerEvent } from "@/lib/posthog/server";
 import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
+import type { InterviewMode, RoundType } from "@/lib/constants";
+import type { RoundContextSnapshot } from "@/lib/loops/types";
 
 type CompleteInterviewBody = {
   interviewId: string;
   interviewerPersona?: string;
+  mode?: InterviewMode;
+  roundType?: RoundType;
+  roundTitle?: string;
   finalCode: string;
   language?: string;
   transcript: { role: string; content: string; timestamp_ms: number }[];
@@ -18,7 +23,8 @@ type CompleteInterviewBody = {
     difficulty?: string;
     category?: string;
     optimal_complexity?: { time: string; space: string };
-  };
+  } | null;
+  roundContext?: RoundContextSnapshot | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -28,8 +34,21 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const body = (await req.json()) as CompleteInterviewBody;
-    const { interviewId, finalCode, transcript, testsPassed, testsTotal, problem } = body;
+    const {
+      interviewId,
+      finalCode,
+      transcript,
+      testsPassed,
+      testsTotal,
+      problem,
+      roundContext,
+      mode = "general_dsa",
+      roundType = "coding",
+      roundTitle,
+    } = body;
     const interviewerPersona = resolveInterviewerPersona(body.interviewerPersona);
+    const resolvedRoundTitle =
+      roundTitle ?? roundContext?.title ?? problem?.title ?? "Interview Round";
 
     if (!interviewId) {
       return NextResponse.json(
@@ -40,19 +59,25 @@ export async function POST(req: NextRequest) {
 
     // Score the interview via Claude AI (skip if no API key)
     let scoringResult: Awaited<ReturnType<typeof scoreInterview>> | null = null;
-    if (transcript && transcript.length > 0 && problem && process.env.ANTHROPIC_API_KEY) {
+    if (transcript && transcript.length > 0 && process.env.ANTHROPIC_API_KEY) {
       try {
         scoringResult = await scoreInterview({
           messages: transcript,
           finalCode: finalCode || "",
           testsPassed: testsPassed ?? 0,
           testsTotal: testsTotal ?? 0,
+          mode,
+          roundType,
+          roundTitle: resolvedRoundTitle,
           interviewerPersonaId: interviewerPersona,
-          problem: {
-            title: problem.title ?? "Unknown Problem",
-            description: problem.description ?? "",
-            optimal_complexity: problem.optimal_complexity ?? { time: "Unknown", space: "Unknown" },
-          },
+          problem: problem
+            ? {
+                title: problem.title ?? "Unknown Problem",
+                description: problem.description ?? "",
+                optimal_complexity: problem.optimal_complexity ?? { time: "Unknown", space: "Unknown" },
+              }
+            : null,
+          roundContext: roundContext ?? null,
         });
       } catch (scoreError) {
         console.error("AI scoring failed:", scoreError);
@@ -73,6 +98,10 @@ export async function POST(req: NextRequest) {
         await updateInterview(interviewId, {
           status: "completed",
           interviewer_persona: interviewerPersona,
+          mode,
+          round_type: roundType,
+          round_title: resolvedRoundTitle,
+          round_context_snapshot: roundContext ?? null,
           final_code: finalCode,
           completed_at: new Date(),
           duration_seconds: durationSeconds,
@@ -101,7 +130,13 @@ export async function POST(req: NextRequest) {
         }
 
         // Update progress stats for this category
-        if (user && problem.category && scoringResult && scoringResult.overall_score != null) {
+        if (
+          user &&
+          mode === "general_dsa" &&
+          problem?.category &&
+          scoringResult &&
+          scoringResult.overall_score != null
+        ) {
           await updateProgress(user.id, problem.category, scoringResult.overall_score);
         }
 
@@ -119,13 +154,16 @@ export async function POST(req: NextRequest) {
       captureServerEvent(user.id, "interview_completed", {
         interview_id: interviewId,
         interviewer_persona: interviewerPersona,
+        mode,
+        round_type: roundType,
+        round_title: resolvedRoundTitle,
         overall_score: scoringResult?.overall_score ?? null,
         hire_recommendation: scoringResult?.hire_recommendation ?? null,
         duration_seconds: durationSeconds,
         tests_passed: testsPassed,
         tests_total: testsTotal,
-        difficulty: problem.difficulty,
-        category: problem.category,
+        difficulty: problem?.difficulty,
+        category: problem?.category,
       });
     }
 
