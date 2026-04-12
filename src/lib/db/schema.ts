@@ -13,6 +13,7 @@ import {
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import { type InferSelectModel, type InferInsertModel } from "drizzle-orm";
+import type { PublicProfileLinks } from "@/lib/public-profile";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -81,6 +82,10 @@ export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(),
   display_name: text("display_name"),
   avatar_url: text("avatar_url"),
+  username: text("username").unique(),
+  public_bio: text("public_bio"),
+  public_links: jsonb("public_links").$type<PublicProfileLinks>(),
+  is_public_profile: boolean("is_public_profile").default(false).notNull(),
   target_company: text("target_company"),
   experience_level: experienceLevelEnum("experience_level"),
   preferred_language: text("preferred_language"),

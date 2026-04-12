@@ -184,7 +184,7 @@ const FAQS: readonly FaqItem[] = [
   {
     question: "How long does a session take?",
     answer:
-      "Paid interviews run for 45 minutes, matching the feel of a real DSA round. The free trial is a shorter 5-minute voice session so you can feel the experience before buying a pack.",
+      "Paid interviews run for 45 minutes across every interview type. The free trial is a shorter 5-minute voice session so you can feel the experience before buying a pack.",
   },
   {
     question: "Do I need a subscription?",

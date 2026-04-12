@@ -19,11 +19,11 @@ export function PrepPlansIndex() {
             </span>
           </div>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-brand-text">
-            Structured prep is coming back here soon.
+            A new structured prep experience is coming soon.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted">
-            The Prep Plans workspace is being refined so company, role, and JD inputs produce a
-            tighter planning experience before it reopens.
+            The Prep Plans workspace is being built so company, role, and JD inputs can create a
+            more focused planning experience when it launches.
           </p>
         </div>
         <Button variant="outline" disabled>
@@ -43,8 +43,8 @@ export function PrepPlansIndex() {
             Prep Plans are coming soon
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
-            We&apos;re rebuilding the planning flow so company-matched prep loops feel sharper before
-            the feature goes live again.
+            We&apos;re building the planning flow so company, role, and JD inputs can turn into
+            sharper prep loops when the feature launches.
           </p>
           <div className="mt-6">
             <Button variant="outline" disabled>

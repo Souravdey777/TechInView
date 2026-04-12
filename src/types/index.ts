@@ -11,6 +11,7 @@ import type {
 } from "@/lib/constants";
 import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
+import type { PublicProfileLinks } from "@/lib/public-profile";
 
 // ─── Profile ─────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,10 @@ export type Profile = {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
+  username: string | null;
+  public_bio: string | null;
+  public_links: PublicProfileLinks | null;
+  is_public_profile: boolean;
   target_company: string | null;
   experience_level: ExperienceLevel | null;
   preferred_language: SupportedLanguage | null;

@@ -1,4 +1,5 @@
 import {
+  FULL_INTERVIEW_DURATION_MINUTES,
   type DifficultyLevel,
   type InterviewMode,
   type RoundType,
@@ -98,11 +99,8 @@ function difficultyForExperience(experienceLevel: ExperienceLevel): DifficultyLe
   return "hard";
 }
 
-function roundDuration(roundType: RoundType): number {
-  if (roundType === "system_design") return 50;
-  if (roundType === "hiring_manager") return 35;
-  if (roundType === "behavioral") return 30;
-  return 45;
+function roundDuration(_roundType: RoundType): number {
+  return FULL_INTERVIEW_DURATION_MINUTES;
 }
 
 function matchesCompany(question: HistoricalQuestion, company: string): boolean {
@@ -163,10 +161,10 @@ function roundSummary(roundType: RoundType, company: string, roleTitle: string, 
     return `A ${company} style coding round tuned for ${roleTitle}, with prompts biased toward ${jdSignals.slice(0, 2).join(" and ") || "core problem solving"}.`;
   }
   if (roundType === "behavioral") {
-    return `Behavioral practice focused on the stories and ownership signals this role is likely to probe.`;
+    return `A behavioral round focused on the stories and ownership signals this role is likely to probe.`;
   }
   if (roundType === "hiring_manager") {
-    return `An engineering manager conversation centered on role fit, priorities, leadership, and decision quality for this job.`;
+    return `An engineering manager round centered on role fit, priorities, leadership, and decision quality for this job.`;
   }
   return `A system design round shaped around architecture, tradeoffs, and scale signals from the job description.`;
 }

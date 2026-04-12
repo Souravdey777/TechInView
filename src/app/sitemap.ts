@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/blog";
-import { getProblems } from "@/lib/db/queries";
+import { getProblems, getPublicProfileUsernames } from "@/lib/db/queries";
+import { getPublicProfilePath } from "@/lib/public-profile";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
@@ -38,6 +39,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
+  let publicProfileUsernames: string[] = [];
+
+  try {
+    publicProfileUsernames = await getPublicProfileUsernames();
+  } catch {
+    publicProfileUsernames = [];
+  }
+
+  const publicProfileEntries: MetadataRoute.Sitemap = publicProfileUsernames.map((username) => ({
+    url: `${baseUrl}${getPublicProfilePath(username)}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.65,
+  }));
+
   return [
     {
       url: baseUrl,
@@ -65,5 +81,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...blogEntries,
     ...practiceEntries,
+    ...publicProfileEntries,
   ];
 }

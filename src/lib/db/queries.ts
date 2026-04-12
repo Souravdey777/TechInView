@@ -13,6 +13,13 @@ import type {
   RoundContextSnapshot,
 } from "@/lib/loops/types";
 import type { InterviewMode, RoundType } from "@/lib/constants";
+import {
+  buildPublicProfilePracticeActivity,
+  normalizePublicProfileLinks,
+  normalizePublicUsername,
+  type PublicProfileLinks,
+  type PublicProfilePracticeActivity,
+} from "@/lib/public-profile";
 
 import type { Profile, Problem, Interview, Message, Progress, Payment, InterviewFeedback } from "./schema";
 
@@ -117,6 +124,244 @@ export async function updateProfile(
     .where(eq(schema.profiles.id, userId))
     .returning();
   return results[0];
+}
+
+export type PublicProfileCategory = {
+  category: string;
+  problems_attempted: number;
+  problems_solved: number;
+  avg_score: number;
+};
+
+export type PublicProfile = {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  public_bio: string | null;
+  public_links: PublicProfileLinks;
+  target_company: string | null;
+  experience_level: Profile["experience_level"];
+  preferred_language: Profile["preferred_language"];
+  interviews_completed: number;
+  created_at: Date | string;
+  average_score: number | null;
+  top_categories: PublicProfileCategory[];
+  practice_activity: PublicProfilePracticeActivity;
+};
+
+export async function getPublicProfileByUsername(
+  username: string
+): Promise<PublicProfile | undefined> {
+  const db = getDb();
+  const normalizedUsername = normalizePublicUsername(username);
+
+  if (!normalizedUsername) {
+    return undefined;
+  }
+
+  try {
+    const profileResults = await db
+      .select({
+        id: schema.profiles.id,
+        username: schema.profiles.username,
+        display_name: schema.profiles.display_name,
+        avatar_url: schema.profiles.avatar_url,
+        public_bio: schema.profiles.public_bio,
+        public_links: schema.profiles.public_links,
+        target_company: schema.profiles.target_company,
+        experience_level: schema.profiles.experience_level,
+        preferred_language: schema.profiles.preferred_language,
+        interviews_completed: schema.profiles.interviews_completed,
+        created_at: schema.profiles.created_at,
+      })
+      .from(schema.profiles)
+      .where(
+        and(
+          eq(schema.profiles.username, normalizedUsername),
+          eq(schema.profiles.is_public_profile, true)
+        )
+      )
+      .limit(1);
+
+    const profile = profileResults[0];
+
+    if (!profile?.username) {
+      return undefined;
+    }
+
+    const practiceDateExpression = sql<string>`to_char((coalesce(${schema.interviews.completed_at}, ${schema.interviews.started_at}) at time zone 'UTC')::date, 'YYYY-MM-DD')`;
+
+    const [averageScoreResults, progressRows, practiceRows] = await Promise.all([
+      db
+        .select({
+          average_score: sql<number | null>`cast(round(avg(${schema.interviews.overall_score})) as int)`,
+        })
+        .from(schema.interviews)
+        .where(
+          and(
+            eq(schema.interviews.user_id, profile.id),
+            eq(schema.interviews.status, "completed"),
+            sql`${schema.interviews.overall_score} is not null`
+          )
+        ),
+      db
+        .select({
+          category: schema.progress.category,
+          problems_attempted: schema.progress.problems_attempted,
+          problems_solved: schema.progress.problems_solved,
+          avg_score: schema.progress.avg_score,
+        })
+        .from(schema.progress)
+        .where(
+          and(
+            eq(schema.progress.user_id, profile.id),
+            sql`${schema.progress.avg_score} is not null`
+          )
+        )
+        .orderBy(
+          desc(schema.progress.avg_score),
+          desc(schema.progress.problems_attempted),
+          asc(schema.progress.category)
+        )
+        .limit(3),
+      db
+        .select({
+          date: practiceDateExpression,
+          count: sql<number>`cast(count(*) as int)`,
+        })
+        .from(schema.interviews)
+        .where(
+          and(
+            eq(schema.interviews.user_id, profile.id),
+            inArray(schema.interviews.status, ["completed", "abandoned"])
+          )
+        )
+        .groupBy(practiceDateExpression)
+        .orderBy(asc(practiceDateExpression)),
+    ]);
+
+    let topCategories: PublicProfileCategory[] = progressRows
+      .filter((row): row is typeof row & { avg_score: number } => row.avg_score != null)
+      .map((row) => ({
+        category: row.category,
+        problems_attempted: row.problems_attempted,
+        problems_solved: row.problems_solved,
+        avg_score: Math.round(row.avg_score),
+      }));
+
+    if (topCategories.length === 0) {
+      const completedInterviewRows = await db
+        .select({
+          category: schema.problems.category,
+          score: schema.interviews.overall_score,
+        })
+        .from(schema.interviews)
+        .innerJoin(schema.problems, eq(schema.interviews.problem_id, schema.problems.id))
+        .where(
+          and(
+            eq(schema.interviews.user_id, profile.id),
+            eq(schema.interviews.status, "completed"),
+            sql`${schema.interviews.overall_score} is not null`
+          )
+        );
+
+      const categoryMap = new Map<
+        string,
+        { scores: number[]; problems_attempted: number; problems_solved: number }
+      >();
+
+      for (const row of completedInterviewRows) {
+        if (row.score == null) {
+          continue;
+        }
+
+        const existing = categoryMap.get(row.category) ?? {
+          scores: [],
+          problems_attempted: 0,
+          problems_solved: 0,
+        };
+
+        existing.scores.push(row.score);
+        existing.problems_attempted += 1;
+        existing.problems_solved += row.score >= 55 ? 1 : 0;
+        categoryMap.set(row.category, existing);
+      }
+
+      topCategories = Array.from(categoryMap.entries())
+        .map(([category, value]) => ({
+          category,
+          problems_attempted: value.problems_attempted,
+          problems_solved: value.problems_solved,
+          avg_score: Math.round(
+            value.scores.reduce((sum, score) => sum + score, 0) / value.scores.length
+          ),
+        }))
+        .sort((left, right) => {
+          if (right.avg_score !== left.avg_score) {
+            return right.avg_score - left.avg_score;
+          }
+          if (right.problems_attempted !== left.problems_attempted) {
+            return right.problems_attempted - left.problems_attempted;
+          }
+          return left.category.localeCompare(right.category);
+        })
+        .slice(0, 3);
+    }
+
+    return {
+      ...profile,
+      username: profile.username,
+      public_links: normalizePublicProfileLinks(
+        (profile.public_links ?? {}) as PublicProfileLinks
+      ),
+      average_score: averageScoreResults[0]?.average_score ?? null,
+      top_categories: topCategories,
+      practice_activity: buildPublicProfilePracticeActivity(practiceRows),
+    };
+  } catch (error: unknown) {
+    if (
+      isMissingSchemaObjectError(error, "username") ||
+      isMissingSchemaObjectError(error, "public_bio") ||
+      isMissingSchemaObjectError(error, "public_links") ||
+      isMissingSchemaObjectError(error, "is_public_profile")
+    ) {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
+
+export async function getPublicProfileUsernames(): Promise<string[]> {
+  const db = getDb();
+  try {
+    const results = await db
+      .select({
+        username: schema.profiles.username,
+      })
+      .from(schema.profiles)
+      .where(
+        and(
+          eq(schema.profiles.is_public_profile, true),
+          sql`${schema.profiles.username} is not null`
+        )
+      )
+      .orderBy(asc(schema.profiles.created_at));
+
+    return results
+      .map((row) => row.username)
+      .filter((username): username is string => Boolean(username));
+  } catch (error: unknown) {
+    if (
+      isMissingSchemaObjectError(error, "username") ||
+      isMissingSchemaObjectError(error, "is_public_profile")
+    ) {
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 // ─── Problem Queries ──────────────────────────────────────────────────────────

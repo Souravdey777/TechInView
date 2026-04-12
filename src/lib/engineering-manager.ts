@@ -1,7 +1,8 @@
 import { REVIEWED_HISTORICAL_QUESTIONS } from "@/data/historical-questions";
+import { FULL_INTERVIEW_DURATION_MINUTES } from "@/lib/constants";
 import type { HistoricalQuestion, RoundContextSnapshot } from "@/lib/loops/types";
 
-export const ENGINEERING_MANAGER_DURATION_MINUTES = 35;
+export const ENGINEERING_MANAGER_DURATION_MINUTES = FULL_INTERVIEW_DURATION_MINUTES;
 
 export const ENGINEERING_MANAGER_FOCUS_OPTIONS = [
   {

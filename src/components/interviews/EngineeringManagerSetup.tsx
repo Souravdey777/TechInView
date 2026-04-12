@@ -187,7 +187,7 @@ export function EngineeringManagerSetup({
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-muted">
               Build a voice-first leadership and role-fit interview around the company, role, and
-              signal areas you want to rehearse. This flow skips coding and focuses on impact,
+              signal areas you want to rehearse. This full-length flow skips coding and focuses on impact,
               prioritization, stakeholder judgment, and concrete examples from your own work.
             </p>
 

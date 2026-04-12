@@ -21,14 +21,14 @@ export function PrepPlanBuilder() {
           Prep plan creation is coming soon.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted">
-          The Prep Plans workspace is staying visible, but the create flow is temporarily paused
-          while we tighten how company, role, and JD signals turn into a structured prep sequence.
+          The create flow is still under construction while we tighten how company, role, and JD
+          signals turn into a structured prep sequence.
         </p>
 
         <div className="mt-8 rounded-2xl border border-brand-border bg-brand-surface p-6">
           <div className="flex items-center gap-2 text-brand-cyan">
             <Sparkles className="h-4 w-4" />
-            <p className="text-sm font-semibold">What&apos;s coming back</p>
+            <p className="text-sm font-semibold">What to expect</p>
           </div>
           <div className="mt-4 space-y-3 text-sm leading-relaxed text-brand-muted">
             <p>Company- and JD-shaped round planning instead of a fixed format checklist.</p>

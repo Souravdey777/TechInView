@@ -160,7 +160,7 @@ export function TechnicalQaSetup() {
                 Dedicated setup route
               </span>
               <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
-                30 min
+                {TECHNICAL_QA_DURATION_MINUTES} min
               </span>
               <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
                 Voice chat
@@ -171,7 +171,7 @@ export function TechnicalQaSetup() {
               Technical Q&A Setup
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-muted">
-              Build a voice-first technical depth interview around the language and frameworks you actually use. This flow skips coding and focuses on practical stack knowledge, debugging, runtime behavior, and engineering tradeoffs.
+              Build a voice-first technical depth interview around the language and frameworks you actually use. This full-length flow skips coding and focuses on practical stack knowledge, debugging, runtime behavior, and engineering tradeoffs.
             </p>
 
             <div className="mt-8 grid gap-6">

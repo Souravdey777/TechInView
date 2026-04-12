@@ -25,6 +25,21 @@ const PACK_COLORS: Record<string, string> = {
   "6pack": "brand-amber",
 };
 
+function resolveAppUrl(headersList: { get(name: string): string | null }): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+
+  const host = headersList.get("host");
+
+  if (!host) {
+    return "http://localhost:3000";
+  }
+
+  const protocol = headersList.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
+  return `${protocol}://${host}`;
+}
+
 export default async function SettingsPage() {
   const supabase = createClient();
   const {
@@ -37,7 +52,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, target_company, experience_level, preferred_language, interview_credits, has_used_free_trial, interviews_completed")
+    .select("display_name, username, public_bio, public_links, is_public_profile, target_company, experience_level, preferred_language, interview_credits, has_used_free_trial, interviews_completed")
     .eq("id", user.id)
     .single();
 
@@ -49,6 +64,7 @@ export default async function SettingsPage() {
   const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
   const { region, symbol } = getRegionForCountry(country);
   const displayKey = getDisplayPricingKey(region);
+  const appUrl = resolveAppUrl(headersList);
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
@@ -71,11 +87,16 @@ export default async function SettingsPage() {
         <SettingsForm
           initialProfile={{
             display_name: profile?.display_name ?? null,
+            username: profile?.username ?? null,
+            public_bio: profile?.public_bio ?? null,
+            public_links: profile?.public_links ?? null,
+            is_public_profile: profile?.is_public_profile ?? false,
             email: user.email ?? "",
             target_company: profile?.target_company ?? null,
             experience_level: profile?.experience_level ?? null,
             preferred_language: profile?.preferred_language ?? null,
           }}
+          shareBaseUrl={appUrl}
         />
       </section>
 
