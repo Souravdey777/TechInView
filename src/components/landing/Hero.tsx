@@ -11,7 +11,12 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const searchParams = useSearchParams();
   const refParam = searchParams.get("ref");
-  const ctaHref = refParam ? `/signup?ref=${refParam}` : "/signup";
+  const practiceHref = refParam
+    ? `/signup?ref=${refParam}&next=${encodeURIComponent("/interview/setup?dsaExperience=practice")}`
+    : `/signup?next=${encodeURIComponent("/interview/setup?dsaExperience=practice")}`;
+  const previewHref = refParam
+    ? `/signup?ref=${refParam}&next=${encodeURIComponent("/interview/setup?dsaExperience=ai_interview")}`
+    : `/signup?next=${encodeURIComponent("/interview/setup?dsaExperience=ai_interview")}`;
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -65,29 +70,28 @@ export function Hero() {
         </h1>
 
         <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto mb-10">
-          Practice DSA problems with {DEFAULT_PERSONA.name}, your generalist AI
-          interviewer, or switch to a company-specific persona. Real-time voice
-          interaction, live code editor, and FAANG-calibrated scoring &mdash; all
-          in one place.
+          Start with free DSA practice, then switch to {DEFAULT_PERSONA.name} for
+          a voice interview that feels closer to the real round. Live code,
+          realistic pressure, and FAANG-calibrated scoring all stay in one place.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href={ctaHref}
+            href={practiceHref}
             className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-brand-cyan text-brand-deep font-semibold text-base hover:bg-cyan-300 transition-all hover:scale-105 glow-cyan"
           >
-            Start Free Interview
+            Practice Free
           </Link>
-          <a
-            href="#features"
+          <Link
+            href={previewHref}
             className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl border border-brand-border text-brand-text font-semibold text-base hover:bg-brand-card transition-colors"
           >
-            See How It Works
-          </a>
+            Try 5-Minute Audio Interview
+          </Link>
         </div>
 
         <p className="mt-5 text-xs text-brand-muted">
-          1 free interview per week &mdash; no credit card required
+          Free DSA practice with saved progress. One 5-minute audio preview included.
         </p>
       </div>
     </section>

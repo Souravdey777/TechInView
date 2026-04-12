@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/blog";
 import { getProblems, getPublicProfileUsernames } from "@/lib/db/queries";
+import { LEGAL_LAST_UPDATED_ISO, LEGAL_LINKS } from "@/lib/legal";
 import { getPublicProfilePath } from "@/lib/public-profile";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -54,6 +55,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.65,
   }));
 
+  const legalEntries: MetadataRoute.Sitemap = LEGAL_LINKS.map((item) => ({
+    url: `${baseUrl}${item.href}`,
+    lastModified: new Date(LEGAL_LAST_UPDATED_ISO),
+    changeFrequency: "monthly" as const,
+    priority: item.href === "/contact" ? 0.45 : 0.4,
+  }));
+
   return [
     {
       url: baseUrl,
@@ -79,6 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    ...legalEntries,
     ...blogEntries,
     ...practiceEntries,
     ...publicProfileEntries,

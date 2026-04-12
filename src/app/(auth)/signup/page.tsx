@@ -16,6 +16,7 @@ export default function SignupPage() {
   const posthog = usePostHog();
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
+  const next = searchParams.get("next");
   const isBeta = ref === BETA_INVITE_CODE;
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +28,7 @@ export default function SignupPage() {
     try {
       const callbackUrl = new URL("/callback", window.location.origin);
       if (ref) callbackUrl.searchParams.set("ref", ref);
+      if (next) callbackUrl.searchParams.set("next", next);
 
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
@@ -69,7 +71,7 @@ export default function SignupPage() {
             </div>
           ) : (
             <p className="text-brand-muted text-sm text-center mb-8">
-              Start with 1 free interview per week
+              Practice DSA for free and keep one 5-minute audio interview preview.
             </p>
           )}
 
@@ -150,7 +152,18 @@ export default function SignupPage() {
         <p className="text-center text-brand-muted text-sm mt-6">
           Already have an account?{" "}
           <Link
-            href={ref ? `/login?ref=${ref}` : "/login"}
+            href={
+              ref || next
+                ? `/login?${new URLSearchParams(
+                    Object.fromEntries(
+                      [
+                        ["ref", ref],
+                        ["next", next],
+                      ].filter((entry): entry is [string, string] => Boolean(entry[1]))
+                    )
+                  ).toString()}`
+                : "/login"
+            }
             className="text-brand-cyan hover:underline"
           >
             Sign in

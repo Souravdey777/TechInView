@@ -72,6 +72,21 @@ export type Problem = {
     space: string;
   };
   follow_up_questions: string[];
+  is_free_solver_enabled: boolean;
+};
+
+export type PracticeAttempt = {
+  id: string;
+  user_id: string;
+  problem_id: string;
+  language: SupportedLanguage;
+  last_code: string | null;
+  tests_passed: number | null;
+  tests_total: number | null;
+  is_solved: boolean;
+  last_run_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 // ─── Code Execution ───────────────────────────────────────────────────────────

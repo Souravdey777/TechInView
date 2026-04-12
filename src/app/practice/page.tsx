@@ -11,7 +11,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Practice DSA Interview Problems — AI Mock Interviews | TechInView",
   description:
-    "Browse 70+ DSA coding interview problems — arrays, trees, graphs, DP, and more. Practice each one with a voice AI interviewer that scores you like a real FAANG interview.",
+    "Browse 70+ DSA coding interview problems — arrays, trees, graphs, DP, and more. Start with free solo practice, then switch into AI Interview Mode when you want the voice-based simulation.",
   keywords: [
     "DSA interview problems",
     "coding interview practice",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Practice DSA Interview Problems — TechInView",
     description:
-      "70+ coding interview problems with AI mock interviews. Practice arrays, trees, graphs, DP, and more with voice-powered feedback.",
+      "70+ coding interview problems with free solo practice plus AI Interview Mode. Practice arrays, trees, graphs, DP, and more with voice-powered feedback when you want it.",
     type: "website",
     url: `${baseUrl}/practice`,
     siteName: "TechInView",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Practice DSA Interview Problems — TechInView",
     description:
-      "70+ coding interview problems with AI mock interviews. Voice-powered feedback scored like a real FAANG interview.",
+      "70+ coding interview problems with free solo practice plus AI Interview Mode. Voice-powered feedback scored like a real FAANG interview.",
     images: ["/og-image.png"],
   },
 };
@@ -69,6 +69,7 @@ export default async function PracticePage() {
     difficulty: p.difficulty,
     category: p.category,
     companyTags: p.company_tags ?? [],
+    isFreeSolverEnabled: p.is_free_solver_enabled,
   }));
 
   // JSON-LD
@@ -80,7 +81,7 @@ export default async function PracticePage() {
         "@id": `${baseUrl}/practice`,
         name: "Practice DSA Interview Problems",
         description:
-          "Browse 70+ DSA coding interview problems — arrays, trees, graphs, DP, and more. Practice each one with a voice AI interviewer.",
+          "Browse 70+ DSA coding interview problems — arrays, trees, graphs, DP, and more. Start with free solo practice, then switch into AI Interview Mode when you want the voice simulation.",
         url: `${baseUrl}/practice`,
         inLanguage: "en",
         isPartOf: { "@type": "WebSite", "@id": baseUrl, name: "TechInView" },
@@ -124,7 +125,7 @@ export default async function PracticePage() {
             name: "How does TechInView's AI mock interview work?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "Pick any DSA problem, then start a voice interview. The AI interviewer asks clarifying questions, evaluates your approach, watches you code in a live editor, and scores you on 5 dimensions — problem solving, code quality, communication, technical knowledge, and testing.",
+              text: "Pick any DSA problem and choose your mode. Practice Mode gives you a simple editor plus test runs, while AI Interview Mode adds a voice interviewer that asks clarifying questions, evaluates your approach, watches you code in a live editor, and scores you on 5 dimensions — problem solving, code quality, communication, technical knowledge, and testing.",
             },
           },
           {
@@ -140,7 +141,7 @@ export default async function PracticePage() {
             name: "Is TechInView free to try?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "Yes. You get a free AI mock interview to experience the full voice-based interview, live coding, and 5-dimension scoring. No credit card required.",
+              text: "Yes. The curated DSA subset is free to solve in Practice Mode, and every account also gets one 5-minute audio interview preview. No credit card required.",
             },
           },
         ],
@@ -165,9 +166,9 @@ export default async function PracticePage() {
         </h1>
         <p className="text-brand-muted text-lg leading-relaxed max-w-2xl mb-6">
           {counts.total} problems across arrays, trees, graphs, dynamic
-          programming, and more. Pick any problem and practice it with an AI
-          interviewer that talks, listens, and scores you like a real FAANG
-          interview.
+          programming, and more. Start with free solo practice on the curated
+          set, then switch any problem into AI Interview Mode when you want the
+          voice-based simulation.
         </p>
         <div className="flex flex-wrap items-center gap-3 text-sm text-brand-muted mb-6">
           <span>
@@ -187,13 +188,21 @@ export default async function PracticePage() {
             hard
           </span>
         </div>
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
-        >
-          <Zap className="w-4 h-4" />
-          Start a free interview
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/interview/setup?dsaExperience=practice"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
+          >
+            <Zap className="w-4 h-4" />
+            Practice Free
+          </Link>
+          <Link
+            href="/interview/setup?dsaExperience=ai_interview"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-brand-border text-brand-text text-sm font-semibold hover:border-brand-cyan/40 hover:text-brand-cyan transition-colors"
+          >
+            Try 5-Minute Audio Interview
+          </Link>
+        </div>
       </section>
 
       {/* Filterable grid (client component) */}

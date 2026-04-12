@@ -476,7 +476,7 @@ export default function ResultsPage() {
           </section>
         )}
 
-        {/* ── Free trial upgrade CTA (shown instead of detailed sections) ── */}
+        {/* ── Audio preview upgrade CTA (shown instead of detailed sections) ── */}
         {isFreeTrial && hasScores && (
           <section className="mb-6 r-anim-4">
             <div className="rounded-xl border border-brand-cyan/30 bg-gradient-to-br from-brand-cyan/5 to-brand-card p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
@@ -489,7 +489,7 @@ export default function ResultsPage() {
                   Detailed Feedback Locked
                 </h3>
                 <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
-                  Your free trial includes the overall score and hire recommendation above.
+                  Your 5-minute audio preview includes the overall score and hire recommendation above.
                   Purchase an interview pack to unlock the 5-dimension radar chart, per-dimension feedback,
                   key strengths, and areas to improve.
                 </p>
@@ -504,14 +504,14 @@ export default function ResultsPage() {
           </section>
         )}
 
-        {/* ── Section 2: Radar Chart (only if scores exist and not free trial) ── */}
+        {/* ── Section 2: Radar Chart (only if scores exist and not preview) ── */}
         {!isFreeTrial && hasScores && radarData.length > 0 && (
           <section className="mb-6 r-anim-4">
             <ScoreRadar scores={radarData} />
           </section>
         )}
 
-        {/* ── Section 3: Feedback Cards (only if scores exist and not free trial) ── */}
+        {/* ── Section 3: Feedback Cards (only if scores exist and not preview) ── */}
         {!isFreeTrial && hasScores && feedbackCards.length > 0 && (
           <section className="mb-6 r-anim-5">
             <h2 className="text-base font-semibold text-brand-text mb-4">
@@ -532,7 +532,7 @@ export default function ResultsPage() {
           </section>
         )}
 
-        {/* ── Section 3b: Key Strengths & Areas to Improve (only if provided and not free trial) ── */}
+        {/* ── Section 3b: Key Strengths & Areas to Improve (only if provided and not preview) ── */}
         {!isFreeTrial && hasScores && (keyStrengths || areasToImprove) && (
           <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {keyStrengths && keyStrengths.length > 0 && (

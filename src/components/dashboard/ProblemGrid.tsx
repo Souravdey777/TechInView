@@ -14,6 +14,7 @@ type Problem = {
   difficulty: DifficultyLevel;
   category: string;
   companyTags: string[];
+  isFreeSolverEnabled: boolean;
 };
 
 type ProblemGridProps = {
@@ -191,9 +192,19 @@ export function ProblemGrid({ problems }: ProblemGridProps) {
               </div>
 
               {/* Category */}
-              <div className="mb-3">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center px-2 py-0.5 rounded bg-brand-surface border border-brand-border text-brand-muted text-xs">
                   {CATEGORY_LABELS[problem.category as ProblemCategory] || problem.category}
+                </span>
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
+                    problem.isFreeSolverEnabled
+                      ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
+                      : "border-brand-amber/20 bg-brand-amber/10 text-brand-amber"
+                  )}
+                >
+                  {problem.isFreeSolverEnabled ? "Free Practice" : "AI Interview Only"}
                 </span>
               </div>
 
@@ -218,13 +229,23 @@ export function ProblemGrid({ problems }: ProblemGridProps) {
               )}
 
               {/* CTA */}
-              <div className="mt-auto pt-3 border-t border-brand-border">
+              <div className="mt-auto space-y-2 border-t border-brand-border pt-3">
                 <Link
-                  href={`/interviews/dsa/setup?problem=${problem.slug}`}
+                  href={
+                    problem.isFreeSolverEnabled
+                      ? `/practice/solve/${problem.slug}`
+                      : `/interview/setup?problem=${problem.slug}&dsaExperience=ai_interview`
+                  }
                   className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan text-sm font-semibold hover:bg-brand-cyan/20 transition-colors group-hover:border-brand-cyan/40"
                 >
-                  Start Interview
+                  {problem.isFreeSolverEnabled ? "Practice" : "AI Interview"}
                   <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href={`/interview/setup?problem=${problem.slug}&dsaExperience=ai_interview`}
+                  className="inline-flex items-center text-xs font-medium text-brand-muted hover:text-brand-cyan"
+                >
+                  AI Interview Mode
                 </Link>
               </div>
             </div>

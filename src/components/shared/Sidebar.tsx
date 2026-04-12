@@ -11,10 +11,12 @@ import {
   LogOut,
   Sparkles,
   FolderKanban,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupabase } from "@/hooks/useSupabase";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { createSupportMailto } from "@/lib/legal";
 
 type NavItem = {
   href: string;
@@ -29,6 +31,10 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/progress", label: "Progress", icon: TrendingUp },
   { href: "/settings", label: "Settings", icon: Settings2 },
 ];
+
+const SIDEBAR_SUPPORT_HREF = createSupportMailto({
+  subject: "TechInView support request",
+});
 
 type SidebarProps = {
   userEmail: string;
@@ -96,6 +102,16 @@ export function Sidebar({ userEmail, startingPrice = "$19" }: SidebarProps) {
             View pricing &rarr;
           </span>
         </Link>
+      </div>
+
+      <div className="px-3 pb-3">
+        <a
+          href={SIDEBAR_SUPPORT_HREF}
+          className="flex items-center gap-2 rounded-xl border border-brand-border px-3 py-2.5 text-xs font-medium text-brand-muted transition-colors hover:border-brand-cyan/30 hover:bg-brand-card hover:text-brand-text"
+        >
+          <Mail className="h-3.5 w-3.5 text-brand-cyan" />
+          Contact support
+        </a>
       </div>
 
       {/* User Info + Sign Out */}

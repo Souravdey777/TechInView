@@ -21,7 +21,16 @@ import {
   type PublicProfilePracticeActivity,
 } from "@/lib/public-profile";
 
-import type { Profile, Problem, Interview, Message, Progress, Payment, InterviewFeedback } from "./schema";
+import type {
+  Profile,
+  Problem,
+  Interview,
+  Message,
+  Progress,
+  Payment,
+  InterviewFeedback,
+  PracticeAttempt,
+} from "./schema";
 
 // ─── DB Connection (lazy, serverless-safe) ───────────────────────────────────
 
@@ -370,6 +379,7 @@ export type ProblemFilters = {
   difficulty?: "easy" | "medium" | "hard";
   category?: string;
   search?: string;
+  freeOnly?: boolean;
 };
 
 async function _getProblems(
@@ -389,6 +399,10 @@ async function _getProblems(
 
   if (filters?.search) {
     conditions.push(ilike(schema.problems.title, `%${filters.search}%`));
+  }
+
+  if (filters?.freeOnly) {
+    conditions.push(eq(schema.problems.is_free_solver_enabled, true));
   }
 
   const query = db
@@ -514,6 +528,127 @@ export async function getRelatedProblems(
     .where(inArray(schema.problems.category, categories))
     .orderBy(sql`random()`)
     .limit(limit);
+}
+
+export type PracticeAttemptUpsertParams = {
+  userId: string;
+  problemId: string;
+  language: string;
+  lastCode?: string | null;
+  testsPassed?: number | null;
+  testsTotal?: number | null;
+  isSolved?: boolean;
+  lastRunAt?: Date | null;
+};
+
+export type PracticeAttemptWithProblem = PracticeAttempt & {
+  problem: Pick<
+    Problem,
+    "id" | "title" | "slug" | "difficulty" | "category" | "is_free_solver_enabled"
+  >;
+};
+
+export async function getPracticeAttempt(
+  userId: string,
+  problemId: string
+): Promise<PracticeAttempt | undefined> {
+  const db = getDb();
+  const results = await db
+    .select()
+    .from(schema.practiceAttempts)
+    .where(
+      and(
+        eq(schema.practiceAttempts.user_id, userId),
+        eq(schema.practiceAttempts.problem_id, problemId)
+      )
+    )
+    .limit(1);
+
+  return results[0];
+}
+
+export async function upsertPracticeAttempt(
+  params: PracticeAttemptUpsertParams
+): Promise<PracticeAttempt> {
+  const db = getDb();
+  const {
+    userId,
+    problemId,
+    language,
+    lastCode = null,
+    testsPassed = null,
+    testsTotal = null,
+    isSolved = false,
+    lastRunAt = null,
+  } = params;
+
+  const results = await db
+    .insert(schema.practiceAttempts)
+    .values({
+      user_id: userId,
+      problem_id: problemId,
+      language,
+      last_code: lastCode,
+      tests_passed: testsPassed,
+      tests_total: testsTotal,
+      is_solved: isSolved,
+      last_run_at: lastRunAt,
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [
+        schema.practiceAttempts.user_id,
+        schema.practiceAttempts.problem_id,
+      ],
+      set: {
+        language,
+        last_code: lastCode,
+        tests_passed: testsPassed,
+        tests_total: testsTotal,
+        is_solved: isSolved,
+        last_run_at: lastRunAt,
+        updated_at: new Date(),
+      },
+    })
+    .returning();
+
+  return results[0];
+}
+
+export async function getRecentPracticeAttempts(
+  userId: string,
+  limit = 6
+): Promise<PracticeAttemptWithProblem[]> {
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: schema.practiceAttempts.id,
+      user_id: schema.practiceAttempts.user_id,
+      problem_id: schema.practiceAttempts.problem_id,
+      language: schema.practiceAttempts.language,
+      last_code: schema.practiceAttempts.last_code,
+      tests_passed: schema.practiceAttempts.tests_passed,
+      tests_total: schema.practiceAttempts.tests_total,
+      is_solved: schema.practiceAttempts.is_solved,
+      last_run_at: schema.practiceAttempts.last_run_at,
+      created_at: schema.practiceAttempts.created_at,
+      updated_at: schema.practiceAttempts.updated_at,
+      problem: {
+        id: schema.problems.id,
+        title: schema.problems.title,
+        slug: schema.problems.slug,
+        difficulty: schema.problems.difficulty,
+        category: schema.problems.category,
+        is_free_solver_enabled: schema.problems.is_free_solver_enabled,
+      },
+    })
+    .from(schema.practiceAttempts)
+    .innerJoin(schema.problems, eq(schema.practiceAttempts.problem_id, schema.problems.id))
+    .where(eq(schema.practiceAttempts.user_id, userId))
+    .orderBy(desc(schema.practiceAttempts.updated_at))
+    .limit(limit);
+
+  return rows as PracticeAttemptWithProblem[];
 }
 
 // ─── Interview Queries ────────────────────────────────────────────────────────

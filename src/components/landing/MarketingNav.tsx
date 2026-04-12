@@ -173,7 +173,7 @@ export function MarketingNav({ signupHref = "/signup" }: MarketingNavProps) {
                 href={signupHref}
                 className="inline-flex items-center justify-center rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-cyan-300"
               >
-                Start Free
+                Practice Free
               </Link>
             </div>
 
@@ -258,7 +258,7 @@ export function MarketingNav({ signupHref = "/signup" }: MarketingNavProps) {
                 className="inline-flex items-center justify-center rounded-xl bg-brand-cyan px-4 py-3 text-sm font-semibold text-brand-deep"
                 onClick={() => setOpen(false)}
               >
-                Start Free
+                Practice Free
               </Link>
             </div>
           </div>

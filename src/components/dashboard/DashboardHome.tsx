@@ -11,7 +11,6 @@ import {
   CalendarClock,
   CheckCircle2,
   ClipboardList,
-  CreditCard,
   Flame,
   FolderKanban,
   Layers3,
@@ -45,6 +44,18 @@ type DashboardHomeProps = {
   startingPrice: string;
   defaultInterviewerName: string;
   initialInterviews: DashboardPracticeItem[];
+  practiceAttempts: {
+    id: string;
+    title: string;
+    slug: string;
+    difficulty: string;
+    category: string;
+    language: string;
+    isSolved: boolean;
+    testsPassed: number | null;
+    testsTotal: number | null;
+    updatedAt: string;
+  }[];
 };
 
 const PRACTICE_ICON_MAP: Record<PracticeInterviewKind, ElementType> = {
@@ -191,6 +202,7 @@ function PracticeCard({
     config.status === "live" && !hasCredits
       ? `Get credits from ${startingPrice}`
       : config.ctaLabel;
+  const isDsaCard = config.kind === "dsa";
 
   return (
     <div
@@ -235,6 +247,21 @@ function PracticeCard({
             {ctaLabel}
             <Lock className="h-3.5 w-3.5" />
           </Button>
+        ) : isDsaCard ? (
+          <div className="flex flex-wrap gap-2">
+            <Button asChild size="sm" variant={style.buttonVariant}>
+              <Link href="/interview/setup?dsaExperience=practice">
+                Practice Free
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="secondary">
+              <Link href={hasCredits ? "/interview/setup?dsaExperience=ai_interview" : "/settings"}>
+                AI Interview
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
         ) : (
           <Button asChild size="sm" variant={style.buttonVariant}>
             <Link href={ctaHref}>
@@ -302,6 +329,7 @@ export function DashboardHome({
   startingPrice,
   defaultInterviewerName,
   initialInterviews,
+  practiceAttempts,
 }: DashboardHomeProps) {
   const prepPlansComingSoon = true;
   const { plans, isLoaded, deletePlan } = usePrepPlans();
@@ -408,9 +436,8 @@ export function DashboardHome({
               Welcome back, <span className="text-brand-cyan">{displayName}</span>
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted">
-              Choose between immediate practice and a structured prep plan. Your live
-              DSA rounds start with {defaultInterviewerName}, while company-specific prep
-              planning is being polished before it reopens in its own workspace.
+              Choose between free Practice Mode and AI Interview Mode. Solo DSA work stays lightweight,
+              while voice-based rounds start with {defaultInterviewerName} when you want pressure and feedback.
             </p>
           </div>
 
@@ -430,10 +457,10 @@ export function DashboardHome({
                 )}
               >
                 {isFreeTrialUser
-                  ? "Free trial available"
+                  ? "Audio preview available"
                   : hasCredits
-                    ? "Practice ready"
-                    : "Need credits"}
+                    ? "AI interview ready"
+                    : "Practice free"}
               </span>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -451,9 +478,9 @@ export function DashboardHome({
                 </Button>
               )}
               <Button asChild variant="secondary">
-                <Link href="/settings">
-                  <CreditCard className="h-4 w-4" />
-                  View packs
+                <Link href="/interview/setup?dsaExperience=ai_interview">
+                  <Sparkles className="h-4 w-4" />
+                  Start AI interview
                 </Link>
               </Button>
             </div>
@@ -482,9 +509,88 @@ export function DashboardHome({
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
+            <h2 className="text-xl font-semibold text-brand-text">Free Solver Activity</h2>
+            <p className="mt-1 text-sm text-brand-muted">
+              Jump back into your saved Practice Mode problems or turn them into an AI interview.
+            </p>
+          </div>
+          <Link
+            href="/interview/setup?dsaExperience=practice"
+            className="inline-flex items-center gap-1 text-sm font-medium text-brand-cyan"
+          >
+            Practice free
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        {practiceAttempts.length === 0 ? (
+          <div className="rounded-2xl border border-brand-border bg-brand-card p-8 text-center">
+            <BookOpenText className="mx-auto h-10 w-10 text-brand-cyan" />
+            <h3 className="mt-4 text-lg font-semibold text-brand-text">No saved practice yet</h3>
+            <p className="mt-2 text-sm text-brand-muted">
+              Start in Practice Mode and your latest DSA attempts will show up here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {practiceAttempts.map((attempt) => (
+              <div
+                key={attempt.id}
+                className="rounded-2xl border border-brand-border bg-brand-card p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-brand-text">{attempt.title}</p>
+                    <p className="mt-1 text-xs text-brand-muted">
+                      {attempt.category} · {attempt.language}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      "rounded-full border px-2.5 py-1 text-[11px] font-medium",
+                      attempt.isSolved
+                        ? "border-brand-green/25 bg-brand-green/10 text-brand-green"
+                        : "border-brand-amber/25 bg-brand-amber/10 text-brand-amber"
+                    )}
+                  >
+                    {attempt.isSolved ? "Solved" : "In progress"}
+                  </span>
+                </div>
+
+                <p className="mt-3 text-xs text-brand-muted">
+                  {attempt.testsTotal
+                    ? `${attempt.testsPassed}/${attempt.testsTotal} tests passed`
+                    : "Code saved, no recent test run"}
+                </p>
+                <p className="mt-1 text-xs text-brand-muted">
+                  Updated {formatShortDate(attempt.updatedAt)}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button asChild size="sm">
+                    <Link href={`/practice/solve/${attempt.slug}`}>
+                      Resume Practice
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" variant="secondary">
+                    <Link href={`/interview/setup?problem=${attempt.slug}&dsaExperience=ai_interview`}>
+                      AI Interview
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
             <h2 className="text-xl font-semibold text-brand-text">Practice Now</h2>
             <p className="mt-1 text-sm text-brand-muted">
-              Every interview type now has its own setup route. Launch directly into the format you want.
+              Start with free DSA practice or jump straight into AI Interview Mode.
             </p>
           </div>
           <Link

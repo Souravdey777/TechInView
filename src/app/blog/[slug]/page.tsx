@@ -181,15 +181,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           Practice out loud with an AI interviewer
         </p>
         <p className="text-sm text-brand-muted mb-6 leading-relaxed">
-          TechInView runs full voice mock interviews with live coding and
-          structured feedback—so you train communication and problem solving
-          together, not just syntax.
+          TechInView lets you start with free DSA practice, then switch into
+          voice mock interviews with live coding and structured feedback when
+          you want the full simulation.
         </p>
         <Link
           href="/login"
           className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
         >
-          Start a free interview
+          Practice free
         </Link>
       </aside>
 

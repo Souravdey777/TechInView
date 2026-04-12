@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -16,8 +17,11 @@ import {
   CreditCard,
   AlertTriangle,
   Ticket,
+  LifeBuoy,
+  Mail,
 } from "lucide-react";
 import { DeleteAccountButton } from "@/components/dashboard/DeleteAccountButton";
+import { LEGAL_LINKS, SUPPORT_EMAIL, createSupportMailto } from "@/lib/legal";
 
 const PACK_COLORS: Record<string, string> = {
   single: "brand-cyan",
@@ -56,7 +60,7 @@ export default async function SettingsPage() {
     .eq("id", user.id)
     .single();
 
-  const credits = profile?.interview_credits ?? 1;
+  const credits = profile?.interview_credits ?? 0;
   const hasUsedTrial = profile?.has_used_free_trial ?? false;
   const interviewsCompleted = profile?.interviews_completed ?? 0;
 
@@ -112,10 +116,10 @@ export default async function SettingsPage() {
           {/* Credits balance */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-brand-muted text-sm">Available interview credits</p>
+              <p className="text-brand-muted text-sm">Available AI interview credits</p>
               <p className="text-xs text-brand-muted mt-0.5">
                 {interviewsCompleted} interview{interviewsCompleted !== 1 ? "s" : ""} completed
-                {!hasUsedTrial && credits > 0 && " · Free trial available"}
+                {!hasUsedTrial && " · 5-minute audio preview available"}
               </p>
             </div>
             <span className={cn(
@@ -177,7 +181,7 @@ export default async function SettingsPage() {
           <div className="flex items-center gap-2">
             <CreditCard className="w-3.5 h-3.5 text-brand-muted" />
             <p className="text-brand-muted text-xs">
-              One-time packs. No subscription. Secure payments via Razorpay.
+              Practice Mode stays free. Credits are only used for AI Interview Mode. One-time packs. No subscription. Secure payments via Razorpay.
               {region === "INR" && (
                 <span className="text-brand-cyan ml-1">India pricing applied.</span>
               )}
@@ -185,6 +189,63 @@ export default async function SettingsPage() {
                 <span className="text-brand-cyan ml-1">Regional pricing applied.</span>
               )}
             </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-border">
+          <LifeBuoy className="w-4 h-4 text-brand-cyan" />
+          <h2 className="text-sm font-semibold text-brand-text">Support</h2>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <p className="text-sm font-medium text-brand-text">
+              Need help with billing, credits, account access, or privacy?
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-brand-muted">
+              Reach the TechInView team directly by email. Include your account
+              email and any order ID, payment ID, or page URL that helps us
+              verify the request quickly.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={createSupportMailto({ subject: "TechInView support request" })}
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
+            >
+              <Mail className="w-4 h-4" />
+              Email support
+            </a>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center rounded-lg border border-brand-border px-4 py-2 text-sm font-medium text-brand-text transition-colors hover:bg-brand-surface"
+            >
+              Support page
+            </Link>
+          </div>
+
+          <p className="text-xs text-brand-muted">
+            Canonical support email:{" "}
+            <a
+              href={createSupportMailto({ subject: "TechInView support request" })}
+              className="text-brand-cyan transition-colors hover:text-cyan-300"
+            >
+              {SUPPORT_EMAIL}
+            </a>
+          </p>
+
+          <div className="flex flex-wrap gap-2 text-xs">
+            {LEGAL_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-full border border-brand-border bg-brand-surface px-3 py-1.5 text-brand-muted transition-colors hover:border-brand-cyan/30 hover:text-brand-text"
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
         </div>
       </section>

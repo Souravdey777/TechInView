@@ -17,6 +17,7 @@ type Problem = {
   difficulty: string;
   category: string;
   companyTags: string[];
+  isFreeSolverEnabled: boolean;
 };
 
 type PracticeGridProps = {
@@ -59,7 +60,8 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
   const [category, setCategory] = useState<string>("all");
 
   const filtered = useMemo(() => {
-    return problems.filter((p) => {
+    return problems
+      .filter((p) => {
       if (difficulty !== "all" && p.difficulty !== difficulty) return false;
       if (category !== "all" && p.category !== category) return false;
       if (search) {
@@ -71,7 +73,11 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
         if (!matchesTitle && !matchesCompany) return false;
       }
       return true;
-    });
+      })
+      .sort((left, right) => {
+        if (left.isFreeSolverEnabled === right.isFreeSolverEnabled) return 0;
+        return left.isFreeSolverEnabled ? -1 : 1;
+      });
   }, [problems, difficulty, category, search]);
 
   return (
@@ -131,10 +137,7 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
       <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 list-none p-0 m-0">
         {filtered.map((p) => (
           <li key={p.slug} className="min-w-0">
-            <Link
-              href={`/practice/${p.slug}`}
-              className="group flex h-full flex-col glass-card p-5 transition-all hover:border-brand-cyan/30 hover:-translate-y-0.5"
-            >
+            <div className="group flex h-full flex-col glass-card p-5 transition-all hover:border-brand-cyan/30 hover:-translate-y-0.5">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <DifficultyBadge
                   difficulty={p.difficulty as DifficultyLevel}
@@ -143,11 +146,25 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
                   {CATEGORY_LABELS[p.category as ProblemCategory] ?? p.category}
                 </span>
               </div>
-              <h2 className="text-base font-semibold text-brand-text group-hover:text-brand-cyan transition-colors mb-2 line-clamp-2">
-                {p.title}
+              <h2 className="mb-2 line-clamp-2 text-base font-semibold text-brand-text transition-colors group-hover:text-brand-cyan">
+                <Link href={`/practice/${p.slug}`} className="hover:text-brand-cyan">
+                  {p.title}
+                </Link>
               </h2>
+              <div className="mt-auto pt-3">
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
+                    p.isFreeSolverEnabled
+                      ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
+                      : "border-brand-amber/20 bg-brand-amber/10 text-brand-amber"
+                  )}
+                >
+                  {p.isFreeSolverEnabled ? "Free Practice" : "AI Interview Only"}
+                </span>
+              </div>
               {p.companyTags.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 mt-auto pt-3">
+                <div className="flex flex-wrap items-center gap-1.5 pt-3">
                   <Building2 className="w-3 h-3 text-brand-muted shrink-0" />
                   {p.companyTags.slice(0, 3).map((tag) => (
                     <span
@@ -164,10 +181,26 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
                   )}
                 </div>
               )}
-              <span className="inline-flex items-center gap-1 mt-3 text-xs font-medium text-brand-cyan group-hover:underline">
-                Practice with AI <ChevronRight className="w-3 h-3" />
-              </span>
-            </Link>
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-brand-border pt-3">
+                <Link
+                  href={
+                    p.isFreeSolverEnabled
+                      ? `/practice/solve/${p.slug}`
+                      : `/interview/setup?problem=${p.slug}&dsaExperience=ai_interview`
+                  }
+                  className="inline-flex items-center gap-1 text-xs font-medium text-brand-cyan hover:underline"
+                >
+                  {p.isFreeSolverEnabled ? "Practice" : "AI Interview"}
+                  <ChevronRight className="w-3 h-3" />
+                </Link>
+                <Link
+                  href={`/interview/setup?problem=${p.slug}&dsaExperience=ai_interview`}
+                  className="text-[11px] font-medium text-brand-muted hover:text-brand-cyan"
+                >
+                  AI Interview
+                </Link>
+              </div>
+            </div>
           </li>
         ))}
       </ul>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
 import { toast } from "@/components/ui/toast";
+import { SUPPORT_EMAIL } from "@/lib/legal";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
@@ -174,7 +175,9 @@ export function RazorpayCheckout({
             } else {
               toast({
                 title: "Verification failed",
-                description: verifyData.error ?? "Please contact support if credits are missing.",
+                description:
+                  verifyData.error ??
+                  `Please contact ${SUPPORT_EMAIL} if credits are missing.`,
                 variant: "error",
               });
             }

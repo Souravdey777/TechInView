@@ -22,6 +22,7 @@ type Problem = {
 
 type ProblemPanelProps = {
   problem: Problem;
+  showHints?: boolean;
 };
 
 // ─── Difficulty badge ─────────────────────────────────────────────────────────
@@ -146,7 +147,7 @@ function HintAccordion({ hints }: { hints: string[] }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function ProblemPanel({ problem }: ProblemPanelProps) {
+export function ProblemPanel({ problem, showHints = true }: ProblemPanelProps) {
   return (
     <div className="h-full overflow-y-auto px-4 py-4 space-y-5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-brand-border">
       {/* Header */}
@@ -208,7 +209,7 @@ export function ProblemPanel({ problem }: ProblemPanelProps) {
       )}
 
       {/* Hints */}
-      <HintAccordion hints={problem.hints} />
+      {showHints ? <HintAccordion hints={problem.hints} /> : null}
     </div>
   );
 }

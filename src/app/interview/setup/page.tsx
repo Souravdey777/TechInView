@@ -16,7 +16,6 @@ import {
   Search,
   BookOpen,
   X,
-  Braces,
   Lock,
   Sparkles,
   Building2,
@@ -49,12 +48,18 @@ import {
 } from "@/lib/loops/generator";
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { DsaExperienceToggle } from "@/components/dsa/DsaExperienceToggle";
 import type {
   GeneratedLoop,
   GeneratedLoopRound,
   HistoricalQuestion,
 } from "@/lib/loops/types";
 import type { ExperienceLevel } from "@/types";
+import {
+  DEFAULT_DSA_EXPERIENCE,
+  normalizeDsaExperience,
+  type DsaExperience,
+} from "@/lib/dsa";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -87,6 +92,7 @@ type ProblemSummary = {
   difficulty: Difficulty;
   category: string;
   company_tags: string[] | null;
+  is_free_solver_enabled: boolean;
 };
 
 type SetupFormState = {
@@ -357,7 +363,8 @@ function InterviewSetupInner() {
   const initFromSetup = useInterviewStore((s) => s.initFromSetup);
   const { supabase, user } = useSupabase();
 
-  const [interviewMode, setInterviewMode] = useState<InterviewMode>("general_dsa");
+  const [interviewMode] = useState<InterviewMode>("general_dsa");
+  const [dsaExperience, setDsaExperience] = useState<DsaExperience>(DEFAULT_DSA_EXPERIENCE);
   const [form, setForm] = useState<SetupFormState>({
     difficulty: "medium",
     category: "any",
@@ -401,14 +408,15 @@ function InterviewSetupInner() {
       if (data) {
         setCredits(data.interview_credits ?? 0);
         const isFreeTrial = !(data.has_used_free_trial ?? false);
+        const shouldForcePreviewDefaults = isFreeTrial && (data.interview_credits ?? 0) <= 0;
         setIsFreeTrialUser(isFreeTrial);
         setForm((f) => ({
           ...f,
-          difficulty: isFreeTrial ? "easy" : f.difficulty,
-          duration: isFreeTrial
+          difficulty: shouldForcePreviewDefaults ? "easy" : f.difficulty,
+          duration: shouldForcePreviewDefaults
             ? (FREE_TRIAL_DURATION_MINUTES as Duration)
             : f.duration,
-          interviewerPersona: isFreeTrial
+          interviewerPersona: shouldForcePreviewDefaults
             ? DEFAULT_INTERVIEWER_PERSONA
             : personaTouchedRef.current
               ? f.interviewerPersona
@@ -421,7 +429,7 @@ function InterviewSetupInner() {
             : prev.company,
           experienceLevel: (data.experience_level as ExperienceLevel | null) ?? prev.experienceLevel,
         }));
-        if (isFreeTrial) {
+        if (shouldForcePreviewDefaults) {
           setProblemMode("random");
         }
       }
@@ -435,11 +443,18 @@ function InterviewSetupInner() {
     }
   }, [router, searchParams]);
 
+  useEffect(() => {
+    setDsaExperience(normalizeDsaExperience(searchParams.get("dsaExperience")));
+  }, [searchParams]);
+
   // Problem selection state
   const [problemMode, setProblemMode] = useState<ProblemMode>("random");
   const [problems, setProblems] = useState<ProblemSummary[]>([]);
   const [problemsLoading, setProblemsLoading] = useState(false);
   const [problemsError, setProblemsError] = useState<string | null>(null);
+  const [practiceRandomMatches, setPracticeRandomMatches] = useState<ProblemSummary[]>([]);
+  const [practiceRandomMatchesLoading, setPracticeRandomMatchesLoading] = useState(false);
+  const [practiceRandomMatchesError, setPracticeRandomMatchesError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProblem, setSelectedProblem] = useState<ProblemSummary | null>(null);
 
@@ -448,6 +463,11 @@ function InterviewSetupInner() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const personaTouchedRef = useRef(false);
   const isSpecificSelected = problemMode === "specific" && selectedProblem !== null;
+  const hasCredits = (credits ?? 0) > 0;
+  const isPracticeMode = interviewMode === "general_dsa" && dsaExperience === "practice";
+  const isAiInterviewMode = interviewMode === "general_dsa" && dsaExperience === "ai_interview";
+  const isPreviewSession = isAiInterviewMode && !hasCredits && isFreeTrialUser;
+  const isAiModeLocked = isAiInterviewMode && !hasCredits && !isFreeTrialUser;
   const selectedPersona = getInterviewerPersona(form.interviewerPersona);
   const targetedPersona = getInterviewerPersona(
     generatedLoop?.personaId ??
@@ -462,14 +482,28 @@ function InterviewSetupInner() {
     )
   );
 
+  useEffect(() => {
+    if (!isPreviewSession) return;
+
+    setProblemMode("random");
+    setSelectedProblem(null);
+    setForm((previous) => ({
+      ...previous,
+      difficulty: "easy",
+      duration: FREE_TRIAL_DURATION_MINUTES as Duration,
+      interviewerPersona: DEFAULT_INTERVIEWER_PERSONA,
+    }));
+  }, [isPreviewSession]);
+
   // ─── Fetch problems ────────────────────────────────────────────────────────
 
-  const fetchProblems = useCallback(async (query: string) => {
+  const fetchProblems = useCallback(async (query: string, freeOnly: boolean) => {
     setProblemsLoading(true);
     setProblemsError(null);
     try {
       const params = new URLSearchParams({ limit: "50" });
       if (query.trim()) params.set("search", query.trim());
+      if (freeOnly) params.set("freeOnly", "true");
       const res = await fetch(`/api/problems?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to load problems");
       const json = (await res.json()) as {
@@ -486,24 +520,61 @@ function InterviewSetupInner() {
     }
   }, []);
 
+  const fetchPracticeRandomOptions = useCallback(async () => {
+    setPracticeRandomMatchesLoading(true);
+    setPracticeRandomMatchesError(null);
+    try {
+      const params = new URLSearchParams({
+        limit: "50",
+        difficulty: form.difficulty,
+        freeOnly: "true",
+      });
+      if (form.category !== "any") {
+        params.set("category", form.category);
+      }
+
+      const res = await fetch(`/api/problems?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to load practice problems");
+      const json = (await res.json()) as {
+        success: boolean;
+        data?: { problems: ProblemSummary[] };
+        error?: string;
+      };
+      if (!json.success) throw new Error(json.error ?? "Failed to load practice problems");
+      setPracticeRandomMatches(json.data?.problems ?? []);
+    } catch (err) {
+      setPracticeRandomMatchesError(
+        err instanceof Error ? err.message : "Failed to load practice problems"
+      );
+      setPracticeRandomMatches([]);
+    } finally {
+      setPracticeRandomMatchesLoading(false);
+    }
+  }, [form.category, form.difficulty]);
+
   // Load problems when "specific" mode is first activated
   useEffect(() => {
     if (problemMode === "specific" && problems.length === 0 && !problemsLoading) {
-      fetchProblems("");
+      fetchProblems("", isPracticeMode);
     }
-  }, [problemMode, problems.length, problemsLoading, fetchProblems]);
+  }, [problemMode, problems.length, problemsLoading, fetchProblems, isPracticeMode]);
 
   // Debounced search
   useEffect(() => {
     if (problemMode !== "specific") return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      fetchProblems(searchQuery);
+      fetchProblems(searchQuery, isPracticeMode);
     }, 300);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [searchQuery, problemMode, fetchProblems]);
+  }, [searchQuery, problemMode, fetchProblems, isPracticeMode]);
+
+  useEffect(() => {
+    if (!isPracticeMode || problemMode !== "random") return;
+    void fetchPracticeRandomOptions();
+  }, [fetchPracticeRandomOptions, isPracticeMode, problemMode]);
 
   // Auto-select from ?problem=slug URL param
   useEffect(() => {
@@ -511,11 +582,19 @@ function InterviewSetupInner() {
     if (!slugFromUrl) return;
 
     setProblemMode("specific");
+    const requestedExperience = normalizeDsaExperience(searchParams.get("dsaExperience"));
 
     // Fetch just the one problem by search to pre-select it
     const findAndSelect = async () => {
       try {
-        const res = await fetch(`/api/problems?search=${encodeURIComponent(slugFromUrl)}&limit=50`);
+        const params = new URLSearchParams({
+          search: slugFromUrl,
+          limit: "50",
+        });
+        if (requestedExperience === "practice") {
+          params.set("freeOnly", "true");
+        }
+        const res = await fetch(`/api/problems?${params.toString()}`);
         if (!res.ok) return;
         const json = (await res.json()) as {
           success: boolean;
@@ -535,6 +614,13 @@ function InterviewSetupInner() {
     void findAndSelect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
+
+  useEffect(() => {
+    if (!isPracticeMode) return;
+    setSelectedProblem((current) =>
+      current && !current.is_free_solver_enabled ? null : current
+    );
+  }, [isPracticeMode]);
 
   // Focus search input when switching to specific mode
   useEffect(() => {
@@ -630,6 +716,40 @@ function InterviewSetupInner() {
 
   // ─── Submit ──────────────────────────────────────────────────────────────────
 
+  function handleDsaExperienceChange(nextExperience: DsaExperience) {
+    setDsaExperience(nextExperience);
+    posthog?.capture("dsa_mode_selected", {
+      mode: nextExperience,
+      source: "dsa_setup",
+    });
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("dsaExperience", nextExperience);
+    router.replace(`/interview/setup?${params.toString()}`);
+  }
+
+  async function handleStartPractice() {
+    let targetProblem = selectedProblem;
+
+    if (problemMode === "random") {
+      if (practiceRandomMatches.length === 0) return;
+      targetProblem =
+        practiceRandomMatches[Math.floor(Math.random() * practiceRandomMatches.length)] ?? null;
+    }
+
+    if (!targetProblem) return;
+
+    posthog?.capture("practice_started", {
+      problem_slug: targetProblem.slug,
+      difficulty: form.difficulty,
+      category: form.category,
+      language: form.language,
+      problem_mode: problemMode,
+    });
+
+    router.push(`/practice/solve/${targetProblem.slug}`);
+  }
+
   async function handleStartInterview() {
     posthog?.capture("interview_setup_started", {
       mode: "general_dsa",
@@ -639,7 +759,7 @@ function InterviewSetupInner() {
       duration: form.duration,
       interviewer_persona: form.interviewerPersona,
       problem_mode: problemMode,
-      is_free_trial: isFreeTrialUser,
+      is_free_trial: isPreviewSession,
     });
 
     const body: Record<string, unknown> = {
@@ -805,7 +925,7 @@ function InterviewSetupInner() {
       <div className="border-b border-brand-border bg-brand-surface">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
           <BrandLogo size="sm" wordmarkClassName="text-base" />
-          <span className="text-sm text-brand-muted">AI Mock Interview</span>
+          <span className="text-sm text-brand-muted">DSA Practice + AI Interviews</span>
         </div>
       </div>
 
@@ -813,116 +933,64 @@ function InterviewSetupInner() {
       <div className="mx-auto max-w-3xl space-y-6 px-6 py-10">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-brand-text">
-            Set Up Your Interview
+            Set Up Your DSA Session
           </h1>
           <p className="mt-1 text-sm text-brand-muted">
-            {interviewMode === "targeted_loop"
-              ? "Paste your JD, generate the likely loop, and start the round you want to practice first."
-              : `Configure your session and ${activePersona.name} will guide you through the rest.`}
+            {isPracticeMode
+              ? "Choose a free-practice configuration and start solving right away."
+              : `Configure your AI interview and ${activePersona.name} will guide you through the rest.`}
           </p>
         </div>
 
-        {/* Free trial banner */}
-        {isFreeTrialUser && (
+        {interviewMode === "general_dsa" && (
+          <SectionCard title="DSA Mode">
+            <DsaExperienceToggle
+              value={dsaExperience}
+              onChange={handleDsaExperienceChange}
+            />
+          </SectionCard>
+        )}
+
+        {isPracticeMode && (
           <div className="flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" />
             <div>
-              <p className="text-sm font-semibold text-brand-text">Free Trial Interview</p>
+              <p className="text-sm font-semibold text-brand-text">Free Practice Mode</p>
+              <p className="mt-1 text-xs text-brand-muted">
+                Practice Mode gives you a curated set of DSA problems, code execution, and saved progress.
+                Switch to AI Interview Mode when you want the 5-minute audio preview or a full paid round with voice and scoring.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* AI preview banner */}
+        {isAiInterviewMode && isFreeTrialUser && !hasCredits && (
+          <div className="flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
+            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" />
+            <div>
+              <p className="text-sm font-semibold text-brand-text">5-Minute Audio Preview</p>
               <p className="text-xs text-brand-muted mt-1">
-                Your free trial includes a {FREE_TRIAL_DURATION_MINUTES}-minute voice session with Tia, an easy problem, and a basic score summary.
-                Buy an interview pack to unlock company-specific personas, full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, all difficulties, and detailed AI feedback.
+                Your preview includes a {FREE_TRIAL_DURATION_MINUTES}-minute voice session with Tia, an easy random problem, and a basic score summary.
+                Buy an interview pack to unlock company-specific personas, full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, specific problem selection, and detailed AI feedback.
               </p>
             </div>
           </div>
         )}
 
         {/* No credits warning */}
-        {credits !== null && credits <= 0 && (
+        {isAiModeLocked && (
           <div className="flex items-start gap-3 rounded-xl border border-brand-rose/30 bg-brand-rose/5 px-5 py-4">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-rose" />
             <div>
-              <p className="text-sm font-semibold text-brand-text">No Credits Remaining</p>
+              <p className="text-sm font-semibold text-brand-text">AI Interview Mode Locked</p>
               <p className="text-xs text-brand-muted mt-1">
-                You need interview credits to start a session.{" "}
-                <a href="/settings" className="text-brand-cyan hover:underline">Buy an interview pack</a> to continue practicing.
+                Your audio preview has already been used.{" "}
+                <a href="/settings" className="text-brand-cyan hover:underline">Buy an interview pack</a> to start another AI interview.
               </p>
             </div>
           </div>
         )}
-
-        {/* 0 – Interview Type */}
-        <SectionCard title="Interview Type">
-          <div className="grid gap-3 md:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setInterviewMode("general_dsa")}
-              className={cn(
-                "flex items-start gap-3 rounded-lg border px-4 py-4 text-left transition-all",
-                interviewMode === "general_dsa"
-                  ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-                  : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
-              )}
-            >
-              <div
-                className={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border",
-                  interviewMode === "general_dsa"
-                    ? "border-brand-cyan/30 bg-brand-cyan/10"
-                    : "border-brand-border bg-brand-surface"
-                )}
-              >
-                <Braces className={cn("h-4 w-4", interviewMode === "general_dsa" ? "text-brand-cyan" : "text-brand-muted")} />
-              </div>
-              <div>
-                <span className={cn("text-sm font-semibold", interviewMode === "general_dsa" ? "text-brand-cyan" : "text-brand-text")}>
-                  General DSA Round
-                </span>
-                <p className="text-xs text-brand-muted mt-0.5">
-                  Pick difficulty, topic, persona, and start a traditional coding interview.
-                </p>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => router.push("/prep-plans/new")}
-              className={cn(
-                "flex items-start gap-3 rounded-lg border px-4 py-4 text-left transition-all",
-                interviewMode === "targeted_loop"
-                  ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-                  : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
-              )}
-            >
-              <div
-                className={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border",
-                  interviewMode === "targeted_loop"
-                    ? "border-brand-cyan/30 bg-brand-cyan/10"
-                    : "border-brand-border bg-brand-surface"
-                )}
-              >
-                <Target className={cn("h-4 w-4", interviewMode === "targeted_loop" ? "text-brand-cyan" : "text-brand-muted")} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className={cn("text-sm font-semibold", interviewMode === "targeted_loop" ? "text-brand-cyan" : "text-brand-text")}>
-                    Targeted Loop
-                  </span>
-                  <span className="rounded-full border border-brand-green/20 bg-brand-green/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-green">
-                    Company + role + JD
-                  </span>
-                </div>
-                <p className="text-xs text-brand-muted mt-0.5">
-                  Generate coding, behavioral, hiring manager, and system design rounds from the job you are actually applying for.
-                </p>
-              </div>
-            </button>
-          </div>
-
-          <p className="mt-4 text-xs leading-relaxed text-brand-muted">
-            Company, role, and JD-based prep planning now lives in <Link href="/prep-plans/new" className="text-brand-cyan hover:underline">Prep Plans</Link>, outside interview setup.
-          </p>
-        </SectionCard>
 
         {interviewMode === "targeted_loop" && (
           <>
@@ -1173,10 +1241,11 @@ function InterviewSetupInner() {
 
         {interviewMode === "general_dsa" && (
           <>
+        {!isPracticeMode && (
         <SectionCard title="Interviewer Persona">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {INTERVIEWER_PERSONAS.map((persona) => {
-              const isLocked = isFreeTrialUser && persona.id !== DEFAULT_INTERVIEWER_PERSONA;
+              const isLocked = isPreviewSession && persona.id !== DEFAULT_INTERVIEWER_PERSONA;
               const isSelected = form.interviewerPersona === persona.id;
 
               return (
@@ -1230,12 +1299,13 @@ function InterviewSetupInner() {
             </p>
           </div>
 
-          {isFreeTrialUser && (
+          {isPreviewSession && (
             <p className="mt-3 text-xs text-brand-amber">
-              Free trial sessions are limited to Tia. Upgrade to unlock company-specific interviewer personas.
+              Preview sessions are limited to Tia. Upgrade to unlock company-specific interviewer personas.
             </p>
           )}
         </SectionCard>
+        )}
 
         {/* 1 – Problem Selection */}
         <SectionCard title="Problem Selection">
@@ -1276,11 +1346,11 @@ function InterviewSetupInner() {
 
             {/* Specific option */}
             <button
-              onClick={() => !isFreeTrialUser && setProblemMode("specific")}
-              disabled={isFreeTrialUser}
+              onClick={() => !isPreviewSession && setProblemMode("specific")}
+              disabled={isPreviewSession}
               className={cn(
                 "flex flex-1 items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150",
-                isFreeTrialUser && "opacity-50 cursor-not-allowed",
+                isPreviewSession && "opacity-50 cursor-not-allowed",
                 problemMode === "specific"
                   ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
                   : "border-brand-border hover:border-brand-subtle"
@@ -1303,7 +1373,7 @@ function InterviewSetupInner() {
                 <span className="text-sm font-medium text-brand-text">
                   Choose Specific
                 </span>
-                {isFreeTrialUser && (
+                {isPreviewSession && (
                   <Lock className="h-3 w-3 text-brand-muted" />
                 )}
               </div>
@@ -1313,8 +1383,9 @@ function InterviewSetupInner() {
           {/* Random mode hint */}
           {problemMode === "random" && (
             <p className="mt-3 text-xs text-brand-muted">
-              A problem will be selected based on your difficulty and category
-              preferences below.
+              {isPracticeMode
+                ? "A free-practice problem will be selected from the curated DSA set based on your filters below."
+                : "A problem will be selected based on your difficulty and category preferences below."}
             </p>
           )}
 
@@ -1426,18 +1497,28 @@ function InterviewSetupInner() {
               {/* Prompt if none selected */}
               {!selectedProblem && !problemsLoading && (
                 <p className="text-xs text-brand-muted">
-                  Click a problem above to select it for your interview.
+                  Click a problem above to select it for your {isPracticeMode ? "practice session" : "interview"}.
                 </p>
               )}
             </div>
           )}
+
+          {isPracticeMode && problemMode === "random" && practiceRandomMatchesError ? (
+            <p className="mt-3 text-xs text-brand-rose">{practiceRandomMatchesError}</p>
+          ) : null}
+
+          {isPracticeMode && problemMode === "random" && !practiceRandomMatchesLoading && practiceRandomMatches.length === 0 ? (
+            <p className="mt-3 text-xs text-brand-amber">
+              No free-practice problems match these filters right now. Adjust difficulty or category to continue.
+            </p>
+          ) : null}
         </SectionCard>
 
         {/* 2 – Difficulty */}
         <SectionCard title="Difficulty">
           <div className={cn("flex gap-3", isSpecificSelected && "opacity-40 pointer-events-none")}>
             {DIFFICULTIES.map((d) => {
-              const lockedByTrial = isFreeTrialUser && d.value !== "easy";
+              const lockedByTrial = isPreviewSession && d.value !== "easy";
               return (
                 <button
                   key={d.value}
@@ -1462,9 +1543,9 @@ function InterviewSetupInner() {
               Locked to {selectedProblem?.difficulty} — determined by the selected problem.
             </p>
           )}
-          {isFreeTrialUser && !isSpecificSelected && (
+          {isPreviewSession && !isSpecificSelected && (
             <p className="mt-2 text-xs text-brand-amber">
-              Free trial is limited to easy problems. Buy a pack to unlock medium and hard.
+              Audio preview is limited to easy problems. Buy a pack to unlock medium and hard.
             </p>
           )}
         </SectionCard>
@@ -1521,9 +1602,9 @@ function InterviewSetupInner() {
         </SectionCard>
 
         {/* 5 – Duration */}
-        {interviewMode === "general_dsa" && (
+        {interviewMode === "general_dsa" && !isPracticeMode && (
         <SectionCard title="Session Duration">
-          {isFreeTrialUser ? (
+          {isPreviewSession ? (
             <>
               <div className="flex gap-3">
                 <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-brand-cyan px-4 py-3 text-sm font-semibold">
@@ -1532,7 +1613,7 @@ function InterviewSetupInner() {
                 </div>
               </div>
               <p className="mt-3 text-xs text-brand-amber">
-                Free trial sessions are capped at {FREE_TRIAL_DURATION_MINUTES} minutes. Upgrade for full {FULL_INTERVIEW_DURATION_MINUTES}-minute interviews.
+                Audio preview sessions are capped at {FREE_TRIAL_DURATION_MINUTES} minutes. Upgrade for full {FULL_INTERVIEW_DURATION_MINUTES}-minute interviews.
               </p>
             </>
           ) : (
@@ -1552,6 +1633,7 @@ function InterviewSetupInner() {
         )}
 
         {/* 6 – Mic Check */}
+        {!isPracticeMode && (
         <SectionCard title="Microphone Check">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -1617,6 +1699,7 @@ function InterviewSetupInner() {
             </div>
           )}
         </SectionCard>
+        )}
 
         {/* Error */}
         {createError && (
@@ -1635,35 +1718,61 @@ function InterviewSetupInner() {
         {/* CTA */}
         {interviewMode === "general_dsa" ? (
           <div className="pt-2 pb-10">
-            <Button
-              size="lg"
-              onClick={handleStartInterview}
-              disabled={
-                isCreating ||
-                (problemMode === "specific" && !selectedProblem) ||
-                (credits !== null && credits <= 0)
-              }
-              className="w-full gap-2 text-base font-semibold"
-            >
-              {isCreating ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Setting up your interview…
-                </>
-              ) : (
-                <>
-                  Start Interview
+            {isPracticeMode ? (
+              <Button
+                size="lg"
+                onClick={handleStartPractice}
+                disabled={
+                  isCreating ||
+                  (problemMode === "specific" && !selectedProblem) ||
+                  (problemMode === "random" && practiceRandomMatches.length === 0)
+                }
+                className="w-full gap-2 text-base font-semibold"
+              >
+                Start Practicing
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            ) : isAiModeLocked ? (
+              <Button asChild size="lg" className="w-full gap-2 text-base font-semibold">
+                <Link href="/settings">
+                  Unlock AI Interview
                   <ChevronRight className="h-5 w-5" />
-                </>
-              )}
-            </Button>
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                onClick={handleStartInterview}
+                disabled={isCreating || (problemMode === "specific" && !selectedProblem)}
+                className="w-full gap-2 text-base font-semibold"
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Setting up your interview…
+                  </>
+                ) : (
+                  <>
+                    {isPreviewSession ? "Start 5-Minute Audio Interview" : "Start AI Interview"}
+                    <ChevronRight className="h-5 w-5" />
+                  </>
+                )}
+              </Button>
+            )}
             {problemMode === "specific" && !selectedProblem && (
               <p className="mt-2 text-center text-xs text-brand-amber">
                 Select a problem above to continue.
               </p>
             )}
+            {isPracticeMode && problemMode === "random" && practiceRandomMatches.length === 0 && !practiceRandomMatchesLoading ? (
+              <p className="mt-2 text-center text-xs text-brand-amber">
+                Adjust your filters to find at least one free-practice problem.
+              </p>
+            ) : null}
             <p className="mt-3 text-center text-xs text-brand-muted">
-              By starting, you agree that {activePersona.name} will record and analyze your session.
+              {isPracticeMode
+                ? "Practice Mode saves your progress as you code so you can resume later."
+                : `By starting, you agree that ${activePersona.name} will record and analyze your session.`}
             </p>
           </div>
         ) : (

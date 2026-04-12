@@ -7,18 +7,21 @@ import {
   ArrowLeft,
   Building2,
   Clock,
-  Zap,
   BarChart3,
   Tag,
   ChevronRight,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getProblems, getProblemBySlug } from "@/lib/db/queries";
 import { DIFFICULTY_CONFIG } from "@/lib/constants";
 import type { DifficultyLevel } from "@/lib/constants";
+import { PracticeModeCta } from "@/components/practice/PracticeModeCta";
+import { normalizeDsaExperience } from "@/lib/dsa";
 
 type PracticeSlugPageProps = {
   params: { slug: string };
+  searchParams?: Record<string, string | string[] | undefined>;
 };
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
@@ -155,6 +158,7 @@ function capitalizeCategory(cat: string) {
 
 export default async function PracticeSlugPage({
   params,
+  searchParams,
 }: PracticeSlugPageProps) {
   const problem = await getProblemBySlug(params.slug);
   if (!problem) notFound();
@@ -243,6 +247,12 @@ export default async function PracticeSlugPage({
   }
 
   const jsonLd = { "@context": "https://schema.org", "@graph": graph };
+  const showLockedNotice = searchParams?.locked === "solver";
+  const initialExperience = normalizeDsaExperience(
+    typeof searchParams?.dsaExperience === "string"
+      ? searchParams.dsaExperience
+      : undefined
+  );
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -401,24 +411,20 @@ export default async function PracticeSlugPage({
         </section>
       )}
 
-      {/* CTA */}
-      <section className="my-12 py-10 px-6 sm:px-10 rounded-2xl bg-gradient-to-br from-brand-cyan/10 via-brand-surface to-brand-card border border-brand-cyan/20 text-center">
-        <Zap className="w-8 h-8 text-brand-cyan mx-auto mb-4" />
-        <h2 className="text-xl sm:text-2xl font-bold font-heading text-brand-text mb-3">
-          Practice this problem with an AI interviewer
-        </h2>
-        <p className="text-brand-muted text-sm sm:text-base leading-relaxed max-w-lg mx-auto mb-6">
-          TechInView conducts a full voice mock interview — the AI asks
-          clarifying questions, evaluates your approach, watches you code, and
-          scores you on 5 dimensions. Just like a real FAANG interview.
-        </p>
-        <Link
-          href="/login"
-          className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
-        >
-          Start a free interview
-        </Link>
-      </section>
+      {showLockedNotice ? (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-brand-amber/20 bg-brand-amber/10 px-4 py-3 text-sm text-brand-muted">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-brand-amber" />
+          <p>
+            This problem is not in the free Practice Mode subset yet. You can still open it in AI Interview Mode from below.
+          </p>
+        </div>
+      ) : null}
+
+      <PracticeModeCta
+        problemSlug={problem.slug}
+        isFreeSolverEnabled={problem.is_free_solver_enabled}
+        initialExperience={initialExperience}
+      />
 
       {/* Related problems */}
       {related.length > 0 && (

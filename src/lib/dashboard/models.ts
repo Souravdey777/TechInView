@@ -44,11 +44,11 @@ export const PRACTICE_CARD_CONFIGS: readonly PracticeCardConfig[] = [
   {
     kind: "dsa",
     label: "DSA",
-    shortDescription: "Choose persona, problem, difficulty, and category for coding-interview prep.",
+    shortDescription: "Switch between free Practice Mode and AI Interview Mode for DSA prep.",
     status: "live",
     href: "/interviews/dsa/setup",
-    setupHighlights: ["Persona", "Problem", "Difficulty", "Category"],
-    ctaLabel: "Open DSA setup",
+    setupHighlights: ["Practice", "AI interview", "Problem", "Difficulty"],
+    ctaLabel: "Open DSA modes",
   },
   {
     kind: "machine_coding",

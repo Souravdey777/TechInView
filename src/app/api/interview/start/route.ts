@@ -90,7 +90,21 @@ export async function POST(req: NextRequest) {
     if (user) {
       const profile = await getProfile(user.id);
 
-      if (!profile || profile.interview_credits <= 0) {
+      if (!profile) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Profile not found.",
+          },
+          { status: 404 }
+        );
+      }
+
+      const hasCredits = profile.interview_credits > 0;
+      targetCompany = companyFromLoop ?? profile.target_company ?? null;
+      isFreeInterview = mode === "general_dsa" ? !hasCredits && !profile.has_used_free_trial : false;
+
+      if (!hasCredits && !isFreeInterview) {
         return NextResponse.json(
           {
             success: false,
@@ -99,9 +113,6 @@ export async function POST(req: NextRequest) {
           { status: 403 }
         );
       }
-
-      targetCompany = companyFromLoop ?? profile.target_company ?? null;
-      isFreeInterview = mode === "general_dsa" ? !profile.has_used_free_trial : false;
 
       if (isFreeInterview) {
         difficulty = "easy";
@@ -117,8 +128,10 @@ export async function POST(req: NextRequest) {
     let problem = null;
     const roundTitle = generatedLoopRoundSnapshot?.title ?? null;
 
-    if (body.problemSlug) {
-      problem = await getProblemBySlug(body.problemSlug);
+    const requestedProblemSlug = isFreeInterview ? undefined : body.problemSlug;
+
+    if (requestedProblemSlug) {
+      problem = await getProblemBySlug(requestedProblemSlug);
     }
 
     if (!problem && mode === "targeted_loop" && roundType === "coding") {
@@ -161,10 +174,17 @@ export async function POST(req: NextRequest) {
       });
       interviewId = interview.id;
 
-      await decrementCredits(user.id);
+      if (!isFreeInterview) {
+        await decrementCredits(user.id);
+      }
 
       if (isFreeInterview) {
         await updateProfile(user.id, { has_used_free_trial: true });
+        captureServerEvent(user.id, "audio_preview_started", {
+          interview_id: interviewId,
+          mode,
+          round_type: roundType,
+        });
       }
     } else {
       interviewId = `demo-${Date.now()}`;

@@ -93,24 +93,24 @@ const TONE_STYLES: Record<
 };
 
 const FREE_TIER: PricingTier = {
-  name: "Free Trial",
-  tagline: "Test the voice workflow before you commit",
+  name: "Free Practice",
+  tagline: "Solve curated DSA problems for free and keep one audio preview in reserve",
   prices: { usd: 0, inr: 0, ppp: 0 },
-  saveBadge: "TRY IT",
+  saveBadge: "FREE",
   saveBadgeColor: "bg-brand-card text-brand-muted",
   features: [
-    { text: `1 x ${FREE_TRIAL_DURATION_MINUTES}-minute voice trial`, included: true },
-    { text: "Easy problem + live coding", included: true },
-    { text: "Basic score summary", included: true },
-    { text: "All difficulties", included: false },
-    { text: "Detailed 5-dimension report", included: false },
-    { text: "Specific problem selection", included: false },
+    { text: "Curated DSA problem set", included: true },
+    { text: "Run code + saved progress", included: true },
+    { text: `1 x ${FREE_TRIAL_DURATION_MINUTES}-minute audio interview preview`, included: true },
+    { text: "Detailed 5-dimension AI report", included: false },
+    { text: "Full-length 45-minute AI interviews", included: false },
+    { text: "Paid interview credit packs", included: false },
   ],
-  ctaText: "Start Free",
+  ctaText: "Practice Free",
   ctaVariant: "default",
   tone: "slate",
-  valueLabel: "Quick workflow preview",
-  miniStats: ["No card needed", "Live voice + coding"],
+  valueLabel: "Practice first",
+  miniStats: ["No card needed", "Saved progress"],
 };
 
 const TIER_CONFIG: Record<
@@ -214,7 +214,16 @@ const tiers: PricingTier[] = [
 ];
 
 export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
-  const ctaHref = refParam ? `/signup?ref=${refParam}` : "/signup";
+  const signupParams = new URLSearchParams();
+  if (refParam) {
+    signupParams.set("ref", refParam);
+  }
+  const signupQuery = signupParams.toString();
+  const ctaHref = signupQuery ? `/signup?${signupQuery}` : "/signup";
+
+  const practiceSignupParams = new URLSearchParams(signupParams);
+  practiceSignupParams.set("next", "/interview/setup?dsaExperience=practice");
+  const practiceHref = `/signup?${practiceSignupParams.toString()}`;
   const [activeRegion, setActiveRegion] = useState<PricingRegion>(defaultRegion);
 
   const symbol = REGION_SYMBOLS[activeRegion];
@@ -247,13 +256,14 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
             Buy interview packs, not a subscription
           </h2>
           <p className="mt-5 text-lg leading-relaxed text-brand-muted">
-            Start with a 5-minute trial, then unlock full mock interviews when you&apos;re ready.
+            Practice DSA for free, then unlock full AI interview rounds when you&apos;re ready.
             Pay once, use the rounds when you want, and keep the feedback trail.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             {[
-              "5-minute free trial",
+              "Free DSA practice",
+              "5-minute audio preview",
               "45-minute full interview rounds",
               "One-time packs, no recurring billing",
             ].map((item) => (
@@ -417,7 +427,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                           per interview
                         </>
                       ) : price === 0 ? (
-                        "No card required. Jump in and test the workflow before paying."
+                        "No card required. Start practicing now and keep the audio preview for later."
                       ) : (
                         "One purchase unlocks one complete full-length mock interview."
                       )}
@@ -453,7 +463,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                   </ul>
 
                   <Link
-                    href={ctaHref}
+                    href={price === 0 ? practiceHref : ctaHref}
                     className={cn(
                       "mt-6 inline-flex w-full items-center justify-between rounded-[1.1rem] px-4 py-3.5 text-sm font-semibold transition-all",
                       style.action
@@ -476,7 +486,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
             No subscription
           </span>
           <span className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2">
-            No card required for free trial
+            No card required for free practice
           </span>
           {activeRegion === "inr" ? (
             <span className="rounded-full border border-brand-cyan/18 bg-brand-cyan/[0.08] px-4 py-2 text-brand-cyan">

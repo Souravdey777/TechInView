@@ -90,7 +90,7 @@ export const profiles = pgTable("profiles", {
   experience_level: experienceLevelEnum("experience_level"),
   preferred_language: text("preferred_language"),
   plan: planEnum("plan").default("free").notNull(),
-  interview_credits: integer("interview_credits").default(1).notNull(),
+  interview_credits: integer("interview_credits").default(0).notNull(),
   has_used_free_trial: boolean("has_used_free_trial").default(false).notNull(),
   country_code: text("country_code"),
   razorpay_customer_id: text("razorpay_customer_id"),
@@ -119,6 +119,7 @@ export const problems = pgTable("problems", {
   hints: text("hints").array(),
   optimal_complexity: jsonb("optimal_complexity"),
   follow_up_questions: text("follow_up_questions").array(),
+  is_free_solver_enabled: boolean("is_free_solver_enabled").default(false).notNull(),
   created_at: timestamp("created_at", { withTimezone: true })
     .default(sql`now()`)
     .notNull(),
@@ -268,6 +269,39 @@ export const progress = pgTable(
   })
 );
 
+export const practiceAttempts = pgTable(
+  "practice_attempts",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    user_id: uuid("user_id")
+      .references(() => profiles.id, { onDelete: "cascade" })
+      .notNull(),
+    problem_id: uuid("problem_id")
+      .references(() => problems.id, { onDelete: "cascade" })
+      .notNull(),
+    language: text("language").notNull(),
+    last_code: text("last_code"),
+    tests_passed: integer("tests_passed"),
+    tests_total: integer("tests_total"),
+    is_solved: boolean("is_solved").default(false).notNull(),
+    last_run_at: timestamp("last_run_at", { withTimezone: true }),
+    created_at: timestamp("created_at", { withTimezone: true })
+      .default(sql`now()`)
+      .notNull(),
+    updated_at: timestamp("updated_at", { withTimezone: true })
+      .default(sql`now()`)
+      .notNull(),
+  },
+  (table) => ({
+    practiceAttemptUserProblemUnique: unique("practice_attempts_user_problem_unique").on(
+      table.user_id,
+      table.problem_id
+    ),
+  })
+);
+
 export const interviewFeedback = pgTable("interview_feedback", {
   id: uuid("id")
     .primaryKey()
@@ -314,10 +348,12 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
   progress: many(progress),
   payments: many(payments),
   generatedLoops: many(generatedLoops),
+  practiceAttempts: many(practiceAttempts),
 }));
 
 export const problemsRelations = relations(problems, ({ many }) => ({
   interviews: many(interviews),
+  practiceAttempts: many(practiceAttempts),
 }));
 
 export const interviewsRelations = relations(interviews, ({ one, many }) => ({
@@ -380,6 +416,17 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
 }));
 
+export const practiceAttemptsRelations = relations(practiceAttempts, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [practiceAttempts.user_id],
+    references: [profiles.id],
+  }),
+  problem: one(problems, {
+    fields: [practiceAttempts.problem_id],
+    references: [problems.id],
+  }),
+}));
+
 // ─── Inferred Types ───────────────────────────────────────────────────────────
 
 export type Profile = InferSelectModel<typeof profiles>;
@@ -402,6 +449,9 @@ export type NewPayment = InferInsertModel<typeof payments>;
 
 export type InterviewFeedback = InferSelectModel<typeof interviewFeedback>;
 export type NewInterviewFeedback = InferInsertModel<typeof interviewFeedback>;
+
+export type PracticeAttempt = InferSelectModel<typeof practiceAttempts>;
+export type NewPracticeAttempt = InferInsertModel<typeof practiceAttempts>;
 
 export type GeneratedLoop = InferSelectModel<typeof generatedLoops>;
 export type NewGeneratedLoop = InferInsertModel<typeof generatedLoops>;

@@ -9,6 +9,7 @@ import {
   type DashboardPracticeItem,
 } from "@/lib/dashboard/models";
 import { CREDIT_PACKS, getDisplayPricingKey, getRegionForCountry } from "@/lib/constants";
+import { getRecentPracticeAttempts } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -104,19 +105,20 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [{ data: profile }, interviewResult] = await Promise.all([
+  const [{ data: profile }, interviewResult, practiceAttempts] = await Promise.all([
     supabase
       .from("profiles")
       .select("display_name, interview_credits, has_used_free_trial, target_company")
       .eq("id", user.id)
       .single(),
     getDashboardInterviews(supabase, user.id),
+    getRecentPracticeAttempts(user.id),
   ]);
 
   const displayName = profile?.display_name ?? user.email?.split("@")[0] ?? "there";
   const credits = profile?.interview_credits ?? 0;
   const hasCredits = credits > 0;
-  const isFreeTrialUser = hasCredits && !(profile?.has_used_free_trial ?? false);
+  const isFreeTrialUser = !(profile?.has_used_free_trial ?? false);
   const defaultInterviewer = getInterviewerPersona(
     getDefaultInterviewerPersona(profile?.target_company ?? null, isFreeTrialUser)
   );
@@ -135,6 +137,21 @@ export default async function DashboardPage() {
       startingPrice={startingPrice}
       defaultInterviewerName={defaultInterviewer.name}
       initialInterviews={toDashboardPracticeItems(interviewResult)}
+      practiceAttempts={practiceAttempts.map((attempt) => ({
+        id: attempt.id,
+        title: attempt.problem.title,
+        slug: attempt.problem.slug,
+        difficulty: attempt.problem.difficulty,
+        category: attempt.problem.category,
+        language: attempt.language,
+        isSolved: attempt.is_solved,
+        testsPassed: attempt.tests_passed,
+        testsTotal: attempt.tests_total,
+        updatedAt:
+          attempt.updated_at instanceof Date
+            ? attempt.updated_at.toISOString()
+            : String(attempt.updated_at),
+      }))}
     />
   );
 }

@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const PROTECTED_PATHS = [
   "/dashboard",
   "/interview",
+  "/practice/solve",
   "/results",
   "/problems",
   "/progress",
@@ -62,7 +63,7 @@ export async function updateSession(request: NextRequest) {
   if (!user && isProtectedPath(pathname)) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("redirectTo", pathname);
+    loginUrl.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }
 

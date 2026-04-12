@@ -15,6 +15,7 @@ export default function LoginPage() {
   const posthog = usePostHog();
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
+  const next = searchParams.get("next");
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,6 +26,7 @@ export default function LoginPage() {
     try {
       const callbackUrl = new URL("/callback", window.location.origin);
       if (ref) callbackUrl.searchParams.set("ref", ref);
+      if (next) callbackUrl.searchParams.set("next", next);
 
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
@@ -56,7 +58,7 @@ export default function LoginPage() {
             Sign in to TechInView
           </h1>
           <p className="text-brand-muted text-sm text-center mb-8">
-            Continue with your preferred account
+            Continue with your account to practice for free or use your audio preview
           </p>
 
           {error && (
@@ -132,7 +134,18 @@ export default function LoginPage() {
         <p className="text-center text-brand-muted text-sm mt-6">
           Don&apos;t have an account?{" "}
           <Link
-            href={ref ? `/signup?ref=${ref}` : "/signup"}
+            href={
+              ref || next
+                ? `/signup?${new URLSearchParams(
+                    Object.fromEntries(
+                      [
+                        ["ref", ref],
+                        ["next", next],
+                      ].filter((entry): entry is [string, string] => Boolean(entry[1]))
+                    )
+                  ).toString()}`
+                : "/signup"
+            }
             className="text-brand-cyan hover:underline"
           >
             Sign up

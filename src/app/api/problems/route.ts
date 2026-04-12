@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
     const difficulty = searchParams.get("difficulty") ?? undefined;
     const category = searchParams.get("category") ?? undefined;
     const search = searchParams.get("search") ?? undefined;
+    const freeOnly = searchParams.get("freeOnly") === "true";
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10)));
 
@@ -58,6 +59,7 @@ export async function GET(req: NextRequest) {
       difficulty: difficulty as DifficultyLevel | undefined,
       category,
       search,
+      freeOnly,
     });
 
     // Strip fields that could reveal solutions or hidden test cases
@@ -75,6 +77,7 @@ export async function GET(req: NextRequest) {
       optimal_complexity: p.optimal_complexity,
       follow_up_questions: p.follow_up_questions,
       hints: p.hints,
+      is_free_solver_enabled: p.is_free_solver_enabled,
       // solution_approach and test_cases intentionally excluded
     }));
 

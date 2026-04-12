@@ -4,6 +4,7 @@ import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { sql as dsql } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
+import { isFreeSolverProblemSlug } from "../src/lib/dsa";
 
 async function seedProblems() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -46,6 +47,7 @@ async function seedProblems() {
           hints: content.hints || [],
           optimal_complexity: content.optimal_complexity,
           follow_up_questions: content.follow_up_questions || [],
+          is_free_solver_enabled: isFreeSolverProblemSlug(content.slug),
         })
         .onConflictDoUpdate({
           target: schema.problems.slug,
@@ -63,6 +65,7 @@ async function seedProblems() {
             hints: dsql`excluded.hints`,
             optimal_complexity: dsql`excluded.optimal_complexity`,
             follow_up_questions: dsql`excluded.follow_up_questions`,
+            is_free_solver_enabled: dsql`excluded.is_free_solver_enabled`,
           },
         })
         .returning({ id: schema.problems.id });

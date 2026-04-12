@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProblemGrid } from "@/components/dashboard/ProblemGrid";
 import { InterviewTypeTabs } from "@/components/shared/InterviewTypeTabs";
+import { getProblems } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,7 @@ export default async function ProblemsPage() {
     redirect("/login");
   }
 
-  // Fetch all problems from DB
-  const { data: problems } = await supabase
-    .from("problems")
-    .select("id, title, slug, difficulty, category, company_tags")
-    .order("difficulty")
-    .order("title");
+  const problems = await getProblems();
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -35,16 +31,15 @@ export default async function ProblemsPage() {
 
       <InterviewTypeTabs>
         <ProblemGrid
-          problems={
-            (problems || []).map((p) => ({
-              id: p.id,
-              title: p.title,
-              slug: p.slug,
-              difficulty: p.difficulty as "easy" | "medium" | "hard",
-              category: p.category,
-              companyTags: (p.company_tags as string[]) || [],
-            }))
-          }
+          problems={problems.map((p) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            difficulty: p.difficulty as "easy" | "medium" | "hard",
+            category: p.category,
+            companyTags: (p.company_tags as string[]) || [],
+            isFreeSolverEnabled: p.is_free_solver_enabled,
+          }))}
         />
       </InterviewTypeTabs>
     </div>

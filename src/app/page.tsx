@@ -184,12 +184,12 @@ const FAQS: readonly FaqItem[] = [
   {
     question: "How long does a session take?",
     answer:
-      "Paid interviews run for 45 minutes across every interview type. The free trial is a shorter 5-minute voice session so you can feel the experience before buying a pack.",
+      "Practice Mode is self-paced. AI Interview Mode runs for 45 minutes on paid rounds, and every account keeps one shorter 5-minute audio preview so you can feel the pressure before buying a pack.",
   },
   {
     question: "Do I need a subscription?",
     answer:
-      "No. TechInView sells one-time interview packs. Start with the trial, then buy the number of rounds you actually need.",
+      "No. Free Practice Mode is always available for the curated DSA set. AI Interview Mode uses one-time interview packs, so you only buy the rounds you actually need.",
   },
   {
     question: "Can I use this on mobile?",
@@ -238,7 +238,20 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
 
   const params = await searchParams;
   const ref = typeof params.ref === "string" ? params.ref : undefined;
-  const signupHref = ref ? `/signup?ref=${ref}` : "/signup";
+  const buildSignupHref = (next?: string) => {
+    const nextParams = new URLSearchParams();
+    if (ref) {
+      nextParams.set("ref", ref);
+    }
+    if (next) {
+      nextParams.set("next", next);
+    }
+
+    const query = nextParams.toString();
+    return query ? `/signup?${query}` : "/signup";
+  };
+  const practiceSignupHref = buildSignupHref("/interview/setup?dsaExperience=practice");
+  const previewSignupHref = buildSignupHref("/interview/setup?dsaExperience=ai_interview");
   const defaultPersona = getInterviewerPersona("tia");
 
   return (
@@ -249,7 +262,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
       >
         Skip to content
       </a>
-      <MarketingNav signupHref={signupHref} />
+      <MarketingNav signupHref={practiceSignupHref} />
 
       <main id="main">
         <section className="relative overflow-hidden px-4 pb-28 pt-16 sm:px-6 sm:pb-32 sm:pt-24">
@@ -277,31 +290,31 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 </h1>
 
                 <p className="mt-8 max-w-2xl text-lg leading-relaxed text-brand-muted sm:text-xl">
-                  TechInView runs full DSA rounds where the interviewer speaks, challenges your
-                  thinking, watches your code, and scores how you perform under pressure. Start
-                  with {defaultPersona.name}, then switch to company-calibrated personas when you
-                  want a sharper bar.
+                  Start with free Practice Mode for DSA, then switch into AI Interview Mode when
+                  you want the interviewer to speak, challenge your thinking, watch your code, and
+                  score how you perform under pressure. {defaultPersona.name} is ready when you
+                  want the real interview feel.
                 </p>
 
                 <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                   <Link
-                    href={signupHref}
+                    href={practiceSignupHref}
                     className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-7 py-4 text-base font-semibold text-brand-deep transition-colors hover:bg-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
                   >
-                    Start Free Round
+                    Practice Free
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                   <Link
-                    href="#scorecard"
+                    href={previewSignupHref}
                     className="group inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-7 py-4 text-base font-semibold text-brand-text transition-colors hover:border-brand-cyan/25 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/40 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
                   >
                     <Play className="h-4 w-4 text-brand-cyan" />
-                    See Sample Scorecard
+                    Try 5-Minute Audio Interview
                   </Link>
                 </div>
 
                 <p className="mt-5 text-sm text-brand-muted">
-                  1 free 5-minute voice trial. No credit card required.
+                  Free DSA practice with saved progress. One 5-minute audio preview included.
                 </p>
 
                 <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-brand-muted">
@@ -646,10 +659,10 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
-                    href={signupHref}
+                    href={previewSignupHref}
                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-6 py-3 text-sm font-semibold text-brand-deep transition-colors hover:bg-cyan-300"
                   >
-                    Run your first interview
+                    Try 5-Minute Audio Interview
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
@@ -728,29 +741,29 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
 
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <Link
-                  href={signupHref}
+                  href={practiceSignupHref}
                   className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-7 py-4 text-base font-semibold text-brand-deep transition-colors hover:bg-cyan-300"
                 >
-                  Start your free interview
+                  Practice Free
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
                 <Link
-                  href="/practice"
+                  href={previewSignupHref}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-7 py-4 text-base font-semibold text-brand-text transition-colors hover:border-brand-cyan/25 hover:bg-white/[0.05]"
                 >
-                  Explore practice problems
+                  Try 5-Minute Audio Interview
                 </Link>
               </div>
 
               <p className="mt-4 text-sm text-brand-muted">
-                Start with the 5-minute trial, then unlock full interview packs when you are ready.
+                Practice free now, then unlock full AI interview packs when you are ready.
               </p>
             </div>
           </LandingReveal>
         </section>
       </main>
 
-      <MarketingFooter signupHref={signupHref} />
+      <MarketingFooter signupHref={practiceSignupHref} />
     </div>
   );
 }
