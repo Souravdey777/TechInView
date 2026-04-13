@@ -2,7 +2,7 @@ export const DSA_EXPERIENCES = ["practice", "ai_interview"] as const;
 
 export type DsaExperience = (typeof DSA_EXPERIENCES)[number];
 
-export const DEFAULT_DSA_EXPERIENCE: DsaExperience = "practice";
+export const DEFAULT_DSA_EXPERIENCE: DsaExperience = "ai_interview";
 
 export const FREE_SOLVER_PROBLEM_SLUGS = [
   "two-sum",

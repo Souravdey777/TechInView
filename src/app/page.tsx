@@ -251,7 +251,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
     return query ? `${pathname}?${query}` : pathname;
   };
   const loginHref = buildAuthHref("/login");
-  const practiceSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=practice");
+  const practiceSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=ai_interview");
   const previewSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=ai_interview");
   const defaultPersona = getInterviewerPersona("tia");
 

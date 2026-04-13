@@ -190,7 +190,7 @@ export default async function PracticePage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/interview/setup?dsaExperience=practice"
+            href="/interview/setup?dsaExperience=ai_interview"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
           >
             <Zap className="w-4 h-4" />

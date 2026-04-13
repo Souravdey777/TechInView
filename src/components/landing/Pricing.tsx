@@ -222,7 +222,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
   const ctaHref = signupQuery ? `/signup?${signupQuery}` : "/signup";
 
   const practiceSignupParams = new URLSearchParams(signupParams);
-  practiceSignupParams.set("next", "/interview/setup?dsaExperience=practice");
+  practiceSignupParams.set("next", "/interview/setup?dsaExperience=ai_interview");
   const practiceHref = `/signup?${practiceSignupParams.toString()}`;
   const [activeRegion, setActiveRegion] = useState<PricingRegion>(defaultRegion);
 

@@ -12,8 +12,8 @@ export function Hero() {
   const searchParams = useSearchParams();
   const refParam = searchParams.get("ref");
   const practiceHref = refParam
-    ? `/signup?ref=${refParam}&next=${encodeURIComponent("/interview/setup?dsaExperience=practice")}`
-    : `/signup?next=${encodeURIComponent("/interview/setup?dsaExperience=practice")}`;
+    ? `/signup?ref=${refParam}&next=${encodeURIComponent("/interview/setup?dsaExperience=ai_interview")}`
+    : `/signup?next=${encodeURIComponent("/interview/setup?dsaExperience=ai_interview")}`;
   const previewHref = refParam
     ? `/signup?ref=${refParam}&next=${encodeURIComponent("/interview/setup?dsaExperience=ai_interview")}`
     : `/signup?next=${encodeURIComponent("/interview/setup?dsaExperience=ai_interview")}`;

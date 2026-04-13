@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Lock, Sparkles } from "lucide-react";
 import { DsaExperienceToggle } from "@/components/dsa/DsaExperienceToggle";
 import { Button } from "@/components/ui/button";
-import type { DsaExperience } from "@/lib/dsa";
+import { DEFAULT_DSA_EXPERIENCE, type DsaExperience } from "@/lib/dsa";
 
 type PracticeModeCtaProps = {
   problemSlug: string;
@@ -16,7 +16,7 @@ type PracticeModeCtaProps = {
 export function PracticeModeCta({
   problemSlug,
   isFreeSolverEnabled,
-  initialExperience = "practice",
+  initialExperience = DEFAULT_DSA_EXPERIENCE,
 }: PracticeModeCtaProps) {
   const [experience, setExperience] = useState<DsaExperience>(initialExperience);
 
