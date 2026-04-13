@@ -3,7 +3,7 @@ import { DEFAULT_OG_IMAGE_PATH, absoluteUrl } from "@/lib/blog-seo";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
-export const SUPPORT_EMAIL = "support@techinview.dev";
+export const SUPPORT_EMAIL = "support@mail.techinview.dev";
 export const LEGAL_LAST_UPDATED = "April 12, 2026";
 export const LEGAL_LAST_UPDATED_ISO = "2026-04-12";
 
