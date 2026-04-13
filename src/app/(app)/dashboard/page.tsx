@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import { getDefaultInterviewerPersona, getInterviewerPersona } from "@/lib/interviewer-personas";
@@ -8,7 +7,6 @@ import {
   mapInterviewToKind,
   type DashboardPracticeItem,
 } from "@/lib/dashboard/models";
-import { CREDIT_PACKS, getDisplayPricingKey, getRegionForCountry } from "@/lib/constants";
 import { getRecentPracticeAttempts } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
@@ -122,11 +120,6 @@ export default async function DashboardPage() {
   const defaultInterviewer = getInterviewerPersona(
     getDefaultInterviewerPersona(profile?.target_company ?? null, isFreeTrialUser)
   );
-  const headersList = headers();
-  const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
-  const { region, symbol } = getRegionForCountry(country);
-  const displayKey = getDisplayPricingKey(region);
-  const startingPrice = `${symbol}${CREDIT_PACKS.single.displayPrices[displayKey]}`;
 
   return (
     <DashboardHome
@@ -134,7 +127,6 @@ export default async function DashboardPage() {
       credits={credits}
       hasCredits={hasCredits}
       isFreeTrialUser={isFreeTrialUser}
-      startingPrice={startingPrice}
       defaultInterviewerName={defaultInterviewer.name}
       initialInterviews={toDashboardPracticeItems(interviewResult)}
       practiceAttempts={practiceAttempts.map((attempt) => ({

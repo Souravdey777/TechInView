@@ -41,7 +41,6 @@ type DashboardHomeProps = {
   credits: number;
   hasCredits: boolean;
   isFreeTrialUser: boolean;
-  startingPrice: string;
   defaultInterviewerName: string;
   initialInterviews: DashboardPracticeItem[];
   practiceAttempts: {
@@ -184,12 +183,10 @@ function PracticeCard({
   config,
   filter,
   hasCredits,
-  startingPrice,
 }: {
   config: PracticeCardConfig;
   filter: DashboardFilter;
   hasCredits: boolean;
-  startingPrice: string;
 }) {
   const Icon = PRACTICE_ICON_MAP[config.kind];
   const style = STATUS_STYLES[config.status];
@@ -199,9 +196,7 @@ function PracticeCard({
   const ctaHref =
     config.status === "live" && !hasCredits ? "/settings" : config.href;
   const ctaLabel =
-    config.status === "live" && !hasCredits
-      ? `Get credits from ${startingPrice}`
-      : config.ctaLabel;
+    config.status === "live" && !hasCredits ? "Buy Credits" : config.ctaLabel;
   const isDsaCard = config.kind === "dsa";
 
   return (
@@ -249,15 +244,18 @@ function PracticeCard({
           </Button>
         ) : isDsaCard ? (
           <div className="flex flex-wrap gap-2">
-            <Button asChild size="sm" variant={style.buttonVariant}>
+            <Button asChild size="sm" variant="secondary">
               <Link href="/interview/setup?dsaExperience=practice">
-                Practice Free
+                Practice
+                <span className="rounded-full border border-brand-green/25 bg-brand-green/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-green">
+                  Free
+                </span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Button>
-            <Button asChild size="sm" variant="secondary">
+            <Button asChild size="sm">
               <Link href={hasCredits ? "/interview/setup?dsaExperience=ai_interview" : "/settings"}>
-                AI Interview
+                {hasCredits ? "AI Interview" : "Buy Credits"}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Button>
@@ -326,7 +324,6 @@ export function DashboardHome({
   credits,
   hasCredits,
   isFreeTrialUser,
-  startingPrice,
   defaultInterviewerName,
   initialInterviews,
   practiceAttempts,
@@ -609,7 +606,6 @@ export function DashboardHome({
               config={config}
               filter={filter}
               hasCredits={hasCredits}
-              startingPrice={startingPrice}
             />
           ))}
         </div>
