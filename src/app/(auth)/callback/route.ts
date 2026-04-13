@@ -10,7 +10,6 @@ import {
   sendBetaWelcomeEmail,
   sendWelcomeEmail,
 } from "@/lib/email/lifecycle";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 const SIGNUP_WINDOW_MS = 15 * 60 * 1000;
 const PROFILE_NOT_FOUND_CODE = "PGRST116";
@@ -38,6 +37,16 @@ function getUserDisplayName(
     (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
     null
   );
+}
+
+function getUserAvatarUrl(
+  user: {
+    user_metadata?: Record<string, unknown>;
+  }
+) {
+  return typeof user.user_metadata?.avatar_url === "string"
+    ? user.user_metadata.avatar_url
+    : null;
 }
 
 function createRedirectResponse(url: string) {
@@ -84,7 +93,7 @@ export async function GET(request: NextRequest) {
             ref: ref ?? undefined,
           });
 
-          const { data: profile, error: profileError } = await supabase
+          let { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("target_company, experience_level, preferred_language, interviews_completed, interview_credits")
             .eq("id", user.id)
@@ -92,6 +101,25 @@ export async function GET(request: NextRequest) {
 
           if (profileError && profileError.code !== PROFILE_NOT_FOUND_CODE) {
             console.error("[auth/callback] Failed to load profile", profileError);
+          }
+
+          if (!profile && profileError?.code === PROFILE_NOT_FOUND_CODE) {
+            const { data: createdProfile, error: createProfileError } = await supabase
+              .from("profiles")
+              .upsert({
+                id: user.id,
+                display_name: getUserDisplayName(user),
+                avatar_url: getUserAvatarUrl(user),
+              })
+              .select("target_company, experience_level, preferred_language, interviews_completed, interview_credits")
+              .single();
+
+            if (createProfileError) {
+              console.error("[auth/callback] Failed to create missing profile", createProfileError);
+            } else {
+              profile = createdProfile;
+              profileError = null;
+            }
           }
 
           needsOnboarding =
@@ -115,14 +143,16 @@ export async function GET(request: NextRequest) {
 
           if (shouldGrantBetaCredits) {
             try {
-              const admin = createAdminClient();
-              const { data: updatedProfile, error: profileUpdateError } = await admin
+              const nextCredits = (profile?.interview_credits ?? 0) + BETA_CREDITS;
+              const { data: updatedProfile, error: profileUpdateError } = await supabase
                 .from("profiles")
-                .update({
-                  interview_credits: (profile?.interview_credits ?? 0) + BETA_CREDITS,
+                .upsert({
+                  id: user.id,
+                  display_name: getUserDisplayName(user),
+                  avatar_url: getUserAvatarUrl(user),
+                  interview_credits: nextCredits,
                   has_used_free_trial: true,
                 })
-                .eq("id", user.id)
                 .select("interview_credits")
                 .single();
 
@@ -131,9 +161,18 @@ export async function GET(request: NextRequest) {
               }
 
               grantedBetaCreditsBalance = updatedProfile?.interview_credits ?? null;
+              profile = profile
+                ? { ...profile, interview_credits: grantedBetaCreditsBalance }
+                : {
+                    target_company: null,
+                    experience_level: null,
+                    preferred_language: null,
+                    interviews_completed: 0,
+                    interview_credits: grantedBetaCreditsBalance,
+                  };
 
-              const { error: metadataUpdateError } = await admin.auth.admin.updateUserById(user.id, {
-                user_metadata: {
+              const { error: metadataUpdateError } = await supabase.auth.updateUser({
+                data: {
                   ...(user.user_metadata ?? {}),
                   beta_credits_granted_at: new Date().toISOString(),
                 },
