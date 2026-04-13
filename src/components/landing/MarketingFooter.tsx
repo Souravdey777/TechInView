@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -175,6 +176,20 @@ export function MarketingFooter({ signupHref }: MarketingFooterProps) {
               Free practice stays open. Paid rounds are available as one-time
               packs when you want live voice pressure and score-driven review.
             </p>
+            <a
+              href="https://builders.to/projects/techinview?utm_source=badge"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex transition-opacity hover:opacity-100"
+            >
+              <Image
+                src="https://builders.to/badges/featured-on-builders-small.svg"
+                alt="TechInView - Featured on Builders.to"
+                width={130}
+                height={40}
+                className="opacity-90"
+              />
+            </a>
           </div>
 
           <div>
