@@ -111,8 +111,7 @@ export async function GET(request: NextRequest) {
               : null;
           const shouldGrantBetaCredits =
             ref === BETA_INVITE_CODE &&
-            betaCreditsGrantedAt == null &&
-            (isFreshSignup || intent === "login");
+            betaCreditsGrantedAt == null;
 
           if (shouldGrantBetaCredits) {
             try {
