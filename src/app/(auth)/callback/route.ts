@@ -6,11 +6,11 @@ import {
   BETA_INVITE_CODE,
   REFERRAL_COOKIE_NAME,
 } from "@/lib/constants";
-import { grantBetaCredits } from "@/lib/db/queries";
 import {
   sendBetaWelcomeEmail,
   sendWelcomeEmail,
 } from "@/lib/email/lifecycle";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const SIGNUP_WINDOW_MS = 15 * 60 * 1000;
 
@@ -25,6 +25,18 @@ function isRecentlyCreatedUser(createdAt: string | undefined) {
   }
 
   return Date.now() - createdAtMs <= SIGNUP_WINDOW_MS;
+}
+
+function getUserDisplayName(
+  user: {
+    user_metadata?: Record<string, unknown>;
+  }
+) {
+  return (
+    (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+    (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
+    null
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -52,9 +64,10 @@ export async function GET(request: NextRequest) {
           ref: ref ?? undefined,
         });
 
+        const admin = createAdminClient();
         const { data: profile } = await supabase
           .from("profiles")
-          .select("target_company, experience_level, preferred_language, interviews_completed, interview_credits, beta_credits_granted_at")
+          .select("target_company, experience_level, preferred_language, interviews_completed, interview_credits")
           .eq("id", user.id)
           .single();
 
@@ -69,39 +82,63 @@ export async function GET(request: NextRequest) {
           (profile?.interviews_completed ?? 0) === 0 &&
           isRecentlyCreatedUser(user.created_at);
 
+        const betaCreditsGrantedAt =
+          typeof user.user_metadata?.beta_credits_granted_at === "string"
+            ? user.user_metadata.beta_credits_granted_at
+            : null;
         const shouldGrantBetaCredits =
           ref === BETA_INVITE_CODE &&
-          profile?.beta_credits_granted_at == null &&
+          betaCreditsGrantedAt == null &&
           (isFreshSignup || intent === "login");
 
-        const grantedBetaProfile = shouldGrantBetaCredits
-          ? await grantBetaCredits(user.id, BETA_CREDITS)
-          : null;
+        let grantedBetaCreditsBalance: number | null = null;
+        if (shouldGrantBetaCredits) {
+          const { data: updatedProfile, error: profileUpdateError } = await admin
+            .from("profiles")
+            .update({
+              interview_credits: (profile?.interview_credits ?? 0) + BETA_CREDITS,
+              has_used_free_trial: true,
+            })
+            .eq("id", user.id)
+            .select("interview_credits")
+            .single();
 
-        if (grantedBetaProfile) {
+          if (profileUpdateError) {
+            throw profileUpdateError;
+          }
+
+          grantedBetaCreditsBalance = updatedProfile?.interview_credits ?? null;
+
+          const { error: metadataUpdateError } = await admin.auth.admin.updateUserById(user.id, {
+            user_metadata: {
+              ...(user.user_metadata ?? {}),
+              beta_credits_granted_at: new Date().toISOString(),
+            },
+          });
+
+          if (metadataUpdateError) {
+            console.error("[auth/callback] Failed to persist beta grant marker", metadataUpdateError);
+          }
+        }
+
+        if (grantedBetaCreditsBalance != null) {
           captureServerEvent(user.id, "beta_credits_granted", {
             credits: BETA_CREDITS,
-            new_balance: grantedBetaProfile.interview_credits,
+            new_balance: grantedBetaCreditsBalance,
             ref,
             intent: intent ?? undefined,
           });
         }
 
-        if (isFreshSignup && ref === BETA_INVITE_CODE && grantedBetaProfile && user.email) {
+        if (isFreshSignup && ref === BETA_INVITE_CODE && grantedBetaCreditsBalance != null && user.email) {
           await sendBetaWelcomeEmail({
             email: user.email,
-            name:
-              (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
-              (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
-              null,
+            name: getUserDisplayName(user),
           });
         } else if (isFreshSignup && user.email) {
           await sendWelcomeEmail({
             email: user.email,
-            name:
-              (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
-              (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
-              null,
+            name: getUserDisplayName(user),
           });
         }
 

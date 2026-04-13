@@ -1025,28 +1025,6 @@ export async function incrementCredits(
   return results[0];
 }
 
-export async function grantBetaCredits(
-  userId: string,
-  amount: number
-): Promise<Profile | undefined> {
-  const db = getDb();
-  const results = await db
-    .update(schema.profiles)
-    .set({
-      interview_credits: sql`${schema.profiles.interview_credits} + ${amount}`,
-      has_used_free_trial: true,
-      beta_credits_granted_at: sql`now()`,
-    })
-    .where(
-      and(
-        eq(schema.profiles.id, userId),
-        sql`${schema.profiles.beta_credits_granted_at} is null`
-      )
-    )
-    .returning();
-  return results[0];
-}
-
 export async function decrementCredits(
   userId: string
 ): Promise<Profile | undefined> {
