@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -12,11 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const CONFIRM_TEXT = "delete my account";
 
 export function DeleteAccountButton() {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [confirmation, setConfirmation] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,20 +30,24 @@ export function DeleteAccountButton() {
 
     try {
       const res = await fetch("/api/account/delete", { method: "POST" });
-      const data = await res.json();
+      const data = (await res.json().catch(() => null)) as
+        | { success?: boolean; error?: string }
+        | null;
 
-      if (!res.ok || !data.success) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+      if (!res.ok || !data?.success) {
+        setError(data?.error ?? "Something went wrong. Please try again.");
         setLoading(false);
         return;
       }
 
-      router.push("/login");
+      const supabase = createClient();
+      await supabase.auth.signOut({ scope: "local" });
+      window.location.replace("/login");
     } catch {
       setError("Network error. Please check your connection and try again.");
       setLoading(false);
     }
-  }, [confirmed, router]);
+  }, [confirmed]);
 
   const handleOpenChange = (next: boolean) => {
     if (loading) return;

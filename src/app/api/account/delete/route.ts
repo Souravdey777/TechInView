@@ -18,28 +18,14 @@ export async function POST() {
 
     const admin = createAdminClient();
 
-    // Delete the profile row first — cascades to interviews, messages,
-    // progress, feedback, and payments via ON DELETE CASCADE.
-    const { error: profileError } = await admin
-      .from("profiles")
-      .delete()
-      .eq("id", user.id);
-
-    if (profileError) {
-      console.error("Failed to delete profile:", profileError);
-      return NextResponse.json(
-        { success: false, error: "Failed to delete account data" },
-        { status: 500 }
-      );
-    }
-
-    // Remove the auth.users entry (requires service role).
+    // Delete the auth.users record first so Postgres can cascade profile-owned
+    // data in a single direction: auth.users -> profiles -> dependent tables.
     const { error: authError } = await admin.auth.admin.deleteUser(user.id);
 
     if (authError) {
       console.error("Failed to delete auth user:", authError);
       return NextResponse.json(
-        { success: false, error: "Failed to delete auth account" },
+        { success: false, error: "Failed to delete account" },
         { status: 500 }
       );
     }
