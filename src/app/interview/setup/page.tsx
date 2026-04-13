@@ -958,7 +958,7 @@ function InterviewSetupInner() {
               <p className="text-sm font-semibold text-brand-text">Free Practice Mode</p>
               <p className="mt-1 text-xs text-brand-muted">
                 Practice Mode gives you a curated set of DSA problems, code execution, and saved progress.
-                Switch to AI Interview Mode when you want the 5-minute audio preview or a full paid round with voice and scoring.
+                Switch to AI Interview Mode when you want the 5-minute audio preview or a full interview round with voice and scoring.
               </p>
             </div>
           </div>
@@ -1625,7 +1625,7 @@ function InterviewSetupInner() {
                 </div>
               </div>
               <p className="mt-3 text-xs text-brand-muted">
-              Each paid interview credit unlocks one full {FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.
+              Each interview credit unlocks one full {FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.
               </p>
             </>
           )}

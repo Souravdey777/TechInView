@@ -92,6 +92,7 @@ export const profiles = pgTable("profiles", {
   plan: planEnum("plan").default("free").notNull(),
   interview_credits: integer("interview_credits").default(0).notNull(),
   has_used_free_trial: boolean("has_used_free_trial").default(false).notNull(),
+  beta_credits_granted_at: timestamp("beta_credits_granted_at", { withTimezone: true }),
   country_code: text("country_code"),
   razorpay_customer_id: text("razorpay_customer_id"),
   razorpay_subscription_id: text("razorpay_subscription_id"),

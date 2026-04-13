@@ -25,6 +25,7 @@ export default function LoginPage() {
     posthog?.capture("login_clicked", { provider });
     try {
       const callbackUrl = new URL("/callback", window.location.origin);
+      callbackUrl.searchParams.set("intent", "login");
       if (ref) callbackUrl.searchParams.set("ref", ref);
       if (next) callbackUrl.searchParams.set("next", next);
 

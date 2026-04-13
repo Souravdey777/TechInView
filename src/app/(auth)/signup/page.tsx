@@ -27,6 +27,7 @@ export default function SignupPage() {
     posthog?.capture("signup_clicked", { provider, ref: ref ?? undefined });
     try {
       const callbackUrl = new URL("/callback", window.location.origin);
+      callbackUrl.searchParams.set("intent", "signup");
       if (ref) callbackUrl.searchParams.set("ref", ref);
       if (next) callbackUrl.searchParams.set("next", next);
 
@@ -65,8 +66,8 @@ export default function SignupPage() {
                 Beta Invite
               </span>
               <p className="text-brand-muted text-sm text-center">
-                You&apos;ve been invited! Sign up for{" "}
-                <span className="text-brand-cyan font-semibold">{BETA_CREDITS} free interviews</span>
+                You&apos;ve been invited! Sign up to get{" "}
+                <span className="text-brand-cyan font-semibold">{BETA_CREDITS} full interview credits</span>
               </p>
             </div>
           ) : (

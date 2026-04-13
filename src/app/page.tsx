@@ -238,20 +238,21 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
 
   const params = await searchParams;
   const ref = typeof params.ref === "string" ? params.ref : undefined;
-  const buildSignupHref = (next?: string) => {
-    const nextParams = new URLSearchParams();
+  const buildAuthHref = (pathname: "/login" | "/signup", next?: string) => {
+    const authParams = new URLSearchParams();
     if (ref) {
-      nextParams.set("ref", ref);
+      authParams.set("ref", ref);
     }
     if (next) {
-      nextParams.set("next", next);
+      authParams.set("next", next);
     }
 
-    const query = nextParams.toString();
-    return query ? `/signup?${query}` : "/signup";
+    const query = authParams.toString();
+    return query ? `${pathname}?${query}` : pathname;
   };
-  const practiceSignupHref = buildSignupHref("/interview/setup?dsaExperience=practice");
-  const previewSignupHref = buildSignupHref("/interview/setup?dsaExperience=ai_interview");
+  const loginHref = buildAuthHref("/login");
+  const practiceSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=practice");
+  const previewSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=ai_interview");
   const defaultPersona = getInterviewerPersona("tia");
 
   return (
@@ -262,7 +263,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
       >
         Skip to content
       </a>
-      <MarketingNav signupHref={practiceSignupHref} />
+      <MarketingNav loginHref={loginHref} signupHref={practiceSignupHref} />
 
       <main id="main">
         <section className="relative overflow-hidden px-4 pb-28 pt-16 sm:px-6 sm:pb-32 sm:pt-24">

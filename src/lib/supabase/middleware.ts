@@ -1,5 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  REFERRAL_COOKIE_MAX_AGE_SECONDS,
+  REFERRAL_COOKIE_NAME,
+} from "@/lib/constants";
 
 const PROTECTED_PATHS = [
   "/dashboard",
@@ -16,6 +20,24 @@ function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PATHS.some((path) => pathname.startsWith(path));
 }
 
+function withReferralCookie(response: NextResponse, request: NextRequest) {
+  const ref = request.nextUrl.searchParams.get("ref")?.trim();
+
+  if (!ref) {
+    return response;
+  }
+
+  response.cookies.set(REFERRAL_COOKIE_NAME, ref, {
+    httpOnly: true,
+    maxAge: REFERRAL_COOKIE_MAX_AGE_SECONDS,
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  return response;
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -27,9 +49,9 @@ export async function updateSession(request: NextRequest) {
     if (isProtectedPath(request.nextUrl.pathname)) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
-      return NextResponse.redirect(url);
+      return withReferralCookie(NextResponse.redirect(url), request);
     }
-    return supabaseResponse;
+    return withReferralCookie(supabaseResponse, request);
   }
 
   const supabase = createServerClient(
@@ -64,7 +86,7 @@ export async function updateSession(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", pathname + request.nextUrl.search);
-    return NextResponse.redirect(loginUrl);
+    return withReferralCookie(NextResponse.redirect(loginUrl), request);
   }
 
   // Redirect authenticated users away from auth pages
@@ -72,7 +94,7 @@ export async function updateSession(request: NextRequest) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = "/dashboard";
     dashboardUrl.search = "";
-    return NextResponse.redirect(dashboardUrl);
+    return withReferralCookie(NextResponse.redirect(dashboardUrl), request);
   }
 
   // Onboarding redirect: check if profile is incomplete
@@ -92,16 +114,16 @@ export async function updateSession(request: NextRequest) {
       const onboardingUrl = request.nextUrl.clone();
       onboardingUrl.pathname = "/onboarding";
       onboardingUrl.search = "";
-      return NextResponse.redirect(onboardingUrl);
+      return withReferralCookie(NextResponse.redirect(onboardingUrl), request);
     }
 
     if (!isIncomplete && pathname === "/onboarding") {
       const dashboardUrl = request.nextUrl.clone();
       dashboardUrl.pathname = "/dashboard";
       dashboardUrl.search = "";
-      return NextResponse.redirect(dashboardUrl);
+      return withReferralCookie(NextResponse.redirect(dashboardUrl), request);
     }
   }
 
-  return supabaseResponse;
+  return withReferralCookie(supabaseResponse, request);
 }

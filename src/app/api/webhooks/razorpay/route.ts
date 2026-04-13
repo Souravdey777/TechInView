@@ -6,6 +6,7 @@ import {
   incrementCredits,
   updateProfile,
 } from "@/lib/db/queries";
+import { sendPaidSupportEmail } from "@/lib/email/lifecycle";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +96,14 @@ export async function POST(req: NextRequest) {
           profileUpdates.razorpay_customer_id = payment.customer_id;
         }
         await updateProfile(userId, profileUpdates);
+
+        await sendPaidSupportEmail({
+          userId,
+          credits,
+          pack,
+          amount: payment.amount,
+          currency: payment.currency,
+        });
 
         break;
       }

@@ -97,6 +97,8 @@ export const FREE_INTERVIEWS_PER_WEEK = 1;
 
 export const BETA_INVITE_CODE = "beta";
 export const BETA_CREDITS = 3;
+export const REFERRAL_COOKIE_NAME = "techinview_ref";
+export const REFERRAL_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
 export const HIRE_RECOMMENDATIONS = ["strong_hire", "hire", "lean_hire", "lean_no_hire", "no_hire"] as const;
 export type HireRecommendation = (typeof HIRE_RECOMMENDATIONS)[number];

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 
 type MarketingNavProps = {
+  loginHref?: string;
   signupHref?: string;
 };
 
@@ -34,7 +35,10 @@ const mobileNavLinks: readonly NavLink[] = [
 
 const SECTION_TRIGGER_PX = 160;
 
-export function MarketingNav({ signupHref = "/signup" }: MarketingNavProps) {
+export function MarketingNav({
+  loginHref = "/login",
+  signupHref = "/signup",
+}: MarketingNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -164,7 +168,7 @@ export function MarketingNav({ signupHref = "/signup" }: MarketingNavProps) {
 
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
-                href="/login"
+                href={loginHref}
                 className="hidden px-2 text-sm text-brand-muted transition-colors hover:text-brand-text sm:inline-flex"
               >
                 Log in
@@ -242,7 +246,7 @@ export function MarketingNav({ signupHref = "/signup" }: MarketingNavProps) {
               );
             })}
             <Link
-              href="/login"
+              href={loginHref}
               className="rounded-lg px-4 py-3 text-sm text-brand-muted transition-colors hover:bg-brand-card hover:text-brand-text"
               onClick={() => setOpen(false)}
             >

@@ -7,6 +7,7 @@ import {
   incrementCredits,
   updateProfile,
 } from "@/lib/db/queries";
+import { sendPaidSupportEmail } from "@/lib/email/lifecycle";
 import { captureServerEvent } from "@/lib/posthog/server";
 
 export const dynamic = "force-dynamic";
@@ -105,6 +106,14 @@ export async function POST(req: NextRequest) {
       profileUpdates.razorpay_customer_id = customerId;
     }
     await updateProfile(user.id, profileUpdates);
+
+    await sendPaidSupportEmail({
+      userId: user.id,
+      credits,
+      pack,
+      amount: payment.amount as number,
+      currency: payment.currency as string,
+    });
 
     captureServerEvent(user.id, "payment_completed", {
       pack,
