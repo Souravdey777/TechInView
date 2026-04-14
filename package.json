@@ -11,7 +11,8 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "seed": "tsx scripts/seed-problems.ts",
-    "seed:historical-questions": "tsx scripts/import-historical-questions.ts"
+    "seed:historical-questions": "tsx scripts/import-historical-questions.ts",
+    "verify:problems": "node --import tsx ./scripts/verify-problems.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

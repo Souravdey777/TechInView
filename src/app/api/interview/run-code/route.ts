@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       language,
       code,
       testCases,
+      problemSlug,
     });
 
     try {

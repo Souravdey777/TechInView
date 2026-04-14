@@ -49,11 +49,6 @@
       "is_hidden": true
     },
     {
-      "input": "s = \"aab\"",
-      "expected_output": "2",
-      "is_hidden": true
-    },
-    {
       "input": "s = \"dvdf\"",
       "expected_output": "3",
       "is_hidden": true

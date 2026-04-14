@@ -7,8 +7,8 @@
   "description": "A **trie** (pronounced \"try\") or **prefix tree** is a tree data structure used to efficiently store and retrieve keys in a dataset of strings. There are various applications of this data structure, such as autocomplete and spellchecker.\n\nImplement the `Trie` class:\n\n- `Trie()` — Initializes the trie object.\n- `void insert(String word)` — Inserts the string `word` into the trie.\n- `boolean search(String word)` — Returns `true` if the string `word` is in the trie (i.e., was inserted before), and `false` otherwise.\n- `boolean startsWith(String prefix)` — Returns `true` if there is a previously inserted string `word` that has the prefix `prefix`, and `false` otherwise.\n\n**Example 1:**\n```\nInput:\n[\"Trie\", \"insert\", \"search\", \"search\", \"startsWith\", \"insert\", \"search\"]\n[[], [\"apple\"], [\"apple\"], [\"app\"], [\"app\"], [\"app\"], [\"app\"]]\nOutput: [null, null, true, false, true, null, true]\nExplanation:\nTrie trie = new Trie();\ntrie.insert(\"apple\");   // Inserts \"apple\" into the trie\ntrie.search(\"apple\");   // Returns true\ntrie.search(\"app\");     // Returns false (\"app\" was not inserted)\ntrie.startsWith(\"app\"); // Returns true (\"apple\" starts with \"app\")\ntrie.insert(\"app\");     // Inserts \"app\" into the trie\ntrie.search(\"app\");     // Returns true (\"app\" is now in the trie)\n```",
   "examples": [
     {
-      "input": "[\"Trie\", \"insert\", \"search\", \"search\", \"startsWith\", \"insert\", \"search\"]\n[[], [\"apple\"], [\"apple\"], [\"app\"], [\"app\"], [\"app\"], [\"app\"]]",
-      "output": "[null, null, true, false, true, null, true]",
+      "input": "operations = [\"Trie\",\"insert\",\"search\",\"search\",\"startsWith\",\"insert\",\"search\"], args = [[],[\"apple\"],[\"apple\"],[\"app\"],[\"app\"],[\"app\"],[\"app\"]]",
+      "output": "[null,null,true,false,true,null,true]",
       "explanation": "After inserting \"apple\", searching for \"apple\" returns true but \"app\" returns false since it wasn't inserted. startsWith(\"app\") returns true because \"apple\" has prefix \"app\". After inserting \"app\", searching for \"app\" returns true."
     }
   ],

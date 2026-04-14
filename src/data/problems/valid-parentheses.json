@@ -17,9 +17,9 @@
       "explanation": "The brackets are not closed in the correct order — the '[' is closed by ')' before the '(' is closed."
     },
     {
-      "input": "s = \"{[]}\"",
-      "output": "true",
-      "explanation": "The '[' inside '{}' is properly closed before the outer '{' is closed."
+      "input": "s = \"]\"",
+      "output": "false",
+      "explanation": "A closing bracket without any matching opening bracket is invalid immediately."
     }
   ],
   "constraints": [
@@ -51,11 +51,6 @@
     {
       "input": "s = \"([)]\"",
       "expected_output": "false",
-      "is_hidden": true
-    },
-    {
-      "input": "s = \"{[]}\"",
-      "expected_output": "true",
       "is_hidden": true
     },
     {

@@ -12,9 +12,9 @@
       "explanation": "Two ways: (1+1) or (2)."
     },
     {
-      "input": "n = 5",
-      "output": "8",
-      "explanation": "Eight ways: 1+1+1+1+1, 1+1+1+2, 1+1+2+1, 1+2+1+1, 2+1+1+1, 1+2+2, 2+1+2, 2+2+1."
+      "input": "n = 3",
+      "output": "3",
+      "explanation": "Three ways: (1+1+1), (1+2), or (2+1)."
     }
   ],
   "constraints": [

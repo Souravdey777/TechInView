@@ -12,9 +12,9 @@
       "explanation": "Level 0 contains just the root [3]. Level 1 contains [9, 20]. Level 2 contains [15, 7] (children of 20)."
     },
     {
-      "input": "root = [1,2,3,4,5]",
-      "output": "[[1],[2,3],[4,5]]",
-      "explanation": "Level 0: [1]. Level 1: [2, 3]. Level 2: [4, 5] (children of 2)."
+      "input": "root = [1]",
+      "output": "[[1]]",
+      "explanation": "With a single-node tree, there is only one level containing the root value [1]."
     }
   ],
   "constraints": [

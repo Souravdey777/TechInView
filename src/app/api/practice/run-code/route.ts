@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
       language,
       code,
       testCases: (problem.test_cases ?? []) as ExecutableTestCase[],
+      problemSlug,
     });
 
     const passed = result.test_results.filter((test) => test.passed).length;
@@ -74,4 +75,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
