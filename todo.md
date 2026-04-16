@@ -1,138 +1,81 @@
-# TechInView — Development TODO (Execution Order)
+# TechInView TODO
 
-## Phase 1: Complete the Core Interview Loop
-_Goal: One full interview from start to scored results_
+_Last refreshed: 2026-04-16_
 
-- [x] 1. Seed 15 problems into Supabase DB — wire `scripts/seed-problems.ts` to real DB insert
-- [x] 2. Wire `/api/interview/start` to select random problem from DB based on difficulty/category
-- [x] 3. Load test cases dynamically from the selected problem (not hardcoded Two Sum)
-- [x] 4. Timer actually counts down during interview
-- [x] 5. Phase transitions — Tia advances through INTRO → PROBLEM → CODING → etc. based on time/conversation
-- [x] 6. Wire real AI scoring on "End Interview" — call `scoreInterview()` from `src/lib/ai/scorer.ts`
-- [x] 7. Results page reads from Zustand store + displays real AI-generated scores, radar chart, feedback
-- [x] 8. Save completed interview + scores to DB (interviews table)
+This list is intentionally current-state focused. Older completed milestones
+were removed so the file stays useful as an execution roadmap instead of a
+launch diary.
 
-## Phase 2: Data-Driven Pages
-_Goal: Dashboard, problems, progress all pull real data_
+## Now
 
-- [x] 9. Problems page loads from DB with working filters (difficulty, category, search)
-- [x] 10. Setup page "Choose specific" option lists real problems from DB
-- [x] 11. Dashboard shows real interview history from DB
-- [x] 12. Dashboard stats (total interviews, avg score, problems solved) from DB queries
-- [x] 13. Progress page shows real score trends and category breakdown
-- [x] 14. Settings page saves profile updates to DB (target company, preferred language, experience level)
+- [ ] Ship Prep Plans as a real product surface
+  - Replace the "coming soon" placeholders in `PrepPlansIndex` and `PrepPlanBuilder`
+  - Wire `/prep-plans/new` into actual loop generation
+  - Persist plans somewhere durable instead of localStorage-only
+  - Let users launch directly from a plan into the matching interview setup page
+  - Track round progress back into the plan
 
-## Phase 3: Polish & UX
-_Goal: Feel like a real product_
+- [ ] Align availability and messaging across the app
+  - Mark Technical Q&A and Engineering Manager as live everywhere they already work
+  - Audit landing, dashboard, nav, and CTA copy for stale "coming soon" labels
+  - Clearly distinguish beta shells from fully shipped interview products
 
-- [x] 15. Loading skeletons on all data-fetching pages
-- [x] 16. Error boundaries on every route segment
-- [x] 17. Toast notifications for user-facing errors
-- [x] 18. Mobile responsive landing page (interview room stays desktop-only)
-- [x] 19. Landing page demo preview (dynamic OG image)
-- [x] 20. OG images for social sharing
+- [ ] Finish the remaining persistence gaps in interview completion
+  - Implement the real DB write in `/api/interview/submit`
+  - Verify final code, timestamps, and round metadata always persist correctly
+  - Make resume/reload behavior consistent across DSA, Technical Q&A, and Engineering Manager
 
-## Phase 4: Deploy MVP
-_Goal: Live on the internet, shareable link_
+- [ ] Close execution and scoring gaps before broader promotion
+  - Either ship Java/C++ execution or hide/lock those run-code paths
+  - Make sure production cannot silently rely on mock scoring
+  - QA score output and result-page parity across all live round types
 
-- [x] 21. Push to GitHub
-- [x] 22. Deploy frontend to Vercel
-- [x] 23. Set up production env vars on Vercel
-- [x] 24. Update Supabase auth redirect URLs to production domain
-- [x] 25. Configure custom domain (techinview.dev)
-- [x] 26. Smoke test full flow on production
+- [ ] Harden production reliability for voice interviews
+  - Stress-test reconnect/resume behavior for reloads and flaky networks
+  - Add better observability around Deepgram token minting, agent failures, and scoring failures
+  - Polish the mic-denied / text-fallback experience
 
-## Phase 5: Monetization
-_Goal: Accept payments_
+## Next
 
-- [x] 27. Razorpay checkout for interview packs:
-  - Free trial: 1 x 5-minute voice trial, $0 (hook & convert)
-  - Single interview: $19 (₹799 India, $9 regional)
-  - 3-pack (Popular): $49 (₹1,999 India, $22 regional)
-  - 6-pack (Best Value): $89 (₹3,699 India, $40 regional)
-- [x] 28. PPP pricing — detect country via Vercel `x-vercel-ip-country` header, show localized prices
-- [x] 29. Wire Razorpay webhook to credit user's interview balance in DB
-- [x] 30. Implement freemium tier restrictions:
-  - No advanced report (basic score only, no detailed feedback breakdown)
-  - No advanced persona (default "Tia" only, no FAANG-specific voices)
-  - 5-minute voice trial (instead of a full 45-minute round)
-  - Random easy problem only
-  - Enforce in `/api/interview/start` + setup/dashboard/results UI
+- [ ] Launch targeted-loop prep end to end
+  - Expose generated loops more clearly in the dashboard
+  - Add review workflow for staged historical questions
+  - Turn company + role + JD input into a visible multi-round prep plan, not just a hidden intermediate
 
-## Phase 6: Analytics & Growth
-_Goal: Understand usage, iterate_
+- [ ] Ship System Design beta
+  - Real setup
+  - Real workspace
+  - Real scoring/results flow
 
-- [x] 31. PostHog integration (interview_started, completed, code_run, payment events)
-- [x] 32. Track conversion funnel: landing → signup → first interview → payment
+- [ ] Ship Behavioral beta
+  - Story workspace
+  - Persona-aware prompting
+  - Results and coaching loop
 
-## Phase 7: Onboarding
+- [ ] Start Machine Coding MVP
+  - Decide FE / BE / FS entry points
+  - Define stack selection and scoped prompts
+  - Reuse as much of the targeted-loop architecture as possible
 
-- [x] 33. User onboarding flow — first-time setup wizard (name, target company, experience level, preferred language)
+- [ ] Improve monetization and growth loops
+  - Referral program
+  - Lifecycle email flows through Resend
+  - Public-profile polish and shareability
+  - Continue blog/SEO expansion around interview prep search terms
 
-## Phase 8: Pre-Beta Launch
+## Later
 
-- [x] 34. Problems & Progress pages should be locked for non-paid users
-- [x] 35. Problem bank expansion (70+ problems)
-- [x] 36. Post-interview review prompt — collect user feedback after every interview (rating, what went well, what didn't)
+- [ ] Personalized prep-plan recommendations based on recent interview performance
+- [ ] Better persona calibration by company and level band
+- [ ] System-design diagramming support
+- [ ] Machine-coding multi-file workspace
+- [ ] More robust analytics around activation -> paid conversion -> repeat usage
 
-## Phase 8: Beta Launch (March 30)
+## Already Shipped
 
-- [ ] 37. Sales and Marketing Plan
-- [x] 38. FAANG-specific AI interviewer voices — unique voice persona per company (Google, Meta, Amazon, Apple, Netflix) similar to "Tia", each with distinct personality and interview style
-
-## Phase 9: Voice Upgrade (Deepgram Voice Agent API)
-_Goal: Replace browser APIs with production Deepgram Voice Agent — single WebSocket, built-in STT + LLM + TTS (Tia), function calling for code context_
-
-### 9A. Voice Agent Core Setup
-- [x] 39. Set up Deepgram Voice Agent WebSocket connection
-- [x] 40. Configure agent Settings message:
-  - `agent.listen` → Deepgram Flux STT (`v2`)
-  - `agent.think` → Anthropic Sonnet with interviewer system prompt
-  - `agent.speak` → Deepgram Aura 2 (Tia voice)
-- [x] 41. Stream browser mic audio → Voice Agent WebSocket (replace browser SpeechRecognition)
-- [x] 42. Receive and play agent audio response → browser AudioContext (replace browser SpeechSynthesis)
-- [x] 43. Handle `ConversationText` events to update live transcript UI for both user and AI messages
-
-### 9B. Function Calling — Code Context
-- [x] 44. Define `get_current_code` function in agent.think.functions config — returns Monaco editor content
-- [x] 45. Handle `FunctionCallRequest` (client_side: true) → read `editor.getValue()` → send `FunctionCallResponse` back
-- [x] 46. Define `run_tests` function — executes code via Piston API, returns pass/fail results to agent
-- [x] 47. Define `get_interview_state` function — returns time remaining, hints given, current phase, tests passed
-- [ ] 48. Test: user says "check my code" → agent calls `get_current_code` → responds with code-specific feedback
-
-### 9C. Background Context Injection
-- [x] 49. On every "Run Code" click → inject code + test results via `InjectAgentMessage`
-- [x] 50. Every 60s during coding phase → inject latest code snapshot via `InjectAgentMessage`
-- [x] 51. Refresh interviewer think config when prompt changes via live `UpdateThink`
-- [x] 52. Pass interview phase context (intro → approach → coding → testing → wrapup) through live think updates
-
-### 9D. Voice UX Polish
-- [ ] 53. Barge-in handling — Voice Agent has built-in interruption detection (verify it works with Tia)
-- [x] 54. Wire `AgentStartedSpeaking` / `AgentAudioDone` events → update VoiceVisualizer states (listening/thinking/speaking)
-- [x] 55. Handle `UserStartedSpeaking` event → pause any UI audio, show listening state
-- [ ] 56. Implement WebSocket reconnection on drop — resume with conversation context via `agent.context.messages`
-- [ ] 57. Add fallback: if mic permission denied → show text input, pipe text through `InjectAgentMessage` instead
-
-### 9E. Remove Old Infra
-- [x] 40. ~~Integrate Deepgram Aura 2 for TTS~~ (now handled by Voice Agent)
-- [x] 58. Remove browser SpeechRecognition code
-- [x] 59. Remove browser SpeechSynthesis code
-- [x] 60. Remove Railway voice-server (no longer needed — Voice Agent handles everything)
-- [x] 61. Clean up unused hooks: old `useVoiceInterview` browser API version
-
-## Pre-V1 Launch
-_Ship before going live_
-
-- [ ] Apply production DB migration: `src/lib/db/migrations/0000_add_interviewer_persona.sql` on Supabase (enum + `interviews.interviewer_persona`) after deploy if the column is not live yet
-- [ ] 62. Referral program for influencers — custom referral links, tracking, commission/credit payouts
-
-## Post-V1 Roadmap
-_After launch & initial traction_
-
-- [ ] Additional company interviewer personas (beyond the shipped FAANG-style set)
-- [ ] Problem bank expansion (100+ problems)
-- [ ] Spaced repetition queue
-- [ ] System Design mode (Excalidraw)
-- [ ] Machine Coding (multi-file IDE)
-- [ ] Peer matching (viral loop)
-- [ ] LeaderBoard & Challenges
+- [x] DSA Practice Mode and DSA AI Interview Mode
+- [x] Deepgram Voice Agent integration with tool-calling and text fallback
+- [x] Company-specific interviewer personas
+- [x] Technical Q&A setup, runtime, and results flow
+- [x] Engineering Manager setup, runtime, and results flow
+- [x] Practice library, onboarding, payments, analytics, blog, and public profiles

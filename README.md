@@ -1,81 +1,113 @@
 <p align="center">
-  <strong>TechInView<span>.</span></strong>
+  <strong>TechInView</strong>
 </p>
 
 <p align="center">
-  Voice-powered AI mock interviews for software engineers.
+  Voice-first AI interview prep for software engineers.
   <br />
-  Practice DSA with a real-time AI interviewer, live code editor, and FAANG-calibrated scoring.
+  Practice DSA, simulate realistic mock interviews, and prepare for broader interview loops with persona-aware AI interviewers.
 </p>
 
 <p align="center">
   <a href="https://techinview.dev">Website</a> &middot;
-  <a href="#features">Features</a> &middot;
-  <a href="#tech-stack">Tech Stack</a> &middot;
+  <a href="#what-is-techinview">Overview</a> &middot;
+  <a href="#current-scope">Current Scope</a> &middot;
   <a href="#getting-started">Getting Started</a>
 </p>
 
 ---
 
-## What is TechInView?
+## What Is TechInView?
 
-TechInView is an AI-powered mock interview platform that simulates realistic DSA coding interviews using voice. An AI interviewer named **Tia** speaks with you in real-time while you solve problems in a live code editor — just like a real phone screen.
+TechInView is a voice-first AI interview prep platform for software engineers.
+It started as a DSA mock interview product and is now evolving into a broader
+prep system that covers:
 
-After each interview, a 5-dimension scoring engine evaluates your performance and tells you whether you'd get a Hire or No-Hire, with detailed, actionable feedback.
+- free DSA practice
+- voice-based DSA interviews
+- company-style interviewer personas
+- targeted loop generation from company + role + JD
+- Technical Q&A rounds
+- Engineering Manager / hiring-manager rounds
 
-## Features
+The goal is simple: help candidates practice the interview format they are
+actually about to face, then turn that session into useful feedback and a clear
+next step.
 
-**Voice-First Interview Experience**
-- Real-time speech-to-text (Deepgram Nova-2) and text-to-speech (ElevenLabs) for natural conversation
-- Sub-1.5s voice response latency with sentence-level streaming
-- Interruption handling — start talking and the AI stops immediately
+## Current Scope
 
-**Live Code Editor**
-- Monaco Editor with syntax highlighting, autocompletion, and multi-language support
-- Instant code execution via sandboxed Piston API
-- Supports Python, JavaScript, Java, and C++
+| Area | Status | Notes |
+| --- | --- | --- |
+| DSA Practice Mode | Live | Solo problem solving with saved attempts and test runs |
+| DSA AI Interview Mode | Live | Voice-based coding interview with live editor and scoring |
+| Interviewer personas | Live | `tia`, `google`, `meta`, `amazon`, `apple`, `netflix` |
+| Technical Q&A | Live | Stack-depth, no-code voice interview |
+| Engineering Manager | Live | Leadership, prioritization, and role-fit interview |
+| Targeted loop generation | Live | Company + role + JD -> likely interview loop |
+| Prep Plans | Partial | Generator logic exists; full product surface is still being finished |
+| Behavioral | Beta shell | Placeholder setup exists |
+| System Design | Beta shell | Placeholder setup exists |
+| Machine Coding | Planned shell | Placeholder setup exists |
 
-**FAANG-Calibrated Scoring**
-- 5-dimension evaluation: Problem Solving, Code Quality, Communication, Technical Knowledge, Testing
-- Hire / No-Hire recommendation with score breakdown
-- Full conversation transcript and code diff against optimal solution
+## Highlights
 
-**Structured Interview Flow**
-- 9-phase interview state machine (Intro → Problem → Clarification → Approach → Coding → Testing → Complexity → Follow-up → Wrap-up)
-- AI adapts behavior per phase — pushes back on suboptimal approaches, stays quiet during coding, asks follow-ups when done
+**Voice-first interviews**
+- Deepgram Voice Agent powers the real-time interview loop
+- Mic input, streamed audio responses, interruption handling, and text fallback
+- Company-style personas change tone, probing style, and scoring emphasis
 
-**Progress Tracking**
-- Score trends over time
-- Category heatmap showing strengths and weaknesses
-- Interview history with full replay
+**Multiple interview formats**
+- DSA coding rounds with a live editor
+- Technical Q&A for stack depth, debugging, and tradeoffs
+- Engineering Manager rounds for leadership and execution judgment
+- JD-driven targeted loops that shape likely round sequences
+
+**Practice + simulation**
+- Free DSA practice library
+- AI Interview Mode for realistic pressure
+- Problem history, progress tracking, and result reviews
+
+**Actionable feedback**
+- Scorecards and hire recommendation
+- Transcript-backed review
+- Persona-aware, round-aware evaluation
 
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
+| --- | --- |
 | Framework | Next.js 14 (App Router) |
 | Language | TypeScript |
-| Styling | Tailwind CSS + shadcn/ui |
-| Auth | Supabase Auth (Google + GitHub OAuth) |
-| Database | Supabase PostgreSQL + Drizzle ORM |
-| AI / LLM | Claude Sonnet 4 (Anthropic) |
-| Speech-to-Text | Deepgram Nova-2 (streaming) |
-| Text-to-Speech | ElevenLabs Turbo v2.5 (streaming) |
-| Code Editor | Monaco Editor |
-| Code Execution | Piston API (sandboxed) |
+| Styling | Tailwind CSS |
+| UI | Custom components + Radix primitives |
+| Auth | Supabase Auth |
+| Database | Supabase PostgreSQL |
+| ORM | Drizzle ORM |
+| AI | Anthropic |
+| Voice | Deepgram Voice Agent |
+| Code editor | Monaco Editor |
+| Code execution | Piston API |
 | Payments | Razorpay |
-| Voice Transport | WebSocket + Web Audio API |
-| Deployment | Vercel (frontend) + Railway (WebSocket server) |
+| Analytics | PostHog |
+| Deployment | Vercel |
 
 ## Architecture
 
-```
-Browser Mic → WebSocket → Deepgram STT → Claude LLM → ElevenLabs TTS → WebSocket → Speaker
-                                ↕
-                    Monaco Editor + Piston Code Execution
+```text
+Browser Mic / Speaker
+        |
+        v
+Deepgram Voice Agent
+        |
+        +--> Anthropic prompts + scoring
+        +--> client-side tool calls (current code, tests, interview state)
+        |
+        v
+Interview runtime + Monaco editor + Piston + Supabase
 ```
 
-The voice pipeline streams at every stage — Deepgram returns interim transcripts, Claude streams tokens, and ElevenLabs returns audio chunks at sentence boundaries. This keeps perceived latency under 1.5 seconds.
+For coding rounds, the AI interviewer can inspect current code, run tests, and
+adapt its behavior based on interview phase and round type.
 
 ## Getting Started
 
@@ -83,71 +115,93 @@ The voice pipeline streams at every stage — Deepgram returns interim transcrip
 
 - Node.js 18+
 - pnpm 9+
-- API keys for: Supabase, Anthropic, Deepgram, ElevenLabs, Razorpay
+- Supabase project
+- Anthropic API key
+- Deepgram API key
+- Razorpay credentials if you want to test checkout
 
 ### Setup
 
 ```bash
-# Clone the repo
 git clone https://github.com/Souravdey777/TechInView.git
 cd TechInView
-
-# Install dependencies
 pnpm install
+```
 
-# Configure environment
-cp .env.example .env.local
-# Fill in your API keys in .env.local
+Create `.env.local` with the variables you need for local development:
 
-# Set up the database
+```bash
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+
+ANTHROPIC_API_KEY=...
+DEEPGRAM_API_KEY=...
+
+PISTON_API_URL=https://emkc.org/api/v2/piston
+
+NEXT_PUBLIC_POSTHOG_KEY=...
+NEXT_PUBLIC_POSTHOG_HOST=...
+
+NEXT_PUBLIC_RAZORPAY_KEY_ID=...
+RAZORPAY_KEY_ID=...
+RAZORPAY_KEY_SECRET=...
+RAZORPAY_WEBHOOK_SECRET=...
+
+RESEND_API_KEY=...
+RESEND_FROM_EMAIL=...
+RESEND_REPLY_TO_EMAIL=...
+```
+
+Then run the app:
+
+```bash
 pnpm db:generate
 pnpm db:push
 pnpm seed
-
-# Start the development server
 pnpm dev
 ```
 
-Voice interviews now run through the browser-based Deepgram Voice Agent flow. The app mints a short-lived token from `/api/voice/deepgram-token` and streams audio directly from the interview room.
+Open [http://localhost:3000](http://localhost:3000).
 
-### Scripts
+## Useful Scripts
 
 | Command | Description |
-|---|---|
-| `pnpm dev` | Start Next.js dev server |
-| `pnpm build` | Production build |
+| --- | --- |
+| `pnpm dev` | Start the Next.js dev server |
+| `pnpm build` | Build for production |
+| `pnpm start` | Start the production server |
 | `pnpm lint` | Run ESLint |
 | `pnpm db:generate` | Generate Drizzle migrations |
-| `pnpm db:push` | Push schema to database |
+| `pnpm db:push` | Push schema changes |
 | `pnpm db:studio` | Open Drizzle Studio |
-| `pnpm seed` | Seed DSA problem bank |
+| `pnpm seed` | Seed the DSA problem bank |
+| `pnpm seed:historical-questions` | Import historical question data |
+| `pnpm verify:problems` | Validate seeded problem data |
 
-## Scoring System
+## Notes
 
-| Dimension | Weight | Evaluates |
-|---|---|---|
-| Problem Solving | 30% | Clarification, approach, edge cases |
-| Code Quality | 25% | Readability, naming, idioms |
-| Communication | 20% | Thinking aloud, structured explanations |
-| Technical Knowledge | 15% | Complexity analysis, trade-offs |
-| Testing | 10% | Proactive testing, bug fixing |
+- Voice interviews now run through the browser-based Deepgram Voice Agent flow.
+  The app mints a short-lived token from `/api/voice/deepgram-token`.
+- Python and JavaScript execution are the most complete code-run paths today.
+  Java and C++ are still being finished end to end.
+- If `ANTHROPIC_API_KEY` is missing, local scoring routes can fall back to mock
+  scores instead of crashing. That is useful for development, but not a
+  production substitute.
+- `voice-server/` is legacy leftover material, not the main runtime path.
 
-**Score → Recommendation:** 85-100 Strong Hire, 70-84 Hire, 55-69 Lean Hire, 40-54 Lean No Hire, 0-39 No Hire
+## Roadmap Direction
 
-## Roadmap
-
-- [x] Voice-powered DSA interviews
-- [x] Live code execution (Python, JS, Java, C++)
-- [x] 5-dimension scoring with Hire/No-Hire
-- [ ] Company-specific interviewer personas (Google, Meta, Amazon)
-- [ ] Problem bank expansion (100+ problems)
-- [ ] System Design interview mode
-- [ ] Machine Coding (multi-file IDE)
-- [ ] Peer matching for mock interviews
+- Finish Prep Plans as a first-class product surface
+- Ship full System Design and Behavioral betas
+- Start the Machine Coding MVP
+- Keep expanding targeted-loop prep and role-aware interview coverage
 
 ## License
 
-All rights reserved. &copy; 2024 TechInView.
+All rights reserved. &copy; 2026 TechInView.
 
 ---
 

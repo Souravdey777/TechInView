@@ -1,615 +1,276 @@
-# CLAUDE.md — TechInView.ai
+# CLAUDE.md - TechInView
 
-> Voice-powered AI mock interview platform for software engineers.
-> DSA rounds with real-time voice interaction, live code execution, and FAANG-calibrated scoring.
+_Last refreshed: 2026-04-16_
 
----
+## Product Snapshot
 
-## Project Overview
+TechInView is a voice-first AI interview prep platform for software engineers.
+The repo started as a DSA-only mock interview app and now spans a broader
+multi-round prep surface:
 
-**TechInView.ai** is a solo-built AI mock interview platform that conducts realistic DSA coding interviews using voice. An AI interviewer (named "Tia") speaks with candidates in real-time while they solve problems in a live code editor. Post-interview, a 5-dimension scoring engine evaluates performance and provides actionable feedback.
+- DSA Practice Mode
+- DSA AI Interview Mode
+- company-specific interviewer personas
+- targeted loop generation from company + role + JD
+- Technical Q&A rounds
+- Engineering Manager / hiring-manager rounds
+- prep plans
+- practice history, public profiles, and SEO/content surfaces
 
-**Target users:** Software engineers preparing for FAANG/top-tier tech interviews.
-**V1 scope:** DSA interviews only. Voice-based. Public launch + demand validation.
-**Domain:** techinview.dev
+The core promise is still the same: simulate the interview format candidates
+will actually face, then turn that session into useful feedback and repeatable
+prep.
 
----
+## Current Product State
 
-## Tech Stack
+| Area | Status | Notes |
+| --- | --- | --- |
+| Landing, pricing, SEO, blog | Live | Marketing site, blog, legal pages, and practice index are all in-repo. |
+| DSA Practice Mode | Live | `/practice` + `/practice/[slug]`, persisted attempts, solo coding workflow. |
+| DSA AI Interview Mode | Live | `/interview/setup` -> `/interview/[id]` -> `/results/[id]`. |
+| Interviewer personas | Live | `tia`, `google`, `meta`, `amazon`, `apple`, `netflix`. |
+| Technical Q&A | Live | Dedicated setup, runtime, and results routes exist. |
+| Engineering Manager | Live | Dedicated setup, runtime, and results routes exist. |
+| Targeted loop generation | Live | JD-driven loop generation API and storage are implemented. |
+| Prep plans | Partial | Generator + local persistence exist, but UI still presents the feature as "coming soon". |
+| Public profiles | Live | Username-based public profile routes and profile settings exist. |
+| Behavioral rounds | Beta shell | Setup placeholder exists, full runtime not shipped. |
+| System Design rounds | Beta shell | Setup placeholder exists, full runtime not shipped. |
+| Machine coding rounds | Planned shell | Setup placeholder only. |
 
-| Layer              | Technology                          | Version    |
-|--------------------|-------------------------------------|------------|
-| Framework          | Next.js (App Router)                | 14.x       |
-| Language           | TypeScript                          | 5.x        |
-| Styling            | Tailwind CSS                        | 3.4.x      |
-| UI Components      | shadcn/ui                           | latest     |
-| Auth               | Supabase Auth (Google + GitHub OAuth) | latest   |
-| Database           | Supabase PostgreSQL                 | latest     |
-| ORM                | Drizzle ORM                         | latest     |
-| STT (Speech→Text)  | Deepgram Nova-2 (streaming)         | latest     |
-| LLM (AI Brain)     | Claude Sonnet 4 (Anthropic API)     | claude-sonnet-4-20250514 |
-| TTS (Text→Speech)  | Deepgram Aura 2 (streaming)            | latest     |
-| Code Editor        | Monaco Editor (@monaco-editor/react) | latest    |
-| Code Execution     | Piston API (self-hosted or public)  | latest     |
-| Payments           | Razorpay (Inline Checkout + Webhooks) | latest   |
-| Analytics          | PostHog                             | latest     |
-| Voice Transport    | WebSocket (native) + Web Audio API  | -          |
-| Deployment         | Vercel (frontend + API) + Railway (WebSocket server) | - |
-| Package Manager    | pnpm                                | 9.x        |
+## Source-of-Truth Notes
 
----
+- Prefer the codebase over older docs. `README.md` and `AGENTS.md` still
+  reflect an earlier DSA-only shape in a few places.
+- `voice-server/` is legacy leftover material, not the current primary runtime
+  path. Voice now goes through Deepgram Voice Agent from the Next.js app.
+- Dashboard and prep-plan labels are not fully aligned with what is actually
+  implemented. Trust route/component behavior over marketing chips.
 
-## Project Structure
+## Architecture Truths
 
-```
-techinview/
-├── CLAUDE.md                          # This file — project bible
-├── .env.local                         # Local env vars (NEVER commit)
-├── .env.example                       # Template for env vars
-├── next.config.ts
-├── tailwind.config.ts
-├── tsconfig.json
-├── drizzle.config.ts
-├── package.json
-│
-├── public/
-│   ├── fonts/                         # Self-hosted fonts
-│   ├── images/                        # Static assets
-│   └── sounds/                        # UI sound effects (interview start, timer warning)
-│
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx                 # Root layout: providers, fonts, metadata
-│   │   ├── page.tsx                   # Landing page (marketing)
-│   │   ├── globals.css                # Tailwind base + CSS variables
-│   │   │
-│   │   ├── (auth)/
-│   │   │   ├── login/page.tsx         # Login page
-│   │   │   ├── signup/page.tsx        # Signup page
-│   │   │   └── callback/route.ts      # OAuth callback handler
-│   │   │
-│   │   ├── (dashboard)/
-│   │   │   ├── layout.tsx             # Dashboard layout (sidebar + auth guard)
-│   │   │   ├── dashboard/page.tsx     # Home — recent interviews, quick stats
-│   │   │   ├── problems/page.tsx      # Problem browser with filters
-│   │   │   ├── progress/page.tsx      # Score trends, category heatmap
-│   │   │   └── settings/page.tsx      # Profile, preferences, billing
-│   │   │
-│   │   ├── interview/
-│   │   │   ├── setup/page.tsx         # Pre-interview config (difficulty, language, category)
-│   │   │   └── [id]/page.tsx          # THE interview room (core experience)
-│   │   │
-│   │   ├── results/
-│   │   │   └── [id]/page.tsx          # Post-interview feedback + scoring
-│   │   │
-│   │   └── api/
-│   │       ├── interview/
-│   │       │   ├── start/route.ts     # POST: Create interview session
-│   │       │   ├── complete/route.ts  # POST: Mark interview complete, trigger scoring
-│   │       │   └── run-code/route.ts  # POST: Execute code via Piston
-│   │       │
-│   │       ├── voice/
-│   │       │   └── route.ts           # WebSocket upgrade for voice pipeline
-│   │       │                          # NOTE: If Vercel WS limits hit, move to Railway
-│   │       │
-│   │       ├── scoring/
-│   │       │   └── route.ts           # POST: Run AI scoring on completed interview
-│   │       │
-│   │       ├── payment/
-│   │       │   ├── create-order/route.ts  # POST: Create Razorpay order
-│   │       │   └── verify/route.ts        # POST: Verify Razorpay payment
-│   │       │
-│   │       └── webhooks/
-│   │           └── razorpay/route.ts  # Razorpay webhook handler
-│   │
-│   ├── components/
-│   │   ├── interview/
-│   │   │   ├── InterviewRoom.tsx      # Main split-pane layout orchestrator
-│   │   │   ├── VoicePanel.tsx         # AI avatar + live transcript + voice controls
-│   │   │   ├── CodeEditor.tsx         # Monaco wrapper with language switching
-│   │   │   ├── ProblemPanel.tsx       # Problem statement (collapsible sidebar)
-│   │   │   ├── TestRunner.tsx         # Test case results (pass/fail badges)
-│   │   │   ├── InterviewTimer.tsx     # Countdown timer with warning states
-│   │   │   └── VoiceVisualizer.tsx    # Audio waveform / speaking indicator
-│   │   │
-│   │   ├── results/
-│   │   │   ├── ScoreRadar.tsx         # 5-axis radar chart (recharts)
-│   │   │   ├── ScoreCard.tsx          # Individual dimension score + feedback
-│   │   │   ├── TranscriptReview.tsx   # Timestamped conversation log
-│   │   │   ├── CodeDiff.tsx           # User code vs optimal (diff view)
-│   │   │   └── HireRecommendation.tsx # Hire/No-Hire badge with reasoning
-│   │   │
-│   │   ├── dashboard/
-│   │   │   ├── RecentInterviews.tsx   # Interview history list
-│   │   │   ├── ProgressChart.tsx      # Score over time (line chart)
-│   │   │   ├── CategoryHeatmap.tsx    # Strengths/weaknesses grid
-│   │   │   └── QuickActions.tsx       # "Start Interview" CTA cards
-│   │   │
-│   │   ├── landing/
-│   │   │   ├── Hero.tsx
-│   │   │   ├── Features.tsx
-│   │   │   ├── DemoPreview.tsx        # Animated mock of the interview room
-│   │   │   ├── Pricing.tsx
-│   │   │   └── Testimonials.tsx
-│   │   │
-│   │   └── ui/                        # shadcn/ui components (auto-generated)
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── dialog.tsx
-│   │       └── ...
-│   │
-│   ├── hooks/
-│   │   ├── useDeepgramVoiceAgent.ts   # Browser Deepgram Voice Agent SDK transport + tool calls
-│   │   ├── useInterviewState.ts       # Interview phase state machine
-│   │   ├── useCodeExecution.ts        # Piston API code runner
-│   │   ├── useInterviewTimer.ts       # Countdown with pause/resume
-│   │   ├── useAudioVisualizer.ts      # Waveform data from audio stream
-│   │   └── useSupabase.ts            # Supabase client hook
-│   │
-│   ├── lib/
-│   │   ├── ai/
-│   │   │   ├── interviewer.ts         # Claude system prompts + conversation manager
-│   │   │   ├── scorer.ts             # Post-interview scoring prompts
-│   │   │   ├── prompts.ts            # All prompt templates (centralized)
-│   │   │   └── context-builder.ts    # Build dynamic context from interview state
-│   │   │
-│   │   ├── db/
-│   │   │   ├── schema.ts             # Drizzle schema definitions
-│   │   │   ├── queries.ts            # Typed query helpers
-│   │   │   └── migrations/           # Drizzle migrations
-│   │   │
-│   │   ├── supabase/
-│   │   │   ├── client.ts             # Browser Supabase client
-│   │   │   ├── server.ts             # Server-side Supabase client
-│   │   │   └── middleware.ts          # Auth middleware for protected routes
-│   │   │
-│   │   ├── piston.ts                 # Code execution API client
-│   │   ├── razorpay.ts               # Razorpay helpers
-│   │   ├── utils.ts                  # General utilities
-│   │   └── constants.ts              # App-wide constants
-│   │
-│   ├── types/
-│   │   ├── interview.ts              # Interview, Message, Problem types
-│   │   ├── scoring.ts                # Score dimensions, rubric types
-│   │   ├── voice.ts                  # Voice pipeline types
-│   │   └── database.ts               # DB row types (inferred from Drizzle)
-│   │
-│   └── data/
-│       └── problems/                  # Seed data (JSON files)
-│           ├── _seed.ts               # Seed script runner
-│           ├── two-sum.json
-│           ├── valid-parentheses.json
-│           ├── merge-intervals.json
-│           ├── lru-cache.json
-│           └── ... (20 problems total)
-└── scripts/
-    ├── seed-problems.ts               # Seed problem bank to Supabase
-    └── generate-problem.ts            # AI-assisted problem generation
-```
+### App and platform
 
----
+- Framework: Next.js 14 App Router
+- Language: TypeScript
+- Styling: Tailwind CSS + shadcn/ui-style primitives
+- Auth + data: Supabase
+- ORM/schema: Drizzle
+- Analytics: PostHog
+- Payments: Razorpay
+- Email/lifecycle: Resend hooks exist
+
+### AI and voice
+
+- LLM/scoring: Anthropic via `@anthropic-ai/sdk`
+- Voice transport: Deepgram Voice Agent
+- Token minting: `src/app/api/voice/deepgram-token/route.ts`
+- Core room wiring: `src/components/interview/InterviewRoom.tsx`
+- Voice hook: `src/hooks/useDeepgramVoiceAgent.ts`
+- Text fallback exists in the voice panel for cases where mic access is denied
+  or unsupported.
+
+### Code execution
+
+- DSA code execution goes through Piston via `src/lib/piston.ts` and
+  `src/lib/code-execution.ts`.
+- Python and JavaScript execute end-to-end today.
+- Java and C++ still present in selectors, but execution currently returns a
+  "coming soon" message instead of real runs.
+
+### Scoring
+
+- Scoring entry point: `src/app/api/interview/score/route.ts`
+- Real scoring requires `ANTHROPIC_API_KEY`.
+- If the key is missing, the API intentionally falls back to mock scores so dev
+  flows do not crash. That is useful locally, but should not be treated as
+  production-complete behavior.
+
+## Route Map
+
+### Public routes
+
+- `/` - landing page
+- `/practice` and `/practice/[slug]` - DSA practice surfaces
+- `/blog`, `/blog/[slug]`, `/blog/rss.xml`
+- `/how-ai-evaluates`
+- `/[username]` and `/u/[username]` - public profiles
+- legal pages under `src/app/(legal)`
+
+### Auth routes
+
+- `/login`
+- `/signup`
+- `/onboarding`
+- `/callback`
+
+### Logged-in app routes
+
+- `/dashboard`
+- `/problems`
+- `/progress`
+- `/settings`
+- `/prep-plans`
+
+### Interview flows
+
+- DSA alias: `/interviews/dsa/setup`
+- DSA setup: `/interview/setup`
+- DSA runtime: `/interview/[id]`
+- DSA results: `/results/[id]`
+- Technical Q&A:
+  - `/interviews/technical-qa/setup`
+  - `/interviews/technical-qa/[id]`
+  - `/interviews/technical-qa/results/[id]`
+- Engineering Manager:
+  - `/interviews/engineering-manager/setup`
+  - `/interviews/engineering-manager/[id]`
+  - `/interviews/engineering-manager/results/[id]`
+- Placeholder/beta setup shells:
+  - `/interviews/behavioral/setup`
+  - `/interviews/system-design/setup`
+  - `/interviews/machine-coding/setup`
+
+### Important API routes
+
+- `/api/interview/start`
+- `/api/interview/chat`
+- `/api/interview/run-code`
+- `/api/interview/score`
+- `/api/interview/complete`
+- `/api/interview/feedback`
+- `/api/interview/submit`
+- `/api/voice/deepgram-token`
+- `/api/loops/generate`
+- `/api/jd/parse`
+- `/api/prep-plans/generate`
+- `/api/practice/attempts`
+- `/api/payment/create-order`
+- `/api/payment/verify`
+- `/api/webhooks/razorpay`
+
+## Files That Matter Most
+
+- `src/app/interview/setup/page.tsx`
+  - The central DSA setup experience. Handles Practice vs AI interview, free
+    trial logic, targeted loops, persona selection, and problem selection.
+- `src/components/interview/InterviewRoom.tsx`
+  - The main runtime for coding interviews. Wires Deepgram events, editor
+    state, agent tools, transcript updates, and resume behavior.
+- `src/hooks/useDeepgramVoiceAgent.ts`
+  - Voice Agent transport, event handling, injected context, and function-call
+    handling.
+- `src/app/api/interview/start/route.ts`
+  - Canonical place where interview mode, round type, persona, free-trial
+    rules, and persistence come together.
+- `src/lib/ai/interviewer-system-prompt.ts`
+  - Round-aware prompt generation for voice interviews.
+- `src/lib/ai/scorer.ts`
+  - Interview scoring orchestration.
+- `src/lib/loops/generator.ts`
+  - Company + role + JD -> targeted loop generation.
+- `src/lib/dashboard/prep-plan-generator.ts`
+  - Current heuristic prep-plan builder.
+- `src/hooks/usePrepPlans.ts`
+  - Prep plans are currently localStorage-backed here.
+- `src/lib/db/schema.ts` and `src/lib/db/queries.ts`
+  - Primary data-model and query layer.
+
+## Data Model Summary
+
+The core tables are:
+
+- `profiles`
+  - Auth-adjacent user profile, plan, credits, onboarding fields, and public
+    profile settings.
+- `problems`
+  - DSA catalog, starter code, hidden/public tests, hints, and metadata.
+- `interviews`
+  - Stores every interview session across DSA and targeted-loop round types.
+- `messages`
+  - Transcript log for interview sessions.
+- `generated_loops`
+  - Stored company/role/JD loop summaries.
+- `generated_loop_rounds`
+  - Child rounds for a generated loop.
+- `historical_questions`
+  - Clustered question bank for targeted-loop generation.
+- `progress`
+  - Aggregated DSA progress by category.
+- `practice_attempts`
+  - Solo practice persistence for code + test progress.
+- `interview_feedback`
+  - Post-round user feedback.
+- `payments`
+  - Razorpay capture and credit attribution records.
 
 ## Environment Variables
 
-```bash
-# .env.local
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-
-# Anthropic (Claude)
-ANTHROPIC_API_KEY=sk-ant-...
-
-# Deepgram (STT)
-DEEPGRAM_API_KEY=...
-
-# Deepgram (shared key for both STT and TTS)
-# DEEPGRAM_API_KEY already set above — used for both Nova-2 STT and Aura TTS
-DEEPGRAM_VOICE_MODEL=aura-2-asteria-en   # Pre-selected voice for "Tia"
-
-# Piston (Code Execution)
-PISTON_API_URL=https://emkc.org/api/v2/piston  # Public, or self-hosted URL
-
-# Razorpay
-RAZORPAY_KEY_ID=rzp_...
-RAZORPAY_KEY_SECRET=...
-RAZORPAY_WEBHOOK_SECRET=...
-NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_...
-
-# PostHog
-NEXT_PUBLIC_POSTHOG_KEY=phc_...
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
-
-# Voice Server (Railway)
-NEXT_PUBLIC_VOICE_WS_URL=wss://techinview-voice.up.railway.app
-
-# App
-NEXT_PUBLIC_APP_URL=https://techinview.dev
-```
-
----
-
-## Database Schema (Drizzle ORM)
-
-All tables live in Supabase PostgreSQL. Use Drizzle for type-safe queries.
-
-### Core Tables
-
-**profiles** — extends Supabase auth.users
-- `id` (UUID, PK, references auth.users)
-- `display_name`, `avatar_url`
-- `target_company` (text) — "google", "meta", "amazon", etc.
-- `experience_level` (enum) — "junior", "mid", "senior", "staff"
-- `preferred_language` (text) — "python", "javascript", "java", "cpp"
-- `interview_credits` (int, default 1) — remaining paid interview credits
-- `has_used_free_trial` (boolean, default false)
-- `razorpay_customer_id`
-- `country_code` (text) — for PPP pricing (detected via IP)
-- `interviews_completed` (int, default 0)
-- `created_at`
-
-**problems** — DSA problem bank
-- `id` (UUID, PK)
-- `title`, `slug` (unique)
-- `difficulty` (enum) — "easy", "medium", "hard"
-- `category` (text) — "arrays", "strings", "trees", "graphs", "dp", "linked-lists", "stacks-queues", "binary-search", "heap", "backtracking"
-- `company_tags` (text array)
-- `description` (markdown text)
-- `examples` (JSONB) — `[{input, output, explanation}]`
-- `constraints` (text array)
-- `starter_code` (JSONB) — `{python: "...", javascript: "...", java: "...", cpp: "..."}`
-- `test_cases` (JSONB) — `[{input, expected_output, is_hidden}]`
-- `solution_approach` (text) — for AI interviewer context
-- `hints` (text array) — progressive hints
-- `optimal_complexity` (JSONB) — `{time: "O(n)", space: "O(n)"}`
-- `follow_up_questions` (text array)
-
-**interviews** — session records
-- `id` (UUID, PK)
-- `user_id` (FK → profiles)
-- `problem_id` (FK → problems)
-- `status` (enum) — "in_progress", "completed", "abandoned"
-- `language` (text) — selected coding language
-- `duration_seconds` (int)
-- `max_duration_seconds` (int, default 2700 = 45 min)
-- `final_code` (text)
-- `code_passed_tests` (boolean)
-- `tests_passed` (int), `tests_total` (int)
-- `overall_score` (int, 0-100)
-- `scores` (JSONB) — detailed dimension breakdown
-- `feedback_summary` (text)
-- `hire_recommendation` (enum) — "strong_hire", "hire", "lean_hire", "lean_no_hire", "no_hire"
-- `started_at`, `completed_at`
-
-**messages** — conversation log
-- `id` (UUID, PK)
-- `interview_id` (FK → interviews)
-- `role` (enum) — "interviewer", "candidate", "system"
-- `content` (text)
-- `audio_url` (text, nullable) — stored audio clip URL
-- `timestamp_ms` (int) — ms from interview start
-- `metadata` (JSONB) — `{type: "hint" | "follow_up" | "code_review" | "intro" | "wrap_up"}`
-
-**progress** — aggregated stats per user per category
-- `id` (UUID, PK)
-- `user_id` (FK → profiles)
-- `category` (text)
-- `problems_attempted`, `problems_solved` (int)
-- `avg_score` (float)
-- unique constraint on `(user_id, category)`
-
----
-
-## AI Interviewer Architecture
-
-### Interview State Machine
-
-```
-INTRO → PROBLEM_PRESENTED → CLARIFICATION → APPROACH_DISCUSSION → CODING → TESTING → COMPLEXITY_ANALYSIS → FOLLOW_UP → WRAP_UP
-```
-
-State transitions are managed by `useInterviewState.ts` hook. The AI interviewer receives the current phase as context and adjusts behavior accordingly:
-
-- **INTRO** (0-1 min): AI introduces itself, asks about experience. Keep warm.
-- **PROBLEM_PRESENTED** (1-2 min): AI reads problem aloud, shares on screen.
-- **CLARIFICATION** (2-5 min): Candidate asks questions. AI answers truthfully based on problem constraints.
-- **APPROACH_DISCUSSION** (5-12 min): AI evaluates proposed approach. Pushes back if suboptimal.
-- **CODING** (12-32 min): AI is mostly silent. Short responses only. Watches code via periodic context updates.
-- **TESTING** (32-37 min): AI asks candidate to trace through examples. Points out untested edge cases.
-- **COMPLEXITY_ANALYSIS** (37-40 min): AI asks time/space complexity. Challenges incorrect analysis.
-- **FOLLOW_UP** (40-43 min): If time permits, AI asks a harder variant.
-- **WRAP_UP** (43-45 min): AI summarizes, thanks candidate, ends interview.
-
-### Prompt Engineering Principles
-
-1. **Keep AI responses SHORT during coding phase** — max 1-2 sentences.
-2. **Pass current code as context every 3-4 turns** — not every message (saves tokens).
-3. **Use the solution_approach field** so the AI knows the optimal path and can guide toward it.
-4. **Separate the interviewer prompt from the scorer prompt** — different system prompts, different calls.
-5. **Stream everything** — Claude streaming, Deepgram TTS streaming. Never wait for full responses.
-
-### Context Window Management
-
-Each Claude call includes:
-- System prompt (~800 tokens, static)
-- Problem description + solution approach (~500 tokens, static)
-- Last 10 conversation turns (~2000 tokens, rolling window)
-- Current code snapshot (~500 tokens, updated every 3 turns)
-- Interview state metadata (~100 tokens)
-
-**Total per call: ~4000 tokens input, ~150 tokens output**
-**Estimated 15-20 Claude calls per 45-min interview**
-
----
-
-## Voice Pipeline Architecture
-
-### Flow (Cascaded STT → LLM → TTS)
-
-```
-[Browser Mic]
-    │ MediaRecorder (audio/webm;codecs=opus, 16kHz)
-    │ send binary frames every 100ms
-    ▼
-[WebSocket Server — Railway]
-    │
-    ├──→ [Deepgram Streaming STT]
-    │        Nova-2 model, smart_format, utterance_end_ms=1500
-    │        VAD (Voice Activity Detection) enabled
-    │        Returns interim + final transcripts
-    │
-    │    On final transcript:
-    ├──→ [Claude Streaming API]
-    │        Conversation history + current code + interview state
-    │        max_tokens=300 (keep short for voice)
-    │        Stream response token by token
-    │
-    │    On sentence boundary detected:
-    ├──→ [Deepgram Aura Streaming TTS]
-    │        Aura 2 model (e.g. aura-2-asteria-en), pre-selected "Tia" voice
-    │        Stream audio chunks back immediately
-    │
-    │    Audio chunks:
-    ▼
-[WebSocket → Browser]
-    │ AudioContext → buffer queue → speaker playback
-    │ Interrupt: if user starts speaking, flush queue + stop playback
-    ▼
-[Speaker Output]
-```
-
-### Latency Budget
-
-| Stage                    | Target    | Max Acceptable |
-|--------------------------|-----------|----------------|
-| Mic → Deepgram STT       | 100ms     | 300ms          |
-| Deepgram processing      | 200ms     | 500ms          |
-| Claude first token       | 300ms     | 800ms          |
-| Deepgram TTS first byte  | 200ms     | 500ms          |
-| **Total perceived delay** | **~800ms** | **<2000ms**   |
-
-### Critical Implementation Details
-
-1. **Sentence-level TTS**: Don't wait for Claude's full response. Detect sentence boundaries and send each sentence to Deepgram Aura 2 immediately.
-2. **Interruption handling**: When Deepgram VAD detects user speech, immediately stop TTS playback and flush the audio buffer.
-3. **Silence detection**: If no speech for >90s during CODING phase, AI offers encouragement. If >120s in APPROACH phase, AI offers a hint.
-4. **Echo cancellation**: Enable `echoCancellation: true` in `getUserMedia` constraints.
-5. **Reconnection**: Auto-reconnect WebSocket on drop. Persist state to DB every 30 seconds.
-
----
-
-## Code Execution (Piston API)
-
-### Supported Languages (V1)
-
-| Language   | Piston Runtime | Version |
-|------------|----------------|---------|
-| Python     | python         | 3.12.x  |
-| JavaScript | javascript     | Node 20 |
-| Java       | java           | 21.x    |
-| C++        | cpp            | 17      |
-
-### Execution Flow
-
-1. User clicks "Run Code" or presses `Ctrl+Enter`
-2. Frontend sends `{language, code, stdin}` to `/api/interview/run-code`
-3. Backend calls Piston API with 10s timeout, 256MB memory limit
-4. Return `{stdout, stderr, exit_code, execution_time}`
-5. Compare stdout against test cases
-6. Display pass/fail badges in TestRunner component
-
-### Security
-
-- Piston sandboxed containers — no filesystem, no network
-- 10-second execution timeout
-- 256MB memory limit
-- Rate limit: max 10 executions per minute per user
-
----
-
-## Scoring System
-
-### 5 Dimensions (Weighted)
-
-| Dimension            | Weight | What It Evaluates |
-|----------------------|--------|-------------------|
-| Problem Solving      | 30%    | Clarification, approach selection, edge case handling |
-| Code Quality         | 25%    | Readability, naming, idioms, no unnecessary complexity |
-| Communication        | 20%    | Thinking aloud, structured explanation, response to hints |
-| Technical Knowledge  | 15%    | Complexity analysis, data structure trade-offs |
-| Testing              | 10%    | Proactive testing, edge case identification, bug fixing |
-
-### Hire Recommendation Mapping
-
-| Score Range | Recommendation |
-|-------------|----------------|
-| 85-100      | Strong Hire    |
-| 70-84       | Hire           |
-| 55-69       | Lean Hire      |
-| 40-54       | Lean No Hire   |
-| 0-39        | No Hire        |
-
----
-
-## Coding Conventions
-
-### TypeScript
-- Strict mode enabled (`"strict": true`)
-- Use `type` over `interface` for object shapes
-- No `any` — use `unknown` with type guards
-- Barrel exports from feature directories
-
-### React / Next.js
-- Server Components by default. `"use client"` only when needed.
-- Use `loading.tsx` and `error.tsx` for every route segment
-- Prefer server actions for mutations where applicable
-- Use `Suspense` boundaries for data fetching
-
-### Naming
-- Files: `kebab-case.ts` for utilities, `PascalCase.tsx` for components
-- Variables/functions: `camelCase`
-- Types: `PascalCase`
-- Constants: `SCREAMING_SNAKE_CASE`
-- DB columns: `snake_case`
-
-### Styling
-- Tailwind utility classes only — no custom CSS except `globals.css`
-- Use `cn()` helper (from shadcn) for conditional classes
-- Dark theme by default. No light theme in V1.
-
-### Color Palette (Brand)
-
-```css
---bg-deep: #07080a;
---bg-surface: #0d1017;
---bg-card: #111820;
---border: #1a2332;
---text-primary: #e2e8f0;
---text-secondary: #7a8ba3;
---accent-primary: #22d3ee;     /* Cyan — brand color */
---accent-secondary: #34d399;   /* Green — success */
---accent-warning: #fbbf24;     /* Amber */
---accent-danger: #f472b6;      /* Rose */
-```
-
-### Error Handling
-- API routes: always return `{ success: boolean, data?: T, error?: string }`
-- `try/catch` on every external API call
-- Voice pipeline errors: fall back to text input gracefully
-- Toast notifications for user-facing errors
-
-### Commit Convention
-```
-feat: add voice pipeline with Deepgram STT
-fix: handle WebSocket reconnection on network drop
-ui: interview room split-pane layout
-data: seed 20 DSA problems
-perf: sentence-level TTS streaming
-deploy: Railway voice server config
-```
-
----
-
-## Development Workflow
-
-### Setup
-```bash
-pnpm install
-cp .env.example .env.local
-pnpm db:generate
-pnpm db:push
-pnpm seed
-pnpm dev                              # port 3000
-```
-
-### Scripts
-```json
-{
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "next lint",
-  "db:generate": "drizzle-kit generate",
-  "db:push": "drizzle-kit push",
-  "db:studio": "drizzle-kit studio",
-  "seed": "tsx scripts/seed-problems.ts"
-}
-```
-
-### Branch Strategy
-- `main` — production (auto-deploys to Vercel)
-- `dev` — working branch
-- Direct push to `dev`, merge to `main` for deploys
-
----
-
-## API Routes
-
-| Method | Path                       | Description                         |
-|--------|----------------------------|-------------------------------------|
-| POST   | `/api/interview/start`     | Create session, return problem data |
-| POST   | `/api/interview/run-code`  | Execute code via Piston             |
-| POST   | `/api/interview/complete`  | End interview, trigger scoring      |
-| POST   | `/api/scoring`             | Run AI scoring (async)              |
-| POST   | `/api/voice/deepgram-token`| Mint short-lived Deepgram Voice Agent token |
-| POST   | `/api/payment/create-order`| Create Razorpay order               |
-| POST   | `/api/payment/verify`      | Verify Razorpay payment             |
-| POST   | `/api/webhooks/razorpay`   | Razorpay payment webhooks           |
-
----
-
-## Deployment
-
-### Vercel (Frontend + API)
-- GitHub auto-deploy on push to `main`
-- Edge Runtime for voice route if needed
-- Browser clients stream directly to Deepgram Voice Agent using short-lived tokens from `/api/voice/deepgram-token`
-- ISR for landing page (revalidate: 3600)
-
-### Supabase
-- Free tier: 500MB DB, 1GB storage
-- RLS enabled on all tables
-
----
-
-## Performance Targets
-
-| Metric                        | Target      |
-|-------------------------------|-------------|
-| Landing page LCP              | < 1.5s      |
-| Interview room TTI            | < 3s        |
-| Voice response latency        | < 1.5s      |
-| Code execution round-trip     | < 3s        |
-| Lighthouse score (landing)    | > 90        |
-
----
-
-## V1 Launch Checklist
-
-- [ ] 20 DSA problems seeded (5 easy, 10 medium, 5 hard)
-- [ ] Voice pipeline working: Chrome + Safari
-- [ ] Code execution: Python + JavaScript minimum
-- [ ] Scoring generates valid results
-- [ ] Razorpay checkout for interview packs (1 interview $19 / ₹799, 3-pack $49 / ₹1,999, 6-pack $89 / ₹3,699) with PPP pricing
-- [ ] Landing page with demo video/GIF
-- [ ] Error boundaries on every route
-- [ ] PostHog tracking (interview_started, completed, code_run, payment)
-- [ ] Mobile-responsive landing (interview room = desktop-only)
-- [ ] OG images for social sharing
-- [ ] 404 and error pages styled
-
----
-
-## Post-V1 Roadmap
-
-| Phase | Feature                              | Timeline  |
-|-------|--------------------------------------|-----------|
-| 2     | Company-specific interviewer personas | Week 3-5  |
-| 2     | Problem bank expansion (100+)        | Week 3-5  |
-| 2     | Spaced repetition queue              | Week 3-5  |
-| 3     | System Design mode (Excalidraw)      | Week 6-8  |
-| 4     | Machine Coding (multi-file IDE)      | Week 9-11 |
-| 5     | Full interview loop simulation       | Week 12+  |
-| 5     | Peer matching (viral loop)           | Week 12+  |
+### Required for core local development
+
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SECRET_KEY` for privileged server work
+- `ANTHROPIC_API_KEY`
+- `DEEPGRAM_API_KEY`
+- `PISTON_API_URL`
+- `NEXT_PUBLIC_POSTHOG_KEY`
+- `NEXT_PUBLIC_POSTHOG_HOST`
+- `NEXT_PUBLIC_RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `RAZORPAY_WEBHOOK_SECRET`
+
+### Optional / secondary
+
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
+- `RESEND_REPLY_TO_EMAIL`
+- `DATABASE_URL` for direct DB scripts and migrations outside the normal app flow
+
+## Product Guardrails
+
+- Do not treat TechInView as DSA-only anymore. New work should fit the
+  multi-round product shape.
+- Do not assume all rounds share the same runtime. Coding rounds, Technical
+  Q&A, and Engineering Manager have different context builders and expectations.
+- Keep voice-first behavior as the default experience. Text input is a fallback,
+  not the main path.
+- If you touch round availability, update both route-level setup pages and any
+  status/config surfaces like `src/lib/dashboard/models.ts`.
+- If you touch prep plans, remember the current storage model is client-side.
+  Do not accidentally document or code against a DB-backed prep-plan system
+  unless you build it.
+- If you add a new round type, expect to update constants, setup UI, prompts,
+  results routing, storage schema, and dashboard modeling together.
+
+## Known Gaps and Sharp Edges
+
+- `src/components/prep-plans/PrepPlansIndex.tsx` and
+  `src/components/prep-plans/PrepPlanBuilder.tsx` still present Prep Plans as
+  "coming soon" even though the generator and local storage hooks exist.
+- `src/lib/dashboard/models.ts` still marks several surfaces as
+  `coming_soon` even though Technical Q&A and Engineering Manager routes are
+  implemented.
+- `src/app/api/interview/submit/route.ts` is still a stub.
+- Java and C++ execution are not fully supported in practice mode / code run.
+- Behavioral, System Design, and Machine Coding are not full end-to-end
+  interview products yet.
+- Production health still depends on env completeness:
+  missing Anthropic key -> mock scoring,
+  missing Deepgram key -> no voice token,
+  missing Razorpay keys -> no checkout.
+
+## Practical Advice For Future Work
+
+- Start with `src/app/api/interview/start/route.ts` when debugging why a round
+  launches with the wrong mode, persona, duration, or gating behavior.
+- Start with `src/components/interview/InterviewRoom.tsx` when debugging runtime
+  voice, code, or tool-call issues.
+- Start with `src/lib/dashboard/models.ts` when dashboard cards and route
+  availability do not match.
+- Start with `src/hooks/usePrepPlans.ts` and
+  `src/lib/dashboard/prep-plan-generator.ts` for any prep-plan work.
+- Start with `src/lib/db/schema.ts` + migrations before adding any new persisted
+  round metadata.
