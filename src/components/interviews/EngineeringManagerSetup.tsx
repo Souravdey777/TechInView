@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   ArrowRight,
   BriefcaseBusiness,
   Building2,
@@ -14,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   DEFAULT_INTERVIEWER_PERSONA,
@@ -156,16 +156,12 @@ export function EngineeringManagerSetup({
 
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text">
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
-
-        <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <SetupPageHeader
+        containerClassName="max-w-6xl"
+        supportingText="Engineering Manager Interview Setup"
+      />
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="rounded-3xl border border-brand-border bg-brand-card p-7 sm:p-8">
             <div className="flex flex-wrap items-center gap-3">
               <span className="rounded-full border border-brand-green/25 bg-brand-green/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-green">

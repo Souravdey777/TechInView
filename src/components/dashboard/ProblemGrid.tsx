@@ -95,9 +95,9 @@ export function ProblemGrid({ problems }: ProblemGridProps) {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-brand-card rounded-xl border border-brand-border">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-brand-border bg-brand-card p-4">
         {/* Search */}
-        <div className="relative flex-1 min-w-48">
+        <div className="relative basis-full min-w-0 sm:flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
           <input
             type="text"
@@ -109,7 +109,7 @@ export function ProblemGrid({ problems }: ProblemGridProps) {
         </div>
 
         {/* Difficulty Filter */}
-        <div className="flex gap-1.5">
+        <div className="flex w-full flex-wrap gap-1.5 sm:w-auto">
           {(["all", "easy", "medium", "hard"] as const).map((d) => (
             <button
               key={d}
@@ -136,7 +136,7 @@ export function ProblemGrid({ problems }: ProblemGridProps) {
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="pl-3 pr-8 py-2 bg-brand-surface border border-brand-border rounded-lg text-brand-text text-sm appearance-none focus:outline-none focus:border-brand-cyan/50"
+          className="w-full appearance-none rounded-lg border border-brand-border bg-brand-surface pl-3 pr-8 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-cyan/50 sm:w-auto"
         >
           <option value="all">All Categories</option>
           {PROBLEM_CATEGORIES.map((cat) => (

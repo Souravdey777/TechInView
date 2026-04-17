@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { Sidebar } from "@/components/shared/Sidebar";
+import { MobileAppNav, Sidebar } from "@/components/shared/Sidebar";
 import {
   CREDIT_PACKS,
   getDisplayPricingKey,
@@ -31,14 +31,14 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-screen bg-brand-deep">
-      {/* Sidebar — hidden on mobile, visible on lg+ */}
+      <MobileAppNav userEmail={userEmail} startingPrice={startingPrice} />
+
       <div className="hidden lg:block">
         <Sidebar userEmail={userEmail} startingPrice={startingPrice} />
       </div>
 
-      {/* Main content area */}
       <main className="lg:ml-64 min-h-screen bg-brand-deep">
-        <div className="p-6">{children}</div>
+        <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">{children}</div>
       </main>
     </div>
   );

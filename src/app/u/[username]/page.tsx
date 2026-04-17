@@ -170,7 +170,7 @@ export default async function PublicProfilePage({
   return (
     <div className="min-h-screen bg-brand-deep">
       <header className="border-b border-brand-border/80 bg-brand-deep/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <Link href="/" className="inline-flex items-center gap-3 text-brand-text">
             <BrandLogo size="sm" wordmarkClassName="text-base" />
           </Link>
@@ -184,9 +184,9 @@ export default async function PublicProfilePage({
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12">
+      <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6">
         <section className="overflow-hidden rounded-3xl border border-brand-border bg-gradient-to-br from-brand-card via-brand-surface to-brand-deep">
-          <div className="grid gap-8 px-6 py-8 md:grid-cols-[minmax(0,1fr)_280px] md:px-8 md:py-10">
+          <div className="grid gap-8 px-5 py-6 sm:px-6 sm:py-8 md:grid-cols-[minmax(0,1fr)_280px] md:px-8 md:py-10">
             <div className="space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-brand-cyan/20 bg-brand-cyan/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -257,7 +257,7 @@ export default async function PublicProfilePage({
               ) : null}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 self-start">
+            <div className="grid grid-cols-1 gap-3 self-start sm:grid-cols-2">
               <div className="rounded-2xl border border-brand-border bg-brand-card p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">
                   Interviews completed

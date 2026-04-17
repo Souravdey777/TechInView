@@ -71,7 +71,7 @@ export default async function SettingsPage() {
   const appUrl = resolveAppUrl(headersList);
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
+    <div className="mx-auto max-w-4xl space-y-6 animate-fade-in sm:space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold font-heading text-brand-text mb-1">
@@ -84,7 +84,7 @@ export default async function SettingsPage() {
 
       {/* Profile Section */}
       <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-border">
+        <div className="flex items-center gap-3 border-b border-brand-border px-5 py-4 sm:px-6">
           <User className="w-4 h-4 text-brand-cyan" />
           <h2 className="text-sm font-semibold text-brand-text">Profile</h2>
         </div>
@@ -106,15 +106,15 @@ export default async function SettingsPage() {
 
       {/* Interview Packs Section */}
       <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-border">
+        <div className="flex items-center gap-3 border-b border-brand-border px-5 py-4 sm:px-6">
           <Ticket className="w-4 h-4 text-brand-cyan" />
           <h2 className="text-sm font-semibold text-brand-text">
             Interview Packs
           </h2>
         </div>
-        <div className="p-6 space-y-5">
+        <div className="space-y-5 p-5 sm:p-6">
           {/* Credits balance */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-brand-muted text-sm">Available AI interview credits</p>
               <p className="text-xs text-brand-muted mt-0.5">
@@ -194,11 +194,11 @@ export default async function SettingsPage() {
       </section>
 
       <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-border">
+        <div className="flex items-center gap-3 border-b border-brand-border px-5 py-4 sm:px-6">
           <LifeBuoy className="w-4 h-4 text-brand-cyan" />
           <h2 className="text-sm font-semibold text-brand-text">Support</h2>
         </div>
-        <div className="p-6 space-y-4">
+        <div className="space-y-4 p-5 sm:p-6">
           <div>
             <p className="text-sm font-medium text-brand-text">
               Need help with billing, credits, account access, or privacy?
@@ -252,13 +252,13 @@ export default async function SettingsPage() {
 
       {/* Danger Zone */}
       <section className="bg-brand-card rounded-xl border border-brand-rose/20 overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-rose/20">
+        <div className="flex items-center gap-3 border-b border-brand-rose/20 px-5 py-4 sm:px-6">
           <AlertTriangle className="w-4 h-4 text-brand-rose" />
           <h2 className="text-sm font-semibold text-brand-rose">
             Danger Zone
           </h2>
         </div>
-        <div className="p-6 flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
           <div>
             <p className="text-brand-text text-sm font-medium mb-1">
               Delete Account

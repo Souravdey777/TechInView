@@ -79,7 +79,7 @@ export function TranscriptReview({
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <ScrollText className="h-4 w-4 text-brand-cyan" />
             Interview Transcript
@@ -91,7 +91,7 @@ export function TranscriptReview({
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="max-h-[500px] overflow-y-auto px-6 pb-6 space-y-3 scrollbar-thin">
+        <div className="max-h-[500px] space-y-3 overflow-y-auto px-4 pb-4 scrollbar-thin sm:px-6 sm:pb-6">
           {messages.map((msg, index) => {
             const config = getRoleConfig(msg.role, interviewerName);
             const { Icon } = config;
@@ -131,7 +131,7 @@ export function TranscriptReview({
                 {/* Message bubble */}
                 <div
                   className={cn(
-                    "flex flex-col gap-1 max-w-[75%]",
+                    "flex max-w-[88%] flex-col gap-1 sm:max-w-[75%]",
                     isCandidate && "items-end"
                   )}
                 >
@@ -158,7 +158,7 @@ export function TranscriptReview({
                   {/* Bubble */}
                   <div
                     className={cn(
-                      "rounded-xl px-4 py-3 text-sm text-brand-text leading-relaxed",
+                      "rounded-xl px-3 py-3 text-sm leading-relaxed text-brand-text sm:px-4",
                       config.bubbleClass
                     )}
                   >

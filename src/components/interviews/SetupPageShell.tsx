@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Clock3, Sparkles } from "lucide-react";
+import { ArrowRight, Clock3, Sparkles } from "lucide-react";
+import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -34,16 +35,12 @@ export function SetupPageShell({
 }: SetupPageShellProps) {
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text">
-      <div className="mx-auto max-w-4xl px-6 py-10">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
-
-        <div className="mt-8 rounded-3xl border border-brand-border bg-brand-card p-7 sm:p-8">
+      <SetupPageHeader
+        containerClassName="max-w-4xl"
+        supportingText={contextLabel ?? "Dedicated interview setup"}
+      />
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+        <div className="rounded-3xl border border-brand-border bg-brand-card p-7 sm:p-8">
           <div className="flex flex-wrap items-center gap-3">
             <span
               className={cn(

@@ -105,12 +105,12 @@ function TestRow({
       </div>
 
       {/* Detail rows */}
-      <div className="grid grid-cols-2 gap-2 px-3 py-2">
+      <div className="grid grid-cols-1 gap-2 px-3 py-2 sm:grid-cols-2">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-muted">
             Input
           </p>
-          <pre className="mt-0.5 truncate font-mono text-xs text-brand-text">
+          <pre className="mt-0.5 overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs text-brand-text">
             {result.input}
           </pre>
         </div>
@@ -118,18 +118,18 @@ function TestRow({
           <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-muted">
             Expected
           </p>
-          <pre className="mt-0.5 truncate font-mono text-xs text-brand-cyan">
+          <pre className="mt-0.5 overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs text-brand-cyan">
             {result.expected}
           </pre>
         </div>
         {result.actual !== undefined && (
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-muted">
               Your Output
             </p>
             <pre
               className={cn(
-                "mt-0.5 truncate font-mono text-xs",
+                "mt-0.5 overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs",
                 result.passed ? "text-brand-green" : "text-brand-rose"
               )}
             >
@@ -152,7 +152,7 @@ export function TestRunner({ testResults, isRunning }: TestRunnerProps) {
   return (
     <div className="flex h-full flex-col bg-brand-card border-t border-brand-border">
       {/* Summary bar */}
-      <div className="flex items-center justify-between border-b border-brand-border px-4 py-2.5">
+      <div className="flex flex-col gap-2 border-b border-brand-border px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="text-xs font-semibold text-brand-text">
             Test Results

@@ -48,7 +48,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-deep flex items-center justify-center px-6">
+    <div className="min-h-screen bg-brand-deep flex items-center justify-center px-4 py-8 sm:px-6">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 flex items-center justify-center">
@@ -56,7 +56,7 @@ export default function SignupPage() {
         </div>
 
         {/* Card */}
-        <div className="glass-card p-8">
+        <div className="glass-card p-6 sm:p-8">
           <h1 className="text-xl font-bold text-brand-text text-center mb-2">
             Create your account
           </h1>

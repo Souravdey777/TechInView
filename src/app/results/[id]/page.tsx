@@ -389,7 +389,7 @@ export default function ResultsPage() {
       <div className="relative z-10 max-w-5xl mx-auto py-8 px-4">
 
         {/* Top nav */}
-        <div className="flex items-center justify-between mb-8 r-anim-1">
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between r-anim-1">
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 text-sm text-brand-muted hover:text-brand-text transition-colors group"
@@ -397,7 +397,7 @@ export default function ResultsPage() {
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
             Back to Dashboard
           </Link>
-          <span className="text-xs text-brand-muted bg-brand-surface border border-brand-border px-3 py-1 rounded-full">
+          <span className="self-start rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted sm:self-auto">
             {sessionMeta}
           </span>
         </div>
@@ -479,7 +479,7 @@ export default function ResultsPage() {
         {/* ── Audio preview upgrade CTA (shown instead of detailed sections) ── */}
         {isFreeTrial && hasScores && (
           <section className="mb-6 r-anim-4">
-            <div className="rounded-xl border border-brand-cyan/30 bg-gradient-to-br from-brand-cyan/5 to-brand-card p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="flex flex-col items-start gap-5 rounded-xl border border-brand-cyan/30 bg-gradient-to-br from-brand-cyan/5 to-brand-card p-6 sm:flex-row sm:items-center">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-cyan/10 border border-brand-cyan/20">
                 <Sparkles className="h-6 w-6 text-brand-cyan" />
               </div>

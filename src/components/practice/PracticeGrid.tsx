@@ -83,8 +83,8 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
   return (
     <section>
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-brand-card rounded-xl border border-brand-border mb-6">
-        <div className="relative flex-1 min-w-48">
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-brand-border bg-brand-card p-4">
+        <div className="relative basis-full min-w-0 sm:flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
           <input
             type="text"
@@ -101,7 +101,7 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
               setDifficulty(e.target.value as DifficultyLevel | "all")
             }
             style={{ colorScheme: "dark" }}
-            className="appearance-none pl-3 pr-8 py-2 rounded-lg bg-brand-surface border border-brand-border text-sm text-brand-text focus:outline-none focus:border-brand-cyan/50 transition-colors cursor-pointer"
+            className="w-full cursor-pointer appearance-none rounded-lg border border-brand-border bg-brand-surface pl-3 pr-8 py-2 text-sm text-brand-text transition-colors focus:outline-none focus:border-brand-cyan/50 sm:w-auto"
           >
             <option value="all">All Difficulties</option>
             <option value="easy">Easy</option>
@@ -115,7 +115,7 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{ colorScheme: "dark" }}
-            className="appearance-none pl-3 pr-8 py-2 rounded-lg bg-brand-surface border border-brand-border text-sm text-brand-text focus:outline-none focus:border-brand-cyan/50 transition-colors cursor-pointer"
+            className="w-full cursor-pointer appearance-none rounded-lg border border-brand-border bg-brand-surface pl-3 pr-8 py-2 text-sm text-brand-text transition-colors focus:outline-none focus:border-brand-cyan/50 sm:w-auto"
           >
             <option value="all">All Categories</option>
             {PROBLEM_CATEGORIES.map((cat) => (

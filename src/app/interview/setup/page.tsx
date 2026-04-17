@@ -47,8 +47,8 @@ import {
   buildLoopStartPayload,
 } from "@/lib/loops/generator";
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
-import { BrandLogo } from "@/components/shared/BrandLogo";
 import { DsaExperienceToggle } from "@/components/dsa/DsaExperienceToggle";
+import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
 import type {
   GeneratedLoop,
   GeneratedLoopRound,
@@ -187,7 +187,7 @@ function SectionCard({
   return (
     <div
       className={cn(
-        "rounded-xl border border-brand-border bg-brand-card p-6",
+        "rounded-xl border border-brand-border bg-brand-card p-5 sm:p-6",
         className
       )}
     >
@@ -342,12 +342,11 @@ export default function InterviewSetupPage() {
 function SetupSkeleton() {
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text">
-      <div className="border-b border-brand-border bg-brand-surface">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <BrandLogo size="sm" wordmarkClassName="text-base" />
-        </div>
-      </div>
-      <div className="mx-auto max-w-3xl space-y-6 px-6 py-10">
+      <SetupPageHeader
+        containerClassName="max-w-3xl"
+        supportingText="DSA Practice + AI Interviews"
+      />
+      <div className="mx-auto max-w-3xl space-y-6 px-4 py-10 sm:px-6">
         <div className="h-8 w-56 animate-pulse rounded-lg bg-brand-card" />
         <div className="h-40 animate-pulse rounded-xl bg-brand-card" />
         <div className="h-24 animate-pulse rounded-xl bg-brand-card" />
@@ -922,15 +921,13 @@ function InterviewSetupInner() {
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text">
       {/* Header */}
-      <div className="border-b border-brand-border bg-brand-surface">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <BrandLogo size="sm" wordmarkClassName="text-base" />
-          <span className="text-sm text-brand-muted">DSA Practice + AI Interviews</span>
-        </div>
-      </div>
+      <SetupPageHeader
+        containerClassName="max-w-3xl"
+        supportingText="DSA Practice + AI Interviews"
+      />
 
       {/* Body */}
-      <div className="mx-auto max-w-3xl space-y-6 px-6 py-10">
+      <div className="mx-auto max-w-3xl space-y-6 px-4 py-10 sm:px-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-brand-text">
             Set Up Your DSA Session
@@ -1310,12 +1307,12 @@ function InterviewSetupInner() {
         {/* 1 – Problem Selection */}
         <SectionCard title="Problem Selection">
           {/* Mode toggle */}
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             {/* Random option */}
             <button
               onClick={() => setProblemMode("random")}
               className={cn(
-                "flex flex-1 items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150",
+                "flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150 sm:flex-1 sm:items-center",
                 problemMode === "random"
                   ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
                   : "border-brand-border hover:border-brand-subtle"
@@ -1333,13 +1330,13 @@ function InterviewSetupInner() {
                   <div className="h-2 w-2 rounded-full bg-brand-deep" />
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-start gap-2 sm:items-center">
                 <Shuffle className="h-4 w-4 text-brand-cyan" />
                 <span className="text-sm font-medium text-brand-text">
                   Random Problem
                 </span>
               </div>
-              <span className="ml-auto text-xs text-brand-muted">
+              <span className="text-xs text-brand-muted sm:ml-auto sm:text-right">
                 Recommended
               </span>
             </button>
@@ -1349,7 +1346,7 @@ function InterviewSetupInner() {
               onClick={() => !isPreviewSession && setProblemMode("specific")}
               disabled={isPreviewSession}
               className={cn(
-                "flex flex-1 items-center gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150",
+                "flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150 sm:flex-1 sm:items-center",
                 isPreviewSession && "opacity-50 cursor-not-allowed",
                 problemMode === "specific"
                   ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
@@ -1368,7 +1365,7 @@ function InterviewSetupInner() {
                   <div className="h-2 w-2 rounded-full bg-brand-deep" />
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-start gap-2 sm:items-center">
                 <BookOpen className="h-4 w-4 text-brand-cyan" />
                 <span className="text-sm font-medium text-brand-text">
                   Choose Specific

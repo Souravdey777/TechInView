@@ -144,7 +144,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-deep flex items-center justify-center px-6">
+    <div className="min-h-screen bg-brand-deep flex items-center justify-center px-4 py-8 sm:px-6">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex items-center justify-center">
@@ -152,7 +152,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Progress */}
-        <div className="flex items-center justify-center gap-2 mb-8">
+        <div className="mb-6 flex items-center justify-center gap-1.5 sm:mb-8 sm:gap-2">
           {STEPS.map((s, i) => {
             const Icon = s.icon;
             const isActive = i === step;
@@ -162,6 +162,7 @@ export default function OnboardingPage() {
                 <div
                   className={cn(
                     "flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all duration-300",
+                    "sm:w-9 sm:h-9 w-8 h-8",
                     isActive
                       ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan"
                       : isDone
@@ -174,7 +175,7 @@ export default function OnboardingPage() {
                 {i < STEPS.length - 1 && (
                   <div
                     className={cn(
-                      "w-8 h-0.5 rounded-full transition-colors duration-300",
+                      "h-0.5 w-5 rounded-full transition-colors duration-300 sm:w-8",
                       isDone ? "bg-brand-green" : "bg-brand-border"
                     )}
                   />
@@ -185,7 +186,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Card */}
-        <div className="glass-card p-8">
+        <div className="glass-card p-6 sm:p-8">
           {/* Step 0: Display Name */}
           {step === 0 && (
             <div className="space-y-6">
@@ -262,7 +263,7 @@ export default function OnboardingPage() {
                   This helps us calibrate interview difficulty and preselect the right persona.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {EXPERIENCE_LEVELS.map((level) => {
                   const isSelected = experienceLevel === level.value;
                   return (
@@ -297,7 +298,7 @@ export default function OnboardingPage() {
                   Pick your go-to language for coding interviews.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {LANGUAGES.map((lang) => {
                   const isSelected = preferredLanguage === lang.value;
                   return (
@@ -329,12 +330,12 @@ export default function OnboardingPage() {
           )}
 
           {/* Navigation */}
-          <div className="mt-8 flex items-center gap-3">
+          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
             {step > 0 && (
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-brand-border text-brand-muted text-sm font-medium hover:text-brand-text hover:border-brand-subtle transition-colors"
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-brand-border px-4 py-2.5 text-sm font-medium text-brand-muted transition-colors hover:border-brand-subtle hover:text-brand-text sm:w-auto"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back
@@ -345,7 +346,7 @@ export default function OnboardingPage() {
               onClick={handleNext}
               disabled={!canContinue() || isSaving}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all",
+                "flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all sm:flex-1",
                 canContinue() && !isSaving
                   ? "bg-brand-cyan text-brand-deep hover:opacity-90"
                   : "bg-brand-border text-brand-muted cursor-not-allowed"

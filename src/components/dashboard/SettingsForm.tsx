@@ -201,7 +201,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
   };
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5 p-5 sm:p-6">
       {/* Display Name */}
       <div className="space-y-1.5">
         <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
@@ -260,7 +260,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
         <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
           Experience Level
         </label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {EXPERIENCE_LEVELS.map((level) => {
             const isSelected = experienceLevel === level.value;
             return (
@@ -324,7 +324,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
       </div>
 
       <div className="space-y-4 rounded-xl border border-brand-border bg-brand-surface/60 p-4">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
             <label className="block text-brand-text text-sm font-semibold">
               Public Profile
@@ -475,7 +475,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
       </div>
 
       {/* Save Button */}
-      <div className="pt-2 flex items-center gap-3">
+      <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row sm:items-center">
         <button
           type="button"
           onClick={handleSave}

@@ -256,12 +256,13 @@ export function PracticeSolverWorkspace({
               Solve on your own, run tests whenever you want, and switch to AI Interview Mode when you want pressure and feedback.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
             <Button
               type="button"
               variant="secondary"
               onClick={handleRunCode}
               disabled={isRunning}
+              className="w-full sm:w-auto"
             >
               {isRunning ? (
                 <>
@@ -275,7 +276,7 @@ export function PracticeSolverWorkspace({
                 </>
               )}
             </Button>
-            <Button type="button" onClick={handleUpgradeClick}>
+            <Button type="button" onClick={handleUpgradeClick} className="w-full sm:w-auto">
               Try 5-Minute Audio Interview
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -311,8 +312,8 @@ export function PracticeSolverWorkspace({
             </div>
 
             <div className="rounded-2xl border border-brand-border bg-brand-card">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand-border px-4 py-3">
-                <div className="flex items-center gap-3 text-xs text-brand-muted">
+              <div className="flex flex-col gap-3 border-b border-brand-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-brand-muted">
                   <span className="inline-flex items-center gap-1.5">
                     <Save className="h-3.5 w-3.5" />
                     {saveLabel}
@@ -337,7 +338,7 @@ export function PracticeSolverWorkspace({
                   Open in AI Interview Mode
                 </Link>
               </div>
-              <div className="h-[28rem] overflow-hidden">
+              <div className="h-[22rem] overflow-hidden sm:h-[28rem]">
                 <CodeEditor
                   language={language}
                   value={currentCode}
@@ -348,7 +349,7 @@ export function PracticeSolverWorkspace({
               </div>
             </div>
 
-            <div className="h-[18rem] overflow-hidden rounded-2xl border border-brand-border bg-brand-card">
+            <div className="min-h-[16rem] overflow-hidden rounded-2xl border border-brand-border bg-brand-card sm:h-[18rem]">
               <TestRunner testResults={testResults} isRunning={isRunning} />
             </div>
 

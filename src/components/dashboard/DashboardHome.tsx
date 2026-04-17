@@ -277,7 +277,7 @@ function ActivityRow({ item }: { item: DashboardActivityItem }) {
   return (
     <Link
       href={item.href}
-      className="flex items-center gap-4 rounded-xl border border-brand-border bg-brand-card px-4 py-4 transition-colors hover:border-brand-cyan/25 hover:bg-brand-card/90"
+      className="flex flex-col gap-3 rounded-xl border border-brand-border bg-brand-card px-4 py-4 transition-colors hover:border-brand-cyan/25 hover:bg-brand-card/90 sm:flex-row sm:items-center"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-border bg-brand-surface">
         {item.type === "practice" ? (
@@ -299,11 +299,11 @@ function ActivityRow({ item }: { item: DashboardActivityItem }) {
         <p className="mt-1 truncate text-xs text-brand-muted">{item.subtitle}</p>
       </div>
 
-      <div className="shrink-0 text-right">
+      <div className="w-full border-t border-brand-border/70 pt-3 text-left sm:w-auto sm:border-t-0 sm:pt-0 sm:text-right">
         <p className="text-xs font-medium capitalize text-brand-text">
           {item.statusLabel}
         </p>
-        <div className="mt-1 flex items-center justify-end gap-3 text-[11px] text-brand-muted">
+        <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-brand-muted sm:justify-end">
           <span className="inline-flex items-center gap-1">
             <CalendarClock className="h-3.5 w-3.5" />
             {formatShortDate(item.timestamp)}
@@ -504,7 +504,7 @@ export function DashboardHome({
       </section>
 
       <section className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-brand-text">Free Solver Activity</h2>
             <p className="mt-1 text-sm text-brand-muted">
@@ -583,7 +583,7 @@ export function DashboardHome({
       </section>
 
       <section className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-brand-text">Practice Now</h2>
             <p className="mt-1 text-sm text-brand-muted">
@@ -706,7 +706,7 @@ export function DashboardHome({
       </section>
 
       <section className="space-y-4 pb-10">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-brand-text">Recent Activity</h2>
             <p className="mt-1 text-sm text-brand-muted">
