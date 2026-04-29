@@ -49,15 +49,11 @@ type ScoreDimensionRaw = {
   feedback: string;
 };
 
-type InjectUserMessage = (
-  text: string,
-  options?: { suppressTranscript?: boolean },
-) => void;
-
 const MAX_DURATION_SECONDS = TECHNICAL_QA_DURATION_MINUTES * 60;
 const MAX_AGENT_CONTEXT_MESSAGES = 20;
+const OPENING_TURN_DELAY_MS = 2000;
 const INTRO_KICKOFF =
-  "The candidate is ready. Continue naturally from your greeting, briefly confirm their stack, and then ask the first strong technical question. Keep this a voice-first conversation and do not ask them to code.";
+  "Start the Technical Q&A now. Greet the candidate briefly, ask exactly one short calibration question about their selected language/framework experience, then stop and wait for their answer. Do not ask the first deep technical question until after the candidate responds.";
 
 function formatTimeLabel(timestampMs: number) {
   const totalSeconds = Math.floor(timestampMs / 1000);
@@ -121,7 +117,7 @@ export function TechnicalQaInterviewRoom({
   const hasRestoredRef = useRef(false);
   const endInterviewRef = useRef<() => Promise<void>>(async () => {});
   const currentPhaseRef = useRef(currentPhase);
-  const agentInjectRef = useRef<InjectUserMessage>(() => {});
+  const shouldSendOpeningTurnRef = useRef(false);
 
   useEffect(() => {
     currentPhaseRef.current = currentPhase;
@@ -209,7 +205,6 @@ export function TechnicalQaInterviewRoom({
         interviewerPersonaId: interviewer.id,
       }),
       voiceModel: interviewer.voiceModel,
-      greeting: agentContextMessages.length === 0 ? interviewer.greeting : undefined,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
     }),
@@ -280,17 +275,32 @@ export function TechnicalQaInterviewRoom({
       setVoiceError(null);
 
       if (transcriptRef.current.length === 0) {
-        startTimeRef.current = Date.now();
-        agentInjectRef.current(INTRO_KICKOFF, { suppressTranscript: true });
+        shouldSendOpeningTurnRef.current = true;
       }
     }, []),
   });
 
-  useEffect(() => {
-    agentInjectRef.current = agent.injectUserMessage;
-  }, [agent.injectUserMessage]);
-
   const voiceState: VoiceState = agent.voiceState;
+  const isAgentConnected = agent.isConnected;
+  const injectAgentUserMessage = agent.injectUserMessage;
+
+  useEffect(() => {
+    if (!hasStarted || !isAgentConnected || !shouldSendOpeningTurnRef.current) return;
+
+    const timer = window.setTimeout(() => {
+      if (!shouldSendOpeningTurnRef.current) return;
+
+      shouldSendOpeningTurnRef.current = false;
+
+      if (!isAgentConnected || transcriptRef.current.length > 0) {
+        return;
+      }
+
+      injectAgentUserMessage(INTRO_KICKOFF, { suppressTranscript: true });
+    }, OPENING_TURN_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [hasStarted, injectAgentUserMessage, isAgentConnected]);
 
   const startInterview = useCallback(async () => {
     msgCounterRef.current = 0;
@@ -300,12 +310,14 @@ export function TechnicalQaInterviewRoom({
 
     try {
       await agent.connect();
-      const now = startTimeRef.current;
+      const now = Date.now();
+      startTimeRef.current = now;
       setHasStarted(true);
       setIsTimerRunning(true);
       setRoomStartedAtMs(now);
       setRoomPhase("INTRO");
     } catch (error) {
+      shouldSendOpeningTurnRef.current = false;
       setIsConnectingVoice(false);
       setIsTimerRunning(false);
       setHasStarted(false);

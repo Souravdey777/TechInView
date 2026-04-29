@@ -49,15 +49,11 @@ type ScoreDimensionRaw = {
   feedback: string;
 };
 
-type InjectUserMessage = (
-  text: string,
-  options?: { suppressTranscript?: boolean },
-) => void;
-
 const MAX_DURATION_SECONDS = ENGINEERING_MANAGER_DURATION_MINUTES * 60;
 const MAX_AGENT_CONTEXT_MESSAGES = 20;
+const OPENING_TURN_DELAY_MS = 2000;
 const INTRO_KICKOFF =
-  "The candidate is ready. Continue naturally from your greeting, briefly confirm the role context you want to evaluate, and then ask the first strong engineering-manager question. Keep this voice-first and do not ask them to code.";
+  "Start the engineering-manager round now. Greet the candidate briefly, confirm the role context you want to evaluate in one short sentence, ask exactly one strong engineering-manager question, then stop and wait for their answer. Keep this voice-first and do not ask them to code.";
 
 function formatTimeLabel(timestampMs: number) {
   const totalSeconds = Math.floor(timestampMs / 1000);
@@ -121,7 +117,7 @@ export function EngineeringManagerInterviewRoom({
   const hasRestoredRef = useRef(false);
   const endInterviewRef = useRef<() => Promise<void>>(async () => {});
   const currentPhaseRef = useRef(currentPhase);
-  const agentInjectRef = useRef<InjectUserMessage>(() => {});
+  const shouldSendOpeningTurnRef = useRef(false);
 
   useEffect(() => {
     currentPhaseRef.current = currentPhase;
@@ -209,7 +205,6 @@ export function EngineeringManagerInterviewRoom({
         interviewerPersonaId: interviewer.id,
       }),
       voiceModel: interviewer.voiceModel,
-      greeting: agentContextMessages.length === 0 ? interviewer.greeting : undefined,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
     }),
@@ -280,17 +275,32 @@ export function EngineeringManagerInterviewRoom({
       setVoiceError(null);
 
       if (transcriptRef.current.length === 0) {
-        startTimeRef.current = Date.now();
-        agentInjectRef.current(INTRO_KICKOFF, { suppressTranscript: true });
+        shouldSendOpeningTurnRef.current = true;
       }
     }, []),
   });
 
-  useEffect(() => {
-    agentInjectRef.current = agent.injectUserMessage;
-  }, [agent.injectUserMessage]);
-
   const voiceState: VoiceState = agent.voiceState;
+  const isAgentConnected = agent.isConnected;
+  const injectAgentUserMessage = agent.injectUserMessage;
+
+  useEffect(() => {
+    if (!hasStarted || !isAgentConnected || !shouldSendOpeningTurnRef.current) return;
+
+    const timer = window.setTimeout(() => {
+      if (!shouldSendOpeningTurnRef.current) return;
+
+      shouldSendOpeningTurnRef.current = false;
+
+      if (!isAgentConnected || transcriptRef.current.length > 0) {
+        return;
+      }
+
+      injectAgentUserMessage(INTRO_KICKOFF, { suppressTranscript: true });
+    }, OPENING_TURN_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [hasStarted, injectAgentUserMessage, isAgentConnected]);
 
   const startInterview = useCallback(async () => {
     msgCounterRef.current = 0;
@@ -300,12 +310,14 @@ export function EngineeringManagerInterviewRoom({
 
     try {
       await agent.connect();
-      const now = startTimeRef.current;
+      const now = Date.now();
+      startTimeRef.current = now;
       setHasStarted(true);
       setIsTimerRunning(true);
       setRoomStartedAtMs(now);
       setRoomPhase("INTRO");
     } catch (error) {
+      shouldSendOpeningTurnRef.current = false;
       setIsConnectingVoice(false);
       setIsTimerRunning(false);
       setHasStarted(false);

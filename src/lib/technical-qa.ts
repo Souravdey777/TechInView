@@ -78,6 +78,27 @@ export function getFrameworkLabels(
     .filter((label): label is string => Boolean(label));
 }
 
+function buildTechnicalQaPrompt(languageLabel: string, frameworkLabels: string[]) {
+  const stackText =
+    frameworkLabels.length > 0
+      ? `${languageLabel} with ${frameworkLabels.join(", ")}`
+      : `${languageLabel} fundamentals`;
+
+  return `Run a ${TECHNICAL_QA_DURATION_MINUTES}-minute, voice-first technical Q&A interview focused on ${stackText}.
+
+Conversation contract:
+- Start with exactly one short calibration question about the candidate's hands-on experience with this stack, then wait.
+- After the candidate answers, ask one high-signal technical question at a time. Never ask a bundle of questions.
+- Do not ask the candidate to code and do not turn this into trivia. Probe how they reason, debug, choose tradeoffs, and explain production behavior.
+- Challenge vague answers with one narrower follow-up asking for a concrete example, failure mode, metric, runtime behavior, or alternative design.
+- Stop speaking after each question so the candidate has room to answer.
+
+Question design:
+- Start broad enough to calibrate level, then go deeper into internals, debugging, testing, performance, rollout risk, scaling implications, and practical production judgment.
+- Prefer scenarios like "this fails in production, how would you debug it?" over definition recall.
+- Reward precise mechanisms, clear tradeoffs, and honest uncertainty. Push back on hand-wavy answers.`;
+}
+
 export function buildTechnicalQaRoundContext(
   input: TechnicalQaSetupInput
 ): RoundContextSnapshot {
@@ -110,9 +131,7 @@ export function buildTechnicalQaRoundContext(
     estimatedMinutes: TECHNICAL_QA_DURATION_MINUTES,
     difficulty: null,
     focusAreas,
-    prompt: frameworkLabels.length > 0
-      ? `Run a ${TECHNICAL_QA_DURATION_MINUTES}-minute, voice-first technical Q&A interview. The candidate's strongest stack is ${languageLabel} with ${frameworkLabels.join(", ")}. Ask one strong question at a time, start broad, then go deeper into internals, debugging, tradeoffs, testing, runtime behavior, scaling implications, and practical production judgment. Do not ask the candidate to code. Push for concrete examples and challenge vague answers.`
-      : `Run a ${TECHNICAL_QA_DURATION_MINUTES}-minute, voice-first technical Q&A interview centered on ${languageLabel}. Probe fundamentals, runtime behavior, debugging, tradeoffs, testing, and production judgment. Do not ask the candidate to code. Push for concrete examples and challenge vague answers.`,
+    prompt: buildTechnicalQaPrompt(languageLabel, frameworkLabels),
     historicalQuestions: [],
     workspaceSections: getWorkspaceSections("technical_qa"),
   };

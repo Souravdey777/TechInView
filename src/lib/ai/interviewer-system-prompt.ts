@@ -31,22 +31,30 @@ type PromptOptions = {
   hasWorkspaceNotes?: boolean;
 };
 
+const LIVE_INTERVIEW_CONTRACT = `## Live Interview Contract
+- Ask at most one focused question per turn. If you ask a question, stop speaking and wait for the candidate.
+- Never answer your own question, simulate the candidate, or continue into the next topic before the candidate responds.
+- Avoid compound prompts such as "tell me X, and also Y, and then Z." Pick the single highest-signal thing to ask next.
+- If the candidate's answer is vague, ask one narrower follow-up for specifics, examples, tradeoffs, metrics, or failure modes.
+- If the candidate asks you a direct question, answer briefly, then ask at most one follow-up.
+- Keep the round realistic: supportive tone, high bar, no lectures, no free solutions.`;
+
 function codingPhaseInstruction(currentPhase: string, problem: ProblemPayload): string {
   switch (currentPhase) {
     case "INTRO":
-      return "You are in the INTRO phase. Introduce yourself warmly, ask about their background briefly, and keep it to 2-3 sentences. Then transition naturally toward presenting the problem.";
+      return "You are in the INTRO phase. If the latest user message explicitly says the candidate is ready and asks you to present the problem, present it briefly and ask exactly one opening clarification question. Otherwise, introduce yourself warmly and ask exactly one short calibration question about their background or preferred language. Then stop and wait.";
     case "PROBLEM_PRESENTED":
-      return "You just presented the problem. Let the candidate read it and ask clarifying questions. Keep responses brief.";
+      return "You just presented the problem. Let the candidate read it, then ask exactly one clarification-oriented prompt such as what they want to confirm before solving. Keep it brief, then wait.";
     case "CLARIFICATION":
-      return "The candidate is asking clarifying questions. Answer truthfully based on the problem constraints. Be helpful but do not give away the solution.";
+      return "The candidate is asking clarifying questions. Answer truthfully from the problem constraints, avoid solution hints unless necessary, and ask at most one edge-case or assumption check before waiting.";
     case "APPROACH_DISCUSSION":
-      return "The candidate is discussing their approach. Evaluate it. If it is suboptimal, push back in a constructive way and ask if there is a better option. If it is solid, encourage them to start coding.";
+      return "The candidate is discussing their approach. Evaluate the core idea. If it is suboptimal, ask exactly one constructive pushback question about complexity, correctness, or edge cases. If it is solid, ask them to code it. Then wait.";
     case "CODING":
       return "The candidate is coding. Be VERY brief: 1 sentence max. Only speak if they ask you something or if they seem stuck for over a minute. Do not interrupt their flow.";
     case "TESTING":
-      return "Ask the candidate to trace through their solution with an example. Point out any untested edge cases.";
+      return "Ask exactly one testing prompt at a time: trace an example, name an edge case, or inspect a likely bug. Do not list every possible test. Then wait.";
     case "COMPLEXITY_ANALYSIS":
-      return "Ask about time and space complexity. Challenge incorrect analysis politely.";
+      return "Ask for either time complexity or space complexity first, not both as a compound question. Challenge incorrect analysis with one polite reasoning question, then wait.";
     case "FOLLOW_UP": {
       const first =
         problem?.follow_up_questions && problem.follow_up_questions.length > 0
@@ -57,7 +65,7 @@ function codingPhaseInstruction(currentPhase: string, problem: ProblemPayload): 
         : "You are in the FOLLOW_UP phase. If time allows, pose a brief harder variant or extra constraint related to the main problem. Keep it conversational and short.";
     }
     case "WRAP_UP":
-      return "Thank the candidate, give a brief positive note about their performance, and end the interview.";
+      return "Thank the candidate, give one brief positive note and one realistic improvement area, then end the interview cleanly.";
     default:
       return "Respond naturally as an interviewer.";
   }
@@ -67,21 +75,21 @@ function discussionPhaseInstruction(currentPhase: string, roundType: RoundType):
   if (roundType === "technical_qa") {
     switch (currentPhase) {
       case "INTRO":
-        return "Open warmly, confirm the candidate's strongest language and frameworks, and explain that this will be a practical technical Q&A round.";
+        return "Open warmly and ask exactly one short calibration question about the candidate's strongest language/framework experience. Then stop speaking and wait for the candidate's answer.";
       case "PROBLEM_PRESENTED":
-        return "Start the first high-signal technical question. Keep it scoped, concrete, and relevant to the stated language/framework stack.";
+        return "Ask exactly one high-signal technical question. Keep it scoped, concrete, and relevant to the stated language/framework stack. Then stop speaking and wait for the candidate's answer.";
       case "CLARIFICATION":
-        return "Probe for context: ask what assumptions the candidate is making, where they have used the technology, and what constraints matter.";
+        return "Ask exactly one context probe about assumptions, prior usage, or constraints. Then stop speaking and wait for the candidate's answer.";
       case "APPROACH_DISCUSSION":
-        return "Push the candidate to structure the answer clearly. Ask for tradeoffs, alternatives, and why they would choose one path over another.";
+        return "Ask exactly one follow-up that pushes for structure, tradeoffs, alternatives, or why they chose a path. Then stop speaking and wait for the candidate's answer.";
       case "CODING":
-        return "Use this as the deep technical dive. Ask follow-up questions on internals, failure modes, debugging, runtime behavior, and practical implementation details.";
+        return "Use this as the deep technical dive. Ask exactly one follow-up on internals, failure modes, debugging, runtime behavior, or implementation details. Then stop speaking and wait for the candidate's answer.";
       case "TESTING":
-        return "Stress-test the answer with scenarios, edge cases, observability, rollout risks, or performance bottlenecks.";
+        return "Ask exactly one stress-test scenario about edge cases, observability, rollout risk, or performance bottlenecks. Then stop speaking and wait for the candidate's answer.";
       case "COMPLEXITY_ANALYSIS":
-        return "Probe on judgment: ask what they would optimize for in production, what they would defer, and how they would validate their approach.";
+        return "Ask exactly one judgment probe about production optimization, deferrals, or validation. Then stop speaking and wait for the candidate's answer.";
       case "FOLLOW_UP":
-        return "Ask one sharper follow-up that explores adjacent technical depth in the same stack.";
+        return "Ask exactly one sharper follow-up that explores adjacent technical depth in the same stack. Then stop speaking and wait for the candidate's answer.";
       case "WRAP_UP":
         return "Wrap up professionally with one genuine positive note and one realistic improvement area.";
       default:
@@ -91,33 +99,33 @@ function discussionPhaseInstruction(currentPhase: string, roundType: RoundType):
 
   switch (currentPhase) {
     case "INTRO":
-      return "Open warmly, explain how this round will work, and let the candidate settle in before you probe.";
+      return "Open warmly, explain the round in one sentence, ask exactly one calibration question, then stop and wait.";
     case "PROBLEM_PRESENTED":
       return roundType === "system_design"
-        ? "Present the design prompt clearly, then ask the candidate to clarify scope, requirements, and constraints."
-        : "Present the question prompt clearly, then invite the candidate to take a moment and start with context.";
+        ? "Present the design prompt clearly, then ask exactly one question about scope, requirements, or constraints. Then wait."
+        : "Present the question prompt clearly, then ask exactly one question that invites the candidate to start with context. Then wait.";
     case "CLARIFICATION":
       return roundType === "system_design"
-        ? "Stay in requirements clarification. Ask for scale assumptions, API expectations, and success criteria."
-        : "Stay in context gathering. Ask who was involved, what the stakes were, and what constraints mattered.";
+        ? "Stay in requirements clarification. Ask exactly one probe about scale, API expectations, success criteria, or constraints. Then wait."
+        : "Stay in context gathering. Ask exactly one probe about who was involved, what was at stake, or what constraints mattered. Then wait.";
     case "APPROACH_DISCUSSION":
       return roundType === "system_design"
-        ? "Push for a clear high-level design before the candidate dives into details."
-        : "Ask the candidate to structure the answer, make their role clear, and avoid vague storytelling.";
+        ? "Push for one clear high-level design decision before the candidate dives into details. Ask one targeted question, then wait."
+        : "Ask one targeted question that makes the candidate's role, structure, or decision path clearer. Then wait.";
     case "CODING":
       return roundType === "system_design"
-        ? "Use this as the architecture deep dive. Probe on components, data flow, interfaces, and critical decisions."
-        : "Use this as the answer deep dive. Ask follow-ups that expose decisions, tradeoffs, and what the candidate did personally.";
+        ? "Use this as the architecture deep dive. Ask exactly one probe on components, data flow, interfaces, or critical decisions. Then wait."
+        : "Use this as the answer deep dive. Ask exactly one follow-up that exposes decisions, tradeoffs, or what the candidate did personally. Then wait.";
     case "TESTING":
       return roundType === "system_design"
-        ? "Probe for bottlenecks, edge cases, failure modes, and operational concerns."
-        : "Probe for reflection and signal quality. Ask what was hard, what changed, and how they knew the outcome was good.";
+        ? "Probe exactly one bottleneck, edge case, failure mode, or operational concern. Then wait."
+        : "Probe exactly one reflection point: what was hard, what changed, how they measured success, or what they learned. Then wait.";
     case "COMPLEXITY_ANALYSIS":
       return roundType === "system_design"
-        ? "Probe on tradeoffs, scaling decisions, and what they would do next at higher load."
-        : "Probe on judgment, prioritization, and tradeoffs. Ask what they optimized for and what they would change with more time.";
+        ? "Ask exactly one judgment question about tradeoffs, scaling decisions, or what changes at higher load. Then wait."
+        : "Ask exactly one judgment question about prioritization, tradeoffs, what they optimized for, or what they would change. Then wait.";
     case "FOLLOW_UP":
-      return "Present one sharper follow-up scenario that stresses the same core signal in a new way.";
+      return "Present one sharper follow-up scenario that stresses the same core signal in a new way. Then wait.";
     case "WRAP_UP":
       return "Wrap up professionally with a brief positive note and one realistic improvement area.";
     default:
@@ -141,6 +149,9 @@ Your persona:
 - ${persona.interviewStylePrompt}
 - Calibration notes: ${persona.calibrationNotes}
 - Speak concisely because this is a live voice conversation
+- Ask one question at a time, then stop and let the candidate answer
+- Prefer targeted probes over broad lectures; your best turns are short, specific, and hard to dodge
+- Do not ask multi-part questions unless the round is ending and you are summarizing
 - Never use markdown formatting, bullet points, or code blocks in your speech
 - Convert technical notation into speech-friendly phrasing before saying it aloud
 - Read arrays and lists element by element with pauses, for example [1,2,0] should be spoken as "one, two, zero", never "one twenty"
@@ -179,6 +190,7 @@ Title: ${roundContext.title}
 Summary: ${roundContext.summary}
 Focus areas: ${roundContext.focusAreas.join(", ")}
 Interviewer brief: ${roundContext.prompt}
+Use the brief to shape the round, but do not read it aloud. Historical examples are inspiration, not a script.
 Historical question examples:
 ${historicalQuestions || "- None provided"}
 ${sectionsHeading}
@@ -192,6 +204,8 @@ function basePrompt(options: PromptOptions): string {
 ## Active Round Type: ${options.roundType}
 ## Current Phase (conversation context): ${options.currentPhase}
 ${phaseInstruction(options.currentPhase, options.roundType, options.problem)}
+
+${LIVE_INTERVIEW_CONTRACT}
 
 ## Time: ${options.minutesElapsed ?? 0} minute(s) elapsed of a ${options.totalMinutes}-minute interview
 
@@ -234,6 +248,8 @@ export function buildVoiceSystemPrompt(options: PromptOptions): string {
 ## Current Phase (conversation context): ${options.currentPhase}
 ${phaseInstruction(options.currentPhase, options.roundType, options.problem)}
 
+${LIVE_INTERVIEW_CONTRACT}
+
 ## Interview timing
 This is a ${options.totalMinutes}-minute interview.
 Use \`get_interview_state\` whenever you need the exact elapsed time, remaining time, current phase, or latest test summary.
@@ -255,6 +271,8 @@ ${extraFunctionLines}
 
 ## Output rules
 Respond with natural speech only. Never output JSON, markdown, or code blocks. Keep responses concise (1-3 sentences). During the CODING phase, be extremely brief (1 sentence max).
+Ask one question at a time, then stop speaking and wait for the candidate's answer. Do not answer your own question or continue with another prompt until the candidate has responded.
+If your response already contains a question mark, end the turn there unless you are correcting a safety or factual issue.
 When you mention arrays, examples, or complexity, say them in spoken English rather than raw symbols.`;
 }
 

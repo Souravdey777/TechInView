@@ -170,6 +170,27 @@ export function getEngineeringManagerFocusLabels(focusAreas: string[]) {
   return resolveFocusOptions(focusAreas).map((option) => option.label);
 }
 
+function buildEngineeringManagerPrompt(contextLabel: string, focusLabels: string[]) {
+  const focusText =
+    focusLabels.length > 0
+      ? focusLabels.join(", ")
+      : "role fit, prioritization, stakeholders, leadership";
+
+  return `Run a ${ENGINEERING_MANAGER_DURATION_MINUTES}-minute, voice-first engineering manager round for a ${contextLabel}.
+
+Conversation contract:
+- Ask exactly one high-signal question at a time, then stop and wait.
+- Keep the round grounded in concrete examples from the candidate's real work. Do not accept abstract values or polished slogans as complete answers.
+- Do not ask the candidate to code.
+- When an answer is vague, ask one follow-up for situation, action, tradeoff, measurable outcome, stakeholder constraint, decision criteria, or reflection.
+- Maintain a supportive but senior hiring-manager bar.
+
+Round focus:
+- Prioritize ${focusText}.
+- Probe role fit, leadership, prioritization, stakeholder management, conflict handling, execution under ambiguity, and how the candidate makes decisions when there is no perfect option.
+- Strong answers should include the candidate's personal contribution, why the decision was hard, what changed because of it, and what they would do differently next time.`;
+}
+
 export function buildEngineeringManagerRoundContext(
   input: EngineeringManagerSetupInput
 ): RoundContextSnapshot {
@@ -196,7 +217,7 @@ export function buildEngineeringManagerRoundContext(
       focusLabels.length > 0
         ? focusLabels
         : ["Role Fit", "Prioritization", "Stakeholders", "Leadership"],
-    prompt: `Run a ${ENGINEERING_MANAGER_DURATION_MINUTES}-minute, voice-first engineering manager round for a ${contextLabel}. Ask one high-signal question at a time. Keep the interview grounded in concrete examples from the candidate's real work. Probe on role fit, leadership, prioritization, stakeholder management, tradeoffs, conflict handling, and execution under ambiguity. Do not ask the candidate to code. Challenge vague answers and ask for measurable outcomes or decision criteria when needed.`,
+    prompt: buildEngineeringManagerPrompt(contextLabel, focusLabels),
     historicalQuestions,
     workspaceSections: [],
   };

@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { DeepgramClient, DeepgramError } from "@deepgram/sdk";
 import { createClient } from "@/lib/supabase/server";
 
+const VOICE_TOKEN_SERVER_TIMEOUT_MS = 10000;
+
+function withTimeout<T>(promise: Promise<T>, message: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), VOICE_TOKEN_SERVER_TIMEOUT_MS);
+    }),
+  ]);
+}
+
 /**
  * POST /api/voice/deepgram-token
  *
@@ -20,7 +31,10 @@ export async function POST(): Promise<Response> {
   const supabase = createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await withTimeout(
+    supabase.auth.getUser(),
+    "Authentication lookup timed out"
+  );
 
   if (!user) {
     return NextResponse.json(
@@ -31,7 +45,10 @@ export async function POST(): Promise<Response> {
 
   try {
     const client = new DeepgramClient({ apiKey });
-    const grant = await client.auth.v1.tokens.grant({ ttl_seconds: 600 });
+    const grant = await withTimeout(
+      client.auth.v1.tokens.grant({ ttl_seconds: 600 }),
+      "Deepgram token grant timed out"
+    );
 
     return NextResponse.json({
       success: true,

@@ -86,14 +86,14 @@ function normalizeSignals(signals: string[], fallbackSignals: string[]) {
 
 function buildPrompt(input: PrepPlanGenerationInput) {
   return `
-Create a structured software-interview prep plan for this candidate.
+Create a structured, company-shaped software interview prep plan for this candidate.
 
 Company: ${input.company}
 Role: ${input.role}
 Job description:
 ${input.jdText}
 
-The plan must cover exactly these six interview kinds:
+Available interview kinds:
 - dsa
 - machine_coding
 - system_design
@@ -101,7 +101,12 @@ The plan must cover exactly these six interview kinds:
 - engineering_manager
 - behavioral
 
-Use your best judgment about the likely hiring pattern for this company and role. Use the job description to decide which tracks are core vs supporting, the order the user should practice them, and the rough volume of likely questions to prepare for.
+Your job:
+- Infer the likely interview loop from the company, role title, seniority signals, and job description.
+- Select only the tracks that are realistically useful. Do not include a track just because it exists.
+- Mark a track "core" only when it is likely to affect hiring outcome for this role. Mark it "supporting" when it is useful prep but probably not the main screen.
+- Order tracks in the sequence the candidate should practice them, starting with the highest-leverage next step.
+- Make the plan feel specific to this role, not a generic checklist.
 
 Return JSON only in this exact shape:
 {
@@ -123,12 +128,19 @@ Rules:
 - Do not force all six interview kinds. Include only the rounds that actually look relevant for this company, role, and JD.
 - Use between 2 and 6 tracks total.
 - Each interview kind can appear at most once.
-- The plan should feel like a company-shaped prep sequence, not a generic product checklist.
+- Prefer 3-4 tracks unless the JD clearly requires more.
+- Include dsa for general SWE roles unless the JD is clearly non-coding or leadership-only.
+- Include system_design mainly for senior/staff/platform/backend/distributed systems roles.
+- Include machine_coding when the JD implies frontend/product engineering, API implementation, full-stack execution, or take-home style evaluation.
+- Include technical_qa when the JD names specific frameworks, runtime/platform expertise, debugging, performance, or infrastructure ownership.
+- Include engineering_manager when role fit, seniority, ownership, leadership, stakeholder alignment, or people influence is prominent.
+- Include behavioral when collaboration, ownership, ambiguity, customer impact, or cross-functional work appears in the JD.
 - Use track titles that match likely round naming, such as phone screen, technical deep dive, system design, collaboration, or hiring manager.
 - Make questionCount realistic for prep planning, between 4 and 30.
 - Keep nextActionLabel concise, specific, and imperative.
-- Use short jdSignals that summarize what drove the plan.
-- planSummary should briefly explain the likely company mix and why these rounds were chosen.
+- Use short jdSignals that summarize what drove the plan; avoid copying generic JD filler.
+- planSummary should briefly explain the likely company mix, the chosen tracks, and the main risk area for the candidate.
+- Rationale should name the exact JD/company signal that made the track relevant.
 - Do not include markdown, prose, or explanations outside the JSON object.
   `.trim();
 }
@@ -218,7 +230,7 @@ export async function generatePrepPlanSummary(
       model: MODEL,
       max_tokens: MAX_TOKENS,
       system:
-        "You generate structured interview prep plans. Return valid JSON only, with no markdown fences or commentary.",
+        "You are a senior technical recruiter and interview coach. Generate realistic, company-shaped interview prep plans from job descriptions. Return valid JSON only, with no markdown fences or commentary.",
       messages: [
         {
           role: "user",

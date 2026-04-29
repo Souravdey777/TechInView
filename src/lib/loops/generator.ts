@@ -158,26 +158,32 @@ function pickHistoricalQuestions(
 
 function roundSummary(roundType: RoundType, company: string, roleTitle: string, jdSignals: string[]): string {
   if (roundType === "coding") {
-    return `A ${company} style coding round tuned for ${roleTitle}, with prompts biased toward ${jdSignals.slice(0, 2).join(" and ") || "core problem solving"}.`;
+    return `A ${company}-style coding round tuned for ${roleTitle}, with pressure on ${jdSignals.slice(0, 2).join(" and ") || "core problem solving"}, edge cases, and clean execution.`;
+  }
+  if (roundType === "technical_qa") {
+    return `A stack-depth technical Q&A round focused on internals, debugging, production tradeoffs, and practical engineering judgment for ${roleTitle}.`;
   }
   if (roundType === "behavioral") {
-    return `A behavioral round focused on the stories and ownership signals this role is likely to probe.`;
+    return `A behavioral round focused on the ownership stories, collaboration signals, and measurable outcomes this role is likely to probe.`;
   }
   if (roundType === "hiring_manager") {
-    return `An engineering manager round centered on role fit, priorities, leadership, and decision quality for this job.`;
+    return `An engineering manager round centered on role fit, priorities, stakeholder judgment, leadership, and decision quality for this job.`;
   }
-  return `A system design round shaped around architecture, tradeoffs, and scale signals from the job description.`;
+  return `A system design round shaped around requirements, architecture, tradeoffs, bottlenecks, and scale signals from the job description.`;
 }
 
 function roundRationale(roundType: RoundType, company: string, roleTitle: string, jdSignals: string[]): string {
   if (roundType === "coding") {
     return `Historical reports for ${company} still show coding as the core bar for ${roleTitle}, so the loop starts with a problem-solving screen before broader evaluation.`;
   }
+  if (roundType === "technical_qa") {
+    return `The job signals practical stack depth, so this round checks whether the candidate can explain real runtime behavior, debugging choices, and tradeoffs beyond memorized definitions.`;
+  }
   if (roundType === "behavioral") {
-    return `The job description stresses collaboration and ownership, so a behavioral round is included to practice signal beyond pure implementation.`;
+    return `The job description stresses collaboration and ownership, so this round forces concrete stories with actions, outcomes, and lessons rather than generic teamwork claims.`;
   }
   if (roundType === "hiring_manager") {
-    return `An engineering manager screen is likely because this role needs clear judgment, prioritization, leadership, and role-fit communication.`;
+    return `An engineering manager screen is likely because this role needs clear judgment, prioritization, leadership, stakeholder alignment, and role-fit communication.`;
   }
   return jdSignals.includes("distributed_systems") || jdSignals.includes("platform")
     ? `Architecture and scale signals in the JD strongly suggest a design round should be part of this loop.`
@@ -185,21 +191,29 @@ function roundRationale(roundType: RoundType, company: string, roleTitle: string
 }
 
 function roundPrompt(roundType: RoundType, roleTitle: string, company: string, jdSignals: string[]): string {
+  const signalText = jdSignals.join(", ") || "the role's core engineering signals";
+
   if (roundType === "coding") {
-    return `Run this as a realistic ${company}-style coding interview for a ${roleTitle}. Push for a clear approach, tight execution, good edge-case handling, and concise tradeoff explanations.`;
+    return `Run this as a realistic ${company}-style coding interview for a ${roleTitle}. Ask one focused question or prompt at a time. Push for a clear approach, tight execution, edge-case coverage, complexity accuracy, and concise tradeoff explanations. During coding, stay mostly quiet unless the candidate asks, gets stuck, or misses a costly bug.`;
+  }
+  if (roundType === "technical_qa") {
+    return `Run this as a stack-depth technical Q&A round for a ${roleTitle}. Ask exactly one question at a time, then wait. Start with a short calibration question, then probe internals, debugging, production tradeoffs, testing, performance, and ${signalText}. Do not ask for code. Challenge vague answers with one concrete scenario or failure mode.`;
   }
   if (roundType === "behavioral") {
-    return `Run this as a behavioral interview for a ${roleTitle}. Ask for concrete stories, probe for ownership and collaboration, and keep pressing until the candidate gives specific actions, results, and lessons.`;
+    return `Run this as a behavioral interview for a ${roleTitle}. Ask one story prompt at a time, then wait. Probe for situation, personal action, tradeoff, measurable result, and lesson learned. Keep pressing on ownership and collaboration until the answer is concrete.`;
   }
   if (roundType === "hiring_manager") {
-    return `Run this as an engineering manager round for a ${roleTitle}. Focus on role fit, prioritization, judgment, stakeholder management, and why the candidate is a strong match for the team.`;
+    return `Run this as an engineering manager round for a ${roleTitle}. Ask one high-signal question at a time. Focus on role fit, prioritization, judgment, stakeholder management, tradeoffs, and why the candidate is a strong match for the team. Challenge vague claims by asking for decision criteria, metrics, or consequences.`;
   }
-  return `Run this as a system design interview for a ${roleTitle}. Start with requirements, then architecture, data flow, bottlenecks, tradeoffs, and scaling. Probe especially on ${jdSignals.join(", ") || "system design fundamentals"}.`;
+  return `Run this as a system design interview for a ${roleTitle}. Ask one prompt at a time. Start with requirements and success criteria, then move into architecture, data flow, bottlenecks, tradeoffs, reliability, and scaling. Probe especially on ${signalText}.`;
 }
 
 function focusAreasForRound(roundType: RoundType, jdSignals: string[]): string[] {
   if (roundType === "coding") {
     return ["clarity under pressure", "edge-case coverage", "clean implementation"];
+  }
+  if (roundType === "technical_qa") {
+    return ["runtime behavior", "debugging judgment", "production tradeoffs"];
   }
   if (roundType === "behavioral") {
     return ["clear ownership", "specific actions", "measurable results"];

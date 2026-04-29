@@ -52,12 +52,10 @@ type InterviewRoomProps = {
   interviewId: string;
 };
 
-type InjectUserMessage = (
-  text: string,
-  options?: { suppressTranscript?: boolean },
-) => void;
-
 const MAX_AGENT_CONTEXT_MESSAGES = 20;
+const OPENING_TURN_DELAY_MS = 2000;
+const INTRO_KICKOFF =
+  "Start the interview now. Greet the candidate briefly, introduce the problem, ask exactly one opening question, then stop and wait for their answer.";
 
 // ─── Helper: extract typed score dimension safely ─────────────────────────────
 
@@ -270,9 +268,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   const hasCandidateCode = isCodingRound && code.trim().length > 0;
 
-  // Ref to break circular dependency: onConnected callback needs agent.injectUserMessage,
-  // but agent is the return of the same hook. The ref is updated after hook returns.
-  const agentInjectRef = useRef<InjectUserMessage>(() => {});
+  const shouldSendOpeningTurnRef = useRef(false);
 
   const agentSettings = useMemo<DeepgramVoiceAgentSettings>(
     () => ({
@@ -289,7 +285,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         },
       ),
       voiceModel: interviewer.voiceModel,
-      greeting: agentContextMessages.length === 0 ? interviewer.greeting : undefined,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
     }),
@@ -414,23 +409,32 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       setIsConnectingVoice(false);
       setVoiceError(null);
       if (conversationRef.current.length === 0) {
-        startTimeRef.current = Date.now();
-        // Trigger the opening turn only for brand-new sessions. Resumes/reconnects
-        // already carry transcript history via agent context.
-        agentInjectRef.current(
-          "The candidate is ready. Continue naturally from your greeting, then introduce the problem and start the interview.",
-          { suppressTranscript: true },
-        );
+        shouldSendOpeningTurnRef.current = true;
       }
     }, []),
   });
 
-  // Keep the ref in sync with the latest injectUserMessage
-  useEffect(() => {
-    agentInjectRef.current = agent.injectUserMessage;
-  }, [agent.injectUserMessage]);
-
   const voiceState: VoiceState = agent.voiceState;
+  const isAgentConnected = agent.isConnected;
+  const injectAgentUserMessage = agent.injectUserMessage;
+
+  useEffect(() => {
+    if (!hasStarted || !isAgentConnected || !shouldSendOpeningTurnRef.current) return;
+
+    const timer = window.setTimeout(() => {
+      if (!shouldSendOpeningTurnRef.current) return;
+
+      shouldSendOpeningTurnRef.current = false;
+
+      if (!isAgentConnected || conversationRef.current.length > 0) {
+        return;
+      }
+
+      injectAgentUserMessage(INTRO_KICKOFF, { suppressTranscript: true });
+    }, OPENING_TURN_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [hasStarted, injectAgentUserMessage, isAgentConnected]);
 
   // ── Start interview (connect voice agent) ─────────────────────────────────
   const startInterview = useCallback(async () => {
@@ -440,14 +444,14 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
     try {
       await agent.connect();
-      const now = startTimeRef.current;
+      const now = Date.now();
       startTimeRef.current = now;
       setHasStarted(true);
       setIsTimerRunning(true);
       setRoomStartedAtMs(now);
       setRoomPhaseInStore("INTRO");
-      // onConnected callback injects the greeting via agentInjectRef
     } catch (error) {
+      shouldSendOpeningTurnRef.current = false;
       setIsConnectingVoice(false);
       setIsTimerRunning(false);
       setHasStarted(false);

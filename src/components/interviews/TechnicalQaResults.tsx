@@ -2,15 +2,35 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, BrainCircuit, FileQuestion, Loader2, MessageSquareText, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  BrainCircuit,
+  Bug,
+  CheckCircle2,
+  FileQuestion,
+  Gauge,
+  ListChecks,
+  Loader2,
+  MessageSquareText,
+  Sparkles,
+  Target,
+  Wrench,
+} from "lucide-react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useInterviewStore } from "@/stores/interview-store";
 import { ScoreSummary } from "@/components/results/ScoreSummary";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
 import { FeedbackCard } from "@/components/results/FeedbackCard";
 import { TranscriptReview } from "@/components/results/TranscriptReview";
-import { ROUND_SCORING_DIMENSIONS, type HireRecommendation, type RoundScoreDimension } from "@/lib/constants";
-import { getInterviewerPersona, resolveInterviewerPersona } from "@/lib/interviewer-personas";
+import {
+  ROUND_SCORING_DIMENSIONS,
+  type HireRecommendation,
+  type RoundScoreDimension,
+} from "@/lib/constants";
+import {
+  getInterviewerPersona,
+  resolveInterviewerPersona,
+} from "@/lib/interviewer-personas";
 import { getTechnicalQaLanguageLabel } from "@/lib/technical-qa";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 
@@ -18,7 +38,255 @@ type TechnicalQaResultsProps = {
   interviewId: string;
 };
 
-type StoreLikeResult = NonNullable<ReturnType<typeof useInterviewStore.getState>["interviewResult"]>;
+type StoreLikeResult = NonNullable<
+  ReturnType<typeof useInterviewStore.getState>["interviewResult"]
+>;
+type TechnicalQaScores = StoreLikeResult["scores"];
+type TechnicalQaTranscript = StoreLikeResult["transcript"];
+
+const TECHNICAL_QA_SCORE_DIMENSIONS = {
+  problem_solving: {
+    ...ROUND_SCORING_DIMENSIONS.problem_solving,
+    label: "Answer Framing",
+    description: "How well the candidate scoped the prompt, stated assumptions, and chose a useful path before going deep.",
+  },
+  communication: {
+    ...ROUND_SCORING_DIMENSIONS.communication,
+    label: "Explanation Clarity",
+    description: "How structured, concise, and easy to follow the answers were under follow-up pressure.",
+  },
+  technical_depth: {
+    ...ROUND_SCORING_DIMENSIONS.technical_depth,
+    label: "Stack Depth",
+    description: "Mechanism-level understanding of the selected language, frameworks, runtime behavior, and internals.",
+  },
+  execution: {
+    ...ROUND_SCORING_DIMENSIONS.execution,
+    label: "Debugging Flow",
+    description: "How concretely the candidate moved from symptoms to hypotheses, instrumentation, and next actions.",
+  },
+  judgment: {
+    ...ROUND_SCORING_DIMENSIONS.judgment,
+    label: "Production Judgment",
+    description: "Decision quality around reliability, performance, rollout risk, observability, and tradeoffs.",
+  },
+} satisfies Record<
+  RoundScoreDimension,
+  { label: string; weight: number; description: string }
+>;
+
+const TECHNICAL_QA_SCORE_ORDER = [
+  "technical_depth",
+  "judgment",
+  "execution",
+  "communication",
+  "problem_solving",
+] as const satisfies readonly RoundScoreDimension[];
+
+const TECHNICAL_QA_SIGNAL_CARDS = [
+  {
+    key: "technical_depth",
+    title: "Stack Depth",
+    description: "Precise mechanisms, runtime behavior, framework internals, and non-trivia depth.",
+    icon: BrainCircuit,
+  },
+  {
+    key: "execution",
+    title: "Debugging Flow",
+    description: "Concrete hypotheses, inspection steps, failure modes, and recovery paths.",
+    icon: Bug,
+  },
+  {
+    key: "judgment",
+    title: "Production Judgment",
+    description: "Sensible tradeoffs around reliability, scale, rollout risk, and observability.",
+    icon: Gauge,
+  },
+  {
+    key: "communication",
+    title: "Answer Quality",
+    description: "Structured responses that stayed direct while still showing enough technical detail.",
+    icon: MessageSquareText,
+  },
+] as const;
+
+const TECHNICAL_QA_EVALUATED_SIGNALS = [
+  "Mechanism-level language and framework explanations",
+  "Debugging approach for ambiguous production failures",
+  "Performance, reliability, and operational tradeoffs",
+  "Concrete examples instead of definition recall",
+];
+
+function getScoreTone(score: number) {
+  if (score >= 85) {
+    return {
+      label: "Strong",
+      text: "text-brand-green",
+      bg: "bg-brand-green/10",
+      border: "border-brand-green/25",
+      bar: "bg-brand-green",
+    };
+  }
+  if (score >= 70) {
+    return {
+      label: "Solid",
+      text: "text-brand-cyan",
+      bg: "bg-brand-cyan/10",
+      border: "border-brand-cyan/25",
+      bar: "bg-brand-cyan",
+    };
+  }
+  if (score >= 55) {
+    return {
+      label: "Developing",
+      text: "text-brand-amber",
+      bg: "bg-brand-amber/10",
+      border: "border-brand-amber/25",
+      bar: "bg-brand-amber",
+    };
+  }
+  return {
+    label: "Needs Work",
+    text: "text-brand-rose",
+    bg: "bg-brand-rose/10",
+    border: "border-brand-rose/25",
+    bar: "bg-brand-rose",
+  };
+}
+
+function getTranscriptStats(transcript: TechnicalQaTranscript) {
+  const lastMessage = transcript[transcript.length - 1];
+  const durationMinutes = lastMessage
+    ? Math.max(1, Math.ceil(lastMessage.timestamp_ms / 60000))
+    : 0;
+  const candidateTurns = transcript.filter((message) => message.role === "candidate").length;
+  const interviewerQuestions = transcript.filter(
+    (message) => message.role === "interviewer" && message.content.includes("?")
+  ).length;
+
+  return {
+    durationLabel: durationMinutes > 0 ? `${durationMinutes} min` : "0 min",
+    candidateTurns,
+    interviewerQuestions,
+    totalTurns: transcript.filter((message) => message.role !== "system").length,
+  };
+}
+
+function TechnicalQaSignalSnapshot({ scores }: { scores: TechnicalQaScores }) {
+  if (!scores) return null;
+
+  const signalCards = TECHNICAL_QA_SIGNAL_CARDS.map((signal) => ({
+    ...signal,
+    score: scores[signal.key]?.score,
+  })).filter((signal): signal is (typeof TECHNICAL_QA_SIGNAL_CARDS)[number] & { score: number } => (
+    typeof signal.score === "number"
+  ));
+
+  if (signalCards.length === 0) return null;
+
+  return (
+    <section>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Technical Q&amp;A Signals</h2>
+          <p className="mt-1 text-sm text-brand-muted">
+            Stack depth, debugging flow, production judgment, and answer quality in one scan.
+          </p>
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        {signalCards.map((signal) => {
+          const Icon = signal.icon;
+          const tone = getScoreTone(signal.score);
+
+          return (
+            <div
+              key={signal.key}
+              className="rounded-3xl border border-brand-border bg-brand-card p-5"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className={`flex h-10 w-10 items-center justify-center rounded-xl border ${tone.border} ${tone.bg}`}>
+                    <Icon className={`h-5 w-5 ${tone.text}`} />
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-brand-text">{signal.title}</h3>
+                    <p className={`mt-1 text-xs font-semibold uppercase tracking-[0.14em] ${tone.text}`}>
+                      {tone.label}
+                    </p>
+                  </div>
+                </div>
+                <span className={`text-2xl font-bold tabular-nums ${tone.text}`}>
+                  {signal.score}
+                  <span className="text-xs font-normal text-brand-muted">/100</span>
+                </span>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-brand-muted">
+                {signal.description}
+              </p>
+              <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-brand-surface">
+                <div
+                  className={`h-full rounded-full ${tone.bar}`}
+                  style={{ width: `${Math.min(100, Math.max(0, signal.score))}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function TechnicalQaCoachingNotes({
+  strengths,
+  areasToImprove,
+}: {
+  strengths: string[] | null;
+  areasToImprove: string[] | null;
+}) {
+  if ((!strengths || strengths.length === 0) && (!areasToImprove || areasToImprove.length === 0)) {
+    return null;
+  }
+
+  return (
+    <section className="grid gap-4 md:grid-cols-2">
+      {strengths && strengths.length > 0 ? (
+        <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
+          <div className="flex items-center gap-2 text-sm font-semibold text-brand-green">
+            <CheckCircle2 className="h-4 w-4" />
+            Technical Strengths
+          </div>
+          <ul className="mt-4 space-y-3">
+            {strengths.map((strength) => (
+              <li key={strength} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted">
+                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-green" />
+                <span>{strength}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {areasToImprove && areasToImprove.length > 0 ? (
+        <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
+          <div className="flex items-center gap-2 text-sm font-semibold text-brand-amber">
+            <Target className="h-4 w-4" />
+            Next Practice Priorities
+          </div>
+          <ul className="mt-4 space-y-3">
+            {areasToImprove.map((area) => (
+              <li key={area} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted">
+                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-amber" />
+                <span>{area}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  );
+}
 
 function NoResultState() {
   return (
@@ -124,10 +392,10 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
   const radarData = useMemo(() => {
     if (!result?.scores) return [];
 
-    return (Object.keys(ROUND_SCORING_DIMENSIONS) as RoundScoreDimension[])
+    return TECHNICAL_QA_SCORE_ORDER
       .filter((key) => result.scores?.[key])
       .map((key) => ({
-        dimension: ROUND_SCORING_DIMENSIONS[key].label,
+        dimension: TECHNICAL_QA_SCORE_DIMENSIONS[key].label,
         score: result.scores?.[key]?.score ?? 0,
         maxScore: 100,
       }));
@@ -136,15 +404,20 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
   const feedbackCards = useMemo(() => {
     if (!result?.scores) return [];
 
-    return (Object.keys(ROUND_SCORING_DIMENSIONS) as RoundScoreDimension[])
+    return TECHNICAL_QA_SCORE_ORDER
       .filter((key) => result.scores?.[key])
       .map((key) => ({
-        dimension: ROUND_SCORING_DIMENSIONS[key].label,
+        dimension: TECHNICAL_QA_SCORE_DIMENSIONS[key].label,
         score: result.scores?.[key]?.score ?? 0,
-        weight: ROUND_SCORING_DIMENSIONS[key].weight,
+        weight: TECHNICAL_QA_SCORE_DIMENSIONS[key].weight,
         feedback: result.scores?.[key]?.feedback ?? "",
       }));
   }, [result]);
+
+  const transcriptStats = useMemo(
+    () => getTranscriptStats(result?.transcript ?? []),
+    [result?.transcript]
+  );
 
   if (isLoading) {
     return (
@@ -196,18 +469,31 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
               </h1>
               <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-muted">
                 {round?.summary ??
-                  "A voice-first technical depth interview focused on how clearly you explained your stack, tradeoffs, debugging instincts, and production judgment."}
+                  "A voice-first technical depth interview focused on whether your answers showed real stack fluency, debugging judgment, production tradeoffs, and clear follow-up handling."}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
                 {interviewer.name}
               </span>
+              {result.company ? (
+                <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
+                  {result.company}
+                </span>
+              ) : null}
+              {result.roleTitle ? (
+                <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
+                  {result.roleTitle}
+                </span>
+              ) : null}
               <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
                 {languageLabel}
               </span>
               <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                Voice chat
+                No coding
+              </span>
+              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
+                Voice Q&amp;A
               </span>
             </div>
           </div>
@@ -241,11 +527,13 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="space-y-6">
+            <TechnicalQaSignalSnapshot scores={result.scores} />
+
             {radarData.length > 0 ? <ScoreRadar scores={radarData} /> : null}
 
             {feedbackCards.length > 0 ? (
               <section>
-                <h2 className="mb-4 text-lg font-semibold">Dimension Breakdown</h2>
+                <h2 className="mb-4 text-lg font-semibold">Technical Rubric Breakdown</h2>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {feedbackCards.map((card) => (
                     <FeedbackCard
@@ -259,6 +547,11 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
                 </div>
               </section>
             ) : null}
+
+            <TechnicalQaCoachingNotes
+              strengths={result.keyStrengths}
+              areasToImprove={result.areasToImprove}
+            />
 
             <TranscriptReview
               messages={result.transcript}
@@ -280,14 +573,38 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
 
             <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                <BrainCircuit className="h-3.5 w-3.5" />
+                <ListChecks className="h-3.5 w-3.5" />
+                Q&amp;A Coverage
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Duration</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.durationLabel}</p>
+                </div>
+                <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Turns</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.totalTurns}</p>
+                </div>
+                <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Answers</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.candidateTurns}</p>
+                </div>
+                <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Questions</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.interviewerQuestions}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
+                <Wrench className="h-3.5 w-3.5" />
                 What Was Evaluated
               </div>
               <div className="mt-4 space-y-3 text-sm text-brand-muted">
-                <p>Communication clarity under follow-up pressure</p>
-                <p>Depth in the chosen language and frameworks</p>
-                <p>Debugging instincts and production tradeoff thinking</p>
-                <p>How concretely you answered with real engineering judgment</p>
+                {TECHNICAL_QA_EVALUATED_SIGNALS.map((signal) => (
+                  <p key={signal}>{signal}</p>
+                ))}
               </div>
             </div>
 

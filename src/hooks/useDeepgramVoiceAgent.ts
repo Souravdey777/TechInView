@@ -50,6 +50,9 @@ const INPUT_SAMPLE_RATE = 16000;
 const OUTPUT_SAMPLE_RATE = 24000;
 const DEFAULT_VOICE_MODEL = "aura-2-asteria-en";
 const KEEPALIVE_INTERVAL_MS = 8000;
+const MIC_RESUME_AFTER_AGENT_MS = 700;
+const MIC_PERMISSION_TIMEOUT_MS = 15000;
+const VOICE_TOKEN_TIMEOUT_MS = 15000;
 
 type AgentConnection = Awaited<ReturnType<DeepgramClient["agent"]["v1"]["connect"]>>;
 
@@ -156,6 +159,10 @@ function normalizeVoiceAgentError(error: unknown): Error {
   return error instanceof Error ? error : new Error(message);
 }
 
+function timeoutError(message: string) {
+  return new DOMException(message, "TimeoutError");
+}
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useDeepgramVoiceAgent(
@@ -192,6 +199,8 @@ export function useDeepgramVoiceAgent(
   const nextPlaybackTimeRef = useRef(0);
   const scheduledPlaybackSourcesRef = useRef<AudioBufferSourceNode[]>([]);
   const playbackAbortRef = useRef<AbortController | null>(null);
+  const isAgentAudioActiveRef = useRef(false);
+  const resumeMicAfterAgentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isMutedRef = useRef(false);
 
@@ -267,6 +276,11 @@ export function useDeepgramVoiceAgent(
   );
 
   const stopSpeaking = useCallback(() => {
+    if (resumeMicAfterAgentTimerRef.current) {
+      clearTimeout(resumeMicAfterAgentTimerRef.current);
+      resumeMicAfterAgentTimerRef.current = null;
+    }
+    isAgentAudioActiveRef.current = false;
     playbackAbortRef.current?.abort();
     playbackAbortRef.current = new AbortController();
     for (const src of scheduledPlaybackSourcesRef.current) {
@@ -284,6 +298,34 @@ export function useDeepgramVoiceAgent(
     scheduledPlaybackSourcesRef.current = [];
     nextPlaybackTimeRef.current = 0;
     setVoiceState((prev) => (prev === "speaking" ? "idle" : prev));
+  }, []);
+
+  const blockMicDuringAgentAudio = useCallback(() => {
+    if (resumeMicAfterAgentTimerRef.current) {
+      clearTimeout(resumeMicAfterAgentTimerRef.current);
+      resumeMicAfterAgentTimerRef.current = null;
+    }
+    isAgentAudioActiveRef.current = true;
+  }, []);
+
+  const resumeMicAfterAgentAudio = useCallback(() => {
+    if (resumeMicAfterAgentTimerRef.current) {
+      clearTimeout(resumeMicAfterAgentTimerRef.current);
+    }
+
+    const ctx = audioCtxRef.current;
+    const queuedPlaybackMs =
+      ctx && ctx.state !== "closed"
+        ? Math.max(0, (nextPlaybackTimeRef.current - ctx.currentTime) * 1000)
+        : 0;
+
+    resumeMicAfterAgentTimerRef.current = setTimeout(() => {
+      isAgentAudioActiveRef.current = false;
+      resumeMicAfterAgentTimerRef.current = null;
+      if (scheduledPlaybackSourcesRef.current.length === 0) {
+        setVoiceState("idle");
+      }
+    }, queuedPlaybackMs + MIC_RESUME_AFTER_AGENT_MS);
   }, []);
 
   const clearKeepalive = useCallback(() => {
@@ -408,20 +450,37 @@ export function useDeepgramVoiceAgent(
     };
     let stream: MediaStream;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: withVoiceIsolation });
+      stream = await Promise.race([
+        navigator.mediaDevices.getUserMedia({ audio: withVoiceIsolation }),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(timeoutError("Microphone permission timed out. Allow mic access and try again.")),
+            MIC_PERMISSION_TIMEOUT_MS,
+          ),
+        ),
+      ]);
     } catch (error) {
       const domError = error instanceof DOMException ? error : null;
       if (
         domError?.name === "NotAllowedError" ||
         domError?.name === "SecurityError" ||
         domError?.name === "NotFoundError" ||
-        domError?.name === "NotReadableError"
+        domError?.name === "NotReadableError" ||
+        domError?.name === "TimeoutError"
       ) {
         throw normalizeVoiceAgentError(error);
       }
 
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: baseAudio });
+        stream = await Promise.race([
+          navigator.mediaDevices.getUserMedia({ audio: baseAudio }),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(timeoutError("Microphone permission timed out. Allow mic access and try again.")),
+              MIC_PERMISSION_TIMEOUT_MS,
+            ),
+          ),
+        ]);
       } catch (fallbackError) {
         throw normalizeVoiceAgentError(fallbackError);
       }
@@ -442,6 +501,7 @@ export function useDeepgramVoiceAgent(
 
     workletNode.port.onmessage = (e: MessageEvent<ArrayBuffer>) => {
       if (isMutedRef.current) return;
+      if (isAgentAudioActiveRef.current) return;
       const conn = connectionRef.current;
       if (conn && conn.readyState === WebSocket.OPEN) {
         conn.sendMedia(e.data);
@@ -549,6 +609,7 @@ export function useDeepgramVoiceAgent(
           break;
 
         case "AgentStartedSpeaking":
+          blockMicDuringAgentAudio();
           setVoiceState("speaking");
           if (!playbackAbortRef.current || playbackAbortRef.current.signal.aborted) {
             playbackAbortRef.current = new AbortController();
@@ -556,11 +617,7 @@ export function useDeepgramVoiceAgent(
           break;
 
         case "AgentAudioDone":
-          setTimeout(() => {
-            if (scheduledPlaybackSourcesRef.current.length === 0) {
-              setVoiceState("idle");
-            }
-          }, 200);
+          resumeMicAfterAgentAudio();
           break;
 
         case "FunctionCallRequest": {
@@ -604,11 +661,13 @@ export function useDeepgramVoiceAgent(
       pcmToFloat32,
       scheduleTtsChunk,
       stopSpeaking,
+      blockMicDuringAgentAudio,
       handleFunctionCall,
       rejectWelcome,
       rejectSettingsApplied,
       resolveSettingsApplied,
       resolveWelcome,
+      resumeMicAfterAgentAudio,
       shouldSuppressUserTranscript,
     ],
   );
@@ -621,7 +680,22 @@ export function useDeepgramVoiceAgent(
       await ensurePcmWorkletLoaded(audioCtx);
       await requestMicStream();
 
-      const tokenRes = await fetch("/api/voice/deepgram-token", { method: "POST" });
+      const tokenController = new AbortController();
+      const tokenTimeout = setTimeout(() => tokenController.abort(), VOICE_TOKEN_TIMEOUT_MS);
+      let tokenRes: Response;
+      try {
+        tokenRes = await fetch("/api/voice/deepgram-token", {
+          method: "POST",
+          signal: tokenController.signal,
+        });
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          throw new Error("Voice token request timed out. Check the Deepgram/Supabase connection and try again.");
+        }
+        throw error;
+      } finally {
+        clearTimeout(tokenTimeout);
+      }
       const tokenJson = (await tokenRes.json()) as {
         success: boolean;
         data?: { token: string };
@@ -803,6 +877,11 @@ export function useDeepgramVoiceAgent(
       connectionRef.current = null;
       lastThinkSignatureRef.current = null;
       suppressedUserMessagesRef.current = [];
+      if (resumeMicAfterAgentTimerRef.current) {
+        clearTimeout(resumeMicAfterAgentTimerRef.current);
+        resumeMicAfterAgentTimerRef.current = null;
+      }
+      isAgentAudioActiveRef.current = false;
       pcmWorkletContextRef.current = null;
       audioCtxRef.current?.close().catch(() => {});
       audioCtxRef.current = null;
