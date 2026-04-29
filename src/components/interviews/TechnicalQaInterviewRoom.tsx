@@ -268,6 +268,7 @@ export function TechnicalQaInterviewRoom({
     onError: useCallback((error: Error) => {
       console.error("[technical-qa-room] Agent error:", error.message);
       setIsConnectingVoice(false);
+      setIsMicEnabled(false);
       setVoiceError(error.message);
     }, []),
     onConnected: useCallback(() => {
@@ -701,8 +702,11 @@ export function TechnicalQaInterviewRoom({
                 interviewerName={interviewer.name}
                 layout="center-stage"
                 isMicEnabled={isMicEnabled}
+                isVoiceConnected={isAgentConnected}
+                isReconnecting={isConnectingVoice}
                 errorMessage={voiceError}
                 onToggleMic={handleToggleMic}
+                onReconnect={resumeInterview}
                 onSendText={handleSendText}
               />
             </div>

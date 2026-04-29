@@ -402,6 +402,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     onError: useCallback((err: Error) => {
       console.error("[interview-room] Agent error:", err.message);
       setIsConnectingVoice(false);
+      setIsMicEnabled(false);
       setVoiceError(err.message);
     }, []),
 
@@ -802,6 +803,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const resumeInterview = useCallback(async () => {
     setVoiceError(null);
     setIsConnectingVoice(true);
+    setIsMicEnabled(true);
 
     try {
       await agent.connect();
@@ -1036,8 +1038,11 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
               roundType={roundType}
               interviewerName={interviewer.name}
               isMicEnabled={isMicEnabled}
+              isVoiceConnected={isAgentConnected}
+              isReconnecting={isConnectingVoice}
               errorMessage={voiceError}
               onToggleMic={handleToggleMic}
+              onReconnect={resumeInterview}
               onSendText={handleSendText}
             />
           </div>

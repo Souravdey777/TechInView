@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ChevronDown, ChevronUp, Mic, MicOff, Send } from "lucide-react";
+import { ChevronDown, ChevronUp, Mic, MicOff, RefreshCw, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type InterviewPhase, PHASE_LABELS } from "@/lib/interview-phases";
 import type { RoundType } from "@/lib/constants";
@@ -15,8 +15,11 @@ type VoicePanelProps = {
   interviewerName: string;
   layout?: "default" | "center-stage";
   isMicEnabled: boolean;
+  isVoiceConnected?: boolean;
+  isReconnecting?: boolean;
   errorMessage?: string | null;
   onToggleMic: () => void;
+  onReconnect?: () => void;
   onSendText: (text: string) => void;
 };
 
@@ -59,8 +62,11 @@ export function VoicePanel({
   interviewerName,
   layout = "default",
   isMicEnabled,
+  isVoiceConnected = true,
+  isReconnecting = false,
   errorMessage,
   onToggleMic,
+  onReconnect,
   onSendText,
 }: VoicePanelProps) {
   const [textOpen, setTextOpen] = useState(true);
@@ -115,7 +121,25 @@ export function VoicePanel({
 
       {errorMessage ? (
         <div className="rounded-lg border border-brand-rose/30 bg-brand-rose/10 px-3 py-2 text-[11px] leading-relaxed text-brand-rose">
-          {errorMessage}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span>{errorMessage}</span>
+            {onReconnect ? (
+              <button
+                type="button"
+                onClick={onReconnect}
+                disabled={isVoiceConnected || isReconnecting}
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition-colors",
+                  isVoiceConnected || isReconnecting
+                    ? "cursor-not-allowed border-brand-border bg-brand-surface text-brand-muted"
+                    : "border-brand-rose/35 bg-brand-deep text-brand-rose hover:border-brand-rose/60 hover:text-brand-text",
+                )}
+              >
+                <RefreshCw className={cn("h-3 w-3", isReconnecting && "animate-spin")} />
+                {isReconnecting ? "Reconnecting" : "Reconnect voice"}
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
