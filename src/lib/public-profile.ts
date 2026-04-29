@@ -9,6 +9,8 @@ const RESERVED_PUBLIC_USERNAMES = new Set([
   "callback",
   "dashboard",
   "favicon.ico",
+  "apple-icon.png",
+  "icon.png",
   "how-ai-evaluates",
   "icon.svg",
   "interview",
