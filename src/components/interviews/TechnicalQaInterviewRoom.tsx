@@ -1,14 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, MessageSquareMore } from "lucide-react";
+import { ArrowLeft, Loader2, MessageSquareMore, Mic, MicOff, PhoneOff, RefreshCw, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Timer } from "@/components/interview/Timer";
-import { VoicePanel } from "@/components/interview/VoicePanel";
 import { VoiceVisualizer, type VoiceState } from "@/components/interview/VoiceVisualizer";
-import { RoundBriefPanel } from "@/components/interview/RoundBriefPanel";
 import {
   useDeepgramVoiceAgent,
   type AgentFunctionDef,
@@ -26,6 +24,7 @@ import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
 import { getPhaseLabelForRound } from "@/lib/loops/round-config";
 import { TECHNICAL_QA_DURATION_MINUTES } from "@/lib/technical-qa";
+import { cn } from "@/lib/utils";
 
 type TechnicalQaInterviewRoomProps = {
   interviewId: string;
@@ -79,6 +78,20 @@ function extractDimension(
 ): ScoreDimensionRaw {
   const raw = scores[key] as ScoreDimensionRaw | undefined;
   return { score: raw?.score ?? 0, feedback: raw?.feedback ?? "" };
+}
+
+function getVoiceStateLabel(voiceState: VoiceState, interviewerName: string) {
+  if (voiceState === "thinking") return "Thinking";
+  if (voiceState === "speaking") return `${interviewerName} speaking`;
+  if (voiceState === "listening") return "Listening";
+  return "Ready";
+}
+
+function getVoiceStateDotClass(voiceState: VoiceState) {
+  if (voiceState === "speaking") return "bg-brand-green";
+  if (voiceState === "thinking") return "bg-brand-amber";
+  if (voiceState === "listening") return "bg-brand-cyan";
+  return "bg-brand-muted";
 }
 
 export function TechnicalQaInterviewRoom({
@@ -638,186 +651,250 @@ export function TechnicalQaInterviewRoom({
     );
   }
 
+  const phaseLabel = getPhaseLabelForRound("technical_qa", currentPhase);
+  const voiceStateLabel = getVoiceStateLabel(voiceState, interviewer.name);
+
   return (
     <div className="flex h-screen flex-col bg-brand-deep text-brand-text">
-      <header className="border-b border-brand-border bg-brand-card px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <div className="hidden h-5 w-px bg-brand-border sm:block" />
-            <div>
-              <p className="text-sm font-semibold tracking-tight">Technical Q&A</p>
-              <p className="text-xs text-brand-muted">
-                Session #{interviewId.slice(-6).toUpperCase()}
-              </p>
-            </div>
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-brand-border bg-brand-deep px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/dashboard"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-brand-muted transition-colors hover:bg-brand-surface hover:text-brand-text"
+            aria-label="Back to dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold tracking-tight">Technical Q&amp;A</p>
+            <p className="truncate text-xs text-brand-muted">
+              {round.title} · #{interviewId.slice(-6).toUpperCase()}
+            </p>
           </div>
+        </div>
 
-          <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
+        <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
 
-          <div className="flex items-center gap-3">
-            <span className="hidden rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted md:inline-flex">
-              {getPhaseLabelForRound("technical_qa", currentPhase)}
-            </span>
-            <Button variant="destructive" size="sm" onClick={() => void handleEndInterview()}>
-              End Interview
-            </Button>
-          </div>
+        <div className="hidden items-center gap-2 md:flex">
+          <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
+            {phaseLabel}
+          </span>
+          <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
+            {storeConfig?.language ?? "Voice"}
+          </span>
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[18rem_22rem_minmax(0,1fr)] xl:grid-cols-[20rem_24rem_minmax(0,1fr)]">
-        <aside className="min-h-0 overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          <RoundBriefPanel
-            round={round}
-            company={storeConfig?.company ?? null}
-            roleTitle={storeConfig?.roleTitle ?? null}
-            loopName={storeConfig?.loopName ?? null}
-          />
-        </aside>
+      <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_22rem] lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-1 xl:grid-cols-[minmax(0,1fr)_28rem]">
+        <section className="flex min-h-0 flex-col bg-brand-deep">
+          <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-5 sm:px-6 lg:px-8">
+            <div className="relative flex aspect-video w-full max-w-5xl items-center justify-center overflow-hidden rounded-lg border border-brand-border bg-brand-surface">
+              <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-brand-border bg-brand-deep/80 px-3 py-1 text-xs text-brand-muted">
+                <span className={cn("h-2 w-2 rounded-full", getVoiceStateDotClass(voiceState))} />
+                {voiceStateLabel}
+              </div>
 
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          <div className="border-b border-brand-border px-5 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-              Voice Room
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-              Focus on the live conversation. The orb stays centered here while the transcript
-              builds alongside it.
-            </p>
-          </div>
+              {voiceError ? (
+                <div className="absolute right-4 top-4 max-w-xs rounded-lg border border-brand-rose/30 bg-brand-rose/10 px-3 py-2 text-xs leading-relaxed text-brand-rose">
+                  {voiceError}
+                </div>
+              ) : null}
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="h-full min-h-[36rem]">
-              <VoicePanel
-                voiceState={voiceState}
-                currentPhase={currentPhase}
-                roundType="technical_qa"
-                interviewerName={interviewer.name}
-                layout="center-stage"
-                isMicEnabled={isMicEnabled}
-                isVoiceConnected={isAgentConnected}
-                isReconnecting={isConnectingVoice}
-                errorMessage={voiceError}
-                onToggleMic={handleToggleMic}
-                onReconnect={resumeInterview}
-                onSendText={handleSendText}
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          <div className="border-b border-brand-border px-5 py-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  Live Transcript
-                </p>
-                <p className="mt-1 text-sm text-brand-muted">
-                  Every spoken turn lands here so you can track the flow of the discussion in real
-                  time.
+              <div className="flex flex-col items-center text-center">
+                <VoiceVisualizer state={voiceState} className="h-40 w-40 sm:h-48 sm:w-48" />
+                <p className="mt-5 text-lg font-semibold text-brand-text">{interviewer.name}</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.16em] text-brand-muted">
+                  AI Interviewer
                 </p>
               </div>
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                {voiceState === "thinking"
-                  ? "Thinking"
-                  : voiceState === "speaking"
-                    ? `${interviewer.name} speaking`
-                    : "Listening live"}
-              </span>
+
+              <div className="absolute bottom-4 left-4 max-w-[70%] rounded-lg border border-brand-border bg-brand-deep/80 px-3 py-2">
+                <p className="truncate text-sm font-medium text-brand-text">{round.title}</p>
+                <p className="mt-1 truncate text-xs text-brand-muted">{phaseLabel}</p>
+              </div>
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-            <TechnicalQaTranscript
-              messages={chatMessages}
-              interviewerName={interviewer.name}
-              isAgentBusy={voiceState === "thinking"}
-            />
+          <div className="shrink-0 border-t border-brand-border bg-brand-deep px-4 py-3">
+            <div className="mx-auto flex max-w-5xl items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleToggleMic}
+                className={cn(
+                  "flex h-11 w-11 items-center justify-center rounded-full border transition-colors",
+                  isMicEnabled
+                    ? "border-brand-cyan/40 bg-brand-cyan/15 text-brand-cyan hover:bg-brand-cyan/25"
+                    : "border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
+                )}
+                aria-label={isMicEnabled ? "Mute microphone" : "Enable microphone"}
+              >
+                {isMicEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void resumeInterview()}
+                disabled={isAgentConnected || isConnectingVoice}
+                className={cn(
+                  "flex h-11 min-w-11 items-center justify-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
+                  isAgentConnected || isConnectingVoice
+                    ? "cursor-not-allowed border-brand-border bg-brand-surface text-brand-muted"
+                    : "border-brand-cyan/40 bg-brand-cyan/15 text-brand-cyan hover:bg-brand-cyan/25"
+                )}
+              >
+                <RefreshCw className={cn("h-4 w-4", isConnectingVoice && "animate-spin")} />
+                <span className="hidden sm:inline">
+                  {isConnectingVoice ? "Reconnecting" : "Reconnect"}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void handleEndInterview()}
+                className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-full bg-brand-rose px-4 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-rose/90"
+              >
+                <PhoneOff className="h-4 w-4" />
+                <span className="hidden sm:inline">End</span>
+              </button>
+            </div>
           </div>
         </section>
+
+        <TechnicalQaConversationPanel
+          messages={chatMessages}
+          interviewerName={interviewer.name}
+          isAgentBusy={voiceState === "thinking"}
+          onSendText={handleSendText}
+        />
       </div>
     </div>
   );
 }
 
-function TechnicalQaTranscript({
+function TechnicalQaConversationPanel({
   messages,
   interviewerName,
   isAgentBusy,
+  onSendText,
 }: {
   messages: ChatMessage[];
   interviewerName: string;
   isAgentBusy: boolean;
+  onSendText: (text: string) => void;
 }) {
+  const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [isAgentBusy, messages]);
 
-  if (messages.length === 0 && !isAgentBusy) {
-    return (
-      <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-brand-border bg-brand-surface">
-        <div className="max-w-sm px-6 text-center">
-          <MessageSquareMore className="mx-auto h-10 w-10 text-brand-cyan" />
-          <p className="mt-4 text-sm font-semibold text-brand-text">
-            {interviewerName} will open the round here
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-            This is a live voice interview with no coding. The full conversation transcript will
-            build here as the round progresses.
-          </p>
-        </div>
-      </div>
-    );
+  function sendDraft() {
+    const message = draft.trim();
+    if (!message) return;
+
+    onSendText(message);
+    setDraft("");
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendDraft();
+    }
   }
 
   return (
-    <div className="space-y-4">
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`flex ${message.role === "candidate" ? "justify-end" : "justify-start"}`}
-        >
-          <div
-            className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-              message.role === "candidate"
-                ? "rounded-tr-sm border border-brand-cyan/25 bg-brand-cyan/10"
-                : "rounded-tl-sm border border-brand-border bg-brand-surface"
-            }`}
+    <aside className="flex min-h-0 flex-col border-t border-brand-border bg-brand-card lg:border-l lg:border-t-0">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-brand-border px-4">
+        <div>
+          <p className="text-sm font-semibold text-brand-text">Conversation</p>
+          <p className="text-xs text-brand-muted">Chat + transcript</p>
+        </div>
+        <span className="rounded-full border border-brand-border bg-brand-surface px-2.5 py-1 text-xs text-brand-muted">
+          {messages.length}
+        </span>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        {messages.length === 0 && !isAgentBusy ? (
+          <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-brand-border bg-brand-surface">
+            <div className="max-w-xs px-6 text-center">
+              <MessageSquareMore className="mx-auto h-9 w-9 text-brand-cyan" />
+              <p className="mt-4 text-sm font-semibold text-brand-text">
+                {interviewerName} will open the round here
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn("flex", message.role === "candidate" ? "justify-end" : "justify-start")}
+            >
+              <div
+                className={cn(
+                  "max-w-[88%] rounded-lg border px-3 py-2.5",
+                  message.role === "candidate"
+                    ? "border-brand-cyan/25 bg-brand-cyan/10"
+                    : "border-brand-border bg-brand-surface"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-brand-text">
+                    {message.role === "candidate" ? "You" : interviewerName}
+                  </span>
+                  <span className="text-[11px] text-brand-muted">{message.time}</span>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-brand-text">{message.content}</p>
+              </div>
+            </div>
+          ))}
+
+          {isAgentBusy ? (
+            <div className="flex justify-start">
+              <div className="rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan [animation-delay:-0.2s]" />
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan [animation-delay:-0.1s]" />
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan" />
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          <div ref={bottomRef} />
+        </div>
+      </div>
+
+      <div className="shrink-0 border-t border-brand-border p-3">
+        <div className="flex items-end gap-2 rounded-lg border border-brand-border bg-brand-surface p-2">
+          <textarea
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={2}
+            placeholder="Type your answer..."
+            className="min-h-10 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-brand-text placeholder:text-brand-muted/60 focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={sendDraft}
+            disabled={!draft.trim()}
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors",
+              draft.trim()
+                ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90"
+                : "cursor-not-allowed bg-brand-border/40 text-brand-muted"
+            )}
+            aria-label="Send typed answer"
           >
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-brand-text">
-                {message.role === "candidate" ? "You" : interviewerName}
-              </span>
-              <span className="text-[11px] text-brand-muted">{message.time}</span>
-            </div>
-            <p className="mt-2 text-sm leading-relaxed text-brand-text">{message.content}</p>
-          </div>
+            <Send className="h-4 w-4" />
+          </button>
         </div>
-      ))}
-
-      {isAgentBusy ? (
-        <div className="flex justify-start">
-          <div className="rounded-2xl rounded-tl-sm border border-brand-border bg-brand-surface px-4 py-3">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan [animation-delay:-0.2s]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan [animation-delay:-0.1s]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan" />
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <div ref={bottomRef} />
-    </div>
+      </div>
+    </aside>
   );
 }
