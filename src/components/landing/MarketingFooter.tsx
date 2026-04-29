@@ -56,13 +56,8 @@ export function MarketingFooter({ signupHref }: MarketingFooterProps) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/35 to-transparent"
         aria-hidden
       />
-      <div
-        className="pointer-events-none absolute -top-24 left-1/2 h-48 w-[min(90vw,42rem)] -translate-x-1/2 rounded-full bg-brand-cyan/[0.06] blur-3xl"
-        aria-hidden
-      />
-
       <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:px-6 sm:pb-12 sm:pt-16 lg:pb-14 lg:pt-20">
-        <div className="rounded-[28px] border border-brand-border bg-[linear-gradient(180deg,rgba(17,24,32,0.92),rgba(7,8,10,0.96))] shadow-[0_24px_80px_-48px_rgba(34,211,238,0.32)]">
+        <div className="rounded-3xl border border-brand-border bg-brand-card shadow-2xl shadow-brand-deep/40">
           <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)] lg:p-10">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-cyan">
@@ -85,7 +80,7 @@ export function MarketingFooter({ signupHref }: MarketingFooterProps) {
               <div className="mt-7 flex flex-wrap items-center gap-3">
                 <Link
                   href={signupHref}
-                  className="group inline-flex items-center gap-2 rounded-xl bg-brand-cyan px-4 py-2.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
+                  className="group inline-flex items-center gap-2 rounded-xl bg-brand-cyan px-4 py-2.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
                 >
                   Practice free
                   <ArrowRight
@@ -128,14 +123,14 @@ export function MarketingFooter({ signupHref }: MarketingFooterProps) {
                 </p>
                 <a
                   href={supportHref}
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-cyan-300"
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
                 >
                   <Mail className="h-4 w-4" aria-hidden />
                   {SUPPORT_EMAIL}
                 </a>
                 <Link
                   href="/contact"
-                  className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-brand-cyan transition-colors hover:text-cyan-300"
+                  className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-brand-cyan transition-colors hover:text-brand-cyan/80"
                 >
                   <LifeBuoy className="h-4 w-4" aria-hidden />
                   Open support page
@@ -156,7 +151,7 @@ export function MarketingFooter({ signupHref }: MarketingFooterProps) {
                 </p>
                 <Link
                   href="/how-ai-evaluates"
-                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-cyan transition-colors hover:text-cyan-300"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-cyan transition-colors hover:text-brand-cyan/80"
                 >
                   Review the rubric
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden />

@@ -27,39 +27,39 @@ const TIMELINE_STYLES: Record<
   }
 > = {
   cyan: {
-    activeBadge: "border-brand-cyan/45 bg-brand-cyan/16 text-brand-cyan shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_24px_rgba(34,211,238,0.14)]",
+    activeBadge: "border-brand-cyan/45 bg-brand-cyan/15 text-brand-cyan shadow-sm shadow-brand-cyan/10",
     activeCard: "bg-brand-cyan/[0.09] ring-1 ring-brand-cyan/30",
-    activeMarker: "border-brand-cyan/45 bg-brand-cyan/18 text-brand-cyan shadow-[0_0_0_1px_rgba(34,211,238,0.12),0_0_0_12px_rgba(34,211,238,0.07),0_0_34px_rgba(34,211,238,0.24)]",
+    activeMarker: "border-brand-cyan/45 bg-brand-cyan/15 text-brand-cyan shadow-lg shadow-brand-cyan/20",
     badgeText: "text-brand-cyan",
     border: "border-brand-cyan/25",
-    glow: "shadow-[0_0_0_1px_rgba(34,211,238,0.08),0_26px_60px_-34px_rgba(34,211,238,0.34)]",
+    glow: "shadow-xl shadow-brand-cyan/10",
     surface: "bg-brand-cyan/10",
   },
   green: {
-    activeBadge: "border-brand-green/45 bg-brand-green/16 text-brand-green shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_24px_rgba(52,211,153,0.14)]",
+    activeBadge: "border-brand-green/45 bg-brand-green/15 text-brand-green shadow-sm shadow-brand-green/10",
     activeCard: "bg-brand-green/[0.08] ring-1 ring-brand-green/30",
-    activeMarker: "border-brand-green/45 bg-brand-green/18 text-brand-green shadow-[0_0_0_1px_rgba(52,211,153,0.12),0_0_0_12px_rgba(52,211,153,0.07),0_0_34px_rgba(52,211,153,0.24)]",
+    activeMarker: "border-brand-green/45 bg-brand-green/15 text-brand-green shadow-lg shadow-brand-green/20",
     badgeText: "text-brand-green",
     border: "border-brand-green/25",
-    glow: "shadow-[0_0_0_1px_rgba(52,211,153,0.08),0_26px_60px_-34px_rgba(52,211,153,0.3)]",
+    glow: "shadow-xl shadow-brand-green/10",
     surface: "bg-brand-green/10",
   },
   amber: {
-    activeBadge: "border-brand-amber/45 bg-brand-amber/16 text-brand-amber shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_24px_rgba(251,191,36,0.14)]",
+    activeBadge: "border-brand-amber/45 bg-brand-amber/15 text-brand-amber shadow-sm shadow-brand-amber/10",
     activeCard: "bg-brand-amber/[0.08] ring-1 ring-brand-amber/30",
-    activeMarker: "border-brand-amber/45 bg-brand-amber/18 text-brand-amber shadow-[0_0_0_1px_rgba(251,191,36,0.12),0_0_0_12px_rgba(251,191,36,0.07),0_0_34px_rgba(251,191,36,0.24)]",
+    activeMarker: "border-brand-amber/45 bg-brand-amber/15 text-brand-amber shadow-lg shadow-brand-amber/20",
     badgeText: "text-brand-amber",
     border: "border-brand-amber/25",
-    glow: "shadow-[0_0_0_1px_rgba(251,191,36,0.08),0_26px_60px_-34px_rgba(251,191,36,0.3)]",
+    glow: "shadow-xl shadow-brand-amber/10",
     surface: "bg-brand-amber/10",
   },
   rose: {
-    activeBadge: "border-brand-rose/45 bg-brand-rose/16 text-brand-rose shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_24px_rgba(244,114,182,0.14)]",
+    activeBadge: "border-brand-rose/45 bg-brand-rose/15 text-brand-rose shadow-sm shadow-brand-rose/10",
     activeCard: "bg-brand-rose/[0.08] ring-1 ring-brand-rose/30",
-    activeMarker: "border-brand-rose/45 bg-brand-rose/18 text-brand-rose shadow-[0_0_0_1px_rgba(244,114,182,0.12),0_0_0_12px_rgba(244,114,182,0.07),0_0_34px_rgba(244,114,182,0.24)]",
+    activeMarker: "border-brand-rose/45 bg-brand-rose/15 text-brand-rose shadow-lg shadow-brand-rose/20",
     badgeText: "text-brand-rose",
     border: "border-brand-rose/25",
-    glow: "shadow-[0_0_0_1px_rgba(244,114,182,0.08),0_26px_60px_-34px_rgba(244,114,182,0.3)]",
+    glow: "shadow-xl shadow-brand-rose/10",
     surface: "bg-brand-rose/10",
   },
 };
@@ -296,10 +296,7 @@ export function HowItWorksTimeline() {
                       {step.window}
                     </p>
                     <h3
-                      className={cn(
-                        "mt-2 text-lg font-semibold transition-colors duration-500",
-                        isActive ? "text-white" : "text-brand-text"
-                      )}
+                      className="mt-2 text-lg font-semibold text-brand-text transition-colors duration-500"
                     >
                       {step.title}
                     </h3>
@@ -318,10 +315,7 @@ export function HowItWorksTimeline() {
                 </div>
 
                 <p
-                  className={cn(
-                    "mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors duration-500",
-                    isActive ? "text-white/78" : "text-brand-muted/90"
-                  )}
+                  className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-muted/90 transition-colors duration-500"
                 >
                   {step.label}
                 </p>

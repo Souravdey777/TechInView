@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
@@ -28,6 +29,7 @@ import {
   buildEngineeringManagerRoundContext,
   getEngineeringManagerFocusLabels,
 } from "@/lib/engineering-manager";
+import { cn } from "@/lib/utils";
 
 type StartResponse = {
   data?: {
@@ -198,22 +200,22 @@ export function EngineeringManagerSetup({
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
                       Company
                     </label>
-                    <input
+                    <Input
                       value={company}
                       onChange={(event) => setCompany(event.target.value)}
                       placeholder="Meta, Google, Stripe..."
-                      className="mt-2 w-full rounded-2xl border border-brand-border bg-brand-card px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted/60 focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                      className="mt-2 h-11 rounded-2xl bg-brand-card px-4"
                     />
                   </div>
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
                       Role Title
                     </label>
-                    <input
+                    <Input
                       value={roleTitle}
                       onChange={(event) => setRoleTitle(event.target.value)}
                       placeholder="Senior Backend Engineer"
-                      className="mt-2 w-full rounded-2xl border border-brand-border bg-brand-card px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted/60 focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                      className="mt-2 h-11 rounded-2xl bg-brand-card px-4"
                     />
                   </div>
                 </div>
@@ -237,15 +239,17 @@ export function EngineeringManagerSetup({
                     const selected = focusAreas.includes(option.value);
 
                     return (
-                      <button
+                      <Button
                         key={option.value}
                         type="button"
                         onClick={() => toggleFocusArea(option.value)}
-                        className={`flex items-start justify-between rounded-2xl border px-4 py-4 text-left transition-colors ${
+                        variant="outline"
+                        className={cn(
+                          "h-auto w-full items-start justify-between whitespace-normal rounded-2xl px-4 py-4 text-left",
                           selected
-                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text"
+                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
                             : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                        }`}
+                        )}
                       >
                         <div>
                           <p className="text-sm font-semibold">{option.label}</p>
@@ -262,7 +266,7 @@ export function EngineeringManagerSetup({
                         >
                           {selected ? <Check className="h-3 w-3" /> : null}
                         </span>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -278,15 +282,17 @@ export function EngineeringManagerSetup({
                     const selected = interviewerPersona === persona.id;
 
                     return (
-                      <button
+                      <Button
                         key={persona.id}
                         type="button"
                         onClick={() => setInterviewerPersona(persona.id)}
-                        className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                        variant="outline"
+                        className={cn(
+                          "h-auto w-full flex-col items-start whitespace-normal rounded-2xl px-4 py-4 text-left",
                           selected
-                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text"
+                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
                             : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                        }`}
+                        )}
                       >
                         <p className="text-sm font-semibold">{persona.name}</p>
                         <p className="mt-1 text-xs uppercase tracking-[0.14em] text-brand-muted">
@@ -295,7 +301,7 @@ export function EngineeringManagerSetup({
                         <p className="mt-3 text-xs leading-relaxed">
                           {persona.shortStyleSummary}
                         </p>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>

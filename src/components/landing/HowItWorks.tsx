@@ -52,11 +52,7 @@ export function HowItWorks() {
         <div className="grid md:grid-cols-3 gap-8 relative">
           {/* Connector line */}
           <div
-            className="hidden md:block absolute top-8 left-1/3 right-1/3 h-px"
-            style={{
-              background:
-                "linear-gradient(to right, transparent, #1a2332, transparent)",
-            }}
+            className="absolute left-1/3 right-1/3 top-8 hidden h-px bg-gradient-to-r from-transparent via-brand-border to-transparent md:block"
             aria-hidden="true"
           />
           {steps.map((step) => (

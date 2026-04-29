@@ -587,7 +587,7 @@ export function DashboardHome({
           <div>
             <h2 className="text-xl font-semibold text-brand-text">Practice Now</h2>
             <p className="mt-1 text-sm text-brand-muted">
-              Start with free DSA practice or jump straight into AI Interview Mode.
+              Start with free DSA practice, AI Interview Mode, or a voice-led Technical Q&A round.
             </p>
           </div>
           <Link

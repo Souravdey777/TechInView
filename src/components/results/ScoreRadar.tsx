@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DESIGN_SYSTEM_CHART_COLORS } from "@/lib/design-system";
 
 type RadarDataPoint = {
   dimension: string;
@@ -65,13 +66,13 @@ export function ScoreRadar({ scores }: ScoreRadarProps) {
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={data} margin={{ top: 16, right: 32, bottom: 16, left: 32 }}>
               <PolarGrid
-                stroke="#1a2332"
+                stroke={DESIGN_SYSTEM_CHART_COLORS.grid}
                 strokeWidth={1}
               />
               <PolarAngleAxis
                 dataKey="dimension"
                 tick={{
-                  fill: "#7a8ba3",
+                  fill: DESIGN_SYSTEM_CHART_COLORS.label,
                   fontSize: 12,
                   fontFamily: "Sora, system-ui, sans-serif",
                 }}
@@ -80,22 +81,22 @@ export function ScoreRadar({ scores }: ScoreRadarProps) {
                 angle={90}
                 domain={[0, 100]}
                 tick={{
-                  fill: "#4a5568",
+                  fill: DESIGN_SYSTEM_CHART_COLORS.tick,
                   fontSize: 10,
                 }}
                 tickCount={5}
-                stroke="#1a2332"
+                stroke={DESIGN_SYSTEM_CHART_COLORS.axis}
               />
               <Radar
                 name="Score"
                 dataKey="score"
-                stroke="#22d3ee"
-                fill="#22d3ee"
+                stroke={DESIGN_SYSTEM_CHART_COLORS.score}
+                fill={DESIGN_SYSTEM_CHART_COLORS.score}
                 fillOpacity={0.2}
                 strokeWidth={2}
                 dot={{
                   r: 4,
-                  fill: "#22d3ee",
+                  fill: DESIGN_SYSTEM_CHART_COLORS.score,
                   strokeWidth: 0,
                 }}
               />

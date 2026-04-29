@@ -10,6 +10,10 @@ import {
   Tooltip,
   ReferenceLine,
 } from "recharts";
+import {
+  DESIGN_SYSTEM_CHART_COLORS,
+  getDesignSystemScoreColor,
+} from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 type DataPoint = {
@@ -32,14 +36,7 @@ function CustomTooltip({
 }) {
   if (!active || !payload?.[0]) return null;
   const { value, payload: point } = payload[0];
-  const color =
-    value >= 85
-      ? "#34d399"
-      : value >= 70
-      ? "#22d3ee"
-      : value >= 55
-      ? "#fbbf24"
-      : "#f472b6";
+  const color = getDesignSystemScoreColor(value);
 
   return (
     <div className="bg-brand-deep border border-brand-border rounded-lg px-3 py-2 shadow-xl">
@@ -65,14 +62,7 @@ function CustomDot({
 }) {
   if (!cx || !cy || !payload) return null;
   const score = payload.score;
-  const fill =
-    score >= 85
-      ? "#34d399"
-      : score >= 70
-      ? "#22d3ee"
-      : score >= 55
-      ? "#fbbf24"
-      : "#f472b6";
+  const fill = getDesignSystemScoreColor(score);
 
   return (
     <g>
@@ -84,7 +74,7 @@ function CustomDot({
         cy={cy}
         r={3.5}
         fill={fill}
-        stroke="#07080a"
+        stroke={DESIGN_SYSTEM_CHART_COLORS.background}
         strokeWidth={1.5}
       />
     </g>
@@ -164,25 +154,25 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps) {
           >
             <defs>
               <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                <stop offset="0%" stopColor={DESIGN_SYSTEM_CHART_COLORS.score} stopOpacity={0.25} />
+                <stop offset="100%" stopColor={DESIGN_SYSTEM_CHART_COLORS.score} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid
               strokeDasharray="3 6"
-              stroke="#1a2332"
+              stroke={DESIGN_SYSTEM_CHART_COLORS.grid}
               vertical={false}
             />
             <XAxis
               dataKey="date"
-              tick={{ fill: "#4a5568", fontSize: 10 }}
-              axisLine={{ stroke: "#1a2332" }}
+              tick={{ fill: DESIGN_SYSTEM_CHART_COLORS.tick, fontSize: 10 }}
+              axisLine={{ stroke: DESIGN_SYSTEM_CHART_COLORS.axis }}
               tickLine={false}
               dy={8}
             />
             <YAxis
               domain={[0, 100]}
-              tick={{ fill: "#4a5568", fontSize: 10 }}
+              tick={{ fill: DESIGN_SYSTEM_CHART_COLORS.tick, fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               dx={-4}
@@ -190,18 +180,18 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps) {
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: "#1a2332", strokeWidth: 1 }}
+              cursor={{ stroke: DESIGN_SYSTEM_CHART_COLORS.grid, strokeWidth: 1 }}
             />
             {/* Hire threshold line */}
             <ReferenceLine
               y={70}
-              stroke="#34d399"
+              stroke={DESIGN_SYSTEM_CHART_COLORS.success}
               strokeDasharray="4 4"
               strokeOpacity={0.3}
               label={{
                 value: "Hire",
                 position: "right",
-                fill: "#34d399",
+                fill: DESIGN_SYSTEM_CHART_COLORS.success,
                 fontSize: 10,
                 opacity: 0.5,
               }}
@@ -209,14 +199,14 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps) {
             <Area
               type="monotone"
               dataKey="score"
-              stroke="#22d3ee"
+              stroke={DESIGN_SYSTEM_CHART_COLORS.score}
               strokeWidth={2.5}
               fill="url(#scoreGradient)"
               dot={<CustomDot />}
               activeDot={{
                 r: 5,
-                fill: "#22d3ee",
-                stroke: "#07080a",
+                fill: DESIGN_SYSTEM_CHART_COLORS.score,
+                stroke: DESIGN_SYSTEM_CHART_COLORS.background,
                 strokeWidth: 2,
               }}
             />

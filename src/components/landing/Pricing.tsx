@@ -62,20 +62,20 @@ const TONE_STYLES: Record<
 > = {
   slate: {
     action:
-      "border border-white/10 bg-white/[0.02] text-brand-text hover:border-white/18 hover:bg-white/[0.06]",
+      "border border-brand-border bg-brand-surface text-brand-text hover:border-brand-cyan/30 hover:bg-brand-card",
     card:
-      "border-white/8 bg-[linear-gradient(180deg,rgba(17,24,32,0.96),rgba(11,15,22,0.98))] shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_28px_90px_-48px_rgba(0,0,0,0.72)]",
-    glow: "bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.12),transparent_52%)]",
+      "border-brand-border bg-brand-card shadow-2xl shadow-brand-deep/40",
+    glow: "bg-brand-surface/30",
     eyebrow: "text-brand-muted",
-    pricePanel: "border-white/8 bg-brand-deep/60",
-    statChip: "border-white/8 bg-white/[0.04] text-brand-muted",
+    pricePanel: "border-brand-border bg-brand-surface",
+    statChip: "border-brand-border bg-brand-card text-brand-muted",
   },
   cyan: {
     action:
-      "border border-brand-cyan/30 bg-brand-cyan text-brand-deep hover:bg-cyan-300 hover:shadow-[0_12px_40px_-22px_rgba(34,211,238,0.7)]",
+      "border border-brand-cyan/30 bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90",
     card:
-      "border-brand-cyan/22 bg-[linear-gradient(180deg,rgba(17,24,32,0.98),rgba(7,12,18,0.98))] shadow-[0_0_0_1px_rgba(34,211,238,0.05),0_32px_110px_-56px_rgba(34,211,238,0.36)]",
-    glow: "bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.22),transparent_52%)]",
+      "border-brand-cyan/30 bg-brand-card shadow-2xl shadow-brand-cyan/10",
+    glow: "bg-brand-cyan/10",
     eyebrow: "text-brand-cyan",
     pricePanel: "border-brand-cyan/16 bg-brand-cyan/[0.08]",
     statChip: "border-brand-cyan/16 bg-brand-cyan/[0.10] text-brand-cyan",
@@ -84,8 +84,8 @@ const TONE_STYLES: Record<
     action:
       "border border-brand-amber/22 bg-brand-amber/[0.08] text-brand-text hover:border-brand-amber/32 hover:bg-brand-amber/[0.14]",
     card:
-      "border-brand-amber/20 bg-[linear-gradient(180deg,rgba(17,24,32,0.97),rgba(16,13,8,0.98))] shadow-[0_0_0_1px_rgba(251,191,36,0.04),0_28px_96px_-52px_rgba(251,191,36,0.26)]",
-    glow: "bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.18),transparent_54%)]",
+      "border-brand-amber/25 bg-brand-card shadow-2xl shadow-brand-amber/10",
+    glow: "bg-brand-amber/10",
     eyebrow: "text-brand-amber",
     pricePanel: "border-brand-amber/14 bg-brand-amber/[0.07]",
     statChip: "border-brand-amber/16 bg-brand-amber/[0.10] text-brand-amber",
@@ -269,7 +269,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
             ].map((item) => (
               <span
                 key={item}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-brand-muted"
+                className="inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-surface px-4 py-2 text-sm text-brand-muted"
               >
                 <Sparkles className="h-3.5 w-3.5 text-brand-cyan" />
                 {item}
@@ -279,7 +279,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
 
           {defaultRegion === "inr" && (
             <div className="mt-8 inline-flex flex-col items-center gap-3">
-              <div className="inline-flex items-center rounded-full border border-white/10 bg-brand-card/70 p-1 shadow-[0_10px_40px_-24px_rgba(0,0,0,0.8)]">
+              <div className="inline-flex items-center rounded-full border border-brand-border bg-brand-card p-1 shadow-xl shadow-brand-deep/40">
                 {[
                   { value: "usd" as const, label: "USD ($)" },
                   { value: "inr" as const, label: "INR (₹)" },
@@ -291,7 +291,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                     className={cn(
                       "rounded-full px-4 py-2 text-sm font-medium transition-all",
                       activeRegion === region.value
-                        ? "bg-brand-cyan text-brand-deep shadow-[0_10px_30px_-18px_rgba(34,211,238,0.8)]"
+                        ? "bg-brand-cyan text-brand-deep shadow-lg shadow-brand-cyan/20"
                         : "text-brand-muted hover:text-brand-text"
                     )}
                   >
@@ -318,7 +318,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
               <div
                 key={tier.name}
                 className={cn(
-                  "group relative flex h-full flex-col overflow-hidden rounded-[1.85rem] border p-6 transition-all duration-300",
+                  "group relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 transition-all duration-300",
                   style.card,
                   isFeatured && "lg:-translate-y-4 lg:scale-[1.02]"
                 )}
@@ -332,7 +332,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                   aria-hidden
                 />
                 <div
-                  className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                  className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/25 to-transparent"
                   aria-hidden
                 />
 
@@ -378,7 +378,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
 
                   <div
                     className={cn(
-                      "mt-6 flex min-h-[15rem] flex-col rounded-[1.35rem] border p-4",
+                      "mt-6 flex min-h-[15rem] flex-col rounded-2xl border p-4",
                       style.pricePanel
                     )}
                   >
@@ -434,7 +434,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                     </p>
                   </div>
 
-                  <ul className="mt-6 flex flex-1 flex-col space-y-3 border-t border-white/8 pt-6 text-sm">
+                  <ul className="mt-6 flex flex-1 flex-col space-y-3 border-t border-brand-border pt-6 text-sm">
                     {tier.features.map((feature) => (
                       <li
                         key={feature.text}
@@ -448,7 +448,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                             "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
                             feature.included
                               ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
-                              : "border-white/8 bg-white/[0.03] text-brand-muted"
+                              : "border-brand-border bg-brand-surface text-brand-muted"
                           )}
                         >
                           {feature.included ? (
@@ -465,7 +465,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
                   <Link
                     href={price === 0 ? practiceHref : ctaHref}
                     className={cn(
-                      "mt-6 inline-flex w-full items-center justify-between rounded-[1.1rem] px-4 py-3.5 text-sm font-semibold transition-all",
+                      "mt-6 inline-flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-sm font-semibold transition-all",
                       style.action
                     )}
                   >
@@ -479,13 +479,13 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm text-brand-muted">
-          <span className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2">
+          <span className="rounded-full border border-brand-border bg-brand-surface px-4 py-2">
             One-time packs
           </span>
-          <span className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2">
+          <span className="rounded-full border border-brand-border bg-brand-surface px-4 py-2">
             No subscription
           </span>
-          <span className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2">
+          <span className="rounded-full border border-brand-border bg-brand-surface px-4 py-2">
             No card required for free practice
           </span>
           {activeRegion === "inr" ? (

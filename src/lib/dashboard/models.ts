@@ -72,10 +72,10 @@ export const PRACTICE_CARD_CONFIGS: readonly PracticeCardConfig[] = [
     kind: "technical_qa",
     label: "Technical Q&A",
     shortDescription: "Choose languages and frameworks, then answer domain-specific technical questions.",
-    status: "coming_soon",
+    status: "live",
     href: "/interviews/technical-qa/setup",
     setupHighlights: ["Languages", "Frameworks", "Expertise"],
-    ctaLabel: "Technical Q&A coming soon",
+    ctaLabel: "Start Technical Q&A",
   },
   {
     kind: "engineering_manager",

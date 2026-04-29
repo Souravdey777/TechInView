@@ -60,7 +60,7 @@ export function ScoreSummary({ overallScore, hireRecommendation, summary }: Scor
                 cy="70"
                 r="54"
                 fill="none"
-                stroke="#1a2332"
+                className="stroke-brand-border"
                 strokeWidth="10"
               />
               {/* Progress arc */}

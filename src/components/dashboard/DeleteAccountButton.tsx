@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -60,13 +61,14 @@ export function DeleteAccountButton() {
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={() => setOpen(true)}
-        className="shrink-0 px-4 py-2 rounded-lg text-sm font-semibold text-brand-rose border border-brand-rose/30 bg-brand-rose/5 hover:bg-brand-rose/10 transition-colors"
+        variant="destructive"
+        className="shrink-0"
       >
         Delete Account
-      </button>
+      </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-md">
@@ -103,23 +105,23 @@ export function DeleteAccountButton() {
           )}
 
           <DialogFooter>
-            <button
+            <Button
               type="button"
               onClick={() => handleOpenChange(false)}
               disabled={loading}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-brand-muted hover:text-brand-text hover:bg-brand-surface border border-brand-border transition-colors disabled:opacity-40"
+              variant="secondary"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handleDelete}
               disabled={!confirmed || loading}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-brand-rose hover:bg-brand-rose/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+              variant="destructive"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? "Deleting..." : "Delete Account"}
-            </button>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

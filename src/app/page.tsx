@@ -60,7 +60,7 @@ const TONE_STYLES: Record<
   cyan: {
     badgeText: "text-brand-cyan",
     border: "border-brand-cyan/25",
-    glow: "shadow-[0_0_0_1px_rgba(34,211,238,0.08),0_18px_45px_-24px_rgba(34,211,238,0.34)]",
+    glow: "shadow-xl shadow-brand-cyan/10",
     solid: "bg-brand-cyan",
     text: "text-brand-cyan",
     surface: "bg-brand-cyan/10",
@@ -68,7 +68,7 @@ const TONE_STYLES: Record<
   green: {
     badgeText: "text-brand-green",
     border: "border-brand-green/25",
-    glow: "shadow-[0_0_0_1px_rgba(52,211,153,0.08),0_18px_45px_-24px_rgba(52,211,153,0.28)]",
+    glow: "shadow-xl shadow-brand-green/10",
     solid: "bg-brand-green",
     text: "text-brand-green",
     surface: "bg-brand-green/10",
@@ -76,7 +76,7 @@ const TONE_STYLES: Record<
   amber: {
     badgeText: "text-brand-amber",
     border: "border-brand-amber/25",
-    glow: "shadow-[0_0_0_1px_rgba(251,191,36,0.08),0_18px_45px_-24px_rgba(251,191,36,0.28)]",
+    glow: "shadow-xl shadow-brand-amber/10",
     solid: "bg-brand-amber",
     text: "text-brand-amber",
     surface: "bg-brand-amber/10",
@@ -84,7 +84,7 @@ const TONE_STYLES: Record<
   rose: {
     badgeText: "text-brand-rose",
     border: "border-brand-rose/25",
-    glow: "shadow-[0_0_0_1px_rgba(244,114,182,0.08),0_18px_45px_-24px_rgba(244,114,182,0.28)]",
+    glow: "shadow-xl shadow-brand-rose/10",
     solid: "bg-brand-rose",
     text: "text-brand-rose",
     surface: "bg-brand-rose/10",
@@ -282,7 +282,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             <div className="grid items-center gap-16 xl:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] xl:gap-20">
               <div className="max-w-3xl pt-4">
                 <div className="inline-flex items-center gap-2 rounded-full border border-brand-cyan/25 bg-brand-cyan/[0.08] px-4 py-1.5 text-xs font-medium text-brand-cyan">
-                  <span className="h-2 w-2 rounded-full bg-brand-cyan shadow-[0_0_12px_rgba(34,211,238,0.55)]" />
+                  <span className="h-2 w-2 rounded-full bg-brand-cyan shadow-sm shadow-brand-cyan/30" />
                   Voice-first AI mock interviews for software engineers
                 </div>
 
@@ -300,14 +300,14 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                   <Link
                     href={practiceSignupHref}
-                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-7 py-4 text-base font-semibold text-brand-deep transition-colors hover:bg-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
+                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-7 py-4 text-base font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
                   >
                     Practice Free
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                   <Link
                     href={previewSignupHref}
-                    className="group inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-7 py-4 text-base font-semibold text-brand-text transition-colors hover:border-brand-cyan/25 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/40 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
+                    className="group inline-flex items-center justify-center gap-2 rounded-xl border border-brand-border bg-brand-surface px-7 py-4 text-base font-semibold text-brand-text transition-colors hover:border-brand-cyan/30 hover:bg-brand-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/40 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
                   >
                     <Play className="h-4 w-4 text-brand-cyan" />
                     Try 5-Minute Audio Interview
@@ -352,7 +352,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                         "rounded-full border px-3 py-1 text-[11px] font-medium",
                         persona.id === "tia"
                           ? "border-brand-cyan/[0.35] bg-brand-cyan/[0.12] text-brand-cyan"
-                          : "border-white/10 bg-white/[0.02] text-brand-muted"
+                          : "border-brand-border bg-brand-surface text-brand-muted"
                       )}
                     >
                       {persona.name} ({persona.companyLabel})
@@ -360,11 +360,11 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                   ))}
                 </div>
 
-                <div className="mt-7 rounded-[1.8rem] border border-white/10 bg-brand-deep/[0.62] p-4 lg:p-5">
+                <div className="mt-7 rounded-3xl border border-brand-border bg-brand-surface/80 p-4 lg:p-5">
                   <div className="grid gap-5 lg:grid-cols-[minmax(17rem,0.72fr)_minmax(0,1.28fr)]">
-                    <div className="rounded-[1.5rem] border border-white/10 bg-black/[0.18] p-5">
+                    <div className="rounded-2xl border border-brand-border bg-brand-card p-5">
                       <LandingTiaPreview />
-                      <div className="mt-5 rounded-[1.2rem] border border-brand-cyan/[0.15] bg-brand-cyan/[0.05] p-4">
+                      <div className="mt-5 rounded-2xl border border-brand-cyan/[0.15] bg-brand-cyan/[0.05] p-4">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-cyan">
                           Live prompt
                         </p>
@@ -376,16 +376,16 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                     </div>
 
                     <div>
-                      <div className="rounded-[1.5rem] border border-white/10 bg-black/[0.16] p-5 lg:h-full">
+                      <div className="rounded-2xl border border-brand-border bg-brand-card p-5 lg:h-full">
                         <div className="flex items-center justify-between gap-3">
-                          <div className="rounded-lg border border-brand-border bg-black/20 px-3 py-1 font-mono text-[11px] text-brand-cyan">
+                          <div className="rounded-lg border border-brand-border bg-brand-surface px-3 py-1 font-mono text-[11px] text-brand-cyan">
                             solution.py
                           </div>
                           <div className="rounded-full border border-brand-green/20 bg-brand-green/10 px-3 py-1 text-[11px] font-semibold text-brand-green">
                             2/2 tests passing
                           </div>
                         </div>
-                        <div className="mt-5 space-y-1 rounded-[1.3rem] border border-white/[0.08] bg-black/[0.18] p-5 font-mono text-[11px] leading-relaxed text-brand-text sm:text-xs">
+                        <div className="mt-5 space-y-1 rounded-2xl border border-brand-border bg-brand-surface p-5 font-mono text-[11px] leading-relaxed text-brand-text sm:text-xs">
                           <p>
                             <span className="text-brand-muted">1</span>{" "}
                             <span className="text-brand-rose">def</span>{" "}
@@ -440,7 +440,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                   align="left"
                 />
 
-                <div className="mt-8 rounded-[1.7rem] border border-white/10 bg-brand-deep/70 p-6">
+                <div className="mt-8 rounded-3xl border border-brand-border bg-brand-card p-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-muted">
                     Why silent practice falls short
                   </p>
@@ -532,7 +532,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                     return (
                       <div
                         key={card.title}
-                        className="rounded-[1.4rem] border border-white/10 bg-white/[0.03] p-5"
+                        className="rounded-2xl border border-brand-border bg-brand-card p-5"
                       >
                         <div
                           className={cn(
@@ -608,7 +608,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                     <p className="mt-3 text-sm leading-relaxed text-brand-muted">
                       {spotlight.edge}
                     </p>
-                    <div className="mt-6 rounded-2xl border border-white/10 bg-brand-deep/[0.65] p-4">
+                    <div className="mt-6 rounded-2xl border border-brand-border bg-brand-surface p-4">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-muted">
                         Sample opener
                       </p>
@@ -654,14 +654,14 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href="/how-ai-evaluates"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-6 py-3 text-sm font-semibold text-brand-text transition-colors hover:border-brand-cyan/25 hover:bg-white/[0.05]"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-border bg-brand-surface px-6 py-3 text-sm font-semibold text-brand-text transition-colors hover:border-brand-cyan/30 hover:bg-brand-card"
                   >
                     Learn how scoring works
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
                     href={previewSignupHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-6 py-3 text-sm font-semibold text-brand-deep transition-colors hover:bg-cyan-300"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-6 py-3 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
                   >
                     Try 5-Minute Audio Interview
                     <ArrowRight className="h-4 w-4" />
@@ -670,7 +670,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               </div>
 
               <div className="landing-panel p-4 sm:p-5">
-                <div className="rounded-[1.6rem] border border-white/10 bg-brand-deep/[0.72] p-5 sm:p-6">
+                <div className="rounded-3xl border border-brand-border bg-brand-surface p-5 sm:p-6">
                   <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-cyan">
@@ -743,14 +743,14 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <Link
                   href={practiceSignupHref}
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-7 py-4 text-base font-semibold text-brand-deep transition-colors hover:bg-cyan-300"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-7 py-4 text-base font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
                 >
                   Practice Free
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
                 <Link
                   href={previewSignupHref}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-7 py-4 text-base font-semibold text-brand-text transition-colors hover:border-brand-cyan/25 hover:bg-white/[0.05]"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-border bg-brand-surface px-7 py-4 text-base font-semibold text-brand-text transition-colors hover:border-brand-cyan/30 hover:bg-brand-card"
                 >
                   Try 5-Minute Audio Interview
                 </Link>

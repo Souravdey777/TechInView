@@ -8,6 +8,7 @@ const RESERVED_PUBLIC_USERNAMES = new Set([
   "blog",
   "callback",
   "dashboard",
+  "design-system",
   "favicon.ico",
   "apple-icon.png",
   "icon.png",

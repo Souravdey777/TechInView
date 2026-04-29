@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectOption } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useSupabase } from "@/hooks/useSupabase";
 import { SUPPORTED_LANGUAGES } from "@/lib/constants";
 import {
@@ -207,12 +211,11 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
         <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
           Display Name
         </label>
-        <input
+        <Input
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="Your name"
-          className="w-full px-3 py-2.5 bg-brand-surface border border-brand-border rounded-lg text-brand-text text-sm placeholder:text-brand-muted focus:outline-none focus:border-brand-cyan/50 transition-colors"
         />
         <p className="text-brand-muted text-xs">
           This is the name shown at the top of your public profile.
@@ -224,12 +227,12 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
         <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
           Email
         </label>
-        <input
+        <Input
           type="email"
           value={initialProfile.email}
           readOnly
           disabled
-          className="w-full px-3 py-2.5 bg-brand-surface border border-brand-border rounded-lg text-brand-muted text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          className="text-brand-muted"
         />
         <p className="text-brand-muted text-xs">
           Email is managed through your OAuth provider.
@@ -241,18 +244,17 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
         <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
           Target Company
         </label>
-        <select
+        <Select
           value={targetCompany}
           onChange={(e) => setTargetCompany(e.target.value)}
-          className="w-full px-3 py-2.5 bg-brand-surface border border-brand-border rounded-lg text-brand-text text-sm appearance-none focus:outline-none focus:border-brand-cyan/50 transition-colors"
         >
-          <option value="">Select a company</option>
+          <SelectOption value="">Select a company</SelectOption>
           {TARGET_COMPANIES.map((company) => (
-            <option key={company} value={company.toLowerCase()}>
+            <SelectOption key={company} value={company.toLowerCase()}>
               {company}
-            </option>
+            </SelectOption>
           ))}
-        </select>
+        </Select>
       </div>
 
       {/* Experience Level */}
@@ -305,19 +307,21 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
           {SUPPORTED_LANGUAGES.map((lang) => {
             const isSelected = preferredLanguage === lang;
             return (
-              <button
+              <Button
                 key={lang}
                 type="button"
                 onClick={() => setPreferredLanguage(lang)}
+                variant="outline"
+                size="sm"
                 className={cn(
-                  "px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors",
+                  "h-auto rounded-lg px-3 py-1.5 text-xs",
                   isSelected
                     ? "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan"
                     : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/20 hover:text-brand-text"
                 )}
               >
                 {LANGUAGE_LABELS[lang]}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -346,7 +350,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                   : "border-brand-border bg-brand-card"
               )}
             >
-              <input
+              <Input
                 type="checkbox"
                 checked={isPublicProfile}
                 onChange={(e) => setIsPublicProfile(e.target.checked)}
@@ -370,13 +374,13 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
           <div className="rounded-lg border border-brand-border bg-brand-card px-3 py-2.5">
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-brand-muted">{shareBaseUrl.replace(/^https?:\/\//, "")}/u/</span>
-              <input
+              <Input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="your-handle"
                 maxLength={PUBLIC_PROFILE_USERNAME_MAX_LENGTH + 10}
-                className="min-w-0 flex-1 bg-transparent text-brand-text placeholder:text-brand-muted focus:outline-none"
+                className="h-auto min-w-0 flex-1 border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0 hover:border-transparent"
               />
             </div>
           </div>
@@ -389,13 +393,13 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
           <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
             Bio
           </label>
-          <textarea
+          <Textarea
             value={publicBio}
             onChange={(e) => setPublicBio(e.target.value)}
             placeholder="What are you preparing for right now?"
             maxLength={PUBLIC_PROFILE_BIO_MAX_LENGTH}
             rows={3}
-            className="w-full resize-none rounded-lg border border-brand-border bg-brand-card px-3 py-2.5 text-sm text-brand-text placeholder:text-brand-muted focus:outline-none focus:border-brand-cyan/50 transition-colors"
+            className="min-h-[5.75rem] bg-brand-card"
           />
           <div className="flex items-center justify-between gap-3 text-xs">
             <span className="text-brand-muted">
@@ -426,7 +430,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                   <label className="block text-brand-text text-sm font-medium">
                     {config.label}
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={publicLinks[key] ?? ""}
                     onChange={(e) =>
@@ -436,7 +440,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                       }))
                     }
                     placeholder={config.placeholder}
-                    className="w-full rounded-lg border border-brand-border bg-brand-card px-3 py-2.5 text-sm text-brand-text placeholder:text-brand-muted focus:outline-none focus:border-brand-cyan/50 transition-colors"
+                    className="bg-brand-card"
                   />
                   <p className="text-xs leading-5 text-brand-muted">
                     {config.helpText}
@@ -476,22 +480,16 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
 
       {/* Save Button */}
       <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row sm:items-center">
-        <button
+        <Button
           type="button"
           onClick={handleSave}
           disabled={saveStatus === "saving"}
-          className={cn(
-            "inline-flex items-center gap-2 px-5 py-2.5 bg-brand-cyan text-brand-deep font-semibold text-sm rounded-lg transition-opacity",
-            saveStatus === "saving"
-              ? "opacity-70 cursor-not-allowed"
-              : "hover:opacity-90"
-          )}
         >
           {saveStatus === "saving" && (
             <Loader2 className="w-4 h-4 animate-spin" />
           )}
           {saveStatus === "saving" ? "Saving…" : "Save Changes"}
-        </button>
+        </Button>
 
         {saveStatus === "success" && (
           <span className="inline-flex items-center gap-1.5 text-brand-green text-sm font-medium">

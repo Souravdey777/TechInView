@@ -324,7 +324,7 @@ export default function OnboardingPage() {
 
           {/* Error */}
           {error && (
-            <div className="mt-4 rounded-lg border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm text-brand-danger">
+            <div className="mt-4 rounded-lg border border-brand-rose/30 bg-brand-rose/10 px-4 py-3 text-sm text-brand-rose">
               {error}
             </div>
           )}

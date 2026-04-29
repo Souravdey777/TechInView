@@ -29,6 +29,7 @@ import {
   getTechnicalQaLanguageLabel,
   type TechnicalQaLanguage,
 } from "@/lib/technical-qa";
+import { cn } from "@/lib/utils";
 
 type StartResponse = {
   data?: {
@@ -178,21 +179,23 @@ export function TechnicalQaSetup() {
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {TECHNICAL_QA_LANGUAGE_OPTIONS.map((option) => (
-                    <button
+                    <Button
                       key={option.value}
                       type="button"
                       onClick={() => handleChangeLanguage(option.value)}
-                      className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                      variant="outline"
+                      className={cn(
+                        "h-auto w-full flex-col items-start whitespace-normal rounded-2xl px-4 py-4 text-left",
                         language === option.value
-                          ? "border-brand-cyan bg-brand-cyan/10 text-brand-text"
+                          ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
                           : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                      }`}
+                      )}
                     >
                       <p className="text-sm font-semibold">{option.label}</p>
                       <p className="mt-2 text-xs leading-relaxed">
                         Use this as the base stack the interviewer should probe first.
                       </p>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </section>
@@ -210,15 +213,17 @@ export function TechnicalQaSetup() {
                     const selected = frameworks.includes(option.value);
 
                     return (
-                      <button
+                      <Button
                         key={option.value}
                         type="button"
                         onClick={() => toggleFramework(option.value)}
-                        className={`flex items-start justify-between rounded-2xl border px-4 py-4 text-left transition-colors ${
+                        variant="outline"
+                        className={cn(
+                          "h-auto w-full items-start justify-between whitespace-normal rounded-2xl px-4 py-4 text-left",
                           selected
-                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text"
+                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
                             : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                        }`}
+                        )}
                       >
                         <div>
                           <p className="text-sm font-semibold">{option.label}</p>
@@ -235,7 +240,7 @@ export function TechnicalQaSetup() {
                         >
                           {selected ? <Check className="h-3 w-3" /> : null}
                         </span>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -251,15 +256,17 @@ export function TechnicalQaSetup() {
                     const selected = interviewerPersona === persona.id;
 
                     return (
-                      <button
+                      <Button
                         key={persona.id}
                         type="button"
                         onClick={() => setInterviewerPersona(persona.id)}
-                        className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                        variant="outline"
+                        className={cn(
+                          "h-auto w-full flex-col items-start whitespace-normal rounded-2xl px-4 py-4 text-left",
                           selected
-                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text"
+                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
                             : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                        }`}
+                        )}
                       >
                         <p className="text-sm font-semibold">{persona.name}</p>
                         <p className="mt-1 text-xs uppercase tracking-[0.14em] text-brand-muted">
@@ -268,7 +275,7 @@ export function TechnicalQaSetup() {
                         <p className="mt-3 text-xs leading-relaxed">
                           {persona.shortStyleSummary}
                         </p>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>

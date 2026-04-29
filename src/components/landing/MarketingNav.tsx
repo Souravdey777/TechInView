@@ -126,7 +126,7 @@ export function MarketingNav({
         className={cn(
           "sticky top-0 z-50 border-b transition-colors duration-300",
           scrolled
-            ? "border-white/10 bg-brand-deep/84 backdrop-blur-md"
+            ? "border-brand-border bg-brand-deep/90 backdrop-blur-md"
             : "border-brand-border bg-brand-deep/78 backdrop-blur-sm"
         )}
       >
@@ -175,7 +175,7 @@ export function MarketingNav({
               </Link>
               <Link
                 href={signupHref}
-                className="inline-flex items-center justify-center rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-cyan-300"
+                className="inline-flex items-center justify-center rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
               >
                 Practice Free
               </Link>
