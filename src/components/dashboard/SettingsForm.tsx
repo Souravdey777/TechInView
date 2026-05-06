@@ -93,6 +93,12 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
   const [preferredLanguage, setPreferredLanguage] = useState(
     initialProfile.preferred_language ?? ""
   );
+  const [savedUsername, setSavedUsername] = useState(
+    normalizePublicUsername(initialProfile.username ?? "")
+  );
+  const [savedIsPublicProfile, setSavedIsPublicProfile] = useState(
+    initialProfile.is_public_profile ?? false
+  );
 
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -104,6 +110,10 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
   const publicProfileUrl = hasValidUsernamePreview
     ? getPublicProfileUrl(shareBaseUrl, normalizedUsername)
     : null;
+  const hasSavedPublicProfile =
+    savedIsPublicProfile &&
+    savedUsername === normalizedUsername &&
+    hasValidUsernamePreview;
 
   const handleSave = async () => {
     if (!user) return;
@@ -199,6 +209,8 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
       setUsername(normalizedUsername);
       setPublicBio(trimmedBio);
       setPublicLinks(normalizedLinks);
+      setSavedUsername(normalizedUsername);
+      setSavedIsPublicProfile(isPublicProfile);
       setSaveStatus("success");
       setTimeout(() => setSaveStatus("idle"), 3000);
     }
@@ -460,15 +472,21 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
               <code className="overflow-x-auto text-sm text-brand-text">
                 {publicProfileUrl}
               </code>
-              <a
-                href={publicProfilePath ?? "#"}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-cyan hover:text-brand-cyan/90"
-              >
-                Open profile
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
+              {hasSavedPublicProfile ? (
+                <a
+                  href={publicProfilePath ?? "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-cyan hover:text-brand-cyan/90"
+                >
+                  Open profile
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              ) : (
+                <span className="text-sm font-medium text-brand-muted">
+                  Save as public to open
+                </span>
+              )}
             </div>
           ) : (
             <p className="mt-2 text-sm text-brand-muted">

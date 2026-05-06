@@ -160,7 +160,7 @@ export function isValidPublicUsername(value: string): boolean {
 }
 
 export function getPublicProfilePath(username: string): string {
-  return `/${normalizePublicUsername(username)}`;
+  return `/u/${normalizePublicUsername(username)}`;
 }
 
 export function getPublicProfileUrl(baseUrl: string, username: string): string {
