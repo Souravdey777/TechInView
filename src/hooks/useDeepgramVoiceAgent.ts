@@ -49,6 +49,7 @@ type InjectUserMessageOptions = {
 const INPUT_SAMPLE_RATE = 16000;
 const OUTPUT_SAMPLE_RATE = 24000;
 const DEFAULT_VOICE_MODEL = "aura-2-asteria-en";
+const DEFAULT_THINK_MODEL = "claude-haiku-4-5";
 const KEEPALIVE_INTERVAL_MS = 8000;
 const MIC_RESUME_AFTER_AGENT_MS = 700;
 const MIC_PERMISSION_TIMEOUT_MS = 15000;
@@ -82,7 +83,7 @@ function buildThinkSettings(settings: DeepgramVoiceAgentSettings): ThinkSettings
   ];
 
   return {
-    provider: { type: "anthropic", model: "claude-sonnet-4-20250514" },
+    provider: { type: "anthropic", model: DEFAULT_THINK_MODEL },
     prompt: settings.systemPrompt,
     functions,
   };
