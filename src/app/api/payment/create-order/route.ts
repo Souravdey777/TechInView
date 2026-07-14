@@ -3,6 +3,7 @@ import { createOrder } from "@/lib/razorpay";
 import { createClient } from "@/lib/supabase/server";
 import { CREDIT_PACKS, getRegionForCountry } from "@/lib/constants";
 import { captureServerEvent } from "@/lib/posthog/server";
+import { enforceApiRateLimit } from "@/lib/api-security";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,14 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    const rateLimited = await enforceApiRateLimit({
+      userId: user.id,
+      action: "payment_create_order",
+      limit: 10,
+      windowSeconds: 60 * 60,
+    });
+    if (rateLimited) return rateLimited;
 
     const { pack, country_code } = (await req.json()) as {
       pack: string;

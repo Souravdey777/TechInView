@@ -3,12 +3,12 @@ import { verifyPaymentSignature, fetchPayment } from "@/lib/razorpay";
 import { createClient } from "@/lib/supabase/server";
 import {
   getPaymentByRazorpayId,
-  insertPayment,
-  incrementCredits,
-  updateProfile,
+  provisionPaymentCredits,
 } from "@/lib/db/queries";
+import { isPaymentBoundToUser } from "@/lib/api-boundaries";
 import { sendPaidSupportEmail } from "@/lib/email/lifecycle";
 import { captureServerEvent } from "@/lib/posthog/server";
+import { enforceApiRateLimit } from "@/lib/api-security";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,14 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    const rateLimited = await enforceApiRateLimit({
+      userId: user.id,
+      action: "payment_verify",
+      limit: 20,
+      windowSeconds: 60 * 60,
+    });
+    if (rateLimited) return rateLimited;
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       (await req.json()) as {
@@ -55,6 +63,16 @@ export async function POST(req: NextRequest) {
 
     const existingPayment = await getPaymentByRazorpayId(razorpay_payment_id);
     if (existingPayment) {
+      if (
+        existingPayment.user_id !== user.id ||
+        existingPayment.razorpay_order_id !== razorpay_order_id
+      ) {
+        return NextResponse.json(
+          { success: false, error: "Payment does not belong to this account" },
+          { status: 409 }
+        );
+      }
+
       return NextResponse.json({
         success: true,
         data: {
@@ -78,15 +96,24 @@ export async function POST(req: NextRequest) {
     const notes = payment.notes as Record<string, string>;
     const credits = parseInt(notes.credits, 10);
     const pack = notes.pack;
+    const paymentOrderId = payment.order_id as string | null;
 
-    if (!credits || !pack) {
+    if (!isPaymentBoundToUser({
+      pack,
+      credits,
+      paymentUserId: notes.userId,
+      authenticatedUserId: user.id,
+      paymentOrderId,
+      submittedOrderId: razorpay_order_id,
+    })) {
       return NextResponse.json(
         { success: false, error: "Invalid payment metadata" },
         { status: 400 }
       );
     }
 
-    await insertPayment({
+    const customerId = (payment as unknown as Record<string, unknown>).customer_id as string | undefined;
+    const provisioning = await provisionPaymentCredits({
       user_id: user.id,
       razorpay_order_id,
       razorpay_payment_id,
@@ -94,18 +121,28 @@ export async function POST(req: NextRequest) {
       credits,
       amount: payment.amount as number,
       currency: payment.currency as string,
+      customer_id: customerId,
     });
 
-    const updatedProfile = await incrementCredits(user.id, credits);
+    if (!provisioning.processed) {
+      const processedPayment = await getPaymentByRazorpayId(razorpay_payment_id);
+      if (!processedPayment || processedPayment.user_id !== user.id) {
+        return NextResponse.json(
+          { success: false, error: "Payment was already processed for another account" },
+          { status: 409 }
+        );
+      }
 
-    const profileUpdates: Record<string, unknown> = {
-      has_used_free_trial: true,
-    };
-    const customerId = (payment as unknown as Record<string, unknown>).customer_id as string | undefined;
-    if (customerId) {
-      profileUpdates.razorpay_customer_id = customerId;
+      return NextResponse.json({
+        success: true,
+        data: {
+          payment_id: razorpay_payment_id,
+          order_id: razorpay_order_id,
+          status: "already_processed",
+          credits: processedPayment.credits,
+        },
+      });
     }
-    await updateProfile(user.id, profileUpdates);
 
     await sendPaidSupportEmail({
       userId: user.id,
@@ -131,7 +168,7 @@ export async function POST(req: NextRequest) {
         order_id: razorpay_order_id,
         status: "verified",
         credits,
-        new_balance: updatedProfile?.interview_credits ?? credits,
+        new_balance: provisioning.profile?.interview_credits ?? credits,
       },
     });
   } catch (error: unknown) {

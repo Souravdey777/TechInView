@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { captureServerEvent } from "@/lib/posthog/server";
+import {
+  enforceApiRateLimit,
+  getAuthenticatedApiUser,
+  unauthorizedResponse,
+} from "@/lib/api-security";
 import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
 import {
   FREE_TRIAL_DURATION_SECONDS,
   FULL_INTERVIEW_DURATION_SECONDS,
+  INTERVIEW_MODES,
+  MAX_INTERVIEW_DURATION,
+  ROUND_TYPES,
+  SUPPORTED_LANGUAGES,
   type InterviewMode,
   type RoundType,
 } from "@/lib/constants";
 import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
+import { toPublicInterviewProblem } from "@/lib/api-boundaries";
 
 function trimOrNull(value?: string | null) {
   const trimmed = value?.trim() ?? "";
@@ -55,24 +64,58 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as StartInterviewBody;
     const { language } = body;
 
-    if (!language) {
+    if (!SUPPORTED_LANGUAGES.includes(language as (typeof SUPPORTED_LANGUAGES)[number])) {
       return NextResponse.json(
-        { success: false, error: "language is required" },
+        { success: false, error: "A supported language is required" },
         { status: 400 }
       );
     }
 
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    if (body.mode && !INTERVIEW_MODES.includes(body.mode)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid interview mode" },
+        { status: 400 }
+      );
+    }
+
+    if (body.roundType && !ROUND_TYPES.includes(body.roundType)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid round type" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      body.maxDurationSeconds !== undefined &&
+      (!Number.isInteger(body.maxDurationSeconds) ||
+        body.maxDurationSeconds <= 0 ||
+        body.maxDurationSeconds > MAX_INTERVIEW_DURATION)
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Invalid interview duration" },
+        { status: 400 }
+      );
+    }
+
+    const user = await getAuthenticatedApiUser();
+    if (!user) {
+      return unauthorizedResponse();
+    }
+
+    const rateLimited = await enforceApiRateLimit({
+      userId: user.id,
+      action: "interview_start",
+      limit: 10,
+      windowSeconds: 60 * 60,
+    });
+    if (rateLimited) return rateLimited;
 
     const {
       getProfile,
       getRandomProblem,
       getRandomProblemForCompany,
       getProblemBySlug,
-      createInterview,
-      decrementCredits,
-      updateProfile,
+      createInterviewWithEntitlement,
     } = await import("@/lib/db/queries");
 
     let isFreeInterview = false;
@@ -87,37 +130,35 @@ export async function POST(req: NextRequest) {
     const roleTitleFromPayload = trimOrNull(body.roleTitle);
     let targetCompany: string | null = companyFromLoop;
 
-    if (user) {
-      const profile = await getProfile(user.id);
+    const profile = await getProfile(user.id);
 
-      if (!profile) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Profile not found.",
-          },
-          { status: 404 }
-        );
-      }
+    if (!profile) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Profile not found.",
+        },
+        { status: 404 }
+      );
+    }
 
-      const hasCredits = profile.interview_credits > 0;
-      targetCompany = companyFromLoop ?? profile.target_company ?? null;
-      isFreeInterview = mode === "general_dsa" ? !hasCredits && !profile.has_used_free_trial : false;
+    const hasCredits = profile.interview_credits > 0;
+    targetCompany = companyFromLoop ?? profile.target_company ?? null;
+    isFreeInterview = mode === "general_dsa" ? !hasCredits && !profile.has_used_free_trial : false;
 
-      if (!hasCredits && !isFreeInterview) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "No interview credits remaining. Buy an interview pack to continue.",
-          },
-          { status: 403 }
-        );
-      }
+    if (!hasCredits && !isFreeInterview) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "No interview credits remaining. Buy an interview pack to continue.",
+        },
+        { status: 403 }
+      );
+    }
 
-      if (isFreeInterview) {
-        difficulty = "easy";
-        maxDuration = FREE_TRIAL_DURATION_SECONDS;
-      }
+    if (isFreeInterview) {
+      difficulty = "easy";
+      maxDuration = FREE_TRIAL_DURATION_SECONDS;
     }
 
     const interviewerPersona = resolveInterviewerPersona(body.interviewerPersona, {
@@ -153,56 +194,45 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let interviewId: string;
-    if (user) {
-      const interview = await createInterview({
-        userId: user.id,
-        problemId: problem?.id ?? null,
-        interviewerPersona,
-        language,
-        maxDuration,
-        isFreeTrial: isFreeInterview,
-        mode,
-        roundType,
-        roundTitle,
-        generatedLoopId: body.generatedLoopId ?? null,
-        generatedLoopRoundId: body.generatedLoopRoundId ?? null,
-        companySnapshot: targetCompany,
-        roleTitleSnapshot: generatedLoopSummary?.roleTitle ?? roleTitleFromPayload,
-        loopSummarySnapshot: generatedLoopSummary,
-        roundContextSnapshot: generatedLoopRoundSnapshot,
-      });
-      interviewId = interview.id;
+    const interview = await createInterviewWithEntitlement({
+      userId: user.id,
+      problemId: problem?.id ?? null,
+      interviewerPersona,
+      language,
+      maxDuration,
+      isFreeTrial: isFreeInterview,
+      mode,
+      roundType,
+      roundTitle,
+      generatedLoopId: body.generatedLoopId ?? null,
+      generatedLoopRoundId: body.generatedLoopRoundId ?? null,
+      companySnapshot: targetCompany,
+      roleTitleSnapshot: generatedLoopSummary?.roleTitle ?? roleTitleFromPayload,
+      loopSummarySnapshot: generatedLoopSummary,
+      roundContextSnapshot: generatedLoopRoundSnapshot,
+      entitlement: isFreeInterview ? "free_trial" : "credit",
+    });
+    const interviewId = interview.id;
 
-      if (!isFreeInterview) {
-        await decrementCredits(user.id);
-      }
-
-      if (isFreeInterview) {
-        await updateProfile(user.id, { has_used_free_trial: true });
-        captureServerEvent(user.id, "audio_preview_started", {
-          interview_id: interviewId,
-          mode,
-          round_type: roundType,
-        });
-      }
-    } else {
-      interviewId = `demo-${Date.now()}`;
-    }
-
-    if (user) {
-      captureServerEvent(user.id, "interview_started", {
-        difficulty: problem?.difficulty ?? generatedLoopRoundSnapshot?.difficulty ?? null,
-        category: problem?.category ?? null,
-        language,
-        interviewer_persona: interviewerPersona,
-        is_free_trial: isFreeInterview,
+    if (isFreeInterview) {
+      captureServerEvent(user.id, "audio_preview_started", {
+        interview_id: interviewId,
         mode,
         round_type: roundType,
-        problem_title: problem?.title ?? generatedLoopRoundSnapshot?.title ?? null,
-        interview_id: interviewId,
       });
     }
+
+    captureServerEvent(user.id, "interview_started", {
+      difficulty: problem?.difficulty ?? generatedLoopRoundSnapshot?.difficulty ?? null,
+      category: problem?.category ?? null,
+      language,
+      interviewer_persona: interviewerPersona,
+      is_free_trial: isFreeInterview,
+      mode,
+      round_type: roundType,
+      problem_title: problem?.title ?? generatedLoopRoundSnapshot?.title ?? null,
+      interview_id: interviewId,
+    });
 
     return NextResponse.json({
       success: true,
@@ -214,24 +244,7 @@ export async function POST(req: NextRequest) {
         roundType,
         round: generatedLoopRoundSnapshot,
         generatedLoopSummary,
-        problem: problem
-          ? {
-              id: problem.id,
-              title: problem.title,
-              slug: problem.slug,
-              difficulty: problem.difficulty,
-              category: problem.category,
-              description: problem.description,
-              examples: problem.examples,
-              constraints: problem.constraints,
-              starter_code: problem.starter_code,
-              hints: problem.hints,
-              test_cases: problem.test_cases,
-              solution_approach: problem.solution_approach,
-              optimal_complexity: problem.optimal_complexity,
-              follow_up_questions: problem.follow_up_questions,
-            }
-          : null,
+        problem: problem ? toPublicInterviewProblem(problem) : null,
         language,
         maxDuration,
         startedAt: new Date().toISOString(),
@@ -239,10 +252,15 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : "Failed to start interview";
+    const status =
+      msg.startsWith("No interview credits remaining") ||
+      msg === "The free interview has already been used."
+        ? 403
+        : 500;
     console.error("Start interview error:", error);
     return NextResponse.json(
       { success: false, error: msg },
-      { status: 500 }
+      { status }
     );
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { DeepgramClient, DeepgramError } from "@deepgram/sdk";
 import { createClient } from "@/lib/supabase/server";
+import { enforceApiRateLimit } from "@/lib/api-security";
 
 const VOICE_TOKEN_SERVER_TIMEOUT_MS = 10000;
 
@@ -42,6 +43,14 @@ export async function POST(): Promise<Response> {
       { status: 401 },
     );
   }
+
+  const rateLimited = await enforceApiRateLimit({
+    userId: user.id,
+    action: "deepgram_token",
+    limit: 12,
+    windowSeconds: 60 * 60,
+  });
+  if (rateLimited) return rateLimited;
 
   try {
     const client = new DeepgramClient({ apiKey });

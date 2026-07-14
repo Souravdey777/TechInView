@@ -133,53 +133,24 @@ export async function GET(request: NextRequest) {
             (profile?.interviews_completed ?? 0) === 0 &&
             isRecentlyCreatedUser(user.created_at);
 
-          const betaCreditsGrantedAt =
-            typeof user.user_metadata?.beta_credits_granted_at === "string"
-              ? user.user_metadata.beta_credits_granted_at
-              : null;
-          const shouldGrantBetaCredits =
-            ref === BETA_INVITE_CODE &&
-            betaCreditsGrantedAt == null;
+          const shouldGrantBetaCredits = ref === BETA_INVITE_CODE;
 
           if (shouldGrantBetaCredits) {
             try {
-              const nextCredits = (profile?.interview_credits ?? 0) + BETA_CREDITS;
-              const { data: updatedProfile, error: profileUpdateError } = await supabase
-                .from("profiles")
-                .upsert({
-                  id: user.id,
-                  display_name: getUserDisplayName(user),
-                  avatar_url: getUserAvatarUrl(user),
-                  interview_credits: nextCredits,
-                  has_used_free_trial: true,
-                })
-                .select("interview_credits")
-                .single();
+              const { grantBetaCreditsOnce } = await import("@/lib/db/queries");
+              const updatedProfile = await grantBetaCreditsOnce(user.id, BETA_CREDITS);
 
-              if (profileUpdateError) {
-                throw profileUpdateError;
-              }
-
-              grantedBetaCreditsBalance = updatedProfile?.interview_credits ?? null;
-              profile = profile
-                ? { ...profile, interview_credits: grantedBetaCreditsBalance }
-                : {
-                    target_company: null,
-                    experience_level: null,
-                    preferred_language: null,
-                    interviews_completed: 0,
-                    interview_credits: grantedBetaCreditsBalance,
-                  };
-
-              const { error: metadataUpdateError } = await supabase.auth.updateUser({
-                data: {
-                  ...(user.user_metadata ?? {}),
-                  beta_credits_granted_at: new Date().toISOString(),
-                },
-              });
-
-              if (metadataUpdateError) {
-                console.error("[auth/callback] Failed to persist beta grant marker", metadataUpdateError);
+              if (updatedProfile) {
+                grantedBetaCreditsBalance = updatedProfile.interview_credits;
+                profile = profile
+                  ? { ...profile, interview_credits: grantedBetaCreditsBalance }
+                  : {
+                      target_company: null,
+                      experience_level: null,
+                      preferred_language: null,
+                      interviews_completed: 0,
+                      interview_credits: grantedBetaCreditsBalance,
+                    };
               }
             } catch (betaGrantError) {
               console.error("[auth/callback] Failed to grant beta credits", betaGrantError);

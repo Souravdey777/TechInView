@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { insertInterviewFeedback, getInterviewFeedback } from "@/lib/db/queries";
+import {
+  getInterview,
+  getInterviewFeedback,
+  insertInterviewFeedback,
+} from "@/lib/db/queries";
 import { captureServerEvent } from "@/lib/posthog/server";
 
 const RATING_KEYS = [
@@ -55,6 +59,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, error: "interviewId is required" },
         { status: 400 }
+      );
+    }
+
+    const interview = await getInterview(interviewId);
+    if (!interview || interview.user_id !== user.id) {
+      return NextResponse.json(
+        { success: false, error: "Interview not found" },
+        { status: 404 }
       );
     }
 
@@ -122,6 +134,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(
         { success: false, error: "interviewId query param is required" },
         { status: 400 }
+      );
+    }
+
+    const interview = await getInterview(interviewId);
+    if (!interview || interview.user_id !== user.id) {
+      return NextResponse.json(
+        { success: false, error: "Interview not found" },
+        { status: 404 }
       );
     }
 

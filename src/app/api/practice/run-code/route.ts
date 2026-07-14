@@ -5,6 +5,7 @@ import {
   executeProblemCode,
   type ExecutableTestCase,
 } from "@/lib/code-execution";
+import { enforceApiRateLimit } from "@/lib/api-security";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,6 +20,14 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    const rateLimited = await enforceApiRateLimit({
+      userId: user.id,
+      action: "practice_code_execution",
+      limit: 10,
+      windowSeconds: 60,
+    });
+    if (rateLimited) return rateLimited;
 
     const body = await req.json();
     const { code, language, problemSlug } = body;

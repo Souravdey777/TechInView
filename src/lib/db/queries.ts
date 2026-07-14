@@ -135,6 +135,28 @@ export async function updateProfile(
   return results[0];
 }
 
+export async function grantBetaCreditsOnce(
+  userId: string,
+  amount: number
+): Promise<Profile | undefined> {
+  const db = getDb();
+  const rows = await db
+    .update(schema.profiles)
+    .set({
+      interview_credits: sql`${schema.profiles.interview_credits} + ${amount}`,
+      has_used_free_trial: true,
+      beta_credits_granted: true,
+    })
+    .where(
+      and(
+        eq(schema.profiles.id, userId),
+        eq(schema.profiles.beta_credits_granted, false)
+      )
+    )
+    .returning();
+  return rows[0];
+}
+
 export type PublicProfileCategory = {
   category: string;
   problems_attempted: number;
@@ -449,6 +471,16 @@ export const getProblemBySlug = cache(
     )()
 );
 
+export async function getProblemById(problemId: string): Promise<Problem | undefined> {
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(schema.problems)
+    .where(eq(schema.problems.id, problemId))
+    .limit(1);
+  return rows[0];
+}
+
 export async function getRandomProblem(
   difficulty?: "easy" | "medium" | "hard",
   category?: string
@@ -757,6 +789,82 @@ export async function createInterview(params: {
   }
 }
 
+export type InterviewEntitlement = "credit" | "free_trial";
+
+export async function createInterviewWithEntitlement(
+  params: Parameters<typeof createInterview>[0] & {
+    entitlement: InterviewEntitlement;
+  }
+): Promise<Interview> {
+  const db = getDb();
+
+  return db.transaction(async (tx) => {
+    const profiles = await tx
+      .select({
+        interviewCredits: schema.profiles.interview_credits,
+        hasUsedFreeTrial: schema.profiles.has_used_free_trial,
+      })
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, params.userId))
+      .for("update");
+    const profile = profiles[0];
+
+    if (!profile) {
+      throw new Error("Profile not found.");
+    }
+
+    if (params.entitlement === "credit") {
+      if (profile.interviewCredits <= 0) {
+        throw new Error("No interview credits remaining. Buy an interview pack to continue.");
+      }
+
+      await tx
+        .update(schema.profiles)
+        .set({
+          interview_credits: sql`${schema.profiles.interview_credits} - 1`,
+        })
+        .where(eq(schema.profiles.id, params.userId));
+    } else {
+      if (
+        params.mode !== "general_dsa" ||
+        profile.interviewCredits > 0 ||
+        profile.hasUsedFreeTrial
+      ) {
+        throw new Error("The free interview has already been used.");
+      }
+
+      await tx
+        .update(schema.profiles)
+        .set({ has_used_free_trial: true })
+        .where(eq(schema.profiles.id, params.userId));
+    }
+
+    const rows = await tx
+      .insert(schema.interviews)
+      .values({
+        user_id: params.userId,
+        problem_id: params.problemId,
+        interviewer_persona: params.interviewerPersona,
+        mode: params.mode ?? "general_dsa",
+        round_type: params.roundType ?? "coding",
+        round_title: params.roundTitle ?? null,
+        generated_loop_id: params.generatedLoopId ?? null,
+        generated_loop_round_id: params.generatedLoopRoundId ?? null,
+        company_snapshot: params.companySnapshot ?? null,
+        role_title_snapshot: params.roleTitleSnapshot ?? null,
+        loop_summary_snapshot: params.loopSummarySnapshot ?? null,
+        round_context_snapshot: params.roundContextSnapshot ?? null,
+        language: params.language,
+        max_duration_seconds: params.maxDuration ?? 2700,
+        is_free_trial: params.entitlement === "free_trial",
+        status: "in_progress",
+      })
+      .returning();
+
+    return rows[0];
+  });
+}
+
 export async function getInterview(
   interviewId: string
 ): Promise<Interview | undefined> {
@@ -852,6 +960,75 @@ export async function updateInterview(
 
     return results[0] ? withDefaultInterviewerPersona(results[0]) : undefined;
   }
+}
+
+export async function completeInterviewForUser(params: {
+  interviewId: string;
+  userId: string;
+  data: Partial<Omit<Interview, "id" | "user_id" | "problem_id" | "started_at">>;
+  messages: Array<{
+    role: "interviewer" | "candidate" | "system";
+    content: string;
+    timestampMs: number;
+  }>;
+  progress?: { category: string; score: number };
+}): Promise<Interview | undefined> {
+  const db = getDb();
+
+  return db.transaction(async (tx) => {
+    const updatedRows = await tx
+      .update(schema.interviews)
+      .set(params.data)
+      .where(
+        and(
+          eq(schema.interviews.id, params.interviewId),
+          eq(schema.interviews.user_id, params.userId),
+          eq(schema.interviews.status, "in_progress")
+        )
+      )
+      .returning();
+    const interview = updatedRows[0];
+
+    if (!interview) {
+      return undefined;
+    }
+
+    if (params.messages.length > 0) {
+      await tx.insert(schema.messages).values(
+        params.messages.map((message) => ({
+          interview_id: params.interviewId,
+          role: message.role,
+          content: message.content,
+          timestamp_ms: message.timestampMs,
+        }))
+      );
+    }
+
+    if (params.progress) {
+      const { category, score } = params.progress;
+      await tx
+        .insert(schema.progress)
+        .values({
+          user_id: params.userId,
+          category,
+          problems_attempted: 1,
+          problems_solved: score >= 55 ? 1 : 0,
+          avg_score: score,
+        })
+        .onConflictDoUpdate({
+          target: [schema.progress.user_id, schema.progress.category],
+          set: {
+            problems_attempted: sql`${schema.progress.problems_attempted} + 1`,
+            problems_solved: sql`${schema.progress.problems_solved} + ${score >= 55 ? 1 : 0}`,
+            avg_score: sql`(
+              ${schema.progress.avg_score} * ${schema.progress.problems_attempted} + ${score}
+            ) / (${schema.progress.problems_attempted} + 1)`,
+          },
+        });
+    }
+
+    return interview;
+  });
 }
 
 export async function getUserInterviews(
@@ -1010,6 +1187,57 @@ export async function insertPayment(data: {
   return results[0];
 }
 
+export async function provisionPaymentCredits(data: {
+  user_id: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  pack: string;
+  credits: number;
+  amount: number;
+  currency: string;
+  customer_id?: string;
+}): Promise<{ processed: boolean; profile?: Profile }> {
+  const db = getDb();
+
+  return db.transaction(async (tx) => {
+    const inserted = await tx
+      .insert(schema.payments)
+      .values({
+        user_id: data.user_id,
+        razorpay_order_id: data.razorpay_order_id,
+        razorpay_payment_id: data.razorpay_payment_id,
+        pack: data.pack,
+        credits: data.credits,
+        amount: data.amount,
+        currency: data.currency,
+      })
+      .onConflictDoNothing({ target: schema.payments.razorpay_payment_id })
+      .returning({ id: schema.payments.id });
+
+    if (inserted.length === 0) {
+      return { processed: false };
+    }
+
+    const profiles = await tx
+      .update(schema.profiles)
+      .set({
+        interview_credits: sql`${schema.profiles.interview_credits} + ${data.credits}`,
+        has_used_free_trial: true,
+        ...(data.customer_id
+          ? { razorpay_customer_id: data.customer_id }
+          : {}),
+      })
+      .where(eq(schema.profiles.id, data.user_id))
+      .returning();
+
+    if (!profiles[0]) {
+      throw new Error("Payment user profile not found.");
+    }
+
+    return { processed: true, profile: profiles[0] };
+  });
+}
+
 export async function incrementCredits(
   userId: string,
   amount: number
@@ -1061,6 +1289,7 @@ export async function insertInterviewFeedback(data: {
     .onConflictDoUpdate({
       target: schema.interviewFeedback.interview_id,
       set: {
+        user_id: data.user_id,
         rating: data.rating,
         ratings: data.ratings ?? null,
         went_well: data.went_well ?? null,
@@ -1239,4 +1468,46 @@ export async function getInterviewFeedback(
     .where(eq(schema.interviewFeedback.interview_id, interviewId))
     .limit(1);
   return results[0];
+}
+
+export async function consumeApiRateLimit(params: {
+  subject: string;
+  action: string;
+  limit: number;
+  windowSeconds: number;
+}): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+  const db = getDb();
+  const now = Date.now();
+  const windowMs = params.windowSeconds * 1000;
+  const windowStartMs = Math.floor(now / windowMs) * windowMs;
+  const windowStart = new Date(windowStartMs);
+
+  const rows = await db
+    .insert(schema.apiRateLimits)
+    .values({
+      subject: params.subject,
+      action: params.action,
+      window_start: windowStart,
+      request_count: 1,
+    })
+    .onConflictDoUpdate({
+      target: [
+        schema.apiRateLimits.subject,
+        schema.apiRateLimits.action,
+        schema.apiRateLimits.window_start,
+      ],
+      set: {
+        request_count: sql`${schema.apiRateLimits.request_count} + 1`,
+      },
+      setWhere: sql`${schema.apiRateLimits.request_count} < ${params.limit}`,
+    })
+    .returning({ requestCount: schema.apiRateLimits.request_count });
+
+  return {
+    allowed: rows.length > 0,
+    retryAfterSeconds: Math.max(
+      1,
+      Math.ceil((windowStartMs + windowMs - now) / 1000)
+    ),
+  };
 }

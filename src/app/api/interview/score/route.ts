@@ -3,6 +3,11 @@ import { scoreInterview } from "@/lib/ai/scorer";
 import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
 import type { InterviewMode, RoundType } from "@/lib/constants";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
+import {
+  enforceApiRateLimit,
+  getAuthenticatedApiUser,
+  unauthorizedResponse,
+} from "@/lib/api-security";
 
 type ScoreRequestBody = {
   transcript: { role: string; content: string }[];
@@ -66,6 +71,16 @@ function getMockResult(
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthenticatedApiUser();
+    if (!user) return unauthorizedResponse();
+    const rateLimited = await enforceApiRateLimit({
+      userId: user.id,
+      action: "interview_score",
+      limit: 10,
+      windowSeconds: 60 * 60,
+    });
+    if (rateLimited) return rateLimited;
+
     const body = (await req.json()) as ScoreRequestBody;
     const {
       transcript,
@@ -80,7 +95,17 @@ export async function POST(req: NextRequest) {
     } = body;
     const interviewerPersona = resolveInterviewerPersona(body.interviewerPersona);
 
-    if (!transcript || transcript.length === 0) {
+    if (
+      !Array.isArray(transcript) ||
+      transcript.length === 0 ||
+      transcript.length > 250 ||
+      transcript.some(
+        (message) =>
+          typeof message?.content !== "string" || message.content.length > 10_000
+      ) ||
+      typeof finalCode !== "string" ||
+      finalCode.length > 100_000
+    ) {
       return NextResponse.json(
         { success: false, error: "transcript is required" },
         { status: 400 }

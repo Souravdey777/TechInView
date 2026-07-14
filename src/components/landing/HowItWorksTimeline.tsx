@@ -273,7 +273,7 @@ export function HowItWorksTimeline() {
                 }}
                 data-index={index}
                 className={cn(
-                  "landing-panel origin-top p-5 transition-[opacity,transform,filter,border-color,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform",
+                  "landing-panel origin-top p-5 transition-[opacity,transform,filter,border-color,box-shadow,background-color] duration-500 ease-out will-change-transform",
                   style.border,
                   isActive ? cn(style.glow, style.activeCard) : "shadow-none",
                   isVisible

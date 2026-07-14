@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/razorpay";
 import {
   getPaymentByRazorpayId,
-  insertPayment,
-  incrementCredits,
-  updateProfile,
+  provisionPaymentCredits,
 } from "@/lib/db/queries";
+import { CREDIT_PACKS } from "@/lib/constants";
 import { sendPaidSupportEmail } from "@/lib/email/lifecycle";
 
 export const dynamic = "force-dynamic";
@@ -71,13 +70,14 @@ export async function POST(req: NextRequest) {
 
         const { userId, pack, credits: creditsStr } = payment.notes;
         const credits = parseInt(creditsStr, 10);
+        const creditPack = CREDIT_PACKS[pack as keyof typeof CREDIT_PACKS];
 
-        if (!userId || !pack || !credits) {
+        if (!userId || !creditPack || credits !== creditPack.credits) {
           console.error("[razorpay-webhook] Missing notes on payment:", payment.id);
           break;
         }
 
-        await insertPayment({
+        const provisioning = await provisionPaymentCredits({
           user_id: userId,
           razorpay_order_id: payment.order_id,
           razorpay_payment_id: payment.id,
@@ -85,17 +85,10 @@ export async function POST(req: NextRequest) {
           credits,
           amount: payment.amount,
           currency: payment.currency,
+          customer_id: payment.customer_id,
         });
 
-        await incrementCredits(userId, credits);
-
-        const profileUpdates: Record<string, unknown> = {
-          has_used_free_trial: true,
-        };
-        if (payment.customer_id) {
-          profileUpdates.razorpay_customer_id = payment.customer_id;
-        }
-        await updateProfile(userId, profileUpdates);
+        if (!provisioning.processed) break;
 
         await sendPaidSupportEmail({
           userId,

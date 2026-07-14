@@ -63,7 +63,12 @@ export function ScoreRadar({ scores }: ScoreRadarProps) {
       </CardHeader>
       <CardContent className="p-4 pb-6">
         <div className="h-[320px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            initialDimension={{ width: 640, height: 320 }}
+          >
             <RadarChart data={data} margin={{ top: 16, right: 32, bottom: 16, left: 32 }}>
               <PolarGrid
                 stroke={DESIGN_SYSTEM_CHART_COLORS.grid}

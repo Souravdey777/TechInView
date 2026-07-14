@@ -1,58 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { captureServerEvent } from "@/lib/posthog/server";
+import {
+  enforceApiRateLimit,
+  getAuthenticatedApiUser,
+  unauthorizedResponse,
+} from "@/lib/api-security";
 import {
   executeProblemCode,
   type ExecutableTestCase,
 } from "@/lib/code-execution";
+import { SUPPORTED_LANGUAGES } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { code, language, problemSlug, testCases: bodyTestCases } = body;
+    const user = await getAuthenticatedApiUser();
+    if (!user) {
+      return unauthorizedResponse();
+    }
 
-    if (!code || !language) {
+    const rateLimited = await enforceApiRateLimit({
+      userId: user.id,
+      action: "interview_code_execution",
+      limit: 10,
+      windowSeconds: 60,
+    });
+    if (rateLimited) return rateLimited;
+
+    const body = await req.json();
+    const { code, language, interviewId } = body;
+
+    if (
+      typeof code !== "string" ||
+      code.length === 0 ||
+      code.length > 100_000 ||
+      !SUPPORTED_LANGUAGES.includes(language as (typeof SUPPORTED_LANGUAGES)[number]) ||
+      typeof interviewId !== "string" ||
+      !interviewId
+    ) {
       return NextResponse.json(
-        { success: false, error: "code and language are required" },
+        { success: false, error: "code, language, and interviewId are required" },
         { status: 400 }
       );
     }
 
-    let testCases: ExecutableTestCase[] = [];
-
-    if (problemSlug) {
-      const { getProblemBySlug } = await import("@/lib/db/queries");
-      const problem = await getProblemBySlug(problemSlug);
-      if (problem?.test_cases) {
-        testCases = problem.test_cases as ExecutableTestCase[];
-      }
-    } else if (bodyTestCases && Array.isArray(bodyTestCases)) {
-      testCases = bodyTestCases as ExecutableTestCase[];
+    const { getInterview, getProblemById } = await import("@/lib/db/queries");
+    const interview = await getInterview(interviewId);
+    if (!interview || interview.user_id !== user.id) {
+      return NextResponse.json(
+        { success: false, error: "Interview not found" },
+        { status: 404 }
+      );
     }
+    if (interview.status !== "in_progress") {
+      return NextResponse.json(
+        { success: false, error: "Interview is no longer active" },
+        { status: 409 }
+      );
+    }
+
+    const problem = interview.problem_id
+      ? await getProblemById(interview.problem_id)
+      : undefined;
+    const testCases = (problem?.test_cases ?? []) as ExecutableTestCase[];
 
     const result = await executeProblemCode({
       language,
       code,
       testCases,
-      problemSlug,
+      problemSlug: problem?.slug,
     });
 
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        const passed = result.test_results.filter((test) => test.passed).length;
-        captureServerEvent(user.id, "code_executed", {
-          language,
-          tests_passed: passed,
-          tests_total: result.test_results.length,
-        });
-      }
-    } catch {
-      // analytics should never block the response
-    }
+    const passed = result.test_results.filter((test) => test.passed).length;
+    captureServerEvent(user.id, "code_executed", {
+      language,
+      tests_passed: passed,
+      tests_total: result.test_results.length,
+    });
 
     return NextResponse.json({
       success: true,

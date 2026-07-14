@@ -4,12 +4,27 @@ import { type InterviewPhase, parseInterviewPhase } from "@/lib/interview-phases
 import { buildChatSystemPrompt, type ProblemPayload } from "@/lib/ai/interviewer-system-prompt";
 import type { RoundType } from "@/lib/constants";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
+import {
+  enforceApiRateLimit,
+  getAuthenticatedApiUser,
+  unauthorizedResponse,
+} from "@/lib/api-security";
 
 // Module-level singleton — reused across requests in the same serverless instance
 const anthropic = new Anthropic();
 
 export async function POST(request: Request) {
   try {
+    const user = await getAuthenticatedApiUser();
+    if (!user) return unauthorizedResponse();
+    const rateLimited = await enforceApiRateLimit({
+      userId: user.id,
+      action: "interview_chat",
+      limit: 60,
+      windowSeconds: 60 * 60,
+    });
+    if (rateLimited) return rateLimited;
+
     const body = await request.json();
     const {
       message,
@@ -33,8 +48,30 @@ export async function POST(request: Request) {
       roundContext?: RoundContextSnapshot | null;
     };
 
-    if (!message) {
+    if (typeof message !== "string" || message.length === 0 || message.length > 4_000) {
       return NextResponse.json({ success: false, error: "Message is required" }, { status: 400 });
+    }
+
+    if (
+      conversationHistory &&
+      (!Array.isArray(conversationHistory) ||
+        conversationHistory.length > 100 ||
+        conversationHistory.some(
+          (entry) =>
+            typeof entry?.content !== "string" || entry.content.length > 10_000
+        ))
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Invalid conversation history" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof currentCode === "string" && currentCode.length > 100_000) {
+      return NextResponse.json(
+        { success: false, error: "Code snapshot is too large" },
+        { status: 400 }
+      );
     }
 
     const elapsed = typeof elapsedSeconds === "number" ? elapsedSeconds : 0;

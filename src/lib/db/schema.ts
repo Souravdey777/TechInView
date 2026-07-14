@@ -92,6 +92,7 @@ export const profiles = pgTable("profiles", {
   plan: planEnum("plan").default("free").notNull(),
   interview_credits: integer("interview_credits").default(0).notNull(),
   has_used_free_trial: boolean("has_used_free_trial").default(false).notNull(),
+  beta_credits_granted: boolean("beta_credits_granted").default(false).notNull(),
   country_code: text("country_code"),
   razorpay_customer_id: text("razorpay_customer_id"),
   razorpay_subscription_id: text("razorpay_subscription_id"),
@@ -340,6 +341,26 @@ export const payments = pgTable("payments", {
     .default(sql`now()`)
     .notNull(),
 });
+
+export const apiRateLimits = pgTable(
+  "api_rate_limits",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    subject: text("subject").notNull(),
+    action: text("action").notNull(),
+    window_start: timestamp("window_start", { withTimezone: true }).notNull(),
+    request_count: integer("request_count").default(1).notNull(),
+  },
+  (table) => ({
+    subjectActionWindowUnique: unique("api_rate_limits_subject_action_window_unique").on(
+      table.subject,
+      table.action,
+      table.window_start
+    ),
+  })
+);
 
 // ─── Relations ────────────────────────────────────────────────────────────────
 

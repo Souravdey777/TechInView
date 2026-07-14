@@ -1,18 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
 import { buildLoopSummary, generateTargetedLoop, sanitizeJdText } from "@/lib/loops/generator";
 import { createGeneratedLoop } from "@/lib/db/queries";
+import {
+  enforceApiRateLimit,
+  getAuthenticatedApiUser,
+  unauthorizedResponse,
+} from "@/lib/api-security";
 
 const GenerateLoopSchema = z.object({
-  company: z.string().min(2),
-  roleTitle: z.string().min(2),
+  company: z.string().min(2).max(80),
+  roleTitle: z.string().min(2).max(120),
   experienceLevel: z.enum(["junior", "mid", "senior", "staff"]),
-  jdText: z.string().min(40),
+  jdText: z.string().min(40).max(12_000),
 });
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthenticatedApiUser();
+    if (!user) return unauthorizedResponse();
+    const rateLimited = await enforceApiRateLimit({
+      userId: user.id,
+      action: "targeted_loop_generate",
+      limit: 10,
+      windowSeconds: 60 * 60,
+    });
+    if (rateLimited) return rateLimited;
+
     const body = await req.json();
     const parsed = GenerateLoopSchema.parse({
       ...body,
@@ -20,13 +34,8 @@ export async function POST(req: NextRequest) {
     });
 
     const loop = generateTargetedLoop(parsed);
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
     const persisted = await createGeneratedLoop({
-      userId: user?.id ?? null,
+      userId: user.id,
       loop,
     });
 
