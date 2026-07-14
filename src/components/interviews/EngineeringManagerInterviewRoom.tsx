@@ -23,6 +23,7 @@ import {
   phaseFromElapsedFraction,
 } from "@/lib/interview-phases";
 import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
+import { getLiveInterviewModel } from "@/lib/ai/models";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
 import { getPhaseLabelForRound } from "@/lib/loops/round-config";
 import { ENGINEERING_MANAGER_DURATION_MINUTES } from "@/lib/engineering-manager";
@@ -204,11 +205,20 @@ export function EngineeringManagerInterviewRoom({
         totalMinutes: Math.round(maxDuration / 60),
         interviewerPersonaId: interviewer.id,
       }),
+      thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
       voiceModel: interviewer.voiceModel,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
     }),
-    [agentContextMessages, agentFunctions, currentPhase, interviewer, maxDuration, round]
+    [
+      agentContextMessages,
+      agentFunctions,
+      currentPhase,
+      interviewer,
+      maxDuration,
+      round,
+      storeConfig?.isFreeInterview,
+    ]
   );
 
   const applyPhaseFromAgent = useCallback(

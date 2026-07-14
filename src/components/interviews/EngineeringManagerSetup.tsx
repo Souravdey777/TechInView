@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 type StartResponse = {
   data?: {
     interviewId?: string;
+    isFreeInterview?: boolean;
     interviewerPersona?: InterviewerPersonaId;
     startedAt?: string;
   };
@@ -130,6 +131,7 @@ export function EngineeringManagerSetup({
 
       initFromSetup({
         interviewId,
+        isFreeInterview: payload.data?.isFreeInterview ?? false,
         mode: "targeted_loop",
         roundType: "hiring_manager",
         problem: null,

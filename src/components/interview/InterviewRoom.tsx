@@ -29,6 +29,7 @@ import {
   parseInterviewPhase,
 } from "@/lib/interview-phases";
 import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
+import { getLiveInterviewModel } from "@/lib/ai/models";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
 import type { RoundScoreDimension } from "@/lib/constants";
 import { ROUND_SCORING_DIMENSIONS } from "@/lib/constants";
@@ -284,6 +285,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           interviewerPersonaId: interviewer.id,
         },
       ),
+      thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
       voiceModel: interviewer.voiceModel,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
@@ -296,6 +298,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       isCodingRound,
       maxDuration,
       interviewer,
+      storeConfig?.isFreeInterview,
       roundType,
       agentFunctions,
       agentContextMessages,

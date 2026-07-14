@@ -49,6 +49,7 @@ type StoreScores = Record<string, ScoreDimension>;
 // ─── Setup config (from the setup page) ──────────────────────────────────────
 
 type SetupConfig = {
+  isFreeInterview: boolean;
   mode: InterviewMode;
   roundType: RoundType;
   difficulty: string;
@@ -125,6 +126,7 @@ type InterviewStore = {
   // Actions — setup
   initFromSetup: (config: {
     interviewId: string;
+    isFreeInterview: boolean;
     mode: InterviewMode;
     roundType: RoundType;
     problem: StoreProblem | null;
@@ -200,6 +202,7 @@ export const useInterviewStore = create<InterviewStore>()(
           roundContext: config.roundContext,
           currentCode: config.problem?.starter_code?.[config.language] ?? "",
           setupConfig: {
+            isFreeInterview: config.isFreeInterview,
             mode: config.mode,
             roundType: config.roundType,
             difficulty: config.difficulty,

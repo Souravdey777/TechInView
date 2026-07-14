@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { isPaymentBoundToUser, toPublicInterviewProblem } from "../api-boundaries";
 import type { Problem } from "../db/schema";
+import {
+  LIVE_INTERVIEW_FREE_MODEL,
+  LIVE_INTERVIEW_PAID_MODEL,
+  getLiveInterviewModel,
+} from "../ai/models";
 
 test("public interview problems omit confidential solution material", () => {
   const problem = {
@@ -44,4 +49,9 @@ test("payment binding requires the expected user, order, pack, and credits", () 
   assert.equal(isPaymentBoundToUser({ ...valid, authenticatedUserId: "user-2" }), false);
   assert.equal(isPaymentBoundToUser({ ...valid, submittedOrderId: "order-2" }), false);
   assert.equal(isPaymentBoundToUser({ ...valid, credits: 6 }), false);
+});
+
+test("live interviews select the model from the server-provided entitlement", () => {
+  assert.equal(getLiveInterviewModel(true), LIVE_INTERVIEW_FREE_MODEL);
+  assert.equal(getLiveInterviewModel(false), LIVE_INTERVIEW_PAID_MODEL);
 });

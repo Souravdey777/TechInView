@@ -9,6 +9,7 @@ import {
   getAuthenticatedApiUser,
   unauthorizedResponse,
 } from "@/lib/api-security";
+import { INTERVIEW_MODEL } from "@/lib/ai/models";
 
 // Module-level singleton — reused across requests in the same serverless instance
 const anthropic = new Anthropic();
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
     ];
 
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: INTERVIEW_MODEL,
       max_tokens: 400,
       system: systemPrompt,
       messages,

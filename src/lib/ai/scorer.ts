@@ -1,12 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { getLoopScoringPrompt, getScorerSystemPrompt, getScoringPrompt } from "./prompts";
 import { ROUND_SCORING_DIMENSIONS, SCORING_DIMENSIONS, type InterviewMode, type RoundType } from "@/lib/constants";
 import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { InterviewResult } from "@/types";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
+import { INTERVIEW_MODEL } from "./models";
 
-const MODEL = "claude-sonnet-4-20250514";
 const MAX_TOKENS = 1500;
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
@@ -162,37 +163,24 @@ export async function scoreInterview(
           },
         });
 
-  const response = await client.messages.create({
-    model: MODEL,
+  const responseSchema =
+    mode === "targeted_loop" ? LoopScoringResponseSchema : ScoringResponseSchema;
+  const response = await client.messages.parse({
+    model: INTERVIEW_MODEL,
     max_tokens: MAX_TOKENS,
     system: getScorerSystemPrompt(interviewerPersonaId),
     messages: [{ role: "user", content: userPrompt }],
+    output_config: {
+      format: zodOutputFormat(responseSchema),
+    },
   });
 
-  // Extract text content from response
-  const rawText = response.content
-    .filter((block) => block.type === "text")
-    .map((block) => (block as { type: "text"; text: string }).text)
-    .join("");
-
-  // Parse JSON — strip any accidental markdown code fences
-  const jsonText = rawText
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```\s*$/, "")
-    .trim();
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(jsonText);
-  } catch {
-    throw new Error(
-      `Scorer returned invalid JSON. Raw response: ${rawText.slice(0, 500)}`
-    );
+  if (!response.parsed_output) {
+    throw new Error("Scorer returned no structured output");
   }
 
-  // Validate with Zod
   if (mode === "targeted_loop") {
-    const validated = LoopScoringResponseSchema.parse(parsed);
+    const validated = LoopScoringResponseSchema.parse(response.parsed_output);
     const recalculatedScore = calculateLoopWeightedScore(validated.dimensions);
     const hireRecommendation = deriveHireRecommendation(recalculatedScore);
 
@@ -232,7 +220,7 @@ export async function scoreInterview(
     };
   }
 
-  const validated = ScoringResponseSchema.parse(parsed);
+  const validated = ScoringResponseSchema.parse(response.parsed_output);
   const recalculatedScore = calculateWeightedScore(validated.dimensions);
   const hireRecommendation = deriveHireRecommendation(recalculatedScore);
 

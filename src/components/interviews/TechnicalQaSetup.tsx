@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 type StartResponse = {
   data?: {
     interviewId?: string;
+    isFreeInterview?: boolean;
     interviewerPersona?: InterviewerPersonaId;
     startedAt?: string;
   };
@@ -116,6 +117,7 @@ export function TechnicalQaSetup() {
 
       initFromSetup({
         interviewId,
+        isFreeInterview: payload.data?.isFreeInterview ?? false,
         mode: "targeted_loop",
         roundType: "technical_qa",
         problem: null,

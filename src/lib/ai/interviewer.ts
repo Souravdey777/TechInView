@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { getInterviewerSystemPrompt } from "./prompts";
+import { INTERVIEW_MODEL } from "./models";
 
-const MODEL = "claude-sonnet-4-20250514";
 const MAX_TOKENS = 300;
 const ROLLING_WINDOW = 10; // keep last N turns in context
 
@@ -80,7 +80,7 @@ export class InterviewerEngine {
     let fullResponse = "";
 
     const stream = this.client.messages.stream({
-      model: MODEL,
+      model: INTERVIEW_MODEL,
       max_tokens: MAX_TOKENS,
       system: systemPrompt,
       messages: recentHistory,

@@ -7,9 +7,10 @@ import {
   type PrepPlanTrack,
 } from "@/lib/dashboard/models";
 import { createPrepPlan } from "@/lib/dashboard/prep-plan-generator";
+import { PREP_PLAN_FALLBACK_MODEL, PREP_PLAN_PRIMARY_MODEL } from "./models";
 
-const MODEL = "claude-sonnet-4-20250514";
 const MAX_TOKENS = 1400;
+const PREP_PLAN_MODELS = [PREP_PLAN_PRIMARY_MODEL, PREP_PLAN_FALLBACK_MODEL] as const;
 
 const PrepPlanGenerationInputSchema = z.object({
   company: z.string().trim().min(2).max(80),
@@ -225,27 +226,34 @@ export async function generatePrepPlanSummary(
     apiKey: process.env.ANTHROPIC_API_KEY,
   });
 
-  try {
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
-      system:
-        "You are a senior technical recruiter and interview coach. Generate realistic, company-shaped interview prep plans from job descriptions. Return valid JSON only, with no markdown fences or commentary.",
-      messages: [
-        {
-          role: "user",
-          content: buildPrompt(input),
-        },
-      ],
-    });
+  let lastError: unknown;
 
-    const jsonText = sanitizeJsonResponse(getTextFromResponse(response));
-    const parsed = JSON.parse(jsonText) as unknown;
-    const validated = AiPrepPlanSchema.parse(parsed);
+  for (const model of PREP_PLAN_MODELS) {
+    try {
+      const response = await client.messages.create({
+        model,
+        max_tokens: MAX_TOKENS,
+        system:
+          "You are a senior technical recruiter and interview coach. Generate realistic, company-shaped interview prep plans from job descriptions. Return valid JSON only, with no markdown fences or commentary.",
+        messages: [
+          {
+            role: "user",
+            content: buildPrompt(input),
+          },
+        ],
+      });
 
-    return mergeAiPlanIntoSummary(input, validated);
-  } catch (error) {
-    console.error("Prep plan generation failed, falling back to heuristic plan:", error);
-    return createPrepPlan(input);
+      const jsonText = sanitizeJsonResponse(getTextFromResponse(response));
+      const parsed = JSON.parse(jsonText) as unknown;
+      const validated = AiPrepPlanSchema.parse(parsed);
+
+      return mergeAiPlanIntoSummary(input, validated);
+    } catch (error) {
+      lastError = error;
+      console.warn(`Prep plan generation failed with ${model}; trying fallback if available.`, error);
+    }
   }
+
+  console.error("All AI prep plan models failed; using heuristic plan:", lastError);
+  return createPrepPlan(input);
 }

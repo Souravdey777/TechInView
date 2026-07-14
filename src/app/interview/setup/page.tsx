@@ -660,6 +660,7 @@ function InterviewSetupInner() {
       const data = (await res.json()) as {
         data?: {
           interviewId?: string;
+          isFreeInterview?: boolean;
           mode?: InterviewMode;
           roundType?: RoundType;
           interviewerPersona?: InterviewerPersonaId;
@@ -677,6 +678,7 @@ function InterviewSetupInner() {
       // Store full setup data in Zustand so InterviewRoom + Results can read it
       initFromSetup({
         interviewId,
+        isFreeInterview: data.data?.isFreeInterview ?? false,
         mode: data.data?.mode ?? "general_dsa",
         roundType: data.data?.roundType ?? "coding",
         problem: data.data?.problem ?? null,
