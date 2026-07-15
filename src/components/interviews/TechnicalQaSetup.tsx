@@ -12,7 +12,12 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
+import {
+  InterviewSetupAsideCard,
+  InterviewSetupHero,
+  InterviewSetupLayout,
+  InterviewSetupSection,
+} from "@/components/interviews/InterviewSetupLayout";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   DEFAULT_INTERVIEWER_PERSONA,
@@ -143,42 +148,64 @@ export function TechnicalQaSetup() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-deep text-brand-text">
-      <SetupPageHeader
-        containerClassName="max-w-6xl"
-        supportingText="Technical Q&A Interview Setup"
-      />
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
-          <div className="rounded-3xl border border-brand-border bg-brand-card p-7 sm:p-8">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-brand-green/25 bg-brand-green/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-green">
-                live
-              </span>
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
-                Dedicated setup route
-              </span>
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
-                {TECHNICAL_QA_DURATION_MINUTES} min
-              </span>
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
-                Voice chat
-              </span>
-            </div>
-
-            <h1 className="mt-5 text-3xl font-bold tracking-tight text-brand-text">
-              Technical Q&A Setup
-            </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-muted">
-              Build a voice-first technical depth interview around the language and frameworks you actually use. This full-length flow skips coding and focuses on practical stack knowledge, debugging, runtime behavior, and engineering tradeoffs.
+    <InterviewSetupLayout
+      supportingText="Technical Q&A · Interview setup"
+      aside={
+        <>
+          <InterviewSetupAsideCard title="Interview preview">
+            <h2 className="mt-3 text-xl font-semibold text-brand-text">
+              {roundContext.title}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-brand-muted">
+              {roundContext.summary}
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {roundContext.focusAreas.map((focus) => (
+                <span
+                  key={focus}
+                  className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
+                >
+                  {focus}
+                </span>
+              ))}
+            </div>
+          </InterviewSetupAsideCard>
 
-            <div className="mt-8 grid gap-6">
-              <section className="rounded-2xl border border-brand-border bg-brand-surface p-5">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  <BrainCircuit className="h-3.5 w-3.5" />
-                  Primary Language
-                </div>
+          <InterviewSetupAsideCard title="Session shape">
+            <div className="mt-4 space-y-3 text-sm text-brand-muted">
+              <p>1. Warm intro and stack calibration</p>
+              <p>2. Voice-led technical depth questions</p>
+              <p>3. Debugging and scenario follow-ups</p>
+              <p>4. Tradeoffs, production judgment, and wrap-up</p>
+            </div>
+            <div className="mt-5 rounded-2xl border border-brand-border bg-brand-surface p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">
+                Selected setup
+              </p>
+              <p className="mt-2 text-sm font-semibold text-brand-text">
+                {getTechnicalQaLanguageLabel(language)}
+              </p>
+              <p className="mt-2 text-sm text-brand-muted">
+                {selectedFrameworkLabels.length > 0
+                  ? selectedFrameworkLabels.join(", ")
+                  : "Choose at least one framework to continue."}
+              </p>
+              <p className="mt-3 text-xs text-brand-muted">
+                Interviewer: {selectedPersona.name}
+              </p>
+            </div>
+          </InterviewSetupAsideCard>
+        </>
+      }
+    >
+      <InterviewSetupHero
+        title="Technical Q&A Setup"
+        description="Build a voice-first technical depth interview around the language and frameworks you actually use. This full-length flow skips coding and focuses on practical stack knowledge, debugging, runtime behavior, and engineering tradeoffs."
+        metadata={[`${TECHNICAL_QA_DURATION_MINUTES} min`, "Voice chat", "No coding"]}
+      />
+
+      <div className="mt-8 grid gap-6">
+              <InterviewSetupSection title="Primary language" icon={<BrainCircuit className="h-3.5 w-3.5" />}>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {TECHNICAL_QA_LANGUAGE_OPTIONS.map((option) => (
                     <Button
@@ -200,16 +227,13 @@ export function TechnicalQaSetup() {
                     </Button>
                   ))}
                 </div>
-              </section>
+              </InterviewSetupSection>
 
-              <section className="rounded-2xl border border-brand-border bg-brand-surface p-5">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Frameworks Of Expertise
-                </div>
-                <p className="mt-3 text-sm text-brand-muted">
-                  Pick the tools you want the interviewer to go deep on. You can choose multiple.
-                </p>
+              <InterviewSetupSection
+                title="Frameworks of expertise"
+                icon={<Sparkles className="h-3.5 w-3.5" />}
+                description="Pick the tools you want the interviewer to go deep on. You can choose multiple."
+              >
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {frameworkOptions.map((option) => {
                     const selected = frameworks.includes(option.value);
@@ -246,13 +270,9 @@ export function TechnicalQaSetup() {
                     );
                   })}
                 </div>
-              </section>
+              </InterviewSetupSection>
 
-              <section className="rounded-2xl border border-brand-border bg-brand-surface p-5">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  <MessageSquareText className="h-3.5 w-3.5" />
-                  Interview Persona
-                </div>
+              <InterviewSetupSection title="Interview persona" icon={<MessageSquareText className="h-3.5 w-3.5" />}>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {INTERVIEWER_PERSONAS.map((persona) => {
                     const selected = interviewerPersona === persona.id;
@@ -281,10 +301,10 @@ export function TechnicalQaSetup() {
                     );
                   })}
                 </div>
-              </section>
-            </div>
+              </InterviewSetupSection>
+      </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3 border-t border-brand-border pt-6">
               <Button onClick={() => void handleStartInterview()} disabled={isDisabled}>
                 {isCreating ? (
                   <>
@@ -304,61 +324,6 @@ export function TechnicalQaSetup() {
             </div>
 
             {error ? <p className="mt-4 text-sm text-brand-rose">{error}</p> : null}
-          </div>
-
-          <aside className="space-y-4">
-            <div className="rounded-3xl border border-brand-border bg-brand-card p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                Interview Preview
-              </p>
-              <h2 className="mt-3 text-xl font-semibold text-brand-text">
-                {roundContext.title}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-brand-muted">
-                {roundContext.summary}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {roundContext.focusAreas.map((focus) => (
-                  <span
-                    key={focus}
-                    className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
-                  >
-                    {focus}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-brand-border bg-brand-card p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                Session Shape
-              </p>
-              <div className="mt-4 space-y-3 text-sm text-brand-muted">
-                <p>1. Warm intro and stack calibration</p>
-                <p>2. Voice-led technical depth questions</p>
-                <p>3. Debugging and scenario follow-ups</p>
-                <p>4. Tradeoffs, production judgment, and wrap-up</p>
-              </div>
-              <div className="mt-5 rounded-2xl border border-brand-border bg-brand-surface p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">
-                  Selected Setup
-                </p>
-                <p className="mt-2 text-sm font-semibold text-brand-text">
-                  {getTechnicalQaLanguageLabel(language)}
-                </p>
-                <p className="mt-2 text-sm text-brand-muted">
-                  {selectedFrameworkLabels.length > 0
-                    ? selectedFrameworkLabels.join(", ")
-                    : "Choose at least one framework to continue."}
-                </p>
-                <p className="mt-3 text-xs text-brand-muted">
-                  Interviewer: {selectedPersona.name}
-                </p>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </div>
+    </InterviewSetupLayout>
   );
 }

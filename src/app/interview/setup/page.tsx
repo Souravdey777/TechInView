@@ -49,6 +49,10 @@ import {
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
 import { DsaExperienceToggle } from "@/components/dsa/DsaExperienceToggle";
 import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
+import {
+  InterviewSetupHero,
+  InterviewSetupSection,
+} from "@/components/interviews/InterviewSetupLayout";
 import type {
   GeneratedLoop,
   GeneratedLoopRound,
@@ -185,17 +189,11 @@ function SectionCard({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border border-brand-border bg-brand-card p-5 sm:p-6",
-        className
-      )}
-    >
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-brand-muted">
-        {title}
-      </h2>
+    <InterviewSetupSection title={title} className={className}>
+      <div className="mt-4">
       {children}
-    </div>
+      </div>
+    </InterviewSetupSection>
   );
 }
 
@@ -343,13 +341,15 @@ function SetupSkeleton() {
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text">
       <SetupPageHeader
-        containerClassName="max-w-3xl"
-        supportingText="DSA Practice + AI Interviews"
+        containerClassName="max-w-4xl"
+        supportingText="DSA · Interview setup"
       />
-      <div className="mx-auto max-w-3xl space-y-6 px-4 py-10 sm:px-6">
-        <div className="h-8 w-56 animate-pulse rounded-lg bg-brand-card" />
-        <div className="h-40 animate-pulse rounded-xl bg-brand-card" />
-        <div className="h-24 animate-pulse rounded-xl bg-brand-card" />
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="space-y-6 rounded-3xl border border-brand-border bg-brand-card p-6 sm:p-8">
+          <div className="h-8 w-56 animate-pulse rounded-lg bg-brand-surface" />
+          <div className="h-40 animate-pulse rounded-2xl bg-brand-surface" />
+          <div className="h-24 animate-pulse rounded-2xl bg-brand-surface" />
+        </div>
       </div>
     </div>
   );
@@ -924,22 +924,26 @@ function InterviewSetupInner() {
     <div className="min-h-screen bg-brand-deep text-brand-text">
       {/* Header */}
       <SetupPageHeader
-        containerClassName="max-w-3xl"
-        supportingText="DSA Practice + AI Interviews"
+        containerClassName="max-w-4xl"
+        supportingText="DSA · Interview setup"
       />
 
       {/* Body */}
-      <div className="mx-auto max-w-3xl space-y-6 px-4 py-10 sm:px-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-brand-text">
-            Set Up Your DSA Session
-          </h1>
-          <p className="mt-1 text-sm text-brand-muted">
-            {isPracticeMode
-              ? "Choose a free-practice configuration and start solving right away."
-              : `Configure your AI interview and ${activePersona.name} will guide you through the rest.`}
-          </p>
-        </div>
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="space-y-6 rounded-3xl border border-brand-border bg-brand-card p-6 sm:p-8">
+          <InterviewSetupHero
+            title="Set Up Your DSA Session"
+            description={
+              isPracticeMode
+                ? "Choose a free-practice configuration and start solving right away."
+                : `Configure your AI interview and ${activePersona.name} will guide you through the rest.`
+            }
+            metadata={[
+              isPracticeMode ? "Practice" : `${form.duration} min`,
+              "Live code",
+              isPracticeMode ? "Self-guided" : "Voice chat",
+            ]}
+          />
 
         {interviewMode === "general_dsa" && (
           <SectionCard title="DSA Mode">
@@ -1779,7 +1783,8 @@ function InterviewSetupInner() {
             Generate a targeted loop above, then launch any round directly from the loop cards. The generated rounds will use {activePersona.name} as the interviewer calibration by default.
           </div>
         )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
