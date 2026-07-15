@@ -886,13 +886,17 @@ export function useDeepgramVoiceAgent(
 
   useEffect(() => {
     if (!isConnected) return;
+    // Do not swap the model prompt in the middle of a generated/spoken turn.
+    // Phase changes often happen during that turn; applying the next phase only
+    // after playback finishes prevents the agent from re-running transition text.
+    if (voiceState === "thinking" || voiceState === "speaking") return;
 
     const syncTimer = window.setTimeout(() => {
       updateThink();
     }, 250);
 
     return () => window.clearTimeout(syncTimer);
-  }, [isConnected, settings.systemPrompt, settings.functions, updateThink]);
+  }, [isConnected, settings.systemPrompt, settings.functions, updateThink, voiceState]);
 
   useEffect(() => {
     const nextDeviceId = settings.inputDeviceId ?? "";

@@ -87,6 +87,24 @@ test("coding introduction requires candidate calibration before presenting the p
   });
 
   assert.match(voicePrompt, /generic instruction to start the interview is not evidence/i);
+  assert.match(voicePrompt, /software engineering and coding interview experience/i);
+  assert.match(voicePrompt, /Do not ask about their preferred language/i);
   assert.match(voicePrompt, /without presenting the problem/i);
   assert.match(voicePrompt, /Once the candidate has answered that question/i);
+  assert.match(voicePrompt, /present the problem exactly once/i);
+  assert.match(voicePrompt, /if any assistant turn has already named or described the problem, do not narrate it again/i);
+});
+
+test("presented-problem phase forbids unsolicited repetition", () => {
+  const voicePrompt = buildVoiceSystemPrompt({
+    roundType: "coding",
+    problem,
+    currentPhase: "PROBLEM_PRESENTED",
+    totalMinutes: 45,
+    interviewerPersonaId: "tia",
+  });
+
+  assert.match(voicePrompt, /problem has already been presented/i);
+  assert.match(voicePrompt, /Never repeat its title, statement, examples, or constraints/i);
+  assert.match(voicePrompt, /finish saying the problem exactly once before calling `set_interview_phase`/i);
 });

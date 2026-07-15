@@ -59,7 +59,7 @@ type InterviewRoomProps = {
 const MAX_AGENT_CONTEXT_MESSAGES = 20;
 const OPENING_TURN_DELAY_MS = 2000;
 const INTRO_KICKOFF =
-  "Start the interview now. Introduce yourself warmly and ask exactly one short calibration question about the candidate's background or preferred coding language. Do not present the problem yet. Stop and wait for their answer.";
+  "Start the interview now. Introduce yourself warmly and ask exactly one short question about the candidate's software engineering and coding interview experience. Do not ask about their preferred language and do not present the problem yet. Stop and wait for their answer.";
 
 // ─── Helper: extract typed score dimension safely ─────────────────────────────
 
