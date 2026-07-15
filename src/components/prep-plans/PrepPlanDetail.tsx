@@ -7,17 +7,10 @@ import { Button } from "@/components/ui/button";
 import { DeletePrepPlanButton } from "@/components/prep-plans/DeletePrepPlanButton";
 import { usePrepPlans } from "@/hooks/usePrepPlans";
 import { getPracticeCard, getPracticeKindLabel, type PracticeInterviewKind } from "@/lib/dashboard/models";
-import { cn } from "@/lib/utils";
 
 type PrepPlanDetailProps = {
   planId: string;
 };
-
-const TRACK_STATUS_STYLES = {
-  not_started: "border-brand-border bg-brand-surface text-brand-muted",
-  in_progress: "border-brand-cyan/25 bg-brand-cyan/10 text-brand-cyan",
-  completed: "border-brand-green/25 bg-brand-green/10 text-brand-green",
-} as const;
 
 function buildLaunchHref(planId: string, kind: PracticeInterviewKind, company: string, role: string) {
   const card = getPracticeCard(kind);
@@ -159,14 +152,6 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
                   <span className="text-lg font-semibold text-brand-text">
                     {track.title ?? getPracticeKindLabel(track.kind)}
                   </span>
-                  <span
-                    className={cn(
-                      "rounded-full border px-3 py-1 text-[11px] font-medium",
-                      TRACK_STATUS_STYLES[track.status]
-                    )}
-                  >
-                    {track.status.replace(/_/g, " ")}
-                  </span>
                   <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
                     {track.priority}
                   </span>
@@ -203,7 +188,7 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
                     ))
                   ) : (
                     <p className="text-sm leading-relaxed text-brand-muted">
-                      Prep Guru identified {track.questionCount} practice targets for this round. Open the setup to generate a live question.
+                      No reliable AI-inferred questions were returned for this round.
                     </p>
                   )}
                 </div>
@@ -212,8 +197,8 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
               <div className="rounded-xl border border-brand-green/20 bg-brand-green/5 p-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-brand-green" />
-                  <h3 className="text-sm font-semibold text-brand-text">Previously asked</h3>
-                  <span className="text-[10px] uppercase tracking-[0.14em] text-brand-green">Reviewed reports</span>
+                  <h3 className="text-sm font-semibold text-brand-text">Reported question patterns</h3>
+                  <span className="text-[10px] uppercase tracking-[0.14em] text-brand-green">Reviewed corpus</span>
                 </div>
                 <div className="mt-3 space-y-4">
                   {(track.historicalQuestions ?? []).length > 0 ? (
@@ -235,25 +220,11 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
                     ))
                   ) : (
                     <p className="text-sm leading-relaxed text-brand-muted">
-                      No reviewed company-specific report is in the corpus for this round yet. Prep Guru won&apos;t present an AI guess as historical fact.
+                      No reviewed company-specific report is in the corpus for this round. Prep Guru won&apos;t present an AI guess as historical fact.
                     </p>
                   )}
                 </div>
               </div>
-            </div>
-
-            <div className="mt-4 h-2 rounded-full bg-brand-deep">
-              <div
-                className={cn(
-                  "h-full rounded-full",
-                  track.status === "completed"
-                    ? "bg-brand-green"
-                    : track.status === "in_progress"
-                      ? "bg-brand-cyan"
-                      : "bg-brand-border"
-                )}
-                style={{ width: `${track.progressPercent}%` }}
-              />
             </div>
           </div>
         ))}

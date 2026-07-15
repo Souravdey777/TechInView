@@ -81,27 +81,6 @@ function inferRelevantKinds(role: string, signals: string[]): PracticeInterviewK
   return DEFAULT_TRACK_ORDER.filter((kind) => relevant.has(kind));
 }
 
-function questionCountForKind(kind: PracticeInterviewKind, signals: string[]) {
-  const base = {
-    dsa: 12,
-    machine_coding: 8,
-    system_design: 7,
-    technical_qa: 10,
-    engineering_manager: 6,
-    behavioral: 9,
-  }[kind];
-
-  if (
-    (kind === "system_design" && signals.includes("architecture")) ||
-    (kind === "machine_coding" && signals.includes("frontend")) ||
-    (kind === "engineering_manager" && signals.includes("leadership"))
-  ) {
-    return base + 4;
-  }
-
-  return base;
-}
-
 function nextActionForKind(kind: PracticeInterviewKind) {
   return {
     dsa: "Practice a coding screen that mirrors the likely phone screen bar",
@@ -197,10 +176,8 @@ function buildTracks(company: string, role: string, signals: string[]): PrepPlan
     kind,
     title: titleForKind(kind, role, signals),
     rationale: rationaleForKind(kind, signals, role),
-    status: index === 0 ? "in_progress" : "not_started",
-    progressPercent: index === 0 ? 15 : 0,
+    status: "not_started",
     priority: index < 3 ? "core" : "supporting",
-    questionCount: questionCountForKind(kind, signals),
     nextActionLabel: nextActionForKind(kind),
     likelyQuestions: likelyQuestionsForKind(kind, company, role),
   }));
@@ -264,7 +241,6 @@ export function markPrepPlanTrackStarted(
     return {
       ...track,
       status: "in_progress" as const,
-      progressPercent: Math.max(track.progressPercent, 25),
     };
   });
 

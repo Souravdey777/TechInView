@@ -141,7 +141,7 @@ export function PrepPlanBuilder() {
         {error ? <p role="alert" className="px-3 pb-2 pt-2 text-left text-sm text-brand-rose">{error}</p> : null}
       </form>
       <p className="py-3 text-center text-[11px] text-brand-muted">
-        AI-inferred questions are possibilities. Previously asked questions are separately labeled with source provenance.
+        Company rounds and possible questions are AI inferences. Community-reported patterns are separately labeled with provenance.
       </p>
     </div>
   );

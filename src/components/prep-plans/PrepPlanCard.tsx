@@ -13,12 +13,6 @@ type PrepPlanCardProps = {
   onDelete?: (planId: string) => void;
 };
 
-const TRACK_STATUS_STYLES = {
-  not_started: "border-brand-border bg-brand-surface text-brand-muted",
-  in_progress: "border-brand-cyan/25 bg-brand-cyan/10 text-brand-cyan",
-  completed: "border-brand-green/25 bg-brand-green/10 text-brand-green",
-} as const;
-
 function formatDateLabel(value: string) {
   return new Date(value).toLocaleDateString("en-US", {
     month: "short",
@@ -93,32 +87,13 @@ export function PrepPlanCard({
                   {getPracticeKindLabel(track.kind)}
                 </p>
               </div>
-              <span
-                className={cn(
-                  "rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
-                  TRACK_STATUS_STYLES[track.status]
-                )}
-              >
-                {track.status.replace(/_/g, " ")}
+              <span className="rounded-full border border-brand-border bg-brand-deep px-2.5 py-0.5 text-[11px] text-brand-muted">
+                {track.priority === "core" ? "Core focus" : "Supporting"}
               </span>
             </div>
-            <div className="mt-3 h-2 rounded-full bg-brand-deep">
-              <div
-                className={cn(
-                  "h-full rounded-full",
-                  track.status === "completed"
-                    ? "bg-brand-green"
-                    : track.status === "in_progress"
-                      ? "bg-brand-cyan"
-                      : "bg-brand-border"
-                )}
-                style={{ width: `${track.progressPercent}%` }}
-              />
-            </div>
-            <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-brand-muted">
-              <span>{track.questionCount} likely questions</span>
-              <span>{track.progressPercent}% ready</span>
-            </div>
+            <p className="mt-3 line-clamp-2 text-[11px] leading-relaxed text-brand-muted">
+              {track.rationale}
+            </p>
           </div>
         ))}
       </div>

@@ -38,7 +38,6 @@ const AiTrackSchema = z.object({
   title: z.string().trim().min(4).max(80),
   rationale: z.string().trim().min(20).max(220),
   priority: z.enum(["core", "supporting"]),
-  questionCount: z.number().int().min(4).max(30),
   nextActionLabel: z.string().trim().min(8).max(120),
   likelyQuestions: z.array(z.string().trim().min(12).max(240)).min(3).max(8),
 });
@@ -142,7 +141,6 @@ Return JSON only in this exact shape:
       "kind": "dsa",
       "rationale": "This company often uses an elimination coding screen before the core onsite loop.",
       "priority": "core",
-      "questionCount": 12,
       "nextActionLabel": "Run one medium coding screen focused on array and graph tradeoffs",
       "likelyQuestions": [
         "Solve a graph traversal problem and explain the tradeoffs in your chosen representation.",
@@ -167,7 +165,6 @@ Rules:
 - Include engineering_manager when role fit, seniority, ownership, leadership, stakeholder alignment, or people influence is prominent.
 - Include behavioral when collaboration, ownership, ambiguity, customer impact, or cross-functional work appears in the JD.
 - Use track titles that match likely round naming, such as phone screen, technical deep dive, system design, collaboration, or hiring manager.
-- Make questionCount realistic for prep planning, between 4 and 30.
 - Keep nextActionLabel concise, specific, and imperative.
 - Use short jdSignals that summarize what drove the plan; avoid copying generic JD filler.
 - planSummary should briefly explain the likely company mix, the chosen tracks, and the main risk area for the candidate.
@@ -202,7 +199,7 @@ function normalizeTracks(
   const aiTrackMap = new Map(aiPlan.tracks.map((track) => [track.kind, track] as const));
   const normalizedKinds = dedupeKinds(aiPlan.tracks.map((track) => track.kind));
 
-  const tracks = normalizedKinds.map((kind, index) => {
+  const tracks = normalizedKinds.map((kind) => {
     const fallbackTrack = fallbackTrackMap.get(kind);
     const aiTrack = aiTrackMap.get(kind);
 
@@ -210,10 +207,8 @@ function normalizeTracks(
       kind,
       title: aiTrack?.title ?? fallbackTrack?.title,
       rationale: aiTrack?.rationale ?? fallbackTrack?.rationale,
-      status: index === 0 ? "in_progress" : "not_started",
-      progressPercent: index === 0 ? 15 : 0,
+      status: "not_started",
       priority: aiTrack?.priority ?? fallbackTrack?.priority ?? "supporting",
-      questionCount: aiTrack?.questionCount ?? fallbackTrack?.questionCount ?? 6,
       nextActionLabel:
         aiTrack?.nextActionLabel ?? fallbackTrack?.nextActionLabel ?? "Start this prep track",
       likelyQuestions: aiTrack?.likelyQuestions ?? fallbackTrack?.likelyQuestions ?? [],
@@ -304,11 +299,7 @@ export async function generatePrepPlanSummary(
   const input = PrepPlanGenerationInputSchema.parse(rawInput);
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    return attachHistoricalQuestions(createPrepPlan({
-      company: input.company || "Target company",
-      role: input.role || "Software Engineer",
-      jdText: input.jdText || input.prompt,
-    }));
+    throw new Error("Prep Guru AI is not configured. Please try again after the AI service is enabled.");
   }
 
   const client = new Anthropic({
@@ -343,10 +334,6 @@ export async function generatePrepPlanSummary(
     }
   }
 
-  console.error("All AI prep plan models failed; using heuristic plan:", lastError);
-  return attachHistoricalQuestions(createPrepPlan({
-    company: input.company || "Target company",
-    role: input.role || "Software Engineer",
-    jdText: input.jdText || input.prompt,
-  }));
+  console.error("All AI prep plan models failed; refusing to create an unreliable plan:", lastError);
+  throw new Error("Prep Guru could not complete reliable AI research for this target. Please try again.");
 }

@@ -113,9 +113,7 @@ export type PrepPlanTrack = {
   title?: string;
   rationale?: string;
   status: PrepPlanTrackStatus;
-  progressPercent: number;
   priority: "core" | "supporting";
-  questionCount: number;
   nextActionLabel: string;
   likelyQuestions?: string[];
   historicalQuestions?: PrepPlanHistoricalQuestion[];

@@ -1,15 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createPrepPlan, markPrepPlanTrackStarted } from "@/lib/dashboard/prep-plan-generator";
+import { markPrepPlanTrackStarted } from "@/lib/dashboard/prep-plan-generator";
 import type { PracticeInterviewKind, PrepPlanSummary } from "@/lib/dashboard/models";
 
 const STORAGE_KEY = "techinview-prep-plans-v1";
 
 type StoredPrepPlans = {
-  version: 1;
+  version: 1 | 2;
   plans: PrepPlanSummary[];
 };
+
+type LegacyPrepPlanTrack = PrepPlanSummary["tracks"][number] & {
+  progressPercent?: number;
+  questionCount?: number;
+};
+
+function normalizeStoredPlans(plans: PrepPlanSummary[]) {
+  return plans
+    .filter(
+      (plan) =>
+        plan.company.trim().toLowerCase() !== "target company" &&
+        !(plan.company.trim() === "" || plan.role.trim() === "")
+    )
+    .map((plan) => ({
+      ...plan,
+      tracks: plan.tracks.map((track) => {
+        const legacyTrack = track as LegacyPrepPlanTrack;
+        const { progressPercent, questionCount: _questionCount, ...currentTrack } = legacyTrack;
+        const wasSyntheticStart =
+          currentTrack.status === "in_progress" && progressPercent === 15;
+
+        return {
+          ...currentTrack,
+          status: wasSyntheticStart ? ("not_started" as const) : currentTrack.status,
+        };
+      }),
+    }));
+}
 
 function readStoredPlans(): PrepPlanSummary[] {
   if (typeof window === "undefined") return [];
@@ -19,7 +47,14 @@ function readStoredPlans(): PrepPlanSummary[] {
     if (!raw) return [];
 
     const parsed = JSON.parse(raw) as StoredPrepPlans;
-    return Array.isArray(parsed.plans) ? parsed.plans : [];
+    if (!Array.isArray(parsed.plans)) return [];
+
+    const plans = normalizeStoredPlans(parsed.plans);
+    if (parsed.version !== 2 || plans.length !== parsed.plans.length) {
+      writeStoredPlans(plans);
+    }
+
+    return plans;
   } catch {
     return [];
   }
@@ -29,7 +64,7 @@ function writeStoredPlans(plans: PrepPlanSummary[]) {
   if (typeof window === "undefined") return;
 
   const payload: StoredPrepPlans = {
-    version: 1,
+    version: 2,
     plans,
   };
 
@@ -69,15 +104,6 @@ export function usePrepPlans() {
     return savedPlan;
   };
 
-  const createPlanFromInput = (input: {
-    company: string;
-    role: string;
-    jdText: string;
-  }) => {
-    const plan = createPrepPlan(input);
-    return savePlan(plan);
-  };
-
   const markTrackStarted = (planId: string, kind: PracticeInterviewKind) => {
     setPlans((currentPlans) => {
       const nextPlans = currentPlans.map((plan) =>
@@ -103,7 +129,6 @@ export function usePrepPlans() {
     plans,
     isLoaded,
     savePlan,
-    createPlanFromInput,
     markTrackStarted,
     deletePlan,
     getPlanById,
