@@ -15,8 +15,8 @@ export default function SystemDesignSetupPage({ searchParams }: PageProps) {
       status="beta"
       description="This setup page is reserved for choosing persona, stack, and system-design prompts as the dedicated 45-minute system-design workflow lands."
       setupHighlights={["45 min", "Persona", "Stack", "Prompt"]}
-      primaryHref="/prep-plans/new"
-      primaryLabel="Create prep plan"
+      primaryHref="/prep-guru"
+      primaryLabel="Ask Prep Guru"
       secondaryHref="/dashboard"
       secondaryLabel="Back to dashboard"
       contextLabel={contextLabel}

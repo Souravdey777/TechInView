@@ -169,7 +169,7 @@ function buildActivityItems(
         title: plan.label,
         subtitle: `${relatedTrack.title ?? DASHBOARD_FILTER_LABELS[relatedTrack.kind]} · ${relatedTrack.nextActionLabel}`,
         timestamp: plan.updatedAt,
-        href: `/prep-plans/${plan.id}`,
+        href: `/prep-guru/${plan.id}`,
         statusLabel: plan.status,
       };
     });
@@ -328,7 +328,7 @@ export function DashboardHome({
   initialInterviews,
   practiceAttempts,
 }: DashboardHomeProps) {
-  const prepPlansComingSoon = true;
+  const prepPlansComingSoon = false;
   const { plans, isLoaded, deletePlan } = usePrepPlans();
   const [filter, setFilter] = useState<DashboardFilter>("all");
 
@@ -408,7 +408,7 @@ export function DashboardHome({
             surface: "bg-brand-green/10",
           },
           {
-            label: filter === "all" ? "Active Prep Plans" : "Completed Rounds",
+            label: filter === "all" ? "Active Prep Guru Plans" : "Completed Rounds",
             value: filter === "all" ? plans.length : completedPractice.length,
             icon: filter === "all" ? FolderKanban : CheckCircle2,
             accent: "text-brand-amber",
@@ -463,13 +463,13 @@ export function DashboardHome({
             <div className="flex flex-wrap gap-3">
               {prepPlansComingSoon ? (
                 <Button variant="outline" disabled>
-                  Prep Plans coming soon
+                  Prep Guru coming soon
                   <Sparkles className="h-4 w-4" />
                 </Button>
               ) : (
                 <Button asChild>
-                  <Link href="/prep-plans/new">
-                    Create Prep Plan
+                  <Link href="/prep-guru">
+                    Ask Prep Guru
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -622,7 +622,7 @@ export function DashboardHome({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-semibold text-brand-text">Prep Plans</h2>
+              <h2 className="text-xl font-semibold text-brand-text">Prep Guru</h2>
               {prepPlansComingSoon ? (
                 <span className="rounded-full border border-brand-amber/25 bg-brand-amber/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-amber">
                   Coming Soon
@@ -630,18 +630,12 @@ export function DashboardHome({
               ) : null}
             </div>
             <p className="mt-1 text-sm text-brand-muted">
-              Plan creation is temporarily paused while we refine the company-matched prep
-              experience and bring the full workspace back in a cleaner shape.
+              Turn a job description or company and role into a researched, round-by-round interview plan.
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-3 lg:flex-nowrap lg:justify-end">
-            <Button variant="secondary" disabled={prepPlansComingSoon}>
-              View all plans
-            </Button>
-            <Button variant="outline" disabled>
-              Create Prep Plan
-              <Sparkles className="h-4 w-4" />
-            </Button>
+            <Button asChild variant="secondary"><Link href="/prep-guru">View all plans</Link></Button>
+            <Button asChild variant="outline"><Link href="/prep-guru">Ask Prep Guru<Sparkles className="h-4 w-4" /></Link></Button>
           </div>
         </div>
 
@@ -653,17 +647,13 @@ export function DashboardHome({
           <div className="rounded-2xl border border-dashed border-brand-border bg-brand-card p-8 text-center">
             <BookOpenText className="mx-auto h-10 w-10 text-brand-cyan" />
             <h3 className="mt-4 text-lg font-semibold text-brand-text">
-              Prep Plans are coming soon
+              Ask Prep Guru about your target role
             </h3>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-brand-muted">
-              We&apos;re tightening the planning experience so company, role, and JD context turn
-              into higher-signal prep loops before the feature goes live again.
+              Paste a JD or name the role and company. Prep Guru will map the likely rounds and surface possible and previously reported questions.
             </p>
             <div className="mt-5">
-              <Button variant="outline" disabled>
-                Prep Plans coming soon
-                <Sparkles className="h-4 w-4" />
-              </Button>
+              <Button asChild><Link href="/prep-guru">Start a conversation<Sparkles className="h-4 w-4" /></Link></Button>
             </div>
           </div>
         ) : (
@@ -685,7 +675,7 @@ export function DashboardHome({
           <h2 className="text-xl font-semibold text-brand-text">Unified Stats</h2>
           <p className="mt-1 text-sm text-brand-muted">
             {filter === "prep_plans"
-              ? "Filter switched to Prep Plans, so these metrics focus on plan progress."
+              ? "Filter switched to Prep Guru, so these metrics focus on plan progress."
               : `Filtered to ${DASHBOARD_FILTER_LABELS[filter]}. Practice metrics stay visible without hiding the broader product shape.`}
           </p>
         </div>
@@ -713,8 +703,8 @@ export function DashboardHome({
               Practice sessions and prep-plan progress show up in one activity feed, clearly labeled by type.
             </p>
           </div>
-          <Link href="/prep-plans" className="inline-flex items-center gap-1 text-sm font-medium text-brand-cyan">
-            Open prep plans
+          <Link href="/prep-guru" className="inline-flex items-center gap-1 text-sm font-medium text-brand-cyan">
+            Open Prep Guru
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>

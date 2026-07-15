@@ -113,6 +113,41 @@ function nextActionForKind(kind: PracticeInterviewKind) {
   }[kind];
 }
 
+function likelyQuestionsForKind(kind: PracticeInterviewKind, company: string, role: string) {
+  return {
+    dsa: [
+      `Solve a medium data-structures problem at the pace expected in a ${company} coding screen.`,
+      "Explain the brute-force approach, optimize it, and defend the time and space complexity.",
+      "Test the solution against empty input, duplicates, and the largest allowed input.",
+    ],
+    machine_coding: [
+      `Build a scoped, production-minded feature relevant to a ${role} role.`,
+      "Explain the component or domain model before implementation.",
+      "Add validation, error handling, and tests for the highest-risk behavior.",
+    ],
+    system_design: [
+      `Design a high-scale service relevant to ${company}'s product domain.`,
+      "Estimate traffic and storage, then identify the first scaling bottleneck.",
+      "Compare two architecture options and explain the reliability tradeoffs.",
+    ],
+    technical_qa: [
+      `Explain a difficult technical decision you would expect a ${role} to own.`,
+      "Diagnose a performance or reliability regression from limited evidence.",
+      "Compare the main framework or platform alternatives named in the role.",
+    ],
+    engineering_manager: [
+      "Describe how you aligned stakeholders around a technically difficult decision.",
+      "Explain a project that slipped and what you changed in response.",
+      "How do you balance delivery pressure, technical debt, and team health?",
+    ],
+    behavioral: [
+      "Tell me about a high-impact decision you made with incomplete information.",
+      "Describe a conflict with a teammate or stakeholder and how you resolved it.",
+      "Give an example of feedback that materially changed how you work.",
+    ],
+  }[kind];
+}
+
 function titleForKind(kind: PracticeInterviewKind, role: string, signals: string[]) {
   switch (kind) {
     case "dsa":
@@ -155,7 +190,7 @@ function rationaleForKind(kind: PracticeInterviewKind, signals: string[], role: 
   }
 }
 
-function buildTracks(role: string, signals: string[]): PrepPlanTrack[] {
+function buildTracks(company: string, role: string, signals: string[]): PrepPlanTrack[] {
   const ordered = inferRelevantKinds(role, signals);
 
   return ordered.map((kind, index) => ({
@@ -167,6 +202,7 @@ function buildTracks(role: string, signals: string[]): PrepPlanTrack[] {
     priority: index < 3 ? "core" : "supporting",
     questionCount: questionCountForKind(kind, signals),
     nextActionLabel: nextActionForKind(kind),
+    likelyQuestions: likelyQuestionsForKind(kind, company, role),
   }));
 }
 
@@ -194,7 +230,7 @@ export function createPrepPlan(input: PrepPlanInput): PrepPlanSummary {
   const role = input.role.trim();
   const jdText = input.jdText.trim();
   const jdSignals = extractSignals(role, jdText);
-  const tracks = buildTracks(role, jdSignals);
+  const tracks = buildTracks(company, role, jdSignals);
   const now = new Date().toISOString();
   const id = `${slugify(company)}-${slugify(role)}-${Date.now()}`;
   const nextRecommendedKind = tracks[0]?.kind ?? "dsa";

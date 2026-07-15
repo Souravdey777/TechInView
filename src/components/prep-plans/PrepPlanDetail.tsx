@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Building2, BriefcaseBusiness, FileText, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bot, Building2, BriefcaseBusiness, CheckCircle2, FileQuestion, FileText, Sparkles, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeletePrepPlanButton } from "@/components/prep-plans/DeletePrepPlanButton";
 import { usePrepPlans } from "@/hooks/usePrepPlans";
@@ -45,7 +45,7 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
   const handleDelete = async () => {
     if (!plan) return;
     deletePlan(plan.id);
-    router.replace("/prep-plans");
+    router.replace("/prep-guru");
   };
 
   if (!isLoaded) {
@@ -65,7 +65,7 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
         </p>
         <div className="mt-5">
           <Button asChild>
-            <Link href="/prep-plans">Back to Prep Plans</Link>
+            <Link href="/prep-guru">Back to Prep Guru</Link>
           </Button>
         </div>
       </div>
@@ -76,11 +76,11 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
-          href="/prep-plans"
+          href="/prep-guru"
           className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Prep Plans
+          Back to Prep Guru
         </Link>
         <DeletePrepPlanButton
           planLabel={plan.label}
@@ -88,10 +88,22 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
         />
       </div>
 
-      <div className="rounded-3xl border border-brand-border bg-brand-card p-7 sm:p-8">
+      <div className="ml-auto max-w-3xl rounded-3xl rounded-br-md border border-brand-border bg-brand-surface p-5">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
+          <UserRound className="h-4 w-4" /> Your target
+        </div>
+        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-brand-text">
+          {plan.jdText || `${plan.role} at ${plan.company}`}
+        </p>
+      </div>
+
+      <div className="relative rounded-3xl rounded-tl-md border border-brand-cyan/20 bg-brand-card p-7 sm:p-8">
+        <div className="absolute -left-3 -top-3 flex h-9 w-9 items-center justify-center rounded-xl border border-brand-cyan/25 bg-brand-deep text-brand-cyan">
+          <Bot className="h-5 w-5" />
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full border border-brand-cyan/20 bg-brand-cyan/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-cyan">
-            Prep Plan
+            Prep Guru research
           </span>
           <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
             {plan.status}
@@ -127,15 +139,23 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
             {plan.planSummary ??
               "The prep plan organizes likely interview work by format first, then launches each format into its own setup page. This keeps planning separate from runtime configuration."}
           </p>
+          {plan.researchNote ? (
+            <p className="mt-3 border-t border-brand-border pt-3 text-xs leading-relaxed text-brand-muted">
+              {plan.researchNote}
+            </p>
+          ) : null}
         </div>
       </div>
 
       <div className="grid gap-4">
-        {sortedTracks.map((track) => (
+        {sortedTracks.map((track, index) => (
           <div key={`${plan.id}-${track.kind}`} className="rounded-2xl border border-brand-border bg-brand-card p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-cyan">
+                    Round {index + 1}
+                  </span>
                   <span className="text-lg font-semibold text-brand-text">
                     {track.title ?? getPracticeKindLabel(track.kind)}
                   </span>
@@ -154,13 +174,9 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
                     {getPracticeKindLabel(track.kind)}
                   </span>
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-brand-muted">
-                  {track.questionCount} likely questions surfaced for this track. Next action: {track.nextActionLabel}
-                </p>
+                <p className="mt-3 text-sm leading-relaxed text-brand-muted">{track.rationale}</p>
                 {track.rationale ? (
-                  <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-                    {track.rationale}
-                  </p>
+                  <p className="mt-2 text-xs font-medium text-brand-cyan">Recommended: {track.nextActionLabel}</p>
                 ) : null}
               </div>
 
@@ -168,6 +184,62 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
                 Open {getPracticeKindLabel(track.kind)} Setup
                 <ArrowRight className="h-4 w-4" />
               </Button>
+            </div>
+
+            <div className="mt-5 grid gap-4 border-t border-brand-border pt-5 lg:grid-cols-2">
+              <div className="rounded-xl border border-brand-border bg-brand-surface p-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-brand-cyan" />
+                  <h3 className="text-sm font-semibold text-brand-text">Possible questions</h3>
+                  <span className="text-[10px] uppercase tracking-[0.14em] text-brand-muted">AI inferred</span>
+                </div>
+                <div className="mt-3 space-y-3">
+                  {(track.likelyQuestions ?? []).length > 0 ? (
+                    track.likelyQuestions?.map((question) => (
+                      <div key={question} className="flex gap-2 text-sm leading-relaxed text-brand-muted">
+                        <FileQuestion className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
+                        <p>{question}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm leading-relaxed text-brand-muted">
+                      Prep Guru identified {track.questionCount} practice targets for this round. Open the setup to generate a live question.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-brand-green/20 bg-brand-green/5 p-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-brand-green" />
+                  <h3 className="text-sm font-semibold text-brand-text">Previously asked</h3>
+                  <span className="text-[10px] uppercase tracking-[0.14em] text-brand-green">Reviewed reports</span>
+                </div>
+                <div className="mt-3 space-y-4">
+                  {(track.historicalQuestions ?? []).length > 0 ? (
+                    track.historicalQuestions?.map((question) => (
+                      <div key={question.id}>
+                        <p className="text-sm leading-relaxed text-brand-text">{question.prompt}</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {question.topics.map((topic) => (
+                            <span key={`${question.id}-${topic}`} className="rounded-full border border-brand-border bg-brand-deep px-2 py-0.5 text-[10px] text-brand-muted">
+                              {topic}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[10px] leading-relaxed text-brand-muted">
+                          {question.sourceLabel} · {Math.round(question.confidence * 100)}% corpus confidence
+                        </p>
+                        <p className="mt-1 text-[10px] leading-relaxed text-brand-muted">{question.provenance}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm leading-relaxed text-brand-muted">
+                      No reviewed company-specific report is in the corpus for this round yet. Prep Guru won&apos;t present an AI guess as historical fact.
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="mt-4 h-2 rounded-full bg-brand-deep">
@@ -190,7 +262,7 @@ export function PrepPlanDetail({ planId }: PrepPlanDetailProps) {
       <div className="rounded-2xl border border-brand-border bg-brand-card p-5">
         <div className="flex items-center gap-2 text-brand-muted">
           <FileText className="h-4 w-4" />
-          <p className="text-sm font-semibold text-brand-text">JD Snapshot</p>
+          <p className="text-sm font-semibold text-brand-text">Source context</p>
         </div>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-brand-muted">
           {plan.jdText}

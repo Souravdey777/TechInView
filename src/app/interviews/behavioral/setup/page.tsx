@@ -15,8 +15,8 @@ export default function BehavioralSetupPage({ searchParams }: PageProps) {
       status="beta"
       description="This setup page is reserved for general behavioral scenario prep with a standardized 45-minute format, persona selection, role context, and structured follow-ups."
       setupHighlights={["45 min", "Scenarios", "Persona", "Role context"]}
-      primaryHref="/prep-plans/new"
-      primaryLabel="Create prep plan"
+      primaryHref="/prep-guru"
+      primaryLabel="Ask Prep Guru"
       secondaryHref="/dashboard"
       secondaryLabel="Back to dashboard"
       contextLabel={contextLabel}

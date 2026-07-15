@@ -1,5 +1,5 @@
-import { PrepPlanBuilder } from "@/components/prep-plans/PrepPlanBuilder";
+import { redirect } from "next/navigation";
 
 export default function NewPrepPlanPage() {
-  return <PrepPlanBuilder />;
+  redirect("/prep-guru");
 }

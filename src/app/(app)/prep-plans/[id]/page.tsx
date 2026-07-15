@@ -1,9 +1,9 @@
-import { PrepPlanDetail } from "@/components/prep-plans/PrepPlanDetail";
+import { redirect } from "next/navigation";
 
 export default function PrepPlanDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  return <PrepPlanDetail planId={params.id} />;
+  redirect(`/prep-guru/${params.id}`);
 }

@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { REVIEWED_HISTORICAL_QUESTIONS } from "@/data/historical-questions";
 import {
   PRACTICE_INTERVIEW_KINDS,
   type PracticeInterviewKind,
@@ -9,14 +10,28 @@ import {
 import { createPrepPlan } from "@/lib/dashboard/prep-plan-generator";
 import { PREP_PLAN_FALLBACK_MODEL, PREP_PLAN_PRIMARY_MODEL } from "./models";
 
-const MAX_TOKENS = 1400;
+const MAX_TOKENS = 3000;
 const PREP_PLAN_MODELS = [PREP_PLAN_PRIMARY_MODEL, PREP_PLAN_FALLBACK_MODEL] as const;
 
-const PrepPlanGenerationInputSchema = z.object({
-  company: z.string().trim().min(2).max(80),
-  role: z.string().trim().min(2).max(120),
-  jdText: z.string().trim().min(40).max(12000),
-});
+const PrepPlanGenerationInputSchema = z
+  .object({
+    prompt: z.string().trim().max(12000).optional().default(""),
+    company: z.string().trim().max(80).optional().default(""),
+    role: z.string().trim().max(120).optional().default(""),
+    jdText: z.string().trim().max(12000).optional().default(""),
+  })
+  .superRefine((value, ctx) => {
+    const hasPrompt = value.prompt.length >= 10;
+    const hasTarget = value.company.length >= 2 && value.role.length >= 2;
+    const hasJd = value.jdText.length >= 40;
+
+    if (!hasPrompt && !hasTarget && !hasJd) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Paste a job description or enter a role and company.",
+      });
+    }
+  });
 
 const AiTrackSchema = z.object({
   kind: z.enum(PRACTICE_INTERVIEW_KINDS),
@@ -25,10 +40,14 @@ const AiTrackSchema = z.object({
   priority: z.enum(["core", "supporting"]),
   questionCount: z.number().int().min(4).max(30),
   nextActionLabel: z.string().trim().min(8).max(120),
+  likelyQuestions: z.array(z.string().trim().min(12).max(240)).min(3).max(8),
 });
 
 const AiPrepPlanSchema = z.object({
+  company: z.string().trim().min(2).max(80),
+  role: z.string().trim().min(2).max(120),
   planSummary: z.string().trim().min(30).max(500),
+  researchNote: z.string().trim().min(20).max(300),
   jdSignals: z.array(z.string().trim().min(2).max(40)).max(8).default([]),
   tracks: z.array(AiTrackSchema).min(2).max(PRACTICE_INTERVIEW_KINDS.length),
 }).superRefine((value, ctx) => {
@@ -91,8 +110,9 @@ Create a structured, company-shaped software interview prep plan for this candid
 
 Company: ${input.company}
 Role: ${input.role}
+Candidate message: ${input.prompt || "Not provided"}
 Job description:
-${input.jdText}
+${input.jdText || "Not provided. Infer the target from the candidate message."}
 
 Available interview kinds:
 - dsa
@@ -111,7 +131,10 @@ Your job:
 
 Return JSON only in this exact shape:
 {
+  "company": "Uber",
+  "role": "Senior Backend Engineer",
   "planSummary": "Uber usually screens this role with a coding screen, then focuses the onsite on coding, design, and collaboration signal.",
+  "researchNote": "Built from the supplied JD, known public interview patterns, and the reviewed historical-question corpus available in TechInView.",
   "jdSignals": ["backend systems", "stakeholder communication"],
   "tracks": [
     {
@@ -120,13 +143,20 @@ Return JSON only in this exact shape:
       "rationale": "This company often uses an elimination coding screen before the core onsite loop.",
       "priority": "core",
       "questionCount": 12,
-      "nextActionLabel": "Run one medium coding screen focused on array and graph tradeoffs"
+      "nextActionLabel": "Run one medium coding screen focused on array and graph tradeoffs",
+      "likelyQuestions": [
+        "Solve a graph traversal problem and explain the tradeoffs in your chosen representation.",
+        "Find the lowest-cost path under changing edge constraints and test the main edge cases.",
+        "Optimize a working solution and explain the time and space complexity precisely."
+      ]
     }
   ]
 }
 
 Rules:
 - Do not force all six interview kinds. Include only the rounds that actually look relevant for this company, role, and JD.
+- Infer company and role from the pasted JD or candidate message when they were not entered separately.
+- Return 3-8 realistic likelyQuestions for every track. These are AI-inferred possibilities, not claims that the company asked them before.
 - Use between 2 and 6 tracks total.
 - Each interview kind can appear at most once.
 - Prefer 3-4 tracks unless the JD clearly requires more.
@@ -186,6 +216,7 @@ function normalizeTracks(
       questionCount: aiTrack?.questionCount ?? fallbackTrack?.questionCount ?? 6,
       nextActionLabel:
         aiTrack?.nextActionLabel ?? fallbackTrack?.nextActionLabel ?? "Start this prep track",
+      likelyQuestions: aiTrack?.likelyQuestions ?? fallbackTrack?.likelyQuestions ?? [],
     } satisfies PrepPlanTrack;
   });
 
@@ -200,17 +231,71 @@ function mergeAiPlanIntoSummary(
   input: PrepPlanGenerationInput,
   aiPlan: AiPrepPlan
 ): PrepPlanSummary {
-  const fallbackPlan = createPrepPlan(input);
+  const resolvedInput = {
+    company: aiPlan.company,
+    role: aiPlan.role,
+    jdText: input.jdText || input.prompt,
+  };
+  const fallbackPlan = createPrepPlan(resolvedInput);
   const normalized = normalizeTracks(aiPlan, fallbackPlan);
+  const jdSignals = normalizeSignals(aiPlan.jdSignals, fallbackPlan.jdSignals);
+  const tracks = attachHistoricalQuestions({
+    ...fallbackPlan,
+    jdSignals,
+    tracks: normalized.tracks,
+  }).tracks;
 
   return {
     ...fallbackPlan,
     planSummary: aiPlan.planSummary,
-    jdSignals: normalizeSignals(aiPlan.jdSignals, fallbackPlan.jdSignals),
+    researchNote: aiPlan.researchNote,
+    jdSignals,
     nextRecommendedKind: normalized.nextRecommendedKind,
     nextActionLabel: normalized.nextActionLabel,
-    tracks: normalized.tracks,
+    tracks,
   };
+}
+
+function attachHistoricalQuestions(plan: PrepPlanSummary): PrepPlanSummary {
+  const trackRoundTypes = {
+    dsa: "coding",
+    machine_coding: null,
+    system_design: "system_design",
+    technical_qa: "technical_qa",
+    engineering_manager: "hiring_manager",
+    behavioral: "behavioral",
+  } as const;
+  const companySlug = plan.company.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const knownCompany = ["google", "meta", "amazon", "apple", "netflix"].find((company) =>
+    companySlug.includes(company)
+  );
+  const signalText = plan.jdSignals.join(" ").toLowerCase();
+  const tracks = plan.tracks.map((track) => {
+    const roundType = trackRoundTypes[track.kind];
+    const questions = REVIEWED_HISTORICAL_QUESTIONS
+      .filter((question) => roundType !== null && question.reviewStatus === "reviewed" && question.roundType === roundType)
+      .map((question) => ({
+        question,
+        score:
+          (question.company === knownCompany ? 100 : question.company === "generic" ? 20 : 0) +
+          question.jdTags.filter((tag) => signalText.includes(tag.toLowerCase())).length * 5,
+      }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score || b.question.confidence - a.question.confidence)
+      .slice(0, 3)
+      .map(({ question }) => ({
+        id: question.id,
+        prompt: question.prompt,
+        topics: question.topics,
+        sourceLabel: question.sourceLabel,
+        provenance: question.provenance,
+        confidence: question.confidence,
+      }));
+
+    return { ...track, historicalQuestions: questions };
+  });
+
+  return { ...plan, tracks };
 }
 
 export async function generatePrepPlanSummary(
@@ -219,7 +304,11 @@ export async function generatePrepPlanSummary(
   const input = PrepPlanGenerationInputSchema.parse(rawInput);
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    return createPrepPlan(input);
+    return attachHistoricalQuestions(createPrepPlan({
+      company: input.company || "Target company",
+      role: input.role || "Software Engineer",
+      jdText: input.jdText || input.prompt,
+    }));
   }
 
   const client = new Anthropic({
@@ -255,5 +344,9 @@ export async function generatePrepPlanSummary(
   }
 
   console.error("All AI prep plan models failed; using heuristic plan:", lastError);
-  return createPrepPlan(input);
+  return attachHistoricalQuestions(createPrepPlan({
+    company: input.company || "Target company",
+    role: input.role || "Software Engineer",
+    jdText: input.jdText || input.prompt,
+  }));
 }

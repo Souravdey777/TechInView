@@ -29,7 +29,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/prep-plans", label: "Prep Plans", icon: FolderKanban },
+  { href: "/prep-guru", label: "Prep Guru", icon: FolderKanban },
   { href: "/problems", label: "Problems", icon: BookOpen },
   { href: "/progress", label: "Progress", icon: TrendingUp },
   { href: "/settings", label: "Settings", icon: Settings2 },

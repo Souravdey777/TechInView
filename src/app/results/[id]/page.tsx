@@ -591,7 +591,7 @@ export default function ResultsPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-brand-border r-anim-8">
           <p className="text-sm text-brand-muted">Ready to improve your score?</p>
           <Link
-            href={mode === "targeted_loop" ? "/prep-plans" : "/interviews/dsa/setup"}
+            href={mode === "targeted_loop" ? "/prep-guru" : "/interviews/dsa/setup"}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
           >
             <RefreshCw className="h-4 w-4" />

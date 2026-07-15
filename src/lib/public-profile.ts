@@ -20,6 +20,7 @@ const RESERVED_PUBLIC_USERNAMES = new Set([
   "onboarding",
   "opengraph-image",
   "practice",
+  "prep-guru",
   "prep-plans",
   "problems",
   "progress",

@@ -40,7 +40,7 @@ export function PrepPlanCard({
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-cyan/20 bg-brand-cyan/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-cyan">
               <Sparkles className="h-3.5 w-3.5" />
-              Prep Plan
+              Prep Guru
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
               <Building2 className="h-3.5 w-3.5" />
@@ -72,7 +72,7 @@ export function PrepPlanCard({
               />
             ) : null}
             <Button asChild size="sm">
-              <Link href={`/prep-plans/${plan.id}`}>
+              <Link href={`/prep-guru/${plan.id}`}>
                 Continue Plan
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>

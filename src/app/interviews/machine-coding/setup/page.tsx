@@ -7,8 +7,8 @@ export default function MachineCodingSetupPage() {
       status="planned"
       description="This setup page will let candidates choose persona, stack, and problem for scoped 45-minute FE, BE, and FS machine-coding rounds."
       setupHighlights={["45 min", "Persona", "Stack", "Problem"]}
-      primaryHref="/prep-plans/new"
-      primaryLabel="Create prep plan instead"
+      primaryHref="/prep-guru"
+      primaryLabel="Ask Prep Guru instead"
       secondaryHref="/dashboard"
       secondaryLabel="Back to dashboard"
     />

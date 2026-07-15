@@ -446,7 +446,7 @@ function InterviewSetupInner() {
   useEffect(() => {
     const requestedMode = searchParams.get("mode");
     if (requestedMode === "targeted_loop") {
-      router.replace("/prep-plans/new");
+      router.replace("/prep-guru");
     }
   }, [router, searchParams]);
 

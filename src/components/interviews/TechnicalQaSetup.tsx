@@ -321,7 +321,7 @@ export function TechnicalQaSetup() {
                 )}
               </Button>
               <Button asChild variant="secondary">
-                <Link href="/prep-plans">Use inside a prep plan</Link>
+                <Link href="/prep-guru">Ask Prep Guru</Link>
               </Button>
             </div>
 

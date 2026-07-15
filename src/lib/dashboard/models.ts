@@ -37,7 +37,7 @@ export const DASHBOARD_FILTER_LABELS: Record<DashboardFilter, string> = {
   technical_qa: "Technical Q&A",
   engineering_manager: "Engineering Manager",
   behavioral: "Behavioral",
-  prep_plans: "Prep Plans",
+  prep_plans: "Prep Guru",
 };
 
 export const PRACTICE_CARD_CONFIGS: readonly PracticeCardConfig[] = [
@@ -99,6 +99,15 @@ export const PRACTICE_CARD_CONFIGS: readonly PracticeCardConfig[] = [
 
 export type PrepPlanTrackStatus = "not_started" | "in_progress" | "completed";
 
+export type PrepPlanHistoricalQuestion = {
+  id: string;
+  prompt: string;
+  topics: string[];
+  sourceLabel: string;
+  provenance: string;
+  confidence: number;
+};
+
 export type PrepPlanTrack = {
   kind: PracticeInterviewKind;
   title?: string;
@@ -108,6 +117,8 @@ export type PrepPlanTrack = {
   priority: "core" | "supporting";
   questionCount: number;
   nextActionLabel: string;
+  likelyQuestions?: string[];
+  historicalQuestions?: PrepPlanHistoricalQuestion[];
 };
 
 export type PrepPlanStatus = "active" | "completed";
@@ -120,6 +131,7 @@ export type PrepPlanSummary = {
   jdText: string;
   jdSignals: string[];
   planSummary?: string;
+  researchNote?: string;
   status: PrepPlanStatus;
   createdAt: string;
   updatedAt: string;
