@@ -15,6 +15,8 @@ import {
   type DeepgramVoiceAgentSettings,
 } from "@/hooks/useDeepgramVoiceAgent";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
+import { useInterviewTextFallback } from "@/hooks/useInterviewTextFallback";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   type InterviewPhase,
@@ -111,6 +113,12 @@ export function EngineeringManagerInterviewRoom({
   const [isScoring, setIsScoring] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [isMicEnabled, setIsMicEnabled] = useState(true);
+  const {
+    devices: microphoneDevices,
+    selectedDeviceId,
+    setSelectedDeviceId,
+    deviceWarning,
+  } = useMicrophoneDevices();
 
   const transcriptRef = useRef<TranscriptEntry[]>([]);
   const startTimeRef = useRef(Date.now());
@@ -209,6 +217,7 @@ export function EngineeringManagerInterviewRoom({
       voiceModel: interviewer.voiceModel,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
+      inputDeviceId: selectedDeviceId,
     }),
     [
       agentContextMessages,
@@ -217,6 +226,7 @@ export function EngineeringManagerInterviewRoom({
       interviewer,
       maxDuration,
       round,
+      selectedDeviceId,
       storeConfig?.isFreeInterview,
     ]
   );
@@ -278,7 +288,6 @@ export function EngineeringManagerInterviewRoom({
     onError: useCallback((error: Error) => {
       console.error("[engineering-manager-room] Agent error:", error.message);
       setIsConnectingVoice(false);
-      setIsMicEnabled(false);
       setVoiceError(error.message);
     }, []),
     onConnected: useCallback(() => {
@@ -339,9 +348,9 @@ export function EngineeringManagerInterviewRoom({
   }, [agent, setRoomPhase, setRoomStartedAtMs]);
 
   const resumeInterview = useCallback(async () => {
+    const wasActive = hasStarted;
     setVoiceError(null);
     setIsConnectingVoice(true);
-    setIsMicEnabled(true);
 
     try {
       await agent.connect();
@@ -350,13 +359,15 @@ export function EngineeringManagerInterviewRoom({
       setIsResuming(false);
     } catch (error) {
       setIsConnectingVoice(false);
-      setIsTimerRunning(false);
-      setHasStarted(false);
+      if (!wasActive) {
+        setIsTimerRunning(false);
+        setHasStarted(false);
+      }
       setVoiceError(
         error instanceof Error ? error.message : "Unable to reconnect to the voice interview"
       );
     }
-  }, [agent]);
+  }, [agent, hasStarted]);
 
   const handleToggleMic = useCallback(() => {
     if (isMicEnabled) {
@@ -370,14 +381,11 @@ export function EngineeringManagerInterviewRoom({
     setIsMicEnabled(true);
   }, [agent, isMicEnabled]);
 
-  const handleSendText = useCallback(
-    (text: string) => {
-      const message = text.trim();
-      if (!message) return;
-
+  const appendTextTurn = useCallback(
+    (role: "candidate" | "interviewer", message: string) => {
       const elapsedMs = Date.now() - startTimeRef.current;
       const transcriptMessage: TranscriptEntry = {
-        role: "candidate",
+        role,
         content: message,
         timestamp_ms: elapsedMs,
       };
@@ -387,16 +395,59 @@ export function EngineeringManagerInterviewRoom({
         ...current,
         {
           id: `engineering-manager-msg-${++msgCounterRef.current}`,
-          role: "candidate",
+          role,
           content: message,
           time: formatTimeLabel(elapsedMs),
         },
       ]);
       addMessageToStore(transcriptMessage);
-      agent.injectUserMessage(message, { suppressTranscript: true });
     },
-    [addMessageToStore, agent]
+    [addMessageToStore]
   );
+
+  const {
+    sendText: sendTextTurn,
+    isSendingText,
+    textError,
+  } = useInterviewTextFallback({
+    getContext: () => ({
+      conversationHistory: transcriptRef.current.map(({ role, content }) => ({ role, content })),
+      problem: null,
+      currentPhase: currentPhaseRef.current,
+      currentCode: "",
+      elapsedSeconds: Math.max(0, Math.floor((Date.now() - startTimeRef.current) / 1000)),
+      maxDurationSeconds: maxDuration,
+      interviewerPersona: interviewer.id,
+      roundType: "hiring_manager",
+      roundContext: round,
+    }),
+    appendTurn: appendTextTurn,
+    applyPhase: applyPhaseFromAgent,
+    isVoiceConnected: () => agent.isConnected,
+    injectVoiceMessage: (message) => agent.injectUserMessage(message, { suppressTranscript: true }),
+  });
+
+  const handleSendText = useCallback((text: string) => sendTextTurn(text), [sendTextTurn]);
+
+  const continueInTextMode = useCallback(async () => {
+    setVoiceError(null);
+    setIsConnectingVoice(false);
+
+    if (isResuming) {
+      setHasStarted(true);
+      setIsTimerRunning(true);
+      setIsResuming(false);
+      return;
+    }
+
+    const now = Date.now();
+    startTimeRef.current = now;
+    setHasStarted(true);
+    setIsTimerRunning(true);
+    setRoomStartedAtMs(now);
+    setRoomPhase("INTRO");
+    await sendTextTurn(INTRO_KICKOFF, { suppressCandidateTranscript: true });
+  }, [isResuming, sendTextTurn, setRoomPhase, setRoomStartedAtMs]);
 
   const handleEndInterview = useCallback(async () => {
     if (!round || isScoring) return;
@@ -636,7 +687,12 @@ export function EngineeringManagerInterviewRoom({
           </div>
 
           {voiceError ? (
-            <p className="mt-4 text-sm text-brand-rose">{voiceError}</p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <p className="text-sm text-brand-rose">{voiceError}</p>
+              <Button variant="secondary" onClick={() => void continueInTextMode()}>
+                Continue with text
+              </Button>
+            </div>
           ) : (
             <p className="mt-4 text-sm text-brand-muted">
               Make sure your mic and speakers are on. Typed fallback stays available inside the
@@ -715,7 +771,13 @@ export function EngineeringManagerInterviewRoom({
                 isVoiceConnected={isAgentConnected}
                 isReconnecting={isConnectingVoice}
                 errorMessage={voiceError}
+                microphoneDevices={microphoneDevices}
+                selectedDeviceId={selectedDeviceId}
+                deviceWarning={deviceWarning}
+                isSendingText={isSendingText}
+                textError={textError}
                 onToggleMic={handleToggleMic}
+                onDeviceChange={setSelectedDeviceId}
                 onReconnect={resumeInterview}
                 onSendText={handleSendText}
               />

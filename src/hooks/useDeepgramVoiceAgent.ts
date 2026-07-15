@@ -26,6 +26,7 @@ export type DeepgramVoiceAgentSettings = {
   greeting?: string;
   functions?: AgentFunctionDef[];
   contextMessages?: { role: "user" | "assistant"; content: string }[];
+  inputDeviceId?: string;
 };
 
 export type AgentFunctionDef = {
@@ -207,6 +208,7 @@ export function useDeepgramVoiceAgent(
   const resumeMicAfterAgentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isMutedRef = useRef(false);
+  const activeInputDeviceIdRef = useRef("");
 
   const getOrCreateAudioContext = useCallback((): AudioContext => {
     if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
@@ -448,14 +450,16 @@ export function useDeepgramVoiceAgent(
       noiseSuppression: true,
       autoGainControl: true,
     };
+    const preferredAudio: MediaTrackConstraints = settingsRef.current.inputDeviceId
+      ? { ...baseAudio, deviceId: { exact: settingsRef.current.inputDeviceId } }
+      : baseAudio;
     const withVoiceIsolation: MediaTrackConstraints & { voiceIsolation?: boolean } = {
-      ...baseAudio,
+      ...preferredAudio,
       voiceIsolation: true,
     };
-    let stream: MediaStream;
-    try {
-      stream = await Promise.race([
-        navigator.mediaDevices.getUserMedia({ audio: withVoiceIsolation }),
+    const request = (audio: MediaTrackConstraints) =>
+      Promise.race([
+        navigator.mediaDevices.getUserMedia({ audio }),
         new Promise<never>((_, reject) =>
           setTimeout(
             () => reject(timeoutError("Microphone permission timed out. Allow mic access and try again.")),
@@ -463,6 +467,9 @@ export function useDeepgramVoiceAgent(
           ),
         ),
       ]);
+    let stream: MediaStream;
+    try {
+      stream = await request(withVoiceIsolation);
     } catch (error) {
       const domError = error instanceof DOMException ? error : null;
       if (
@@ -476,17 +483,18 @@ export function useDeepgramVoiceAgent(
       }
 
       try {
-        stream = await Promise.race([
-          navigator.mediaDevices.getUserMedia({ audio: baseAudio }),
-          new Promise<never>((_, reject) =>
-            setTimeout(
-              () => reject(timeoutError("Microphone permission timed out. Allow mic access and try again.")),
-              MIC_PERMISSION_TIMEOUT_MS,
-            ),
-          ),
-        ]);
+        stream = await request(domError?.name === "OverconstrainedError" ? baseAudio : preferredAudio);
       } catch (fallbackError) {
-        throw normalizeVoiceAgentError(fallbackError);
+        const fallbackDomError = fallbackError instanceof DOMException ? fallbackError : null;
+        if (fallbackDomError?.name === "OverconstrainedError") {
+          try {
+            stream = await request(baseAudio);
+          } catch (defaultDeviceError) {
+            throw normalizeVoiceAgentError(defaultDeviceError);
+          }
+        } else {
+          throw normalizeVoiceAgentError(fallbackError);
+        }
       }
     }
     micStreamRef.current = stream;
@@ -505,7 +513,6 @@ export function useDeepgramVoiceAgent(
 
     workletNode.port.onmessage = (e: MessageEvent<ArrayBuffer>) => {
       if (isMutedRef.current) return;
-      if (isAgentAudioActiveRef.current) return;
       const conn = connectionRef.current;
       if (conn && conn.readyState === WebSocket.OPEN) {
         conn.sendMedia(e.data);
@@ -514,7 +521,8 @@ export function useDeepgramVoiceAgent(
 
     source.connect(workletNode);
     workletNodeRef.current = workletNode;
-    setIsListening(true);
+    activeInputDeviceIdRef.current = settingsRef.current.inputDeviceId ?? "";
+    setIsListening(!isMutedRef.current);
   }, [ensurePcmWorkletLoaded, getOrCreateAudioContext, requestMicStream]);
 
   const stopMicCapture = useCallback(() => {
@@ -868,6 +876,16 @@ export function useDeepgramVoiceAgent(
 
     return () => window.clearTimeout(syncTimer);
   }, [isConnected, settings.systemPrompt, settings.functions, updateThink]);
+
+  useEffect(() => {
+    const nextDeviceId = settings.inputDeviceId ?? "";
+    if (!isConnected || nextDeviceId === activeInputDeviceIdRef.current) return;
+
+    stopMicCapture();
+    void startMicCapture().catch((error) => {
+      callbacksRef.current.onError(normalizeVoiceAgentError(error));
+    });
+  }, [isConnected, settings.inputDeviceId, startMicCapture, stopMicCapture]);
 
   useEffect(() => {
     return () => {

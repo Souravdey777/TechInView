@@ -13,6 +13,8 @@ import {
   type DeepgramVoiceAgentSettings,
 } from "@/hooks/useDeepgramVoiceAgent";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
+import { useInterviewTextFallback } from "@/hooks/useInterviewTextFallback";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   type InterviewPhase,
@@ -124,6 +126,12 @@ export function TechnicalQaInterviewRoom({
   const [isScoring, setIsScoring] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [isMicEnabled, setIsMicEnabled] = useState(true);
+  const {
+    devices: microphoneDevices,
+    selectedDeviceId,
+    setSelectedDeviceId,
+    deviceWarning,
+  } = useMicrophoneDevices();
 
   const transcriptRef = useRef<TranscriptEntry[]>([]);
   const startTimeRef = useRef(Date.now());
@@ -222,6 +230,7 @@ export function TechnicalQaInterviewRoom({
       voiceModel: interviewer.voiceModel,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
+      inputDeviceId: selectedDeviceId,
     }),
     [
       agentContextMessages,
@@ -230,6 +239,7 @@ export function TechnicalQaInterviewRoom({
       interviewer,
       maxDuration,
       round,
+      selectedDeviceId,
       storeConfig?.isFreeInterview,
     ]
   );
@@ -291,7 +301,6 @@ export function TechnicalQaInterviewRoom({
     onError: useCallback((error: Error) => {
       console.error("[technical-qa-room] Agent error:", error.message);
       setIsConnectingVoice(false);
-      setIsMicEnabled(false);
       setVoiceError(error.message);
     }, []),
     onConnected: useCallback(() => {
@@ -352,9 +361,9 @@ export function TechnicalQaInterviewRoom({
   }, [agent, setRoomPhase, setRoomStartedAtMs]);
 
   const resumeInterview = useCallback(async () => {
+    const wasActive = hasStarted;
     setVoiceError(null);
     setIsConnectingVoice(true);
-    setIsMicEnabled(true);
 
     try {
       await agent.connect();
@@ -363,13 +372,15 @@ export function TechnicalQaInterviewRoom({
       setIsResuming(false);
     } catch (error) {
       setIsConnectingVoice(false);
-      setIsTimerRunning(false);
-      setHasStarted(false);
+      if (!wasActive) {
+        setIsTimerRunning(false);
+        setHasStarted(false);
+      }
       setVoiceError(
         error instanceof Error ? error.message : "Unable to reconnect to the voice interview"
       );
     }
-  }, [agent]);
+  }, [agent, hasStarted]);
 
   const handleToggleMic = useCallback(() => {
     if (isMicEnabled) {
@@ -383,14 +394,11 @@ export function TechnicalQaInterviewRoom({
     setIsMicEnabled(true);
   }, [agent, isMicEnabled]);
 
-  const handleSendText = useCallback(
-    (text: string) => {
-      const message = text.trim();
-      if (!message) return;
-
+  const appendTextTurn = useCallback(
+    (role: "candidate" | "interviewer", message: string) => {
       const elapsedMs = Date.now() - startTimeRef.current;
       const transcriptMessage: TranscriptEntry = {
-        role: "candidate",
+        role,
         content: message,
         timestamp_ms: elapsedMs,
       };
@@ -400,16 +408,59 @@ export function TechnicalQaInterviewRoom({
         ...current,
         {
           id: `technical-qa-msg-${++msgCounterRef.current}`,
-          role: "candidate",
+          role,
           content: message,
           time: formatTimeLabel(elapsedMs),
         },
       ]);
       addMessageToStore(transcriptMessage);
-      agent.injectUserMessage(message, { suppressTranscript: true });
     },
-      [addMessageToStore, agent]
-    );
+    [addMessageToStore],
+  );
+
+  const {
+    sendText: sendTextTurn,
+    isSendingText,
+    textError,
+  } = useInterviewTextFallback({
+    getContext: () => ({
+      conversationHistory: transcriptRef.current.map(({ role, content }) => ({ role, content })),
+      problem: null,
+      currentPhase: currentPhaseRef.current,
+      currentCode: "",
+      elapsedSeconds: Math.max(0, Math.floor((Date.now() - startTimeRef.current) / 1000)),
+      maxDurationSeconds: maxDuration,
+      interviewerPersona: interviewer.id,
+      roundType: "technical_qa",
+      roundContext: round,
+    }),
+    appendTurn: appendTextTurn,
+    applyPhase: applyPhaseFromAgent,
+    isVoiceConnected: () => agent.isConnected,
+    injectVoiceMessage: (message) => agent.injectUserMessage(message, { suppressTranscript: true }),
+  });
+
+  const handleSendText = useCallback((text: string) => sendTextTurn(text), [sendTextTurn]);
+
+  const continueInTextMode = useCallback(async () => {
+    setVoiceError(null);
+    setIsConnectingVoice(false);
+
+    if (isResuming) {
+      setHasStarted(true);
+      setIsTimerRunning(true);
+      setIsResuming(false);
+      return;
+    }
+
+    const now = Date.now();
+    startTimeRef.current = now;
+    setHasStarted(true);
+    setIsTimerRunning(true);
+    setRoomStartedAtMs(now);
+    setRoomPhase("INTRO");
+    await sendTextTurn(INTRO_KICKOFF, { suppressCandidateTranscript: true });
+  }, [isResuming, sendTextTurn, setRoomPhase, setRoomStartedAtMs]);
 
   const handleEndInterview = useCallback(async () => {
     if (!round || isScoring) return;
@@ -649,7 +700,12 @@ export function TechnicalQaInterviewRoom({
           </div>
 
           {voiceError ? (
-            <p className="mt-4 text-sm text-brand-rose">{voiceError}</p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <p className="text-sm text-brand-rose">{voiceError}</p>
+              <Button variant="secondary" onClick={() => void continueInTextMode()}>
+                Continue with text
+              </Button>
+            </div>
           ) : (
             <p className="mt-4 text-sm text-brand-muted">
               Make sure your mic and speakers are on. Typed fallback stays available inside the
@@ -662,7 +718,11 @@ export function TechnicalQaInterviewRoom({
   }
 
   const phaseLabel = getPhaseLabelForRound("technical_qa", currentPhase);
-  const voiceStateLabel = getVoiceStateLabel(voiceState, interviewer.name);
+  const voiceStateLabel = isConnectingVoice
+    ? "Connecting"
+    : isAgentConnected
+      ? getVoiceStateLabel(voiceState, interviewer.name)
+      : "Text mode";
 
   return (
     <div className="flex h-screen flex-col bg-brand-deep text-brand-text">
@@ -726,20 +786,37 @@ export function TechnicalQaInterviewRoom({
           </div>
 
           <div className="shrink-0 border-t border-brand-border bg-brand-deep px-4 py-3">
-            <div className="mx-auto flex max-w-5xl items-center justify-center gap-3">
+            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={handleToggleMic}
+                disabled={!isAgentConnected}
                 className={cn(
                   "flex h-11 w-11 items-center justify-center rounded-full border transition-colors",
-                  isMicEnabled
+                  !isAgentConnected
+                    ? "cursor-not-allowed border-brand-border bg-brand-surface text-brand-muted opacity-50"
+                    : isMicEnabled
                     ? "border-brand-cyan/40 bg-brand-cyan/15 text-brand-cyan hover:bg-brand-cyan/25"
                     : "border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
                 )}
-                aria-label={isMicEnabled ? "Mute microphone" : "Enable microphone"}
+                aria-label={!isAgentConnected ? "Voice disconnected" : isMicEnabled ? "Mute microphone" : "Enable microphone"}
               >
                 {isMicEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
               </button>
+
+              {microphoneDevices.length > 0 ? (
+                <select
+                  value={selectedDeviceId}
+                  onChange={(event) => setSelectedDeviceId(event.target.value)}
+                  className="h-11 max-w-56 rounded-full border border-brand-border bg-brand-surface px-4 text-sm text-brand-text focus:border-brand-cyan/60 focus:outline-none"
+                  aria-label="Select microphone"
+                >
+                  <option value="">System default</option>
+                  {microphoneDevices.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>{device.label}</option>
+                  ))}
+                </select>
+              ) : null}
 
               <button
                 type="button"
@@ -767,6 +844,7 @@ export function TechnicalQaInterviewRoom({
                 <span className="hidden sm:inline">End</span>
               </button>
             </div>
+            {deviceWarning ? <p className="mt-2 text-center text-xs text-brand-amber">{deviceWarning}</p> : null}
           </div>
         </section>
 
@@ -774,6 +852,8 @@ export function TechnicalQaInterviewRoom({
           messages={chatMessages}
           interviewerName={interviewer.name}
           isAgentBusy={voiceState === "thinking"}
+          isSendingText={isSendingText}
+          textError={textError}
           onSendText={handleSendText}
         />
       </div>
@@ -785,12 +865,16 @@ function TechnicalQaConversationPanel({
   messages,
   interviewerName,
   isAgentBusy,
+  isSendingText,
+  textError,
   onSendText,
 }: {
   messages: ChatMessage[];
   interviewerName: string;
   isAgentBusy: boolean;
-  onSendText: (text: string) => void;
+  isSendingText: boolean;
+  textError: string | null;
+  onSendText: (text: string) => Promise<boolean>;
 }) {
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -799,18 +883,18 @@ function TechnicalQaConversationPanel({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [isAgentBusy, messages]);
 
-  function sendDraft() {
+  async function sendDraft() {
     const message = draft.trim();
-    if (!message) return;
+    if (!message || isSendingText) return;
 
-    onSendText(message);
-    setDraft("");
+    const sent = await onSendText(message);
+    if (sent) setDraft("");
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      sendDraft();
+      void sendDraft();
     }
   }
 
@@ -891,19 +975,20 @@ function TechnicalQaConversationPanel({
           />
           <button
             type="button"
-            onClick={sendDraft}
-            disabled={!draft.trim()}
+            onClick={() => void sendDraft()}
+            disabled={!draft.trim() || isSendingText}
             className={cn(
               "flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors",
-              draft.trim()
+              draft.trim() && !isSendingText
                 ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90"
                 : "cursor-not-allowed bg-brand-border/40 text-brand-muted"
             )}
             aria-label="Send typed answer"
           >
-            <Send className="h-4 w-4" />
+            {isSendingText ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </button>
         </div>
+        {textError ? <p className="mt-2 text-xs text-brand-rose">{textError}</p> : null}
       </div>
     </aside>
   );

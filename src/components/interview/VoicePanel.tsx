@@ -7,6 +7,7 @@ import { type InterviewPhase, PHASE_LABELS } from "@/lib/interview-phases";
 import type { RoundType } from "@/lib/constants";
 import { getPhaseLabelForRound } from "@/lib/loops/round-config";
 import { MicVisualizer, VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
+import type { MicrophoneDevice } from "@/hooks/useMicrophoneDevices";
 
 type VoicePanelProps = {
   voiceState: VoiceState;
@@ -18,9 +19,15 @@ type VoicePanelProps = {
   isVoiceConnected?: boolean;
   isReconnecting?: boolean;
   errorMessage?: string | null;
+  microphoneDevices?: MicrophoneDevice[];
+  selectedDeviceId?: string;
+  deviceWarning?: string | null;
+  isSendingText?: boolean;
+  textError?: string | null;
   onToggleMic: () => void;
+  onDeviceChange?: (deviceId: string) => void;
   onReconnect?: () => void;
-  onSendText: (text: string) => void;
+  onSendText: (text: string) => boolean | Promise<boolean>;
 };
 
 const PHASE_COLORS: Record<InterviewPhase, string> = {
@@ -65,7 +72,13 @@ export function VoicePanel({
   isVoiceConnected = true,
   isReconnecting = false,
   errorMessage,
+  microphoneDevices = [],
+  selectedDeviceId = "",
+  deviceWarning,
+  isSendingText = false,
+  textError,
   onToggleMic,
+  onDeviceChange,
   onReconnect,
   onSendText,
 }: VoicePanelProps) {
@@ -81,18 +94,18 @@ export function VoicePanel({
     setMicSupported(hasGetUserMedia);
   }, []);
 
-  function handleSend() {
+  async function handleSend() {
     const trimmed = draft.trim();
-    if (!trimmed) return;
+    if (!trimmed || isSendingText) return;
 
-    onSendText(trimmed);
-    setDraft("");
+    const sent = await onSendText(trimmed);
+    if (sent) setDraft("");
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      handleSend();
+      void handleSend();
     }
   }
 
@@ -114,8 +127,12 @@ export function VoicePanel({
             ? PHASE_LABELS[currentPhase]
             : getPhaseLabelForRound(roundType, currentPhase)}
         </span>
-        <span className={cn("text-xs font-medium", STATE_COLORS[voiceState])}>
-          {getStateLabel(voiceState, interviewerName)}
+        <span className={cn("text-xs font-medium", isVoiceConnected ? STATE_COLORS[voiceState] : "text-brand-amber")}>
+          {isReconnecting
+            ? "Connecting"
+            : !isVoiceConnected
+              ? "Text mode"
+              : getStateLabel(voiceState, interviewerName)}
         </span>
       </div>
 
@@ -172,17 +189,17 @@ export function VoicePanel({
             <MicVisualizer isActive={isMicEnabled} className="absolute inset-0" />
             <button
               onClick={onToggleMic}
-              disabled={!micSupported}
+              disabled={!micSupported || !isVoiceConnected}
               className={cn(
                 "relative z-10 flex items-center justify-center rounded-full transition-all duration-300",
                 isCenterStage ? "h-14 w-14" : "h-12 w-12",
-                !micSupported
+                !micSupported || !isVoiceConnected
                   ? "cursor-not-allowed border border-brand-border bg-brand-card text-brand-muted opacity-50"
                   : isMicEnabled
                     ? "border-2 border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_20px_rgba(34,211,238,0.3)]"
                     : "border border-brand-border bg-brand-card text-brand-muted hover:border-brand-subtle hover:text-brand-text"
               )}
-              aria-label={isMicEnabled ? "Mute microphone" : "Enable microphone"}
+              aria-label={!isVoiceConnected ? "Voice disconnected" : isMicEnabled ? "Mute microphone" : "Enable microphone"}
             >
               {isMicEnabled ? (
                 <Mic className={cn(isCenterStage ? "h-6 w-6" : "h-5 w-5")} />
@@ -197,9 +214,38 @@ export function VoicePanel({
             </span>
           ) : (
             <span className="mt-0.5 text-[10px] text-brand-muted">
-              {isMicEnabled ? "Tap to mute" : "Tap to unmute"}
+              {!isVoiceConnected
+                ? "Voice disconnected"
+                : isMicEnabled
+                  ? voiceState === "listening"
+                    ? "Listening · tap to mute"
+                    : "Mic active · tap to mute"
+                  : "Muted · tap to unmute"}
             </span>
           )}
+          {onDeviceChange && microphoneDevices.length > 0 ? (
+            <label className="mt-2 flex flex-col gap-1 text-[10px] text-brand-muted">
+              <span>Microphone</span>
+              <select
+                value={selectedDeviceId}
+                onChange={(event) => onDeviceChange(event.target.value)}
+                className="max-w-52 rounded-md border border-brand-border bg-brand-surface px-2 py-1.5 text-xs text-brand-text focus:border-brand-cyan/60 focus:outline-none"
+                aria-label="Select microphone"
+              >
+                <option value="">System default</option>
+                {microphoneDevices.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          {deviceWarning ? (
+            <span className="mt-1 max-w-56 text-center text-[10px] text-brand-amber">
+              {deviceWarning}
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -233,18 +279,21 @@ export function VoicePanel({
               className="w-full resize-none rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5 text-sm text-brand-text placeholder:text-brand-muted/60 focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
             />
             <button
-              onClick={handleSend}
-              disabled={!draft.trim()}
+              onClick={() => void handleSend()}
+              disabled={!draft.trim() || isSendingText}
               className={cn(
                 "flex items-center justify-center gap-2 self-end rounded-lg px-4 py-2 text-xs font-medium transition-colors",
-                draft.trim()
+                draft.trim() && !isSendingText
                   ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90"
                   : "cursor-not-allowed bg-brand-border/30 text-brand-muted"
               )}
             >
               <Send className="h-3.5 w-3.5" />
-              Send
+              {isSendingText ? "Sending..." : "Send"}
             </button>
+            {textError ? (
+              <p className="text-[11px] leading-relaxed text-brand-rose">{textError}</p>
+            ) : null}
           </div>
         ) : null}
       </div>

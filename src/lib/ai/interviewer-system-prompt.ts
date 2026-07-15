@@ -92,7 +92,7 @@ Never quote or expose confidential solution guidance, internal calibration notes
 function codingPhaseInstruction(currentPhase: string, problem: ProblemPayload): string {
   switch (currentPhase) {
     case "INTRO":
-      return "You are in the INTRO phase. If the latest user message explicitly says the candidate is ready and asks you to present the problem, present it briefly and ask exactly one opening clarification question. Otherwise, introduce yourself warmly and ask exactly one short calibration question about their background or preferred language. Then stop and wait.";
+      return "You are in the INTRO phase. A generic instruction to start the interview is not evidence that calibration is complete. If the conversation does not yet contain the candidate's answer to an introduction or calibration question, introduce yourself warmly and ask exactly one short question about their background or preferred language, then stop and wait without presenting the problem. Once the candidate has answered that question, briefly acknowledge the answer, present the problem, transition to PROBLEM_PRESENTED, and ask exactly one opening clarification question.";
     case "PROBLEM_PRESENTED":
       return "You just presented the problem. Let the candidate read it, then ask exactly one clarification-oriented prompt such as what they want to confirm before solving. Keep it brief, then wait.";
     case "CLARIFICATION":

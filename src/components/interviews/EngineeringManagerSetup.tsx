@@ -35,6 +35,7 @@ import {
   getEngineeringManagerFocusLabels,
 } from "@/lib/engineering-manager";
 import { cn } from "@/lib/utils";
+import { MicrophoneSetupCheck } from "@/components/interviews/MicrophoneSetupCheck";
 
 type StartResponse = {
   data?: {
@@ -339,6 +340,7 @@ export function EngineeringManagerSetup({
                   })}
                 </div>
               </InterviewSetupSection>
+              <MicrophoneSetupCheck />
       </div>
 
             <div className="mt-8 flex flex-wrap gap-3 border-t border-brand-border pt-6">

@@ -21,6 +21,7 @@ import {
   type AgentFunctionDef,
 } from "@/hooks/useDeepgramVoiceAgent";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   type InterviewPhase,
@@ -35,6 +36,7 @@ import type { RoundScoreDimension } from "@/lib/constants";
 import { ROUND_SCORING_DIMENSIONS } from "@/lib/constants";
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { sendInterviewChatTurn } from "@/lib/interview-chat-client";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,7 +58,7 @@ type InterviewRoomProps = {
 const MAX_AGENT_CONTEXT_MESSAGES = 20;
 const OPENING_TURN_DELAY_MS = 2000;
 const INTRO_KICKOFF =
-  "Start the interview now. Greet the candidate briefly, introduce the problem, ask exactly one opening question, then stop and wait for their answer.";
+  "Start the interview now. Introduce yourself warmly and ask exactly one short calibration question about the candidate's background or preferred coding language. Do not present the problem yet. Stop and wait for their answer.";
 
 // ─── Helper: extract typed score dimension safely ─────────────────────────────
 
@@ -114,10 +116,14 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const [isResuming, setIsResuming] = useState(false);
   const [isConnectingVoice, setIsConnectingVoice] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [isSendingText, setIsSendingText] = useState(false);
+  const [textError, setTextError] = useState<string | null>(null);
+  const isSendingTextRef = useRef(false);
   const conversationRef = useRef<{ role: string; content: string; timestamp_ms: number }[]>([]);
   const startTimeRef = useRef(Date.now());
   const msgCounterRef = useRef(0);
   const hasRestoredRef = useRef(false);
+  const pendingTextRef = useRef<{ text: string; history: { role: string; content: string }[] } | null>(null);
 
   // ── Interview state ──────────────────────────────────────────────────────────
   const [currentPhase, setCurrentPhase] = useState<InterviewPhase>("INTRO");
@@ -140,6 +146,12 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   // ── Mic mute state (mic streams continuously; this mutes/unmutes) ──────────
   const [isMicEnabled, setIsMicEnabled] = useState(true);
+  const {
+    devices: microphoneDevices,
+    selectedDeviceId,
+    setSelectedDeviceId,
+    deviceWarning,
+  } = useMicrophoneDevices();
 
   // ── Resizable panel state ─────────────────────────────────────────────────
   const MIN_PANEL = 300;
@@ -289,6 +301,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       voiceModel: interviewer.voiceModel,
       functions: agentFunctions,
       contextMessages: agentContextMessages,
+      inputDeviceId: selectedDeviceId,
     }),
     [
       activeProblem,
@@ -300,6 +313,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       interviewer,
       storeConfig?.isFreeInterview,
       roundType,
+      selectedDeviceId,
       agentFunctions,
       agentContextMessages,
     ],
@@ -405,7 +419,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     onError: useCallback((err: Error) => {
       console.error("[interview-room] Agent error:", err.message);
       setIsConnectingVoice(false);
-      setIsMicEnabled(false);
       setVoiceError(err.message);
     }, []),
 
@@ -478,21 +491,96 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     }
   }, [isMicEnabled, agent]);
 
-  const handleSendText = useCallback(
-    (text: string) => {
-      const elapsedMs = Date.now() - startTimeRef.current;
+  const appendChatTurn = useCallback(
+    (role: "candidate" | "interviewer", content: string, elapsedMs: number) => {
       const id = `msg-${++msgCounterRef.current}`;
       const elapsed = Math.floor(elapsedMs / 1000);
       const m = Math.floor(elapsed / 60);
       const s = elapsed % 60;
       const time = `${m}:${s.toString().padStart(2, "0")}`;
-      setChatMessages((prev) => [...prev, { id, role: "candidate", content: text, time }]);
-      conversationRef.current.push({ role: "candidate", content: text, timestamp_ms: elapsedMs });
-      addMessageToStore({ role: "candidate", content: text, timestamp_ms: elapsedMs });
-      agent.injectUserMessage(text, { suppressTranscript: true });
+      setChatMessages((prev) => [...prev, { id, role, content, time }]);
+      conversationRef.current.push({ role, content, timestamp_ms: elapsedMs });
+      addMessageToStore({ role, content, timestamp_ms: elapsedMs });
     },
-    [agent, addMessageToStore],
+    [addMessageToStore],
   );
+
+  const sendTextTurn = useCallback(
+    async (text: string, options?: { suppressCandidateTranscript?: boolean }) => {
+      const message = text.trim();
+      if (!message || isSendingTextRef.current) return false;
+
+      isSendingTextRef.current = true;
+      setIsSendingText(true);
+      setTextError(null);
+      const pending = pendingTextRef.current?.text === message ? pendingTextRef.current : null;
+      const history = pending?.history ?? conversationRef.current.map(({ role, content }) => ({ role, content }));
+
+      if (!options?.suppressCandidateTranscript && !pending) {
+        appendChatTurn("candidate", message, Date.now() - startTimeRef.current);
+      }
+
+      if (agent.isConnected && !options?.suppressCandidateTranscript) {
+        agent.injectUserMessage(message, { suppressTranscript: true });
+        pendingTextRef.current = null;
+        isSendingTextRef.current = false;
+        setIsSendingText(false);
+        return true;
+      }
+
+      try {
+        const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startTimeRef.current) / 1000));
+        const result = await sendInterviewChatTurn({
+          message,
+          conversationHistory: history,
+          problem: activeProblem ?? null,
+          currentPhase: currentPhaseRef.current,
+          currentCode: codeRef.current,
+          elapsedSeconds,
+          maxDurationSeconds: maxDuration,
+          interviewerPersona: interviewer.id,
+          roundType,
+          roundContext: activeRound,
+        });
+        appendChatTurn("interviewer", result.message, Date.now() - startTimeRef.current);
+        if (result.phase) applyPhaseFromAgent(result.phase);
+        pendingTextRef.current = null;
+        return true;
+      } catch (error) {
+        if (!options?.suppressCandidateTranscript) {
+          pendingTextRef.current = { text: message, history };
+        }
+        setTextError(error instanceof Error ? error.message : "Tia could not respond. Please try again.");
+        return false;
+      } finally {
+        isSendingTextRef.current = false;
+        setIsSendingText(false);
+      }
+    },
+    [activeProblem, activeRound, agent, appendChatTurn, applyPhaseFromAgent, interviewer.id, maxDuration, roundType],
+  );
+
+  const handleSendText = useCallback((text: string) => sendTextTurn(text), [sendTextTurn]);
+
+  const continueInTextMode = useCallback(async () => {
+    setVoiceError(null);
+    setIsConnectingVoice(false);
+
+    if (isResuming) {
+      setHasStarted(true);
+      setIsTimerRunning(true);
+      setIsResuming(false);
+      return;
+    }
+
+    const now = Date.now();
+    startTimeRef.current = now;
+    setHasStarted(true);
+    setIsTimerRunning(true);
+    setRoomStartedAtMs(now);
+    setRoomPhaseInStore("INTRO");
+    await sendTextTurn(INTRO_KICKOFF, { suppressCandidateTranscript: true });
+  }, [isResuming, sendTextTurn, setRoomPhaseInStore, setRoomStartedAtMs]);
 
   const handleLanguageChange = useCallback(
     (newLang: SupportedLanguage) => {
@@ -804,9 +892,9 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   // ── Resume interview (after reload) — reconnect voice agent ─────────────────
   const resumeInterview = useCallback(async () => {
+    const wasActive = hasStarted;
     setVoiceError(null);
     setIsConnectingVoice(true);
-    setIsMicEnabled(true);
 
     try {
       await agent.connect();
@@ -815,13 +903,15 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       setIsResuming(false);
     } catch (error) {
       setIsConnectingVoice(false);
-      setIsTimerRunning(false);
-      setHasStarted(false);
+      if (!wasActive) {
+        setIsTimerRunning(false);
+        setHasStarted(false);
+      }
       setVoiceError(
         error instanceof Error ? error.message : "Unable to reconnect to the voice agent",
       );
     }
-  }, [agent]);
+  }, [agent, hasStarted]);
 
   // ── Timer countdown ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -984,12 +1074,18 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 : "Start Interview"}
           </button>
           {voiceError && (
-            <p
-              className="max-w-sm text-center text-xs leading-relaxed text-brand-rose"
-              style={{ animation: "start-fade-up 0.8s ease-out 0.52s both" }}
-            >
-              {voiceError}
-            </p>
+            <div className="flex flex-col items-center gap-3" style={{ animation: "start-fade-up 0.8s ease-out 0.52s both" }}>
+              <p className="max-w-sm text-center text-xs leading-relaxed text-brand-rose">
+                {voiceError}
+              </p>
+              <button
+                type="button"
+                onClick={() => void continueInTextMode()}
+                className="rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 px-4 py-2 text-sm font-semibold text-brand-cyan hover:bg-brand-cyan/15"
+              >
+                Continue with text
+              </button>
+            </div>
           )}
           <p className="text-xs text-brand-muted/60" style={{ animation: "start-fade-up 0.8s ease-out 0.6s both" }}>
             {isResuming
@@ -1044,7 +1140,13 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
               isVoiceConnected={isAgentConnected}
               isReconnecting={isConnectingVoice}
               errorMessage={voiceError}
+              microphoneDevices={microphoneDevices}
+              selectedDeviceId={selectedDeviceId}
+              deviceWarning={deviceWarning}
+              isSendingText={isSendingText}
+              textError={textError}
               onToggleMic={handleToggleMic}
+              onDeviceChange={setSelectedDeviceId}
               onReconnect={resumeInterview}
               onSendText={handleSendText}
             />

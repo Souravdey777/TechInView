@@ -76,3 +76,17 @@ test("discussion interviewers stay voice-first when no workspace exists", () => 
   assert.doesNotMatch(prompt, /`get_current_code`: Retrieve/);
   assert.doesNotMatch(prompt, /`get_workspace_notes`: Retrieve/);
 });
+
+test("coding introduction requires candidate calibration before presenting the problem", () => {
+  const voicePrompt = buildVoiceSystemPrompt({
+    roundType: "coding",
+    problem,
+    currentPhase: "INTRO",
+    totalMinutes: 45,
+    interviewerPersonaId: "tia",
+  });
+
+  assert.match(voicePrompt, /generic instruction to start the interview is not evidence/i);
+  assert.match(voicePrompt, /without presenting the problem/i);
+  assert.match(voicePrompt, /Once the candidate has answered that question/i);
+});

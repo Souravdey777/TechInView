@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useInterviewStore } from "@/stores/interview-store";
 import { useSupabase } from "@/hooks/useSupabase";
+import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
 import {
   FREE_TRIAL_DURATION_MINUTES,
   FULL_INTERVIEW_DURATION_MINUTES,
@@ -391,6 +392,13 @@ function InterviewSetupInner() {
   const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const {
+    devices: microphoneDevices,
+    selectedDeviceId,
+    setSelectedDeviceId,
+    refreshDevices,
+    deviceWarning,
+  } = useMicrophoneDevices();
 
   // Freemium state
   const [isFreeTrialUser, setIsFreeTrialUser] = useState(false);
@@ -633,8 +641,7 @@ function InterviewSetupInner() {
   async function handleMicCheck() {
     setMicStatus("checking");
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((t) => t.stop());
+      await refreshDevices(true);
       setMicStatus("granted");
     } catch {
       setMicStatus("denied");
@@ -1694,11 +1701,31 @@ function InterviewSetupInner() {
             </div>
           )}
           {micStatus === "granted" && (
-            <div className="mt-3 flex items-start gap-2 rounded-lg bg-brand-green/5 border border-brand-green/20 px-3 py-2.5">
-              <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
-              <p className="text-xs text-brand-green">
-                Microphone detected and working. Voice interaction is enabled.
-              </p>
+            <div className="mt-3 space-y-3 rounded-lg border border-brand-green/20 bg-brand-green/5 px-3 py-2.5">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
+                <p className="text-xs text-brand-green">
+                  Microphone detected and working. Voice interaction is enabled.
+                </p>
+              </div>
+              {microphoneDevices.length > 0 ? (
+                <label className="block text-xs text-brand-muted">
+                  <span className="mb-1 block">Microphone</span>
+                  <select
+                    value={selectedDeviceId}
+                    onChange={(event) => setSelectedDeviceId(event.target.value)}
+                    className="w-full rounded-lg border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-text focus:border-brand-cyan/60 focus:outline-none"
+                  >
+                    <option value="">System default</option>
+                    {microphoneDevices.map((device) => (
+                      <option key={device.deviceId} value={device.deviceId}>
+                        {device.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              {deviceWarning ? <p className="text-xs text-brand-amber">{deviceWarning}</p> : null}
             </div>
           )}
         </SectionCard>
@@ -1775,7 +1802,7 @@ function InterviewSetupInner() {
             <p className="mt-3 text-center text-xs text-brand-muted">
               {isPracticeMode
                 ? "Practice Mode saves your progress as you code so you can resume later."
-                : `By starting, you agree that ${activePersona.name} will record and analyze your session.`}
+                : <>By starting, you agree to live microphone processing by our voice provider. TechInView stores transcripts, code, timing, scores, and results—not raw microphone audio. See our <Link href="/privacy" className="text-brand-cyan hover:underline">Privacy Policy</Link>.</>}
             </p>
           </div>
         ) : (

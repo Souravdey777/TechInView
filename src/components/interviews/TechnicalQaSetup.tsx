@@ -35,6 +35,7 @@ import {
   type TechnicalQaLanguage,
 } from "@/lib/technical-qa";
 import { cn } from "@/lib/utils";
+import { MicrophoneSetupCheck } from "@/components/interviews/MicrophoneSetupCheck";
 
 type StartResponse = {
   data?: {
@@ -302,6 +303,7 @@ export function TechnicalQaSetup() {
                   })}
                 </div>
               </InterviewSetupSection>
+              <MicrophoneSetupCheck />
       </div>
 
             <div className="mt-8 flex flex-wrap gap-3 border-t border-brand-border pt-6">
