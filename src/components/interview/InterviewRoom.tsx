@@ -36,6 +36,7 @@ import type { RoundScoreDimension } from "@/lib/constants";
 import { ROUND_SCORING_DIMENSIONS } from "@/lib/constants";
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { InterviewStartingOverlay } from "@/components/interviews/InterviewStartingOverlay";
 import { sendInterviewChatTurn } from "@/lib/interview-chat-client";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -982,6 +983,11 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   if (isScoring) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep overflow-hidden">
+        <InterviewStartingOverlay
+          visible={isConnectingVoice}
+          interviewerName={interviewer.name}
+          isResuming={isResuming}
+        />
         <div className="absolute inset-0 bg-grid-pattern opacity-30" />
         <div className="absolute w-[400px] h-[400px] rounded-full bg-brand-cyan/5 blur-[100px] animate-pulse" />
         <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">

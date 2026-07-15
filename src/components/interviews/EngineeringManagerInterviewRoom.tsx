@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, MessageSquareMore } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InterviewStartingOverlay } from "@/components/interviews/InterviewStartingOverlay";
 import { Timer } from "@/components/interview/Timer";
 import { VoicePanel } from "@/components/interview/VoicePanel";
 import { VoiceVisualizer, type VoiceState } from "@/components/interview/VoiceVisualizer";
@@ -618,6 +619,11 @@ export function EngineeringManagerInterviewRoom({
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-brand-deep px-6 text-brand-text">
+        <InterviewStartingOverlay
+          visible={isConnectingVoice}
+          interviewerName={interviewer.name}
+          isResuming={isResuming}
+        />
         <div className="w-full max-w-3xl rounded-3xl border border-brand-border bg-brand-card p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
             Engineering Manager

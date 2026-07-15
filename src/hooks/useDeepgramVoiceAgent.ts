@@ -57,6 +57,8 @@ const KEEPALIVE_INTERVAL_MS = 8000;
 const MIC_RESUME_AFTER_AGENT_MS = 700;
 const MIC_PERMISSION_TIMEOUT_MS = 15000;
 const VOICE_TOKEN_TIMEOUT_MS = 15000;
+const PLAYBACK_JITTER_BUFFER_SECONDS = 0.15;
+const PLAYBACK_FADE_OUT_SECONDS = 0.005;
 
 type AgentConnection = Awaited<ReturnType<DeepgramClient["agent"]["v1"]["connect"]>>;
 
@@ -203,6 +205,7 @@ export function useDeepgramVoiceAgent(
   /** Schedule TTS chunks on a single timeline so there are no gaps between WebSocket frames. */
   const nextPlaybackTimeRef = useRef(0);
   const scheduledPlaybackSourcesRef = useRef<AudioBufferSourceNode[]>([]);
+  const playbackGainRef = useRef<GainNode | null>(null);
   const playbackAbortRef = useRef<AbortController | null>(null);
   const isAgentAudioActiveRef = useRef(false);
   const resumeMicAfterAgentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -247,24 +250,29 @@ export function useDeepgramVoiceAgent(
       const audioBuffer = ctx.createBuffer(1, samples.length, OUTPUT_SAMPLE_RATE);
       audioBuffer.getChannelData(0).set(samples);
 
+      let playbackGain = playbackGainRef.current;
+      if (!playbackGain) {
+        playbackGain = ctx.createGain();
+        playbackGain.gain.setValueAtTime(1, ctx.currentTime);
+        playbackGain.connect(ctx.destination);
+        playbackGainRef.current = playbackGain;
+      }
+
       const src = ctx.createBufferSource();
       src.buffer = audioBuffer;
-      src.connect(ctx.destination);
+      src.connect(playbackGain);
 
       const now = ctx.currentTime;
       let startAt = nextPlaybackTimeRef.current;
-      if (startAt < now) startAt = now;
+      // Hold the first chunk—or the first chunk after an underrun—briefly so
+      // ordinary WebSocket jitter does not create audible gaps between chunks.
+      if (startAt <= now) startAt = now + PLAYBACK_JITTER_BUFFER_SECONDS;
 
       const onAbort = () => {
         try {
-          src.stop();
+          src.stop(ctx.currentTime + PLAYBACK_FADE_OUT_SECONDS);
         } catch {
           /* already stopped */
-        }
-        try {
-          src.disconnect();
-        } catch {
-          /* noop */
         }
         scheduledPlaybackSourcesRef.current = scheduledPlaybackSourcesRef.current.filter((s) => s !== src);
       };
@@ -273,6 +281,11 @@ export function useDeepgramVoiceAgent(
       scheduledPlaybackSourcesRef.current.push(src);
       src.onended = () => {
         scheduledPlaybackSourcesRef.current = scheduledPlaybackSourcesRef.current.filter((s) => s !== src);
+        try {
+          src.disconnect();
+        } catch {
+          /* noop */
+        }
       };
 
       src.start(startAt);
@@ -287,20 +300,24 @@ export function useDeepgramVoiceAgent(
       resumeMicAfterAgentTimerRef.current = null;
     }
     isAgentAudioActiveRef.current = false;
+    const ctx = audioCtxRef.current;
+    const playbackGain = playbackGainRef.current;
+    playbackGainRef.current = null;
+    if (ctx && ctx.state !== "closed" && playbackGain) {
+      const now = ctx.currentTime;
+      playbackGain.gain.cancelScheduledValues(now);
+      playbackGain.gain.setValueAtTime(playbackGain.gain.value, now);
+      playbackGain.gain.linearRampToValueAtTime(0, now + PLAYBACK_FADE_OUT_SECONDS);
+      setTimeout(() => {
+        try {
+          playbackGain.disconnect();
+        } catch {
+          /* noop */
+        }
+      }, Math.ceil(PLAYBACK_FADE_OUT_SECONDS * 1000) + 10);
+    }
     playbackAbortRef.current?.abort();
     playbackAbortRef.current = new AbortController();
-    for (const src of scheduledPlaybackSourcesRef.current) {
-      try {
-        src.stop();
-      } catch {
-        /* already stopped */
-      }
-      try {
-        src.disconnect();
-      } catch {
-        /* noop */
-      }
-    }
     scheduledPlaybackSourcesRef.current = [];
     nextPlaybackTimeRef.current = 0;
     setVoiceState((prev) => (prev === "speaking" ? "idle" : prev));
