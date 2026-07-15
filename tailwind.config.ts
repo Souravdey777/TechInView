@@ -103,6 +103,14 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "research-scan": {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+        "soft-float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
       },
       animation: {
         "pulse-ring": "pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite",
@@ -113,6 +121,8 @@ const config: Config = {
         "slide-in-right": "slide-in-right 0.5s ease-out forwards",
         "scale-in": "scale-in 0.4s ease-out forwards",
         "count-up": "count-up 0.5s ease-out forwards",
+        "research-scan": "research-scan 2.4s linear infinite",
+        "soft-float": "soft-float 3s ease-in-out infinite",
       },
     },
   },
