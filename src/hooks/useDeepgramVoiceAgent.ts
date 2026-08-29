@@ -47,6 +47,36 @@ type InjectUserMessageOptions = {
   suppressTranscript?: boolean;
 };
 
+// ─── Latency instrumentation ────────────────────────────────────────────────
+
+export type VoiceLatencySample = {
+  /** End of the candidate's speech (STT final) -> agent audio begins. Perceived latency. */
+  v2vMs: number | null;
+  /** AgentThinking -> AgentStartedSpeaking (LLM think + TTS first audio). */
+  thinkToAudioMs: number | null;
+  /** Deepgram's own LatencyReport total for the turn, if it reported one (ms). */
+  dgTotalMs: number | null;
+  at: number;
+};
+
+export type VoiceLatencyStats = {
+  count: number;
+  lastV2vMs: number | null;
+  p50V2vMs: number | null;
+  p90V2vMs: number | null;
+  samples: VoiceLatencySample[];
+};
+
+const EMPTY_LATENCY_STATS: VoiceLatencyStats = {
+  count: 0,
+  lastV2vMs: null,
+  p50V2vMs: null,
+  p90V2vMs: null,
+  samples: [],
+};
+
+const LATENCY_WINDOW = 50;
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const INPUT_SAMPLE_RATE = 16000;
@@ -179,6 +209,7 @@ export function useDeepgramVoiceAgent(
   const [voiceState, setVoiceState] = useState<VoiceState>("idle");
   const [isConnected, setIsConnected] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [latencyStats, setLatencyStats] = useState<VoiceLatencyStats>(EMPTY_LATENCY_STATS);
 
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
@@ -212,6 +243,34 @@ export function useDeepgramVoiceAgent(
 
   const isMutedRef = useRef(false);
   const activeInputDeviceIdRef = useRef("");
+
+  /** Per-turn latency timestamps + a rolling window of samples for p50/p90. */
+  const turnTimingRef = useRef<{ userFinalAt?: number; thinkAt?: number }>({});
+  const latencySamplesRef = useRef<VoiceLatencySample[]>([]);
+  const lastDgLatencyMsRef = useRef<number | null>(null);
+
+  const pushLatencySample = useCallback(
+    (sample: Omit<VoiceLatencySample, "at">) => {
+      const next = [...latencySamplesRef.current, { ...sample, at: Date.now() }].slice(-LATENCY_WINDOW);
+      latencySamplesRef.current = next;
+
+      const sorted = next
+        .map((s) => s.v2vMs)
+        .filter((v): v is number => v != null)
+        .sort((a, b) => a - b);
+      const pct = (p: number) =>
+        sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))] : null;
+
+      setLatencyStats({
+        count: next.length,
+        lastV2vMs: sample.v2vMs,
+        p50V2vMs: pct(0.5),
+        p90V2vMs: pct(0.9),
+        samples: next,
+      });
+    },
+    [],
+  );
 
   const getOrCreateAudioContext = useCallback((): AudioContext => {
     if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
@@ -620,6 +679,10 @@ export function useDeepgramVoiceAgent(
           if (ct.role !== "assistant" && shouldSuppressUserTranscript(ct.content)) {
             break;
           }
+          // A real (non-injected) candidate final marks end-of-speech: the t0 for V2V latency.
+          if (ct.role !== "assistant") {
+            turnTimingRef.current.userFinalAt = performance.now();
+          }
           callbacksRef.current.onTranscript(
             ct.content,
             ct.role === "assistant" ? "agent" : "user",
@@ -629,21 +692,55 @@ export function useDeepgramVoiceAgent(
         }
 
         case "UserStartedSpeaking":
+          turnTimingRef.current = {}; // new turn
           stopSpeaking();
           setVoiceState("listening");
           break;
 
         case "AgentThinking":
+          turnTimingRef.current.thinkAt = performance.now();
           setVoiceState("thinking");
           break;
 
-        case "AgentStartedSpeaking":
+        case "AgentStartedSpeaking": {
+          const now = performance.now();
+          const { userFinalAt, thinkAt } = turnTimingRef.current;
+          const v2vMs = userFinalAt != null ? Math.round(now - userFinalAt) : null;
+          const thinkToAudioMs = thinkAt != null ? Math.round(now - thinkAt) : null;
+          if (v2vMs != null || thinkToAudioMs != null) {
+            pushLatencySample({ v2vMs, thinkToAudioMs, dgTotalMs: lastDgLatencyMsRef.current });
+            if (process.env.NODE_ENV !== "production") {
+              console.log(
+                `[latency] V2V=${v2vMs ?? "?"}ms think→audio=${thinkToAudioMs ?? "?"}ms ` +
+                  `dgTotal=${lastDgLatencyMsRef.current ?? "?"}ms (+~150ms jitter buffer to audible)`,
+              );
+            }
+          }
+          turnTimingRef.current = {};
+          lastDgLatencyMsRef.current = null;
+
           blockMicDuringAgentAudio();
           setVoiceState("speaking");
           if (!playbackAbortRef.current || playbackAbortRef.current.signal.aborted) {
             playbackAbortRef.current = new AbortController();
           }
           break;
+        }
+
+        case "LatencyReport": {
+          // Deepgram reports per-stage latency in seconds; capture a turn total when present.
+          const lr = event as Record<string, unknown>;
+          const num = (v: unknown) => (typeof v === "number" ? v : 0);
+          const totalSec =
+            typeof lr.total_latency === "number"
+              ? lr.total_latency
+              : num(lr.stt_latency) + num(lr.ttt_latency) + num(lr.llm_latency) + num(lr.tts_latency);
+          if (totalSec > 0) lastDgLatencyMsRef.current = Math.round(totalSec * 1000);
+          if (process.env.NODE_ENV !== "production") {
+            console.log("[dg-latency]", lr);
+          }
+          break;
+        }
 
         case "AgentAudioDone":
           resumeMicAfterAgentAudio();
@@ -698,6 +795,7 @@ export function useDeepgramVoiceAgent(
       resolveWelcome,
       resumeMicAfterAgentAudio,
       shouldSuppressUserTranscript,
+      pushLatencySample,
     ],
   );
 
@@ -936,6 +1034,7 @@ export function useDeepgramVoiceAgent(
     voiceState,
     isConnected,
     isListening,
+    latencyStats,
     connect,
     disconnect,
     stopSpeaking,
