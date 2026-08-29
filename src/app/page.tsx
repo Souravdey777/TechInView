@@ -17,6 +17,7 @@ import { MarketingNav } from "@/components/landing/MarketingNav";
 import { HowItWorksTimeline } from "@/components/landing/HowItWorksTimeline";
 import { LandingReveal } from "@/components/landing/LandingReveal";
 import { LandingTiaPreview } from "@/components/landing/LandingTiaPreview";
+import { TiltCard } from "@/components/landing/TiltCard";
 import { MarketingFooter } from "@/components/landing/MarketingFooter";
 import { Pricing } from "@/components/landing/Pricing";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
@@ -332,7 +333,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 </div>
               </div>
 
-              <div className="landing-panel relative p-6 lg:p-8">
+              <TiltCard className="landing-panel p-6 lg:p-8">
                 <div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-cyan">
@@ -385,7 +386,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                             2/2 tests passing
                           </div>
                         </div>
-                        <div className="mt-5 space-y-1 rounded-2xl border border-brand-border bg-brand-surface p-5 font-mono text-[11px] leading-relaxed text-brand-text sm:text-xs">
+                        <div className="mt-5 space-y-1 overflow-x-auto whitespace-nowrap rounded-2xl border border-brand-border bg-brand-surface p-5 font-mono text-[11px] leading-relaxed text-brand-text [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:text-xs">
                           <p>
                             <span className="text-brand-muted">1</span>{" "}
                             <span className="text-brand-rose">def</span>{" "}
@@ -424,7 +425,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </TiltCard>
             </div>
           </LandingReveal>
         </section>
