@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,7 @@ import { TestRunner, type TestResult } from "./TestRunner";
 import { Timer } from "./Timer";
 import { InterviewControls } from "./InterviewControls";
 import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
+import { VoiceLatencyHud } from "./VoiceLatencyHud";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   useDeepgramVoiceAgent,
@@ -91,6 +93,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   const setTestResultsInStore = useInterviewStore((s) => s.setTestResults);
   const mode = storeConfig?.mode ?? "general_dsa";
   const roundType = storeConfig?.roundType ?? "coding";
+  const posthog = usePostHog();
   const isCodingRound = roundType === "coding";
 
   // Guard: wait for hydration before deciding to redirect
@@ -434,6 +437,49 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   const voiceState: VoiceState = agent.voiceState;
   const isAgentConnected = agent.isConnected;
+
+  // Dev-only latency HUD: on in dev, or anywhere with ?latency=1 in the URL.
+  const [showLatency, setShowLatency] = useState(false);
+  useEffect(() => {
+    try {
+      setShowLatency(
+        process.env.NODE_ENV !== "production" ||
+          new URLSearchParams(window.location.search).has("latency"),
+      );
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  // Stream one voice_turn_latency event per completed turn to PostHog so p90 can
+  // be charted by model and phase across real traffic.
+  const lastLatencyCountRef = useRef(0);
+  useEffect(() => {
+    const stats = agent.latencyStats;
+    if (stats.count === lastLatencyCountRef.current) return;
+    lastLatencyCountRef.current = stats.count;
+    const last = stats.samples[stats.samples.length - 1];
+    if (!last) return;
+    posthog?.capture("voice_turn_latency", {
+      v2v_ms: last.v2vMs,
+      think_to_audio_ms: last.thinkToAudioMs,
+      dg_total_ms: last.dgTotalMs,
+      model: agentSettings.thinkModel,
+      round_type: roundType,
+      mode,
+      phase: currentPhaseRef.current,
+      is_free_trial: storeConfig?.isFreeInterview ?? false,
+      interview_id: interviewId,
+    });
+  }, [
+    agent.latencyStats,
+    posthog,
+    agentSettings.thinkModel,
+    roundType,
+    mode,
+    interviewId,
+    storeConfig?.isFreeInterview,
+  ]);
   const injectAgentUserMessage = agent.injectUserMessage;
 
   useEffect(() => {
@@ -1257,6 +1303,8 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         onEndInterview={handleEndInterview}
         isRunning={isRunningTests}
       />
+
+      {showLatency && <VoiceLatencyHud stats={agent.latencyStats} />}
     </div>
   );
 }
