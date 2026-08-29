@@ -93,7 +93,7 @@ export default function HowAiEvaluatesPage() {
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-5xl px-4 py-12 sm:py-16 sm:px-6">
+      <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16 sm:px-6">
         <header className="mb-12 max-w-3xl">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-brand-cyan">
             Resources

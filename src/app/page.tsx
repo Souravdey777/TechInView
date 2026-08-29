@@ -278,7 +278,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             aria-hidden
           />
 
-          <LandingReveal className="relative mx-auto max-w-[92rem]">
+          <LandingReveal className="relative mx-auto max-w-6xl">
             <div className="grid items-center gap-16 xl:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] xl:gap-20">
               <div className="max-w-3xl pt-4">
                 <div className="inline-flex items-center gap-2 rounded-full border border-brand-cyan/25 bg-brand-cyan/[0.08] px-4 py-1.5 text-xs font-medium text-brand-cyan">
@@ -727,7 +727,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             aria-hidden
           />
 
-          <LandingReveal className="relative mx-auto max-w-5xl">
+          <LandingReveal className="relative mx-auto max-w-6xl">
             <div className="landing-panel px-6 py-10 text-center sm:px-10 sm:py-14">
               <div className="inline-flex items-center gap-2 rounded-full border border-brand-cyan/25 bg-brand-cyan/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
                 Ready when you are

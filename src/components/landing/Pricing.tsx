@@ -247,7 +247,7 @@ export function Pricing({ defaultRegion = "usd", refParam }: PricingProps) {
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-7xl">
+      <div className="relative mx-auto max-w-6xl">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-cyan">
             Pricing
