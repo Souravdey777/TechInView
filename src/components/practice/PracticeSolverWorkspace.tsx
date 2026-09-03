@@ -1,22 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  Loader2,
-  Play,
-  Save,
-  Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { CodeEditor } from "@/components/interview/CodeEditor";
+import { PanelResizeHandle } from "@/components/interview/PanelResizeHandle";
 import { ProblemPanel } from "@/components/interview/ProblemPanel";
 import { TestRunner, type TestResult } from "@/components/interview/TestRunner";
+import { PracticeControls } from "./PracticeControls";
+import { useResizablePanel } from "@/hooks/useResizablePanel";
 import type { SupportedLanguage } from "@/lib/constants";
 
 type ProblemExample = {
@@ -71,11 +66,16 @@ const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
   "cpp",
 ];
 
+const DIFFICULTY_STYLES = {
+  easy: "border-brand-green/30 bg-brand-green/10 text-brand-green",
+  medium: "border-brand-amber/30 bg-brand-amber/10 text-brand-amber",
+  hard: "border-brand-rose/30 bg-brand-rose/10 text-brand-rose",
+} as const;
+
 export function PracticeSolverWorkspace({
   problem,
   initialAttempt,
 }: PracticeSolverWorkspaceProps) {
-  const router = useRouter();
   const posthog = usePostHog();
   const [language, setLanguage] = useState<SupportedLanguage>(initialAttempt?.language ?? "python");
   const [codeByLanguage, setCodeByLanguage] = useState<Record<SupportedLanguage, string>>(() => {
@@ -103,8 +103,13 @@ export function PracticeSolverWorkspace({
   const hasMountedRef = useRef(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Resizable panel state (shared with the AI interview room) ─────────────
+  const { width: panelWidth, isDragging, handleResizeStart, handleTouchResizeStart } =
+    useResizablePanel();
+
   const currentCode = codeByLanguage[language] ?? problem.starter_code[language] ?? "";
   const lastSavedAt = initialAttempt ? new Date(initialAttempt.updatedAt).toLocaleString() : null;
+  const interviewHref = `/interview/setup?problem=${problem.slug}&dsaExperience=ai_interview`;
 
   const persistAttempt = useCallback(
     async (payload?: {
@@ -177,7 +182,7 @@ export function PracticeSolverWorkspace({
     return lastSavedAt ? `Last saved ${lastSavedAt}` : "Progress autosaves";
   }, [lastSavedAt, saveState]);
 
-  async function handleRunCode() {
+  const handleRunCode = useCallback(async () => {
     setIsRunning(true);
     setError(null);
     try {
@@ -222,7 +227,7 @@ export function PracticeSolverWorkspace({
     } finally {
       setIsRunning(false);
     }
-  }
+  }, [currentCode, language, persistAttempt, posthog, problem.slug]);
 
   function handleLanguageChange(nextLanguage: SupportedLanguage) {
     setLanguage(nextLanguage);
@@ -235,139 +240,118 @@ export function PracticeSolverWorkspace({
     }));
   }
 
+  function handleResetCode() {
+    const starter = problem.starter_code[language] ?? "";
+    setCodeByLanguage((prev) => ({ ...prev, [language]: starter }));
+    setTestResults([]);
+    setError(null);
+    posthog?.capture("practice_code_reset", {
+      problem_slug: problem.slug,
+      language,
+    });
+  }
+
   function handleUpgradeClick() {
     posthog?.capture("practice_upgrade_clicked", {
       problem_slug: problem.slug,
       source: "solver_workspace",
     });
-    router.push(`/interview/setup?problem=${problem.slug}&dsaExperience=ai_interview`);
   }
 
   return (
-    <div className="px-4 py-8 sm:px-6">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex flex-col gap-4 rounded-2xl border border-brand-border bg-brand-card p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-              Practice Mode
-            </p>
-            <h1 className="mt-2 text-2xl font-bold text-brand-text">{problem.title}</h1>
-            <p className="mt-1 text-sm text-brand-muted">
-              Solve on your own, run tests whenever you want, and switch to AI Interview Mode when you want pressure and feedback.
-            </p>
-          </div>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleRunCode}
-              disabled={isRunning}
-              className="w-full sm:w-auto"
-            >
-              {isRunning ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Running...
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4" />
-                  Run Code
-                </>
-              )}
-            </Button>
-            <Button type="button" onClick={handleUpgradeClick} className="w-full sm:w-auto">
-              Try 5-Minute Audio Interview
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
+    <div className="flex h-screen w-screen flex-col bg-brand-deep overflow-hidden">
+      {/* ── Top bar ── */}
+      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-brand-border bg-brand-card px-4">
+        <div className="flex min-w-0 shrink items-center gap-3">
+          <BrandLogo size="sm" wordmarkClassName="text-sm" />
+          <span className="h-4 w-px shrink-0 bg-brand-border" aria-hidden />
+          <span className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-subtle">
+            Practice Mode
+          </span>
+          <span className="truncate text-xs text-brand-muted">{problem.title}</span>
+          <span
+            className={cn(
+              "shrink-0 rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em]",
+              DIFFICULTY_STYLES[problem.difficulty]
+            )}
+          >
+            {problem.difficulty}
+          </span>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(20rem,0.9fr)_minmax(0,1.1fr)]">
-          <section className="overflow-hidden rounded-2xl border border-brand-border bg-brand-card">
-            <ProblemPanel problem={problem} showHints={false} />
-          </section>
-
-          <section className="space-y-4">
-            <div className="rounded-2xl border border-brand-cyan/20 bg-brand-cyan/5 p-5">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-brand-text">Want the real interview feel?</p>
-                  <p className="mt-1 text-sm text-brand-muted">
-                    AI Interview Mode adds voice back-and-forth, interview pressure, and a scored review of your performance.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2 text-xs text-brand-muted">
-                  <span className="rounded-full border border-brand-cyan/20 bg-brand-surface px-3 py-1">
-                    Voice interviewer
-                  </span>
-                  <span className="rounded-full border border-brand-cyan/20 bg-brand-surface px-3 py-1">
-                    Real-time pressure
-                  </span>
-                  <span className="rounded-full border border-brand-cyan/20 bg-brand-surface px-3 py-1">
-                    Score + transcript
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-brand-border bg-brand-card">
-              <div className="flex flex-col gap-3 border-b border-brand-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center gap-3 text-xs text-brand-muted">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Save className="h-3.5 w-3.5" />
-                    {saveLabel}
-                  </span>
-                  {testsTotal !== null ? (
-                    <span className="inline-flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-brand-green" />
-                      {testsPassed}/{testsTotal} tests
-                    </span>
-                  ) : null}
-                  {isSolved ? (
-                    <span className="inline-flex items-center gap-1.5 text-brand-green">
-                      <Sparkles className="h-3.5 w-3.5" />
-                      Solved
-                    </span>
-                  ) : null}
-                </div>
-                <Link
-                  href={`/interview/setup?problem=${problem.slug}&dsaExperience=ai_interview`}
-                  className="text-xs font-medium text-brand-cyan hover:underline"
-                >
-                  Open in AI Interview Mode
-                </Link>
-              </div>
-              <div className="h-[22rem] overflow-hidden sm:h-[28rem]">
-                <CodeEditor
-                  language={language}
-                  value={currentCode}
-                  onChange={handleCodeChange}
-                  onRunCode={handleRunCode}
-                  onLanguageChange={handleLanguageChange}
-                />
-              </div>
-            </div>
-
-            <div className="min-h-[16rem] overflow-hidden rounded-2xl border border-brand-border bg-brand-card sm:h-[18rem]">
-              <TestRunner testResults={testResults} isRunning={isRunning} />
-            </div>
-
-            {error ? (
-              <div className="rounded-xl border border-brand-rose/20 bg-brand-rose/5 px-4 py-3 text-sm text-brand-rose">
-                {error}
-              </div>
-            ) : null}
-
-            <div className="rounded-xl border border-brand-border bg-brand-card px-4 py-3 text-xs text-brand-muted">
-              <div className="flex items-center gap-2">
-                <Clock3 className="h-3.5 w-3.5" />
-                <span>Use Ctrl/Cmd + Enter to run code quickly.</span>
-              </div>
-            </div>
-          </section>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={handleResetCode}
+            className="flex items-center gap-1.5 rounded-lg border border-brand-border px-3 py-1.5 text-xs font-medium text-brand-muted transition-colors hover:border-brand-subtle hover:text-brand-text"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Reset code
+          </button>
+          <Link
+            href={interviewHref}
+            onClick={handleUpgradeClick}
+            className="flex items-center gap-1.5 rounded-lg bg-brand-cyan px-3 py-1.5 text-xs font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
+          >
+            Interview this one
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
+      </header>
+
+      {/* ── Main area ── */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* ── Left panel (resizable) ── */}
+        <aside
+          className="flex shrink-0 flex-col border-r border-brand-border bg-brand-surface overflow-hidden"
+          style={{ width: `${panelWidth}px` }}
+        >
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <ProblemPanel problem={problem} />
+          </div>
+        </aside>
+
+        {/* ── Resize handle ── */}
+        <PanelResizeHandle
+          isDragging={isDragging}
+          onMouseDown={handleResizeStart}
+          onTouchStart={handleTouchResizeStart}
+        />
+
+        {/* ── Editor + tests ── */}
+        <main className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              language={language}
+              value={currentCode}
+              onChange={handleCodeChange}
+              onRunCode={handleRunCode}
+              onLanguageChange={handleLanguageChange}
+            />
+          </div>
+
+          {error && (
+            <div className="shrink-0 border-t border-brand-rose/30 bg-brand-rose/10 px-4 py-2 text-xs text-brand-rose">
+              {error}
+            </div>
+          )}
+
+          <div className="h-48 shrink-0 overflow-hidden">
+            <TestRunner testResults={testResults} isRunning={isRunning} />
+          </div>
+        </main>
       </div>
+
+      {/* ── Bottom bar ── */}
+      <PracticeControls
+        language={language}
+        saveLabel={saveLabel}
+        testsPassed={testsPassed}
+        testsTotal={testsTotal}
+        isSolved={isSolved}
+        isRunning={isRunning}
+        onRunCode={handleRunCode}
+      />
     </div>
   );
 }

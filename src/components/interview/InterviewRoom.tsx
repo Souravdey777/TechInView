@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
-import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { VoicePanel } from "./VoicePanel";
@@ -17,6 +16,7 @@ import { Timer } from "./Timer";
 import { InterviewControls } from "./InterviewControls";
 import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { VoiceLatencyHud } from "./VoiceLatencyHud";
+import { PanelResizeHandle } from "./PanelResizeHandle";
 import {
   useDeepgramVoiceAgent,
   type DeepgramVoiceAgentSettings,
@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useDeepgramVoiceAgent";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
+import { useResizablePanel } from "@/hooks/useResizablePanel";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   type InterviewPhase,
@@ -162,57 +163,12 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   } = useMicrophoneDevices();
 
   // ── Resizable panel state ─────────────────────────────────────────────────
-  const MIN_PANEL = 300;
-  const MAX_PANEL = 700;
-  const DEFAULT_PANEL = 400;
-  const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartX = useRef(0);
-  const dragStartWidth = useRef(DEFAULT_PANEL);
-
-  const handleResizeStart = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    dragStartX.current = e.clientX;
-    dragStartWidth.current = panelWidth;
-  }, [panelWidth]);
-
-  const handleTouchResizeStart = useCallback((e: React.TouchEvent) => {
-    setIsDragging(true);
-    dragStartX.current = e.touches[0].clientX;
-    dragStartWidth.current = panelWidth;
-  }, [panelWidth]);
-
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handleMove = (clientX: number) => {
-      const delta = clientX - dragStartX.current;
-      const newWidth = Math.min(MAX_PANEL, Math.max(MIN_PANEL, dragStartWidth.current + delta));
-      setPanelWidth(newWidth);
-    };
-
-    const onMouseMove = (e: MouseEvent) => handleMove(e.clientX);
-    const onTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX);
-    const onEnd = () => setIsDragging(false);
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onEnd);
-    document.addEventListener("touchmove", onTouchMove);
-    document.addEventListener("touchend", onEnd);
-
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-
-    return () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onEnd);
-      document.removeEventListener("touchmove", onTouchMove);
-      document.removeEventListener("touchend", onEnd);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-  }, [isDragging]);
+  const {
+    width: panelWidth,
+    isDragging,
+    handleResizeStart,
+    handleTouchResizeStart,
+  } = useResizablePanel();
 
   // Use a ref for activeProblem so callbacks always read the latest value.
   const activeProblemRef = useRef(activeProblem);
@@ -1209,19 +1165,11 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         </aside>
 
         {/* ── Resize handle ── */}
-        <div
-          className={cn(
-            "flex w-2 shrink-0 cursor-col-resize items-center justify-center border-r border-brand-border bg-brand-surface transition-colors hover:bg-brand-cyan/10 group",
-            isDragging && "bg-brand-cyan/10"
-          )}
+        <PanelResizeHandle
+          isDragging={isDragging}
           onMouseDown={handleResizeStart}
           onTouchStart={handleTouchResizeStart}
-        >
-          <GripVertical className={cn(
-            "h-5 w-5 text-brand-border transition-colors group-hover:text-brand-cyan/60",
-            isDragging && "text-brand-cyan/60"
-          )} />
-        </div>
+        />
 
         {/* ── Right panel ── */}
         <main className="flex flex-1 flex-col overflow-hidden">
