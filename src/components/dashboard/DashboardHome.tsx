@@ -86,7 +86,7 @@ export function DashboardHome({
       <MeterStrip meters={summary.meters} />
 
       {/* ─── Trend and dimensions ─── */}
-      <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
+      <div className="grid gap-5 lg:grid-cols-12">
         <div className="lg:col-span-7">
           <ScoreTrendPanel trend={summary.trend} />
         </div>

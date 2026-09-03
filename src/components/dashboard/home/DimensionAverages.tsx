@@ -19,11 +19,13 @@ export function DimensionAverages({
 
   return (
     <Rack
+      className="flex h-full flex-col"
+      bodyClassName="flex flex-1 flex-col"
       label={<MonoLabel className="tracking-[0.18em]">Dimension average</MonoLabel>}
       accessory={<MonoLabel className="tracking-[0.12em]">{note}</MonoLabel>}
     >
       {dimensions.length > 0 ? (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 pb-5">
           {dimensions.map((dimension) => {
             const isWeakest = dimension.key === weakestKey;
 
@@ -67,7 +69,7 @@ export function DimensionAverages({
       )}
 
       {footnote ? (
-        <p className="mt-5 border-t border-brand-border pt-4 text-xs leading-relaxed text-brand-muted">
+        <p className="mt-auto border-t border-brand-border pt-4 text-xs leading-relaxed text-brand-muted">
           {footnote}
         </p>
       ) : null}

@@ -49,6 +49,8 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
 
   return (
     <Rack
+      className="flex h-full flex-col"
+      bodyClassName="flex flex-1 flex-col justify-center"
       label={<MonoLabel className="tracking-[0.18em]">Score trend</MonoLabel>}
       accessory={
         hasTrend ? (
@@ -62,7 +64,7 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
       {hasTrend ? (
         <svg
           viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-          className="h-48 w-full"
+          className="h-full max-h-64 min-h-[12rem] w-full"
           role="img"
           aria-label={`Weighted score across your last ${trend.length} scored rounds`}
         >
@@ -141,7 +143,7 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
           ))}
         </svg>
       ) : (
-        <div className="flex h-48 flex-col items-center justify-center gap-2 text-center">
+        <div className="flex min-h-[12rem] flex-1 flex-col items-center justify-center gap-2 text-center">
           <MonoLabel>Not enough takes</MonoLabel>
           <p className="max-w-xs text-xs leading-relaxed text-brand-muted">
             Two scored rounds draw the first line. Until then the trend stays
