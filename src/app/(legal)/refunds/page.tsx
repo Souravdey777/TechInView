@@ -109,6 +109,7 @@ export default function RefundsPage() {
       currentPath="/refunds"
       title="Refund Policy"
       description="A practical refund policy for duplicate charges, missing credits, and unused interview packs purchased on TechInView."
+      summary="Packs are one-time purchases and every request is reviewed case by case. Confirmed duplicate charges and fulfillment errors get corrected. Unused packs can be reviewed within 7 days of purchase, and credits you have already used are not refundable except where the law requires it or a verified platform error caused the problem."
       sections={sections}
     />
   );
