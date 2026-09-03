@@ -4,10 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef, useCallback, Suspense, type ChangeEvent, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Mic,
-  MicOff,
   CheckCircle,
-  XCircle,
   Shuffle,
   Code2,
   ChevronRight,
@@ -30,7 +27,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useInterviewStore } from "@/stores/interview-store";
 import { useSupabase } from "@/hooks/useSupabase";
-import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
 import {
   FREE_TRIAL_DURATION_MINUTES,
   FULL_INTERVIEW_DURATION_MINUTES,
@@ -56,21 +52,22 @@ import {
   SETUP_FOCUS_RING,
   SetupMonoLabel,
   SetupRack,
-} from "@/components/interviews/dsa-setup/SetupRack";
+} from "@/components/interviews/setup/SetupRack";
 import {
   SetupSegmentedControl,
   SetupSelect,
-} from "@/components/interviews/dsa-setup/SetupControls";
+} from "@/components/interviews/setup/SetupControls";
 import {
   DsaModePicker,
   type ModeChipTone,
-} from "@/components/interviews/dsa-setup/DsaModePicker";
-import { InterviewerPersonaPicker } from "@/components/interviews/dsa-setup/InterviewerPersonaPicker";
+} from "@/components/interviews/setup/DsaModePicker";
+import { InterviewerPersonaPicker } from "@/components/interviews/setup/InterviewerPersonaPicker";
+import { MicrophoneRack } from "@/components/interviews/setup/MicrophoneRack";
 import {
   InterviewerVoiceCard,
   SessionFactsCard,
   type SessionFact,
-} from "@/components/interviews/dsa-setup/SessionSummaryCards";
+} from "@/components/interviews/setup/SessionSummaryCards";
 import type {
   GeneratedLoop,
   GeneratedLoopRound,
@@ -104,7 +101,6 @@ type Language = "python" | "javascript" | "java" | "cpp";
 type Duration =
   | typeof FREE_TRIAL_DURATION_MINUTES
   | typeof FULL_INTERVIEW_DURATION_MINUTES;
-type MicStatus = "idle" | "checking" | "granted" | "denied";
 type ProblemMode = "random" | "specific";
 
 type ProblemSummary = {
@@ -416,16 +412,8 @@ function InterviewSetupInner() {
   const [historicalQuestionsError, setHistoricalQuestionsError] = useState<string | null>(null);
   const [questionSearch, setQuestionSearch] = useState("");
   const [questionTopicFilter, setQuestionTopicFilter] = useState("all");
-  const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const {
-    devices: microphoneDevices,
-    selectedDeviceId,
-    setSelectedDeviceId,
-    refreshDevices,
-    deviceWarning,
-  } = useMicrophoneDevices();
 
   // Freemium state
   const [isFreeTrialUser, setIsFreeTrialUser] = useState(false);
@@ -662,18 +650,6 @@ function InterviewSetupInner() {
       setTimeout(() => searchInputRef.current?.focus(), 50);
     }
   }, [problemMode]);
-
-  // ─── Mic check ──────────────────────────────────────────────────────────────
-
-  async function handleMicCheck() {
-    setMicStatus("checking");
-    try {
-      await refreshDevices(true);
-      setMicStatus("granted");
-    } catch {
-      setMicStatus("denied");
-    }
-  }
 
   async function launchInterview(body: Record<string, unknown>) {
     setIsCreating(true);
@@ -1631,91 +1607,10 @@ function InterviewSetupInner() {
 
         {/* Microphone */}
         {!isPracticeMode && (
-        <SetupRack index={rackIndex.microphone} label="Microphone">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <p className="text-sm text-brand-text">
-                Verify your microphone before starting
-              </p>
-              <p className="text-xs text-brand-muted">
-                TechInView uses your mic for real-time voice interaction with
-                {" "}{activePersona.name}.
-              </p>
-            </div>
-            <button
-              onClick={handleMicCheck}
-              disabled={micStatus === "checking"}
-              className={cn(
-                "flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-150",
-                micStatus === "granted"
-                  ? "border-brand-green/40 bg-brand-green/10 text-brand-green"
-                  : micStatus === "denied"
-                    ? "border-brand-rose/40 bg-brand-rose/10 text-brand-rose"
-                    : "border-brand-border text-brand-text hover:border-brand-subtle hover:bg-brand-card"
-              )}
-            >
-              {micStatus === "checking" ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Checking…
-                </>
-              ) : micStatus === "granted" ? (
-                <>
-                  <CheckCircle className="h-4 w-4" />
-                  Mic Ready
-                </>
-              ) : micStatus === "denied" ? (
-                <>
-                  <XCircle className="h-4 w-4" />
-                  Access Denied
-                </>
-              ) : (
-                <>
-                  <Mic className="h-4 w-4" />
-                  Test Microphone
-                </>
-              )}
-            </button>
-          </div>
-          {micStatus === "denied" && (
-            <div className="mt-3 flex items-start gap-2 rounded-lg bg-brand-rose/5 border border-brand-rose/20 px-3 py-2.5">
-              <MicOff className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
-              <p className="text-xs text-brand-rose">
-                Microphone access was blocked. You can still type your responses
-                during the interview, or grant access in your browser settings
-                and try again.
-              </p>
-            </div>
-          )}
-          {micStatus === "granted" && (
-            <div className="mt-3 space-y-3 rounded-lg border border-brand-green/20 bg-brand-green/5 px-3 py-2.5">
-              <div className="flex items-start gap-2">
-                <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
-                <p className="text-xs text-brand-green">
-                  Microphone detected and working. Voice interaction is enabled.
-                </p>
-              </div>
-              {microphoneDevices.length > 0 ? (
-                <label className="block text-xs text-brand-muted">
-                  <span className="mb-1 block">Microphone</span>
-                  <select
-                    value={selectedDeviceId}
-                    onChange={(event) => setSelectedDeviceId(event.target.value)}
-                    className="w-full rounded-lg border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-text focus:border-brand-cyan/60 focus:outline-none"
-                  >
-                    <option value="">System default</option>
-                    {microphoneDevices.map((device) => (
-                      <option key={device.deviceId} value={device.deviceId}>
-                        {device.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-              {deviceWarning ? <p className="text-xs text-brand-amber">{deviceWarning}</p> : null}
-            </div>
-          )}
-        </SetupRack>
+          <MicrophoneRack
+            index={rackIndex.microphone}
+            interviewerName={activePersona.name}
+          />
         )}
 
           </div>

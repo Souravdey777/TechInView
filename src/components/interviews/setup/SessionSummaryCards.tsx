@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { VoiceVisualizer } from "@/components/interview/VoiceVisualizer";
-import { SetupMonoLabel } from "@/components/interviews/dsa-setup/SetupRack";
+import { SetupMonoLabel } from "@/components/interviews/setup/SetupRack";
 import type { InterviewerPersona } from "@/lib/interviewer-personas";
 
 /**
@@ -79,6 +79,31 @@ export function SessionFactsCard({
           </div>
         ))}
       </dl>
+    </section>
+  );
+}
+
+/** Rail panel walking through the shape of the round, step by step. */
+export function SessionStepsCard({
+  title,
+  steps,
+}: {
+  title: string;
+  steps: readonly string[];
+}) {
+  return (
+    <section className="rounded-2xl border border-brand-border bg-brand-card p-5">
+      <SetupMonoLabel>{title}</SetupMonoLabel>
+      <ol className="mt-4 space-y-3">
+        {steps.map((step, index) => (
+          <li key={step} className="flex gap-3">
+            <span className="font-mono text-[10px] font-semibold leading-5 text-brand-cyan">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="text-xs leading-5 text-brand-muted">{step}</span>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }

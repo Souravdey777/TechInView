@@ -5,10 +5,30 @@ import type { RoundContextSnapshot } from "@/lib/loops/types";
 export const TECHNICAL_QA_DURATION_MINUTES = FULL_INTERVIEW_DURATION_MINUTES;
 
 export const TECHNICAL_QA_LANGUAGE_OPTIONS = [
-  { value: "javascript", label: "JavaScript / TypeScript" },
-  { value: "python", label: "Python" },
-  { value: "java", label: "Java" },
-  { value: "cpp", label: "C++" },
+  {
+    value: "javascript",
+    label: "JavaScript / TypeScript",
+    shortLabel: "JS / TS",
+    hint: "Event loop, async behavior, typing, and the React/Node ecosystem.",
+  },
+  {
+    value: "python",
+    label: "Python",
+    shortLabel: "Python",
+    hint: "Data model, concurrency limits, and web or data-heavy services.",
+  },
+  {
+    value: "java",
+    label: "Java",
+    shortLabel: "Java",
+    hint: "JVM behavior, Spring-era services, and distributed messaging.",
+  },
+  {
+    value: "cpp",
+    label: "C++",
+    shortLabel: "C++",
+    hint: "Memory model, threading, and performance-critical systems work.",
+  },
 ] as const;
 
 export type TechnicalQaLanguage = (typeof TECHNICAL_QA_LANGUAGE_OPTIONS)[number]["value"];
@@ -58,6 +78,13 @@ export type TechnicalQaSetupInput = {
 export function getTechnicalQaLanguageLabel(language: string) {
   return (
     TECHNICAL_QA_LANGUAGE_OPTIONS.find((item) => item.value === language)?.label ?? language
+  );
+}
+
+export function getTechnicalQaLanguageShortLabel(language: TechnicalQaLanguage) {
+  return (
+    TECHNICAL_QA_LANGUAGE_OPTIONS.find((item) => item.value === language)?.shortLabel ??
+    language
   );
 }
 

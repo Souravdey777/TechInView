@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import {
   SETUP_FOCUS_RING,
   SetupMonoLabel,
-} from "@/components/interviews/dsa-setup/SetupRack";
+} from "@/components/interviews/setup/SetupRack";
 import type {
   InterviewerPersona,
   InterviewerPersonaId,
