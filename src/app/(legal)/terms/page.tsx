@@ -172,6 +172,7 @@ export default function TermsPage() {
       currentPath="/terms"
       title="Terms of Service"
       description="The ground rules for using TechInView, including accounts, credits, acceptable use, AI output limitations, and support."
+      summary="Interview packs are one-time purchases, not subscriptions, and credits have no cash value. You keep ownership of the code and content you submit; we license it only to run and improve the product. AI scores are practice feedback, not a guaranteed job outcome."
       sections={sections}
     />
   );

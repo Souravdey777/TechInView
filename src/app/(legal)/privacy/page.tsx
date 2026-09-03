@@ -195,6 +195,7 @@ export default function PrivacyPage() {
       currentPath="/privacy"
       title="Privacy Policy"
       description="How TechInView handles account details, interview data, voice transcripts, payments, analytics, and support communications."
+      summary="We collect account details, interview and practice data, transcripts, usage analytics, and payment records. Raw candidate microphone audio is processed live by our voice provider and is not stored by TechInView. We do not sell your personal information and we do not use your content for advertising."
       sections={sections}
     />
   );

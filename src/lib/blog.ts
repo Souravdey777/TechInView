@@ -1,24 +1,28 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
+import {
+  normalizeTopic,
+  type BlogFrontmatter,
+  type BlogListItem,
+} from "@/lib/blog-taxonomy";
 
 const BLOG_DIR = path.join(process.cwd(), "src/content/blog");
 
-export type BlogFrontmatter = {
-  title: string;
-  description: string;
-  date: string;
-  keyword: string;
-  /** ISO date if the post was materially updated (SEO: dateModified, OG) */
-  updated?: string;
-  /** Secondary keywords / topics for meta keywords and discovery */
-  tags?: string[];
-};
-
-export type BlogListItem = BlogFrontmatter & {
-  slug: string;
-  readingTimeMinutes: number;
-};
+// Re-exported so existing `@/lib/blog` importers keep working; the pure
+// definitions live in blog-taxonomy so client components can use them.
+export {
+  BLOG_TOPICS,
+  BLOG_START_HERE,
+  groupPostsByMonth,
+  getTopicCounts,
+} from "@/lib/blog-taxonomy";
+export type {
+  BlogFrontmatter,
+  BlogListItem,
+  BlogTopic,
+  BlogMonthGroup,
+} from "@/lib/blog-taxonomy";
 
 export type BlogPost = BlogListItem & {
   body: string;
@@ -57,6 +61,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     ...fm,
     tags,
     updated,
+    topic: normalizeTopic(fm.topic),
     slug,
     body: content,
     readingTimeMinutes: readingMinutesFromContent(content),

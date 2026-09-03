@@ -121,6 +121,7 @@ export default function ContactPage() {
       currentPath="/contact"
       title="Contact Support"
       description="Email TechInView for billing help, missing credits, account access, bug reports, and privacy or legal requests."
+      summary="Email is the fastest way to reach us. Include the account email you used on TechInView plus any order, payment, or page details so we can reproduce the issue. Requests are reviewed in the order they arrive, with billing, access, and privacy or security concerns handled first."
       sections={sections}
     />
   );

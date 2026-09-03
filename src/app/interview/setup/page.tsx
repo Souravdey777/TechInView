@@ -9,7 +9,7 @@ import {
   CheckCircle,
   XCircle,
   Shuffle,
-  Clock,
+  Code2,
   ChevronRight,
   Loader2,
   AlertCircle,
@@ -34,9 +34,11 @@ import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
 import {
   FREE_TRIAL_DURATION_MINUTES,
   FULL_INTERVIEW_DURATION_MINUTES,
+  SCORING_DIMENSIONS,
   type RoundType,
   type InterviewMode,
 } from "@/lib/constants";
+import { PHASE_ORDER } from "@/lib/interview-phases";
 import {
   DEFAULT_INTERVIEWER_PERSONA,
   INTERVIEWER_PERSONAS,
@@ -48,12 +50,27 @@ import {
   buildLoopStartPayload,
 } from "@/lib/loops/generator";
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
-import { DsaExperienceToggle } from "@/components/dsa/DsaExperienceToggle";
 import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
+import { InterviewSetupSection } from "@/components/interviews/InterviewSetupLayout";
 import {
-  InterviewSetupHero,
-  InterviewSetupSection,
-} from "@/components/interviews/InterviewSetupLayout";
+  SETUP_FOCUS_RING,
+  SetupMonoLabel,
+  SetupRack,
+} from "@/components/interviews/dsa-setup/SetupRack";
+import {
+  SetupSegmentedControl,
+  SetupSelect,
+} from "@/components/interviews/dsa-setup/SetupControls";
+import {
+  DsaModePicker,
+  type ModeChipTone,
+} from "@/components/interviews/dsa-setup/DsaModePicker";
+import { InterviewerPersonaPicker } from "@/components/interviews/dsa-setup/InterviewerPersonaPicker";
+import {
+  InterviewerVoiceCard,
+  SessionFactsCard,
+  type SessionFact,
+} from "@/components/interviews/dsa-setup/SessionSummaryCards";
 import type {
   GeneratedLoop,
   GeneratedLoopRound,
@@ -215,9 +232,12 @@ function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
 
 // ─── Category tag ─────────────────────────────────────────────────────────────
 
+function categoryLabel(category: string) {
+  return CATEGORIES.find((c) => c.value === category)?.label ?? category;
+}
+
 function CategoryTag({ category }: { category: string }) {
-  const label =
-    CATEGORIES.find((c) => c.value === category)?.label ?? category;
+  const label = categoryLabel(category);
   return (
     <span className="rounded-full border border-brand-border px-2 py-0.5 text-xs text-brand-muted">
       {label}
@@ -342,14 +362,21 @@ function SetupSkeleton() {
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text">
       <SetupPageHeader
-        containerClassName="max-w-4xl"
+        containerClassName="max-w-6xl"
         supportingText="DSA · Interview setup"
       />
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="space-y-6 rounded-3xl border border-brand-border bg-brand-card p-6 sm:p-8">
-          <div className="h-8 w-56 animate-pulse rounded-lg bg-brand-surface" />
-          <div className="h-40 animate-pulse rounded-2xl bg-brand-surface" />
-          <div className="h-24 animate-pulse rounded-2xl bg-brand-surface" />
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="h-10 w-64 animate-pulse rounded-lg bg-brand-surface" />
+        <div className="mt-6 grid gap-5 lg:grid-cols-12 lg:items-start">
+          <div className="space-y-5 lg:col-span-8">
+            <div className="h-40 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
+            <div className="h-48 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
+            <div className="h-56 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
+          </div>
+          <div className="space-y-5 lg:col-span-4">
+            <div className="h-72 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
+            <div className="h-40 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
+          </div>
         </div>
       </div>
     </div>
@@ -925,44 +952,77 @@ function InterviewSetupInner() {
       ]
     : problems;
 
+  // ─── Display-only derivations ───────────────────────────────────────────────
+
+  const scoringDimensionCount = Object.keys(SCORING_DIMENSIONS).length;
+  const selectedLanguageLabel =
+    LANGUAGES.find((lang) => lang.value === form.language)?.label ?? form.language;
+  const selectedCategoryLabel = categoryLabel(form.category);
+  const rackIndex = isPracticeMode
+    ? { mode: "01", interviewer: "02", problem: "02", microphone: "03" }
+    : { mode: "01", interviewer: "02", problem: "03", microphone: "04" };
+  const aiModeStatus = isPreviewSession
+    ? `${FREE_TRIAL_DURATION_MINUTES}-min preview`
+    : isAiModeLocked
+      ? "Locked"
+      : "1 credit";
+  const aiModeStatusTone: ModeChipTone = isAiModeLocked ? "rose" : "cyan";
+  const aiModeCostSentence = isPreviewSession
+    ? `Runs as your free ${FREE_TRIAL_DURATION_MINUTES}-minute audio preview.`
+    : isAiModeLocked
+      ? "Needs an interview pack before another round can start."
+      : `Spends one interview credit on a full ${FULL_INTERVIEW_DURATION_MINUTES}-minute round.`;
+  const aiModeDetail = `Voice interviewer, live editor, ${PHASE_ORDER.length} phases, scored on ${scoringDimensionCount} dimensions. ${aiModeCostSentence}`;
+  const aiCostValue = isPreviewSession
+    ? "Free preview"
+    : isAiModeLocked
+      ? "Interview pack needed"
+      : credits === null
+        ? "1 interview credit"
+        : `1 of ${credits} credit${credits === 1 ? "" : "s"}`;
+  const sessionFacts: SessionFact[] = isPracticeMode
+    ? [
+        { label: "Format", value: "Solo practice" },
+        { label: "Timer", value: "Untimed" },
+        { label: "Language", value: selectedLanguageLabel },
+        { label: "Cost", value: "Free", emphasis: true },
+      ]
+    : [
+        { label: "Duration", value: `${form.duration} min` },
+        { label: "Phases", value: `${PHASE_ORDER.length}` },
+        { label: "Scored on", value: `${scoringDimensionCount} dimensions` },
+        { label: "Cost", value: aiCostValue, emphasis: true },
+      ];
+
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-brand-deep text-brand-text">
       {/* Header */}
       <SetupPageHeader
-        containerClassName="max-w-4xl"
+        containerClassName="max-w-6xl"
         supportingText="DSA · Interview setup"
       />
 
       {/* Body */}
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="space-y-6 rounded-3xl border border-brand-border bg-brand-card p-6 sm:p-8">
-          <InterviewSetupHero
-            title="Set Up Your DSA Session"
-            description={
-              isPracticeMode
-                ? "Choose a free-practice configuration and start solving right away."
-                : `Configure your AI interview and ${activePersona.name} will guide you through the rest.`
-            }
-            metadata={[
-              isPracticeMode ? "Practice" : `${form.duration} min`,
-              "Live code",
-              isPracticeMode ? "Self-guided" : "Voice chat",
-            ]}
-          />
-
-        {interviewMode === "general_dsa" && (
-          <SectionCard title="DSA Mode">
-            <DsaExperienceToggle
-              value={dsaExperience}
-              onChange={handleDsaExperienceChange}
-            />
-          </SectionCard>
-        )}
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+          <div className="min-w-0">
+            <SetupMonoLabel>New session</SetupMonoLabel>
+            <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
+              Set up the room.
+            </h1>
+          </div>
+          <p className="text-sm leading-relaxed text-brand-muted lg:max-w-sm lg:text-right">
+            Practice Mode is free and self-paced. AI Interview Mode spends one
+            interview credit and runs a full{" "}
+            {FULL_INTERVIEW_DURATION_MINUTES}-minute voice round that is scored on{" "}
+            {scoringDimensionCount} dimensions.
+          </p>
+        </header>
 
         {isPracticeMode && (
-          <div className="flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
+          <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" />
             <div>
               <p className="text-sm font-semibold text-brand-text">Free Practice Mode</p>
@@ -976,7 +1036,7 @@ function InterviewSetupInner() {
 
         {/* AI preview banner */}
         {isAiInterviewMode && isFreeTrialUser && !hasCredits && (
-          <div className="flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
+          <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" />
             <div>
               <p className="text-sm font-semibold text-brand-text">5-Minute Audio Preview</p>
@@ -990,7 +1050,7 @@ function InterviewSetupInner() {
 
         {/* No credits warning */}
         {isAiModeLocked && (
-          <div className="flex items-start gap-3 rounded-xl border border-brand-rose/30 bg-brand-rose/5 px-5 py-4">
+          <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-rose/30 bg-brand-rose/5 px-5 py-4">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-rose" />
             <div>
               <p className="text-sm font-semibold text-brand-text">AI Interview Mode Locked</p>
@@ -1000,6 +1060,25 @@ function InterviewSetupInner() {
               </p>
             </div>
           </div>
+        )}
+
+        <div className="mt-6 grid gap-5 lg:grid-cols-12 lg:items-start">
+          {/* ─── Configuration racks ─── */}
+          <div className="flex min-w-0 flex-col gap-5 lg:col-span-8">
+
+        {interviewMode === "general_dsa" && (
+          <SetupRack index={rackIndex.mode} label="Mode">
+            <DsaModePicker
+              value={dsaExperience}
+              onChange={handleDsaExperienceChange}
+              practiceStatus="Free"
+              practiceStatusTone="green"
+              practiceDetail="Solve solo and untimed with hints and code execution. Progress saves as you go and no interview credit is spent."
+              aiStatus={aiModeStatus}
+              aiStatusTone={aiModeStatusTone}
+              aiDetail={aiModeDetail}
+            />
+          </SetupRack>
         )}
 
         {interviewMode === "targeted_loop" && (
@@ -1249,403 +1328,311 @@ function InterviewSetupInner() {
           </>
         )}
 
-        {interviewMode === "general_dsa" && (
-          <>
-        {!isPracticeMode && (
-        <SectionCard title="Interviewer Persona">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {INTERVIEWER_PERSONAS.map((persona) => {
-              const isLocked = isPreviewSession && persona.id !== DEFAULT_INTERVIEWER_PERSONA;
-              const isSelected = form.interviewerPersona === persona.id;
+        {interviewMode === "general_dsa" && !isPracticeMode && (
+          <SetupRack
+            index={rackIndex.interviewer}
+            label="Interviewer"
+            note="Each has its own voice and scoring emphasis"
+          >
+            <InterviewerPersonaPicker
+              personas={INTERVIEWER_PERSONAS}
+              value={form.interviewerPersona}
+              isPersonaLocked={(personaId) =>
+                isPreviewSession && personaId !== DEFAULT_INTERVIEWER_PERSONA
+              }
+              onSelect={(personaId) => {
+                if (isPreviewSession && personaId !== DEFAULT_INTERVIEWER_PERSONA) return;
+                personaTouchedRef.current = true;
+                setForm((prev) => ({ ...prev, interviewerPersona: personaId }));
+              }}
+            />
 
-              return (
-                <button
-                  key={persona.id}
-                  type="button"
-                  disabled={isLocked}
-                  onClick={() => {
-                    if (isLocked) return;
-                    personaTouchedRef.current = true;
-                    setForm((prev) => ({ ...prev, interviewerPersona: persona.id }));
-                  }}
-                  className={cn(
-                    "relative rounded-xl border px-4 py-4 text-left transition-all duration-150",
-                    isLocked && "cursor-not-allowed opacity-50",
-                    isSelected
-                      ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-                      : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
-                  )}
-                >
-                  {isLocked && (
-                    <Lock className="absolute right-3 top-3 h-3.5 w-3.5 text-brand-muted" />
-                  )}
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-brand-text">
-                        {persona.name}
-                      </p>
-                      <p className="text-xs text-brand-cyan">
-                        {persona.companyLabel}
-                      </p>
-                    </div>
-                    {isSelected && (
-                      <CheckCircle className="h-4 w-4 shrink-0 text-brand-cyan" />
-                    )}
-                  </div>
-                  <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-                    {persona.shortStyleSummary}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
+            <div className="mt-4 rounded-xl border border-brand-border bg-brand-surface px-4 py-3">
+              <SetupMonoLabel>
+                Calibration · {selectedPersona.name} · {selectedPersona.companyLabel}
+              </SetupMonoLabel>
+              <p className="mt-2 text-xs leading-relaxed text-brand-muted">
+                {selectedPersona.calibrationNotes}
+              </p>
+            </div>
 
-          <div className="mt-3 rounded-lg border border-brand-border bg-brand-surface px-4 py-3">
-            <p className="text-sm font-medium text-brand-text">
-              {selectedPersona.name} · {selectedPersona.companyLabel}
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-              {selectedPersona.calibrationNotes}
-            </p>
-          </div>
-
-          {isPreviewSession && (
-            <p className="mt-3 text-xs text-brand-amber">
-              Preview sessions are limited to Tia. Upgrade to unlock company-specific interviewer personas.
-            </p>
-          )}
-        </SectionCard>
+            {isPreviewSession && (
+              <p className="mt-3 text-xs text-brand-amber">
+                Preview sessions are limited to Tia. Upgrade to unlock company-specific interviewer personas.
+              </p>
+            )}
+          </SetupRack>
         )}
 
-        {/* 1 – Problem Selection */}
-        <SectionCard title="Problem Selection">
-          {/* Mode toggle */}
-          <div className="flex flex-col gap-3 sm:flex-row">
-            {/* Random option */}
-            <button
-              onClick={() => setProblemMode("random")}
-              className={cn(
-                "flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150 sm:flex-1 sm:items-center",
-                problemMode === "random"
-                  ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-                  : "border-brand-border hover:border-brand-subtle"
-              )}
-            >
-              <div
-                className={cn(
-                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
-                  problemMode === "random"
-                    ? "border-brand-cyan bg-brand-cyan"
-                    : "border-brand-border"
-                )}
-              >
-                {problemMode === "random" && (
-                  <div className="h-2 w-2 rounded-full bg-brand-deep" />
-                )}
-              </div>
-              <div className="flex min-w-0 flex-1 items-start gap-2 sm:items-center">
-                <Shuffle className="h-4 w-4 text-brand-cyan" />
-                <span className="text-sm font-medium text-brand-text">
-                  Random Problem
-                </span>
-              </div>
-              <span className="text-xs text-brand-muted sm:ml-auto sm:text-right">
-                Recommended
-              </span>
-            </button>
+        <SetupRack index={rackIndex.problem} label="Problem">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {interviewMode === "general_dsa" && (
+              <>
+                <SetupSegmentedControl<Difficulty>
+                  label="Difficulty"
+                  value={form.difficulty}
+                  className={cn(isSpecificSelected && "pointer-events-none opacity-40")}
+                  onChange={(value) => setForm((f) => ({ ...f, difficulty: value }))}
+                  options={DIFFICULTIES.map((d) => ({
+                    value: d.value,
+                    label: d.label,
+                    disabled: isSpecificSelected || (isPreviewSession && d.value !== "easy"),
+                    locked: isPreviewSession && d.value !== "easy",
+                    inactiveClassName: d.color,
+                    activeClassName: d.activeColor,
+                  }))}
+                />
 
-            {/* Specific option */}
-            <button
-              onClick={() => !isPreviewSession && setProblemMode("specific")}
-              disabled={isPreviewSession}
-              className={cn(
-                "flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left transition-all duration-150 sm:flex-1 sm:items-center",
-                isPreviewSession && "opacity-50 cursor-not-allowed",
-                problemMode === "specific"
-                  ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-                  : "border-brand-border hover:border-brand-subtle"
-              )}
-            >
-              <div
-                className={cn(
-                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
-                  problemMode === "specific"
-                    ? "border-brand-cyan bg-brand-cyan"
-                    : "border-brand-border"
-                )}
-              >
-                {problemMode === "specific" && (
-                  <div className="h-2 w-2 rounded-full bg-brand-deep" />
-                )}
-              </div>
-              <div className="flex min-w-0 flex-1 items-start gap-2 sm:items-center">
-                <BookOpen className="h-4 w-4 text-brand-cyan" />
-                <span className="text-sm font-medium text-brand-text">
-                  Choose Specific
-                </span>
-                {isPreviewSession && (
-                  <Lock className="h-3 w-3 text-brand-muted" />
-                )}
-              </div>
-            </button>
+                <SetupSelect<Category>
+                  id="dsa-setup-category"
+                  label="Category"
+                  value={form.category}
+                  options={CATEGORIES}
+                  disabled={isSpecificSelected}
+                  onChange={(value) => setForm((f) => ({ ...f, category: value }))}
+                />
+              </>
+            )}
+
+            <SetupSelect<Language>
+              id="dsa-setup-language"
+              label="Language"
+              value={form.language}
+              options={LANGUAGES}
+              onChange={(value) => setForm((f) => ({ ...f, language: value }))}
+            />
           </div>
 
-          {/* Random mode hint */}
-          {problemMode === "random" && (
-            <p className="mt-3 text-xs text-brand-muted">
-              {isPracticeMode
-                ? "A free-practice problem will be selected from the curated DSA set based on your filters below."
-                : "A problem will be selected based on your difficulty and category preferences below."}
-            </p>
-          )}
-
-          {/* Specific mode: search + list */}
-          {problemMode === "specific" && (
-            <div className="mt-4 space-y-3">
-              {/* Selected problem banner */}
-              {selectedProblem && (
-                <div className="flex items-center gap-3 rounded-lg border border-brand-cyan/40 bg-brand-cyan/5 px-4 py-2.5">
-                  <CheckCircle className="h-4 w-4 shrink-0 text-brand-cyan" />
-                  <span className="flex-1 text-sm font-medium text-brand-text">
-                    {selectedProblem.title}
-                  </span>
-                  <DifficultyBadge difficulty={selectedProblem.difficulty} />
-                  <button
-                    onClick={() => setSelectedProblem(null)}
-                    className="ml-1 rounded p-0.5 text-brand-muted hover:text-brand-text"
-                    aria-label="Clear selection"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              )}
-
-              {/* Search input */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search problems by title…"
-                  className="w-full rounded-lg border border-brand-border bg-brand-surface py-2.5 pl-9 pr-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-text"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {/* Problems list */}
-              <div className="max-h-64 overflow-y-auto rounded-lg border border-brand-border">
-                {problemsLoading ? (
-                  <div className="flex items-center justify-center gap-2 py-8 text-sm text-brand-muted">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading problems…
-                  </div>
-                ) : problemsError ? (
-                  <div className="flex items-center gap-2 px-4 py-6 text-sm text-brand-rose">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
-                    {problemsError}
-                  </div>
-                ) : displayProblems.length === 0 ? (
-                  <div className="py-8 text-center text-sm text-brand-muted">
-                    {searchQuery
-                      ? `No problems match "${searchQuery}"`
-                      : "No problems found"}
-                  </div>
-                ) : (
-                  <ul className="divide-y divide-brand-border">
-                    {displayProblems.map((problem) => {
-                      const isSelected = selectedProblem?.slug === problem.slug;
-                      return (
-                        <li key={problem.slug}>
-                          <button
-                            onClick={() =>
-                              setSelectedProblem(isSelected ? null : problem)
-                            }
-                            className={cn(
-                              "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-100",
-                              isSelected
-                                ? "border-l-2 border-brand-cyan bg-brand-cyan/5"
-                                : "hover:bg-brand-surface"
-                            )}
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p
-                                className={cn(
-                                  "truncate text-sm font-medium",
-                                  isSelected
-                                    ? "text-brand-cyan"
-                                    : "text-brand-text"
-                                )}
-                              >
-                                {problem.title}
-                              </p>
-                            </div>
-                            <div className="flex shrink-0 items-center gap-2">
-                              <CategoryTag category={problem.category} />
-                              <DifficultyBadge difficulty={problem.difficulty} />
-                              {isSelected && (
-                                <CheckCircle className="h-4 w-4 text-brand-cyan" />
-                              )}
-                            </div>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-
-              {/* Prompt if none selected */}
-              {!selectedProblem && !problemsLoading && (
-                <p className="text-xs text-brand-muted">
-                  Click a problem above to select it for your {isPracticeMode ? "practice session" : "interview"}.
+          {interviewMode === "general_dsa" && (
+            <>
+              {isSpecificSelected && (
+                <p className="mt-3 text-xs text-brand-amber">
+                  Difficulty is locked to {selectedProblem?.difficulty} and category to{" "}
+                  {selectedProblem?.category} — determined by the selected problem.
                 </p>
               )}
-            </div>
-          )}
 
-          {isPracticeMode && problemMode === "random" && practiceRandomMatchesError ? (
-            <p className="mt-3 text-xs text-brand-rose">{practiceRandomMatchesError}</p>
-          ) : null}
+              {isPreviewSession && !isSpecificSelected && (
+                <p className="mt-3 text-xs text-brand-amber">
+                  Audio preview is limited to easy problems. Buy a pack to unlock medium and hard.
+                </p>
+              )}
 
-          {isPracticeMode && problemMode === "random" && !practiceRandomMatchesLoading && practiceRandomMatches.length === 0 ? (
-            <p className="mt-3 text-xs text-brand-amber">
-              No free-practice problems match these filters right now. Adjust difficulty or category to continue.
-            </p>
-          ) : null}
-        </SectionCard>
-
-        {/* 2 – Difficulty */}
-        <SectionCard title="Difficulty">
-          <div className={cn("flex gap-3", isSpecificSelected && "opacity-40 pointer-events-none")}>
-            {DIFFICULTIES.map((d) => {
-              const lockedByTrial = isPreviewSession && d.value !== "easy";
-              return (
-                <button
-                  key={d.value}
-                  disabled={isSpecificSelected || lockedByTrial}
-                  onClick={() => !lockedByTrial && setForm((f) => ({ ...f, difficulty: d.value }))}
-                  className={cn(
-                    "relative flex-1 rounded-lg border px-4 py-3 text-sm font-semibold transition-all duration-150",
-                    lockedByTrial && "opacity-40 cursor-not-allowed",
-                    form.difficulty === d.value ? d.activeColor : d.color
-                  )}
-                >
-                  {d.label}
-                  {lockedByTrial && (
-                    <Lock className="absolute top-1.5 right-1.5 h-3 w-3 text-brand-muted" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          {isSpecificSelected && (
-            <p className="mt-2 text-xs text-brand-amber">
-              Locked to {selectedProblem?.difficulty} — determined by the selected problem.
-            </p>
-          )}
-          {isPreviewSession && !isSpecificSelected && (
-            <p className="mt-2 text-xs text-brand-amber">
-              Audio preview is limited to easy problems. Buy a pack to unlock medium and hard.
-            </p>
-          )}
-        </SectionCard>
-
-        {/* 3 – Category */}
-        <SectionCard title="Topic Category">
-          <div className={cn("flex flex-wrap gap-2", isSpecificSelected && "opacity-40 pointer-events-none")}>
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.value}
-                disabled={isSpecificSelected}
-                onClick={() => setForm((f) => ({ ...f, category: c.value }))}
-                className={cn(
-                  "rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-150",
-                  form.category === c.value
-                    ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan"
-                    : "border-brand-border text-brand-muted hover:border-brand-subtle hover:text-brand-text"
-                )}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-          {isSpecificSelected && (
-            <p className="mt-2 text-xs text-brand-amber">
-              Locked to {selectedProblem?.category} — determined by the selected problem.
-            </p>
-          )}
-        </SectionCard>
-          </>
-        )}
-
-        {/* 4 – Language */}
-        <SectionCard title="Coding Language">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {LANGUAGES.map((lang) => (
-              <button
-                key={lang.value}
-                onClick={() => setForm((f) => ({ ...f, language: lang.value }))}
-                className={cn(
-                  "flex flex-col items-center gap-1.5 rounded-lg border px-3 py-4 text-sm font-medium transition-all duration-150",
-                  form.language === lang.value
-                    ? "border-brand-cyan bg-brand-cyan/5 text-brand-cyan ring-1 ring-brand-cyan/30"
-                    : "border-brand-border text-brand-muted hover:border-brand-subtle hover:text-brand-text"
-                )}
-              >
-                <span className="font-mono text-xs text-brand-muted">
-                  {lang.ext}
-                </span>
-                <span>{lang.label}</span>
-              </button>
-            ))}
-          </div>
-        </SectionCard>
-
-        {/* 5 – Duration */}
-        {interviewMode === "general_dsa" && !isPracticeMode && (
-        <SectionCard title="Session Duration">
-          {isPreviewSession ? (
-            <>
-              <div className="flex gap-3">
-                <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-brand-cyan px-4 py-3 text-sm font-semibold">
-                  <Clock className="h-4 w-4" />
-                  <span>{FREE_TRIAL_DURATION_MINUTES} min</span>
+              {/* Chosen problem */}
+              {problemMode === "random" ? (
+                <div className="mt-4">
+                  <div className="flex flex-col gap-3 rounded-xl border border-brand-cyan/40 bg-brand-cyan/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <Shuffle className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-brand-text">
+                          Random problem
+                        </p>
+                        <p className="mt-1">
+                          <SetupMonoLabel>
+                            {form.difficulty} · {selectedCategoryLabel} · Recommended
+                          </SetupMonoLabel>
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => !isPreviewSession && setProblemMode("specific")}
+                      disabled={isPreviewSession}
+                      className={cn(
+                        "inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-lg border border-brand-border bg-brand-card px-3 text-xs font-medium text-brand-text transition-colors duration-150",
+                        isPreviewSession
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:border-brand-subtle",
+                        SETUP_FOCUS_RING
+                      )}
+                    >
+                      <BookOpen className="h-3.5 w-3.5" />
+                      Pick a specific problem
+                      {isPreviewSession && (
+                        <Lock className="h-3 w-3 text-brand-muted" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-brand-muted">
+                    {isPracticeMode
+                      ? "A free-practice problem will be selected from the curated DSA set based on your filters above."
+                      : "A problem will be selected based on your difficulty and category preferences above."}
+                  </p>
                 </div>
-              </div>
-              <p className="mt-3 text-xs text-brand-amber">
-                Audio preview sessions are capped at {FREE_TRIAL_DURATION_MINUTES} minutes. Upgrade for full {FULL_INTERVIEW_DURATION_MINUTES}-minute interviews.
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="flex gap-3">
-                <div className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-brand-cyan px-4 py-3 text-sm font-semibold">
-                  <Clock className="h-4 w-4" />
-                  <span>{FULL_INTERVIEW_DURATION_MINUTES} min</span>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {selectedProblem ? (
+                    <div className="flex flex-col gap-3 rounded-xl border border-brand-cyan/40 bg-brand-cyan/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-brand-text">
+                            {selectedProblem.title}
+                          </p>
+                          <p className="mt-1">
+                            <SetupMonoLabel>
+                              {selectedProblem.difficulty} ·{" "}
+                              {categoryLabel(selectedProblem.category)}
+                            </SetupMonoLabel>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedProblem(null)}
+                          className={cn(
+                            "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-brand-border bg-brand-card px-3 text-xs font-medium text-brand-text transition-colors duration-150 hover:border-brand-subtle",
+                            SETUP_FOCUS_RING
+                          )}
+                        >
+                          <Search className="h-3.5 w-3.5" />
+                          Pick another
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setProblemMode("random")}
+                          className={cn(
+                            "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-3 text-xs font-medium text-brand-muted transition-colors duration-150 hover:text-brand-text",
+                            SETUP_FOCUS_RING
+                          )}
+                        >
+                          <Shuffle className="h-3.5 w-3.5" />
+                          Use a random problem
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div hidden={selectedProblem !== null} className="space-y-3">
+                    {/* Search input */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search problems by title…"
+                        className="w-full rounded-lg border border-brand-border bg-brand-surface py-2.5 pl-9 pr-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-text"
+                          aria-label="Clear search"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Problems list */}
+                    <div className="max-h-64 overflow-y-auto rounded-lg border border-brand-border">
+                      {problemsLoading ? (
+                        <div className="flex items-center justify-center gap-2 py-8 text-sm text-brand-muted">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Loading problems…
+                        </div>
+                      ) : problemsError ? (
+                        <div className="flex items-center gap-2 px-4 py-6 text-sm text-brand-rose">
+                          <AlertCircle className="h-4 w-4 shrink-0" />
+                          {problemsError}
+                        </div>
+                      ) : displayProblems.length === 0 ? (
+                        <div className="py-8 text-center text-sm text-brand-muted">
+                          {searchQuery
+                            ? `No problems match "${searchQuery}"`
+                            : "No problems found"}
+                        </div>
+                      ) : (
+                        <ul className="divide-y divide-brand-border">
+                          {displayProblems.map((problem) => {
+                            const isSelected = selectedProblem?.slug === problem.slug;
+                            return (
+                              <li key={problem.slug}>
+                                <button
+                                  onClick={() =>
+                                    setSelectedProblem(isSelected ? null : problem)
+                                  }
+                                  className={cn(
+                                    "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-100",
+                                    isSelected
+                                      ? "border-l-2 border-brand-cyan bg-brand-cyan/5"
+                                      : "hover:bg-brand-surface"
+                                  )}
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <p
+                                      className={cn(
+                                        "truncate text-sm font-medium",
+                                        isSelected
+                                          ? "text-brand-cyan"
+                                          : "text-brand-text"
+                                      )}
+                                    >
+                                      {problem.title}
+                                    </p>
+                                  </div>
+                                  <div className="flex shrink-0 items-center gap-2">
+                                    <CategoryTag category={problem.category} />
+                                    <DifficultyBadge difficulty={problem.difficulty} />
+                                    {isSelected && (
+                                      <CheckCircle className="h-4 w-4 text-brand-cyan" />
+                                    )}
+                                  </div>
+                                </button>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+
+                    {/* Prompt if none selected */}
+                    {!selectedProblem && !problemsLoading && (
+                      <p className="text-xs text-brand-muted">
+                        Click a problem above to select it for your {isPracticeMode ? "practice session" : "interview"}.
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setProblemMode("random")}
+                      className={cn(
+                        "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-3 text-xs font-medium text-brand-muted transition-colors duration-150 hover:text-brand-text",
+                        SETUP_FOCUS_RING
+                      )}
+                    >
+                      <Shuffle className="h-3.5 w-3.5" />
+                      Use a random problem instead
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <p className="mt-3 text-xs text-brand-muted">
-              Each interview credit unlocks one full {FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.
-              </p>
+              )}
+
+              {isPracticeMode && problemMode === "random" && practiceRandomMatchesError ? (
+                <p className="mt-3 text-xs text-brand-rose">{practiceRandomMatchesError}</p>
+              ) : null}
+
+              {isPracticeMode && problemMode === "random" && !practiceRandomMatchesLoading && practiceRandomMatches.length === 0 ? (
+                <p className="mt-3 text-xs text-brand-amber">
+                  No free-practice problems match these filters right now. Adjust difficulty or category to continue.
+                </p>
+              ) : null}
             </>
           )}
-        </SectionCard>
-        )}
 
-        {/* 6 – Mic Check */}
+          <p className="mt-4 text-xs leading-relaxed text-brand-muted">
+            Python and JavaScript execute against real tests in the round. Java and
+            C++ are selectable, but execution is still landing.
+          </p>
+        </SetupRack>
+
+        {/* Microphone */}
         {!isPracticeMode && (
-        <SectionCard title="Microphone Check">
-          <div className="flex items-center justify-between">
+        <SetupRack index={rackIndex.microphone} label="Microphone">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <p className="text-sm text-brand-text">
                 Verify your microphone before starting
@@ -1659,7 +1646,7 @@ function InterviewSetupInner() {
               onClick={handleMicCheck}
               disabled={micStatus === "checking"}
               className={cn(
-                "flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-150",
+                "flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-150",
                 micStatus === "granted"
                   ? "border-brand-green/40 bg-brand-green/10 text-brand-green"
                   : micStatus === "denied"
@@ -1728,88 +1715,123 @@ function InterviewSetupInner() {
               {deviceWarning ? <p className="text-xs text-brand-amber">{deviceWarning}</p> : null}
             </div>
           )}
-        </SectionCard>
+        </SetupRack>
         )}
 
-        {/* Error */}
-        {createError && (
-          <div className="flex items-start gap-3 rounded-lg border border-brand-rose/30 bg-brand-rose/5 px-4 py-3">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
-            <p className="text-sm text-brand-rose">{createError}</p>
           </div>
-        )}
-        {loopError && (
-          <div className="flex items-start gap-3 rounded-lg border border-brand-rose/30 bg-brand-rose/5 px-4 py-3">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
-            <p className="text-sm text-brand-rose">{loopError}</p>
-          </div>
-        )}
 
-        {/* CTA */}
-        {interviewMode === "general_dsa" ? (
-          <div className="pt-2 pb-10">
-            {isPracticeMode ? (
-              <Button
-                size="lg"
-                onClick={handleStartPractice}
-                disabled={
-                  isCreating ||
-                  (problemMode === "specific" && !selectedProblem) ||
-                  (problemMode === "random" && practiceRandomMatches.length === 0)
-                }
-                className="w-full gap-2 text-base font-semibold"
-              >
-                Start Practicing
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-            ) : isAiModeLocked ? (
-              <Button asChild size="lg" className="w-full gap-2 text-base font-semibold">
-                <Link href="/settings">
-                  Unlock AI Interview
-                  <ChevronRight className="h-5 w-5" />
-                </Link>
-              </Button>
-            ) : (
-              <Button
-                size="lg"
-                onClick={handleStartInterview}
-                disabled={isCreating || (problemMode === "specific" && !selectedProblem)}
-                className="w-full gap-2 text-base font-semibold"
-              >
-                {isCreating ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Setting up your interview…
-                  </>
-                ) : (
-                  <>
-                    {isPreviewSession ? "Start 5-Minute Audio Interview" : "Start AI Interview"}
-                    <ChevronRight className="h-5 w-5" />
-                  </>
-                )}
-              </Button>
-            )}
-            {problemMode === "specific" && !selectedProblem && (
-              <p className="mt-2 text-center text-xs text-brand-amber">
-                Select a problem above to continue.
-              </p>
-            )}
-            {isPracticeMode && problemMode === "random" && practiceRandomMatches.length === 0 && !practiceRandomMatchesLoading ? (
-              <p className="mt-2 text-center text-xs text-brand-amber">
-                Adjust your filters to find at least one free-practice problem.
-              </p>
-            ) : null}
-            <p className="mt-3 text-center text-xs text-brand-muted">
-              {isPracticeMode
-                ? "Practice Mode saves your progress as you code so you can resume later."
-                : <>By starting, you agree to live microphone processing by our voice provider. TechInView stores transcripts, code, timing, scores, and results—not raw microphone audio. See our <Link href="/privacy" className="text-brand-cyan hover:underline">Privacy Policy</Link>.</>}
-            </p>
+          {/* ─── Summary rail ─── */}
+          <div className="lg:col-span-4">
+            <div className="flex flex-col gap-5 lg:sticky lg:top-8">
+              {!isPracticeMode && <InterviewerVoiceCard persona={activePersona} />}
+
+              <SessionFactsCard title="This session" facts={sessionFacts} />
+
+              {interviewMode === "general_dsa" && !isPracticeMode && (
+                <p
+                  className={cn(
+                    "text-xs leading-relaxed",
+                    isPreviewSession ? "text-brand-amber" : "text-brand-muted"
+                  )}
+                >
+                  {isPreviewSession
+                    ? `Audio preview sessions are capped at ${FREE_TRIAL_DURATION_MINUTES} minutes. Upgrade for full ${FULL_INTERVIEW_DURATION_MINUTES}-minute interviews.`
+                    : `Each interview credit unlocks one full ${FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.`}
+                </p>
+              )}
+
+              {/* Error */}
+              {createError && (
+                <div className="flex items-start gap-3 rounded-lg border border-brand-rose/30 bg-brand-rose/5 px-4 py-3">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
+                  <p className="text-sm text-brand-rose">{createError}</p>
+                </div>
+              )}
+              {loopError && (
+                <div className="flex items-start gap-3 rounded-lg border border-brand-rose/30 bg-brand-rose/5 px-4 py-3">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
+                  <p className="text-sm text-brand-rose">{loopError}</p>
+                </div>
+              )}
+
+              {/* CTA */}
+              {interviewMode === "general_dsa" ? (
+                <div className="flex flex-col gap-3">
+                  {isPracticeMode ? (
+                    <Button
+                      size="lg"
+                      onClick={handleStartPractice}
+                      disabled={
+                        isCreating ||
+                        (problemMode === "specific" && !selectedProblem) ||
+                        (problemMode === "random" && practiceRandomMatches.length === 0)
+                      }
+                      className="w-full gap-2 text-base font-semibold"
+                    >
+                      Start Practicing
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  ) : isAiModeLocked ? (
+                    <Button asChild size="lg" className="w-full gap-2 text-base font-semibold">
+                      <Link href="/settings">
+                        Unlock AI Interview
+                        <ChevronRight className="h-5 w-5" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      onClick={handleStartInterview}
+                      disabled={isCreating || (problemMode === "specific" && !selectedProblem)}
+                      className="w-full gap-2 text-base font-semibold"
+                    >
+                      {isCreating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Setting up your interview…
+                        </>
+                      ) : (
+                        <>
+                          {isPreviewSession ? "Start 5-Minute Audio Interview" : "Start AI Interview"}
+                          <ChevronRight className="h-5 w-5" />
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  {isAiInterviewMode && (
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      onClick={() => handleDsaExperienceChange("practice")}
+                      className="w-full gap-2 text-sm font-medium"
+                    >
+                      <Code2 className="h-4 w-4" />
+                      Practice this free instead
+                    </Button>
+                  )}
+                  {problemMode === "specific" && !selectedProblem && (
+                    <p className="text-center text-xs text-brand-amber">
+                      Select a problem above to continue.
+                    </p>
+                  )}
+                  {isPracticeMode && problemMode === "random" && practiceRandomMatches.length === 0 && !practiceRandomMatchesLoading ? (
+                    <p className="text-center text-xs text-brand-amber">
+                      Adjust your filters to find at least one free-practice problem.
+                    </p>
+                  ) : null}
+                  <p className="text-center text-xs text-brand-muted">
+                    {isPracticeMode
+                      ? "Practice Mode saves your progress as you code so you can resume later."
+                      : <>By starting, you agree to live microphone processing by our voice provider. TechInView stores transcripts, code, timing, scores, and results—not raw microphone audio. See our <Link href="/privacy" className="text-brand-cyan hover:underline">Privacy Policy</Link>.</>}
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-brand-border bg-brand-card px-5 py-4 text-sm text-brand-muted">
+                  Generate a targeted loop above, then launch any round directly from the loop cards. The generated rounds will use {activePersona.name} as the interviewer calibration by default.
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="rounded-xl border border-brand-border bg-brand-card px-5 py-4 text-sm text-brand-muted">
-            Generate a targeted loop above, then launch any round directly from the loop cards. The generated rounds will use {activePersona.name} as the interviewer calibration by default.
-          </div>
-        )}
         </div>
       </main>
     </div>
