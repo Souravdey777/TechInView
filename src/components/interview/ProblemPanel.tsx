@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ProblemProse, renderConstraint } from "./ProblemProse";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,31 +50,32 @@ function ExampleBlock({
   index: number;
 }) {
   return (
-    <div className="rounded-lg border border-brand-border bg-brand-surface overflow-hidden">
-      <div className="border-b border-brand-border px-3 py-1.5">
-        <span className="text-xs font-medium text-brand-muted">
+    <div className="overflow-hidden rounded-lg border border-brand-border bg-brand-surface">
+      <div className="border-b border-brand-border bg-brand-card px-3 py-1.5">
+        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-brand-muted">
           Example {index + 1}
         </span>
       </div>
-      <div className="space-y-2 px-3 py-2.5">
-        <div>
-          <span className="text-xs font-semibold text-brand-muted">Input</span>
-          <pre className="mt-0.5 font-mono text-xs text-brand-text leading-relaxed whitespace-pre-wrap break-all">
+      <div className="space-y-2.5 px-3 py-3">
+        <div className="grid grid-cols-[52px_minmax(0,1fr)] items-baseline gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-brand-subtle">
+            Input
+          </span>
+          <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-brand-text">
             {example.input}
           </pre>
         </div>
-        <div>
-          <span className="text-xs font-semibold text-brand-muted">Output</span>
-          <pre className="mt-0.5 font-mono text-xs text-brand-cyan leading-relaxed whitespace-pre-wrap break-all">
+        <div className="grid grid-cols-[52px_minmax(0,1fr)] items-baseline gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-brand-subtle">
+            Output
+          </span>
+          <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-brand-green">
             {example.output}
           </pre>
         </div>
         {example.explanation && (
-          <div>
-            <span className="text-xs font-semibold text-brand-muted">
-              Explanation
-            </span>
-            <p className="mt-0.5 text-xs text-brand-muted leading-relaxed">
+          <div className="border-t border-brand-border pt-2.5">
+            <p className="text-xs leading-relaxed text-brand-muted [text-wrap:pretty]">
               {example.explanation}
             </p>
           </div>
@@ -171,16 +173,12 @@ export function ProblemPanel({ problem, showHints = true }: ProblemPanelProps) {
       </div>
 
       {/* Description */}
-      <div>
-        <p className="text-sm text-brand-text leading-relaxed whitespace-pre-wrap">
-          {problem.description}
-        </p>
-      </div>
+      <ProblemProse description={problem.description} />
 
       {/* Examples */}
       {problem.examples.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
+          <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-brand-muted">
             Examples
           </h3>
           {problem.examples.map((ex, i) => (
@@ -192,15 +190,15 @@ export function ProblemPanel({ problem, showHints = true }: ProblemPanelProps) {
       {/* Constraints */}
       {problem.constraints.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
+          <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-brand-muted">
             Constraints
           </h3>
-          <ul className="space-y-1">
+          <ul className="space-y-1.5 rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5">
             {problem.constraints.map((c, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand-cyan" />
-                <span className="font-mono text-xs text-brand-muted leading-relaxed">
-                  {c}
+              <li key={i} className="flex items-start gap-2.5">
+                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-cyan" />
+                <span className="font-mono text-xs leading-relaxed text-brand-muted">
+                  {renderConstraint(c, `con-${i}`)}
                 </span>
               </li>
             ))}
