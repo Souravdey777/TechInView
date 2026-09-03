@@ -24,6 +24,8 @@ type VoicePanelProps = {
   deviceWarning?: string | null;
   isSendingText?: boolean;
   textError?: string | null;
+  /** Off when the transcript panel owns the composer (see TranscriptChat). */
+  showTextFallback?: boolean;
   onToggleMic: () => void;
   onDeviceChange?: (deviceId: string) => void;
   onReconnect?: () => void;
@@ -77,6 +79,7 @@ export function VoicePanel({
   deviceWarning,
   isSendingText = false,
   textError,
+  showTextFallback = true,
   onToggleMic,
   onDeviceChange,
   onReconnect,
@@ -249,54 +252,56 @@ export function VoicePanel({
         </div>
       </div>
 
-      <div className={cn("border-t border-brand-border", isCenterStage ? "pt-4" : "mt-1 pt-2")}>
-        <button
-          onClick={() => {
-            setTextOpen((current) => !current);
-            if (!textOpen) {
-              setTimeout(() => textareaRef.current?.focus(), 50);
-            }
-          }}
-          className="flex w-full items-center justify-between px-1 text-xs text-brand-muted transition-colors hover:text-brand-text"
-        >
-          <span>Type instead of speaking</span>
-          {textOpen ? (
-            <ChevronUp className="h-3.5 w-3.5" />
-          ) : (
-            <ChevronDown className="h-3.5 w-3.5" />
-          )}
-        </button>
+      {showTextFallback ? (
+        <div className={cn("border-t border-brand-border", isCenterStage ? "pt-4" : "mt-1 pt-2")}>
+          <button
+            onClick={() => {
+              setTextOpen((current) => !current);
+              if (!textOpen) {
+                setTimeout(() => textareaRef.current?.focus(), 50);
+              }
+            }}
+            className="flex w-full items-center justify-between px-1 text-xs text-brand-muted transition-colors hover:text-brand-text"
+          >
+            <span>Type instead of speaking</span>
+            {textOpen ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+          </button>
 
-        {textOpen ? (
-          <div className="mt-2 flex flex-col gap-2">
-            <textarea
-              ref={textareaRef}
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your response... (Enter to send)"
-              rows={isCenterStage ? 4 : 3}
-              className="w-full resize-none rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5 text-sm text-brand-text placeholder:text-brand-muted/60 focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
-            />
-            <button
-              onClick={() => void handleSend()}
-              disabled={!draft.trim() || isSendingText}
-              className={cn(
-                "flex items-center justify-center gap-2 self-end rounded-lg px-4 py-2 text-xs font-medium transition-colors",
-                draft.trim() && !isSendingText
-                  ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90"
-                  : "cursor-not-allowed bg-brand-border/30 text-brand-muted"
-              )}
-            >
-              <Send className="h-3.5 w-3.5" />
-              {isSendingText ? "Sending..." : "Send"}
-            </button>
-            {textError ? (
-              <p className="text-[11px] leading-relaxed text-brand-rose">{textError}</p>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+          {textOpen ? (
+            <div className="mt-2 flex flex-col gap-2">
+              <textarea
+                ref={textareaRef}
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your response... (Enter to send)"
+                rows={isCenterStage ? 4 : 3}
+                className="w-full resize-none rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5 text-sm text-brand-text placeholder:text-brand-muted/60 focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+              />
+              <button
+                onClick={() => void handleSend()}
+                disabled={!draft.trim() || isSendingText}
+                className={cn(
+                  "flex items-center justify-center gap-2 self-end rounded-lg px-4 py-2 text-xs font-medium transition-colors",
+                  draft.trim() && !isSendingText
+                    ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90"
+                    : "cursor-not-allowed bg-brand-border/30 text-brand-muted"
+                )}
+              >
+                <Send className="h-3.5 w-3.5" />
+                {isSendingText ? "Sending..." : "Send"}
+              </button>
+              {textError ? (
+                <p className="text-[11px] leading-relaxed text-brand-rose">{textError}</p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

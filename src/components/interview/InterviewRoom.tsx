@@ -7,6 +7,7 @@ import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { VoicePanel } from "./VoicePanel";
+import { TranscriptChat } from "./TranscriptChat";
 import { CodeEditor } from "./CodeEditor";
 import { ProblemPanel } from "./ProblemPanel";
 import { RoundBriefPanel } from "./RoundBriefPanel";
@@ -16,8 +17,6 @@ import { Timer } from "./Timer";
 import { InterviewControls } from "./InterviewControls";
 import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { VoiceLatencyHud } from "./VoiceLatencyHud";
-import { PhaseTransport } from "./PhaseTransport";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   useDeepgramVoiceAgent,
   type DeepgramVoiceAgentSettings,
@@ -31,6 +30,7 @@ import {
   phaseFromElapsedFraction,
   clampPhaseToTimeFloor,
   parseInterviewPhase,
+  resolveAgentPhase,
 } from "@/lib/interview-phases";
 import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
 import { getLiveInterviewModel } from "@/lib/ai/models";
@@ -329,9 +329,9 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const pct = Math.min(1, Math.max(0, elapsed / maxDuration));
       const timePhase = phaseFromElapsedFraction(pct);
-      const clamped = clampPhaseToTimeFloor(aiPhase, timePhase);
-      setCurrentPhase(clamped);
-      setRoomPhaseInStore(clamped);
+      const next = resolveAgentPhase(currentPhaseRef.current, aiPhase, timePhase);
+      setCurrentPhase(next);
+      setRoomPhaseInStore(next);
     },
     [maxDuration, setRoomPhaseInStore],
   );
@@ -1152,56 +1152,18 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-brand-deep overflow-hidden">
-      {/* ── Transport bar ── */}
+      {/* ── Top bar ── */}
       <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-brand-border bg-brand-card px-4">
-        {/* Identity + live state */}
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex min-w-0 shrink items-center gap-3">
           <BrandLogo size="sm" wordmarkClassName="text-sm" />
-          <span className="h-4 w-px bg-brand-border" aria-hidden />
-          <span
-            className={cn(
-              "flex items-center gap-2 rounded-full border px-2.5 py-1",
-              isAgentConnected
-                ? "border-brand-cyan/35 bg-brand-cyan/[0.09]"
-                : "border-brand-border"
-            )}
-          >
-            <span
-              className={cn(
-                "h-1.5 w-1.5 shrink-0 rounded-full",
-                isAgentConnected
-                  ? "bg-brand-cyan shadow-sm shadow-brand-cyan/60"
-                  : "bg-brand-subtle"
-              )}
-              aria-hidden
-            />
-            <span
-              className={cn(
-                "font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
-                isAgentConnected ? "text-brand-cyan" : "text-brand-muted"
-              )}
-            >
-              {isAgentConnected ? "On air" : isConnectingVoice ? "Connecting" : "Offline"}
-            </span>
-          </span>
-          <span className="hidden shrink-0 items-center gap-2 lg:flex">
-            <span className="font-mono text-xs text-brand-muted">
-              {isCodingRound && activeProblem
-                ? activeProblem.title
-                : ROUND_TYPE_LABELS[roundType] ?? "Interview"}
-            </span>
-            {isCodingRound && activeProblem ? (
-              <span className="rounded border border-brand-border px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-brand-muted">
-                {activeProblem.difficulty}
-              </span>
-            ) : null}
+          <span className="h-4 w-px shrink-0 bg-brand-border" aria-hidden />
+          <span className="truncate text-xs text-brand-muted">
+            {isCodingRound && activeProblem
+              ? activeProblem.title
+              : ROUND_TYPE_LABELS[roundType] ?? "Interview"}
           </span>
         </div>
 
-        {/* Phase — coding rounds walk the nine-step arc; other rounds do not */}
-        {isCodingRound ? <PhaseTransport currentPhase={currentPhase} /> : <div />}
-
-        {/* Clock */}
         <div className="flex shrink-0 items-center gap-3">
           <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
           <span className="hidden font-mono text-[10px] text-brand-subtle 2xl:inline">
@@ -1218,45 +1180,18 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           style={{ width: `${panelWidth}px` }}
         >
 
-          {/* Problem / Transcript tabs */}
-          <div className="flex flex-1 flex-col overflow-hidden px-4 pt-3">
-            <Tabs defaultValue="problem" className="flex flex-1 flex-col overflow-hidden">
-              <TabsList className="w-full">
-                <TabsTrigger value="problem" className="flex-1 text-xs">
-                  {isCodingRound ? "Problem" : "Round Brief"}
-                </TabsTrigger>
-                <TabsTrigger value="transcript" className="flex-1 text-xs">
-                  Transcript
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent
-                value="problem"
-                className="flex-1 overflow-hidden mt-0"
-              >
-                {isCodingRound && activeProblem ? (
-                  <ProblemPanel problem={{ ...activeProblem, difficulty: activeProblem.difficulty as "easy" | "medium" | "hard" }} />
-                ) : activeRound ? (
-                  <RoundBriefPanel
-                    round={activeRound}
-                    company={storeConfig?.company}
-                    roleTitle={storeConfig?.roleTitle}
-                    loopName={storeConfig?.loopName}
-                  />
-                ) : null}
-              </TabsContent>
-
-              <TabsContent
-                value="transcript"
-                className="flex-1 overflow-y-auto mt-2"
-              >
-                <TranscriptPanel
-                  messages={chatMessages}
-                  interviewerName={interviewer.name}
-                  isThinking={voiceState === "thinking"}
-                />
-              </TabsContent>
-            </Tabs>
+          {/* Problem / round brief */}
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {isCodingRound && activeProblem ? (
+              <ProblemPanel problem={{ ...activeProblem, difficulty: activeProblem.difficulty as "easy" | "medium" | "hard" }} />
+            ) : activeRound ? (
+              <RoundBriefPanel
+                round={activeRound}
+                company={storeConfig?.company}
+                roleTitle={storeConfig?.roleTitle}
+                loopName={storeConfig?.loopName}
+              />
+            ) : null}
           </div>
         </aside>
 
@@ -1307,25 +1242,35 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           ) : null}
         </main>
 
-        {/* ── Voice channel ── */}
-        <aside className="flex w-[300px] shrink-0 flex-col overflow-y-auto border-l border-brand-border bg-brand-surface xl:w-[336px]">
-          <VoicePanel
-            voiceState={voiceState}
-            currentPhase={currentPhase}
-            roundType={roundType}
+        {/* ── Voice channel + transcript ── */}
+        <aside className="flex w-[300px] shrink-0 flex-col overflow-hidden border-l border-brand-border bg-brand-surface xl:w-[336px]">
+          <div className="shrink-0">
+            <VoicePanel
+              voiceState={voiceState}
+              currentPhase={currentPhase}
+              roundType={roundType}
+              interviewerName={interviewer.name}
+              isMicEnabled={isMicEnabled}
+              isVoiceConnected={isAgentConnected}
+              isReconnecting={isConnectingVoice}
+              errorMessage={voiceError}
+              microphoneDevices={microphoneDevices}
+              selectedDeviceId={selectedDeviceId}
+              deviceWarning={deviceWarning}
+              showTextFallback={false}
+              onToggleMic={handleToggleMic}
+              onDeviceChange={setSelectedDeviceId}
+              onReconnect={resumeInterview}
+              onSendText={handleSendText}
+            />
+          </div>
+
+          <TranscriptChat
+            messages={chatMessages}
             interviewerName={interviewer.name}
-            isMicEnabled={isMicEnabled}
-            isVoiceConnected={isAgentConnected}
-            isReconnecting={isConnectingVoice}
-            errorMessage={voiceError}
-            microphoneDevices={microphoneDevices}
-            selectedDeviceId={selectedDeviceId}
-            deviceWarning={deviceWarning}
+            isThinking={voiceState === "thinking"}
             isSendingText={isSendingText}
             textError={textError}
-            onToggleMic={handleToggleMic}
-            onDeviceChange={setSelectedDeviceId}
-            onReconnect={resumeInterview}
             onSendText={handleSendText}
           />
         </aside>
@@ -1342,88 +1287,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       />
 
       {showLatency && <VoiceLatencyHud stats={agent.latencyStats} />}
-    </div>
-  );
-}
-
-// ─── Transcript panel ─────────────────────────────────────────────────────────
-
-function TranscriptPanel({
-  messages,
-  interviewerName,
-  isThinking,
-}: {
-  messages: ChatMessage[];
-  interviewerName: string;
-  isThinking: boolean;
-}) {
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const interviewerInitial = interviewerName.charAt(0).toUpperCase() || "A";
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isThinking]);
-
-  if (messages.length === 0 && !isThinking) {
-    return (
-      <p className="text-center text-[10px] text-brand-muted pt-8">
-        {interviewerName} will start the conversation shortly...
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-3 pb-4">
-      {messages.map((msg) => (
-        <div
-          key={msg.id}
-          className={cn(
-            "flex gap-2",
-            msg.role === "candidate" ? "flex-row-reverse" : "flex-row"
-          )}
-        >
-          <div
-            className={cn(
-              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-              msg.role === "interviewer"
-                ? "bg-brand-cyan/20 text-brand-cyan"
-                : "bg-brand-green/20 text-brand-green"
-            )}
-          >
-            {msg.role === "interviewer" ? interviewerInitial : "Y"}
-          </div>
-          <div
-            className={cn(
-              "max-w-[80%] rounded-xl px-3 py-2",
-              msg.role === "interviewer"
-                ? "rounded-tl-none bg-brand-card border border-brand-border"
-                : "rounded-tr-none bg-brand-cyan/10 border border-brand-cyan/20"
-            )}
-          >
-            <p className="text-xs leading-relaxed text-brand-text">
-              {msg.content}
-            </p>
-            <span className="mt-1 block text-[10px] text-brand-muted">
-              {msg.time}
-            </span>
-          </div>
-        </div>
-      ))}
-      {isThinking && (
-        <div className="flex gap-2">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold bg-brand-cyan/20 text-brand-cyan">
-            {interviewerInitial}
-          </div>
-          <div className="rounded-xl rounded-tl-none bg-brand-card border border-brand-border px-3 py-2">
-            <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 bg-brand-amber rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 bg-brand-amber rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 bg-brand-amber rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-            </div>
-          </div>
-        </div>
-      )}
-      <div ref={bottomRef} />
     </div>
   );
 }
