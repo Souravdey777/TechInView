@@ -69,6 +69,7 @@ const config: Config = {
         sans: ["Sora", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
         heading: ["Sora", "system-ui", "sans-serif"],
+        handwriting: ["var(--font-handwriting)", "Bradley Hand", "cursive"],
       },
       keyframes: {
         "pulse-ring": {

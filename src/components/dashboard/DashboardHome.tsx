@@ -19,6 +19,7 @@ import type { DashboardSummary } from "@/lib/dashboard/home-metrics";
 import type { SessionLogRow } from "@/lib/dashboard/session-log";
 
 type DashboardHomeProps = {
+  displayName: string;
   credits: number;
   hasCredits: boolean;
   isFreeTrialUser: boolean;
@@ -28,6 +29,7 @@ type DashboardHomeProps = {
 };
 
 export function DashboardHome({
+  displayName,
   credits,
   hasCredits,
   isFreeTrialUser,
@@ -38,11 +40,10 @@ export function DashboardHome({
   const { plans, isLoaded, deletePlan } = usePrepPlans();
 
   const canStartRound = hasCredits || isFreeTrialUser;
+  const isPreviewRound = isFreeTrialUser && !hasCredits;
+  const firstName = displayName.trim().split(/\s+/)[0] || displayName;
   const primaryAction = canStartRound
-    ? {
-        href: "/interview/setup?dsaExperience=ai_interview",
-        label: isFreeTrialUser && !hasCredits ? "Start audio preview" : "Start round",
-      }
+    ? { href: "/interview/setup?dsaExperience=ai_interview", label: "AI Round" }
     : { href: "/settings#rounds", label: "Buy rounds" };
 
   return (
@@ -50,27 +51,34 @@ export function DashboardHome({
       {/* ─── Hero ─── */}
       <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
         <div className="min-w-0">
-          <MonoLabel>Studio</MonoLabel>
-          <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
-            {summary.headline}
+          <h1 className="font-handwriting pb-1 text-4xl font-semibold leading-[1.15] tracking-tight text-brand-text sm:text-5xl">
+            Hi {firstName},
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-brand-muted">
+            <span className="text-brand-text">{summary.headline}</span>{" "}
             {summary.insight}
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <Button asChild size="lg" className="gap-2 text-base font-semibold">
-            <Link href={primaryAction.href}>
-              {primaryAction.label}
-              <ChevronRight className="h-5 w-5" />
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="secondary" className="gap-2">
-            <Link href="/interview/setup?dsaExperience=practice">
-              Practice free
-            </Link>
-          </Button>
+        <div className="flex flex-col gap-2 lg:items-end">
+          <div className="flex flex-wrap gap-3">
+            <Button asChild size="lg" className="gap-2 text-base font-semibold">
+              <Link href={primaryAction.href}>
+                {primaryAction.label}
+                <ChevronRight className="h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="secondary" className="gap-2">
+              <Link href="/interview/setup?dsaExperience=practice">
+                Practice free
+              </Link>
+            </Button>
+          </div>
+          {isPreviewRound ? (
+            <MonoLabel className="tracking-[0.12em]">
+              Runs as your free audio preview
+            </MonoLabel>
+          ) : null}
         </div>
       </header>
 

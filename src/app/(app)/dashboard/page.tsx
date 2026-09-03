@@ -166,7 +166,7 @@ export default async function DashboardPage() {
     await Promise.all([
       supabase
         .from("profiles")
-        .select("interview_credits, has_used_free_trial")
+        .select("display_name, interview_credits, has_used_free_trial")
         .eq("id", user.id)
         .single(),
       getDashboardInterviews(supabase, user.id),
@@ -179,6 +179,8 @@ export default async function DashboardPage() {
         .eq("status", "completed"),
     ]);
 
+  const displayName =
+    profile?.display_name ?? user.email?.split("@")[0] ?? "there";
   const credits = profile?.interview_credits ?? 0;
   const isFreeTrialUser = !(profile?.has_used_free_trial ?? false);
 
@@ -252,6 +254,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardHome
+      displayName={displayName}
       credits={credits}
       hasCredits={credits > 0}
       isFreeTrialUser={isFreeTrialUser}

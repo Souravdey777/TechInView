@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Sora, JetBrains_Mono } from "next/font/google";
+import { Sora, JetBrains_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
@@ -16,6 +16,14 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   display: "swap",
   weight: ["300", "400", "500", "600", "700"],
+});
+
+// Referenced through var(--font-handwriting) so the loaded face actually applies.
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-handwriting",
+  display: "swap",
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -86,7 +94,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className={`${sora.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        className={`${sora.variable} ${jetbrainsMono.variable} ${caveat.variable} font-sans antialiased`}
       >
         <PostHogProvider>
           <div>{children}</div>
