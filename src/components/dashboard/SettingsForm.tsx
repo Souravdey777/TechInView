@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectOption } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  SettingsField,
+  SettingsMonoLabel,
+  SettingsRack,
+  SettingsToggleRow,
+} from "@/components/dashboard/settings/SettingsRack";
 import { useSupabase } from "@/hooks/useSupabase";
 import { SUPPORTED_LANGUAGES } from "@/lib/constants";
 import {
@@ -216,312 +222,279 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
     }
   };
 
+  const shareHost = shareBaseUrl.replace(/^https?:\/\//, "");
+
   return (
-    <div className="space-y-5 p-5 sm:p-6">
-      {/* Display Name */}
-      <div className="space-y-1.5">
-        <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-          Display Name
-        </label>
-        <Input
-          type="text"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          placeholder="Your name"
-        />
-        <p className="text-brand-muted text-xs">
-          This is the name shown at the top of your public profile.
-        </p>
-      </div>
+    <>
+      <SettingsRack
+        id="profile"
+        label="Profile"
+        note="Used across every round"
+      >
+        <div className="grid gap-5 sm:grid-cols-2">
+          <SettingsField
+            label="Display name"
+            htmlFor="settings-display-name"
+            hint="Shown at the top of your public profile and scorecards."
+          >
+            <Input
+              id="settings-display-name"
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Your name"
+            />
+          </SettingsField>
 
-      {/* Email (read-only) */}
-      <div className="space-y-1.5">
-        <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-          Email
-        </label>
-        <Input
-          type="email"
-          value={initialProfile.email}
-          readOnly
-          disabled
-          className="text-brand-muted"
-        />
-        <p className="text-brand-muted text-xs">
-          Email is managed through your OAuth provider.
-        </p>
-      </div>
+          <SettingsField
+            label="Email"
+            htmlFor="settings-email"
+            hint="Managed through your sign-in provider."
+          >
+            <Input
+              id="settings-email"
+              type="email"
+              value={initialProfile.email}
+              readOnly
+              disabled
+              className="text-brand-muted"
+            />
+          </SettingsField>
 
-      {/* Target Company */}
-      <div className="space-y-1.5">
-        <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-          Target Company
-        </label>
-        <Select
-          value={targetCompany}
-          onChange={(e) => setTargetCompany(e.target.value)}
-        >
-          <SelectOption value="">Select a company</SelectOption>
-          {TARGET_COMPANIES.map((company) => (
-            <SelectOption key={company} value={company.toLowerCase()}>
-              {company}
-            </SelectOption>
-          ))}
-        </Select>
-      </div>
-
-      {/* Experience Level */}
-      <div className="space-y-1.5">
-        <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-          Experience Level
-        </label>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {EXPERIENCE_LEVELS.map((level) => {
-            const isSelected = experienceLevel === level.value;
-            return (
-              <label
-                key={level.value}
-                className={cn(
-                  "flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-sm cursor-pointer transition-colors",
-                  isSelected
-                    ? "border-brand-cyan/40 bg-brand-cyan/5 text-brand-cyan"
-                    : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/20 hover:text-brand-text"
-                )}
-              >
-                <input
-                  type="radio"
-                  name="experience"
-                  value={level.value}
-                  checked={isSelected}
-                  onChange={() => setExperienceLevel(level.value)}
-                  className="sr-only"
-                />
-                <div
-                  className={cn(
-                    "w-3.5 h-3.5 rounded-full border-2 shrink-0 transition-colors",
-                    isSelected
-                      ? "border-brand-cyan bg-brand-cyan"
-                      : "border-brand-border"
-                  )}
-                />
-                <span>{level.label}</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Preferred Language */}
-      <div className="space-y-1.5">
-        <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-          Preferred Language
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {SUPPORTED_LANGUAGES.map((lang) => {
-            const isSelected = preferredLanguage === lang;
-            return (
-              <Button
-                key={lang}
-                type="button"
-                onClick={() => setPreferredLanguage(lang)}
-                variant="outline"
-                size="sm"
-                className={cn(
-                  "h-auto rounded-lg px-3 py-1.5 text-xs",
-                  isSelected
-                    ? "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan"
-                    : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/20 hover:text-brand-text"
-                )}
-              >
-                {LANGUAGE_LABELS[lang]}
-              </Button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="space-y-4 rounded-xl border border-brand-border bg-brand-surface/60 p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1">
-            <label className="block text-brand-text text-sm font-semibold">
-              Public Profile
-            </label>
-            <p className="text-brand-muted text-xs leading-5 max-w-md">
-              Create a shareable TechInView page with your handle, headline, and high-level interview progress.
-            </p>
-          </div>
-
-          <label className="inline-flex cursor-pointer items-center gap-3">
-            <span className="text-xs font-medium uppercase tracking-wide text-brand-muted">
-              {isPublicProfile ? "Public" : "Private"}
-            </span>
-            <span
-              className={cn(
-                "relative inline-flex h-6 w-11 items-center rounded-full border transition-colors",
-                isPublicProfile
-                  ? "border-brand-cyan/50 bg-brand-cyan/20"
-                  : "border-brand-border bg-brand-card"
-              )}
+          <SettingsField
+            label="Target company"
+            htmlFor="settings-target-company"
+            hint="Tunes the interviewer persona suggested on setup."
+          >
+            <Select
+              id="settings-target-company"
+              value={targetCompany}
+              onChange={(e) => setTargetCompany(e.target.value)}
             >
-              <Input
-                type="checkbox"
-                checked={isPublicProfile}
-                onChange={(e) => setIsPublicProfile(e.target.checked)}
-                className="sr-only"
-                aria-label="Toggle public profile visibility"
-              />
-              <span
-                className={cn(
-                  "inline-block h-4 w-4 rounded-full bg-brand-text transition-transform",
-                  isPublicProfile ? "translate-x-6" : "translate-x-1"
-                )}
-              />
-            </span>
-          </label>
+              <SelectOption value="">Select a company</SelectOption>
+              {TARGET_COMPANIES.map((company) => (
+                <SelectOption key={company} value={company.toLowerCase()}>
+                  {company}
+                </SelectOption>
+              ))}
+            </Select>
+          </SettingsField>
+
+          <SettingsField
+            label="Years of experience"
+            htmlFor="settings-experience"
+            hint="Sets the bar your rounds are scored against."
+          >
+            <Select
+              id="settings-experience"
+              value={experienceLevel}
+              onChange={(e) => setExperienceLevel(e.target.value)}
+            >
+              <SelectOption value="">Select a level</SelectOption>
+              {EXPERIENCE_LEVELS.map((level) => (
+                <SelectOption key={level.value} value={level.value}>
+                  {level.label}
+                </SelectOption>
+              ))}
+            </Select>
+          </SettingsField>
+
+          <SettingsField
+            label="Preferred language"
+            hint="Pre-selected in the editor when a round starts."
+            className="sm:col-span-2"
+          >
+            <div className="flex flex-wrap gap-2">
+              {SUPPORTED_LANGUAGES.map((lang) => {
+                const isSelected = preferredLanguage === lang;
+                return (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => setPreferredLanguage(lang)}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "h-9 rounded-md border px-3 text-xs font-medium transition-colors",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-card",
+                      isSelected
+                        ? "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan"
+                        : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/20 hover:text-brand-text"
+                    )}
+                  >
+                    {LANGUAGE_LABELS[lang]}
+                  </button>
+                );
+              })}
+            </div>
+          </SettingsField>
+        </div>
+      </SettingsRack>
+
+      <SettingsRack
+        id="public-page"
+        label="Public page"
+        note="Private until you turn it on"
+        bodyClassName="p-0 sm:p-0"
+      >
+        <div className="px-4 pt-4 sm:px-5 sm:pt-5">
+          <SettingsToggleRow
+            title="Publish my profile"
+            description="Creates a shareable page with your handle, headline, and high-level interview progress."
+            checked={isPublicProfile}
+            onCheckedChange={setIsPublicProfile}
+            label="Toggle public profile visibility"
+          />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-            Username
-          </label>
-          <div className="rounded-lg border border-brand-border bg-brand-card px-3 py-2.5">
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-brand-muted">{shareBaseUrl.replace(/^https?:\/\//, "")}/u/</span>
-              <Input
+        <div className="grid gap-5 border-t border-brand-border px-4 py-5 sm:px-5">
+          <SettingsField
+            label="Username"
+            htmlFor="settings-username"
+            hint="Lowercase letters, numbers, and hyphens only. Changing it breaks old links."
+          >
+            <div className="flex h-10 items-center rounded-md border border-brand-border bg-brand-surface px-3 transition-colors focus-within:border-brand-cyan/50 focus-within:ring-2 focus-within:ring-brand-cyan focus-within:ring-offset-2 focus-within:ring-offset-brand-card">
+              <span className="shrink-0 font-mono text-sm text-brand-subtle">
+                {shareHost}/u/
+              </span>
+              <input
+                id="settings-username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="your-handle"
                 maxLength={PUBLIC_PROFILE_USERNAME_MAX_LENGTH + 10}
-                className="h-auto min-w-0 flex-1 border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0 hover:border-transparent"
+                className="min-w-0 flex-1 border-0 bg-transparent font-mono text-sm text-brand-text placeholder:text-brand-subtle focus:outline-none"
               />
             </div>
-          </div>
-          <p className="text-brand-muted text-xs leading-5">
-            Lowercase letters, numbers, and hyphens only. We normalize spaces and capitals for you on save.
-          </p>
-        </div>
+          </SettingsField>
 
-        <div className="space-y-1.5">
-          <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-            Bio
-          </label>
-          <Textarea
-            value={publicBio}
-            onChange={(e) => setPublicBio(e.target.value)}
-            placeholder="What are you preparing for right now?"
-            maxLength={PUBLIC_PROFILE_BIO_MAX_LENGTH}
-            rows={3}
-            className="min-h-[5.75rem] bg-brand-card"
-          />
-          <div className="flex items-center justify-between gap-3 text-xs">
-            <span className="text-brand-muted">
-              Keep it short and focused on your interview goals.
-            </span>
-            <span className={cn(publicBio.length > PUBLIC_PROFILE_BIO_MAX_LENGTH ? "text-brand-rose" : "text-brand-muted")}>
-              {publicBio.length}/{PUBLIC_PROFILE_BIO_MAX_LENGTH}
-            </span>
-          </div>
-        </div>
+          <SettingsField label="Bio" htmlFor="settings-bio">
+            <Textarea
+              id="settings-bio"
+              value={publicBio}
+              onChange={(e) => setPublicBio(e.target.value)}
+              placeholder="What are you preparing for right now?"
+              maxLength={PUBLIC_PROFILE_BIO_MAX_LENGTH}
+              rows={3}
+              className="min-h-[5.75rem]"
+            />
+            <div className="mt-2 flex items-center justify-between gap-3 text-xs">
+              <span className="text-brand-subtle">
+                Keep it short and focused on your interview goals.
+              </span>
+              <span
+                className={cn(
+                  "font-mono",
+                  publicBio.length > PUBLIC_PROFILE_BIO_MAX_LENGTH
+                    ? "text-brand-rose"
+                    : "text-brand-subtle"
+                )}
+              >
+                {publicBio.length}/{PUBLIC_PROFILE_BIO_MAX_LENGTH}
+              </span>
+            </div>
+          </SettingsField>
 
-        <div className="space-y-3">
           <div>
-            <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-              Links
-            </label>
-            <p className="mt-1 text-xs leading-5 text-brand-muted">
+            <SettingsMonoLabel>Links</SettingsMonoLabel>
+            <p className="mt-2 text-xs leading-relaxed text-brand-subtle">
               Add the profiles you want people to discover from your public page.
             </p>
-          </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {PUBLIC_PROFILE_LINK_ORDER.map((key) => {
+                const config = PUBLIC_PROFILE_LINK_CONFIG[key];
 
-          <div className="grid gap-3">
-            {PUBLIC_PROFILE_LINK_ORDER.map((key) => {
-              const config = PUBLIC_PROFILE_LINK_CONFIG[key];
-
-              return (
-                <div key={key} className="space-y-1.5">
-                  <label className="block text-brand-text text-sm font-medium">
-                    {config.label}
-                  </label>
-                  <Input
-                    type="text"
-                    value={publicLinks[key] ?? ""}
-                    onChange={(e) =>
-                      setPublicLinks((current) => ({
-                        ...current,
-                        [key]: e.target.value,
-                      }))
-                    }
-                    placeholder={config.placeholder}
-                    className="bg-brand-card"
-                  />
-                  <p className="text-xs leading-5 text-brand-muted">
-                    {config.helpText}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-brand-border bg-brand-card px-3 py-3">
-          <p className="text-brand-muted text-xs font-medium uppercase tracking-wide">
-            Share Link
-          </p>
-          {publicProfileUrl ? (
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <code className="overflow-x-auto text-sm text-brand-text">
-                {publicProfileUrl}
-              </code>
-              {hasSavedPublicProfile ? (
-                <a
-                  href={publicProfilePath ?? "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-cyan hover:text-brand-cyan/90"
-                >
-                  Open profile
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              ) : (
-                <span className="text-sm font-medium text-brand-muted">
-                  Save as public to open
-                </span>
-              )}
+                return (
+                  <SettingsField
+                    key={key}
+                    label={config.label}
+                    htmlFor={`settings-link-${key}`}
+                    hint={config.helpText}
+                  >
+                    <Input
+                      id={`settings-link-${key}`}
+                      type="text"
+                      value={publicLinks[key] ?? ""}
+                      onChange={(e) =>
+                        setPublicLinks((current) => ({
+                          ...current,
+                          [key]: e.target.value,
+                        }))
+                      }
+                      placeholder={config.placeholder}
+                    />
+                  </SettingsField>
+                );
+              })}
             </div>
-          ) : (
-            <p className="mt-2 text-sm text-brand-muted">
-              Pick a username to generate your shareable profile link.
-            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-brand-border bg-brand-surface px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="min-w-0">
+            <SettingsMonoLabel>Share link</SettingsMonoLabel>
+            {publicProfileUrl ? (
+              <p className="mt-1.5 truncate font-mono text-sm text-brand-text">
+                {publicProfileUrl}
+              </p>
+            ) : (
+              <p className="mt-1.5 text-sm text-brand-subtle">
+                Pick a username to generate your shareable link.
+              </p>
+            )}
+          </div>
+
+          {publicProfileUrl ? (
+            hasSavedPublicProfile ? (
+              <a
+                href={publicProfilePath ?? "#"}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-brand-cyan transition-colors hover:text-brand-cyan/80"
+              >
+                Open profile
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            ) : (
+              <span className="shrink-0 text-sm text-brand-subtle">
+                Save as public to open
+              </span>
+            )
+          ) : null}
+        </div>
+      </SettingsRack>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs leading-relaxed text-brand-subtle">
+          Saves your profile and public page together.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {saveStatus === "success" && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-green">
+              <CheckCircle2 className="h-4 w-4" />
+              Saved
+            </span>
           )}
+
+          {saveStatus === "error" && (
+            <span className="text-sm text-brand-rose">
+              {errorMessage ?? "Failed to save. Please try again."}
+            </span>
+          )}
+
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={saveStatus === "saving"}
+          >
+            {saveStatus === "saving" && (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            )}
+            {saveStatus === "saving" ? "Saving…" : "Save changes"}
+          </Button>
         </div>
       </div>
-
-      {/* Save Button */}
-      <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row sm:items-center">
-        <Button
-          type="button"
-          onClick={handleSave}
-          disabled={saveStatus === "saving"}
-        >
-          {saveStatus === "saving" && (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          )}
-          {saveStatus === "saving" ? "Saving…" : "Save Changes"}
-        </Button>
-
-        {saveStatus === "success" && (
-          <span className="inline-flex items-center gap-1.5 text-brand-green text-sm font-medium">
-            <CheckCircle2 className="w-4 h-4" />
-            Saved successfully
-          </span>
-        )}
-
-        {saveStatus === "error" && (
-          <span className="text-brand-rose text-sm">
-            {errorMessage ?? "Failed to save. Please try again."}
-          </span>
-        )}
-      </div>
-    </div>
+    </>
   );
 }

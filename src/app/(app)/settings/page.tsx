@@ -4,6 +4,14 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { cn } from "@/lib/utils";
 import { SettingsForm } from "@/components/dashboard/SettingsForm";
+import {
+  SettingsMonoLabel,
+  SettingsRack,
+} from "@/components/dashboard/settings/SettingsRack";
+import {
+  SettingsSectionNav,
+  type SettingsSection,
+} from "@/components/dashboard/settings/SettingsSectionNav";
 import { RazorpayCheckout } from "@/components/shared/RazorpayCheckout";
 import {
   CREDIT_PACKS,
@@ -12,14 +20,7 @@ import {
   getDisplayPricingKey,
   getRegionForCountry,
 } from "@/lib/constants";
-import {
-  User,
-  CreditCard,
-  AlertTriangle,
-  Ticket,
-  LifeBuoy,
-  Mail,
-} from "lucide-react";
+import { Mail } from "lucide-react";
 import { DeleteAccountButton } from "@/components/dashboard/DeleteAccountButton";
 import { LEGAL_LINKS, SUPPORT_EMAIL, createSupportMailto } from "@/lib/legal";
 
@@ -28,6 +29,14 @@ const PACK_COLORS: Record<string, string> = {
   "3pack": "brand-green",
   "6pack": "brand-amber",
 };
+
+const SETTINGS_SECTIONS: readonly SettingsSection[] = [
+  { id: "profile", label: "Profile" },
+  { id: "public-page", label: "Public page" },
+  { id: "rounds", label: "Rounds and billing" },
+  { id: "support", label: "Support" },
+  { id: "danger", label: "Danger zone", tone: "danger" },
+];
 
 function resolveAppUrl(headersList: { get(name: string): string | null }): string {
   if (process.env.NEXT_PUBLIC_APP_URL) {
@@ -69,208 +78,204 @@ export default async function SettingsPage() {
   const { region, symbol } = getRegionForCountry(country);
   const displayKey = getDisplayPricingKey(region);
   const appUrl = resolveAppUrl(headersList);
+  const supportHref = createSupportMailto({
+    subject: "TechInView support request",
+  });
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 animate-fade-in sm:space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold font-heading text-brand-text mb-1">
+    <div className="animate-fade-in">
+      <header>
+        <SettingsMonoLabel className="tracking-[0.18em]">
           Settings
+        </SettingsMonoLabel>
+        <h1 className="mt-3 font-heading text-3xl font-bold leading-none tracking-[-0.04em] text-brand-text sm:text-[2.5rem]">
+          Account.
         </h1>
-        <p className="text-brand-muted text-sm">
-          Manage your profile, preferences, and billing.
-        </p>
-      </div>
+      </header>
 
-      {/* Profile Section */}
-      <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
-        <div className="flex items-center gap-3 border-b border-brand-border px-5 py-4 sm:px-6">
-          <User className="w-4 h-4 text-brand-cyan" />
-          <h2 className="text-sm font-semibold text-brand-text">Profile</h2>
-        </div>
-        <SettingsForm
-          initialProfile={{
-            display_name: profile?.display_name ?? null,
-            username: profile?.username ?? null,
-            public_bio: profile?.public_bio ?? null,
-            public_links: profile?.public_links ?? null,
-            is_public_profile: profile?.is_public_profile ?? false,
-            email: user.email ?? "",
-            target_company: profile?.target_company ?? null,
-            experience_level: profile?.experience_level ?? null,
-            preferred_language: profile?.preferred_language ?? null,
-          }}
-          shareBaseUrl={appUrl}
-        />
-      </section>
+      <div className="mt-8 grid items-start gap-6 sm:mt-10 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
+        <SettingsSectionNav sections={SETTINGS_SECTIONS} />
 
-      {/* Interview Packs Section */}
-      <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
-        <div className="flex items-center gap-3 border-b border-brand-border px-5 py-4 sm:px-6">
-          <Ticket className="w-4 h-4 text-brand-cyan" />
-          <h2 className="text-sm font-semibold text-brand-text">
-            Interview Packs
-          </h2>
-        </div>
-        <div className="space-y-5 p-5 sm:p-6">
-          {/* Credits balance */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-brand-muted text-sm">Available AI interview credits</p>
-              <p className="text-xs text-brand-muted mt-0.5">
-                {interviewsCompleted} interview{interviewsCompleted !== 1 ? "s" : ""} completed
-                {!hasUsedTrial && " · 5-minute audio preview available"}
+        <div className="flex min-w-0 flex-col gap-5">
+          <SettingsForm
+            initialProfile={{
+              display_name: profile?.display_name ?? null,
+              username: profile?.username ?? null,
+              public_bio: profile?.public_bio ?? null,
+              public_links: profile?.public_links ?? null,
+              is_public_profile: profile?.is_public_profile ?? false,
+              email: user.email ?? "",
+              target_company: profile?.target_company ?? null,
+              experience_level: profile?.experience_level ?? null,
+              preferred_language: profile?.preferred_language ?? null,
+            }}
+            shareBaseUrl={appUrl}
+          />
+
+          <SettingsRack
+            id="rounds"
+            label="Rounds and billing"
+            note="One-time packs, nothing renews"
+          >
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="flex items-baseline gap-3">
+                    <span
+                      className={cn(
+                        "font-heading text-[2.5rem] font-bold leading-none tracking-[-0.04em]",
+                        credits > 0 ? "text-brand-text" : "text-brand-subtle"
+                      )}
+                    >
+                      {credits}
+                    </span>
+                    <span className="text-sm text-brand-muted">
+                      round{credits === 1 ? "" : "s"} remaining
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed text-brand-subtle">
+                    {interviewsCompleted} round
+                    {interviewsCompleted === 1 ? "" : "s"} completed. Rounds never
+                    expire.
+                    {!hasUsedTrial && " A 5-minute audio preview is still available."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {PACK_IDS.map((packId) => {
+                  const pack = CREDIT_PACKS[packId];
+                  const color = PACK_COLORS[packId] ?? "brand-cyan";
+                  const price = pack.displayPrices[displayKey];
+
+                  return (
+                    <div
+                      key={packId}
+                      className="flex flex-col gap-3 rounded-xl border border-brand-border bg-brand-surface p-4"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <SettingsMonoLabel>{pack.label}</SettingsMonoLabel>
+                        {pack.badge && (
+                          <span
+                            className={cn(
+                              "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                              color === "brand-green"
+                                ? "bg-brand-green/15 text-brand-green"
+                                : "bg-brand-amber/15 text-brand-amber"
+                            )}
+                          >
+                            {pack.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      <span className="font-heading text-xl font-bold tracking-[-0.03em] text-brand-text">
+                        {symbol}
+                        {price.toLocaleString(region === "INR" ? "en-IN" : "en-US")}
+                      </span>
+
+                      <p className="text-xs leading-relaxed text-brand-subtle">
+                        {pack.credits} x {FULL_INTERVIEW_DURATION_MINUTES}-minute
+                        full round{pack.credits > 1 ? "s" : ""}
+                      </p>
+
+                      <RazorpayCheckout
+                        packId={packId}
+                        countryCode={country}
+                        userName={profile?.display_name ?? undefined}
+                        userEmail={user.email ?? undefined}
+                        className={cn(
+                          "mt-auto h-9 rounded-md border text-xs font-semibold transition-colors",
+                          color === "brand-cyan" && "border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20",
+                          color === "brand-green" && "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20",
+                          color === "brand-amber" && "border-brand-amber/30 bg-brand-amber/10 text-brand-amber hover:bg-brand-amber/20",
+                        )}
+                      >
+                        Buy pack
+                      </RazorpayCheckout>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <p className="border-t border-brand-border pt-4 text-xs leading-relaxed text-brand-subtle">
+                Practice Mode stays free. Rounds are only spent in AI Interview
+                Mode. One-time packs, no subscription, secure payments via
+                Razorpay.
+                {region === "INR" && (
+                  <span className="ml-1 text-brand-cyan">India pricing applied.</span>
+                )}
+                {region === "PPP" && (
+                  <span className="ml-1 text-brand-cyan">Regional pricing applied.</span>
+                )}
               </p>
             </div>
-            <span className={cn(
-              "text-3xl font-bold font-heading",
-              credits > 0 ? "text-brand-cyan" : "text-brand-muted"
-            )}>
-              {credits}
-            </span>
-          </div>
+          </SettingsRack>
 
-          {/* Credit packs */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {PACK_IDS.map((packId) => {
-              const pack = CREDIT_PACKS[packId];
-              const color = PACK_COLORS[packId] ?? "brand-cyan";
-              const price = pack.displayPrices[displayKey];
+          <SettingsRack id="support" label="Support" note="Replies from a human">
+            <div className="flex flex-col gap-5">
+              <div>
+                <p className="text-sm font-medium text-brand-text">
+                  Need help with billing, rounds, account access, or privacy?
+                </p>
+                <p className="mt-1.5 text-xs leading-relaxed text-brand-subtle">
+                  Email the TechInView team directly. Include your account email
+                  and any order ID, payment ID, or page URL that helps us verify
+                  the request quickly.
+                </p>
+              </div>
 
-              return (
-                <div
-                  key={packId}
-                  className="rounded-xl border border-brand-border bg-brand-surface p-4 flex flex-col gap-3"
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href={supportHref}
+                  className="inline-flex h-10 items-center gap-2 rounded-md bg-brand-cyan px-4 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-brand-text">{pack.label}</span>
-                    {pack.badge && (
-                      <span className={cn(
-                        "text-[10px] font-semibold px-2 py-0.5 rounded-full",
-                        color === "brand-green" ? "bg-brand-green/15 text-brand-green" : "bg-brand-amber/15 text-brand-amber"
-                      )}>
-                        {pack.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-brand-muted">
-                    {pack.credits} x {FULL_INTERVIEW_DURATION_MINUTES}-minute full interview{pack.credits > 1 ? "s" : ""}
-                  </p>
-                  <span className="text-xl font-bold text-brand-text">
-                    {symbol}{price.toLocaleString(region === "INR" ? "en-IN" : "en-US")}
-                  </span>
-                  <RazorpayCheckout
-                    packId={packId}
-                    countryCode={country}
-                    userName={profile?.display_name ?? undefined}
-                    userEmail={user.email ?? undefined}
-                    className={cn(
-                      "px-3 py-2 rounded-lg text-xs font-semibold border transition-colors",
-                      color === "brand-cyan" && "bg-brand-cyan/10 border-brand-cyan/30 text-brand-cyan hover:bg-brand-cyan/20",
-                      color === "brand-green" && "bg-brand-green/10 border-brand-green/30 text-brand-green hover:bg-brand-green/20",
-                      color === "brand-amber" && "bg-brand-amber/10 border-brand-amber/30 text-brand-amber hover:bg-brand-amber/20",
-                    )}
+                  <Mail className="h-4 w-4" />
+                  Email support
+                </a>
+                <Link
+                  href="/contact"
+                  className="inline-flex h-10 items-center rounded-md border border-brand-border px-4 text-sm font-medium text-brand-text transition-colors hover:border-brand-cyan/40 hover:bg-brand-surface"
+                >
+                  Support page
+                </Link>
+                <span className="font-mono text-xs text-brand-subtle">
+                  {SUPPORT_EMAIL}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2 border-t border-brand-border pt-4">
+                {LEGAL_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="rounded-full border border-brand-border bg-brand-surface px-3 py-1.5 text-xs text-brand-muted transition-colors hover:border-brand-cyan/30 hover:text-brand-text"
                   >
-                    Buy Pack
-                  </RazorpayCheckout>
-                </div>
-              );
-            })}
-          </div>
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </SettingsRack>
 
-          <div className="flex items-center gap-2">
-            <CreditCard className="w-3.5 h-3.5 text-brand-muted" />
-            <p className="text-brand-muted text-xs">
-              Practice Mode stays free. Credits are only used for AI Interview Mode. One-time packs. No subscription. Secure payments via Razorpay.
-              {region === "INR" && (
-                <span className="text-brand-cyan ml-1">India pricing applied.</span>
-              )}
-              {region === "PPP" && (
-                <span className="text-brand-cyan ml-1">Regional pricing applied.</span>
-              )}
-            </p>
-          </div>
+          <SettingsRack id="danger" label="Danger zone" tone="danger">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
+              <div>
+                <p className="text-sm font-medium text-brand-text">
+                  Delete account
+                </p>
+                <p className="mt-1.5 max-w-md text-xs leading-relaxed text-brand-subtle">
+                  Removes your transcripts, scorecards, and practice progress.
+                  Unused rounds are not refunded, and this cannot be undone.
+                </p>
+              </div>
+              <div className="shrink-0">
+                <DeleteAccountButton />
+              </div>
+            </div>
+          </SettingsRack>
         </div>
-      </section>
-
-      <section className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
-        <div className="flex items-center gap-3 border-b border-brand-border px-5 py-4 sm:px-6">
-          <LifeBuoy className="w-4 h-4 text-brand-cyan" />
-          <h2 className="text-sm font-semibold text-brand-text">Support</h2>
-        </div>
-        <div className="space-y-4 p-5 sm:p-6">
-          <div>
-            <p className="text-sm font-medium text-brand-text">
-              Need help with billing, credits, account access, or privacy?
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-              Reach the TechInView team directly by email. Include your account
-              email and any order ID, payment ID, or page URL that helps us
-              verify the request quickly.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <a
-              href={createSupportMailto({ subject: "TechInView support request" })}
-              className="inline-flex items-center gap-2 rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
-            >
-              <Mail className="w-4 h-4" />
-              Email support
-            </a>
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center rounded-lg border border-brand-border px-4 py-2 text-sm font-medium text-brand-text transition-colors hover:bg-brand-surface"
-            >
-              Support page
-            </Link>
-          </div>
-
-          <p className="text-xs text-brand-muted">
-            Canonical support email:{" "}
-            <a
-              href={createSupportMailto({ subject: "TechInView support request" })}
-              className="text-brand-cyan transition-colors hover:text-cyan-300"
-            >
-              {SUPPORT_EMAIL}
-            </a>
-          </p>
-
-          <div className="flex flex-wrap gap-2 text-xs">
-            {LEGAL_LINKS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-full border border-brand-border bg-brand-surface px-3 py-1.5 text-brand-muted transition-colors hover:border-brand-cyan/30 hover:text-brand-text"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Danger Zone */}
-      <section className="bg-brand-card rounded-xl border border-brand-rose/20 overflow-hidden">
-        <div className="flex items-center gap-3 border-b border-brand-rose/20 px-5 py-4 sm:px-6">
-          <AlertTriangle className="w-4 h-4 text-brand-rose" />
-          <h2 className="text-sm font-semibold text-brand-rose">
-            Danger Zone
-          </h2>
-        </div>
-        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
-          <div>
-            <p className="text-brand-text text-sm font-medium mb-1">
-              Delete Account
-            </p>
-            <p className="text-brand-muted text-xs max-w-sm">
-              Permanently delete your account and all associated data. This
-              action cannot be undone.
-            </p>
-          </div>
-          <DeleteAccountButton />
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
