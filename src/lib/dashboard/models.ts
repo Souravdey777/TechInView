@@ -138,41 +138,6 @@ export type PrepPlanSummary = {
   tracks: PrepPlanTrack[];
 };
 
-export type DashboardPracticeItem = {
-  id: string;
-  kind: PracticeInterviewKind;
-  title: string;
-  subtitle: string;
-  score: number | null;
-  status: "completed" | "abandoned" | "in_progress";
-  startedAt: string;
-  durationSeconds: number | null;
-};
-
-export type DashboardActivityItem =
-  | {
-      id: string;
-      type: "practice";
-      filter: PracticeInterviewKind;
-      title: string;
-      subtitle: string;
-      timestamp: string;
-      href: string;
-      statusLabel: string;
-      score: number | null;
-    }
-  | {
-      id: string;
-      type: "prep_plan";
-      filter: "prep_plans";
-      relatedKind: PracticeInterviewKind;
-      title: string;
-      subtitle: string;
-      timestamp: string;
-      href: string;
-      statusLabel: string;
-    };
-
 export function getPracticeCard(kind: PracticeInterviewKind) {
   return PRACTICE_CARD_CONFIGS.find((item) => item.kind === kind);
 }

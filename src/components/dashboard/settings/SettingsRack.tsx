@@ -1,27 +1,9 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-
-type SettingsMonoLabelProps = {
-  children: ReactNode;
-  className?: string;
-};
+import { MonoLabel, Rack } from "@/components/shared/Rack";
 
 /** Mono micro-label used for rack headers and field labels. */
-export function SettingsMonoLabel({
-  children,
-  className,
-}: SettingsMonoLabelProps) {
-  return (
-    <span
-      className={cn(
-        "font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-brand-subtle",
-        className
-      )}
-    >
-      {children}
-    </span>
-  );
-}
+export { MonoLabel as SettingsMonoLabel } from "@/components/shared/Rack";
 
 type SettingsRackProps = {
   id: string;
@@ -43,39 +25,28 @@ export function SettingsRack({
   className,
   bodyClassName,
 }: SettingsRackProps) {
-  const isDanger = tone === "danger";
-
   return (
-    <section
+    <Rack
       id={id}
-      className={cn(
-        "scroll-mt-24 overflow-hidden rounded-2xl border bg-brand-card",
-        isDanger ? "border-brand-rose/25" : "border-brand-border",
-        className
-      )}
-    >
-      <div
-        className={cn(
-          "flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b bg-brand-surface px-4 py-3 sm:px-5",
-          isDanger ? "border-brand-rose/25" : "border-brand-border"
-        )}
-      >
-        <SettingsMonoLabel
+      tone={tone}
+      className={className}
+      bodyClassName={bodyClassName}
+      label={
+        <MonoLabel
           className={cn(
             "tracking-[0.18em]",
-            isDanger ? "text-brand-rose" : "text-brand-cyan"
+            tone === "danger" ? "text-brand-rose" : "text-brand-cyan"
           )}
         >
           {label}
-        </SettingsMonoLabel>
-        {note ? (
-          <SettingsMonoLabel className="tracking-[0.12em]">
-            {note}
-          </SettingsMonoLabel>
-        ) : null}
-      </div>
-      <div className={cn("p-4 sm:p-5", bodyClassName)}>{children}</div>
-    </section>
+        </MonoLabel>
+      }
+      accessory={
+        note ? <MonoLabel className="tracking-[0.12em]">{note}</MonoLabel> : null
+      }
+    >
+      {children}
+    </Rack>
   );
 }
 
@@ -98,7 +69,7 @@ export function SettingsField({
   return (
     <div className={cn("min-w-0", className)}>
       <label htmlFor={htmlFor} className="block">
-        <SettingsMonoLabel>{label}</SettingsMonoLabel>
+        <MonoLabel>{label}</MonoLabel>
       </label>
       <div className="mt-2">{children}</div>
       {hint ? (
