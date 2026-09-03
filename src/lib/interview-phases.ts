@@ -82,3 +82,25 @@ export function clampPhaseToTimeFloor(aiPhase: InterviewPhase, timeFloorPhase: I
 
 /** Comma-separated list for LLM prompts */
 export const PHASE_ORDER_PROMPT_LIST = PHASE_ORDER.join(", ");
+
+/**
+ * Resolve the phase to apply when the agent calls `set_interview_phase`.
+ *
+ * Phases only ever move forward. The agent can re-emit an earlier phase, and
+ * moving back to INTRO re-arms the INTRO instruction — which tells the
+ * interviewer to present the problem — so a backward jump makes it narrate the
+ * problem a second time. Clamping against the current phase as well as the time
+ * floor makes that impossible.
+ */
+export function resolveAgentPhase(
+  currentPhase: InterviewPhase,
+  aiPhase: InterviewPhase,
+  timeFloorPhase: InterviewPhase,
+): InterviewPhase {
+  const highest = Math.max(
+    phaseIndex(currentPhase),
+    phaseIndex(aiPhase),
+    phaseIndex(timeFloorPhase),
+  );
+  return PHASE_ORDER[highest]!;
+}
