@@ -1,12 +1,6 @@
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { MobileAppNav, Sidebar } from "@/components/shared/Sidebar";
-import {
-  CREDIT_PACKS,
-  getDisplayPricingKey,
-  getRegionForCountry,
-} from "@/lib/constants";
+import { AppNav } from "@/components/shared/AppNav";
 
 export default async function AppLayout({
   children,
@@ -23,22 +17,25 @@ export default async function AppLayout({
   }
 
   const userEmail = user.email ?? "";
-  const headersList = headers();
-  const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
-  const { region, symbol } = getRegionForCountry(country);
-  const displayKey = getDisplayPricingKey(region);
-  const startingPrice = `${symbol}${CREDIT_PACKS.single.displayPrices[displayKey]}`;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name, interview_credits")
+    .eq("id", user.id)
+    .single();
 
   return (
     <div className="min-h-screen bg-brand-deep">
-      <MobileAppNav userEmail={userEmail} startingPrice={startingPrice} />
+      <AppNav
+        userEmail={userEmail}
+        displayName={profile?.display_name ?? null}
+        credits={profile?.interview_credits ?? 0}
+      />
 
-      <div className="hidden lg:block">
-        <Sidebar userEmail={userEmail} startingPrice={startingPrice} />
-      </div>
-
-      <main className="lg:ml-64 min-h-screen bg-brand-deep">
-        <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">{children}</div>
+      <main className="min-h-screen bg-brand-deep">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+          {children}
+        </div>
       </main>
     </div>
   );

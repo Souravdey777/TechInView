@@ -67,7 +67,7 @@ export function DeleteAccountButton() {
         variant="destructive"
         className="shrink-0"
       >
-        Delete Account
+        Delete account
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
