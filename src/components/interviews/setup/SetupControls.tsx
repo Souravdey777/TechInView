@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   SETUP_FOCUS_RING,
   SetupMonoLabel,
-} from "@/components/interviews/dsa-setup/SetupRack";
+} from "@/components/interviews/setup/SetupRack";
 
 export type SetupSegmentedOption<T extends string> = {
   value: T;

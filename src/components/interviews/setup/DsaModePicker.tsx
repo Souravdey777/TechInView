@@ -2,7 +2,7 @@
 
 import { Brain, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SETUP_FOCUS_RING } from "@/components/interviews/dsa-setup/SetupRack";
+import { SETUP_FOCUS_RING } from "@/components/interviews/setup/SetupRack";
 import type { DsaExperience } from "@/lib/dsa";
 
 export type ModeChipTone = "green" | "cyan" | "amber" | "rose";
