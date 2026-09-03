@@ -16,6 +16,7 @@ import { Timer } from "./Timer";
 import { InterviewControls } from "./InterviewControls";
 import { VoiceVisualizer, type VoiceState } from "./VoiceVisualizer";
 import { VoiceLatencyHud } from "./VoiceLatencyHud";
+import { PhaseTransport } from "./PhaseTransport";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   useDeepgramVoiceAgent,
@@ -1151,25 +1152,60 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-brand-deep overflow-hidden">
-      {/* ── Top bar ── */}
-      <header
-        className={cn(
-          "flex h-14 shrink-0 items-center justify-between border-b border-brand-border bg-brand-card px-4"
-        )}
-      >
-        {/* Logo */}
-        <BrandLogo size="sm" wordmarkClassName="text-sm" />
-
-        {/* Timer */}
-        <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
-
-        {/* Right controls placeholder (run + end live in bottom bar) */}
-        <div className="w-28 text-right">
-          <span className="text-xs text-brand-muted">
-            Session{" "}
-            <span className="font-mono text-brand-text">
-              #{interviewId.slice(-6).toUpperCase()}
+      {/* ── Transport bar ── */}
+      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-brand-border bg-brand-card px-4">
+        {/* Identity + live state */}
+        <div className="flex shrink-0 items-center gap-3">
+          <BrandLogo size="sm" wordmarkClassName="text-sm" />
+          <span className="h-4 w-px bg-brand-border" aria-hidden />
+          <span
+            className={cn(
+              "flex items-center gap-2 rounded-full border px-2.5 py-1",
+              isAgentConnected
+                ? "border-brand-cyan/35 bg-brand-cyan/[0.09]"
+                : "border-brand-border"
+            )}
+          >
+            <span
+              className={cn(
+                "h-1.5 w-1.5 shrink-0 rounded-full",
+                isAgentConnected
+                  ? "bg-brand-cyan shadow-sm shadow-brand-cyan/60"
+                  : "bg-brand-subtle"
+              )}
+              aria-hidden
+            />
+            <span
+              className={cn(
+                "font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
+                isAgentConnected ? "text-brand-cyan" : "text-brand-muted"
+              )}
+            >
+              {isAgentConnected ? "On air" : isConnectingVoice ? "Connecting" : "Offline"}
             </span>
+          </span>
+          <span className="hidden shrink-0 items-center gap-2 lg:flex">
+            <span className="font-mono text-xs text-brand-muted">
+              {isCodingRound && activeProblem
+                ? activeProblem.title
+                : ROUND_TYPE_LABELS[roundType] ?? "Interview"}
+            </span>
+            {isCodingRound && activeProblem ? (
+              <span className="rounded border border-brand-border px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-brand-muted">
+                {activeProblem.difficulty}
+              </span>
+            ) : null}
+          </span>
+        </div>
+
+        {/* Phase — coding rounds walk the nine-step arc; other rounds do not */}
+        {isCodingRound ? <PhaseTransport currentPhase={currentPhase} /> : <div />}
+
+        {/* Clock */}
+        <div className="flex shrink-0 items-center gap-3">
+          <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
+          <span className="hidden font-mono text-[10px] text-brand-subtle 2xl:inline">
+            #{interviewId.slice(-6).toUpperCase()}
           </span>
         </div>
       </header>
@@ -1181,28 +1217,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           className="flex shrink-0 flex-col border-r border-brand-border bg-brand-surface overflow-hidden"
           style={{ width: `${panelWidth}px` }}
         >
-          {/* Voice panel always visible at top */}
-          <div className="shrink-0 border-b border-brand-border">
-            <VoicePanel
-              voiceState={voiceState}
-              currentPhase={currentPhase}
-              roundType={roundType}
-              interviewerName={interviewer.name}
-              isMicEnabled={isMicEnabled}
-              isVoiceConnected={isAgentConnected}
-              isReconnecting={isConnectingVoice}
-              errorMessage={voiceError}
-              microphoneDevices={microphoneDevices}
-              selectedDeviceId={selectedDeviceId}
-              deviceWarning={deviceWarning}
-              isSendingText={isSendingText}
-              textError={textError}
-              onToggleMic={handleToggleMic}
-              onDeviceChange={setSelectedDeviceId}
-              onReconnect={resumeInterview}
-              onSendText={handleSendText}
-            />
-          </div>
 
           {/* Problem / Transcript tabs */}
           <div className="flex flex-1 flex-col overflow-hidden px-4 pt-3">
@@ -1292,6 +1306,29 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             />
           ) : null}
         </main>
+
+        {/* ── Voice channel ── */}
+        <aside className="flex w-[300px] shrink-0 flex-col overflow-y-auto border-l border-brand-border bg-brand-surface xl:w-[336px]">
+          <VoicePanel
+            voiceState={voiceState}
+            currentPhase={currentPhase}
+            roundType={roundType}
+            interviewerName={interviewer.name}
+            isMicEnabled={isMicEnabled}
+            isVoiceConnected={isAgentConnected}
+            isReconnecting={isConnectingVoice}
+            errorMessage={voiceError}
+            microphoneDevices={microphoneDevices}
+            selectedDeviceId={selectedDeviceId}
+            deviceWarning={deviceWarning}
+            isSendingText={isSendingText}
+            textError={textError}
+            onToggleMic={handleToggleMic}
+            onDeviceChange={setSelectedDeviceId}
+            onReconnect={resumeInterview}
+            onSendText={handleSendText}
+          />
+        </aside>
       </div>
 
       {/* ── Bottom bar ── */}
