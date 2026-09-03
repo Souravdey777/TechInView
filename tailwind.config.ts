@@ -66,9 +66,12 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Sora", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
-        heading: ["Sora", "system-ui", "sans-serif"],
+        // next/font generates hashed family names, so these have to go through
+        // the CSS variables it sets on <body>. Naming "Sora" or "JetBrains
+        // Mono" directly matches nothing and falls through to the system font.
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+        heading: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "pulse-ring": {
