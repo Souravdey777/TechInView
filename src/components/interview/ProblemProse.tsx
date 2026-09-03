@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { stripEmbeddedExamples } from "@/lib/problems/statement";
+
 /**
  * Problem statements are authored as light markdown — inline `code`, **bold**,
  * and fenced blocks. Rendering them raw showed candidates literal backticks and
@@ -73,16 +75,10 @@ export function renderConstraint(text: string, keyPrefix: string): ReactNode[] {
 }
 
 /**
- * Every problem in the catalog repeats its examples inside the description as
- * `**Example 1:**` plus a fenced block, while also carrying a structured
- * `examples[]` array that the panel renders properly. Drop the prose copies so
- * each example appears once.
+ * Re-exported so the panel and the practice page strip the same duplicated
+ * example blocks. The parsing itself lives in `lib/problems/statement`.
  */
-export function stripEmbeddedExamples(description: string): string {
-  const marker = /\*\*Example\s*\d*[^\n]*\*\*/;
-  const match = marker.exec(description);
-  return (match ? description.slice(0, match.index) : description).trim();
-}
+export { stripEmbeddedExamples };
 
 export function ProblemProse({ description }: { description: string }) {
   const blocks = stripEmbeddedExamples(description).split(/```/);

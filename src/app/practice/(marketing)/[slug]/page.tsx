@@ -17,6 +17,15 @@ import { getProblems, getProblemBySlug } from "@/lib/db/queries";
 import { DIFFICULTY_CONFIG } from "@/lib/constants";
 import type { DifficultyLevel } from "@/lib/constants";
 import { PracticeModeCta } from "@/components/practice/PracticeModeCta";
+import {
+  ProblemConstraints,
+  ProblemExamples,
+  SectionLabel,
+} from "@/components/practice/ProblemStatement";
+import {
+  diagramsForExamples,
+  stripEmbeddedExamples,
+} from "@/lib/problems/statement";
 import { normalizeDsaExperience } from "@/lib/dsa";
 
 type PracticeSlugPageProps = {
@@ -127,7 +136,12 @@ export async function generateMetadata({
 // Helpers
 // ---------------------------------------------------------------------------
 
-type Example = { input: string; output: string; explanation?: string };
+type Example = {
+  input: string;
+  output: string;
+  explanation?: string;
+  diagram?: string;
+};
 type OptimalComplexity = { time?: string; space?: string };
 
 function DifficultyBadge({ difficulty }: { difficulty: DifficultyLevel }) {
@@ -163,14 +177,23 @@ export default async function PracticeSlugPage({
   const problem = await getProblemBySlug(params.slug);
   if (!problem) notFound();
 
-  const examples = (problem.examples ?? []) as Example[];
+  // Every description repeats its examples in prose while the structured
+  // array carries them too, so the prose copies come out and the ASCII
+  // diagrams they hide move onto the example they belong to.
+  const statement = stripEmbeddedExamples(problem.description);
+  const structuredExamples = (problem.examples ?? []) as Example[];
+  const diagrams = diagramsForExamples(problem.description, structuredExamples);
+  const examples: Example[] = structuredExamples.map((example, i) => ({
+    ...example,
+    diagram: diagrams[i],
+  }));
   const complexity = (problem.optimal_complexity ?? {}) as OptimalComplexity;
   const companyTags = problem.company_tags ?? [];
   const constraints = problem.constraints ?? [];
 
   // Compile markdown description
   const { content: descriptionContent } = await compileMDX({
-    source: problem.description,
+    source: statement,
     options: { mdxOptions: { remarkPlugins: [remarkGfm] } },
   });
 
@@ -301,107 +324,59 @@ export default async function PracticeSlugPage({
         )}
       </header>
 
-      {/* Problem description */}
-      <section className="mb-10">
+      {/* Problem statement */}
+      <section className="mb-12">
         <div
           className="
-            prose prose-invert prose-lg max-w-none
+            prose prose-invert max-w-none
+            prose-p:text-[17px] prose-p:leading-[1.72] prose-p:text-brand-muted
             prose-headings:font-heading prose-headings:text-brand-text
-            prose-p:text-brand-muted prose-p:leading-relaxed
             prose-strong:text-brand-text prose-strong:font-semibold
+            prose-em:text-brand-text prose-em:italic
             prose-a:text-brand-cyan prose-a:no-underline hover:prose-a:underline
-            prose-li:text-brand-muted prose-li:marker:text-brand-cyan
-            prose-code:text-brand-cyan prose-code:bg-brand-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-mono prose-code:text-[0.9em] prose-code:before:content-none prose-code:after:content-none
-            prose-pre:bg-brand-surface prose-pre:border prose-pre:border-brand-border prose-pre:rounded-xl
+            prose-ul:my-5 prose-ol:my-5 prose-li:my-1
+            prose-li:text-[17px] prose-li:leading-[1.72] prose-li:text-brand-muted prose-li:marker:text-brand-cyan
+            prose-code:rounded prose-code:bg-brand-card prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-[0.85em] prose-code:font-normal prose-code:text-brand-cyan prose-code:before:content-none prose-code:after:content-none
+            prose-pre:overflow-x-auto prose-pre:rounded-xl prose-pre:border prose-pre:border-brand-border prose-pre:bg-brand-surface prose-pre:px-4 prose-pre:py-3.5 prose-pre:font-mono prose-pre:text-[13px] prose-pre:leading-[1.7] prose-pre:text-brand-muted
+            [&_pre_code]:rounded-none [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[1em] [&_pre_code]:font-normal [&_pre_code]:text-inherit
+            prose-hr:border-brand-border
+            prose-table:text-sm prose-th:text-brand-text prose-td:text-brand-muted
           "
         >
           {descriptionContent}
         </div>
       </section>
 
-      {/* Examples */}
-      {examples.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-lg font-semibold font-heading text-brand-text mb-4">
-            Examples
-          </h2>
-          <div className="space-y-4">
-            {examples.map((ex, i) => (
-              <div
-                key={i}
-                className="glass-card p-5 space-y-2"
-              >
-                <p className="text-xs font-semibold text-brand-muted uppercase tracking-wide">
-                  Example {i + 1}
-                </p>
-                <div className="text-sm font-mono">
-                  <p className="text-brand-muted">
-                    <span className="text-brand-text font-semibold">Input:</span>{" "}
-                    {ex.input}
-                  </p>
-                  <p className="text-brand-muted mt-1">
-                    <span className="text-brand-text font-semibold">Output:</span>{" "}
-                    {ex.output}
-                  </p>
-                  {ex.explanation && (
-                    <p className="text-brand-muted mt-1">
-                      <span className="text-brand-text font-semibold">
-                        Explanation:
-                      </span>{" "}
-                      {ex.explanation}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <ProblemExamples examples={examples} />
 
-      {/* Constraints */}
-      {constraints.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-lg font-semibold font-heading text-brand-text mb-4">
-            Constraints
-          </h2>
-          <ul className="space-y-1.5">
-            {constraints.map((c, i) => (
-              <li
-                key={i}
-                className="text-sm text-brand-muted font-mono flex items-start gap-2"
-              >
-                <span className="text-brand-cyan mt-0.5 shrink-0">-</span>
-                {c}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <ProblemConstraints constraints={constraints} />
 
       {/* Complexity */}
       {(complexity.time || complexity.space) && (
-        <section className="mb-10">
-          <h2 className="text-lg font-semibold font-heading text-brand-text mb-4">
-            Optimal Complexity
-          </h2>
-          <div className="flex flex-wrap gap-4">
+        <section className="mb-12">
+          <SectionLabel>Optimal complexity</SectionLabel>
+          <div className="grid gap-3 sm:grid-cols-2">
             {complexity.time && (
-              <div className="glass-card px-5 py-3 flex items-center gap-3">
-                <Clock className="w-4 h-4 text-brand-cyan shrink-0" />
+              <div className="flex items-center gap-3 rounded-xl border border-brand-border bg-brand-surface px-4 py-3">
+                <Clock className="h-4 w-4 shrink-0 text-brand-cyan" />
                 <div>
-                  <p className="text-xs text-brand-muted">Time</p>
-                  <p className="text-sm font-mono text-brand-text font-semibold">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand-subtle">
+                    Time
+                  </p>
+                  <p className="mt-0.5 font-mono text-sm font-semibold text-brand-text">
                     {complexity.time}
                   </p>
                 </div>
               </div>
             )}
             {complexity.space && (
-              <div className="glass-card px-5 py-3 flex items-center gap-3">
-                <BarChart3 className="w-4 h-4 text-brand-green shrink-0" />
+              <div className="flex items-center gap-3 rounded-xl border border-brand-border bg-brand-surface px-4 py-3">
+                <BarChart3 className="h-4 w-4 shrink-0 text-brand-green" />
                 <div>
-                  <p className="text-xs text-brand-muted">Space</p>
-                  <p className="text-sm font-mono text-brand-text font-semibold">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand-subtle">
+                    Space
+                  </p>
+                  <p className="mt-0.5 font-mono text-sm font-semibold text-brand-text">
                     {complexity.space}
                   </p>
                 </div>
