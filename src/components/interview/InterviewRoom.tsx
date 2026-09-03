@@ -32,7 +32,10 @@ import {
   parseInterviewPhase,
   resolveAgentPhase,
 } from "@/lib/interview-phases";
-import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
+import {
+  buildVoiceSystemPrompt,
+  hasPresentedProblem,
+} from "@/lib/ai/interviewer-system-prompt";
 import { getLiveInterviewModel } from "@/lib/ai/models";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
 import type { RoundScoreDimension } from "@/lib/constants";
@@ -286,6 +289,14 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   const hasCandidateCode = isCodingRound && code.trim().length > 0;
 
+  // Read from the transcript rather than the phase: an agent that presents the
+  // problem but never calls set_interview_phase used to leave the INTRO
+  // instruction armed, and it narrated the problem again on the next turn.
+  const problemAlreadyPresented = useMemo(
+    () => hasPresentedProblem(chatMessages, activeProblem?.title),
+    [chatMessages, activeProblem?.title],
+  );
+
   const shouldSendOpeningTurnRef = useRef(false);
 
   const agentSettings = useMemo<DeepgramVoiceAgentSettings>(
@@ -300,6 +311,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           hasWorkspaceNotes: !isCodingRound,
           totalMinutes: Math.round(maxDuration / 60),
           interviewerPersonaId: interviewer.id,
+          problemAlreadyPresented,
         },
       ),
       thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
@@ -315,6 +327,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       hasCandidateCode,
       isCodingRound,
       maxDuration,
+      problemAlreadyPresented,
       interviewer,
       storeConfig?.isFreeInterview,
       roundType,

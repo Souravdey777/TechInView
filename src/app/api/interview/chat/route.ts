@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { type InterviewPhase, parseInterviewPhase } from "@/lib/interview-phases";
-import { buildChatSystemPrompt, type ProblemPayload } from "@/lib/ai/interviewer-system-prompt";
+import {
+  buildChatSystemPrompt,
+  hasPresentedProblem,
+  type ProblemPayload,
+} from "@/lib/ai/interviewer-system-prompt";
 import type { RoundType } from "@/lib/constants";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import {
@@ -92,6 +96,12 @@ export async function POST(request: Request) {
       minutesElapsed: minutes,
       totalMinutes,
       interviewerPersonaId: interviewerPersona,
+      // Same guard as the voice path: derived from the transcript, so a phase
+      // that never advances cannot re-arm the "present the problem" instruction.
+      problemAlreadyPresented: hasPresentedProblem(
+        conversationHistory ?? [],
+        (problem as ProblemPayload)?.title,
+      ),
     });
 
     const messages: Anthropic.MessageParam[] = [

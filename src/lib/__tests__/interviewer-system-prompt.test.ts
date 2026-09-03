@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildChatSystemPrompt,
   buildVoiceSystemPrompt,
+  hasPresentedProblem,
   type ProblemPayload,
 } from "../ai/interviewer-system-prompt";
 
@@ -107,4 +108,83 @@ test("presented-problem phase forbids unsolicited repetition", () => {
   assert.match(voicePrompt, /problem has already been presented/i);
   assert.match(voicePrompt, /Never repeat its title, statement, examples, or constraints/i);
   assert.match(voicePrompt, /finish saying the problem exactly once before calling `set_interview_phase`/i);
+});
+
+// ─── Repeated problem narration ───────────────────────────────────────────────
+
+test("hasPresentedProblem only counts interviewer turns", () => {
+  const title = "Two Sum";
+  assert.equal(
+    hasPresentedProblem(
+      [{ role: "candidate", content: "I have done Two Sum before" }],
+      title,
+    ),
+    false,
+    "the candidate naming the problem is not the interviewer presenting it",
+  );
+  assert.equal(
+    hasPresentedProblem(
+      [{ role: "interviewer", content: "Let's look at Two Sum. Given an array..." }],
+      title,
+    ),
+    true,
+  );
+  assert.equal(
+    hasPresentedProblem(
+      [{ role: "assistant", content: "Today's question is TWO  SUM!" }],
+      title,
+    ),
+    true,
+    "matching ignores case, punctuation and extra whitespace",
+  );
+});
+
+test("hasPresentedProblem is false before the problem is named", () => {
+  assert.equal(
+    hasPresentedProblem(
+      [
+        { role: "interviewer", content: "Hi, tell me about your experience." },
+        { role: "candidate", content: "Eight years of backend work." },
+      ],
+      "Two Sum",
+    ),
+    false,
+  );
+  assert.equal(hasPresentedProblem([], "Two Sum"), false);
+  assert.equal(hasPresentedProblem([{ role: "interviewer", content: "x" }], ""), false);
+});
+
+test("INTRO stops instructing narration once the problem was presented", () => {
+  const base = {
+    roundType: "coding" as const,
+    problem,
+    currentPhase: "INTRO",
+    totalMinutes: 45,
+  };
+
+  const first = buildVoiceSystemPrompt(base);
+  assert.match(first, /present the problem exactly once/i);
+
+  const again = buildVoiceSystemPrompt({ ...base, problemAlreadyPresented: true });
+  assert.doesNotMatch(
+    again,
+    /present the problem exactly once/i,
+    "an INTRO phase that never advanced must not re-arm narration",
+  );
+  assert.match(again, /already been presented/i);
+  assert.match(again, /set_interview_phase/);
+});
+
+test("both transports share the already-presented instruction", () => {
+  const base = {
+    roundType: "coding" as const,
+    problem,
+    currentPhase: "INTRO",
+    totalMinutes: 45,
+    problemAlreadyPresented: true,
+  };
+  for (const prompt of [buildVoiceSystemPrompt(base), buildChatSystemPrompt(base)]) {
+    assert.match(prompt, /already been presented/i);
+    assert.doesNotMatch(prompt, /present the problem exactly once/i);
+  }
 });
