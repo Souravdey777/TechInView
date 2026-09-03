@@ -3,13 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import { Calendar, Clock, Tag } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import {
   buildBlogPostingAndBreadcrumbJsonLd,
   wordCountFromMarkdownBody,
 } from "@/lib/blog-seo";
 import { getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/blog";
+import { extractHeadings } from "@/lib/blog-taxonomy";
+import { PostToc } from "@/components/blog/PostToc";
 import { RelatedProblems } from "@/components/blog/RelatedProblems";
 
 type BlogPostPageProps = {
@@ -102,9 +104,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     },
   });
 
-  const related = getAllPosts()
-    .filter((p) => p.slug !== post.slug)
-    .slice(0, 3);
+  const allPosts = getAllPosts();
+  const headings = extractHeadings(post.body);
+
+  // same topic first, then most recent, so "related" means something
+  const related = [
+    ...allPosts.filter((p) => p.slug !== post.slug && p.topic === post.topic),
+    ...allPosts.filter((p) => p.slug !== post.slug && p.topic !== post.topic),
+  ].slice(0, 3);
 
   const keywords = buildPostKeywords(post);
   const wordCount = wordCountFromMarkdownBody(post.body);
@@ -121,99 +128,140 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   });
 
   return (
-    <article className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       <Link
         href="/blog"
-        className="text-sm text-brand-muted hover:text-brand-cyan transition-colors mb-8 inline-block"
+        className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-cyan"
       >
-        ← All posts
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        All posts
       </Link>
 
-      <header className="mb-10 pb-10 border-b border-brand-border">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-brand-muted mb-4">
-          <span className="inline-flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" aria-hidden />
-            <time dateTime={post.date}>{formatDate(post.date)}</time>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" aria-hidden />
-            {post.readingTimeMinutes} min read
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-brand-cyan/90">
-            <Tag className="w-3.5 h-3.5" aria-hidden />
-            {post.keyword}
-          </span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold font-heading text-brand-text leading-tight mb-4">
-          {post.title}
-        </h1>
-        <p className="text-lg text-brand-muted leading-relaxed">
-          {post.description}
-        </p>
-      </header>
+      <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-14">
+        <article className="min-w-0">
+          <header className="border-b border-brand-border pb-9">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11px] tracking-wide text-brand-muted">
+              <span className="inline-flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <time dateTime={post.date}>{formatDate(post.date)}</time>
+              </span>
+              <span className="h-3 w-px bg-brand-border" aria-hidden />
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {post.readingTimeMinutes} min read
+              </span>
+              <span className="h-3 w-px bg-brand-border" aria-hidden />
+              <span className="text-brand-cyan">{post.topic}</span>
+            </div>
 
-      <div
-        className="
-          prose prose-invert prose-lg max-w-none
-          prose-headings:font-heading prose-headings:text-brand-text prose-headings:scroll-mt-24
-          prose-p:text-brand-muted prose-p:leading-relaxed
-          prose-strong:text-brand-text prose-strong:font-semibold
-          prose-a:text-brand-cyan prose-a:no-underline hover:prose-a:underline
-          prose-li:text-brand-muted prose-li:marker:text-brand-cyan
-          prose-blockquote:border-brand-cyan/40 prose-blockquote:text-brand-muted
-          prose-code:text-brand-cyan prose-code:bg-brand-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-mono prose-code:text-[0.9em] prose-code:before:content-none prose-code:after:content-none
-          prose-pre:bg-brand-surface prose-pre:border prose-pre:border-brand-border prose-pre:rounded-xl
-          [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none
-          prose-hr:border-brand-border
-          prose-table:text-sm
-          prose-th:text-brand-text prose-td:text-brand-muted
-        "
-      >
-        {content}
+            <h1 className="mt-6 font-heading text-3xl font-bold leading-tight tracking-tight text-brand-text sm:text-[2.75rem]">
+              {post.title}
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-brand-muted">
+              {post.description}
+            </p>
+
+            {post.tags?.length ? (
+              <ul className="m-0 mt-7 flex list-none flex-wrap gap-2 p-0">
+                {post.tags.map((tag) => (
+                  <li
+                    key={tag}
+                    className="rounded-lg border border-brand-border px-2.5 py-1 font-mono text-[11px] text-brand-muted"
+                  >
+                    {tag}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </header>
+
+          <div
+            className="
+              prose prose-invert prose-lg mt-10 max-w-none
+              prose-headings:font-heading prose-headings:text-brand-text prose-headings:scroll-mt-24
+              prose-p:text-brand-muted prose-p:leading-relaxed
+              prose-strong:text-brand-text prose-strong:font-semibold
+              prose-a:text-brand-cyan prose-a:no-underline hover:prose-a:underline
+              prose-li:text-brand-muted prose-li:marker:text-brand-cyan
+              prose-blockquote:border-brand-cyan/40 prose-blockquote:text-brand-muted
+              prose-code:text-brand-cyan prose-code:bg-brand-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-mono prose-code:text-[0.9em] prose-code:before:content-none prose-code:after:content-none
+              prose-pre:bg-brand-surface prose-pre:border prose-pre:border-brand-border prose-pre:rounded-xl
+              [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none
+              prose-hr:border-brand-border
+              prose-table:text-sm
+              prose-th:text-brand-text prose-td:text-brand-muted
+            "
+          >
+            {content}
+          </div>
+
+          <RelatedProblems keyword={post.keyword} />
+        </article>
+
+        <aside className="flex flex-col gap-5 lg:sticky lg:top-8 lg:self-start">
+          <PostToc headings={headings} />
+
+          <div className="landing-panel p-6">
+            <div className="flex items-center gap-2.5">
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-brand-cyan shadow-sm shadow-brand-cyan/50"
+                aria-hidden
+              />
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-cyan">
+                Practice out loud
+              </span>
+            </div>
+            <p className="mt-4 text-lg font-semibold leading-snug text-brand-text">
+              Reading this is the easy half.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-brand-muted">
+              Start with free DSA practice, then switch into a voice mock
+              interview with live coding and a scored breakdown when you want
+              the full simulation.
+            </p>
+            <Link
+              href="/signup?next=/interview/setup"
+              className="mt-6 flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-cyan font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
+            >
+              Practice free
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+
+          {related.length > 0 ? (
+            <nav
+              aria-label="Related posts"
+              className="rounded-2xl border border-brand-border bg-brand-surface p-6"
+            >
+              <p className="m-0 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-muted">
+                Related
+              </p>
+              <ul className="m-0 mt-4 list-none p-0">
+                {related.map((p) => (
+                  <li key={p.slug}>
+                    <Link
+                      href={`/blog/${p.slug}`}
+                      className="group flex flex-col gap-1.5 border-t border-brand-border py-4"
+                    >
+                      <span className="text-sm font-medium leading-snug text-brand-text transition-colors group-hover:text-brand-cyan">
+                        {p.title}
+                      </span>
+                      <span className="font-mono text-[10px] tracking-wide text-brand-subtle">
+                        {p.topic} &middot; {p.readingTimeMinutes} min
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ) : null}
+        </aside>
       </div>
-
-      <aside className="mt-16 pt-10 border-t border-brand-border">
-        <p className="text-sm font-semibold text-brand-text mb-4">
-          Practice out loud with an AI interviewer
-        </p>
-        <p className="text-sm text-brand-muted mb-6 leading-relaxed">
-          TechInView lets you start with free DSA practice, then switch into
-          voice mock interviews with live coding and structured feedback when
-          you want the full simulation.
-        </p>
-        <Link
-          href="/login"
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep text-sm font-semibold hover:bg-cyan-300 transition-colors"
-        >
-          Practice free
-        </Link>
-      </aside>
-
-      <RelatedProblems keyword={post.keyword} />
-
-      {related.length > 0 ? (
-        <nav className="mt-14" aria-label="Related posts">
-          <h2 className="text-sm font-semibold text-brand-muted uppercase tracking-wide mb-4">
-            More on the blog
-          </h2>
-          <ul className="space-y-3">
-            {related.map((p) => (
-              <li key={p.slug}>
-                <Link
-                  href={`/blog/${p.slug}`}
-                  className="text-brand-cyan hover:underline text-sm font-medium"
-                >
-                  {p.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      ) : null}
-    </article>
+    </div>
   );
 }
