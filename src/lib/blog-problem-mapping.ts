@@ -49,6 +49,21 @@ export const BLOG_KEYWORD_TO_CATEGORIES: Record<string, ProblemCategory[]> = {
 
   // software-engineer-take-home-assignment-tips.mdx
   "software engineer take home assignment": [],
+
+  // data-structure-decision-guide.mdx
+  "data structures for coding interviews": ["arrays", "strings", "trees", "heap", "stacks-queues"],
+
+  // stuck-in-a-coding-interview-recovery.mdx
+  "stuck in coding interview": ["arrays", "strings", "dp"],
+
+  // technical-qa-interview-round-prep.mdx
+  "technical Q&A interview": [],
+
+  // engineering-manager-interview-questions.mdx
+  "engineering manager interview questions": [],
+
+  // job-description-interview-prep.mdx
+  "job description interview prep": [],
 };
 
 export function getCategoriesForKeyword(keyword: string): ProblemCategory[] {

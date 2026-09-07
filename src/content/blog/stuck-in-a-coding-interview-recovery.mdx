@@ -1,0 +1,87 @@
+---
+title: "Stuck in a Coding Interview: A Recovery Playbook"
+description: "What to do in the ninety seconds after you freeze: three recovery moves, how to take a hint without losing points, and what interviewers actually deduct for."
+date: "2026-06-05"
+keyword: "stuck in coding interview"
+topic: "Coding craft"
+tags:
+  - blanking in an interview
+  - taking hints interview
+  - coding interview mistakes
+  - interview recovery script
+---
+
+Everyone gets **stuck in coding interview** rounds. Strong candidates are not the ones who never stall — they are the ones whose stall lasts forty seconds instead of eight minutes, and who narrate their way out of it. The deduction almost never comes from being stuck. It comes from **going silent while stuck**.
+
+## First, name which kind of stuck you are
+
+The recovery move is different for each, so diagnose before you thrash:
+
+| Kind | Symptom | The move |
+|---|---|---|
+| No approach | You have read the problem three times and have nothing | Solve a smaller version by hand |
+| Approach won’t scale | You have a brute force and no idea how to improve it | Attack the redundant work |
+| Bug you cannot find | Logic looks right, output is wrong | Trace one input, out loud, on paper |
+| Wrong turn | Ten minutes into an approach that is collapsing | Say so, and cost the retreat |
+
+## The ninety-second protocol
+
+When your mind goes blank, do this instead of freezing:
+
+1. **Say the words “let me think about this out loud for a second.”** You have now bought yourself silence that reads as deliberate rather than lost.
+2. **Restate what you know.** Inputs, constraints, the output shape, and what you have already ruled out. Half the time the missing idea falls out of this.
+3. **Shrink the problem.** Solve n = 2 or n = 3 by hand. Concrete examples break abstraction locks better than staring does.
+4. **Say what would unblock you.** “I think I need a way to look up the complement in constant time” invites a hint that costs you almost nothing, because you supplied the direction.
+
+That last step is the whole trick. An interviewer who hears a specific blocker gives a specific nudge. An interviewer watching silence has to decide whether you are thinking or drowning — and they will assume the worse of the two.
+
+## Attacking redundant work
+
+When the brute force is obvious but the optimisation is not, ask: **what am I recomputing?**
+
+- Recomputing a lookup → hash map or set
+- Recomputing a sum over a range → prefix sums
+- Recomputing a min or max in a window → deque or heap
+- Recomputing an entire subproblem → memoisation
+- Rescanning after every insert → keep the collection sorted, or use a heap
+
+Almost every “optimal” interview solution is one of those five. Walk the list aloud; it is a search you can perform under stress, and it pairs directly with the [structure decision guide](/blog/data-structure-decision-guide).
+
+## Taking a hint without losing points
+
+Hints are priced by what you do with them, not by receiving them. Two responses to the same nudge:
+
+> “Oh, a hash map. Okay.” — then silently typing.
+
+> “A hash map — so I trade O(n) memory for constant lookup, which drops me from O(n²) to O(n). Let me redo the loop with that.” — then typing.
+
+Same hint. The second one recovers most of the signal, because you extended the idea instead of just accepting it. This is the same [thinking-out-loud discipline](/blog/coding-interview-communication) that carries the rest of the round.
+
+## What actually costs you
+
+- **Silence longer than about thirty seconds.** The interviewer cannot score what they cannot hear.
+- **Defending a dead approach** after it is clearly failing. Retreating costs two minutes; stubbornness costs the round.
+- **Guess-and-check debugging.** Randomly flipping `<` to `<=` tells the panel you do not have a model of your own code.
+- **Abandoning a working brute force** with eight minutes left because it is not optimal. Shipping something correct beats an elegant half-solution.
+
+## Rehearse being stuck
+
+You cannot practise recovery on problems you can already solve. Deliberately pick problems slightly above your level, set a timer, and **require yourself to keep talking** for the full session. Recording it is uncomfortable and unusually effective. This is precisely the failure mode that silent practice never touches — [pressure has to be trained](/blog/coding-interview-pressure-live-coding).
+
+## FAQ
+
+### How long should I struggle before asking for help?
+
+Two to three minutes of visible, narrated effort. Past that you are burning clock that you need for implementation.
+
+### Does asking for a hint mean I failed?
+
+No. Interviewers expect to collaborate. Unprompted silence and unrecoverable stubbornness are what sink candidates.
+
+### What if I finish nothing?
+
+A clearly explained approach with partial code still scores on communication and problem solving. State your remaining plan before time runs out.
+
+---
+
+**Summary:** Being **stuck in coding interview** rounds is normal; going quiet is what costs you. Diagnose the kind of stuck, narrate, shrink the problem, name your blocker, and extend any hint you are given.
