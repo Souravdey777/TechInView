@@ -166,7 +166,7 @@ export default async function DashboardPage() {
     await Promise.all([
       supabase
         .from("profiles")
-        .select("interview_credits, has_used_free_trial")
+        .select("display_name, interview_credits, has_used_free_trial")
         .eq("id", user.id)
         .single(),
       getDashboardInterviews(supabase, user.id),
@@ -181,6 +181,13 @@ export default async function DashboardPage() {
 
   const credits = profile?.interview_credits ?? 0;
   const isFreeTrialUser = !(profile?.has_used_free_trial ?? false);
+  // Onboarding fills display_name, but OAuth metadata covers profiles created
+  // before that step ran.
+  const displayName =
+    profile?.display_name?.trim() ||
+    (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+    (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
+    null;
 
   const attempts = practiceAttempts.map((attempt) => ({
     id: attempt.id,
@@ -208,6 +215,7 @@ export default async function DashboardPage() {
 
   const summary = buildDashboardSummary({
     rounds,
+    displayName,
     completedCount: completedCount.count ?? undefined,
     activityDates: [
       ...rounds.filter((round) => round.status === "completed").map((round) => round.timestamp),

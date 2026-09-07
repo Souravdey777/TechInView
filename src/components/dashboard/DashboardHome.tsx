@@ -52,8 +52,11 @@ export function DashboardHome({
         <div className="min-w-0">
           <MonoLabel>Studio</MonoLabel>
           <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
-            {summary.headline}
+            {summary.greeting}
           </h1>
+          <p className="mt-2 font-heading text-lg font-semibold tracking-tight text-brand-text/90">
+            {summary.headline}
+          </p>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
             {summary.insight}
           </p>

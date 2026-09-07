@@ -62,6 +62,7 @@ export type DimensionAverage = {
 };
 
 export type DashboardSummary = {
+  greeting: string;
   headline: string;
   insight: string;
   meters: DashboardMeter[];
@@ -195,6 +196,25 @@ function buildDimensionsFootnote(dimensions: readonly DimensionAverage[]) {
   return `${below.length} dimensions sit below the hire line of ${HIRE_LINE}. Start with ${weakest.label} at ${weakest.average}; the lowest one drags the weighted score hardest.`;
 }
 
+/** First name only — a full legal name reads stiff in a greeting. */
+function toFirstName(displayName: string | null | undefined) {
+  const first = (displayName ?? "").trim().split(/\s+/)[0] ?? "";
+  return first.length > 0 ? first : null;
+}
+
+function buildGreeting(
+  displayName: string | null | undefined,
+  totalCompleted: number
+) {
+  const name = toFirstName(displayName);
+
+  if (totalCompleted === 0) {
+    return name ? `Welcome, ${name}.` : "Welcome to your studio.";
+  }
+
+  return name ? `Welcome back, ${name}.` : "Welcome back.";
+}
+
 function buildInsight(
   dimensions: readonly DimensionAverage[],
   scoredCount: number
@@ -220,11 +240,14 @@ export function buildDashboardSummary({
   problemsSolved,
   problemsTotal,
   completedCount,
+  displayName,
 }: {
   rounds: readonly DashboardRound[];
   activityDates: readonly string[];
   problemsSolved: number;
   problemsTotal: number;
+  /** Profile name used to greet the user; the greeting drops it when absent. */
+  displayName?: string | null;
   /** Total completed rounds on the account, when it exceeds the fetched window. */
   completedCount?: number;
 }): DashboardSummary {
@@ -307,6 +330,7 @@ export function buildDashboardSummary({
   ];
 
   return {
+    greeting: buildGreeting(displayName, totalCompleted),
     headline:
       totalCompleted === 0
         ? "Your first take is one round away."
