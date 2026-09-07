@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import {
   buildBlogPostingAndBreadcrumbJsonLd,
+  serializeJsonLd,
   wordCountFromMarkdownBody,
 } from "@/lib/blog-seo";
 import { getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/blog";
@@ -135,7 +136,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       <Link

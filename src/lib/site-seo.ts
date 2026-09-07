@@ -1,7 +1,11 @@
 /** Site-level structured data for the marketing home page. */
 
 import { CREDIT_PACKS, PACK_IDS } from "@/lib/constants";
-import { DEFAULT_OG_IMAGE_PATH, absoluteUrl } from "@/lib/blog-seo";
+import {
+  DEFAULT_OG_IMAGE_PATH,
+  absoluteUrl,
+  buildFaqPageNode,
+} from "@/lib/blog-seo";
 
 const APPLICATION_DESCRIPTION =
   "Voice-first AI mock interviews for software engineers: live coding rounds with a real-time AI interviewer, code execution against tests, and FAANG-calibrated scoring across five dimensions.";
@@ -102,15 +106,7 @@ export function buildHomeJsonLd(input: {
   ];
 
   if (input.faq.length > 0) {
-    graph.push({
-      "@type": "FAQPage",
-      "@id": `${input.baseUrl}#faq`,
-      mainEntity: input.faq.map((entry) => ({
-        "@type": "Question",
-        name: entry.question,
-        acceptedAnswer: { "@type": "Answer", text: entry.answer },
-      })),
-    });
+    graph.push(buildFaqPageNode(`${input.baseUrl}#faq`, input.faq));
   }
 
   return { "@context": "https://schema.org", "@graph": graph };

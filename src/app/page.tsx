@@ -24,6 +24,7 @@ import { Pricing } from "@/components/landing/Pricing";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
 import { getRegionForCountry } from "@/lib/constants";
 import { buildHomeJsonLd } from "@/lib/site-seo";
+import { serializeJsonLd } from "@/lib/blog-seo";
 import {
   INTERVIEWER_PERSONAS,
   getInterviewerPersona,
@@ -272,7 +273,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
     <div className="min-h-screen [overflow-x:clip] bg-brand-deep text-brand-text">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <a
         href="#main"

@@ -8,6 +8,33 @@ export function absoluteUrl(baseUrl: string, path: string): string {
   return `${base}${p}`;
 }
 
+/**
+ * JSON for a <script type="application/ld+json"> tag. JSON.stringify leaves
+ * `<` raw, so a literal "</script>" in content would close the tag early.
+ */
+export function serializeJsonLd(jsonLd: unknown): string {
+  return JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+}
+
+/** FAQPage node from question/answer pairs already rendered on the page. */
+export function buildFaqPageNode(
+  id: string,
+  faq: readonly { question: string; answer: string }[]
+) {
+  return {
+    "@type": "FAQPage",
+    "@id": id,
+    mainEntity: faq.map((entry) => ({
+      "@type": "Question",
+      name: entry.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: entry.answer,
+      },
+    })),
+  };
+}
+
 export function wordCountFromMarkdownBody(body: string): number {
   return body.trim().split(/\s+/).filter(Boolean).length;
 }
@@ -107,18 +134,7 @@ export function buildBlogPostingAndBreadcrumbJsonLd(input: {
   const graph: Record<string, unknown>[] = [blogPosting, breadcrumb];
 
   if (input.faq && input.faq.length > 0) {
-    graph.push({
-      "@type": "FAQPage",
-      "@id": `${pageUrl}#faq`,
-      mainEntity: input.faq.map((entry) => ({
-        "@type": "Question",
-        name: entry.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: entry.answer,
-        },
-      })),
-    });
+    graph.push(buildFaqPageNode(`${pageUrl}#faq`, input.faq));
   }
 
   return {

@@ -175,21 +175,29 @@ export function extractHeadings(body: string): BlogHeading[] {
   return headings;
 }
 
-/** Markdown -> the plain text schema.org expects in an Answer. */
+/**
+ * Markdown -> the plain text schema.org expects in an Answer.
+ *
+ * Block markers have to be stripped per line, before the lines are joined:
+ * once joined, `^`-anchored rules only match the first line.
+ */
 function markdownToPlainText(markdown: string): string {
-  return markdown
+  const text = markdown
     .split("\n")
+    // Tables carry no meaning once flattened to a sentence.
     .filter((line) => !/^\s*\|/.test(line))
-    .join(" ")
-    .replace(/^\s*[-*+]\s+/gm, "")
-    .replace(/^\s*>\s?/gm, "")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/\s+/g, " ")
-    .trim();
+    .map((line) =>
+      line
+        .replace(/^\s*>\s?/, "")
+        .replace(/^\s*(?:[-*+]|\d+\.)\s+/, "")
+    )
+    .join(" ");
+
+  return stripInlineMarkdown(text).replace(/\s+/g, " ").trim();
 }
+
+/** Headings that open an FAQ section, however the author phrased it. */
+const FAQ_HEADING = /^(faqs?|frequently asked questions)\b/i;
 
 /**
  * Pulls the `## FAQ` section's `### question` + answer pairs out of raw MDX.
@@ -221,7 +229,7 @@ export function extractFaq(body: string): BlogFaqEntry[] {
     const h2 = /^##\s+(.+?)\s*#*\s*$/.exec(line);
     if (h2) {
       flush();
-      inFaqSection = /^faq\b/i.test(stripInlineMarkdown(h2[1]));
+      inFaqSection = FAQ_HEADING.test(stripInlineMarkdown(h2[1]));
       continue;
     }
     if (!inFaqSection) continue;
