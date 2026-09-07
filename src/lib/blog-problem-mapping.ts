@@ -51,13 +51,7 @@ export const BLOG_KEYWORD_TO_CATEGORIES: Record<string, ProblemCategory[]> = {
   "software engineer take home assignment": [],
 
   // data-structure-decision-guide.mdx
-  "data structures for coding interviews": [
-    "arrays",
-    "strings",
-    "trees",
-    "heap",
-    "stacks-queues",
-  ],
+  "data structures for coding interviews": ["arrays", "strings", "trees", "heap", "stacks-queues"],
 
   // stuck-in-a-coding-interview-recovery.mdx
   "stuck in coding interview": ["arrays", "strings", "dp"],

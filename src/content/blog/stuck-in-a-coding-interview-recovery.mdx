@@ -20,7 +20,7 @@ The recovery move is different for each, so diagnose before you thrash:
 | Kind | Symptom | The move |
 |---|---|---|
 | No approach | You have read the problem three times and have nothing | Solve a smaller version by hand |
-| Approach won't scale | You have a brute force and no idea how to improve it | Attack the redundant work |
+| Approach won’t scale | You have a brute force and no idea how to improve it | Attack the redundant work |
 | Bug you cannot find | Logic looks right, output is wrong | Trace one input, out loud, on paper |
 | Wrong turn | Ten minutes into an approach that is collapsing | Say so, and cost the retreat |
 
@@ -28,10 +28,10 @@ The recovery move is different for each, so diagnose before you thrash:
 
 When your mind goes blank, do this instead of freezing:
 
-1. **Say the words "let me think about this out loud for a second."** You have now bought yourself silence that reads as deliberate rather than lost.
+1. **Say the words “let me think about this out loud for a second.”** You have now bought yourself silence that reads as deliberate rather than lost.
 2. **Restate what you know.** Inputs, constraints, the output shape, and what you have already ruled out. Half the time the missing idea falls out of this.
 3. **Shrink the problem.** Solve n = 2 or n = 3 by hand. Concrete examples break abstraction locks better than staring does.
-4. **Say what would unblock you.** "I think I need a way to look up the complement in constant time" invites a hint that costs you almost nothing, because you supplied the direction.
+4. **Say what would unblock you.** “I think I need a way to look up the complement in constant time” invites a hint that costs you almost nothing, because you supplied the direction.
 
 That last step is the whole trick. An interviewer who hears a specific blocker gives a specific nudge. An interviewer watching silence has to decide whether you are thinking or drowning — and they will assume the worse of the two.
 
@@ -45,15 +45,15 @@ When the brute force is obvious but the optimisation is not, ask: **what am I re
 - Recomputing an entire subproblem → memoisation
 - Rescanning after every insert → keep the collection sorted, or use a heap
 
-Almost every "optimal" interview solution is one of those five. Walk the list aloud; it is a search you can perform under stress, and it pairs directly with the [structure decision guide](/blog/data-structure-decision-guide).
+Almost every “optimal” interview solution is one of those five. Walk the list aloud; it is a search you can perform under stress, and it pairs directly with the [structure decision guide](/blog/data-structure-decision-guide).
 
 ## Taking a hint without losing points
 
 Hints are priced by what you do with them, not by receiving them. Two responses to the same nudge:
 
-> "Oh, a hash map. Okay." — then silently typing.
+> “Oh, a hash map. Okay.” — then silently typing.
 
-> "A hash map — so I trade O(n) memory for constant lookup, which drops me from O(n²) to O(n). Let me redo the loop with that." — then typing.
+> “A hash map — so I trade O(n) memory for constant lookup, which drops me from O(n²) to O(n). Let me redo the loop with that.” — then typing.
 
 Same hint. The second one recovers most of the signal, because you extended the idea instead of just accepting it. This is the same [thinking-out-loud discipline](/blog/coding-interview-communication) that carries the rest of the round.
 

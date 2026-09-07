@@ -28,20 +28,20 @@ Answer those four and the structure is usually forced. Say the answers aloud —
 
 | What the problem says | Reach for | Cost you accept |
 |---|---|---|
-| "Have I seen this before?" | Hash set | O(n) memory, no order |
-| "Count occurrences" | Hash map to int | Same, plus key hashing |
-| "Kth largest" / "top k" | Heap of size k | O(n log k), no random access |
-| "Next greater / previous smaller" | Monotonic stack | Reasoning is harder to explain |
-| "Sliding window of size k" | Deque | Index bookkeeping |
-| "Sorted and I need a boundary" | Binary search on the array | Sorting cost if not given sorted |
-| "Prefix / autocomplete" | Trie | Memory, and setup time in a 35-minute round |
-| "Group things that connect" | Union-find or BFS | Extra structure to justify |
+| “Have I seen this before?” | Hash set | O(n) memory, no order |
+| “Count occurrences” | Hash map to int | Same, plus key hashing |
+| “Kth largest” / “top k” | Heap of size k | O(n log k), no random access |
+| “Next greater / previous smaller” | Monotonic stack | Reasoning is harder to explain |
+| “Sliding window of size k” | Deque | Index bookkeeping |
+| “Sorted and I need a boundary” | Binary search on the array | Sorting cost if not given sorted |
+| “Prefix / autocomplete” | Trie | Memory, and setup time in a 35-minute round |
+| “Group things that connect” | Union-find or BFS | Extra structure to justify |
 
 Notice the third column. A structure choice is a **trade**, and naming the cost yourself is what separates a senior-sounding answer from a lucky one.
 
 ## Three misfires that show up constantly
 
-- **Sorting when a heap would do.** "Top 5 of 10 million" does not need a sort. Sorting is O(n log n) and throws away your streaming option.
+- **Sorting when a heap would do.** “Top 5 of 10 million” does not need a sort. Sorting is O(n log n) and throws away your streaming option.
 - **A map where a set belongs.** If you never read the value, you are telling the interviewer you did not think about what you needed.
 - **A hash map when you needed order.** Then you sort the keys at the end and quietly pay O(n log n) — after claiming O(n).
 
@@ -49,7 +49,7 @@ Notice the third column. A structure choice is a **trade**, and naming the cost 
 
 A clean two-sentence pattern, usable on any problem:
 
-> "I need membership checks by value and I do not care about order, so a hash set gives me O(1) average lookup. I am paying O(n) extra memory, and if the interviewer wants constant space I would sort first and use two pointers instead."
+> “I need membership checks by value and I do not care about order, so a hash set gives me O(1) average lookup. I am paying O(n) extra memory, and if the interviewer wants constant space I would sort first and use two pointers instead.”
 
 That second clause — the alternative you did not pick — is the part most candidates skip. It shows you chose rather than defaulted. If saying this under time pressure feels unnatural, that is a [rehearsal problem, not a knowledge problem](/blog/coding-interview-pressure-live-coding).
 
@@ -63,13 +63,13 @@ Take five random problem statements. Do not solve them. For each, write only: th
 
 Only if the constraints demand one, and only if you can implement it. Naming a structure you cannot code is a net negative.
 
-### Is a Python dict enough for every "map" question?
+### Is a Python dict enough for every “map” question?
 
 For interviews, usually yes — but know that it preserves insertion order and does **not** give you sorted iteration. Say which property you are relying on.
 
 ### How do I justify memory use?
 
-Quote the trade explicitly against the input size. "n up to 10^5, so an O(n) set is a few megabytes" ends the conversation. See the [complexity cheat sheet](/blog/time-complexity-cheat-sheet) for the arithmetic.
+Quote the trade explicitly against the input size. “n up to 10^5, so an O(n) set is a few megabytes” ends the conversation. See the [complexity cheat sheet](/blog/time-complexity-cheat-sheet) for the arithmetic.
 
 ---
 
