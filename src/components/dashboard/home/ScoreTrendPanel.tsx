@@ -31,10 +31,7 @@ function takeToX(index: number, total: number) {
   return PLOT_LEFT + (index / (total - 1)) * (PLOT_RIGHT - PLOT_LEFT);
 }
 
-/**
- * The SVG twin of getScoreColor. It lives here rather than in lib/utils because
- * Tailwind only scans src/app, src/components, and src/content for classes.
- */
+/** The SVG twin of getScoreColor, for chart marks. */
 function scoreFill(score: number) {
   if (score >= 85) return "fill-brand-green";
   if (score >= HIRE_LINE) return "fill-brand-cyan";

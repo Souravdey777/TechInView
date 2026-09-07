@@ -9,6 +9,15 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/content/**/*.{md,mdx}",
+    // Helpers here return Tailwind class strings (getScoreColor, the *_CONFIG
+    // color fields, SessionLogRow.verdictClassName, the design-system tables).
+    // Without this glob those classes are only generated when some component
+    // happens to contain the same literal, so a new one silently renders
+    // unstyled.
+    "./src/lib/**/*.{js,ts,jsx,tsx}",
+    // Test fixtures are arbitrary strings that render nothing, but they still
+    // match the extractor ("order-1" became an .order-1 rule).
+    "!./src/lib/**/__tests__/**",
   ],
   theme: {
     extend: {
