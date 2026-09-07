@@ -1,73 +1,77 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+/** Mirrors the hero, the trend rack, the category rack, and the insight pair. */
 export default function ProgressLoading() {
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
-      {/* Heading */}
-      <div className="space-y-2">
-        <Skeleton className="h-7 w-44" />
-        <Skeleton className="h-4 w-72" />
+    <div className="mx-auto max-w-6xl space-y-5">
+      {/* Hero */}
+      <div className="space-y-3">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-9 w-72" />
+        <Skeleton className="h-4 w-full max-w-xl" />
       </div>
 
-      {/* Score Trend Chart */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-4 w-4 rounded" />
-          <Skeleton className="h-5 w-28" />
+      {/* Score trend — ScoreTrendPanel's rack: chrome header, then the plot. */}
+      <div className="overflow-hidden rounded-2xl border border-brand-border bg-brand-card">
+        <div className="flex items-center justify-between border-b border-brand-border bg-brand-surface px-4 py-3 sm:px-5">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-40" />
         </div>
-        <Skeleton className="h-56 w-full rounded-xl" />
+        <div className="p-4 sm:p-5">
+          <Skeleton className="h-52 w-full rounded-md" />
+        </div>
       </div>
 
-      {/* Category Breakdown */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-4 w-4 rounded" />
-          <Skeleton className="h-5 w-40" />
+      {/* Category breakdown rack */}
+      <div className="overflow-hidden rounded-2xl border border-brand-border bg-brand-card">
+        <div className="flex items-center justify-between border-b border-brand-border bg-brand-surface px-4 py-3.5 sm:px-5">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-32" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {Array.from({ length: 10 }).map((_, i) => (
+        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-3">
+          {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
-              className="bg-brand-card rounded-xl border border-brand-border p-4 space-y-3"
+              className="rounded-xl border border-brand-border bg-brand-surface px-4 py-3.5"
             >
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
-                <div className="space-y-1.5 flex-1">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 space-y-1.5">
                   <Skeleton className="h-4 w-28" />
-                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-2.5 w-32" />
                 </div>
+                <Skeleton className="h-7 w-7 shrink-0 rounded-md" />
               </div>
-              <div className="space-y-1.5">
-                <div className="flex justify-between">
-                  <Skeleton className="h-3 w-16" />
-                  <Skeleton className="h-3 w-10" />
+              <div className="mt-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-2.5 w-16" />
+                  <Skeleton className="h-3 w-12" />
                 </div>
-                <Skeleton className="h-1.5 w-full rounded-full" />
+                <Skeleton className="h-1.5 w-full rounded-sm" />
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Strengths & Weaknesses */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Strengths & weaknesses */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {Array.from({ length: 2 }).map((_, i) => (
           <div
             key={i}
-            className="bg-brand-card rounded-xl border border-brand-border p-5 space-y-3"
+            className="overflow-hidden rounded-2xl border border-brand-border bg-brand-card"
           >
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-4 rounded" />
-              <Skeleton className="h-5 w-24" />
+            <div className="flex items-center justify-between border-b border-brand-border bg-brand-surface px-4 py-3.5 sm:px-5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-28" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 p-4 sm:p-5">
               {Array.from({ length: 3 }).map((_, j) => (
                 <div
                   key={j}
-                  className="flex items-center justify-between bg-brand-surface rounded-lg px-3 py-2"
+                  className="flex items-center justify-between rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5"
                 >
                   <Skeleton className="h-4 w-28" />
-                  <Skeleton className="h-4 w-8" />
+                  <Skeleton className="h-3 w-12" />
                 </div>
               ))}
             </div>

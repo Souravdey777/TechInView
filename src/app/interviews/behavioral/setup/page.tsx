@@ -1,4 +1,4 @@
-import { SetupPageShell } from "@/components/interviews/SetupPageShell";
+import { BehavioralSetup } from "@/components/interviews/BehavioralSetup";
 
 type PageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
@@ -6,20 +6,7 @@ type PageProps = {
 
 export default function BehavioralSetupPage({ searchParams }: PageProps) {
   const company = typeof searchParams?.company === "string" ? searchParams.company : null;
-  const role = typeof searchParams?.role === "string" ? searchParams.role : null;
-  const contextLabel = company && role ? `${company} · ${role}` : null;
+  const roleTitle = typeof searchParams?.role === "string" ? searchParams.role : null;
 
-  return (
-    <SetupPageShell
-      title="Behavioral Setup"
-      status="beta"
-      description="This setup page is reserved for general behavioral scenario prep with a standardized 45-minute format, persona selection, role context, and structured follow-ups."
-      setupHighlights={["45 min", "Scenarios", "Persona", "Role context"]}
-      primaryHref="/prep-guru"
-      primaryLabel="Ask Prep Guru"
-      secondaryHref="/dashboard"
-      secondaryLabel="Back to dashboard"
-      contextLabel={contextLabel}
-    />
-  );
+  return <BehavioralSetup initialCompany={company} initialRoleTitle={roleTitle} />;
 }

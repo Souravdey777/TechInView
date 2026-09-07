@@ -4,19 +4,17 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
-  BrainCircuit,
-  BriefcaseBusiness,
   CheckCircle2,
   Compass,
   FileQuestion,
+  Layers,
   ListChecks,
   Loader2,
   MessageSquareText,
-  Scale,
+  Quote,
   Sparkles,
   Target,
-  TrendingUp,
-  Users,
+  Wrench,
 } from "lucide-react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useInterviewStore } from "@/stores/interview-store";
@@ -37,108 +35,93 @@ import {
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import type { CompetencyReport } from "@/types";
 
-type EngineeringManagerResultsProps = {
+type BehavioralResultsProps = {
   interviewId: string;
 };
 
 type StoreLikeResult = NonNullable<
   ReturnType<typeof useInterviewStore.getState>["interviewResult"]
 >;
-type EngineeringManagerScores = StoreLikeResult["scores"];
-type EngineeringManagerTranscript = StoreLikeResult["transcript"];
+type BehavioralScores = StoreLikeResult["scores"];
+type BehavioralTranscript = StoreLikeResult["transcript"];
 
-const INTERVIEW_SELECT_COLUMNS =
-  "id, round_type, interviewer_persona, language, overall_score, scores, feedback_summary, hire_recommendation, round_title, round_context_snapshot, competency_report, company_snapshot, role_title_snapshot, messages(*)";
-
-/**
- * The shared five dimensions, relabelled for a leadership lens. A hiring
- * manager is not grading "technical depth" as implementation fluency here — the
- * same dimension is read as tradeoff reasoning behind the calls the candidate
- * made.
- */
-const ENGINEERING_MANAGER_SCORE_DIMENSIONS = {
+const BEHAVIORAL_SCORE_DIMENSIONS = {
   problem_solving: {
     ...ROUND_SCORING_DIMENSIONS.problem_solving,
-    label: "Situation Framing",
+    label: "Story Selection",
     description:
-      "How clearly each story was set up: the scope you owned, the constraint that made it hard, and why it mattered to the business.",
+      "Whether the examples you reached for actually tested the competency being asked about, at a scope worth grading.",
   },
   communication: {
     ...ROUND_SCORING_DIMENSIONS.communication,
-    label: "Stakeholder Communication",
+    label: "Story Clarity",
     description:
-      "How legibly you explained decisions, tradeoffs, and bad news to the people who had to act on them.",
+      "How cleanly each answer moved through situation, task, action, and result without wandering or needing to be restarted.",
   },
   technical_depth: {
     ...ROUND_SCORING_DIMENSIONS.technical_depth,
-    label: "Technical Judgment",
+    label: "Depth of Detail",
     description:
-      "Tradeoff reasoning behind your technical calls — why that option, what it cost — rather than implementation fluency.",
+      "How far your stories held up under follow-up: the real constraint, the option you rejected, who pushed back and why.",
   },
   execution: {
     ...ROUND_SCORING_DIMENSIONS.execution,
-    label: "Delivery Evidence",
+    label: "Evidence & Specifics",
     description:
-      "What actually shipped, the number that moved, and your own contribution as distinct from the team's.",
+      "Whether your own contribution and a measured outcome were concrete, or stayed at the level of team effort and assertion.",
   },
   judgment: {
     ...ROUND_SCORING_DIMENSIONS.judgment,
-    label: "Prioritization & Decisions",
+    label: "Reflection & Judgment",
     description:
-      "How you sequenced roadmap against quality and debt, what you cut, and how you handled conflict and escalation.",
+      "The quality of your decisions in hindsight: what you would change, what you learned, and how honestly you own the misses.",
   },
 } satisfies Record<
   RoundScoreDimension,
   { label: string; weight: number; description: string }
 >;
 
-/** Leadership-first ordering: what a hiring manager reads before anything else. */
-const ENGINEERING_MANAGER_SCORE_ORDER = [
+const BEHAVIORAL_SCORE_ORDER = [
+  "execution",
+  "technical_depth",
   "judgment",
   "communication",
-  "execution",
   "problem_solving",
-  "technical_depth",
 ] as const satisfies readonly RoundScoreDimension[];
 
-const ENGINEERING_MANAGER_SIGNAL_CARDS = [
+const BEHAVIORAL_SIGNAL_CARDS = [
+  {
+    key: "execution",
+    title: "Evidence & Specifics",
+    description: "Your own action, the numbers, and how the result was measured.",
+    icon: Quote,
+  },
+  {
+    key: "technical_depth",
+    title: "Depth of Detail",
+    description: "How well the story survived probing on the genuinely hard part.",
+    icon: Layers,
+  },
   {
     key: "judgment",
-    title: "Prioritization & Decisions",
-    description:
-      "Whether you sequenced competing asks with a real example, and named what you dropped.",
+    title: "Reflection & Judgment",
+    description: "Decision quality, honest hindsight, and what you would change.",
     icon: Compass,
   },
   {
     key: "communication",
-    title: "Stakeholder Communication",
-    description:
-      "How you aligned partners you could not instruct, and how early you surfaced risk.",
-    icon: Users,
-  },
-  {
-    key: "execution",
-    title: "Delivery Evidence",
-    description:
-      "Measurable outcomes and your own contribution, rather than effort or scope.",
-    icon: TrendingUp,
-  },
-  {
-    key: "technical_depth",
-    title: "Technical Judgment",
-    description:
-      "Tradeoff reasoning behind hard calls: the alternatives, the cost, the hindsight.",
-    icon: BrainCircuit,
+    title: "Story Clarity",
+    description: "STAR structure held under pressure, without rambling or resets.",
+    icon: MessageSquareText,
   },
 ] as const;
 
-const ENGINEERING_MANAGER_EVALUATED_SIGNALS = [
-  "Role fit and motivation: why this team, this role, now",
-  "Prioritization between roadmap, quality, and debt, backed by a real example",
-  "Stakeholder alignment and influence without formal authority",
-  "Conflict, escalation, and decisions with no perfect option",
-  "Personal contribution, measurable outcome, and hindsight in each story",
-  "The questions you asked the manager at the close",
+const BEHAVIORAL_EVALUATED_SIGNALS = [
+  "A specific past situation for every question, not a hypothetical",
+  "Your personal contribution separated from the team's",
+  "The tradeoff, the constraint, and who disagreed with you",
+  "A measurable result and how you knew it moved",
+  "What you would do differently with hindsight",
 ];
 
 function getScoreTone(score: number) {
@@ -178,7 +161,7 @@ function getScoreTone(score: number) {
   };
 }
 
-function getTranscriptStats(transcript: EngineeringManagerTranscript) {
+function getTranscriptStats(transcript: BehavioralTranscript) {
   const lastMessage = transcript[transcript.length - 1];
   const durationMinutes = lastMessage
     ? Math.max(1, Math.ceil(lastMessage.timestamp_ms / 60000))
@@ -196,32 +179,27 @@ function getTranscriptStats(transcript: EngineeringManagerTranscript) {
   };
 }
 
-function EngineeringManagerSignalSnapshot({
-  scores,
-}: {
-  scores: EngineeringManagerScores;
-}) {
+function BehavioralSignalSnapshot({ scores }: { scores: BehavioralScores }) {
   if (!scores) return null;
 
-  const signalCards = ENGINEERING_MANAGER_SIGNAL_CARDS.map((signal) => ({
+  const signalCards = BEHAVIORAL_SIGNAL_CARDS.map((signal) => ({
     ...signal,
     score: scores[signal.key]?.score,
-  })).filter(
-    (
-      signal
-    ): signal is (typeof ENGINEERING_MANAGER_SIGNAL_CARDS)[number] & { score: number } =>
-      typeof signal.score === "number"
-  );
+  })).filter((signal): signal is (typeof BEHAVIORAL_SIGNAL_CARDS)[number] & { score: number } => (
+    typeof signal.score === "number"
+  ));
 
   if (signalCards.length === 0) return null;
 
   return (
     <section>
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold">Hiring Manager Signals</h2>
-        <p className="mt-1 text-sm text-brand-muted">
-          The four things a hiring manager writes down after this round, in one scan.
-        </p>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Answer Quality</h2>
+          <p className="mt-1 text-sm text-brand-muted">
+            How your stories scored as evidence, independent of the individual competencies.
+          </p>
+        </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {signalCards.map((signal) => {
@@ -234,22 +212,18 @@ function EngineeringManagerSignalSnapshot({
               className="rounded-3xl border border-brand-border bg-brand-card p-5"
             >
               <div className="flex items-start justify-between gap-4">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${tone.border} ${tone.bg}`}
-                  >
+                <div className="flex items-center gap-3">
+                  <span className={`flex h-10 w-10 items-center justify-center rounded-xl border ${tone.border} ${tone.bg}`}>
                     <Icon className={`h-5 w-5 ${tone.text}`} />
                   </span>
-                  <div className="min-w-0">
+                  <div>
                     <h3 className="text-sm font-semibold text-brand-text">{signal.title}</h3>
-                    <p
-                      className={`mt-1 text-xs font-semibold uppercase tracking-[0.14em] ${tone.text}`}
-                    >
+                    <p className={`mt-1 text-xs font-semibold uppercase tracking-[0.14em] ${tone.text}`}>
                       {tone.label}
                     </p>
                   </div>
                 </div>
-                <span className={`shrink-0 text-2xl font-bold tabular-nums ${tone.text}`}>
+                <span className={`text-2xl font-bold tabular-nums ${tone.text}`}>
                   {signal.score}
                   <span className="text-xs font-normal text-brand-muted">/100</span>
                 </span>
@@ -271,7 +245,7 @@ function EngineeringManagerSignalSnapshot({
   );
 }
 
-function EngineeringManagerCoachingNotes({
+function BehavioralCoachingNotes({
   strengths,
   areasToImprove,
 }: {
@@ -288,14 +262,11 @@ function EngineeringManagerCoachingNotes({
         <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
           <div className="flex items-center gap-2 text-sm font-semibold text-brand-green">
             <CheckCircle2 className="h-4 w-4" />
-            Leadership Strengths
+            What Landed
           </div>
           <ul className="mt-4 space-y-3">
             {strengths.map((strength) => (
-              <li
-                key={strength}
-                className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted"
-              >
+              <li key={strength} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-green" />
                 <span>{strength}</span>
               </li>
@@ -312,10 +283,7 @@ function EngineeringManagerCoachingNotes({
           </div>
           <ul className="mt-4 space-y-3">
             {areasToImprove.map((area) => (
-              <li
-                key={area}
-                className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted"
-              >
+              <li key={area} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-amber" />
                 <span>{area}</span>
               </li>
@@ -332,17 +300,16 @@ function NoResultState() {
     <main className="min-h-screen bg-brand-deep px-4 py-12 text-brand-text">
       <div className="mx-auto flex max-w-3xl flex-col items-center justify-center rounded-3xl border border-brand-border bg-brand-card px-8 py-16 text-center">
         <FileQuestion className="h-12 w-12 text-brand-cyan" />
-        <h1 className="mt-5 text-2xl font-semibold">No Engineering Manager report found</h1>
+        <h1 className="mt-5 text-2xl font-semibold">No behavioral report found</h1>
         <p className="mt-3 max-w-md text-sm leading-relaxed text-brand-muted">
-          We couldn&apos;t find an Engineering Manager result for this session. The store may have
-          been cleared or the interview might not have been completed yet.
+          We couldn&apos;t find a behavioral result for this session. The store may have been cleared or the interview might not have been completed yet.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
-            href="/interviews/engineering-manager/setup"
+            href="/interviews/behavioral/setup"
             className="inline-flex items-center rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
           >
-            Start a new Engineering Manager round
+            Start a new behavioral round
           </Link>
           <Link
             href="/dashboard"
@@ -356,13 +323,43 @@ function NoResultState() {
   );
 }
 
+/**
+ * The competency report is stored as jsonb, so treat every field as untrusted
+ * and drop the report entirely when there are no competency rows to show.
+ */
+function parseCompetencyReport(value: unknown): CompetencyReport | null {
+  if (!value || typeof value !== "object") return null;
+
+  const candidate = value as Partial<CompetencyReport>;
+
+  if (!Array.isArray(candidate.competencies) || candidate.competencies.length === 0) {
+    return null;
+  }
+
+  return {
+    framework_id: typeof candidate.framework_id === "string" ? candidate.framework_id : "generic",
+    framework_label:
+      typeof candidate.framework_label === "string"
+        ? candidate.framework_label
+        : "Behavioural competencies",
+    competencies: candidate.competencies,
+    star_coverage: candidate.star_coverage ?? null,
+    debrief_note: typeof candidate.debrief_note === "string" ? candidate.debrief_note : "",
+    follow_up_drills: Array.isArray(candidate.follow_up_drills)
+      ? candidate.follow_up_drills
+      : [],
+    key_strengths: Array.isArray(candidate.key_strengths) ? candidate.key_strengths : [],
+    areas_to_improve: Array.isArray(candidate.areas_to_improve)
+      ? candidate.areas_to_improve
+      : [],
+  };
+}
+
 function buildDbResult(interview: Record<string, unknown>): StoreLikeResult {
-  const rawScores =
-    (interview.scores as Record<string, { score: number; feedback: string }> | null) ?? null;
+  const rawScores = (interview.scores as Record<string, { score: number; feedback: string }> | null) ?? null;
   const roundContext = (interview.round_context_snapshot as RoundContextSnapshot | null) ?? null;
   const transcript =
-    ((interview.messages as { role: string; content: string; timestamp_ms: number }[] | undefined) ??
-      []).map((message) => ({
+    ((interview.messages as { role: string; content: string; timestamp_ms: number }[] | undefined) ?? []).map((message) => ({
       role: message.role as "interviewer" | "candidate" | "system",
       content: message.content,
       timestamp_ms: message.timestamp_ms,
@@ -370,11 +367,8 @@ function buildDbResult(interview: Record<string, unknown>): StoreLikeResult {
 
   return {
     mode: "targeted_loop",
-    roundType: "hiring_manager",
-    roundTitle:
-      (interview.round_title as string | null) ??
-      roundContext?.title ??
-      "Engineering Manager Round",
+    roundType: "behavioral",
+    roundTitle: (interview.round_title as string | null) ?? roundContext?.title ?? "Behavioral Round",
     interviewId: interview.id as string,
     interviewerPersona: resolveInterviewerPersona(
       (interview.interviewer_persona as string | null | undefined) ?? null
@@ -388,45 +382,29 @@ function buildDbResult(interview: Record<string, unknown>): StoreLikeResult {
     summary: (interview.feedback_summary as string | null) ?? null,
     keyStrengths: null,
     areasToImprove: null,
+    competencyReport: parseCompetencyReport(interview.competency_report),
     testsPassed: 0,
     testsTotal: 0,
-    problemTitle: roundContext?.title ?? "Engineering Manager Round",
+    problemTitle: roundContext?.title ?? "Behavioral Round",
     problemDifficulty: "medium",
-    problemCategory: "engineering-manager",
+    problemCategory: "behavioral",
     company: (interview.company_snapshot as string | null) ?? null,
     roleTitle: (interview.role_title_snapshot as string | null) ?? null,
     loopName: null,
     loopSummary: null,
     roundContext,
-    competencyReport: normalizeCompetencyReport(interview.competency_report),
   };
 }
 
-/** Drops an empty or malformed persisted report so the panel is not rendered blank. */
-function normalizeCompetencyReport(value: unknown): CompetencyReport | null {
-  const report = (value as CompetencyReport | null | undefined) ?? null;
-
-  if (!report || !Array.isArray(report.competencies) || report.competencies.length === 0) {
-    return null;
-  }
-
-  return report;
-}
-
-export function EngineeringManagerResults({
-  interviewId,
-}: EngineeringManagerResultsProps) {
+export function BehavioralResults({ interviewId }: BehavioralResultsProps) {
   const storeResult = useInterviewStore((state) => state.interviewResult);
   const storeMatches =
-    storeResult?.interviewId === interviewId && storeResult?.roundType === "hiring_manager";
+    storeResult?.interviewId === interviewId && storeResult?.roundType === "behavioral";
   const { supabase } = useSupabase();
 
   const [dbResult, setDbResult] = useState<StoreLikeResult | null>(null);
   const [isLoading, setIsLoading] = useState(!storeMatches);
 
-  // Store-first: the round that just finished renders with no query at all. The
-  // Supabase row is only needed on a reload or a later visit, and it carries the
-  // persisted competency report so the full debrief survives either way.
   useEffect(() => {
     if (storeMatches) return;
 
@@ -435,11 +413,11 @@ export function EngineeringManagerResults({
       try {
         const { data } = await supabase
           .from("interviews")
-          .select(INTERVIEW_SELECT_COLUMNS)
+          .select("id, round_type, interviewer_persona, language, overall_score, scores, competency_report, feedback_summary, hire_recommendation, round_title, round_context_snapshot, company_snapshot, role_title_snapshot, messages(*)")
           .eq("id", interviewId)
           .single();
 
-        if (data && data.round_type === "hiring_manager" && data.round_context_snapshot) {
+        if (data && data.round_type === "behavioral" && data.round_context_snapshot) {
           setDbResult(buildDbResult(data as Record<string, unknown>));
         }
       } catch {
@@ -455,22 +433,26 @@ export function EngineeringManagerResults({
   const radarData = useMemo(() => {
     if (!result?.scores) return [];
 
-    return ENGINEERING_MANAGER_SCORE_ORDER.filter((key) => result.scores?.[key]).map((key) => ({
-      dimension: ENGINEERING_MANAGER_SCORE_DIMENSIONS[key].label,
-      score: result.scores?.[key]?.score ?? 0,
-      maxScore: 100,
-    }));
+    return BEHAVIORAL_SCORE_ORDER
+      .filter((key) => result.scores?.[key])
+      .map((key) => ({
+        dimension: BEHAVIORAL_SCORE_DIMENSIONS[key].label,
+        score: result.scores?.[key]?.score ?? 0,
+        maxScore: 100,
+      }));
   }, [result]);
 
   const feedbackCards = useMemo(() => {
     if (!result?.scores) return [];
 
-    return ENGINEERING_MANAGER_SCORE_ORDER.filter((key) => result.scores?.[key]).map((key) => ({
-      dimension: ENGINEERING_MANAGER_SCORE_DIMENSIONS[key].label,
-      score: result.scores?.[key]?.score ?? 0,
-      weight: ENGINEERING_MANAGER_SCORE_DIMENSIONS[key].weight,
-      feedback: result.scores?.[key]?.feedback ?? "",
-    }));
+    return BEHAVIORAL_SCORE_ORDER
+      .filter((key) => result.scores?.[key])
+      .map((key) => ({
+        dimension: BEHAVIORAL_SCORE_DIMENSIONS[key].label,
+        score: result.scores?.[key]?.score ?? 0,
+        weight: BEHAVIORAL_SCORE_DIMENSIONS[key].weight,
+        feedback: result.scores?.[key]?.feedback ?? "",
+      }));
   }, [result]);
 
   const transcriptStats = useMemo(
@@ -483,29 +465,33 @@ export function EngineeringManagerResults({
       <main className="flex min-h-screen items-center justify-center bg-brand-deep text-brand-text">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-brand-cyan" />
-          <p className="text-sm text-brand-muted">
-            Loading Engineering Manager report...
-          </p>
+          <p className="text-sm text-brand-muted">Loading behavioral report...</p>
         </div>
       </main>
     );
   }
 
-  if (!result || result.roundType !== "hiring_manager") {
+  if (!result || result.roundType !== "behavioral") {
     return <NoResultState />;
   }
 
   const interviewer = getInterviewerPersona(result.interviewerPersona);
   const round = result.roundContext;
-  const valueLens = round?.valuesContext ?? null;
+  // Store path carries the report the room just scored; the DB path normalizes
+  // it out of jsonb in buildDbResult. Older results have neither.
+  const competencyReport = result.competencyReport ?? null;
+  const valueLensLabel =
+    round?.valuesContext?.frameworkLabel ?? competencyReport?.framework_label ?? null;
   const hasScores = Boolean(result.overallScore !== null && result.scores);
-  // Set from the scoring response on the store path and from the persisted
-  // `competency_report` column on the DB path.
-  const competencyReport = normalizeCompetencyReport(result.competencyReport);
-  // `buildDbResult` cannot recover key strengths from the interviews row, so on
-  // a reload the report's own copy is the fallback rather than an empty list.
-  const keyStrengths = result.keyStrengths ?? competencyReport?.key_strengths ?? null;
-  const areasToImprove = result.areasToImprove ?? competencyReport?.areas_to_improve ?? null;
+  // Store copy wins while it is warm; the report's own lists survive a reload.
+  const strengths =
+    result.keyStrengths && result.keyStrengths.length > 0
+      ? result.keyStrengths
+      : competencyReport?.key_strengths ?? null;
+  const areasToImprove =
+    result.areasToImprove && result.areasToImprove.length > 0
+      ? result.areasToImprove
+      : competencyReport?.areas_to_improve ?? null;
 
   return (
     <main className="min-h-screen bg-brand-deep px-4 py-8 text-brand-text">
@@ -519,7 +505,7 @@ export function EngineeringManagerResults({
             Back to dashboard
           </Link>
           <Link
-            href="/interviews/engineering-manager/setup"
+            href="/interviews/behavioral/setup"
             className="inline-flex items-center gap-2 rounded-lg border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-text transition-colors hover:border-brand-cyan/30"
           >
             Start another round
@@ -528,16 +514,16 @@ export function EngineeringManagerResults({
 
         <section className="rounded-3xl border border-brand-border bg-brand-card p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-            Engineering Manager Report
+            Behavioral Report
           </p>
           <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
-                {round?.title ?? "Engineering Manager Round"}
+                {round?.title ?? "Behavioral Round"}
               </h1>
               <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-muted">
                 {round?.summary ??
-                  "A voice-first hiring-manager round focused on how clearly you explained impact, priorities, stakeholder alignment, and decision-making under pressure."}
+                  "A voice-first behavioural round graded on the evidence in your stories: the specific situation, your own contribution, the measurable result, and what you would do differently."}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -554,17 +540,16 @@ export function EngineeringManagerResults({
                   {result.roleTitle}
                 </span>
               ) : null}
-              {valueLens ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                  <Scale className="h-3 w-3" />
-                  {valueLens.frameworkLabel}
+              {valueLensLabel ? (
+                <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
+                  {valueLensLabel}
                 </span>
               ) : null}
               <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
                 No coding
               </span>
               <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                Voice chat
+                STAR stories
               </span>
             </div>
           </div>
@@ -591,8 +576,7 @@ export function EngineeringManagerResults({
         ) : (
           <section className="rounded-3xl border border-brand-border bg-brand-card p-7">
             <p className="text-sm text-brand-muted">
-              Scoring was not available for this Engineering Manager session, but the transcript is
-              still available below.
+              Scoring was not available for this behavioral session, but the transcript is still available below.
             </p>
           </section>
         )}
@@ -602,18 +586,18 @@ export function EngineeringManagerResults({
             {competencyReport ? (
               <CompetencyReportPanel
                 report={competencyReport}
-                title="Leadership Signals"
-                description="Each competency you chose, graded on the evidence you actually gave. A hiring manager rates a specific example with your own action and a real outcome, not a well-delivered generality."
+                title="Competency Signals"
+                description="Each competency you selected, graded only on the evidence you actually gave. A low rating means the story was missing a part an interviewer needs, not that the delivery was poor."
               />
             ) : null}
 
-            <EngineeringManagerSignalSnapshot scores={result.scores} />
+            <BehavioralSignalSnapshot scores={result.scores} />
 
             {radarData.length > 0 ? <ScoreRadar scores={radarData} /> : null}
 
             {feedbackCards.length > 0 ? (
               <section>
-                <h2 className="mb-4 text-lg font-semibold">Leadership Rubric Breakdown</h2>
+                <h2 className="mb-4 text-lg font-semibold">Behavioral Rubric Breakdown</h2>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {feedbackCards.map((card) => (
                     <FeedbackCard
@@ -628,8 +612,8 @@ export function EngineeringManagerResults({
               </section>
             ) : null}
 
-            <EngineeringManagerCoachingNotes
-              strengths={keyStrengths}
+            <BehavioralCoachingNotes
+              strengths={strengths}
               areasToImprove={areasToImprove}
             />
 
@@ -647,37 +631,9 @@ export function EngineeringManagerResults({
               </div>
               <p className="mt-3 text-sm leading-relaxed text-brand-muted">
                 {round?.rationale ??
-                  "This round tests whether the manager would take you onto the team: why you fit the role, how you prioritize, how you move people who do not report to you, and whether your examples hold up under follow-up."}
+                  "This round mirrors the dedicated behavioural interview in a real loop: one competency per question, and follow-ups until the story is specific enough to grade."}
               </p>
             </div>
-
-            {valueLens && valueLens.competencies.length > 0 ? (
-              <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  <Scale className="h-3.5 w-3.5" />
-                  Value Lens
-                </div>
-                <p className="mt-3 text-sm font-semibold text-brand-text">
-                  {valueLens.frameworkLabel}
-                </p>
-                <p className="mt-1 text-xs text-brand-muted">{valueLens.frameworkOrigin}</p>
-                <div className="mt-4 space-y-3">
-                  {valueLens.competencies.map((competency) => (
-                    <div
-                      key={competency.id}
-                      className="rounded-2xl border border-brand-border bg-brand-surface p-3"
-                    >
-                      <p className="text-sm font-semibold text-brand-text">
-                        {competency.label}
-                      </p>
-                      <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-                        {competency.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
 
             <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
@@ -686,47 +642,31 @@ export function EngineeringManagerResults({
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">
-                    Duration
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">
-                    {transcriptStats.durationLabel}
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Duration</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.durationLabel}</p>
                 </div>
                 <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">
-                    Turns
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">
-                    {transcriptStats.totalTurns}
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Turns</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.totalTurns}</p>
                 </div>
                 <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">
-                    Your answers
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">
-                    {transcriptStats.candidateTurns}
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Your turns</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.candidateTurns}</p>
                 </div>
                 <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">
-                    Questions
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">
-                    {transcriptStats.interviewerQuestions}
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Questions</p>
+                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.interviewerQuestions}</p>
                 </div>
               </div>
             </div>
 
             <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                <BriefcaseBusiness className="h-3.5 w-3.5" />
+                <Wrench className="h-3.5 w-3.5" />
                 What Was Evaluated
               </div>
               <div className="mt-4 space-y-3 text-sm text-brand-muted">
-                {ENGINEERING_MANAGER_EVALUATED_SIGNALS.map((signal) => (
+                {BEHAVIORAL_EVALUATED_SIGNALS.map((signal) => (
                   <p key={signal}>{signal}</p>
                 ))}
               </div>

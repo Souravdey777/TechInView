@@ -1,6 +1,6 @@
 # CLAUDE.md - TechInView
 
-_Last refreshed: 2026-04-16_
+_Last refreshed: 2026-09-07_
 
 ## Product Snapshot
 
@@ -34,7 +34,8 @@ prep.
 | Targeted loop generation | Live | JD-driven loop generation API and storage are implemented. |
 | Prep plans | Partial | Generator + local persistence exist, but UI still presents the feature as "coming soon". |
 | Public profiles | Live | Username-based public profile routes and profile settings exist. |
-| Behavioral rounds | Beta shell | Setup placeholder exists, full runtime not shipped. |
+| Behavioral rounds | Live | Setup, runtime, and results routes exist. Graded against a selectable value lens. |
+| Value lens + competency report | Live | Shared across Behavioral and Engineering Manager rounds. |
 | System Design rounds | Beta shell | Setup placeholder exists, full runtime not shipped. |
 | Machine coding rounds | Planned shell | Setup placeholder only. |
 
@@ -126,8 +127,11 @@ prep.
   - `/interviews/engineering-manager/setup`
   - `/interviews/engineering-manager/[id]`
   - `/interviews/engineering-manager/results/[id]`
-- Placeholder/beta setup shells:
+- Behavioral:
   - `/interviews/behavioral/setup`
+  - `/interviews/behavioral/[id]`
+  - `/interviews/behavioral/results/[id]`
+- Placeholder/beta setup shells:
   - `/interviews/system-design/setup`
   - `/interviews/machine-coding/setup`
 
@@ -169,6 +173,15 @@ prep.
   - Interview scoring orchestration.
 - `src/lib/loops/generator.ts`
   - Company + role + JD -> targeted loop generation.
+- `src/lib/interview-values.ts`
+  - Shared value/competency frameworks (Universal, Amazon LPs, Googleyness &
+    Leadership, Meta, Netflix, Startup Operator). Behaviour-led rounds pick a
+    lens here; it drives the live questions AND the competency report. The
+    prompt and rubric builders deliberately re-resolve competencies from this
+    catalog rather than trusting the client-supplied round snapshot.
+- `src/lib/behavioral.ts` and `src/lib/engineering-manager.ts`
+  - Round-specific setup catalogs and interviewer briefs for the two
+    behaviour-led rounds. Both populate `RoundContextSnapshot.valuesContext`.
 - `src/lib/dashboard/prep-plan-generator.ts`
   - Current heuristic prep-plan builder.
 - `src/hooks/usePrepPlans.ts`
@@ -201,6 +214,12 @@ The core tables are:
   - Solo practice persistence for code + test progress.
 - `interview_feedback`
   - Post-round user feedback.
+- `interviews.competency_report` (jsonb)
+  - Per-competency evidence report for behaviour-led rounds: rating, evidence,
+    gap, upgrade per competency, plus STAR coverage, an interviewer debrief
+    note, and rehearsal drills. Added by
+    `src/lib/db/migrations/0006_add_competency_report.sql` and mirrored in
+    `supabase/migrations/008_add_competency_report.sql`.
 - `payments`
   - Razorpay capture and credit attribution records.
 
@@ -244,19 +263,27 @@ The core tables are:
   unless you build it.
 - If you add a new round type, expect to update constants, setup UI, prompts,
   results routing, storage schema, and dashboard modeling together.
+- Behaviour-led rounds (behavioral, hiring_manager) share one pipeline: pick a
+  value lens at setup -> `valuesContext` on the round snapshot -> value block in
+  the live system prompt -> competency rubric in the scorer -> `CompetencyReport`
+  rendered by `src/components/results/CompetencyReportPanel.tsx`. Do not add a
+  per-round copy of any of those stages. Reuse
+  `src/components/interviews/setup/ValueLensPicker.tsx` for the picker and let
+  `RoundBriefPanel` surface the lens in the room.
 
 ## Known Gaps and Sharp Edges
 
 - `src/components/prep-plans/PrepPlansIndex.tsx` and
   `src/components/prep-plans/PrepPlanBuilder.tsx` still present Prep Plans as
   "coming soon" even though the generator and local storage hooks exist.
-- `src/lib/dashboard/models.ts` still marks several surfaces as
-  `coming_soon` even though Technical Q&A and Engineering Manager routes are
-  implemented.
+- `src/lib/dashboard/models.ts` still marks Machine Coding and System Design as
+  `coming_soon`. Technical Q&A, Engineering Manager, and Behavioral are `live`.
+  This file is the single source of truth for round entry points and results
+  routing, so round availability changes belong here.
 - `src/app/api/interview/submit/route.ts` is still a stub.
 - Java and C++ execution are not fully supported in practice mode / code run.
-- Behavioral, System Design, and Machine Coding are not full end-to-end
-  interview products yet.
+- System Design and Machine Coding are not full end-to-end interview products
+  yet.
 - Production health still depends on env completeness:
   missing Anthropic key -> mock scoring,
   missing Deepgram key -> no voice token,
@@ -273,4 +300,15 @@ The core tables are:
 - Start with `src/hooks/usePrepPlans.ts` and
   `src/lib/dashboard/prep-plan-generator.ts` for any prep-plan work.
 - Start with `src/lib/db/schema.ts` + migrations before adding any new persisted
-  round metadata.
+  round metadata. There are TWO hand-written migration sets that have drifted:
+  `src/lib/db/migrations` (drizzle-kit's `out` dir, and where the `round_type`
+  enum and the targeted-loop columns actually live) and `supabase/migrations`
+  (which has the initial schema but never got the round-type changes). Neither
+  is complete on its own, and overlapping changes are listed in both under each
+  dir's own numbering. There is no `meta/_journal.json`, so `drizzle-kit migrate`
+  is not in use — these are applied by hand.
+- `npm run db:push` currently crashes against this database: drizzle-kit 0.31.10
+  fails introspecting the `profiles_username_format` CHECK constraint (its regex
+  breaks the check-constraint parser, throwing
+  `Cannot read properties of undefined (reading 'replace')`). Apply schema
+  changes with hand-written SQL instead, or upgrade drizzle-kit first.

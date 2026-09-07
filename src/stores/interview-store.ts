@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type { InterviewMode, RoundType } from "@/lib/constants";
 import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
+import type { CompetencyReport } from "@/types";
 
 // ─── Lightweight types for the store (no heavy imports from @/types) ─────────
 
@@ -93,6 +94,12 @@ type InterviewResult = {
   loopName: string | null;
   loopSummary: LoopSummarySnapshot | null;
   roundContext: RoundContextSnapshot | null;
+  /**
+   * Per-competency evidence report for behaviour-led rounds. Carried through the
+   * store so the results page can render the full debrief immediately after a
+   * round instead of re-fetching the interviews row it was just handed.
+   */
+  competencyReport?: CompetencyReport | null;
 };
 
 // ─── Store ───────────────────────────────────────────────────────────────────

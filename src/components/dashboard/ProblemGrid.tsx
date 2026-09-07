@@ -1,257 +1,256 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { useMemo, useState } from "react";
+import { Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MonoLabel, Rack } from "@/components/shared/Rack";
 import { DIFFICULTY_CONFIG, PROBLEM_CATEGORIES } from "@/lib/constants";
-import type { DifficultyLevel, ProblemCategory } from "@/lib/constants";
-import { Search, ArrowRight, Building2 } from "lucide-react";
+import type { DifficultyLevel } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { FacetChip } from "@/components/dashboard/problems/FacetChip";
+import { ProblemBankMeters } from "@/components/dashboard/problems/ProblemBankMeters";
+import { ProblemFacetRow } from "@/components/dashboard/problems/ProblemFacetRow";
+import {
+  PROBLEM_ROW_GRID,
+  ProblemRow,
+} from "@/components/dashboard/problems/ProblemRow";
+import {
+  DIFFICULTY_TONE,
+  EMPTY_FACETS,
+  computeFacetCounts,
+  filterProblems,
+  hasActiveFacets,
+  summarizeBank,
+  type BankProblem,
+  type ProblemBankSummary,
+  type ProblemFacets,
+} from "@/components/dashboard/problems/catalogue";
 
-type Problem = {
-  id: string;
-  title: string;
-  slug: string;
-  difficulty: DifficultyLevel;
-  category: string;
-  companyTags: string[];
-  isFreeSolverEnabled: boolean;
-};
+const DIFFICULTY_ORDER: readonly (DifficultyLevel | "all")[] = [
+  "all",
+  "easy",
+  "medium",
+  "hard",
+];
+
+const FOOTER_LINK =
+  "font-mono text-[10px] uppercase tracking-[0.12em] text-brand-cyan hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-surface";
 
 type ProblemGridProps = {
-  problems: Problem[];
+  problems: BankProblem[];
+  /** Computed on the server where possible; derived here when a caller omits it. */
+  summary?: ProblemBankSummary;
 };
 
-const CATEGORY_LABELS: Record<ProblemCategory, string> = {
-  arrays: "Arrays",
-  strings: "Strings",
-  trees: "Trees",
-  graphs: "Graphs",
-  dp: "Dynamic Prog.",
-  "linked-lists": "Linked Lists",
-  "stacks-queues": "Stacks & Queues",
-  "binary-search": "Binary Search",
-  heap: "Heap / PQ",
-  backtracking: "Backtracking",
-  "sliding-window": "Sliding Window",
-  trie: "Trie",
-};
+/**
+ * The problem bank: totals, facets, and one hairline row per problem. Kept as
+ * a list rather than a card grid because seventy cards stop being scannable.
+ */
+export function ProblemGrid({ problems, summary }: ProblemGridProps) {
+  const [facets, setFacets] = useState<ProblemFacets>(EMPTY_FACETS);
 
-function DifficultyBadge({ difficulty }: { difficulty: DifficultyLevel }) {
-  const cfg = DIFFICULTY_CONFIG[difficulty];
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold",
-        cfg.bgColor,
-        cfg.color
-      )}
-    >
-      {cfg.label}
-    </span>
-  );
-}
+  const derivedSummary = useMemo(() => summarizeBank(problems), [problems]);
+  const bank = summary ?? derivedSummary;
 
-export function ProblemGrid({ problems }: ProblemGridProps) {
-  const [search, setSearch] = useState("");
-  const [difficulty, setDifficulty] = useState<DifficultyLevel | "all">("all");
-  const [category, setCategory] = useState<string>("all");
-
-  const filtered = useMemo(() => {
-    return problems.filter((p) => {
-      if (difficulty !== "all" && p.difficulty !== difficulty) return false;
-      if (category !== "all" && p.category !== category) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        const matchesTitle = p.title.toLowerCase().includes(q);
-        const matchesCompany = p.companyTags.some((t) =>
-          t.toLowerCase().includes(q)
-        );
-        if (!matchesTitle && !matchesCompany) return false;
-      }
-      return true;
-    });
-  }, [problems, difficulty, category, search]);
-
-  const counts = useMemo(() => {
-    const easy = problems.filter((p) => p.difficulty === "easy").length;
-    const medium = problems.filter((p) => p.difficulty === "medium").length;
-    const hard = problems.filter((p) => p.difficulty === "hard").length;
-    return { easy, medium, hard, total: problems.length };
+  const categories = useMemo(() => {
+    const present = new Set(problems.map((problem) => problem.category));
+    const known = (PROBLEM_CATEGORIES as readonly string[]).filter((category) =>
+      present.has(category)
+    );
+    const extra = [...present]
+      .filter(
+        (category) =>
+          !(PROBLEM_CATEGORIES as readonly string[]).includes(category)
+      )
+      .sort();
+    return [...known, ...extra];
   }, [problems]);
 
+  const counts = useMemo(
+    () => computeFacetCounts(problems, facets),
+    [problems, facets]
+  );
+  const filtered = useMemo(
+    () => filterProblems(problems, facets),
+    [problems, facets]
+  );
+
+  const isFiltered = hasActiveFacets(facets);
+  const query = facets.search.trim();
+
+  function update<K extends keyof ProblemFacets>(
+    key: K,
+    value: ProblemFacets[K]
+  ) {
+    setFacets((previous) => ({ ...previous, [key]: value }));
+  }
+
+  function clearFacets() {
+    setFacets(EMPTY_FACETS);
+  }
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold font-heading text-brand-text mb-1">
-          Problem Bank
-        </h1>
-        <p className="text-brand-muted text-sm">
-          {counts.total} problems &mdash;{" "}
-          <span className="text-brand-green">{counts.easy} easy</span>,{" "}
-          <span className="text-brand-amber">{counts.medium} medium</span>,{" "}
-          <span className="text-brand-rose">{counts.hard} hard</span>
-        </p>
-      </div>
+    <div className="space-y-5">
+      {problems.length > 0 ? <ProblemBankMeters summary={bank} /> : null}
 
-      {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-brand-border bg-brand-card p-4">
-        {/* Search */}
-        <div className="relative basis-full min-w-0 sm:flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
-          <input
-            type="text"
-            placeholder="Search problems or companies..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-brand-surface border border-brand-border rounded-lg text-brand-text text-sm placeholder:text-brand-muted focus:outline-none focus:border-brand-cyan/50"
-          />
-        </div>
+      {problems.length > 0 ? (
+        <ProblemFacetRow
+          facets={facets}
+          counts={counts}
+          categories={categories}
+          showProgress={bank.hasProgress}
+          onCategoryChange={(category) => update("category", category)}
+          onProgressChange={(progress) => update("progress", progress)}
+          onFreeOnlyChange={(freeOnly) => update("freeOnly", freeOnly)}
+        />
+      ) : null}
 
-        {/* Difficulty Filter */}
-        <div className="flex w-full flex-wrap gap-1.5 sm:w-auto">
-          {(["all", "easy", "medium", "hard"] as const).map((d) => (
-            <button
-              key={d}
-              onClick={() => setDifficulty(d)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
-                difficulty === d
-                  ? d === "easy"
-                    ? "bg-brand-green/10 text-brand-green border-brand-green/30"
-                    : d === "medium"
-                    ? "bg-brand-amber/10 text-brand-amber border-brand-amber/30"
-                    : d === "hard"
-                    ? "bg-brand-rose/10 text-brand-rose border-brand-rose/30"
-                    : "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30"
-                  : "bg-brand-surface text-brand-muted border-brand-border hover:border-brand-border/80"
-              )}
-            >
-              {d === "all" ? "All" : DIFFICULTY_CONFIG[d].label}
-            </button>
-          ))}
-        </div>
-
-        {/* Category Filter */}
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full appearance-none rounded-lg border border-brand-border bg-brand-surface pl-3 pr-8 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-cyan/50 sm:w-auto"
-        >
-          <option value="all">All Categories</option>
-          {PROBLEM_CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {CATEGORY_LABELS[cat]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Results count */}
-      {(search || difficulty !== "all" || category !== "all") && (
-        <p className="text-brand-muted text-sm">
-          Showing {filtered.length} of {problems.length} problems
-          {search && (
-            <>
-              {" "}matching &quot;{search}&quot;
-            </>
-          )}
-        </p>
-      )}
-
-      {/* Problem Grid */}
-      {filtered.length === 0 ? (
-        <div className="bg-brand-card rounded-xl border border-brand-border p-12 text-center">
-          <p className="text-brand-muted text-sm mb-2">
-            No problems match your filters.
-          </p>
-          <button
-            onClick={() => {
-              setSearch("");
-              setDifficulty("all");
-              setCategory("all");
-            }}
-            className="text-brand-cyan text-sm hover:underline"
+      <Rack
+        label={
+          <div
+            role="group"
+            aria-label="Filter by difficulty"
+            className="flex flex-wrap items-center gap-1"
           >
-            Clear filters
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((problem) => (
-            <div
-              key={problem.id}
-              className="bg-brand-card rounded-xl border border-brand-border hover:border-brand-cyan/30 transition-all duration-150 flex flex-col p-5 group"
-            >
-              {/* Title + Difficulty */}
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <h3 className="text-brand-text font-semibold text-sm leading-snug">
-                  {problem.title}
-                </h3>
-                <DifficultyBadge difficulty={problem.difficulty} />
-              </div>
+            {DIFFICULTY_ORDER.map((level) => {
+              const count =
+                level === "all"
+                  ? counts.difficulty.all
+                  : counts.difficulty[level];
+              const isActive = facets.difficulty === level;
 
-              {/* Category */}
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center px-2 py-0.5 rounded bg-brand-surface border border-brand-border text-brand-muted text-xs">
-                  {CATEGORY_LABELS[problem.category as ProblemCategory] || problem.category}
-                </span>
-                <span
-                  className={cn(
-                    "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-                    problem.isFreeSolverEnabled
-                      ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
-                      : "border-brand-amber/20 bg-brand-amber/10 text-brand-amber"
-                  )}
-                >
-                  {problem.isFreeSolverEnabled ? "Free Practice" : "AI Interview Only"}
-                </span>
-              </div>
-
-              {/* Company Tags */}
-              {problem.companyTags.length > 0 && (
-                <div className="flex items-center gap-1.5 mb-4 flex-wrap">
-                  <Building2 className="w-3.5 h-3.5 text-brand-muted shrink-0" />
-                  {problem.companyTags.slice(0, 4).map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-xs text-brand-muted"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {problem.companyTags.length > 4 && (
-                    <span className="text-xs text-brand-muted">
-                      +{problem.companyTags.length - 4}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* CTA */}
-              <div className="mt-auto space-y-2 border-t border-brand-border pt-3">
-                <Link
-                  href={
-                    problem.isFreeSolverEnabled
-                      ? `/practice/solve/${problem.slug}`
-                      : `/interview/setup?problem=${problem.slug}&dsaExperience=ai_interview`
+              return (
+                <FacetChip
+                  key={level}
+                  bare
+                  label={level === "all" ? "All" : DIFFICULTY_CONFIG[level].label}
+                  count={count}
+                  isActive={isActive}
+                  disabled={count === 0 && !isActive}
+                  toneClassName={
+                    level === "all" && !isActive
+                      ? undefined
+                      : DIFFICULTY_TONE[level]
                   }
-                  className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan text-sm font-semibold hover:bg-brand-cyan/20 transition-colors group-hover:border-brand-cyan/40"
-                >
-                  {problem.isFreeSolverEnabled ? "Practice" : "AI Interview"}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href={`/interview/setup?problem=${problem.slug}&dsaExperience=ai_interview`}
-                  className="inline-flex items-center text-xs font-medium text-brand-muted hover:text-brand-cyan"
-                >
-                  AI Interview Mode
-                </Link>
+                  className="focus-visible:ring-offset-brand-surface"
+                  onClick={() => update("difficulty", level)}
+                />
+              );
+            })}
+          </div>
+        }
+        accessory={
+          <div className="relative w-full sm:w-64">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-subtle"
+            />
+            <input
+              type="text"
+              value={facets.search}
+              onChange={(event) => update("search", event.target.value)}
+              aria-label="Search problems, categories, or companies"
+              placeholder="Search problems or companies"
+              className="h-8 w-full rounded-md border border-brand-border bg-brand-deep pl-8 pr-8 font-mono text-[11px] text-brand-text placeholder:text-brand-subtle focus:border-brand-cyan/50 focus:outline-none"
+            />
+            {query ? (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => update("search", "")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-brand-subtle hover:text-brand-text"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            ) : null}
+          </div>
+        }
+        bodyClassName="p-0"
+      >
+        {problems.length === 0 ? (
+          <div className="px-5 py-12 text-center">
+            <MonoLabel>Bank is empty</MonoLabel>
+            <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-brand-muted">
+              No problems came back from the catalogue. Reload in a moment —
+              nothing you have already solved is lost.
+            </p>
+          </div>
+        ) : (
+          <>
+            {filtered.length > 0 ? (
+              <div
+                className={cn(
+                  "hidden border-b border-brand-border bg-brand-surface/60 px-4 py-2.5 sm:px-5",
+                  PROBLEM_ROW_GRID,
+                  "lg:grid"
+                )}
+              >
+                <span aria-hidden="true" />
+                <MonoLabel className="text-[9px]">Problem</MonoLabel>
+                <MonoLabel className="text-[9px]">Category</MonoLabel>
+                <MonoLabel className="text-[9px]">Difficulty</MonoLabel>
+                <MonoLabel className="text-[9px] lg:text-right">
+                  Your tests
+                </MonoLabel>
+                <MonoLabel className="text-[9px] lg:text-right">
+                  Launch
+                </MonoLabel>
               </div>
+            ) : null}
+
+            {filtered.length === 0 ? (
+              <div className="px-5 py-12 text-center">
+                <MonoLabel>No match</MonoLabel>
+                <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-brand-muted">
+                  {query ? (
+                    <>
+                      Nothing matches{" "}
+                      <span className="text-brand-text">
+                        &ldquo;{query}&rdquo;
+                      </span>{" "}
+                      with these filters.
+                    </>
+                  ) : (
+                    "Nothing in the bank fits these filters."
+                  )}{" "}
+                  Widen one, or clear them all.
+                </p>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="mt-4"
+                  onClick={clearFacets}
+                >
+                  Clear filters
+                </Button>
+              </div>
+            ) : (
+              <div className="divide-y divide-brand-border/60">
+                {filtered.map((problem) => (
+                  <ProblemRow key={problem.id} problem={problem} />
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-brand-border bg-brand-surface/40 px-4 py-3 sm:px-5">
+              <MonoLabel>
+                {filtered.length === problems.length
+                  ? `All ${problems.length} problems`
+                  : `${filtered.length} of ${problems.length} problems`}
+              </MonoLabel>
+              {isFiltered ? (
+                <button type="button" onClick={clearFacets} className={FOOTER_LINK}>
+                  Clear filters
+                </button>
+              ) : (
+                <MonoLabel className="text-[9px] normal-case tracking-[0.08em]">
+                  Python and JavaScript run · Java and C++ are coming
+                </MonoLabel>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+          </>
+        )}
+      </Rack>
     </div>
   );
 }

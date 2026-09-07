@@ -29,11 +29,22 @@ import {
 } from "@/lib/interviewer-personas";
 import {
   DEFAULT_ENGINEERING_MANAGER_FOCUS_AREAS,
+  DEFAULT_ENGINEERING_MANAGER_REPORTING_SCOPE,
   ENGINEERING_MANAGER_DURATION_MINUTES,
   ENGINEERING_MANAGER_FOCUS_OPTIONS,
+  ENGINEERING_MANAGER_REPORTING_SCOPES,
   buildEngineeringManagerRoundContext,
   getEngineeringManagerFocusLabels,
+  type EngineeringManagerReportingScopeId,
 } from "@/lib/engineering-manager";
+import {
+  DEFAULT_VALUE_FRAMEWORK_ID,
+  MAX_VALUE_COMPETENCIES,
+  MIN_VALUE_COMPETENCIES,
+  getValueFramework,
+  type ValueFrameworkId,
+} from "@/lib/interview-values";
+import { ValueLensPicker } from "@/components/interviews/setup/ValueLensPicker";
 import { cn } from "@/lib/utils";
 import { MicrophoneSetupCheck } from "@/components/interviews/MicrophoneSetupCheck";
 
@@ -67,6 +78,15 @@ export function EngineeringManagerSetup({
   const [focusAreas, setFocusAreas] = useState<string[]>(
     DEFAULT_ENGINEERING_MANAGER_FOCUS_AREAS
   );
+  const [reportingScope, setReportingScope] = useState<EngineeringManagerReportingScopeId>(
+    DEFAULT_ENGINEERING_MANAGER_REPORTING_SCOPE
+  );
+  const [valueFrameworkId, setValueFrameworkId] = useState<ValueFrameworkId>(
+    DEFAULT_VALUE_FRAMEWORK_ID
+  );
+  const [valueCompetencyIds, setValueCompetencyIds] = useState<string[]>(() => [
+    ...getValueFramework(DEFAULT_VALUE_FRAMEWORK_ID).defaultCompetencyIds,
+  ]);
   const [interviewerPersona, setInterviewerPersona] =
     useState<InterviewerPersonaId>(DEFAULT_INTERVIEWER_PERSONA);
   const [isCreating, setIsCreating] = useState(false);
@@ -78,15 +98,28 @@ export function EngineeringManagerSetup({
         company,
         roleTitle,
         focusAreas,
+        reportingScope,
+        valueFrameworkId,
+        valueCompetencyIds,
       }),
-    [company, focusAreas, roleTitle]
+    [company, focusAreas, reportingScope, roleTitle, valueCompetencyIds, valueFrameworkId]
   );
   const selectedPersona = getInterviewerPersona(interviewerPersona);
   const selectedFocusLabels = useMemo(
     () => getEngineeringManagerFocusLabels(focusAreas),
     [focusAreas]
   );
-  const isDisabled = focusAreas.length === 0 || isCreating;
+  const selectedFramework = getValueFramework(valueFrameworkId);
+  const selectedCompetencyLabels = useMemo(
+    () =>
+      selectedFramework.competencies
+        .filter((competency) => valueCompetencyIds.includes(competency.id))
+        .map((competency) => competency.label),
+    [selectedFramework, valueCompetencyIds]
+  );
+  const hasRequiredSelections =
+    focusAreas.length > 0 && valueCompetencyIds.length >= MIN_VALUE_COMPETENCIES;
+  const isDisabled = !hasRequiredSelections || isCreating;
 
   function toggleFocusArea(value: string) {
     setFocusAreas((current) =>
@@ -96,8 +129,31 @@ export function EngineeringManagerSetup({
     );
   }
 
+  // Competency ids are framework-scoped, so switching lenses has to reset the
+  // selection to the new framework's own defaults rather than keep stale ids.
+  function handleFrameworkChange(nextFrameworkId: ValueFrameworkId) {
+    if (nextFrameworkId === valueFrameworkId) return;
+
+    setValueFrameworkId(nextFrameworkId);
+    setValueCompetencyIds([...getValueFramework(nextFrameworkId).defaultCompetencyIds]);
+  }
+
+  function toggleValueCompetency(competencyId: string) {
+    setValueCompetencyIds((current) => {
+      if (current.includes(competencyId)) {
+        return current.filter((item) => item !== competencyId);
+      }
+
+      if (current.length >= MAX_VALUE_COMPETENCIES) {
+        return current;
+      }
+
+      return [...current, competencyId];
+    });
+  }
+
   async function handleStartInterview() {
-    if (focusAreas.length === 0 || isCreating) return;
+    if (!hasRequiredSelections || isCreating) return;
 
     setIsCreating(true);
     setError(null);
@@ -190,10 +246,10 @@ export function EngineeringManagerSetup({
 
           <InterviewSetupAsideCard title="Session shape">
             <div className="mt-4 space-y-3 text-sm text-brand-muted">
-              <p>1. Warm intro and role-context calibration</p>
-              <p>2. Leadership and prioritization questions</p>
-              <p>3. Stakeholder, conflict, and judgment follow-ups</p>
-              <p>4. Role-fit close with realistic wrap-up feedback</p>
+              <p>1. Role-context calibration on what you own today</p>
+              <p>2. Decision-making and leadership deep dive</p>
+              <p>3. Outcome, prioritization, and stakeholder follow-ups</p>
+              <p>4. Role fit, then your questions for the manager</p>
             </div>
             <div className="mt-5 rounded-2xl border border-brand-border bg-brand-surface p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">
@@ -208,6 +264,17 @@ export function EngineeringManagerSetup({
                   ? selectedFocusLabels.join(", ")
                   : "Choose at least one focus area to continue."}
               </p>
+              <p className="mt-3 text-xs uppercase tracking-[0.16em] text-brand-muted">
+                Value lens
+              </p>
+              <p className="mt-1 text-sm font-semibold text-brand-text">
+                {selectedFramework.label}
+              </p>
+              <p className="mt-1 text-sm text-brand-muted">
+                {selectedCompetencyLabels.length > 0
+                  ? selectedCompetencyLabels.join(", ")
+                  : "Pick at least one competency to continue."}
+              </p>
               <p className="mt-3 text-xs text-brand-muted">
                 Interviewer: {selectedPersona.name}
               </p>
@@ -219,8 +286,10 @@ export function EngineeringManagerSetup({
             icon={<BriefcaseBusiness className="h-3.5 w-3.5" />}
           >
             <p className="mt-3 text-sm leading-relaxed text-brand-muted">
-              Strong rounds sound specific, grounded, and calm under pressure. Bring measurable
-              outcomes, tradeoff logic, and your actual role in the story.
+              This is the go/no-go conversation with the manager who would own your work. Strong
+              rounds sound specific and calm: name your own contribution, why the call was hard,
+              the number that moved, and what you would do differently. Technical questions here
+              test judgment, not implementation.
             </p>
           </InterviewSetupAsideCard>
         </>
@@ -228,7 +297,7 @@ export function EngineeringManagerSetup({
     >
       <InterviewSetupHero
         title="Engineering Manager Setup"
-        description="Build a voice-first leadership and role-fit interview around the company, role, and signal areas you want to rehearse. This full-length flow skips coding and focuses on impact, prioritization, stakeholder judgment, and concrete examples from your own work."
+        description="Build the voice-first hiring-manager round around the company, role, and value lens you want to be graded against. This full-length flow skips coding and focuses on role fit, prioritization, stakeholder judgment, and concrete examples from your own work — then closes with your questions for the manager."
         metadata={[`${ENGINEERING_MANAGER_DURATION_MINUTES} min`, "Voice chat", "Leadership"]}
         contextLabel={
           [trimOrNull(company), trimOrNull(roleTitle)].filter(Boolean).join(" · ") || null
@@ -265,6 +334,45 @@ export function EngineeringManagerSetup({
                   These are optional, but they help the round feel more like a real role-fit or
                   hiring-manager conversation.
                 </p>
+
+                <div className="mt-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
+                    What you lead today
+                  </p>
+                  <p className="mt-2 text-sm text-brand-muted">
+                    A hiring manager calibrates on this in the first two minutes. It decides
+                    whether team health and performance questions are on the table at all.
+                  </p>
+                  <div
+                    role="radiogroup"
+                    aria-label="Reporting scope"
+                    className="mt-4 grid gap-3 sm:grid-cols-3"
+                  >
+                    {ENGINEERING_MANAGER_REPORTING_SCOPES.map((scope) => {
+                      const selected = reportingScope === scope.value;
+
+                      return (
+                        <Button
+                          key={scope.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => setReportingScope(scope.value)}
+                          variant="outline"
+                          className={cn(
+                            "h-auto w-full flex-col items-start whitespace-normal rounded-2xl px-4 py-4 text-left",
+                            selected
+                              ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
+                              : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
+                          )}
+                        >
+                          <p className="text-sm font-semibold">{scope.label}</p>
+                          <p className="mt-2 text-xs leading-relaxed">{scope.description}</p>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
               </InterviewSetupSection>
 
               <InterviewSetupSection
@@ -309,6 +417,14 @@ export function EngineeringManagerSetup({
                   })}
                 </div>
               </InterviewSetupSection>
+
+              <ValueLensPicker
+                frameworkId={valueFrameworkId}
+                competencyIds={valueCompetencyIds}
+                onFrameworkChange={handleFrameworkChange}
+                onCompetencyToggle={toggleValueCompetency}
+                description="Choose the value system the hiring manager grades you against. It shapes the leadership questions asked live and the competency report you get afterwards."
+              />
 
               <InterviewSetupSection title="Interview persona" icon={<MessageSquareText className="h-3.5 w-3.5" />}>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -361,6 +477,12 @@ export function EngineeringManagerSetup({
                 <Link href="/prep-guru">Ask Prep Guru</Link>
               </Button>
             </div>
+
+            {!hasRequiredSelections && !isCreating ? (
+              <p className="mt-4 text-sm text-brand-muted">
+                Pick at least one focus area and one value competency to start the round.
+              </p>
+            ) : null}
 
             {error ? <p className="mt-4 text-sm text-brand-rose">{error}</p> : null}
     </InterviewSetupLayout>

@@ -6,6 +6,7 @@ import type {
   SupportedLanguage,
 } from "@/lib/constants";
 import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
+import type { RoundValuesContext } from "@/lib/interview-values";
 import type { ExperienceLevel } from "@/types";
 
 export type HistoricalQuestionReviewStatus = "reviewed" | "staged";
@@ -121,4 +122,10 @@ export type RoundContextSnapshot = {
   prompt: string;
   historicalQuestions: HistoricalQuestion[];
   workspaceSections: WorkspaceSection[];
+  /**
+   * Value lens the round is run and graded against. Present on behaviour-led
+   * rounds (behavioural, engineering manager); absent on coding, technical Q&A,
+   * and older stored snapshots, so every consumer must treat it as optional.
+   */
+  valuesContext?: RoundValuesContext | null;
 };

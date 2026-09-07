@@ -80,20 +80,20 @@ export const PRACTICE_CARD_CONFIGS: readonly PracticeCardConfig[] = [
   {
     kind: "engineering_manager",
     label: "Engineering Manager",
-    shortDescription: "Practice voice-first leadership, prioritization, and stakeholder questions grounded in your target role.",
-    status: "coming_soon",
+    shortDescription: "Practice voice-first leadership, prioritization, and stakeholder questions graded against the value system you choose.",
+    status: "live",
     href: "/interviews/engineering-manager/setup",
-    setupHighlights: ["Role context", "Leadership", "Stakeholder tradeoffs"],
-    ctaLabel: "Engineering manager coming soon",
+    setupHighlights: ["Role context", "Value lens", "Leadership signals"],
+    ctaLabel: "Start Engineering Manager round",
   },
   {
     kind: "behavioral",
     label: "Behavioral",
-    shortDescription: "Practice general behavioral scenarios with structured follow-ups and coaching.",
-    status: "coming_soon",
+    shortDescription: "Practice STAR-format behavioral rounds graded against Amazon LPs, Googleyness, Meta values, or a universal competency set.",
+    status: "live",
     href: "/interviews/behavioral/setup",
-    setupHighlights: ["Scenarios", "Persona", "Role context"],
-    ctaLabel: "Behavioral coming soon",
+    setupHighlights: ["Value lens", "Competencies", "STAR follow-ups"],
+    ctaLabel: "Start Behavioral round",
   },
 ] as const;
 
@@ -169,6 +169,10 @@ export function getPracticeResultsHref(kind: PracticeInterviewKind, interviewId:
 
   if (kind === "engineering_manager") {
     return `/interviews/engineering-manager/results/${interviewId}`;
+  }
+
+  if (kind === "behavioral") {
+    return `/interviews/behavioral/results/${interviewId}`;
   }
 
   return `/results/${interviewId}`;

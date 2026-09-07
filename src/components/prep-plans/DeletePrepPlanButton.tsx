@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 type DeletePrepPlanButtonProps = {
   planLabel: string;
@@ -19,6 +20,8 @@ type DeletePrepPlanButtonProps = {
   triggerLabel?: string;
   size?: ButtonProps["size"];
   variant?: ButtonProps["variant"];
+  /** Trash glyph only, with the label kept for screen readers. */
+  iconOnly?: boolean;
 };
 
 export function DeletePrepPlanButton({
@@ -27,6 +30,7 @@ export function DeletePrepPlanButton({
   triggerLabel = "Delete plan",
   size = "sm",
   variant = "destructive",
+  iconOnly = false,
 }: DeletePrepPlanButtonProps) {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -45,9 +49,16 @@ export function DeletePrepPlanButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={size} variant={variant}>
+        <Button
+          size={size}
+          variant={variant}
+          aria-label={iconOnly ? `${triggerLabel}: ${planLabel}` : undefined}
+          className={cn(
+            iconOnly && "h-8 w-8 shrink-0 px-0 text-brand-subtle hover:text-brand-rose"
+          )}
+        >
           <Trash2 className="h-3.5 w-3.5" />
-          {triggerLabel}
+          {iconOnly ? null : triggerLabel}
         </Button>
       </DialogTrigger>
 
@@ -55,8 +66,9 @@ export function DeletePrepPlanButton({
         <DialogHeader>
           <DialogTitle>Delete this prep plan?</DialogTitle>
           <DialogDescription>
-            This will permanently remove <span className="text-brand-text">{planLabel}</span> from
-            this browser and clear its saved progress.
+            This removes <span className="text-brand-text">{planLabel}</span> from this browser
+            along with its saved round progress. Plans are not synced to your account yet, so
+            there is no copy to restore it from.
           </DialogDescription>
         </DialogHeader>
 

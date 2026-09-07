@@ -157,6 +157,8 @@ export const interviews = pgTable("interviews", {
   tests_total: integer("tests_total"),
   overall_score: integer("overall_score"),
   scores: jsonb("scores"),
+  /** Per-competency evidence report for behaviour-led rounds. Null elsewhere. */
+  competency_report: jsonb("competency_report"),
   feedback_summary: text("feedback_summary"),
   hire_recommendation: hireRecommendationEnum("hire_recommendation"),
   is_free_trial: boolean("is_free_trial").default(false).notNull(),

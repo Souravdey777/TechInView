@@ -10,6 +10,7 @@ import type { RoundType } from "@/lib/constants";
 import { PHASE_ORDER_PROMPT_LIST } from "@/lib/interview-phases";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
+import { buildValuesPromptBlock } from "@/lib/interview-values";
 
 export type ProblemPayload = {
   title?: string;
@@ -194,6 +195,56 @@ function discussionPhaseInstruction(currentPhase: string, roundType: RoundType):
     }
   }
 
+  if (roundType === "behavioral") {
+    switch (currentPhase) {
+      case "INTRO":
+        return "Open warmly, say in one sentence that this round is about past experience rather than coding, then ask exactly one short calibration question about the candidate's current scope and the kind of work they own. Then stop speaking and wait.";
+      case "PROBLEM_PRESENTED":
+        return "Ask the first behavioural question for the first competency in the value lens. Phrase it as \"tell me about a time...\" or \"walk me through a specific situation where...\", scoped to one competency. Do not name the competency as a label. Then stop speaking and wait.";
+      case "CLARIFICATION":
+        return "The candidate is setting up their story. Ask exactly one probe that pins down the situation: when it happened, the scope, who else was involved, or what was at stake. Then stop speaking and wait.";
+      case "APPROACH_DISCUSSION":
+        return "Establish what the candidate personally owned. Ask exactly one probe separating their own action from the team's: what they decided, what they did with their own hands, or what would not have happened without them. Then stop speaking and wait.";
+      case "CODING":
+        return "This is the story deep dive. Ask exactly one probe for the hardest part: the tradeoff they made, who disagreed and what that person's argument was, the constraint they worked around, or the option they rejected. Then stop speaking and wait.";
+      case "TESTING":
+        return "Push for the result and the reflection. Ask exactly one probe for the measurable outcome, how they knew it worked, or what they would do differently with hindsight. If they gave no metric, ask for the number. Then stop speaking and wait.";
+      case "COMPLEXITY_ANALYSIS":
+        return "Move to the next competency in the value lens that has the least evidence so far. Ask exactly one new behavioural question for it. Then stop speaking and wait.";
+      case "FOLLOW_UP":
+        return "Cover any remaining competency in the value lens, or stress the weakest signal with one sharper variant such as \"what data did you not have that would have changed your decision?\". Ask exactly one question, then stop speaking and wait.";
+      case "WRAP_UP":
+        return "Wrap up professionally: one genuine strength you observed with the moment it came from, and one realistic gap. Invite one question from the candidate, then close.";
+      default:
+        return "Respond naturally as a behavioural interviewer.";
+    }
+  }
+
+  if (roundType === "hiring_manager") {
+    switch (currentPhase) {
+      case "INTRO":
+        return "Open as the hiring manager for this team. In one sentence say what the round covers, then ask exactly one calibration question about the candidate's current scope and what they own end to end. Then stop speaking and wait.";
+      case "PROBLEM_PRESENTED":
+        return "Ask the first substantive question, anchored to the round's focus areas and the first competency in the value lens. Prefer a real situation over a hypothetical. Then stop speaking and wait.";
+      case "CLARIFICATION":
+        return "Gather role context. Ask exactly one probe about team size, the surface they owned, the stakeholders involved, or why the work mattered to the business. Then stop speaking and wait.";
+      case "APPROACH_DISCUSSION":
+        return "Test decision-making. Ask exactly one probe about how they chose between competing options: what the alternatives were, what criteria they used, or who they had to convince. Then stop speaking and wait.";
+      case "CODING":
+        return "This is the leadership deep dive. Ask exactly one probe on the hard part: the stakeholder who pushed back, the tradeoff between speed and quality, the debt they accepted, or the person issue they had to handle. Then stop speaking and wait.";
+      case "TESTING":
+        return "Push for outcome and self-awareness. Ask exactly one probe for the measured result, what it cost, or what they would do differently. If the answer had no number, ask for the number. Then stop speaking and wait.";
+      case "COMPLEXITY_ANALYSIS":
+        return "Ask exactly one prioritization question: how they sequence roadmap against quality and debt, or what they would cut first under pressure. Ground it in a real example, not a philosophy. Then stop speaking and wait.";
+      case "FOLLOW_UP":
+        return "Cover the remaining competency or focus area with the weakest evidence, or close role fit: why this team, this role, and this timing. Ask exactly one question, then stop speaking and wait.";
+      case "WRAP_UP":
+        return "Wrap up as a hiring manager would: one genuine strength tied to a specific moment, one realistic gap, then invite the candidate's questions about the team or role and answer one briefly.";
+      default:
+        return "Respond naturally as a hiring manager.";
+    }
+  }
+
   switch (currentPhase) {
     case "INTRO":
       return "Open warmly, explain the round in one sentence, ask exactly one calibration question, then stop and wait.";
@@ -303,12 +354,15 @@ function buildRoundContextBlock(roundType: RoundType, roundContext?: RoundContex
   const emptySectionsText =
     roundType === "technical_qa" ? "- No reference anchors" : "- No structured sections";
 
+  const valuesBlock = buildValuesPromptBlock(roundContext.valuesContext);
+
   return `
 ## Round Context
 Title: ${roundContext.title}
 Summary: ${roundContext.summary}
 Focus areas: ${roundContext.focusAreas.join(", ")}
 Interviewer brief: ${roundContext.prompt}
+${valuesBlock}
 Use the brief to shape the round, but do not read it aloud. Historical examples are inspiration, not a script.
 Historical question examples:
 ${historicalQuestions || "- None provided"}

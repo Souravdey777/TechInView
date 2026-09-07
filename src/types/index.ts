@@ -172,6 +172,57 @@ export type InterviewResult = {
   key_strengths: string[];
   areas_to_improve: string[];
   summary: string;
+  /**
+   * Per-competency evidence report for behaviour-led rounds (behavioural and
+   * engineering manager). Null for coding, technical Q&A, and any round scored
+   * before the value lens existed.
+   */
+  competency_report?: CompetencyReport | null;
+};
+
+// ─── Competency Reporting (behaviour-led rounds) ──────────────────────────────
+
+export const COMPETENCY_RATINGS = ["strong", "solid", "mixed", "insufficient"] as const;
+export type CompetencyRating = (typeof COMPETENCY_RATINGS)[number];
+
+export type CompetencySignal = {
+  /** Competency id from the selected value framework. */
+  competency_id: string;
+  label: string;
+  rating: CompetencyRating;
+  score: number;
+  /** What the candidate actually said that supports the rating. */
+  evidence: string;
+  /** What a real interviewer would still be missing after the round. */
+  gap: string;
+  /** One concrete action to make the next answer stronger. */
+  upgrade: string;
+};
+
+/**
+ * How completely the candidate's stories covered each part of the STAR-plus
+ * structure, 0-100. Reflection is scored separately because senior loops weight
+ * "what would you do differently" heavily.
+ */
+export type StarCoverage = {
+  situation: number;
+  task: number;
+  action: number;
+  result: number;
+  reflection: number;
+};
+
+export type CompetencyReport = {
+  framework_id: string;
+  framework_label: string;
+  competencies: CompetencySignal[];
+  star_coverage: StarCoverage | null;
+  /** The note an interviewer would leave in a hiring debrief. */
+  debrief_note: string;
+  /** Concrete rehearsal actions before the next attempt. */
+  follow_up_drills: string[];
+  key_strengths: string[];
+  areas_to_improve: string[];
 };
 
 // ─── Voice ────────────────────────────────────────────────────────────────────

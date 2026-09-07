@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, MessageSquare, Target } from "lucide-react";
+import { FileText, MessageSquare, Scale, Target } from "lucide-react";
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 
@@ -17,6 +17,9 @@ export function RoundBriefPanel({
   roleTitle,
   loopName,
 }: RoundBriefPanelProps) {
+  // Behaviour-led rounds carry a value lens; coding and technical Q&A do not.
+  const values = round.valuesContext ?? null;
+
   return (
     <div className="h-full overflow-y-auto px-4 py-4 space-y-5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-brand-border">
       <div className="space-y-2">
@@ -64,6 +67,39 @@ export function RoundBriefPanel({
           ))}
         </div>
       </div>
+
+      {values && values.competencies.length > 0 ? (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-muted">
+            <Scale className="h-3.5 w-3.5 text-brand-cyan" />
+            Graded Against
+          </div>
+          <div className="rounded-xl border border-brand-border bg-brand-surface px-4 py-4">
+            <p className="text-sm font-semibold text-brand-text">{values.frameworkLabel}</p>
+            <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-brand-muted">
+              {values.frameworkOrigin}
+            </p>
+            <ul className="mt-3 space-y-2.5">
+              {values.competencies.map((competency) => (
+                <li
+                  key={`${round.id}-${competency.id}`}
+                  className="grid grid-cols-[auto_minmax(0,1fr)] gap-2.5"
+                >
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-brand-cyan" />
+                  <span>
+                    <span className="block text-sm font-semibold text-brand-text">
+                      {competency.label}
+                    </span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-brand-muted">
+                      {competency.description}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
 
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-muted">

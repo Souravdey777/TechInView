@@ -181,6 +181,7 @@ export async function POST(req: NextRequest) {
         tests_total: testsTotal,
         overall_score: scoringResult?.overall_score ?? null,
         scores: scoringResult?.scores ?? null,
+        competency_report: scoringResult?.competency_report ?? null,
         feedback_summary: scoringResult?.summary ?? null,
         hire_recommendation: (scoringResult?.hire_recommendation ?? null) as "strong_hire" | "hire" | "lean_hire" | "lean_no_hire" | "no_hire" | null,
       },

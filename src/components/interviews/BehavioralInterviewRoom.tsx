@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, MessageSquareMore, Scale } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InterviewStartingOverlay } from "@/components/interviews/InterviewStartingOverlay";
 import { Timer } from "@/components/interview/Timer";
+import { DiscussionWorkspace } from "@/components/interview/DiscussionWorkspace";
+import { RoundBriefPanel } from "@/components/interview/RoundBriefPanel";
+import { TranscriptChat, type TranscriptMessage } from "@/components/interview/TranscriptChat";
 import { VoicePanel } from "@/components/interview/VoicePanel";
 import { VoiceVisualizer, type VoiceState } from "@/components/interview/VoiceVisualizer";
-import { RoundBriefPanel } from "@/components/interview/RoundBriefPanel";
 import {
   useDeepgramVoiceAgent,
   type AgentFunctionDef,
@@ -29,18 +31,11 @@ import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
 import { getLiveInterviewModel } from "@/lib/ai/models";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
 import { getPhaseLabelForRound } from "@/lib/loops/round-config";
-import { ENGINEERING_MANAGER_DURATION_MINUTES } from "@/lib/engineering-manager";
+import { BEHAVIORAL_DURATION_MINUTES } from "@/lib/behavioral";
 import type { CompetencyReport } from "@/types";
 
-type EngineeringManagerInterviewRoomProps = {
+type BehavioralInterviewRoomProps = {
   interviewId: string;
-};
-
-type ChatMessage = {
-  id: string;
-  role: "interviewer" | "candidate";
-  content: string;
-  time: string;
 };
 
 type TranscriptEntry = {
@@ -54,11 +49,11 @@ type ScoreDimensionRaw = {
   feedback: string;
 };
 
-const MAX_DURATION_SECONDS = ENGINEERING_MANAGER_DURATION_MINUTES * 60;
+const MAX_DURATION_SECONDS = BEHAVIORAL_DURATION_MINUTES * 60;
 const MAX_AGENT_CONTEXT_MESSAGES = 20;
 const OPENING_TURN_DELAY_MS = 2000;
 const INTRO_KICKOFF =
-  "Start the engineering-manager round now. Greet the candidate briefly as the hiring manager for this team, say in one sentence what the round covers, then ask exactly one calibration question about their current scope and what they own end to end. Stop and wait for their answer. Keep this voice-first: do not ask them to code, and do not stack more than one question into a turn.";
+  "Start the behavioural round now. Greet the candidate briefly, say in one sentence that this round is about specific past experience rather than coding, then ask exactly one short calibration question about their current scope and the work they own. Stop and wait for their answer. Keep this voice-first and never ask them to code.";
 
 function formatTimeLabel(timestampMs: number) {
   const totalSeconds = Math.floor(timestampMs / 1000);
@@ -67,11 +62,11 @@ function formatTimeLabel(timestampMs: number) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-function toUiMessages(messages: TranscriptEntry[]): ChatMessage[] {
+function toUiMessages(messages: TranscriptEntry[]): TranscriptMessage[] {
   return messages
     .filter((message) => message.role !== "system")
     .map((message, index) => ({
-      id: `engineering-manager-msg-${index + 1}`,
+      id: `behavioral-msg-${index + 1}`,
       role: message.role as "interviewer" | "candidate",
       content: message.content,
       time: formatTimeLabel(message.timestamp_ms),
@@ -86,9 +81,7 @@ function extractDimension(
   return { score: raw?.score ?? 0, feedback: raw?.feedback ?? "" };
 }
 
-export function EngineeringManagerInterviewRoom({
-  interviewId,
-}: EngineeringManagerInterviewRoomProps) {
+export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoomProps) {
   const router = useRouter();
   const hasHydrated = useHasHydrated();
   const storeConfig = useInterviewStore((state) => state.setupConfig);
@@ -104,12 +97,8 @@ export function EngineeringManagerInterviewRoom({
   );
   const maxDuration = storeConfig?.maxDurationSeconds ?? MAX_DURATION_SECONDS;
   const round = roundContext;
-  // Value lens the round is graded against. Absent on snapshots created before
-  // value lenses shipped, so every read has to tolerate null.
-  const valueLens = round?.valuesContext ?? null;
-  const valueCompetencies = valueLens?.competencies ?? [];
 
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatMessages, setChatMessages] = useState<TranscriptMessage[]>([]);
   const [currentPhase, setCurrentPhase] = useState<InterviewPhase>("INTRO");
   const [timeLeft, setTimeLeft] = useState(maxDuration);
   const [hasStarted, setHasStarted] = useState(false);
@@ -119,6 +108,7 @@ export function EngineeringManagerInterviewRoom({
   const [isScoring, setIsScoring] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [isMicEnabled, setIsMicEnabled] = useState(true);
+  const [notes, setNotes] = useState<Record<string, string>>({});
   const {
     devices: microphoneDevices,
     selectedDeviceId,
@@ -132,6 +122,7 @@ export function EngineeringManagerInterviewRoom({
   const hasRestoredRef = useRef(false);
   const endInterviewRef = useRef<() => Promise<void>>(async () => {});
   const currentPhaseRef = useRef(currentPhase);
+  const notesRef = useRef(notes);
   const shouldSendOpeningTurnRef = useRef(false);
 
   useEffect(() => {
@@ -139,9 +130,13 @@ export function EngineeringManagerInterviewRoom({
   }, [currentPhase]);
 
   useEffect(() => {
+    notesRef.current = notes;
+  }, [notes]);
+
+  useEffect(() => {
     if (!hasHydrated) return;
-    if (!round || storeConfig?.roundType !== "hiring_manager") {
-      router.replace("/interviews/engineering-manager/setup");
+    if (!round || storeConfig?.roundType !== "behavioral") {
+      router.replace("/interviews/behavioral/setup");
     }
   }, [hasHydrated, round, router, storeConfig?.roundType]);
 
@@ -154,7 +149,7 @@ export function EngineeringManagerInterviewRoom({
     const matchesSession =
       state.interviewId === interviewId &&
       state.isInterviewActive &&
-      state.setupConfig?.roundType === "hiring_manager";
+      state.setupConfig?.roundType === "behavioral";
 
     if (!matchesSession || !startedAtMs || state.messages.length === 0) {
       return;
@@ -194,6 +189,12 @@ export function EngineeringManagerInterviewRoom({
           "Get current interview state including the active phase, elapsed time, and remaining time.",
         parameters: { type: "object", properties: {}, required: [] },
       },
+      {
+        name: "get_workspace_notes",
+        description:
+          "Retrieve the candidate's structured STAR notes from the round workspace before assuming what they have already written down.",
+        parameters: { type: "object", properties: {}, required: [] },
+      },
     ],
     []
   );
@@ -210,12 +211,12 @@ export function EngineeringManagerInterviewRoom({
   const agentSettings = useMemo<DeepgramVoiceAgentSettings>(
     () => ({
       systemPrompt: buildVoiceSystemPrompt({
-        roundType: "hiring_manager",
+        roundType: "behavioral",
         problem: null,
         roundContext: round,
         currentPhase,
         hasCandidateCode: false,
-        hasWorkspaceNotes: false,
+        hasWorkspaceNotes: true,
         totalMinutes: Math.round(maxDuration / 60),
         interviewerPersonaId: interviewer.id,
       }),
@@ -263,7 +264,7 @@ export function EngineeringManagerInterviewRoom({
         setChatMessages((current) => [
           ...current,
           {
-            id: `engineering-manager-msg-${++msgCounterRef.current}`,
+            id: `behavioral-msg-${++msgCounterRef.current}`,
             role: chatRole,
             content: text,
             time: formatTimeLabel(elapsedMs),
@@ -284,6 +285,8 @@ export function EngineeringManagerInterviewRoom({
               remainingSeconds: Math.max(0, maxDuration - elapsed),
             };
           }
+          case "get_workspace_notes":
+            return { roundType: "behavioral", notes: notesRef.current };
           default:
             return { error: `Unknown function: ${name}` };
         }
@@ -292,7 +295,7 @@ export function EngineeringManagerInterviewRoom({
     ),
     onPhaseChange: applyPhaseFromAgent,
     onError: useCallback((error: Error) => {
-      console.error("[engineering-manager-room] Agent error:", error.message);
+      console.error("[behavioral-room] Agent error:", error.message);
       setIsConnectingVoice(false);
       setVoiceError(error.message);
     }, []),
@@ -387,6 +390,10 @@ export function EngineeringManagerInterviewRoom({
     setIsMicEnabled(true);
   }, [agent, isMicEnabled]);
 
+  const handleChangeNote = useCallback((sectionId: string, value: string) => {
+    setNotes((current) => ({ ...current, [sectionId]: value }));
+  }, []);
+
   const appendTextTurn = useCallback(
     (role: "candidate" | "interviewer", message: string) => {
       const elapsedMs = Date.now() - startTimeRef.current;
@@ -400,7 +407,7 @@ export function EngineeringManagerInterviewRoom({
       setChatMessages((current) => [
         ...current,
         {
-          id: `engineering-manager-msg-${++msgCounterRef.current}`,
+          id: `behavioral-msg-${++msgCounterRef.current}`,
           role,
           content: message,
           time: formatTimeLabel(elapsedMs),
@@ -424,7 +431,7 @@ export function EngineeringManagerInterviewRoom({
       elapsedSeconds: Math.max(0, Math.floor((Date.now() - startTimeRef.current) / 1000)),
       maxDurationSeconds: maxDuration,
       interviewerPersona: interviewer.id,
-      roundType: "hiring_manager",
+      roundType: "behavioral",
       roundContext: round,
     }),
     appendTurn: appendTextTurn,
@@ -469,7 +476,6 @@ export function EngineeringManagerInterviewRoom({
       summary?: string;
       key_strengths?: string[];
       areas_to_improve?: string[];
-      /** Per-competency leadership report, present when a value lens was set. */
       competency_report?: CompetencyReport | null;
     };
 
@@ -485,7 +491,7 @@ export function EngineeringManagerInterviewRoom({
           interviewId,
           interviewerPersona: interviewer.id,
           mode: "targeted_loop",
-          roundType: "hiring_manager",
+          roundType: "behavioral",
           roundTitle: round.title,
           finalCode: "",
           language: storeConfig?.language ?? "javascript",
@@ -521,7 +527,7 @@ export function EngineeringManagerInterviewRoom({
 
     completeInterviewStore({
       mode: "targeted_loop",
-      roundType: "hiring_manager",
+      roundType: "behavioral",
       roundTitle: round.title,
       interviewId,
       interviewerPersona: interviewer.id,
@@ -539,7 +545,7 @@ export function EngineeringManagerInterviewRoom({
       testsTotal: 0,
       problemTitle: round.title,
       problemDifficulty: "medium",
-      problemCategory: "engineering-manager",
+      problemCategory: "behavioral",
       company: storeConfig?.company ?? null,
       roleTitle: storeConfig?.roleTitle ?? null,
       loopName: storeConfig?.loopName ?? null,
@@ -547,7 +553,7 @@ export function EngineeringManagerInterviewRoom({
       roundContext: round,
     });
 
-    router.push(`/interviews/engineering-manager/results/${interviewId}`);
+    router.push(`/interviews/behavioral/results/${interviewId}`);
   }, [
     agent,
     completeInterviewStore,
@@ -601,7 +607,7 @@ export function EngineeringManagerInterviewRoom({
     });
   }, [hasStarted, maxDuration, setRoomPhase, timeLeft]);
 
-  if (!hasHydrated || !round || storeConfig?.roundType !== "hiring_manager") {
+  if (!hasHydrated || !round || storeConfig?.roundType !== "behavioral") {
     return null;
   }
 
@@ -611,10 +617,10 @@ export function EngineeringManagerInterviewRoom({
         <div className="max-w-md space-y-5">
           <VoiceVisualizer state="thinking" className="mx-auto h-28 w-28" />
           <div>
-            <h1 className="text-2xl font-semibold">Scoring your Engineering Manager round</h1>
+            <h1 className="text-2xl font-semibold">Scoring your behavioral round</h1>
             <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-              We&apos;re reviewing the transcript for decision quality, stakeholder handling,
-              prioritization, and the evidence behind each competency you chose.
+              We&apos;re reviewing each story for the evidence a real interviewer grades:
+              your own contribution, the hard part, the result, and your reflection.
             </p>
           </div>
         </div>
@@ -634,7 +640,7 @@ export function EngineeringManagerInterviewRoom({
         />
         <div className="w-full max-w-3xl rounded-3xl border border-brand-border bg-brand-card p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-            Engineering Manager
+            Behavioral
           </p>
           <h1 className="mt-4 text-3xl font-bold tracking-tight">
             {isResuming ? "Resume your voice interview" : round.title}
@@ -670,7 +676,7 @@ export function EngineeringManagerInterviewRoom({
             <div className="rounded-2xl border border-brand-border bg-brand-surface p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">Duration</p>
               <p className="mt-2 text-sm font-semibold text-brand-text">
-                {ENGINEERING_MANAGER_DURATION_MINUTES} minutes
+                {BEHAVIORAL_DURATION_MINUTES} minutes
               </p>
             </div>
             <div className="rounded-2xl border border-brand-border bg-brand-surface p-4">
@@ -678,21 +684,6 @@ export function EngineeringManagerInterviewRoom({
               <p className="mt-2 text-sm font-semibold text-brand-text">{interviewer.name}</p>
             </div>
           </div>
-
-          {valueLens && valueCompetencies.length > 0 ? (
-            <div className="mt-4 rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-brand-muted">
-                <Scale className="h-3.5 w-3.5 text-brand-cyan" />
-                Graded against
-              </div>
-              <p className="mt-2 text-sm font-semibold text-brand-text">
-                {valueLens.frameworkLabel}
-              </p>
-              <p className="mt-1 text-sm leading-relaxed text-brand-muted">
-                {valueCompetencies.map((competency) => competency.label).join(" · ")}
-              </p>
-            </div>
-          ) : null}
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
@@ -705,13 +696,13 @@ export function EngineeringManagerInterviewRoom({
                   Connecting...
                 </>
               ) : isResuming ? (
-                "Resume Engineering Manager Round"
+                "Resume Behavioral Round"
               ) : (
-                "Start Engineering Manager Round"
+                "Start Behavioral Round"
               )}
             </Button>
             <Button asChild variant="secondary">
-              <Link href="/interviews/engineering-manager/setup">Back to setup</Link>
+              <Link href="/interviews/behavioral/setup">Back to setup</Link>
             </Button>
           </div>
 
@@ -747,7 +738,7 @@ export function EngineeringManagerInterviewRoom({
             </Link>
             <div className="hidden h-5 w-px bg-brand-border sm:block" />
             <div>
-              <p className="text-sm font-semibold tracking-tight">Engineering Manager</p>
+              <p className="text-sm font-semibold tracking-tight">Behavioral</p>
               <p className="text-xs text-brand-muted">
                 Session #{interviewId.slice(-6).toUpperCase()}
               </p>
@@ -758,7 +749,7 @@ export function EngineeringManagerInterviewRoom({
 
           <div className="flex items-center gap-3">
             <span className="hidden rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted md:inline-flex">
-              {getPhaseLabelForRound("hiring_manager", currentPhase)}
+              {getPhaseLabelForRound("behavioral", currentPhase)}
             </span>
             <Button variant="destructive" size="sm" onClick={() => void handleEndInterview()}>
               End Interview
@@ -767,10 +758,10 @@ export function EngineeringManagerInterviewRoom({
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[18rem_22rem_minmax(0,1fr)] xl:grid-cols-[20rem_24rem_minmax(0,1fr)]">
+      {/* Brief | STAR notes workspace | voice + transcript, mirroring the
+          non-coding layout the shared interview room uses. */}
+      <div className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[17rem_minmax(0,1fr)_20rem] xl:grid-cols-[19rem_minmax(0,1fr)_22rem]">
         <aside className="min-h-0 overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          {/* The shared brief panel renders the value lens itself, so the room
-              does not repeat it here. */}
           <RoundBriefPanel
             round={round}
             company={storeConfig?.company ?? null}
@@ -779,148 +770,48 @@ export function EngineeringManagerInterviewRoom({
           />
         </aside>
 
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          <div className="border-b border-brand-border px-5 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-              Voice Room
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-              Stay in the conversation. This round is built for clear, concrete leadership
-              answers, not note-taking or coding.
-            </p>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="h-full min-h-[36rem]">
-              <VoicePanel
-                voiceState={voiceState}
-                currentPhase={currentPhase}
-                roundType="hiring_manager"
-                interviewerName={interviewer.name}
-                layout="center-stage"
-                isMicEnabled={isMicEnabled}
-                isVoiceConnected={isAgentConnected}
-                isReconnecting={isConnectingVoice}
-                errorMessage={voiceError}
-                microphoneDevices={microphoneDevices}
-                selectedDeviceId={selectedDeviceId}
-                deviceWarning={deviceWarning}
-                isSendingText={isSendingText}
-                textError={textError}
-                onToggleMic={handleToggleMic}
-                onDeviceChange={setSelectedDeviceId}
-                onReconnect={resumeInterview}
-                onSendText={handleSendText}
-              />
-            </div>
-          </div>
+        <section className="min-h-0 overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
+          <DiscussionWorkspace
+            round={round}
+            company={storeConfig?.company}
+            roleTitle={storeConfig?.roleTitle}
+            notes={notes}
+            onChangeNote={handleChangeNote}
+          />
         </section>
 
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          <div className="border-b border-brand-border px-5 py-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  Live Transcript
-                </p>
-                <p className="mt-1 text-sm text-brand-muted">
-                  Every spoken turn lands here so you can track the flow of the round in real
-                  time.
-                </p>
-              </div>
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                {voiceState === "thinking"
-                  ? "Thinking"
-                  : voiceState === "speaking"
-                    ? `${interviewer.name} speaking`
-                    : "Listening live"}
-              </span>
-            </div>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-            <EngineeringManagerTranscript
-              messages={chatMessages}
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
+          <div className="shrink-0">
+            <VoicePanel
+              voiceState={voiceState}
+              currentPhase={currentPhase}
+              roundType="behavioral"
               interviewerName={interviewer.name}
-              isAgentBusy={voiceState === "thinking"}
+              isMicEnabled={isMicEnabled}
+              isVoiceConnected={isAgentConnected}
+              isReconnecting={isConnectingVoice}
+              errorMessage={voiceError}
+              microphoneDevices={microphoneDevices}
+              selectedDeviceId={selectedDeviceId}
+              deviceWarning={deviceWarning}
+              showTextFallback={false}
+              onToggleMic={handleToggleMic}
+              onDeviceChange={setSelectedDeviceId}
+              onReconnect={resumeInterview}
+              onSendText={handleSendText}
             />
           </div>
-        </section>
+
+          <TranscriptChat
+            messages={chatMessages}
+            interviewerName={interviewer.name}
+            isThinking={voiceState === "thinking"}
+            isSendingText={isSendingText}
+            textError={textError}
+            onSendText={handleSendText}
+          />
+        </aside>
       </div>
-    </div>
-  );
-}
-
-function EngineeringManagerTranscript({
-  messages,
-  interviewerName,
-  isAgentBusy,
-}: {
-  messages: ChatMessage[];
-  interviewerName: string;
-  isAgentBusy: boolean;
-}) {
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [isAgentBusy, messages]);
-
-  if (messages.length === 0 && !isAgentBusy) {
-    return (
-      <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-brand-border bg-brand-surface">
-        <div className="max-w-sm px-6 text-center">
-          <MessageSquareMore className="mx-auto h-10 w-10 text-brand-cyan" />
-          <p className="mt-4 text-sm font-semibold text-brand-text">
-            {interviewerName} will open the round here
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-            This is a live voice interview with no coding. The transcript will build here as the
-            interviewer probes role fit, leadership, and decision-making.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`flex ${message.role === "candidate" ? "justify-end" : "justify-start"}`}
-        >
-          <div
-            className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-              message.role === "candidate"
-                ? "rounded-tr-sm border border-brand-cyan/25 bg-brand-cyan/10"
-                : "rounded-tl-sm border border-brand-border bg-brand-surface"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-brand-text">
-                {message.role === "candidate" ? "You" : interviewerName}
-              </span>
-              <span className="text-[11px] text-brand-muted">{message.time}</span>
-            </div>
-            <p className="mt-2 text-sm leading-relaxed text-brand-text">{message.content}</p>
-          </div>
-        </div>
-      ))}
-
-      {isAgentBusy ? (
-        <div className="flex justify-start">
-          <div className="rounded-2xl rounded-tl-sm border border-brand-border bg-brand-surface px-4 py-3">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan [animation-delay:-0.2s]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan [animation-delay:-0.1s]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan" />
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <div ref={bottomRef} />
     </div>
   );
 }

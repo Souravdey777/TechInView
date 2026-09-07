@@ -1,33 +1,54 @@
 "use client";
 
-import { History } from "lucide-react";
-import { PrepPlanBuilder } from "@/components/prep-plans/PrepPlanBuilder";
-import { PrepPlanCard } from "@/components/prep-plans/PrepPlanCard";
+import { useState } from "react";
+import { PrepGuruShell } from "@/components/prep-plans/PrepGuruShell";
+import { PrepGuruChat } from "@/components/prep-plans/PrepGuruChat";
 import { usePrepPlans } from "@/hooks/usePrepPlans";
+import type { PrepPlanSummary } from "@/lib/dashboard/models";
 
+/**
+ * Prep Guru's conversation surface: the plan-history rail plus one thread. The
+ * page opens on a fresh composer; picking a plan from the rail replays that
+ * plan's thread without leaving the page.
+ */
 export function PrepPlansIndex() {
-  const { plans, isLoaded, deletePlan } = usePrepPlans();
+  const { plans, isLoaded, savePlan, deletePlan } = usePrepPlans();
+  const [activePlanId, setActivePlanId] = useState<string | null>(null);
+  // Remounting the thread is how "New plan" clears a draft or a failed send,
+  // including when no plan was selected in the first place.
+  const [threadKey, setThreadKey] = useState(0);
+
+  const activePlan = plans.find((plan) => plan.id === activePlanId) ?? null;
+
+  const handleNewPlan = () => {
+    setActivePlanId(null);
+    setThreadKey((current) => current + 1);
+  };
+
+  const handlePlanGenerated = (plan: PrepPlanSummary) => {
+    const savedPlan = savePlan(plan);
+    setActivePlanId(savedPlan.id);
+  };
+
+  const handleDeletePlan = (planId: string) => {
+    deletePlan(planId);
+    setActivePlanId((current) => (current === planId ? null : current));
+  };
 
   return (
-    <div className="space-y-12">
-      <PrepPlanBuilder />
-
-      {isLoaded && plans.length > 0 ? (
-        <section className="mx-auto max-w-5xl border-t border-brand-border pt-10">
-          <div className="mb-5 flex items-center gap-2">
-            <History className="h-4 w-4 text-brand-cyan" />
-            <h2 className="text-lg font-semibold text-brand-text">Previous Prep Guru plans</h2>
-            <span className="rounded-full border border-brand-border bg-brand-surface px-2.5 py-0.5 text-[11px] text-brand-muted">
-              {plans.length}
-            </span>
-          </div>
-          <div className="grid gap-4">
-            {plans.map((plan) => (
-              <PrepPlanCard key={plan.id} plan={plan} onDelete={deletePlan} />
-            ))}
-          </div>
-        </section>
-      ) : null}
-    </div>
+    <PrepGuruShell
+      plans={plans}
+      isLoaded={isLoaded}
+      activePlanId={activePlanId}
+      onSelectPlan={setActivePlanId}
+      onNewPlan={handleNewPlan}
+      onDeletePlan={handleDeletePlan}
+    >
+      <PrepGuruChat
+        key={threadKey}
+        activePlan={activePlan}
+        onPlanGenerated={handlePlanGenerated}
+      />
+    </PrepGuruShell>
   );
 }

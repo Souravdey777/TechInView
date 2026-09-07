@@ -11,6 +11,11 @@ import {
   type SessionLogRow,
 } from "@/lib/dashboard/session-log";
 import { mapInterviewToKind } from "@/lib/dashboard/models";
+import {
+  isMissingColumn,
+  normalizeRoundStatus as normalizeStatus,
+  roundTitle,
+} from "@/lib/dashboard/trend-points";
 import { getRecentPracticeAttempts } from "@/lib/db/queries";
 import type { HireRecommendation } from "@/lib/constants";
 
@@ -40,11 +45,6 @@ type DashboardInterview = {
     | { title: string; difficulty: string; category: string }[]
     | null;
 };
-
-function isMissingColumn(error: { code?: string; message?: string } | null, column: string) {
-  if (!error) return false;
-  return error.code === "42703" || error.message?.toLowerCase().includes(column.toLowerCase());
-}
 
 async function getDashboardInterviews(
   supabase: ReturnType<typeof createClient>,
@@ -110,21 +110,6 @@ function toDimensionScores(scores: unknown): Record<string, number> | null {
     .filter((entry): entry is readonly [string, number] => entry !== null);
 
   return entries.length > 0 ? Object.fromEntries(entries) : null;
-}
-
-/** Supabase returns a to-one embed as an object, but older clients send an array. */
-function problemOf(problems: DashboardInterview["problems"]) {
-  if (!problems) return null;
-  return Array.isArray(problems) ? problems[0] ?? null : problems;
-}
-
-/** Round title falls back to the problem, then to a generic label. */
-function roundTitle(interview: DashboardInterview) {
-  return interview.round_title ?? problemOf(interview.problems)?.title ?? "Interview";
-}
-
-function normalizeStatus(status: string): DashboardRound["status"] {
-  return status === "completed" || status === "abandoned" ? status : "in_progress";
 }
 
 /** Distinct problems the user has actually solved, in practice or in a round. */

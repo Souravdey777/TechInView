@@ -1,20 +1,19 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { cn } from "@/lib/utils";
-import { getScoreColor } from "@/lib/utils";
+import { cn, getScoreBgColor, getScoreColor } from "@/lib/utils";
 import { PROBLEM_CATEGORIES } from "@/lib/constants";
 import type { ProblemCategory } from "@/lib/constants";
+import { MonoLabel, Rack } from "@/components/shared/Rack";
+import { ScoreTrendPanel } from "@/components/dashboard/home/ScoreTrendPanel";
 import {
-  TrendingUp,
-  BarChart2,
-  Star,
-  AlertCircle,
-  LineChart,
-} from "lucide-react";
-import { ScoreTrendChart } from "@/components/dashboard/ScoreTrendChart";
-import { InterviewTypeTabs } from "@/components/shared/InterviewTypeTabs";
+  buildTrendPoints,
+  fetchTrendInterviews,
+} from "@/lib/dashboard/trend-points";
 
 export const dynamic = "force-dynamic";
+
+/** Matches the dashboard's metrics window so both trends cover the same rounds. */
+const TREND_WINDOW = 20;
 
 const CATEGORY_LABELS: Record<ProblemCategory, string> = {
   arrays: "Arrays",
@@ -53,12 +52,6 @@ type ProgressData = {
   avg_score: number | null;
 };
 
-type InterviewForTrend = {
-  overall_score: number | null;
-  completed_at: string | null;
-  started_at: string;
-};
-
 export default async function ProgressPage() {
   const supabase = createClient();
   const {
@@ -70,19 +63,22 @@ export default async function ProgressPage() {
   }
 
   // Fetch progress data and trend data in parallel
-  const [{ data: progressRows }, { data: trendInterviews }] = await Promise.all([
+  const [{ data: progressRows }, trendInterviews, completedCount] = await Promise.all([
     supabase
       .from("progress")
       .select("category, problems_attempted, problems_solved, avg_score")
       .eq("user_id", user.id),
+    // A trend point carries the round's title, type and verdict, so this needs
+    // more than the score: the panel makes each take clickable through to its
+    // own results page.
+    fetchTrendInterviews(supabase, user.id, TREND_WINDOW).catch(() => []),
+    // Takes are numbered from the user's first completed round, not from the
+    // start of the window, so a take reads the same here as on the dashboard.
     supabase
       .from("interviews")
-      .select("overall_score, completed_at, started_at")
+      .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
-      .eq("status", "completed")
-      .not("overall_score", "is", null)
-      .order("completed_at", { ascending: true })
-      .limit(20),
+      .eq("status", "completed"),
   ]);
 
   const progressMap = new Map<string, ProgressData>();
@@ -122,8 +118,7 @@ export default async function ProgressPage() {
     }
   }
 
-  const trendData = (trendInterviews || []) as InterviewForTrend[];
-  const hasTrendData = trendData.length >= 2;
+  const trend = buildTrendPoints(trendInterviews, completedCount.count ?? undefined);
 
   // Compute strengths and weaknesses
   const categoriesWithScores = PROBLEM_CATEGORIES
@@ -139,65 +134,42 @@ export default async function ProgressPage() {
   const strengths = categoriesWithScores.slice(0, 3);
   const weaknesses = [...categoriesWithScores].reverse().slice(0, 3);
   const hasInsights = categoriesWithScores.length >= 2;
+  const attemptedCategories = PROBLEM_CATEGORIES.filter(
+    (cat) => (progressMap.get(cat)?.problems_attempted ?? 0) > 0
+  ).length;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold font-heading text-brand-text mb-1">
+    <div className="mx-auto max-w-6xl animate-fade-in space-y-5">
+      {/* ─── Hero ─── */}
+      <header>
+        <MonoLabel>Progress</MonoLabel>
+        <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
           Your Progress
         </h1>
-        <p className="text-brand-muted text-sm">
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
           Track your improvement across all problem categories.
         </p>
-      </div>
+      </header>
 
-      <InterviewTypeTabs>
+      {/* ─── Score trend ─── */}
+      {/* Same panel the dashboard uses, so a take reads identically on both
+          surfaces: hoverable points, per-take cards, and its own empty state. */}
+      <ScoreTrendPanel trend={trend} />
 
-      {/* Score Trend */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-4 h-4 text-brand-cyan" />
-          <h2 className="text-base font-semibold text-brand-text">
-            Score Trend
+      {/* ─── Category breakdown ─── */}
+      <Rack
+        label={
+          <h2>
+            <MonoLabel className="tracking-[0.18em]">Category Breakdown</MonoLabel>
           </h2>
-        </div>
-        {hasTrendData ? (
-          <ScoreTrendChart
-            data={trendData.map((item) => {
-              const d = new Date(item.completed_at || item.started_at);
-              return {
-                score: item.overall_score ?? 0,
-                date: `${d.getMonth() + 1}/${d.getDate()}`,
-                label: d.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                }),
-              };
-            })}
-          />
-        ) : (
-          <div className="bg-brand-card rounded-xl border border-brand-border p-8 flex flex-col items-center justify-center min-h-[220px] text-center">
-            <div className="w-14 h-14 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center mb-4">
-              <LineChart className="w-7 h-7 text-brand-cyan opacity-60" />
-            </div>
-            <p className="text-brand-muted text-sm max-w-xs">
-              Score trend will appear here after completing at least 2 interviews.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Category Breakdown */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart2 className="w-4 h-4 text-brand-cyan" />
-          <h2 className="text-base font-semibold text-brand-text">
-            Category Breakdown
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        }
+        accessory={
+          <MonoLabel className="tracking-[0.12em]">
+            {attemptedCategories} of {PROBLEM_CATEGORIES.length} attempted
+          </MonoLabel>
+        }
+      >
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {PROBLEM_CATEGORIES.map((category) => {
             const data = progressMap.get(category);
             return (
@@ -211,71 +183,89 @@ export default async function ProgressPage() {
             );
           })}
         </div>
+      </Rack>
+
+      {/* ─── Strengths & weaknesses ─── */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <InsightRack
+          label="Strengths"
+          accessory={`Top ${strengths.length} by average`}
+          tone="text-brand-green"
+          rows={strengths}
+          hasInsights={hasInsights}
+          emptyCopy="Complete interviews across different categories to see your strengths."
+        />
+        <InsightRack
+          label="Areas to Improve"
+          accessory={`Weakest ${weaknesses.length} by average`}
+          tone="text-brand-rose"
+          rows={weaknesses}
+          hasInsights={hasInsights}
+          emptyCopy="Your weak spots will be identified after completing several interviews."
+        />
       </div>
-
-      {/* Strengths & Weaknesses */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Strengths */}
-        <div className="bg-brand-card rounded-xl border border-brand-green/20 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Star className="w-4 h-4 text-brand-green" />
-            <h3 className="text-sm font-semibold text-brand-text">
-              Strengths
-            </h3>
-          </div>
-          {hasInsights ? (
-            <div className="space-y-2.5">
-              {strengths.map((s) => (
-                <div
-                  key={s.category}
-                  className="flex items-center justify-between bg-brand-surface rounded-lg px-3 py-2"
-                >
-                  <span className="text-sm text-brand-text">{s.label}</span>
-                  <span className={cn("text-sm font-semibold", getScoreColor(s.avgScore ?? 0))}>
-                    {Math.round(s.avgScore ?? 0)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-brand-muted text-sm">
-              Complete interviews across different categories to see your strengths.
-            </p>
-          )}
-        </div>
-
-        {/* Weaknesses */}
-        <div className="bg-brand-card rounded-xl border border-brand-rose/20 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertCircle className="w-4 h-4 text-brand-rose" />
-            <h3 className="text-sm font-semibold text-brand-text">
-              Areas to Improve
-            </h3>
-          </div>
-          {hasInsights ? (
-            <div className="space-y-2.5">
-              {weaknesses.map((w) => (
-                <div
-                  key={w.category}
-                  className="flex items-center justify-between bg-brand-surface rounded-lg px-3 py-2"
-                >
-                  <span className="text-sm text-brand-text">{w.label}</span>
-                  <span className={cn("text-sm font-semibold", getScoreColor(w.avgScore ?? 0))}>
-                    {Math.round(w.avgScore ?? 0)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-brand-muted text-sm">
-              Your weak spots will be identified after completing several interviews.
-            </p>
-          )}
-        </div>
-      </div>
-
-      </InterviewTypeTabs>
     </div>
+  );
+}
+
+type InsightRow = {
+  category: ProblemCategory;
+  label: string;
+  avgScore: number | null;
+};
+
+function InsightRack({
+  label,
+  accessory,
+  tone,
+  rows,
+  hasInsights,
+  emptyCopy,
+}: {
+  label: string;
+  accessory: string;
+  tone: string;
+  rows: InsightRow[];
+  hasInsights: boolean;
+  emptyCopy: string;
+}) {
+  return (
+    <Rack
+      label={
+        <h2>
+          <MonoLabel className={cn("tracking-[0.18em]", tone)}>{label}</MonoLabel>
+        </h2>
+      }
+      accessory={
+        hasInsights ? (
+          <MonoLabel className="tracking-[0.12em]">{accessory}</MonoLabel>
+        ) : null
+      }
+    >
+      {hasInsights ? (
+        <div className="flex flex-col gap-2">
+          {rows.map((row) => (
+            <div
+              key={row.category}
+              className="flex items-center justify-between gap-3 rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5"
+            >
+              <span className="truncate text-sm text-brand-text">{row.label}</span>
+              <span
+                className={cn(
+                  "shrink-0 font-mono text-xs font-bold",
+                  getScoreColor(row.avgScore ?? 0)
+                )}
+              >
+                {Math.round(row.avgScore ?? 0)}
+                <span className="font-normal text-brand-subtle">/100</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs leading-relaxed text-brand-muted">{emptyCopy}</p>
+      )}
+    </Rack>
   );
 }
 
@@ -290,43 +280,63 @@ function CategoryCard({
   solved: number;
   avgScore: number;
 }) {
+  const score = Math.round(avgScore);
+  const isUntouched = attempted === 0;
+
   return (
-    <div className="bg-brand-card rounded-xl border border-brand-border p-4 hover:border-brand-border/80 transition-colors">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-8 h-8 rounded-lg bg-brand-surface border border-brand-border flex items-center justify-center text-brand-muted text-xs font-mono select-none">
-          {CATEGORY_ICONS[category]}
-        </div>
+    <div
+      className={cn(
+        "rounded-xl border border-brand-border bg-brand-surface px-4 py-3.5",
+        isUntouched && "opacity-70"
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-brand-text text-sm font-semibold truncate">
+          <p className="truncate text-sm font-semibold text-brand-text">
             {CATEGORY_LABELS[category]}
           </p>
-          <p className="text-brand-muted text-xs">
+          <MonoLabel className="mt-1 block">
             {attempted} attempted · {solved} solved
-          </p>
+          </MonoLabel>
         </div>
+        <span
+          aria-hidden="true"
+          className="flex h-7 w-7 shrink-0 select-none items-center justify-center rounded-md border border-brand-border bg-brand-card font-mono text-[11px] text-brand-subtle"
+        >
+          {CATEGORY_ICONS[category]}
+        </span>
       </div>
 
-      {/* Score Bar */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className="text-brand-muted text-xs">Avg Score</span>
+      {/* Flat meter over a recessed well, matching the dashboard racks. */}
+      <div className="mt-3.5">
+        <div className="flex items-baseline justify-between gap-2">
+          <MonoLabel className="text-[9px]">Avg score</MonoLabel>
           <span
             className={cn(
-              "text-xs font-semibold",
-              avgScore === 0 ? "text-brand-muted" : getScoreColor(avgScore)
+              "font-mono text-xs font-bold",
+              score === 0 ? "text-brand-subtle" : getScoreColor(score)
             )}
           >
-            {avgScore === 0 ? "—" : `${Math.round(avgScore)}/100`}
+            {score === 0 ? (
+              "—"
+            ) : (
+              <>
+                {score}
+                <span className="font-normal text-brand-subtle">/100</span>
+              </>
+            )}
           </span>
         </div>
-        <div className="h-1.5 bg-brand-surface rounded-full overflow-hidden">
-          <div
-            className={cn(
-              "h-full rounded-full transition-all duration-500",
-              avgScore >= 70 ? "bg-brand-green" : avgScore >= 55 ? "bg-brand-amber" : avgScore > 0 ? "bg-brand-rose" : "bg-brand-surface"
-            )}
-            style={{ width: `${avgScore}%` }}
-          />
+        <div
+          aria-hidden="true"
+          className="mt-2 h-1.5 overflow-hidden rounded-sm bg-brand-border"
+        >
+          {score > 0 ? (
+            <div
+              className={cn("h-full rounded-sm", getScoreBgColor(score))}
+              style={{ width: `${Math.max(2, Math.min(100, score))}%` }}
+            />
+          ) : null}
         </div>
       </div>
     </div>

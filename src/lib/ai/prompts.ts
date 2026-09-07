@@ -1,6 +1,7 @@
 import { ROUND_SCORING_DIMENSIONS, type RoundType } from "@/lib/constants";
 import { getInterviewerPersona } from "@/lib/interviewer-personas";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
+import { buildValuesRubricBlock } from "@/lib/interview-values";
 
 // ─── Interviewer System Prompt ────────────────────────────────────────────────
 
@@ -348,6 +349,11 @@ type LoopScoringPromptParams = {
     optimal_complexity?: { time: string; space: string };
   } | null;
   roundContext?: RoundContextSnapshot | null;
+  /**
+   * Behaviour-led rounds (behavioural, engineering manager) additionally ask for
+   * a per-competency evidence report graded against the round's value lens.
+   */
+  includeCompetencyReport?: boolean;
 };
 
 export function getLoopScoringPrompt(params: LoopScoringPromptParams): string {
@@ -361,8 +367,29 @@ export function getLoopScoringPrompt(params: LoopScoringPromptParams): string {
     roundTitle,
     problem,
     roundContext,
+    includeCompetencyReport = false,
   } = params;
   const persona = getInterviewerPersona(interviewerPersonaId);
+  const valuesContext = roundContext?.valuesContext ?? null;
+  const competencyRubric = includeCompetencyReport
+    ? buildValuesRubricBlock(valuesContext)
+    : "";
+  const competencyInstructions = includeCompetencyReport
+    ? `
+## Behaviour-Led Round Report (required)
+Alongside the dimension scores, produce a competency report that reads like a real interviewer's debrief.
+- competencies: one entry per competency in the value lens above, using the exact competency id, with a rating, a 0-100 score, the evidence you observed, the gap that remains, and one concrete upgrade the candidate should make next time.
+- star_coverage: rate 0-100 how completely the candidate's stories supplied Situation, Task, Action, Result, and Reflection across the round. Score low where the candidate skipped a part, even if the story was engaging.
+- debrief_note: two to four sentences in the voice of an interviewer writing up the round for a hiring discussion. State the decision-relevant signal, not encouragement.
+- follow_up_drills: two to four specific rehearsal actions, each naming the competency and what to add (a metric, a disagreement, a tradeoff, a reflection).
+- key_strengths and areas_to_improve must be grounded in specific moments from this transcript.
+
+Report calibration:
+- Do not soften an insufficient rating because the candidate was likeable or fluent.
+- Do not credit a competency that never came up. Rate it insufficient and say it was not probed.
+- Name the missing evidence precisely: "no metric for the migration outcome" beats "could quantify more".
+`
+    : "";
 
   const transcriptText = transcript
     .map((m) => {
@@ -434,7 +461,7 @@ ${SCORING_CALIBRATION_RULES}
 - For technical Q&A, strong scores require precise mechanisms and production judgment, not memorized definitions.
 - For system design, strong scores require requirements, architecture, bottlenecks, tradeoffs, and operational risks.
 - The overall_score must be consistent with the dimension scores and hire recommendation.
-
+${competencyRubric}${competencyInstructions}
 Return ONLY this JSON structure:
 {
   "overall_score": <weighted score 0-100, integer>,
@@ -448,7 +475,19 @@ Return ONLY this JSON structure:
   "hire_recommendation": "<strong_hire|hire|lean_hire|lean_no_hire|no_hire>",
   "key_strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
   "areas_to_improve": ["<area 1>", "<area 2>", "<area 3>"],
-  "summary": "<2-3 sentence narrative summary>"
+  "summary": "<2-3 sentence narrative summary>"${
+    includeCompetencyReport
+      ? `,
+  "competency_report": {
+    "competencies": [
+      { "competency_id": "<id from the value lens>", "label": "<competency label>", "rating": "<strong|solid|mixed|insufficient>", "score": <0-100>, "evidence": "<what the candidate actually said>", "gap": "<what is still missing>", "upgrade": "<one concrete action>" }
+    ],
+    "star_coverage": { "situation": <0-100>, "task": <0-100>, "action": <0-100>, "result": <0-100>, "reflection": <0-100> },
+    "debrief_note": "<2-4 sentences an interviewer would write in a hiring debrief>",
+    "follow_up_drills": ["<drill 1>", "<drill 2>"]
+  }`
+      : ""
+  }
 }`;
 }
 
