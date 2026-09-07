@@ -1,0 +1,76 @@
+---
+title: "Which Data Structure? A Decision Guide for Coding Interviews"
+description: "Pick the right structure fast in interviews: four questions that narrow the field, a constraint-to-structure map, and how to justify the choice out loud."
+date: "2026-05-08"
+keyword: "data structures for coding interviews"
+topic: "Fundamentals"
+tags:
+  - hash map vs array interview
+  - when to use a heap
+  - DSA patterns interview
+  - data structure trade-offs
+---
+
+Most people who lose a round on **data structures for coding interviews** knew every structure on the syllabus. What they could not do was **choose one in ninety seconds and defend it**. Interviewers are not testing recall of a red-black tree; they are watching whether your structure follows from the constraints you were given.
+
+## Four questions that narrow it fast
+
+Ask these out loud, in this order, before you name a structure:
+
+1. **What am I looking up, and by what key?** Lookup by identity means a hash map or set. Lookup by position means an array. Lookup by rank or range means something sorted.
+2. **Do I need order?** Insertion order, sorted order, or none at all. This one question kills half the options.
+3. **Do I need every element, or only an extreme?** If you only ever touch the min or max, you want a heap, not a sort.
+4. **What mutates, and how often?** Frequent inserts in the middle punish arrays. Frequent lookups punish linked lists.
+
+Answer those four and the structure is usually forced. Say the answers aloud — this is exactly the reasoning [interviewers score](/blog/faang-interview-scoring), and it reads as competence rather than guesswork.
+
+## The constraint-to-structure map
+
+| What the problem says | Reach for | Cost you accept |
+|---|---|---|
+| "Have I seen this before?" | Hash set | O(n) memory, no order |
+| "Count occurrences" | Hash map to int | Same, plus key hashing |
+| "Kth largest" / "top k" | Heap of size k | O(n log k), no random access |
+| "Next greater / previous smaller" | Monotonic stack | Reasoning is harder to explain |
+| "Sliding window of size k" | Deque | Index bookkeeping |
+| "Sorted and I need a boundary" | Binary search on the array | Sorting cost if not given sorted |
+| "Prefix / autocomplete" | Trie | Memory, and setup time in a 35-minute round |
+| "Group things that connect" | Union-find or BFS | Extra structure to justify |
+
+Notice the third column. A structure choice is a **trade**, and naming the cost yourself is what separates a senior-sounding answer from a lucky one.
+
+## Three misfires that show up constantly
+
+- **Sorting when a heap would do.** "Top 5 of 10 million" does not need a sort. Sorting is O(n log n) and throws away your streaming option.
+- **A map where a set belongs.** If you never read the value, you are telling the interviewer you did not think about what you needed.
+- **A hash map when you needed order.** Then you sort the keys at the end and quietly pay O(n log n) — after claiming O(n).
+
+## Say the choice, then the cost
+
+A clean two-sentence pattern, usable on any problem:
+
+> "I need membership checks by value and I do not care about order, so a hash set gives me O(1) average lookup. I am paying O(n) extra memory, and if the interviewer wants constant space I would sort first and use two pointers instead."
+
+That second clause — the alternative you did not pick — is the part most candidates skip. It shows you chose rather than defaulted. If saying this under time pressure feels unnatural, that is a [rehearsal problem, not a knowledge problem](/blog/coding-interview-pressure-live-coding).
+
+## Drill this in ten minutes a day
+
+Take five random problem statements. Do not solve them. For each, write only: the structure, the reason, the cost, and one alternative. You will get faster at the part of the interview that happens in the first three minutes — and that is the part that sets up everything after it. Pair the drill with the [problem-reading framework](/blog/how-to-read-coding-interview-problems) so you extract constraints before you commit.
+
+## FAQ
+
+### Should I mention exotic structures like segment trees?
+
+Only if the constraints demand one, and only if you can implement it. Naming a structure you cannot code is a net negative.
+
+### Is a Python dict enough for every "map" question?
+
+For interviews, usually yes — but know that it preserves insertion order and does **not** give you sorted iteration. Say which property you are relying on.
+
+### How do I justify memory use?
+
+Quote the trade explicitly against the input size. "n up to 10^5, so an O(n) set is a few megabytes" ends the conversation. See the [complexity cheat sheet](/blog/time-complexity-cheat-sheet) for the arithmetic.
+
+---
+
+**Summary:** Good **data structures for coding interviews** come from four questions — key, order, extremes, mutation — not from memorizing a catalogue. Name the structure, name the cost, name the alternative.
