@@ -22,6 +22,8 @@ export function buildBlogPostingAndBreadcrumbJsonLd(input: {
   keywords: string[];
   wordCount: number;
   readingTimeMinutes?: number;
+  /** Rendered FAQ pairs from the post body, if it has an FAQ section. */
+  faq?: { question: string; answer: string }[];
 }) {
   const pageUrl = absoluteUrl(input.baseUrl, `/blog/${input.slug}`);
   const imageUrl = absoluteUrl(input.baseUrl, DEFAULT_OG_IMAGE_PATH);
@@ -102,9 +104,26 @@ export function buildBlogPostingAndBreadcrumbJsonLd(input: {
     ],
   };
 
+  const graph: Record<string, unknown>[] = [blogPosting, breadcrumb];
+
+  if (input.faq && input.faq.length > 0) {
+    graph.push({
+      "@type": "FAQPage",
+      "@id": `${pageUrl}#faq`,
+      mainEntity: input.faq.map((entry) => ({
+        "@type": "Question",
+        name: entry.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: entry.answer,
+        },
+      })),
+    });
+  }
+
   return {
     "@context": "https://schema.org",
-    "@graph": [blogPosting, breadcrumb],
+    "@graph": graph,
   };
 }
 

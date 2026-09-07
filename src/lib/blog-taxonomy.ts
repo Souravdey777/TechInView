@@ -43,12 +43,23 @@ export type BlogFrontmatter = {
   description: string;
   date: string;
   keyword: string;
+  /**
+   * Short `<title>` for search results. The on-page `title` is written for
+   * readers and runs long; Google truncates around 60 characters, so this is
+   * the trimmed, keyword-first version used for metadata only.
+   */
+  seoTitle?: string;
   /** Reader-facing topic used by the blog index filter */
   topic?: BlogTopic;
   /** ISO date if the post was materially updated (SEO: dateModified, OG) */
   updated?: string;
   /** Secondary keywords / topics for meta keywords and discovery */
   tags?: string[];
+};
+
+export type BlogFaqEntry = {
+  question: string;
+  answer: string;
 };
 
 export type BlogListItem = Omit<BlogFrontmatter, "topic"> & {
@@ -162,4 +173,76 @@ export function extractHeadings(body: string): BlogHeading[] {
   }
 
   return headings;
+}
+
+/** Markdown -> the plain text schema.org expects in an Answer. */
+function markdownToPlainText(markdown: string): string {
+  return markdown
+    .split("\n")
+    .filter((line) => !/^\s*\|/.test(line))
+    .join(" ")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/^\s*>\s?/gm, "")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Pulls the `## FAQ` section's `### question` + answer pairs out of raw MDX.
+ * The pairs are already rendered on the page, which is what makes them
+ * legitimate FAQPage markup rather than hidden content.
+ */
+export function extractFaq(body: string): BlogFaqEntry[] {
+  const entries: BlogFaqEntry[] = [];
+  let inFaqSection = false;
+  let inFence = false;
+  let question: string | null = null;
+  let answerLines: string[] = [];
+
+  const flush = () => {
+    if (!question) return;
+    const answer = markdownToPlainText(answerLines.join("\n"));
+    if (answer) entries.push({ question, answer });
+    question = null;
+    answerLines = [];
+  };
+
+  for (const line of body.split("\n")) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+
+    const h2 = /^##\s+(.+?)\s*#*\s*$/.exec(line);
+    if (h2) {
+      flush();
+      inFaqSection = /^faq\b/i.test(stripInlineMarkdown(h2[1]));
+      continue;
+    }
+    if (!inFaqSection) continue;
+
+    const h3 = /^###\s+(.+?)\s*#*\s*$/.exec(line);
+    if (h3) {
+      flush();
+      question = stripInlineMarkdown(h3[1]);
+      continue;
+    }
+
+    // A horizontal rule ends the FAQ block in these posts (the summary follows).
+    if (/^\s*---\s*$/.test(line)) {
+      flush();
+      inFaqSection = false;
+      continue;
+    }
+
+    if (question) answerLines.push(line);
+  }
+
+  flush();
+  return entries;
 }

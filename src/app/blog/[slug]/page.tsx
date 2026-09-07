@@ -10,7 +10,7 @@ import {
   wordCountFromMarkdownBody,
 } from "@/lib/blog-seo";
 import { getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/blog";
-import { extractHeadings } from "@/lib/blog-taxonomy";
+import { extractFaq, extractHeadings } from "@/lib/blog-taxonomy";
 import { PostToc } from "@/components/blog/PostToc";
 import { RelatedProblems } from "@/components/blog/RelatedProblems";
 
@@ -63,7 +63,9 @@ export function generateMetadata({ params }: BlogPostPageProps): Metadata {
   const keywords = buildPostKeywords(post);
 
   return {
-    title: `${post.title} — TechInView Blog`,
+    // Long, reader-facing titles get truncated in search; seoTitle is the
+    // trimmed version when a post supplies one.
+    title: post.seoTitle ?? `${post.title} — TechInView Blog`,
     description: post.description,
     keywords,
     authors: [{ name: "TechInView", url: baseUrl }],
@@ -106,6 +108,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   const allPosts = getAllPosts();
   const headings = extractHeadings(post.body);
+  const faq = extractFaq(post.body);
 
   // same topic first, then most recent, so "related" means something
   const related = [
@@ -125,6 +128,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     keywords,
     wordCount,
     readingTimeMinutes: post.readingTimeMinutes,
+    faq,
   });
 
   return (

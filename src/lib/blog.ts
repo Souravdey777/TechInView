@@ -57,10 +57,15 @@ export function getPostBySlug(slug: string): BlogPost | null {
     typeof fm.updated === "string" && fm.updated.length > 0
       ? fm.updated
       : undefined;
+  const seoTitle =
+    typeof fm.seoTitle === "string" && fm.seoTitle.length > 0
+      ? fm.seoTitle
+      : undefined;
   return {
     ...fm,
     tags,
     updated,
+    seoTitle,
     topic: normalizeTopic(fm.topic),
     slug,
     body: content,

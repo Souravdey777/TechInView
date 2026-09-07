@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
 import {
@@ -22,12 +23,21 @@ import { MarketingFooter } from "@/components/landing/MarketingFooter";
 import { Pricing } from "@/components/landing/Pricing";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
 import { getRegionForCountry } from "@/lib/constants";
+import { buildHomeJsonLd } from "@/lib/site-seo";
 import {
   INTERVIEWER_PERSONAS,
   getInterviewerPersona,
   type InterviewerPersonaId,
 } from "@/lib/interviewer-personas";
 import { cn } from "@/lib/utils";
+
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
+
+// Title, description, and OG come from the root layout; the home page only
+// needs to claim its own canonical.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 type LandingPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -256,8 +266,14 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
   const previewSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=ai_interview");
   const defaultPersona = getInterviewerPersona("tia");
 
+  const jsonLd = buildHomeJsonLd({ baseUrl, faq: FAQS });
+
   return (
     <div className="min-h-screen [overflow-x:clip] bg-brand-deep text-brand-text">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-brand-cyan focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-deep focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:ring-offset-2 focus:ring-offset-brand-deep"
