@@ -20,7 +20,7 @@ export default async function AppLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, interview_credits")
+    .select("display_name, avatar_url, username, is_public_profile, interview_credits")
     .eq("id", user.id)
     .single();
 
@@ -29,6 +29,9 @@ export default async function AppLayout({
       <AppNav
         userEmail={userEmail}
         displayName={profile?.display_name ?? null}
+        avatarUrl={profile?.avatar_url ?? null}
+        username={profile?.username ?? null}
+        isPublicProfile={profile?.is_public_profile ?? false}
         credits={profile?.interview_credits ?? 0}
       />
 

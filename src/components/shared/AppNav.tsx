@@ -4,17 +4,21 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  ExternalLink,
   LogOut,
   Mail,
   Menu,
   Settings2,
   Ticket,
+  UserRound,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupabase } from "@/hooks/useSupabase";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { createSupportMailto } from "@/lib/legal";
+import { getPublicProfilePath } from "@/lib/public-profile";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,15 +44,41 @@ const SUPPORT_HREF = createSupportMailto({
 });
 
 const ROUNDS_HREF = "/settings#rounds";
+const PUBLIC_PAGE_HREF = "/settings#public-page";
 
 type AppNavProps = {
   userEmail: string;
   displayName?: string | null;
+  avatarUrl?: string | null;
+  username?: string | null;
+  isPublicProfile?: boolean;
   credits?: number;
 };
 
 function isItemActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function getAvatarInitial(displayName: string | null | undefined, userEmail: string) {
+  return (displayName?.trim() || userEmail || "?").charAt(0).toUpperCase();
+}
+
+/**
+ * The public page only resolves once a handle exists and the profile is
+ * published, so link straight to it when it is live and to the settings
+ * section that turns it on otherwise.
+ */
+function getPublicProfileLink(
+  username: string | null | undefined,
+  isPublicProfile: boolean
+) {
+  const handle = username?.trim();
+
+  if (handle && isPublicProfile) {
+    return { href: getPublicProfilePath(handle), isLive: true as const };
+  }
+
+  return { href: PUBLIC_PAGE_HREF, isLive: false as const };
 }
 
 function formatRounds(credits: number) {
@@ -79,15 +109,20 @@ function RoundsCounter({
 function AccountMenu({
   userEmail,
   displayName,
+  avatarUrl,
+  username,
+  isPublicProfile,
 }: {
   userEmail: string;
   displayName?: string | null;
+  avatarUrl?: string | null;
+  username?: string | null;
+  isPublicProfile: boolean;
 }) {
   const router = useRouter();
   const { signOut } = useSupabase();
-  const initial = (displayName?.trim() || userEmail || "?")
-    .charAt(0)
-    .toUpperCase();
+  const initial = getAvatarInitial(displayName, userEmail);
+  const publicProfile = getPublicProfileLink(username, isPublicProfile);
 
   const handleSignOut = async () => {
     await signOut();
@@ -98,34 +133,66 @@ function AccountMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          "flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full",
-          "border border-brand-border bg-brand-card text-xs font-semibold text-brand-muted",
-          "transition-colors hover:border-brand-cyan/40 hover:text-brand-text",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-surface",
-          "data-[state=open]:border-brand-cyan/40 data-[state=open]:text-brand-text"
+          "group shrink-0 rounded-full",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-surface"
         )}
         aria-label="Account menu"
       >
-        {initial}
+        <Avatar
+          className={cn(
+            "h-[30px] w-[30px] border border-brand-border bg-brand-card text-xs text-brand-muted",
+            "transition-colors group-hover:border-brand-cyan/40 group-hover:text-brand-text",
+            "group-data-[state=open]:border-brand-cyan/40 group-data-[state=open]:text-brand-text"
+          )}
+        >
+          <AvatarImage src={avatarUrl ?? undefined} alt="" />
+          <AvatarFallback className="border-0 bg-transparent text-xs font-semibold text-inherit">
+            {initial}
+          </AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
-        <div className="px-2.5 pb-2 pt-1.5">
-          <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-brand-subtle">
-            Signed in as
-          </p>
-          <p
-            className="mt-1 truncate text-sm font-medium text-brand-text"
-            title={userEmail}
-          >
-            {displayName?.trim() || userEmail}
-          </p>
-          {displayName?.trim() ? (
-            <p className="truncate text-xs text-brand-muted" title={userEmail}>
-              {userEmail}
+      <DropdownMenuContent align="end" className="w-64">
+        <div className="flex items-center gap-2.5 px-2.5 pb-2 pt-1.5">
+          <Avatar className="h-9 w-9 border border-brand-border bg-brand-card text-brand-muted">
+            <AvatarImage src={avatarUrl ?? undefined} alt="" />
+            <AvatarFallback className="border-0 bg-transparent text-xs font-semibold text-inherit">
+              {initial}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-brand-subtle">
+              Signed in as
             </p>
-          ) : null}
+            <p
+              className="mt-0.5 truncate text-sm font-medium text-brand-text"
+              title={userEmail}
+            >
+              {displayName?.trim() || userEmail}
+            </p>
+            {displayName?.trim() ? (
+              <p className="truncate text-xs text-brand-muted" title={userEmail}>
+                {userEmail}
+              </p>
+            ) : null}
+          </div>
         </div>
         <DropdownMenuSeparator />
+        {publicProfile.isLive ? (
+          <DropdownMenuItem asChild>
+            <a href={publicProfile.href} target="_blank" rel="noreferrer">
+              <UserRound />
+              Public profile
+              <ExternalLink className="ml-auto !size-3.5" />
+            </a>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link href={publicProfile.href}>
+              <UserRound />
+              Set up public profile
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href="/settings">
             <Settings2 />
@@ -157,11 +224,19 @@ function AccountMenu({
   );
 }
 
-export function AppNav({ userEmail, displayName, credits = 0 }: AppNavProps) {
+export function AppNav({
+  userEmail,
+  displayName,
+  avatarUrl,
+  username,
+  isPublicProfile = false,
+  credits = 0,
+}: AppNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useSupabase();
   const [open, setOpen] = useState(false);
+  const publicProfile = getPublicProfileLink(username, isPublicProfile);
 
   const close = () => setOpen(false);
 
@@ -263,7 +338,13 @@ export function AppNav({ userEmail, displayName, credits = 0 }: AppNavProps) {
             </Link>
 
             <div className="hidden lg:block">
-              <AccountMenu userEmail={userEmail} displayName={displayName} />
+              <AccountMenu
+                userEmail={userEmail}
+                displayName={displayName}
+                avatarUrl={avatarUrl}
+                username={username}
+                isPublicProfile={isPublicProfile}
+              />
             </div>
 
             <button
@@ -360,9 +441,12 @@ export function AppNav({ userEmail, displayName, credits = 0 }: AppNavProps) {
 
           <div className="flex flex-col gap-1 border-t border-brand-border px-4 py-4 sm:px-6">
             <div className="flex items-center gap-2.5 pb-2">
-              <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full border border-brand-border bg-brand-card text-xs font-semibold text-brand-muted">
-                {(displayName?.trim() || userEmail || "?").charAt(0).toUpperCase()}
-              </span>
+              <Avatar className="h-[30px] w-[30px] border border-brand-border bg-brand-card text-brand-muted">
+                <AvatarImage src={avatarUrl ?? undefined} alt="" />
+                <AvatarFallback className="border-0 bg-transparent text-xs font-semibold text-inherit">
+                  {getAvatarInitial(displayName, userEmail)}
+                </AvatarFallback>
+              </Avatar>
               <div className="min-w-0">
                 <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-brand-subtle">
                   Signed in as
@@ -375,6 +459,31 @@ export function AppNav({ userEmail, displayName, credits = 0 }: AppNavProps) {
                 </p>
               </div>
             </div>
+
+            {publicProfile.isLive ? (
+              <a
+                href={publicProfile.href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={close}
+                tabIndex={open ? 0 : -1}
+                className="flex items-center gap-2.5 rounded-md px-2 py-2.5 text-sm text-brand-muted transition-colors hover:bg-brand-card hover:text-brand-text"
+              >
+                <UserRound className="h-4 w-4" />
+                Public profile
+                <ExternalLink className="ml-auto h-3.5 w-3.5" />
+              </a>
+            ) : (
+              <Link
+                href={publicProfile.href}
+                onClick={close}
+                tabIndex={open ? 0 : -1}
+                className="flex items-center gap-2.5 rounded-md px-2 py-2.5 text-sm text-brand-muted transition-colors hover:bg-brand-card hover:text-brand-text"
+              >
+                <UserRound className="h-4 w-4" />
+                Set up public profile
+              </Link>
+            )}
 
             <Link
               href="/settings"
