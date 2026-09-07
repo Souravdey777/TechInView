@@ -1,9 +1,12 @@
 import {
+  HIRE_RECOMMENDATION_CONFIG,
   ROUND_SCORING_DIMENSIONS,
   SCORING_DIMENSIONS,
+  type HireRecommendation,
 } from "@/lib/constants";
 import {
   DASHBOARD_FILTER_LABELS,
+  getPracticeResultsHref,
   type PracticeInterviewKind,
 } from "@/lib/dashboard/models";
 
@@ -31,12 +34,18 @@ const NUMBER_WORDS = [
 ];
 
 export type DashboardRound = {
+  id: string;
   kind: PracticeInterviewKind;
   /** "general_dsa" or "targeted_loop" — decides which rubric the round used. */
   mode: string | null;
   status: "completed" | "abandoned" | "in_progress";
+  /** Problem or round title, used as the trend point's headline. */
+  title: string;
   score: number | null;
+  verdict: HireRecommendation | null;
   dimensionScores: Record<string, number> | null;
+  /** Take number shared with the session log, or null when unscored. */
+  take: number | null;
   timestamp: string;
 };
 
@@ -52,7 +61,12 @@ export type DashboardMeter = {
 export type TrendPoint = {
   take: number;
   score: number;
-  caption: string;
+  title: string;
+  typeLabel: string;
+  verdictLabel: string | null;
+  /** Results route for the round behind the point. */
+  href: string;
+  timestamp: string;
 };
 
 export type DimensionAverage = {
@@ -274,9 +288,15 @@ export function buildDashboardSummary({
     .slice(0, TREND_SAMPLE_SIZE)
     .reverse()
     .map((round, index) => ({
-      take: index + 1,
+      take: round.take ?? index + 1,
       score: round.score,
-      caption: `Take ${index + 1} · ${round.score}`,
+      title: round.title,
+      typeLabel: DASHBOARD_FILTER_LABELS[round.kind],
+      verdictLabel: round.verdict
+        ? HIRE_RECOMMENDATION_CONFIG[round.verdict].label
+        : null,
+      href: getPracticeResultsHref(round.kind, round.id),
+      timestamp: round.timestamp,
     }));
 
   const solvedRatio = problemsTotal > 0 ? problemsSolved / problemsTotal : 0;

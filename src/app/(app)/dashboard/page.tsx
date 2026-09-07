@@ -118,6 +118,11 @@ function problemOf(problems: DashboardInterview["problems"]) {
   return Array.isArray(problems) ? problems[0] ?? null : problems;
 }
 
+/** Round title falls back to the problem, then to a generic label. */
+function roundTitle(interview: DashboardInterview) {
+  return interview.round_title ?? problemOf(interview.problems)?.title ?? "Interview";
+}
+
 function normalizeStatus(status: string): DashboardRound["status"] {
   return status === "completed" || status === "abandoned" ? status : "in_progress";
 }
@@ -204,12 +209,29 @@ export default async function DashboardPage() {
         : String(attempt.updated_at),
   }));
 
-  const rounds: DashboardRound[] = interviews.map((interview) => ({
+  // Takes count up from the user's first completed round, newest row first, and
+  // the trend and the session log have to agree on the numbering.
+  let nextTake =
+    completedCount.count ??
+    interviews.filter((interview) => normalizeStatus(interview.status) === "completed")
+      .length;
+  const takes = interviews.map((interview) => {
+    if (normalizeStatus(interview.status) !== "completed") return null;
+    const take = nextTake;
+    nextTake -= 1;
+    return take;
+  });
+
+  const rounds: DashboardRound[] = interviews.map((interview, index) => ({
+    id: interview.id,
     kind: mapInterviewToKind(interview.mode, interview.round_type),
     mode: interview.mode,
     status: normalizeStatus(interview.status),
+    title: roundTitle(interview),
     score: interview.overall_score,
+    verdict: (interview.hire_recommendation as HireRecommendation | null) ?? null,
     dimensionScores: toDimensionScores(interview.scores),
+    take: takes[index],
     timestamp: interview.completed_at ?? interview.started_at,
   }));
 
@@ -225,30 +247,23 @@ export default async function DashboardPage() {
     problemsTotal: coverage.total,
   });
 
-  // Takes count up from the user's first completed round, newest row first.
-  let nextTake = completedCount.count ?? rounds.filter((round) => round.status === "completed").length;
-  const roundRows: SessionLogRow[] = interviews.map((interview, index) => {
-    const status = normalizeStatus(interview.status);
-    const take = status === "completed" ? nextTake : null;
-    if (status === "completed") nextTake -= 1;
-
-    return buildRoundLogRow(
+  const roundRows: SessionLogRow[] = interviews.map((interview, index) =>
+    buildRoundLogRow(
       {
-        id: interview.id,
+        id: rounds[index].id,
         kind: rounds[index].kind,
-        status,
-        title:
-          interview.round_title ?? problemOf(interview.problems)?.title ?? "Interview",
+        status: rounds[index].status,
+        title: rounds[index].title,
         language: interview.language,
         interviewerPersona: interview.interviewer_persona,
         durationSeconds: interview.duration_seconds,
-        score: interview.overall_score,
-        verdict: (interview.hire_recommendation as HireRecommendation | null) ?? null,
-        timestamp: interview.completed_at ?? interview.started_at,
+        score: rounds[index].score,
+        verdict: rounds[index].verdict,
+        timestamp: rounds[index].timestamp,
       },
-      take,
-    );
-  });
+      takes[index],
+    ),
+  );
 
   const sessionRows = [
     ...roundRows.slice(0, LOG_ROUNDS),
