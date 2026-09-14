@@ -1,5 +1,5 @@
 <p align="center">
-  <strong>TechInView</strong>
+  <img src="public/images/techinview-hero.svg" alt="TechInView — voice-first AI interview prep for software engineers" width="100%" />
 </p>
 
 <p align="center">
