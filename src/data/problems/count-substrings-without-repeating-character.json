@@ -1,0 +1,81 @@
+{
+  "title": "Count Substrings Without Repeating Character",
+  "slug": "count-substrings-without-repeating-character",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given a string `s` of lowercase English letters. A substring is **special** if no character appears in it more than once.\n\nReturn the number of special substrings of `s`. Substrings are counted by position, so equal text at different positions counts separately.\n\n**Example 1:**\n```\nInput: s = \"abcd\"\nOutput: 10\nExplanation: All characters are distinct, so every one of the 4 * 5 / 2 = 10 substrings is special.\n```\n\n**Example 2:**\n```\nInput: s = \"xxyx\"\nOutput: 6\nExplanation: The 4 single characters are special, plus \"xy\" and \"yx\". \"xx\" and every longer substring repeat an 'x'.\n```\n\n**Example 3:**\n```\nInput: s = \"abab\"\nOutput: 7\nExplanation: Special substrings: 4 of length 1 and 3 of length 2 (\"ab\", \"ba\", \"ab\"). Every length-3 or longer substring repeats a letter.\n```",
+  "examples": [
+    {
+      "input": "s = \"abcd\"",
+      "output": "10",
+      "explanation": "All characters are distinct, so every one of the 4 * 5 / 2 = 10 substrings is special."
+    },
+    {
+      "input": "s = \"xxyx\"",
+      "output": "6",
+      "explanation": "The 4 single characters are special, plus \"xy\" and \"yx\". \"xx\" and every longer substring repeat an 'x'."
+    },
+    {
+      "input": "s = \"abab\"",
+      "output": "7",
+      "explanation": "Special substrings: 4 of length 1 and 3 of length 2 (\"ab\", \"ba\", \"ab\"). Every length-3 or longer substring repeats a letter."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^5",
+    "s consists only of lowercase English letters",
+    "The answer fits in a 64-bit signed integer"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def numberOfSpecialSubstrings(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function numberOfSpecialSubstrings(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int numberOfSpecialSubstrings(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int numberOfSpecialSubstrings(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"abcd\"",
+      "expected_output": "10",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"xxyx\"",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abab\"",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abcabcbbzz\"",
+      "expected_output": "21",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates every substring and checks for duplicates, which is O(n^2) substrings with up to O(26) work each. The optimal solution uses a sliding window: move the right end r across the string, and whenever s[r] already appears in the window, advance the left end until it no longer does. At that point every substring ending at r and starting anywhere in [left, r] is special, so add r - left + 1 to the total. Each index enters and leaves the window at most once, giving O(n) time and O(1) space (a 26-entry count array). Because a window never exceeds 26 characters, the total is at most 26 * n.",
+  "hints": [
+    "If a substring has no repeated characters, does every substring inside it also have none?",
+    "For each right end r, find the smallest left end such that s[left..r] has no repeats; how many valid substrings end at r?",
+    "Maintain a window with a count array, shrink from the left while s[r] is duplicated, then add r - left + 1 to the answer."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you count substrings in which every character appears at most k times?",
+    "How would you return the longest special substring instead of the count?"
+  ]
+}

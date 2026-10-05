@@ -1,0 +1,83 @@
+{
+  "title": "Number of Visible People in a Queue",
+  "slug": "number-of-visible-people-in-a-queue",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "uber",
+    "bloomberg",
+    "meta"
+  ],
+  "description": "`n` people stand in a line from left to right, and `heights[i]` is the height of the person at position `i`. All heights are **distinct**.\n\nEach person looks to the **right**. Person `i` can see person `j` (with `i < j`) when every person strictly between them is shorter than **both** `heights[i]` and `heights[j]`. In particular, a person can always see their immediate right neighbour.\n\nReturn an array `answer` of length `n` where `answer[i]` is the number of people that person `i` can see.\n\n**Example 1:**\n```\nInput: heights = [10,6,8,5,11,9]\nOutput: [3,1,2,1,1,0]\nExplanation: Person 0 (height 10) sees persons 1, 2 and 4. Person 1 sees only person 2. Person 2 sees persons 3 and 4. Person 3 sees person 4. Person 4 sees person 5. Person 5 has nobody to the right.\n```\n\n**Example 2:**\n```\nInput: heights = [5,1,2,3,10]\nOutput: [4,1,1,1,0]\nExplanation: Person 0 sees everyone because each person in between is shorter than both ends. Persons 1, 2 and 3 each see only the next person, who is taller and blocks the rest.\n```\n\n**Example 3:**\n```\nInput: heights = [4,3,2,1]\nOutput: [1,1,1,0]\nExplanation: In a strictly decreasing line each person sees only the neighbour directly to the right, since that neighbour blocks everyone further away.\n```",
+  "examples": [
+    {
+      "input": "heights = [10,6,8,5,11,9]",
+      "output": "[3,1,2,1,1,0]",
+      "explanation": "Person 0 (height 10) sees persons 1, 2 and 4. Person 1 sees only person 2. Person 2 sees persons 3 and 4. Person 3 sees person 4. Person 4 sees person 5. Person 5 has nobody to the right."
+    },
+    {
+      "input": "heights = [5,1,2,3,10]",
+      "output": "[4,1,1,1,0]",
+      "explanation": "Person 0 sees everyone because each person in between is shorter than both ends. Persons 1, 2 and 3 each see only the next person, who is taller and blocks the rest."
+    },
+    {
+      "input": "heights = [4,3,2,1]",
+      "output": "[1,1,1,0]",
+      "explanation": "In a strictly decreasing line each person sees only the neighbour directly to the right, since that neighbour blocks everyone further away."
+    }
+  ],
+  "constraints": [
+    "1 <= heights.length <= 10^5",
+    "1 <= heights[i] <= 10^5",
+    "All values in heights are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def canSeePersonsCount(self, heights: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function canSeePersonsCount(heights) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] canSeePersonsCount(int[] heights) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> canSeePersonsCount(vector<int>& heights) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "heights = [10,6,8,5,11,9]",
+      "expected_output": "[3,1,2,1,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [5,1,2,3,10]",
+      "expected_output": "[4,1,1,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [4,3,2,1]",
+      "expected_output": "[1,1,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "heights = [7]",
+      "expected_output": "[0]",
+      "is_hidden": true
+    },
+    {
+      "input": "heights = [1,2,3,4,5]",
+      "expected_output": "[1,1,1,1,0]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force checks, for every pair i < j, whether all people between them are shorter than both, which is O(n^2) with a running maximum (O(n^3) naively). The optimal approach scans from right to left with a monotonic stack that stays strictly decreasing from bottom to top. For person i, pop every stack entry shorter than heights[i]; each popped person is visible to i (nothing between them was taller), so count them. If the stack is still non-empty after popping, the top is the first taller person to the right, and i can see them too, so add one more. Then push heights[i]. Every height is pushed and popped at most once, giving O(n) time and O(n) space.",
+  "hints": [
+    "Once a taller person stands to the right of you, nobody beyond them is visible. What does that suggest about which people are still relevant?",
+    "Process people from right to left and keep a stack of heights that could still be seen by someone further left.",
+    "For person i, pop and count all shorter people on the stack, then add one if a taller person remains on top. Push heights[i] afterwards."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would the solution change if heights could repeat and an equal-height person blocked the view?",
+    "How would you count, for every person, how many people to the LEFT can see them?"
+  ]
+}

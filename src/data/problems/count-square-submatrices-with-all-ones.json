@@ -1,0 +1,82 @@
+{
+  "title": "Count Square Submatrices with All Ones",
+  "slug": "count-square-submatrices-with-all-ones",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "apple"
+  ],
+  "description": "Given an `m x n` matrix `matrix` containing only `0`s and `1`s, return how many **square** submatrices consist entirely of `1`s.\n\nSquares of every size count, and overlapping squares are counted separately (a single `1` cell is a 1x1 square).\n\n**Example 1:**\n```\nInput: matrix = [[0,1,1,1],[1,1,1,1],[0,1,1,1]]\nOutput: 15\nExplanation: There are 10 squares of size 1, 4 squares of size 2 and 1 square of size 3, for a total of 15.\n```\n\n**Example 2:**\n```\nInput: matrix = [[1,0,1],[1,1,0],[1,1,0]]\nOutput: 7\nExplanation: There are 6 squares of size 1 and 1 square of size 2 (bottom-left), for a total of 7.\n```\n\n**Example 3:**\n```\nInput: matrix = [[0,0],[0,0]]\nOutput: 0\nExplanation: No cell is 1, so there are no squares.\n```",
+  "examples": [
+    {
+      "input": "matrix = [[0,1,1,1],[1,1,1,1],[0,1,1,1]]",
+      "output": "15",
+      "explanation": "There are 10 squares of size 1, 4 squares of size 2 and 1 square of size 3, for a total of 15."
+    },
+    {
+      "input": "matrix = [[1,0,1],[1,1,0],[1,1,0]]",
+      "output": "7",
+      "explanation": "There are 6 squares of size 1 and 1 square of size 2 (bottom-left), for a total of 7."
+    },
+    {
+      "input": "matrix = [[0,0],[0,0]]",
+      "output": "0",
+      "explanation": "No cell is 1, so there are no squares."
+    }
+  ],
+  "constraints": [
+    "1 <= matrix.length <= 300",
+    "1 <= matrix[0].length <= 300",
+    "matrix[i][j] is 0 or 1"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countSquares(self, matrix: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countSquares(matrix) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int countSquares(int[][] matrix) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int countSquares(vector<vector<int>>& matrix) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "matrix = [[0,1,1,1],[1,1,1,1],[0,1,1,1]]",
+      "expected_output": "15",
+      "is_hidden": false
+    },
+    {
+      "input": "matrix = [[1,0,1],[1,1,0],[1,1,0]]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "matrix = [[0,0],[0,0]]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "matrix = [[1]]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "matrix = [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]",
+      "expected_output": "30",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force picks every top-left corner and every size and checks whether the square is all ones, costing up to O(m * n * min(m, n)^3), or O(m * n * min(m, n)^2) with a 2D prefix sum. The optimal dynamic programming approach lets dp[i][j] be the side of the largest all-ones square whose bottom-right corner is (i, j): if matrix[i][j] is 1, dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]), otherwise 0. A cell with dp value s is the bottom-right corner of exactly s squares (sizes 1..s), so the answer is the sum of all dp values. This is O(m * n) time and O(1) extra space if the matrix is updated in place (O(n) with a rolling row).",
+  "hints": [
+    "Count squares by their bottom-right corner. How many squares end at a given cell?",
+    "If the largest all-ones square ending at (i, j) has side s, then exactly s squares end there. How does s depend on the neighbours above, left and diagonally up-left?",
+    "dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) when matrix[i][j] == 1, else 0. Sum all dp values."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you instead return the area of the largest all-ones square (Maximal Square)?",
+    "How would you count all-ones rectangles rather than squares?"
+  ]
+}

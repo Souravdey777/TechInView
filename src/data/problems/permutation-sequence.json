@@ -1,0 +1,82 @@
+{
+  "title": "Permutation Sequence",
+  "slug": "permutation-sequence",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "Consider all `n!` orderings of the numbers `1, 2, ..., n`, written as strings and listed in increasing lexicographic (dictionary) order. For `n = 3` the list is `\"123\"`, `\"132\"`, `\"213\"`, `\"231\"`, `\"312\"`, `\"321\"`.\n\nGiven `n` and `k`, return the `k`-th string in this list, counting from `k = 1`.\n\n**Example 1:**\n```\nInput: n = 3, k = 3\nOutput: \"213\"\nExplanation: The ordered list is 123, 132, 213, 231, 312, 321. The third entry is 213.\n```\n\n**Example 2:**\n```\nInput: n = 4, k = 9\nOutput: \"2314\"\nExplanation: The first 6 permutations start with 1, so the 9th is the 3rd among those that start with 2: 2134, 2143, 2314.\n```\n\n**Example 3:**\n```\nInput: n = 3, k = 1\nOutput: \"123\"\nExplanation: The very first permutation is the digits in increasing order.\n```",
+  "examples": [
+    {
+      "input": "n = 3, k = 3",
+      "output": "\"213\"",
+      "explanation": "The ordered list is 123, 132, 213, 231, 312, 321. The third entry is 213."
+    },
+    {
+      "input": "n = 4, k = 9",
+      "output": "\"2314\"",
+      "explanation": "The first 6 permutations start with 1, so the 9th is the 3rd among those that start with 2: 2134, 2143, 2314."
+    },
+    {
+      "input": "n = 3, k = 1",
+      "output": "\"123\"",
+      "explanation": "The very first permutation is the digits in increasing order."
+    }
+  ],
+  "constraints": [
+    "`1 <= n <= 9`",
+    "`1 <= k <= n!`",
+    "`k` is 1-indexed"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def getPermutation(self, n: int, k: int) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function getPermutation(n, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String getPermutation(int n, int k) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string getPermutation(int n, int k) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 3, k = 3",
+      "expected_output": "\"213\"",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 4, k = 9",
+      "expected_output": "\"2314\"",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, k = 1",
+      "expected_output": "\"123\"",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, k = 1",
+      "expected_output": "\"1\"",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 9, k = 362880",
+      "expected_output": "\"987654321\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force approach generates permutations in lexicographic order by backtracking (or repeatedly applies next-permutation) and stops at the k-th one, which costs O(k * n), up to O(n! * n). The optimal approach uses the factorial number system: there are (n-1)! permutations beginning with each possible first digit, so with k converted to 0-indexed (k - 1), the first digit is the element at index (k - 1) / (n-1)! in the sorted list of remaining numbers; remove it, set k to the remainder, and repeat with (n-2)!, and so on down to 0!. Each step removes an element from a list of size at most n, giving O(n^2) time (O(n log n) with a Fenwick tree for the selection) and O(n) space.",
+  "hints": [
+    "How many permutations start with the digit 1? With 2? Notice they come in equal-sized blocks.",
+    "Each block for the first position has (n-1)! permutations. Use integer division of (k-1) by (n-1)! to find which block k falls in.",
+    "Pick that digit from the remaining sorted numbers, remove it, replace k with the remainder, and repeat with the next smaller factorial."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Given a permutation, how would you compute its rank k (the inverse problem)?",
+    "How would you handle the case where the input multiset contains repeated values?"
+  ]
+}

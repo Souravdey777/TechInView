@@ -1,0 +1,75 @@
+{
+  "title": "Minimum White Tiles After Covering With Carpets",
+  "slug": "minimum-white-tiles-after-covering-with-carpets",
+  "difficulty": "hard",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "A floor is described by a binary string `floor`, where `floor[i] = '0'` means tile `i` is black and `floor[i] = '1'` means it is white.\n\nYou have `numCarpets` black carpets, each exactly `carpetLen` tiles long. A carpet covers a contiguous block of tiles. Carpets may overlap each other, and a carpet may hang past the end of the floor. You do not have to use every carpet.\n\nReturn the **minimum number of white tiles** that remain visible (not covered by any carpet).\n\n**Example 1:**\n```\nInput: floor = \"10110101\", numCarpets = 2, carpetLen = 2\nOutput: 2\nExplanation: Cover tiles 2-3 and tiles 4-5. The white tiles at indices 0 and 7 remain visible. No placement of two length-2 carpets can hide more white tiles.\n```\n\n**Example 2:**\n```\nInput: floor = \"11111\", numCarpets = 2, carpetLen = 3\nOutput: 0\nExplanation: Cover tiles 0-2 and tiles 2-4 (the carpets overlap on tile 2). Every tile is covered, so no white tile is visible.\n```",
+  "examples": [
+    {
+      "input": "floor = \"10110101\", numCarpets = 2, carpetLen = 2",
+      "output": "2",
+      "explanation": "Cover tiles 2-3 and tiles 4-5. The white tiles at indices 0 and 7 remain visible. No placement of two length-2 carpets can hide more white tiles."
+    },
+    {
+      "input": "floor = \"11111\", numCarpets = 2, carpetLen = 3",
+      "output": "0",
+      "explanation": "Cover tiles 0-2 and tiles 2-4 (the carpets overlap on tile 2). Every tile is covered, so no white tile is visible."
+    }
+  ],
+  "constraints": [
+    "1 <= carpetLen <= floor.length <= 1000",
+    "floor[i] is either '0' or '1'",
+    "1 <= numCarpets <= 1000"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumWhiteTiles(self, floor: str, numCarpets: int, carpetLen: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumWhiteTiles(floor, numCarpets, carpetLen) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minimumWhiteTiles(String floor, int numCarpets, int carpetLen) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumWhiteTiles(string floor, int numCarpets, int carpetLen) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "floor = \"10110101\", numCarpets = 2, carpetLen = 2",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "floor = \"11111\", numCarpets = 2, carpetLen = 3",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "floor = \"0000\", numCarpets = 1, carpetLen = 2",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "floor = \"1\", numCarpets = 1, carpetLen = 1",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "floor = \"1101101011\", numCarpets = 2, carpetLen = 2",
+      "expected_output": "3",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every combination of carpet start positions, roughly O(n^numCarpets), which is far too slow. Use DP: let dp[i][c] be the minimum visible white tiles among tiles i..n-1 when c carpets are still available. At tile i either leave it uncovered, costing (floor[i] == '1') + dp[i+1][c], or start a carpet there (when c > 0), jumping to dp[i + carpetLen][c - 1]; positions at or beyond n cost 0. It never helps to start a carpet anywhere other than at the first uncovered tile, so this choice set is complete. The answer is dp[0][numCarpets]. Time is O(n * numCarpets) and space can be reduced to O(n) by keeping two layers. If numCarpets * carpetLen >= n the answer is immediately 0.",
+  "hints": [
+    "Overlapping carpets are never strictly better than placing each one at the first tile the earlier ones left uncovered (Example 2 overlaps, but a non-overlapping placement that hangs past the end works too), so think of scanning the floor left to right and deciding, at each tile, whether a carpet starts here.",
+    "Define a state by (current tile index, carpets remaining). Two choices exist at each tile: leave it bare or lay a carpet starting there.",
+    "dp[i][c] = min((floor[i]=='1') + dp[i+1][c], dp[i+carpetLen][c-1]) with dp[i>=n][*] = 0. Answer dp[0][numCarpets]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * numCarpets)",
+    "space": "O(n * numCarpets)"
+  },
+  "follow_up_questions": [
+    "How would you reduce the space usage to O(n)?",
+    "What changes if carpets have different lengths given as an array?"
+  ]
+}

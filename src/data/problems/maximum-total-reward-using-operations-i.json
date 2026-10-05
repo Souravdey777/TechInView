@@ -1,0 +1,81 @@
+{
+  "title": "Maximum Total Reward Using Operations I",
+  "slug": "maximum-total-reward-using-operations-i",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given an integer array `rewardValues`. Your total reward `x` starts at `0`, and every index starts unmarked. You may repeat the following any number of times (including zero):\n\n- Choose an unmarked index `i` such that `rewardValues[i]` is **strictly greater** than the current `x`.\n- Add `rewardValues[i]` to `x` and mark index `i`.\n\nEach index can be used at most once, and you may pick indices in any order. Return the maximum total reward `x` you can end up with.\n\n**Example 1:**\n```\nInput: rewardValues = [2,5,3,8]\nOutput: 15\nExplanation: Take 2 (x = 2), then 5 since 5 > 2 (x = 7), then 8 since 8 > 7 (x = 15). No ordering can reach more.\n```\n\n**Example 2:**\n```\nInput: rewardValues = [4,4,4]\nOutput: 4\nExplanation: After taking one 4, x = 4 and the remaining values are not strictly greater, so the answer is 4.\n```\n\n**Example 3:**\n```\nInput: rewardValues = [1,6,4,3,2]\nOutput: 11\nExplanation: Take 1 (x = 1), then 4 (x = 5), then 6 (x = 11). The final value can never reach 2 * 6 = 12.\n```",
+  "examples": [
+    {
+      "input": "rewardValues = [2,5,3,8]",
+      "output": "15",
+      "explanation": "Take 2 (x = 2), then 5 since 5 > 2 (x = 7), then 8 since 8 > 7 (x = 15). No ordering can reach more."
+    },
+    {
+      "input": "rewardValues = [4,4,4]",
+      "output": "4",
+      "explanation": "After taking one 4, x = 4 and the remaining values are not strictly greater, so the answer is 4."
+    },
+    {
+      "input": "rewardValues = [1,6,4,3,2]",
+      "output": "11",
+      "explanation": "Take 1 (x = 1), then 4 (x = 5), then 6 (x = 11). The final value can never reach 2 * 6 = 12."
+    }
+  ],
+  "constraints": [
+    "1 <= rewardValues.length <= 2000",
+    "1 <= rewardValues[i] <= 2000",
+    "Each index may be chosen at most once, and a value can be added only if it is strictly greater than the current total"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxTotalReward(self, rewardValues: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxTotalReward(rewardValues) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxTotalReward(int[] rewardValues) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxTotalReward(vector<int>& rewardValues) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "rewardValues = [2,5,3,8]",
+      "expected_output": "15",
+      "is_hidden": false
+    },
+    {
+      "input": "rewardValues = [4,4,4]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "rewardValues = [1,6,4,3,2]",
+      "expected_output": "11",
+      "is_hidden": false
+    },
+    {
+      "input": "rewardValues = [1]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "rewardValues = [3,3,7,7,1,9,6,6]",
+      "expected_output": "17",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every subset in every order, which is exponential. Observe that any valid set of chosen values can be taken in increasing order, so sort the values (duplicates can be dropped, since a value equal to x is never allowed). Then this becomes a subset-sum reachability problem with a twist: value v can be added only to a current total x < v. Maintain a boolean array reachable[s] for totals s; for each v in increasing order, for every reachable s < v mark s + v reachable. The answer is the largest reachable total, which is always below 2 * max(rewardValues). With M = max value this is O(n * M) time and O(M) space; a bitset (big integer) speeds the inner loop further.",
+  "hints": [
+    "If you pick a set of values, in what order should you take them so that each step is legal?",
+    "After sorting, adding value v is only possible when the current total is less than v. Which totals can the final x possibly reach? Is there an upper bound in terms of the maximum value?",
+    "Track the set of reachable totals (a boolean array of size 2 * max). Process values in increasing order and, for each reachable s < v, mark s + v reachable. Return the largest reachable total."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * M) where M = max(rewardValues)",
+    "space": "O(M)"
+  },
+  "follow_up_questions": [
+    "How can you use a bitset or big-integer shift to speed up the reachability update?",
+    "How would you scale this when values and length go up to 5 * 10^4 (version II)?"
+  ]
+}

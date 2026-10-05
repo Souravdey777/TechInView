@@ -1,0 +1,84 @@
+{
+  "title": "Longest Path With Different Adjacent Characters",
+  "slug": "longest-path-with-different-adjacent-characters",
+  "difficulty": "hard",
+  "category": "trees",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft"
+  ],
+  "description": "You are given a tree with `n` nodes labelled `0` to `n - 1`, rooted at node `0`, described by an array `parent` where `parent[i]` is the parent of node `i`. The root has `parent[0] == -1`.\n\nYou are also given a string `s` of length `n`, where `s[i]` is the character written on node `i`.\n\nReturn the number of **nodes** on the longest path in the tree in which no two adjacent nodes have the same character. A path may start and end at any nodes and does not have to pass through the root. A single node is always a valid path of length 1.\n\n**Example 1:**\n```\nInput: parent = [-1,0,0,1,1,2], s = \"abacbe\"\nOutput: 3\nExplanation: The path 3 -> 1 -> 0 has characters c, b, a, all different from their neighbours. Node 2 cannot extend it because 0 and 2 are both 'a'.\n```\n\n**Example 2:**\n```\nInput: parent = [-1,0,0,0], s = \"aabc\"\nOutput: 3\nExplanation: The path 2 -> 0 -> 3 has characters b, a, c. Node 1 cannot join because it shares 'a' with node 0.\n```\n\n**Example 3:**\n```\nInput: parent = [-1,0,1,2], s = \"aaaa\"\nOutput: 1\nExplanation: Every pair of adjacent nodes shares the character 'a', so the best path is a single node.\n```",
+  "examples": [
+    {
+      "input": "parent = [-1,0,0,1,1,2], s = \"abacbe\"",
+      "output": "3",
+      "explanation": "The path 3 -> 1 -> 0 has characters c, b, a, all different from their neighbours. Node 2 cannot extend it because 0 and 2 are both 'a'."
+    },
+    {
+      "input": "parent = [-1,0,0,0], s = \"aabc\"",
+      "output": "3",
+      "explanation": "The path 2 -> 0 -> 3 has characters b, a, c. Node 1 cannot join because it shares 'a' with node 0."
+    },
+    {
+      "input": "parent = [-1,0,1,2], s = \"aaaa\"",
+      "output": "1",
+      "explanation": "Every pair of adjacent nodes shares the character 'a', so the best path is a single node."
+    }
+  ],
+  "constraints": [
+    "n == parent.length == s.length",
+    "1 <= n <= 10^5",
+    "parent[0] == -1, and 0 <= parent[i] < n for i >= 1",
+    "parent describes a valid tree.",
+    "s consists of lowercase English letters only."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def longestPath(self, parent: list[int], s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function longestPath(parent, s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int longestPath(int[] parent, String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int longestPath(vector<int>& parent, string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "parent = [-1,0,0,1,1,2], s = \"abacbe\"",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "parent = [-1,0,0,0], s = \"aabc\"",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "parent = [-1,0,1,2], s = \"aaaa\"",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "parent = [-1], s = \"z\"",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "parent = [-1,2,0,1,0,4], s = \"acbdab\"",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach tries every pair of endpoints, walks the unique path between them, and checks that adjacent characters differ, which costs O(n^2) to O(n^3). The optimal approach is a post-order DFS similar to computing a tree's diameter. For each node u, compute the longest valid downward chain starting at u: among its children whose character differs from s[u], keep the two longest child chains a and b. The best path through u has 1 + a + b nodes, so update the global answer with that, and return 1 + a as u's chain length to its parent. Children with the same character contribute 0. Every node is visited once, so this runs in O(n) time and O(n) space; use an iterative order (for example processing nodes by reverse BFS order) to avoid recursion limits on deep trees.",
+  "hints": [
+    "This resembles finding the diameter of a tree, with an extra rule about which edges you may use.",
+    "For each node, think about the longest valid chain going down from it. Which children are allowed to extend that chain?",
+    "In a post-order pass, for each node keep the two longest chains from children with a different character. Update the answer with 1 + top1 + top2 and return 1 + top1 upward."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you also return the actual sequence of nodes on one longest valid path?",
+    "How would the solution change if adjacent characters had to be strictly increasing in alphabetical order along the path?"
+  ]
+}

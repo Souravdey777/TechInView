@@ -1,0 +1,83 @@
+{
+  "title": "Count Vowel Strings in Ranges",
+  "slug": "count-vowel-strings-in-ranges",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given a 0-indexed array of strings `words` and a 2D array `queries`, where each `queries[i] = [l, r]`.\n\nCall a word a **vowel string** if its first character and its last character are both vowels (`'a'`, `'e'`, `'i'`, `'o'`, `'u'`). A one-letter word that is a vowel counts.\n\nFor each query, count the vowel strings among `words[l]` through `words[r]` inclusive. Return an array of answers in the same order as `queries`.\n\n**Example 1:**\n```\nInput: words = [\"ice\",\"tree\",\"ozone\",\"u\",\"eye\"], queries = [[0,4],[1,2],[1,1]]\nOutput: [4,1,0]\nExplanation: ice, ozone, u and eye start and end with a vowel; tree does not. Range [0,4] holds 4 such words, [1,2] holds only ozone, and [1,1] holds only tree, giving 0.\n```\n\n**Example 2:**\n```\nInput: words = [\"apple\",\"banana\",\"orange\"], queries = [[0,0],[0,2],[1,1]]\nOutput: [1,2,0]\nExplanation: apple and orange qualify, banana does not. So the answers are 1, 2 and 0.\n```\n\n**Example 3:**\n```\nInput: words = [\"a\",\"b\",\"io\"], queries = [[0,2],[2,2]]\nOutput: [2,1]\nExplanation: A single-letter word like \"a\" both starts and ends with a vowel. \"io\" also qualifies, so [0,2] gives 2 and [2,2] gives 1.\n```",
+  "examples": [
+    {
+      "input": "words = [\"ice\",\"tree\",\"ozone\",\"u\",\"eye\"], queries = [[0,4],[1,2],[1,1]]",
+      "output": "[4,1,0]",
+      "explanation": "ice, ozone, u and eye start and end with a vowel; tree does not. Range [0,4] holds 4 such words, [1,2] holds only ozone, and [1,1] holds only tree, giving 0."
+    },
+    {
+      "input": "words = [\"apple\",\"banana\",\"orange\"], queries = [[0,0],[0,2],[1,1]]",
+      "output": "[1,2,0]",
+      "explanation": "apple and orange qualify, banana does not. So the answers are 1, 2 and 0."
+    },
+    {
+      "input": "words = [\"a\",\"b\",\"io\"], queries = [[0,2],[2,2]]",
+      "output": "[2,1]",
+      "explanation": "A single-letter word like \"a\" both starts and ends with a vowel. \"io\" also qualifies, so [0,2] gives 2 and [2,2] gives 1."
+    }
+  ],
+  "constraints": [
+    "1 <= words.length <= 10^5",
+    "1 <= words[i].length <= 40",
+    "words[i] consists of lowercase English letters",
+    "1 <= queries.length <= 10^5",
+    "0 <= l <= r < words.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def vowelStrings(self, words: list[str], queries: list[list[int]]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function vowelStrings(words, queries) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] vowelStrings(String[] words, int[][] queries) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> vowelStrings(vector<string>& words, vector<vector<int>>& queries) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "words = [\"ice\",\"tree\",\"ozone\",\"u\",\"eye\"], queries = [[0,4],[1,2],[1,1]]",
+      "expected_output": "[4,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"apple\",\"banana\",\"orange\"], queries = [[0,0],[0,2],[1,1]]",
+      "expected_output": "[1,2,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"a\",\"b\",\"io\"], queries = [[0,2],[2,2]]",
+      "expected_output": "[2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"bcd\",\"xyz\",\"pqr\"], queries = [[0,2],[1,1]]",
+      "expected_output": "[0,0]",
+      "is_hidden": true
+    },
+    {
+      "input": "words = [\"e\"], queries = [[0,0]]",
+      "expected_output": "[1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force answers each query by scanning words[l..r] and testing the first and last letters, which costs O(n * q) in the worst case. The optimal approach builds a prefix-sum array where prefix[i + 1] = prefix[i] + (1 if words[i] is a vowel string else 0). Each query [l, r] is then answered in O(1) as prefix[r + 1] - prefix[l]. Building the prefix array takes O(n) and answering all queries takes O(q), so total time is O(n + q) with O(n) extra space.",
+  "hints": [
+    "Whether a word qualifies never changes between queries. Can you precompute something once and reuse it?",
+    "Mark each word with 1 if it starts and ends with a vowel, 0 otherwise. A range count is then the sum of a contiguous slice of that array.",
+    "Build prefix sums with prefix[0] = 0 and prefix[i + 1] = prefix[i] + mark[i]; answer each query [l, r] with prefix[r + 1] - prefix[l]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + q)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you handle updates where words can be replaced between queries?",
+    "How would you adapt the solution if the vowel rule changed per query (for example, a different set of allowed letters)?"
+  ]
+}

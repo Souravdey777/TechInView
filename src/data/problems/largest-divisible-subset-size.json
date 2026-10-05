@@ -1,0 +1,82 @@
+{
+  "title": "Largest Divisible Subset Size",
+  "slug": "largest-divisible-subset-size",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "You are given an array `nums` of **distinct** positive integers. Pick a subset of these numbers such that for every two numbers `x` and `y` in the subset, one of them divides the other (`x % y == 0` or `y % x == 0`).\n\nReturn the **size** of the largest such subset. A subset with a single element always qualifies, so the answer is at least `1`.\n\n**Example 1:**\n```\nInput: nums = [4,8,10,240]\nOutput: 3\nExplanation: {4,8,240} works because 4 divides 8 and 8 divides 240. Adding 10 fails because 10 and 8 do not divide each other.\n```\n\n**Example 2:**\n```\nInput: nums = [3,6,7,12,24]\nOutput: 4\nExplanation: 3, 6, 12 and 24 each divide the next one. 7 does not divide or get divided by any of them.\n```\n\n**Example 3:**\n```\nInput: nums = [3,5,7]\nOutput: 1\nExplanation: No two numbers divide each other, so the best subset holds just one element.\n```",
+  "examples": [
+    {
+      "input": "nums = [4,8,10,240]",
+      "output": "3",
+      "explanation": "{4,8,240} works because 4 divides 8 and 8 divides 240. Adding 10 fails because 10 and 8 do not divide each other."
+    },
+    {
+      "input": "nums = [3,6,7,12,24]",
+      "output": "4",
+      "explanation": "3, 6, 12 and 24 each divide the next one. 7 does not divide or get divided by any of them."
+    },
+    {
+      "input": "nums = [3,5,7]",
+      "output": "1",
+      "explanation": "No two numbers divide each other, so the best subset holds just one element."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 1000",
+    "1 <= nums[i] <= 2 * 10^9",
+    "All values in nums are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def largestDivisibleSubsetSize(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function largestDivisibleSubsetSize(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int largestDivisibleSubsetSize(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int largestDivisibleSubsetSize(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [4,8,10,240]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,6,7,12,24]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,5,7]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [5,9,18,54,108,540,90,180,360,720]",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates all 2^n subsets and checks every pair, which is O(2^n * n^2). The key observation is that after sorting, a valid subset is a chain where each element divides the next, and divisibility is transitive: if a | b and b | c then a | c. So sort nums and let dp[i] be the size of the longest chain ending at nums[i]; dp[i] = 1 + max(dp[j]) over j < i with nums[i] % nums[j] == 0. The answer is the maximum dp value. This runs in O(n^2) time and O(n) space (plus the sort).",
+  "hints": [
+    "Order matters less than you think: what happens to the divisibility relationship if you sort the numbers first?",
+    "In sorted order, a valid subset is a chain where each element divides the next. Because divisibility is transitive, you only need to check the immediately previous element of the chain.",
+    "Sort nums, define dp[i] as the longest chain ending at index i, and set dp[i] = 1 + max dp[j] for every j < i where nums[i] % nums[j] == 0. Return max(dp)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you reconstruct and return the subset itself rather than only its size?",
+    "Why is it enough to compare each element with the previous chain element only, and would that still hold for a relation that is not transitive?"
+  ]
+}

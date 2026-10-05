@@ -1,0 +1,85 @@
+{
+  "title": "Reverse Nodes in K-Group",
+  "slug": "reverse-nodes-in-k-group",
+  "difficulty": "hard",
+  "category": "linked-lists",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "google",
+    "meta",
+    "apple",
+    "bloomberg",
+    "adobe"
+  ],
+  "description": "Given the `head` of a singly linked list and a positive integer `k`, split the list into consecutive groups of `k` nodes starting from the head and reverse the order of nodes inside each full group. If the number of remaining nodes at the end is **less than `k`**, leave that last partial group in its original order.\n\nReturn the head of the modified list. Only the links between nodes may change; node values must not be modified.\n\n**Example 1:**\n```\nInput: head = [1,2,3,4,5,6,7], k = 3\nOutput: [3,2,1,6,5,4,7]\nExplanation: Groups are [1,2,3], [4,5,6] and a partial [7]. The two full groups are reversed; [7] stays as is.\n```\n\n**Example 2:**\n```\nInput: head = [1,2,3,4,5], k = 2\nOutput: [2,1,4,3,5]\nExplanation: Groups [1,2] and [3,4] are reversed; the leftover [5] is shorter than k and is unchanged.\n```\n\n**Example 3:**\n```\nInput: head = [1,2,3,4,5,6], k = 6\nOutput: [6,5,4,3,2,1]\nExplanation: The whole list forms one full group of size 6, so it is fully reversed.\n```",
+  "examples": [
+    {
+      "input": "head = [1,2,3,4,5,6,7], k = 3",
+      "output": "[3,2,1,6,5,4,7]",
+      "explanation": "Groups are [1,2,3], [4,5,6] and a partial [7]. The two full groups are reversed; [7] stays as is."
+    },
+    {
+      "input": "head = [1,2,3,4,5], k = 2",
+      "output": "[2,1,4,3,5]",
+      "explanation": "Groups [1,2] and [3,4] are reversed; the leftover [5] is shorter than k and is unchanged."
+    },
+    {
+      "input": "head = [1,2,3,4,5,6], k = 6",
+      "output": "[6,5,4,3,2,1]",
+      "explanation": "The whole list forms one full group of size 6, so it is fully reversed."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the list is n, where 1 <= n <= 5000.",
+    "1 <= k <= n",
+    "0 <= Node.val <= 1000"
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reverseKGroup(self, head: ListNode | None, k: int) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction reverseKGroup(head, k) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode reverseKGroup(ListNode head, int k) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* reverseKGroup(ListNode* head, int k) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "head = [1,2,3,4,5,6,7], k = 3",
+      "expected_output": "[3,2,1,6,5,4,7]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1,2,3,4,5], k = 2",
+      "expected_output": "[2,1,4,3,5]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1,2,3,4,5,6], k = 6",
+      "expected_output": "[6,5,4,3,2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1], k = 1",
+      "expected_output": "[1]",
+      "is_hidden": true
+    },
+    {
+      "input": "head = [1,2,3,4,5,6,7,8], k = 4",
+      "expected_output": "[4,3,2,1,8,7,6,5]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: copy the node values (or nodes) into an array, reverse each full block of k in the array, and rebuild or relink the list, which is O(n) time but O(n) extra space. Optimal: use a dummy node before the head and a pointer groupPrev to the node preceding the current group. From groupPrev, walk k steps to find the group's kth node; if fewer than k nodes remain, stop. Otherwise reverse the k nodes in place with the standard three-pointer technique, using the node after the kth as the initial 'prev', then reconnect groupPrev.next to the kth node and advance groupPrev to the old first node of the group (now its tail). This is O(n) time and O(1) extra space.",
+  "hints": [
+    "Before reversing anything, how do you know whether a full group of k nodes is available?",
+    "Keep a pointer to the node just before the current group and locate the kth node from it; you will need the node after the kth node too.",
+    "Reverse the group in place starting with prev = node after the kth, then set groupPrev.next to the kth node and move groupPrev to the group's original first node. A dummy head removes the special case for the first group."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you change the solution if the last partial group should also be reversed?",
+    "Can you write a recursive version, and what is its space complexity?"
+  ]
+}

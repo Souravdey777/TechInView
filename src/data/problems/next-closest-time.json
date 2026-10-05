@@ -1,0 +1,81 @@
+{
+  "title": "Next Closest Time",
+  "slug": "next-closest-time",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given a 24-hour clock reading `time` in the form `\"HH:MM\"`. Find the soonest moment strictly after `time` whose `\"HH:MM\"` representation is made up only of digits that already appear in `time`. Each available digit may be used any number of times.\n\nThe clock wraps around at midnight, so the answer may fall on the following day. If no other valid time can be formed, the answer is `time` itself (the same reading exactly 24 hours later).\n\nReturn the answer as a string in the same `\"HH:MM\"` format (two-digit hour `00`-`23`, two-digit minute `00`-`59`).\n\n**Example 1:**\n```\nInput: time = \"19:34\"\nOutput: \"19:39\"\nExplanation: The digits available are 1, 9, 3 and 4. The first reachable time after 19:34 is 19:39, five minutes later. (19:35 to 19:38 need digits that are not available.)\n```\n\n**Example 2:**\n```\nInput: time = \"23:59\"\nOutput: \"22:22\"\nExplanation: Nothing after 23:59 on the same day works, so we wrap past midnight. The earliest time built from {2, 3, 5, 9} on the next day is 22:22.\n```\n\n**Example 3:**\n```\nInput: time = \"13:55\"\nOutput: \"15:11\"\nExplanation: With digits {1, 3, 5}, no minute value larger than 55 exists, and hour 14 is impossible, so the next hour is 15 with the smallest minute 11.\n```",
+  "examples": [
+    {
+      "input": "time = \"19:34\"",
+      "output": "\"19:39\"",
+      "explanation": "The digits available are 1, 9, 3 and 4. The first reachable time after 19:34 is 19:39, five minutes later. (19:35 to 19:38 need digits that are not available.)"
+    },
+    {
+      "input": "time = \"23:59\"",
+      "output": "\"22:22\"",
+      "explanation": "Nothing after 23:59 on the same day works, so we wrap past midnight. The earliest time built from {2, 3, 5, 9} on the next day is 22:22."
+    },
+    {
+      "input": "time = \"13:55\"",
+      "output": "\"15:11\"",
+      "explanation": "With digits {1, 3, 5}, no minute value larger than 55 exists, and hour 14 is impossible, so the next hour is 15 with the smallest minute 11."
+    }
+  ],
+  "constraints": [
+    "`time` has length 5 and matches the pattern `\"HH:MM\"`",
+    "`time` is a valid 24-hour time: `00 <= HH <= 23` and `00 <= MM <= 59`",
+    "The answer must be strictly later than `time` unless no other time can be formed, in which case return `time`"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def nextClosestTime(self, time: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function nextClosestTime(time) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String nextClosestTime(String time) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string nextClosestTime(string time) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "time = \"19:34\"",
+      "expected_output": "\"19:39\"",
+      "is_hidden": false
+    },
+    {
+      "input": "time = \"23:59\"",
+      "expected_output": "\"22:22\"",
+      "is_hidden": false
+    },
+    {
+      "input": "time = \"13:55\"",
+      "expected_output": "\"15:11\"",
+      "is_hidden": false
+    },
+    {
+      "input": "time = \"00:00\"",
+      "expected_output": "\"00:00\"",
+      "is_hidden": true
+    },
+    {
+      "input": "time = \"11:11\"",
+      "expected_output": "\"11:11\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: simulate the clock one minute at a time starting from time + 1 (mod 1440 minutes), format each candidate as HH:MM and return the first whose digits are all in the original digit set; at most 1440 checks, so O(1) time and space for this fixed-size input. The backtracking view is to generate every HH:MM string from the (at most 4) distinct digits, 4^4 = 256 combinations, discard invalid ones (hour > 23 or minute > 59), and pick the one with the smallest positive forward distance ((candidate - current + 1440) % 1440, treating 0 as 1440). A greedy refinement walks the four positions from right to left, replacing a digit with the next larger allowed digit that keeps the time valid and resetting everything to its right to the smallest digit. All approaches are O(1) time and O(1) space because the input size is constant.",
+  "hints": [
+    "There are only 1440 minutes in a day and at most four distinct digits. A complete search is cheap.",
+    "Either step forward minute by minute, or enumerate every HH:MM you can build from the digits and validate hours (< 24) and minutes (< 60).",
+    "Measure each valid candidate by its forward distance (candidate - current) mod 1440, treating a distance of 0 as a full day, and keep the smallest."
+  ],
+  "optimal_complexity": {
+    "time": "O(1)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you find the previous closest time instead of the next one?",
+    "Can you do it greedily by changing the rightmost digit that can be increased, and when does that need to cascade to the left?"
+  ]
+}

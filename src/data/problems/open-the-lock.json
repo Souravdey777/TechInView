@@ -1,0 +1,84 @@
+{
+  "title": "Open the Lock",
+  "slug": "open-the-lock",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "uber"
+  ],
+  "description": "A lock has 4 circular wheels, each showing a digit from `'0'` to `'9'`. One **move** rotates a single wheel by one step forward or backward, and the wheels wrap around (`'9'` forward becomes `'0'`, `'0'` backward becomes `'9'`). The lock starts at `\"0000\"`.\n\nYou are given a list `deadends`. If the lock ever shows one of these combinations, the wheels jam and no further moves are possible, so a valid route must never pass through a deadend (including the start).\n\nGiven a 4-digit string `target`, return the **minimum** number of moves needed to reach it from `\"0000\"`, or `-1` if it is impossible. If `target` is `\"0000\"` and `\"0000\"` is not a deadend, return `0`.\n\n**Example 1:**\n```\nInput: deadends = [\"0100\",\"0010\",\"1000\",\"0001\"], target = \"0110\"\nOutput: 4\nExplanation: The two-move routes 0000 -> 0100 -> 0110 and 0000 -> 0010 -> 0110 are blocked, as is every first move except turning a wheel backward. A shortest safe route is 0000 -> 9000 -> 9100 -> 9110 -> 0110.\n```\n\n**Example 2:**\n```\nInput: deadends = [\"0001\"], target = \"0009\"\nOutput: 1\nExplanation: Turning the last wheel backward once takes 0 to 9, giving 0009 in a single move.\n```\n\n**Example 3:**\n```\nInput: deadends = [\"0000\"], target = \"1234\"\nOutput: -1\nExplanation: The starting combination itself is a deadend, so the lock is stuck immediately and no move can be made.\n```",
+  "examples": [
+    {
+      "input": "deadends = [\"0100\",\"0010\",\"1000\",\"0001\"], target = \"0110\"",
+      "output": "4",
+      "explanation": "The two-move routes 0000 -> 0100 -> 0110 and 0000 -> 0010 -> 0110 are blocked, as is every first move except turning a wheel backward. A shortest safe route is 0000 -> 9000 -> 9100 -> 9110 -> 0110."
+    },
+    {
+      "input": "deadends = [\"0001\"], target = \"0009\"",
+      "output": "1",
+      "explanation": "Turning the last wheel backward once takes 0 to 9, giving 0009 in a single move."
+    },
+    {
+      "input": "deadends = [\"0000\"], target = \"1234\"",
+      "output": "-1",
+      "explanation": "The starting combination itself is a deadend, so the lock is stuck immediately and no move can be made."
+    }
+  ],
+  "constraints": [
+    "1 <= deadends.length <= 500",
+    "deadends[i].length == 4 and target.length == 4",
+    "deadends[i] and target consist of digits only",
+    "target is not in deadends"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def openLock(self, deadends: list[str], target: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function openLock(deadends, target) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int openLock(String[] deadends, String target) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int openLock(vector<string>& deadends, string target) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "deadends = [\"0100\",\"0010\",\"1000\",\"0001\"], target = \"0110\"",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "deadends = [\"0001\"], target = \"0009\"",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "deadends = [\"0000\"], target = \"1234\"",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "deadends = [\"8888\"], target = \"0000\"",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "deadends = [\"4443\",\"4445\",\"4434\",\"4454\",\"4344\",\"4544\",\"3444\",\"5444\"], target = \"4444\"",
+      "expected_output": "-1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Treat each of the 10,000 combinations as a node, with edges to the 8 combinations reachable by turning one wheel one step either way. A brute-force recursive search over move sequences revisits states endlessly and is exponential. The optimal approach is BFS from \"0000\": put deadends in a hash set (return -1 immediately if \"0000\" is one), then expand level by level, skipping visited states and deadends, and return the level at which target is first reached. Each of the 10^4 states is visited at most once and generates 8 neighbours, so time is O(10^4 * 8 + d) and space is O(10^4 + d), where d is the number of deadends.",
+  "hints": [
+    "The state space is small: only 10,000 possible combinations. What search finds the fewest moves in an unweighted graph?",
+    "Run BFS from \"0000\". Each state has exactly 8 neighbours: for each of 4 wheels, turn it +1 or -1 with wraparound.",
+    "Store deadends and visited states in sets. Before starting, check whether \"0000\" is a deadend. Process the queue level by level and return the current level when you pop target."
+  ],
+  "optimal_complexity": {
+    "time": "O(10^4 * 8 + d)",
+    "space": "O(10^4 + d)"
+  },
+  "follow_up_questions": [
+    "How would bidirectional BFS from both \"0000\" and target change the work done?",
+    "How would you generalise the solution to n wheels with digits in base b?"
+  ]
+}

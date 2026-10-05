@@ -1,0 +1,86 @@
+{
+  "title": "Delete Node In BST",
+  "slug": "delete-node-in-bst",
+  "difficulty": "medium",
+  "category": "trees",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "google",
+    "meta",
+    "oracle",
+    "bloomberg"
+  ],
+  "description": "You are given the `root` of a binary search tree (BST) with distinct values and an integer `key`. Remove the node whose value is `key` (if such a node exists) and return the root of the resulting BST.\n\nBecause several valid BSTs can result from a deletion, follow this exact rule so the output is unique:\n\n- If the node is a **leaf**, simply remove it.\n- If the node has **exactly one child**, replace the node with that child.\n- If the node has **two children**, copy the value of its **inorder successor** (the smallest value in its right subtree) into the node, then delete that successor from the right subtree using the same rules.\n\nIf `key` is not present, return the tree unchanged. Trees are given and returned in level-order form, with `null` marking missing children (trailing `null`s omitted).\n\n**Example 1:**\n```\nInput: root = [5,3,6,2,4,null,7], key = 3\nOutput: [5,4,6,2,null,null,7]\nExplanation: Node 3 has two children. Its inorder successor is 4, so 3 is overwritten with 4 and the original leaf 4 is removed.\n```\n\n**Example 2:**\n```\nInput: root = [5,3,6,2,4,null,7], key = 0\nOutput: [5,3,6,2,4,null,7]\nExplanation: 0 is not in the tree, so nothing changes.\n```\n\n**Example 3:**\n```\nInput: root = [], key = 0\nOutput: []\nExplanation: Deleting from an empty tree yields an empty tree.\n```",
+  "examples": [
+    {
+      "input": "root = [5,3,6,2,4,null,7], key = 3",
+      "output": "[5,4,6,2,null,null,7]",
+      "explanation": "Node 3 has two children. Its inorder successor is 4, so 3 is overwritten with 4 and the original leaf 4 is removed."
+    },
+    {
+      "input": "root = [5,3,6,2,4,null,7], key = 0",
+      "output": "[5,3,6,2,4,null,7]",
+      "explanation": "0 is not in the tree, so nothing changes."
+    },
+    {
+      "input": "root = [], key = 0",
+      "output": "[]",
+      "explanation": "Deleting from an empty tree yields an empty tree."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [0, 10^4].",
+    "-10^5 <= Node.val <= 10^5",
+    "All node values are unique.",
+    "The input tree is a valid binary search tree.",
+    "-10^5 <= key <= 10^5"
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def deleteNode(self, root: TreeNode | None, key: int) -> TreeNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction deleteNode(root, key) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public TreeNode deleteNode(TreeNode root, int key) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* deleteNode(TreeNode* root, int key) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [5,3,6,2,4,null,7], key = 3",
+      "expected_output": "[5,4,6,2,null,null,7]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [5,3,6,2,4,null,7], key = 0",
+      "expected_output": "[5,3,6,2,4,null,7]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [], key = 0",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [50,30,70,20,40,60,80,null,null,null,null,55,65], key = 50",
+      "expected_output": "[55,30,70,20,40,60,80,null,null,null,null,null,65]",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [2,1], key = 2",
+      "expected_output": "[1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A simple baseline locates key with a full traversal that ignores ordering (O(n) time), then splices the node out using the same three cases below; it is correct but wastes the BST property. A tempting shortcut, rebuilding a BST from the inorder list minus key, is also O(n) but violates the requirement to keep the remaining structure intact. The optimal approach walks down the tree using the BST property: go left if key is smaller, right if larger. On finding the node, handle three cases: no children (return null), one child (return that child), or two children (find the leftmost node of the right subtree, copy its value into the current node, and recursively delete that value from the right subtree). Each recursive call returns the new subtree root so parents can relink. This takes O(h) time and O(h) recursion space, where h is the tree height (O(log n) when balanced, O(n) when skewed).",
+  "hints": [
+    "Use the BST ordering to locate the node without visiting the whole tree.",
+    "Once found, think about the three cases separately: zero, one, or two children. The first two are easy relinks.",
+    "For two children, find the minimum of the right subtree, copy its value into the node, then recursively delete that value from the right subtree, returning the updated subtree root at each level."
+  ],
+  "optimal_complexity": {
+    "time": "O(h)",
+    "space": "O(h)"
+  },
+  "follow_up_questions": [
+    "How would your solution change if you used the inorder predecessor instead of the successor? Would the output tree differ?",
+    "Can you implement the deletion iteratively with O(1) extra space?"
+  ]
+}

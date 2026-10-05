@@ -1,0 +1,86 @@
+{
+  "title": "Decode String",
+  "slug": "decode-string",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "bloomberg",
+    "apple",
+    "oracle"
+  ],
+  "description": "You are given an encoded string `s`. The encoding rule is `k[text]`, meaning the bracketed `text` should be written out exactly `k` times in a row, where `k` is a positive integer. Encodings may be **nested**, e.g. `2[a3[b]]`.\n\nReturn the fully decoded string.\n\nYou may assume the input is always well-formed: brackets are balanced, there are no stray spaces, every number is immediately followed by `[`, and digits only ever appear as repeat counts (the plain text never contains digits).\n\n**Example 1:**\n```\nInput: s = \"2[x]3[yz]\"\nOutput: \"xxyzyzyz\"\nExplanation: \"x\" written twice followed by \"yz\" written three times gives \"xx\" + \"yzyzyz\".\n```\n\n**Example 2:**\n```\nInput: s = \"2[m3[n]]\"\nOutput: \"mnnnmnnn\"\nExplanation: The inner part \"m3[n]\" decodes to \"mnnn\", and writing it twice gives \"mnnnmnnn\".\n```\n\n**Example 3:**\n```\nInput: s = \"3[ab]2[c]de\"\nOutput: \"abababccde\"\nExplanation: \"ababab\" + \"cc\" + the literal tail \"de\".\n```",
+  "examples": [
+    {
+      "input": "s = \"2[x]3[yz]\"",
+      "output": "\"xxyzyzyz\"",
+      "explanation": "\"x\" written twice followed by \"yz\" written three times gives \"xx\" + \"yzyzyz\"."
+    },
+    {
+      "input": "s = \"2[m3[n]]\"",
+      "output": "\"mnnnmnnn\"",
+      "explanation": "The inner part \"m3[n]\" decodes to \"mnnn\", and writing it twice gives \"mnnnmnnn\"."
+    },
+    {
+      "input": "s = \"3[ab]2[c]de\"",
+      "output": "\"abababccde\"",
+      "explanation": "\"ababab\" + \"cc\" + the literal tail \"de\"."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 30",
+    "s consists of lowercase English letters, digits, and square brackets '[]'",
+    "s is a valid encoding and every integer k is in the range [1, 300]",
+    "The decoded string has length at most 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def decodeString(self, s: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function decodeString(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String decodeString(String s) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string decodeString(string s) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"2[x]3[yz]\"",
+      "expected_output": "\"xxyzyzyz\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"2[m3[n]]\"",
+      "expected_output": "\"mnnnmnnn\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"3[ab]2[c]de\"",
+      "expected_output": "\"abababccde\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abc\"",
+      "expected_output": "\"abc\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"10[a]2[b3[cd]]x\"",
+      "expected_output": "\"aaaaaaaaaabcdcdcdbcdcdcdx\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A naive approach repeatedly finds an innermost k[...] pattern (for example with a regex), expands it, and rescans the string until no brackets remain; each pass is linear in the current string length, so it can be quadratic in the output size. The optimal approach decodes in a single left-to-right pass with a stack. Accumulate digits into a number (counts may have several digits); on '[' push the current partial string and the count, then reset both; on a letter append it to the current string; on ']' pop the previous string and count and set current = previous + current * count. Recursion that mirrors the bracket nesting works equally well. Let L be the length of the decoded output (up to 10^5 even though n <= 30); building it dominates, so time is O(n + L) and space is O(n + L) for the result and the stack of saved partial strings.",
+  "hints": [
+    "Brackets can be nested, so you need a way to remember what you were building before you entered an inner bracket.",
+    "A stack works well: when you see '[', save the text built so far and the repeat count; when you see ']', restore them and combine. Watch out for multi-digit counts like 12[x].",
+    "Keep cur (string) and num (int). Digit: num = num*10 + d. '[': push (cur, num), reset both. Letter: cur += ch. ']': pop (prev, k) and set cur = prev + cur * k. Return cur at the end."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + L)",
+    "space": "O(n + L)"
+  },
+  "follow_up_questions": [
+    "How would you write the inverse: encode a string into the shortest k[...] form?",
+    "What would change if the plain text could also contain digits, requiring an escape scheme?"
+  ]
+}

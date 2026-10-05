@@ -1,0 +1,82 @@
+{
+  "title": "Merge Two Sorted Lists In Descending Order",
+  "slug": "merge-two-sorted-lists-in-descending-order",
+  "difficulty": "medium",
+  "category": "linked-lists",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "adobe",
+    "oracle"
+  ],
+  "description": "You are given the heads of two singly linked lists `list1` and `list2`, each sorted in **non-decreasing** order. Merge them into a single list sorted in **non-increasing** (descending) order and return its head.\n\nBuild the result by relinking the existing nodes in a single merge pass; do not merge in ascending order first and then reverse the whole list. Either input may be empty; if both are empty, return an empty list. Duplicate values are kept (every input node appears exactly once in the output).\n\n**Example 1:**\n```\nInput: list1 = [1,3,5], list2 = [2,4,6]\nOutput: [6,5,4,3,2,1]\nExplanation: All six nodes are merged and arranged from largest to smallest.\n```\n\n**Example 2:**\n```\nInput: list1 = [1,1,4], list2 = [2,3]\nOutput: [4,3,2,1,1]\nExplanation: Both copies of 1 are kept; the result is in descending order.\n```\n\n**Example 3:**\n```\nInput: list1 = [], list2 = [0,7]\nOutput: [7,0]\nExplanation: With list1 empty, the result is just list2 in descending order.\n```",
+  "examples": [
+    {
+      "input": "list1 = [1,3,5], list2 = [2,4,6]",
+      "output": "[6,5,4,3,2,1]",
+      "explanation": "All six nodes are merged and arranged from largest to smallest."
+    },
+    {
+      "input": "list1 = [1,1,4], list2 = [2,3]",
+      "output": "[4,3,2,1,1]",
+      "explanation": "Both copies of 1 are kept; the result is in descending order."
+    },
+    {
+      "input": "list1 = [], list2 = [0,7]",
+      "output": "[7,0]",
+      "explanation": "With list1 empty, the result is just list2 in descending order."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in each list is in the range [0, 10^4].",
+    "-10^5 <= Node.val <= 10^5",
+    "Both list1 and list2 are sorted in non-decreasing order."
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def mergeDescending(self, list1: ListNode | None, list2: ListNode | None) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction mergeDescending(list1, list2) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode mergeDescending(ListNode list1, ListNode list2) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* mergeDescending(ListNode* list1, ListNode* list2) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "list1 = [1,3,5], list2 = [2,4,6]",
+      "expected_output": "[6,5,4,3,2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [1,1,4], list2 = [2,3]",
+      "expected_output": "[4,3,2,1,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [], list2 = [0,7]",
+      "expected_output": "[7,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [], list2 = []",
+      "expected_output": "[]",
+      "is_hidden": true
+    },
+    {
+      "input": "list1 = [-5,-5,0], list2 = [-5,-1]",
+      "expected_output": "[0,-1,-5,-5,-5]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: copy all values into an array, sort it in descending order, and build a new list, which costs O((n + m) log(n + m)) time and O(n + m) space. A two-step approach merges ascending and then reverses, which is O(n + m) but needs a second pass. Optimal single pass: walk both lists with two pointers, and at each step detach the node with the smaller value and push it onto the front of a result list (head insertion: node.next = result; result = node). Because nodes are taken in ascending order and each one is prepended, the result ends up in descending order. When one list runs out, keep prepending the remaining nodes of the other. This is O(n + m) time and O(1) extra space.",
+  "hints": [
+    "Merging in ascending order is easy. What happens to the order if every node you pick is placed at the front of the output instead of the back?",
+    "Compare the current nodes of both lists, take the smaller one, and save its next pointer before relinking it.",
+    "Prepend each detached node to a result head (node.next = result; result = node). After one list is exhausted, prepend the rest of the other list the same way."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + m)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you merge k ascending sorted lists into one descending list?",
+    "What changes if the inputs were sorted in descending order and you needed an ascending result?"
+  ]
+}

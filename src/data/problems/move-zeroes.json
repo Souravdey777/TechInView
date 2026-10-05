@@ -1,0 +1,84 @@
+{
+  "title": "Move Zeroes",
+  "slug": "move-zeroes",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "meta",
+    "amazon",
+    "microsoft",
+    "apple",
+    "bloomberg",
+    "google"
+  ],
+  "description": "You are given an integer array `nums`. Shift every `0` to the end of the array while keeping the non-zero values in the same relative order they started in.\n\nReturn the rearranged array. Aim to do the rearrangement in place, without allocating a second array.\n\n**Example 1:**\n```\nInput: nums = [0,1,0,3,12]\nOutput: [1,3,12,0,0]\nExplanation: The non-zero values 1, 3, 12 keep their order and both zeros move to the back.\n```\n\n**Example 2:**\n```\nInput: nums = [0]\nOutput: [0]\nExplanation: A single zero is already at the end.\n```\n\n**Example 3:**\n```\nInput: nums = [4,0,5,0,0,6]\nOutput: [4,5,6,0,0,0]\nExplanation: 4, 5 and 6 stay in order; the three zeros collect at the end.\n```",
+  "examples": [
+    {
+      "input": "nums = [0,1,0,3,12]",
+      "output": "[1,3,12,0,0]",
+      "explanation": "The non-zero values 1, 3, 12 keep their order and both zeros move to the back."
+    },
+    {
+      "input": "nums = [0]",
+      "output": "[0]",
+      "explanation": "A single zero is already at the end."
+    },
+    {
+      "input": "nums = [4,0,5,0,0,6]",
+      "output": "[4,5,6,0,0,0]",
+      "explanation": "4, 5 and 6 stay in order; the three zeros collect at the end."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^4",
+    "-2^31 <= nums[i] <= 2^31 - 1",
+    "The returned array must have the same length as the input"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def moveZeroes(self, nums: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function moveZeroes(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] moveZeroes(int[] nums) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> moveZeroes(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [0,1,0,3,12]",
+      "expected_output": "[1,3,12,0,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0]",
+      "expected_output": "[0]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,0,5,0,0,6]",
+      "expected_output": "[4,5,6,0,0,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3]",
+      "expected_output": "[1,2,3]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [0,0,-1,0,2147483647,-2147483648]",
+      "expected_output": "[-1,2147483647,-2147483648,0,0,0]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force builds a new array: copy all non-zero values in order, then append as many zeros as were skipped. That is O(n) time but O(n) extra space. The optimal in-place approach uses two pointers: a write pointer marks where the next non-zero value should go, and a read pointer scans the array. Each time the read pointer finds a non-zero value, swap it into the write position and advance the write pointer. Swapping (rather than overwrite-then-fill) leaves all zeros naturally at the end in one pass. This runs in O(n) time with O(1) extra space.",
+  "hints": [
+    "Think of the array as two regions: a prefix that is already correct and the part you have not looked at yet.",
+    "Keep a pointer to the next slot where a non-zero value belongs, and scan with a second pointer.",
+    "When the scanning pointer sees a non-zero value, swap it with the element at the write pointer and advance the write pointer. Zeros end up behind the write pointer automatically."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you minimise the total number of array writes when most elements are zero?",
+    "How would you move all zeros to the front instead, still keeping non-zero order?"
+  ]
+}

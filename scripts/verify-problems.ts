@@ -146,6 +146,8 @@ function formatProblemList(problems: string[]): string {
 }
 
 function main() {
+  // --only=slug-a,slug-b reports just those problems (duplicate checks still see every file).
+  const only = process.argv.find((arg) => arg.startsWith("--only="))?.slice("--only=".length).split(",");
   const issues: Issue[] = [];
   const seenSlugs = new Map<string, string>();
   const seenTitles = new Map<string, string>();
@@ -274,6 +276,8 @@ function main() {
       });
     }
 
+    if (only && !only.includes(problem.slug)) continue;
+
     const firstTestCase = problem.test_cases[0];
     const wrappedPython = wrapCodeForExecution({
       language: "python",
@@ -315,8 +319,9 @@ function main() {
     }
   }
 
-  const errors = issues.filter((issue) => issue.level === "error");
-  const warnings = issues.filter((issue) => issue.level === "warning");
+  const reported = only ? issues.filter((issue) => only.includes(issue.problem)) : issues;
+  const errors = reported.filter((issue) => issue.level === "error");
+  const warnings = reported.filter((issue) => issue.level === "warning");
 
   console.log(`Verified ${files.length} problem files in ${PROBLEMS_DIR}`);
   console.log("");
@@ -330,7 +335,7 @@ function main() {
   );
 
   const groupedIssues = new Map<string, Issue[]>();
-  for (const issue of issues) {
+  for (const issue of reported) {
     const key = `${issue.level}:${issue.code}`;
     const bucket = groupedIssues.get(key) ?? [];
     bucket.push(issue);

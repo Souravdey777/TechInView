@@ -1,0 +1,82 @@
+{
+  "title": "Most Stones Removed with Same Row or Column",
+  "slug": "most-stones-removed-with-same-row-or-column",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft"
+  ],
+  "description": "Stones are placed at distinct integer points on a 2D grid, given as `stones[i] = [row, col]`.\n\nYou may remove a stone if, at the moment of removal, **another stone still on the board** shares its row or its column. You may perform removals in any order.\n\nReturn the **largest number of stones** that can be removed.\n\n**Example 1:**\n```\nInput: stones = [[0,0],[0,2],[1,1],[2,1]]\nOutput: 2\nExplanation: Stones (0,0) and (0,2) share row 0, so one of them can be removed. Stones (1,1) and (2,1) share column 1, so one of them can be removed. Two stones are left, one per group, so 2 are removed.\n```\n\n**Example 2:**\n```\nInput: stones = [[0,0]]\nOutput: 0\nExplanation: A single stone has no partner, so nothing can be removed.\n```\n\n**Example 3:**\n```\nInput: stones = [[0,1],[1,0],[1,1]]\nOutput: 2\nExplanation: All three stones are linked: (1,1) shares row 1 with (1,0) and column 1 with (0,1). Remove (1,0), then (0,1) still shares column 1 with (1,1), so remove it too. 2 stones are removed.\n```",
+  "examples": [
+    {
+      "input": "stones = [[0,0],[0,2],[1,1],[2,1]]",
+      "output": "2",
+      "explanation": "Stones (0,0) and (0,2) share row 0, so one of them can be removed. Stones (1,1) and (2,1) share column 1, so one of them can be removed. Two stones are left, one per group, so 2 are removed."
+    },
+    {
+      "input": "stones = [[0,0]]",
+      "output": "0",
+      "explanation": "A single stone has no partner, so nothing can be removed."
+    },
+    {
+      "input": "stones = [[0,1],[1,0],[1,1]]",
+      "output": "2",
+      "explanation": "All three stones are linked: (1,1) shares row 1 with (1,0) and column 1 with (0,1). Remove (1,0), then (0,1) still shares column 1 with (1,1), so remove it too. 2 stones are removed."
+    }
+  ],
+  "constraints": [
+    "1 <= stones.length <= 1000",
+    "0 <= row, col <= 10^4",
+    "No two stones are at the same point"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def removeStones(self, stones: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function removeStones(stones) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int removeStones(int[][] stones) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int removeStones(vector<vector<int>>& stones) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "stones = [[0,0],[0,2],[1,1],[2,1]]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [[0,0]]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [[0,1],[1,0],[1,1]]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [[0,0],[1,1],[2,2]]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "stones = [[0,1],[1,0],[5,5],[5,7],[9,7],[10000,10000]]",
+      "expected_output": "2",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Connect two stones if they share a row or column. Within each connected component, you can always remove stones in an order (e.g. post-order of a DFS spanning tree) that leaves exactly one stone, and you can never empty a component completely, so the answer is (number of stones) - (number of components). A brute-force way builds the graph by comparing every pair of stones, O(n^2), then counts components with DFS. The optimal approach uses union-find on rows and columns as nodes: for each stone, union node 'row r' with node 'column c' (offset columns, e.g. c + 10001, so they do not collide with rows). The number of distinct roots among stones' rows gives the component count. This takes O(n * alpha(n)) time and O(n) space.",
+  "hints": [
+    "Think about which stones are 'linked' to each other through shared rows or columns. What structure do they form?",
+    "In any connected group of stones, you can remove all but one. So the answer depends only on how many groups there are.",
+    "Use union-find: for every stone union its row with its column (keep row and column ids distinct). Answer = stones.length - number of distinct components."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * alpha(n))",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Can you produce an actual removal order that achieves the maximum?",
+    "How would you handle stones being added dynamically while keeping the answer up to date?"
+  ]
+}

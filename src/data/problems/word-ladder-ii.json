@@ -1,0 +1,87 @@
+{
+  "title": "Word Ladder II",
+  "slug": "word-ladder-ii",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google",
+    "meta",
+    "microsoft",
+    "uber",
+    "bloomberg",
+    "linkedin"
+  ],
+  "description": "A **word ladder** from `beginWord` to `endWord` is a list of words `beginWord -> w1 -> w2 -> ... -> endWord` where:\n\n- each consecutive pair of words differs in exactly one letter position,\n- every word after `beginWord` (including `endWord`) is taken from `wordList`, and\n- no word appears twice in the same ladder.\n\n`beginWord` itself does not need to be in `wordList`.\n\nReturn **all** ladders of the shortest possible length, each as a list of words starting with `beginWord` and ending with `endWord`. If no ladder exists, return an empty list `[]`. The ladders may be returned in any order (the examples list them sorted for readability), but the words inside each ladder must be in path order.\n\n**Example 1:**\n```\nInput: beginWord = \"cat\", endWord = \"dog\", wordList = [\"cot\",\"cog\",\"dog\",\"dat\",\"dot\"]\nOutput: [[\"cat\",\"cot\",\"cog\",\"dog\"],[\"cat\",\"cot\",\"dot\",\"dog\"],[\"cat\",\"dat\",\"dot\",\"dog\"]]\nExplanation: Three ladders of length 4 exist: cat -> cot -> cog -> dog, cat -> cot -> dot -> dog and cat -> dat -> dot -> dog. No ladder with 3 words exists because \"cat\" and \"dog\" differ in every position.\n```\n\n**Example 2:**\n```\nInput: beginWord = \"cold\", endWord = \"warm\", wordList = [\"cord\",\"card\",\"ward\",\"warm\",\"word\",\"worm\"]\nOutput: [[\"cold\",\"cord\",\"card\",\"ward\",\"warm\"],[\"cold\",\"cord\",\"word\",\"ward\",\"warm\"],[\"cold\",\"cord\",\"word\",\"worm\",\"warm\"]]\nExplanation: Both \"card\" and \"word\" lead toward \"ward\"/\"worm\"; the shortest ladders have 5 words each: cold -> cord -> card -> ward -> warm, cold -> cord -> word -> ward -> warm and cold -> cord -> word -> worm -> warm.\n```\n\n**Example 3:**\n```\nInput: beginWord = \"hot\", endWord = \"dog\", wordList = [\"hat\",\"hit\",\"dot\"]\nOutput: []\nExplanation: \"dog\" is not in wordList, so no ladder can end there.\n```",
+  "examples": [
+    {
+      "input": "beginWord = \"cat\", endWord = \"dog\", wordList = [\"cot\",\"cog\",\"dog\",\"dat\",\"dot\"]",
+      "output": "[[\"cat\",\"cot\",\"cog\",\"dog\"],[\"cat\",\"cot\",\"dot\",\"dog\"],[\"cat\",\"dat\",\"dot\",\"dog\"]]",
+      "explanation": "Three ladders of length 4 exist: cat -> cot -> cog -> dog, cat -> cot -> dot -> dog and cat -> dat -> dot -> dog. No ladder with 3 words exists because \"cat\" and \"dog\" differ in every position."
+    },
+    {
+      "input": "beginWord = \"cold\", endWord = \"warm\", wordList = [\"cord\",\"card\",\"ward\",\"warm\",\"word\",\"worm\"]",
+      "output": "[[\"cold\",\"cord\",\"card\",\"ward\",\"warm\"],[\"cold\",\"cord\",\"word\",\"ward\",\"warm\"],[\"cold\",\"cord\",\"word\",\"worm\",\"warm\"]]",
+      "explanation": "Both \"card\" and \"word\" lead toward \"ward\"/\"worm\"; the shortest ladders have 5 words each: cold -> cord -> card -> ward -> warm, cold -> cord -> word -> ward -> warm and cold -> cord -> word -> worm -> warm."
+    },
+    {
+      "input": "beginWord = \"hot\", endWord = \"dog\", wordList = [\"hat\",\"hit\",\"dot\"]",
+      "output": "[]",
+      "explanation": "\"dog\" is not in wordList, so no ladder can end there."
+    }
+  ],
+  "constraints": [
+    "1 <= beginWord.length <= 5",
+    "endWord.length == beginWord.length and every word in wordList has that same length",
+    "1 <= wordList.length <= 500, and all words in wordList are distinct",
+    "All words consist of lowercase English letters, and beginWord != endWord",
+    "The total number of shortest ladders does not exceed 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findLadders(self, beginWord: str, endWord: str, wordList: list[str]) -> list[list[str]]:\n        # Write your solution here\n        pass",
+    "javascript": "function findLadders(beginWord, endWord, wordList) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<String>> findLadders(String beginWord, String endWord, List<String> wordList) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "beginWord = \"cat\", endWord = \"dog\", wordList = [\"cot\",\"cog\",\"dog\",\"dat\",\"dot\"]",
+      "expected_output": "[[\"cat\",\"cot\",\"cog\",\"dog\"],[\"cat\",\"cot\",\"dot\",\"dog\"],[\"cat\",\"dat\",\"dot\",\"dog\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "beginWord = \"cold\", endWord = \"warm\", wordList = [\"cord\",\"card\",\"ward\",\"warm\",\"word\",\"worm\"]",
+      "expected_output": "[[\"cold\",\"cord\",\"card\",\"ward\",\"warm\"],[\"cold\",\"cord\",\"word\",\"ward\",\"warm\"],[\"cold\",\"cord\",\"word\",\"worm\",\"warm\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "beginWord = \"hot\", endWord = \"dog\", wordList = [\"hat\",\"hit\",\"dot\"]",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "beginWord = \"a\", endWord = \"c\", wordList = [\"a\",\"b\",\"c\"]",
+      "expected_output": "[[\"a\",\"c\"]]",
+      "is_hidden": true
+    },
+    {
+      "input": "beginWord = \"hit\", endWord = \"cog\", wordList = [\"hot\",\"dot\",\"lot\",\"cog\"]",
+      "expected_output": "[]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force DFS explores every simple path from beginWord and keeps those of minimal length, which is exponential in the dictionary size. The optimal approach runs a level-by-level BFS from beginWord, generating neighbours by replacing each position with 'a'..'z' and checking a hash set. Words are removed from the set only after a whole level finishes, so several parents on the same level can all record an edge to the same child. For each discovered word store its list of parents from the previous level; stop once endWord is reached. Then backtrack from endWord to beginWord through the parent map, building every shortest ladder. The BFS costs O(N * L * 26) for N words of length L, plus output-sensitive time to emit the ladders; space is O(N * L) for the graph.",
+  "hints": [
+    "Model words as graph nodes joined when they differ in exactly one letter; you want all shortest paths, which is a BFS question.",
+    "During BFS, a word can be reached from several words on the previous level. Record all of them as parents, and only mark words visited once the whole level is processed.",
+    "After BFS reaches endWord, DFS backwards from endWord through the parent lists to beginWord, reversing each path you collect. Searching backwards avoids exploring dead-end branches."
+  ],
+  "optimal_complexity": {
+    "time": "O(N * L * 26 + P)",
+    "space": "O(N * L)"
+  },
+  "follow_up_questions": [
+    "If you only needed the length of the shortest ladder, how would you speed it up with bidirectional BFS?",
+    "How would you handle a dictionary of millions of words where generating 26 * L neighbours per word is too slow?"
+  ]
+}

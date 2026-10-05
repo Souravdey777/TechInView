@@ -1,0 +1,81 @@
+{
+  "title": "Minimum Number of Increments on Subarrays to Form a Target Array",
+  "slug": "minimum-number-of-increments-on-subarrays-to-form-target-array",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an array `target` of positive integers. You start with an array `initial` of the same length filled with zeros.\n\nIn a single operation you choose any contiguous subarray of `initial` and add `1` to each of its elements.\n\nReturn the **minimum number of operations** needed to turn `initial` into `target`.\n\n**Example 1:**\n```\nInput: target = [1,2,3,2,1]\nOutput: 3\nExplanation: Increment [0..4], then [1..3], then [2..2]. Three operations are needed because the peak value is 3.\n```\n\n**Example 2:**\n```\nInput: target = [3,1,1,2]\nOutput: 4\nExplanation: Increment the whole array once, then index 0 twice more, then index 3 once more: 1 + 2 + 1 = 4 operations.\n```\n\n**Example 3:**\n```\nInput: target = [3,1,5,4,2]\nOutput: 7\nExplanation: Each rise must be paid for with new operations: 3 to start, 0 for the drop to 1, 4 for the climb from 1 to 5, and nothing for the later drops. That totals 3 + 4 = 7.\n```",
+  "examples": [
+    {
+      "input": "target = [1,2,3,2,1]",
+      "output": "3",
+      "explanation": "Increment [0..4], then [1..3], then [2..2]. Three operations are needed because the peak value is 3."
+    },
+    {
+      "input": "target = [3,1,1,2]",
+      "output": "4",
+      "explanation": "Increment the whole array once, then index 0 twice more, then index 3 once more: 1 + 2 + 1 = 4 operations."
+    },
+    {
+      "input": "target = [3,1,5,4,2]",
+      "output": "7",
+      "explanation": "Each rise must be paid for with new operations: 3 to start, 0 for the drop to 1, 4 for the climb from 1 to 5, and nothing for the later drops. That totals 3 + 4 = 7."
+    }
+  ],
+  "constraints": [
+    "1 <= target.length <= 10^5",
+    "1 <= target[i] <= 10^5",
+    "The initial array is all zeros, with the same length as target"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minNumberOperations(self, target: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minNumberOperations(target) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minNumberOperations(int[] target) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minNumberOperations(vector<int>& target) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "target = [1,2,3,2,1]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "target = [3,1,1,2]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "target = [3,1,5,4,2]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "target = [1]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "target = [100000,1,100000,1,100000]",
+      "expected_output": "299998",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A direct simulation repeatedly finds a maximal run of non-zero values and decrements it, costing O(n * max(target)) time. A cleaner view: each operation is an interval, so walking left to right, an interval covering index i - 1 can be extended to cover index i for free. Whenever target[i] > target[i-1], exactly target[i] - target[i-1] new intervals must start at i; when the value drops, some intervals simply end there at no cost. Therefore the answer is target[0] + sum of max(0, target[i] - target[i-1]) for i >= 1. This is a single pass in O(n) time and O(1) space.",
+  "hints": [
+    "Try simulating small cases: what happens to the count when the next value is lower than the current one?",
+    "Operations that cover index i - 1 can be stretched to also cover index i at no extra cost, as long as target[i] is high enough.",
+    "Only increases cost anything: the answer is target[0] plus the sum of every positive difference target[i] - target[i-1]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you output an actual list of subarray operations achieving the minimum?",
+    "What if each operation could add 1 to a subarray OR subtract 1 from it, and initial were an arbitrary array?"
+  ]
+}

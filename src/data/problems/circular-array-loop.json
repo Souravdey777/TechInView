@@ -1,0 +1,81 @@
+{
+  "title": "Circular Array Loop",
+  "slug": "circular-array-loop",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "google"
+  ],
+  "description": "You are given a **circular** array `nums` of non-zero integers. Each value is a move instruction: from index `i`, a positive `nums[i]` moves you `nums[i]` steps forward and a negative one moves you `|nums[i]|` steps backward. Because the array is circular, stepping past the last element wraps to the first and vice versa, so the next index is `(i + nums[i]) mod n`, taken as a non-negative remainder.\n\nA *cycle* is a sequence of indices `seq[0] -> seq[1] -> ... -> seq[k-1] -> seq[0]` produced by these moves such that:\n\n- every `nums[seq[j]]` has the same sign (all forward or all backward), and\n- `k > 1`, i.e. a single index that jumps back onto itself does not count.\n\nReturn `true` if such a cycle exists anywhere in `nums`, otherwise `false`.\n\n**Example 1:**\n```\nInput: nums = [2,-1,1,2,2]\nOutput: true\nExplanation: 0 -> 2 -> 3 -> 0 is a cycle of length 3 in which every move goes forward.\n```\n\n**Example 2:**\n```\nInput: nums = [-1,-2,-3,-4,-5,6]\nOutput: false\nExplanation: Index 5 moves 6 steps and lands on itself, a length-1 loop that does not count. Every other path eventually mixes backward moves with index 5's forward move.\n```\n\n**Example 3:**\n```\nInput: nums = [1,-1,5,1,4]\nOutput: true\nExplanation: 3 -> 4 -> 3 is a forward-only cycle of length 2. (0 -> 1 -> 0 also loops, but it mixes directions, so it does not count on its own.)\n```",
+  "examples": [
+    {
+      "input": "nums = [2,-1,1,2,2]",
+      "output": "true",
+      "explanation": "0 -> 2 -> 3 -> 0 is a cycle of length 3 in which every move goes forward."
+    },
+    {
+      "input": "nums = [-1,-2,-3,-4,-5,6]",
+      "output": "false",
+      "explanation": "Index 5 moves 6 steps and lands on itself, a length-1 loop that does not count. Every other path eventually mixes backward moves with index 5's forward move."
+    },
+    {
+      "input": "nums = [1,-1,5,1,4]",
+      "output": "true",
+      "explanation": "3 -> 4 -> 3 is a forward-only cycle of length 2. (0 -> 1 -> 0 also loops, but it mixes directions, so it does not count on its own.)"
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 5000",
+    "-1000 <= nums[i] <= 1000",
+    "nums[i] != 0"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def circularArrayLoop(self, nums: list[int]) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function circularArrayLoop(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean circularArrayLoop(int[] nums) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool circularArrayLoop(vector<int>& nums) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,-1,1,2,2]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-1,-2,-3,-4,-5,6]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,-1,5,1,4]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3]",
+      "expected_output": "false",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [-2,-3,-9]",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force starts a walk from every index, following moves while the direction matches the starting sign, and reports a cycle if it revisits an index of the current walk without hitting a self-loop; each walk can take O(n) steps, so this is O(n^2) time. The optimal approach runs Floyd's slow/fast pointers from each unvisited index, advancing only while the next index has the same sign as the start and is not a self-loop (next(i) == i). If slow meets fast, check that the meeting point is not a length-1 loop and return true. If the walk fails, re-walk the path from the start and mark every index on it (e.g. set it to 0) as dead, since no valid cycle passes through it. Each index is marked once, giving O(n) time and O(1) extra space.",
+  "hints": [
+    "Every index has exactly one outgoing move, so following moves from any start must eventually repeat an index. What makes a repeat count as a valid cycle?",
+    "A walk is invalid the moment it changes direction or an index jumps onto itself. Could you detect a loop with two pointers moving at different speeds?",
+    "From each start, run slow/fast pointers that only advance onto indices with the same sign and next(i) != i. If they meet, return true; otherwise mark every index on that path as visited so it is never explored again, keeping the total work O(n)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "What if zero values were allowed and meant \"stay in place\"? How would that change which cycles count as valid?",
+    "How would you return the indices that make up the cycle?"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "title": "Plus One",
+  "slug": "plus-one",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "apple",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "A non-negative integer is stored as an array `digits`, where each element is a single decimal digit and the **most significant** digit comes first. The number has no leading zeros, except for the number `0` itself, which is represented as `[0]`.\n\nAdd one to the number and return the digits of the result in the same format.\n\n**Example 1:**\n```\nInput: digits = [1,2,3]\nOutput: [1,2,4]\nExplanation: The array represents 123, and 123 + 1 = 124.\n```\n\n**Example 2:**\n```\nInput: digits = [4,3,2,1]\nOutput: [4,3,2,2]\nExplanation: The array represents 4321, and 4321 + 1 = 4322.\n```\n\n**Example 3:**\n```\nInput: digits = [9,9]\nOutput: [1,0,0]\nExplanation: 99 + 1 = 100; the carry ripples through every digit and adds a new leading 1.\n```",
+  "examples": [
+    {
+      "input": "digits = [1,2,3]",
+      "output": "[1,2,4]",
+      "explanation": "The array represents 123, and 123 + 1 = 124."
+    },
+    {
+      "input": "digits = [4,3,2,1]",
+      "output": "[4,3,2,2]",
+      "explanation": "The array represents 4321, and 4321 + 1 = 4322."
+    },
+    {
+      "input": "digits = [9,9]",
+      "output": "[1,0,0]",
+      "explanation": "99 + 1 = 100; the carry ripples through every digit and adds a new leading 1."
+    }
+  ],
+  "constraints": [
+    "1 <= digits.length <= 100",
+    "0 <= digits[i] <= 9",
+    "digits has no leading zeros unless it is exactly [0]"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def plusOne(self, digits: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function plusOne(digits) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] plusOne(int[] digits) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> plusOne(vector<int>& digits) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "digits = [1,2,3]",
+      "expected_output": "[1,2,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "digits = [4,3,2,1]",
+      "expected_output": "[4,3,2,2]",
+      "is_hidden": false
+    },
+    {
+      "input": "digits = [9,9]",
+      "expected_output": "[1,0,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "digits = [0]",
+      "expected_output": "[1]",
+      "is_hidden": true
+    },
+    {
+      "input": "digits = [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]",
+      "expected_output": "[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force converts the digits to a big integer, adds one, and splits it back into digits; this is O(n) with arbitrary-precision arithmetic but does not work in languages with fixed-size integers. The optimal approach simulates grade-school addition from the least significant digit: walk from the last index toward the first; if the digit is less than 9, increment it and return immediately; otherwise set it to 0 and keep carrying. If every digit was 9, the result is a 1 followed by n zeros. This takes O(n) time and O(1) extra space apart from the possible new array of length n + 1.",
+  "hints": [
+    "Think about how you add 1 to a number by hand, starting from the rightmost digit.",
+    "A digit below 9 simply increases and stops the carry. A 9 turns into 0 and passes the carry left.",
+    "Loop i from the last index down to 0: if digits[i] < 9, increment and return digits; else set it to 0. If the loop finishes, return [1] followed by all the zeros."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you add two numbers that are both given as digit arrays?",
+    "How would you handle adding an arbitrary integer k instead of 1?"
+  ]
+}

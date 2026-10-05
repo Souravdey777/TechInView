@@ -1,0 +1,82 @@
+{
+  "title": "Count Visited Nodes in a Directed Graph",
+  "slug": "count-visited-nodes-in-a-directed-graph",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given a directed graph with `n` nodes labelled `0` to `n - 1`, described by an array `edges` of length `n`: node `i` has exactly one outgoing edge, to `edges[i]`. No node points to itself.\n\nFor each starting node `i`, walk along the outgoing edges and stop as soon as you are about to step onto a node you have already visited during this walk. Count how many **distinct** nodes the walk visited, including node `i` itself.\n\nReturn an array `answer` of length `n` where `answer[i]` is that count for starting node `i`.\n\n**Example 1:**\n```\nInput: edges = [1,2,3,1,3]\nOutput: [4,3,3,3,4]\nExplanation: Nodes 1, 2, 3 form a cycle, so starting from any of them visits 3 nodes. From 0 the walk is 0 -> 1 -> 2 -> 3, visiting 4 nodes. From 4 the walk is 4 -> 3 -> 1 -> 2, also 4 nodes.\n```\n\n**Example 2:**\n```\nInput: edges = [1,0,1]\nOutput: [2,2,3]\nExplanation: Nodes 0 and 1 form a 2-cycle. Starting at 2 visits 2 -> 1 -> 0 before returning to 1, which is 3 nodes.\n```\n\n**Example 3:**\n```\nInput: edges = [3,6,1,0,5,4,4]\nOutput: [2,4,5,2,2,2,3]\nExplanation: Nodes 0 and 3 form a 2-cycle, as do nodes 4 and 5, so each of them visits 2 nodes. From 6 the walk is 6 -> 4 -> 5 (3 nodes), from 1 it is 1 -> 6 -> 4 -> 5 (4 nodes), and from 2 it is 2 -> 1 -> 6 -> 4 -> 5 (5 nodes).\n```",
+  "examples": [
+    {
+      "input": "edges = [1,2,3,1,3]",
+      "output": "[4,3,3,3,4]",
+      "explanation": "Nodes 1, 2, 3 form a cycle, so starting from any of them visits 3 nodes. From 0 the walk is 0 -> 1 -> 2 -> 3, visiting 4 nodes. From 4 the walk is 4 -> 3 -> 1 -> 2, also 4 nodes."
+    },
+    {
+      "input": "edges = [1,0,1]",
+      "output": "[2,2,3]",
+      "explanation": "Nodes 0 and 1 form a 2-cycle. Starting at 2 visits 2 -> 1 -> 0 before returning to 1, which is 3 nodes."
+    },
+    {
+      "input": "edges = [3,6,1,0,5,4,4]",
+      "output": "[2,4,5,2,2,2,3]",
+      "explanation": "Nodes 0 and 3 form a 2-cycle, as do nodes 4 and 5, so each of them visits 2 nodes. From 6 the walk is 6 -> 4 -> 5 (3 nodes), from 1 it is 1 -> 6 -> 4 -> 5 (4 nodes), and from 2 it is 2 -> 1 -> 6 -> 4 -> 5 (5 nodes)."
+    }
+  ],
+  "constraints": [
+    "n == edges.length",
+    "2 <= n <= 10^5",
+    "0 <= edges[i] <= n - 1",
+    "edges[i] != i"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countVisitedNodes(self, edges: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function countVisitedNodes(edges) {\n    // Write your solution here\n    return [];\n}",
+    "java": "class Solution {\n    public int[] countVisitedNodes(int[] edges) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> countVisitedNodes(vector<int>& edges) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "edges = [1,2,3,1,3]",
+      "expected_output": "[4,3,3,3,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "edges = [1,0,1]",
+      "expected_output": "[2,2,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "edges = [3,6,1,0,5,4,4]",
+      "expected_output": "[2,4,5,2,2,2,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "edges = [1,0]",
+      "expected_output": "[2,2]",
+      "is_hidden": true
+    },
+    {
+      "input": "edges = [1,2,0,0,3,4,5]",
+      "expected_output": "[3,3,3,4,5,6,7]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Simulating each walk separately is O(n^2) in the worst case (for example, one long chain leading into a cycle). Because every node has exactly one outgoing edge, the graph is a functional graph: each component is a single cycle with trees hanging into it. Every node on a cycle of length L has answer L, and a node off the cycle has answer 1 + answer[edges[i]]. Compute this in O(n) by either (a) Kahn-style topological peeling: repeatedly remove nodes with in-degree 0, which leaves exactly the cycle nodes; measure each cycle and assign its length, then fill tree nodes in reverse removal order; or (b) an iterative walk with a visit-time stamp per node that detects where the current walk closes a cycle and back-fills answers along the stack. Both run in O(n) time and O(n) space.",
+  "hints": [
+    "Each node has exactly one outgoing edge. What does every walk eventually run into?",
+    "Nodes on a cycle all share the same answer (the cycle length). For a node not on a cycle, how does its answer relate to the answer of the node it points to?",
+    "Peel off in-degree-0 nodes (topological order) to isolate the cycles, set each cycle node's answer to its cycle length, then process peeled nodes in reverse order with answer[i] = 1 + answer[edges[i]]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you answer, for each node, the length of the cycle it eventually enters (rather than the total count)?",
+    "Could you answer queries 'how many steps until node i first repeats a node' after the edges array is updated dynamically?"
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "title": "Finding The Number Of Visible Mountains",
+  "slug": "finding-the-number-of-visible-mountains",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": [
+    "google",
+    "amazon",
+    "uber"
+  ],
+  "description": "You are given a 2D integer array `peaks` where `peaks[i] = [x_i, y_i]` is the top of mountain `i`. Every mountain is a right-angled isosceles triangle standing on the x-axis: its sides slope down at 45 degrees on both sides, so its base runs from `(x_i - y_i, 0)` to `(x_i + y_i, 0)`.\n\nA mountain is **visible** if its peak does not lie inside another mountain or on the border of another mountain. In particular, if two or more mountains are identical (same peak), they hide each other and none of them is visible.\n\nReturn the number of visible mountains.\n\n**Example 1:**\n```\nInput: peaks = [[2,4],[5,2],[9,1]]\nOutput: 3\nExplanation: At x = 5 the first mountain is only 1 high, below the peak [5,2], so that peak is visible. [9,1] spans 8..10 and touches no other mountain above the ground. All 3 peaks are visible.\n```\n\n**Example 2:**\n```\nInput: peaks = [[4,2],[4,2],[6,5]]\nOutput: 1\nExplanation: The two [4,2] mountains are identical, so they hide each other, and both also lie inside [6,5] (base 1..11). Only [6,5] is visible.\n```\n\n**Example 3:**\n```\nInput: peaks = [[1,1],[4,2],[4,1]]\nOutput: 2\nExplanation: [4,1] lies inside [4,2]. [1,1] (base 0..2) and [4,2] (base 2..6) only touch at the ground, so both are visible.\n```",
+  "examples": [
+    {
+      "input": "peaks = [[2,4],[5,2],[9,1]]",
+      "output": "3",
+      "explanation": "At x = 5 the first mountain is only 1 high, below the peak [5,2], so that peak is visible. [9,1] spans 8..10 and touches no other mountain above the ground. All 3 peaks are visible."
+    },
+    {
+      "input": "peaks = [[4,2],[4,2],[6,5]]",
+      "output": "1",
+      "explanation": "The two [4,2] mountains are identical, so they hide each other, and both also lie inside [6,5] (base 1..11). Only [6,5] is visible."
+    },
+    {
+      "input": "peaks = [[1,1],[4,2],[4,1]]",
+      "output": "2",
+      "explanation": "[4,1] lies inside [4,2]. [1,1] (base 0..2) and [4,2] (base 2..6) only touch at the ground, so both are visible."
+    }
+  ],
+  "constraints": [
+    "1 <= peaks.length <= 10^5",
+    "peaks[i].length == 2",
+    "1 <= x_i, y_i <= 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def visibleMountains(self, peaks: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function visibleMountains(peaks) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int visibleMountains(int[][] peaks) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int visibleMountains(vector<vector<int>>& peaks) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "peaks = [[2,4],[5,2],[9,1]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "peaks = [[4,2],[4,2],[6,5]]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "peaks = [[1,1],[4,2],[4,1]]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "peaks = [[1,1]]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "peaks = [[2,2],[2,2],[5,3],[5,1]]",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force compares every pair, checking whether y_j - |x_i - x_j| >= y_i, which is O(n^2). Transform each mountain to its base interval [x - y, x + y]; mountain A hides mountain B exactly when A's interval contains B's. Sort intervals by left endpoint ascending and right endpoint descending, then sweep while tracking the largest right endpoint seen so far (equivalently, keep a monotonic stack of current visible candidates). An interval is visible only if its right end strictly exceeds that maximum and it is not duplicated elsewhere in the input. Time O(n log n) for sorting, space O(n).",
+  "hints": [
+    "Turn each triangle into the interval it covers on the x-axis. What does 'peak inside another mountain' mean for two intervals?",
+    "Mountain B is hidden by A exactly when A's base interval contains B's base interval. Sort the intervals so that any containing interval comes first.",
+    "Sort by (left ascending, right descending) and sweep with the maximum right end so far; count an interval only if its right end beats that maximum and it occurs exactly once."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you return the indices of the visible mountains instead of just their count?",
+    "What if mountains could have different slopes on the left and right sides?"
+  ]
+}

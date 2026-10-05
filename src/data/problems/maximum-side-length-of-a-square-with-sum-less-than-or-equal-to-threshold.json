@@ -1,0 +1,81 @@
+{
+  "title": "Maximum Side Length Of A Square With Sum Less Than Or Equal To Threshold",
+  "slug": "maximum-side-length-of-a-square-with-sum-less-than-or-equal-to-threshold",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an `m x n` grid `mat` of non-negative integers and an integer `threshold`.\n\nFind the largest integer `L` such that there is at least one `L x L` square submatrix of `mat` whose elements add up to **at most** `threshold`. Return `L`, or `0` if no such square exists (that is, every single cell is already greater than `threshold`).\n\n**Example 1:**\n```\nInput: mat = [[1,2,1,3],[2,1,2,1],[1,1,1,2],[3,2,1,1]], threshold = 10\nOutput: 2\nExplanation: The top-left 2x2 square has sum 1 + 2 + 2 + 1 = 6 <= 10. All four 3x3 squares have sums of 12 or 14, which exceed 10.\n```\n\n**Example 2:**\n```\nInput: mat = [[4,5],[6,7]], threshold = 3\nOutput: 0\nExplanation: Every single cell is larger than 3, so no square qualifies.\n```\n\n**Example 3:**\n```\nInput: mat = [[5,1,1],[1,1,1],[1,1,9]], threshold = 4\nOutput: 2\nExplanation: The 2x2 square covering rows 0-1 and columns 1-2 contains 1, 1, 1, 1 with sum 4. The only 3x3 square has sum 21.\n```",
+  "examples": [
+    {
+      "input": "mat = [[1,2,1,3],[2,1,2,1],[1,1,1,2],[3,2,1,1]], threshold = 10",
+      "output": "2",
+      "explanation": "The top-left 2x2 square has sum 1 + 2 + 2 + 1 = 6 <= 10. All four 3x3 squares have sums of 12 or 14, which exceed 10."
+    },
+    {
+      "input": "mat = [[4,5],[6,7]], threshold = 3",
+      "output": "0",
+      "explanation": "Every single cell is larger than 3, so no square qualifies."
+    },
+    {
+      "input": "mat = [[5,1,1],[1,1,1],[1,1,9]], threshold = 4",
+      "output": "2",
+      "explanation": "The 2x2 square covering rows 0-1 and columns 1-2 contains 1, 1, 1, 1 with sum 4. The only 3x3 square has sum 21."
+    }
+  ],
+  "constraints": [
+    "1 <= m, n <= 300",
+    "0 <= mat[i][j] <= 10^4",
+    "0 <= threshold <= 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxSideLength(self, mat: list[list[int]], threshold: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxSideLength(mat, threshold) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxSideLength(int[][] mat, int threshold) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxSideLength(vector<vector<int>>& mat, int threshold) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "mat = [[1,2,1,3],[2,1,2,1],[1,1,1,2],[3,2,1,1]], threshold = 10",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "mat = [[4,5],[6,7]], threshold = 3",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "mat = [[5,1,1],[1,1,1],[1,1,9]], threshold = 4",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "mat = [[0]], threshold = 0",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "mat = [[0,0,0,0],[0,0,0,0],[0,0,0,0]], threshold = 0",
+      "expected_output": "3",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries every top-left corner and every side length and sums the square directly, costing up to O(m * n * min(m, n)^3) time. Build a 2D prefix-sum table P where P[i][j] is the sum of mat[0..i-1][0..j-1]; any square sum is then an O(1) inclusion-exclusion query. Since all values are non-negative, if some L x L square fits under the threshold then some (L-1) x (L-1) square also fits, so feasibility is monotonic in L and you can binary search L in [0, min(m, n)], checking each candidate in O(m * n). That gives O(m * n * log(min(m, n))) time and O(m * n) space. An even tighter variant scans every cell once and only tries to grow the best answer found so far by one, achieving O(m * n).",
+  "hints": [
+    "Computing every square sum from scratch is slow. What precomputation lets you get any rectangle's sum in O(1)?",
+    "Because all entries are non-negative, if a square of side L works, does a square of side L - 1 also work? What does that monotonicity let you do?",
+    "Build a 2D prefix sum, then binary search the side length L; for each L, check every top-left corner using sum = P[r+L][c+L] - P[r][c+L] - P[r+L][c] + P[r][c]."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n * log(min(m, n)))",
+    "space": "O(m * n)"
+  },
+  "follow_up_questions": [
+    "Can you solve it in O(m * n) time by only trying to extend the current best side length at each cell?",
+    "How would you adapt the solution if mat could contain negative numbers?"
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "title": "Count Ways to Reach Score With 3 5 10",
+  "slug": "count-ways-to-reach-score-with-3-5-10",
+  "difficulty": "easy",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "goldman-sachs"
+  ],
+  "description": "In a game, every move scores either `3`, `5`, or `10` points. Given a target score `n`, return the number of **distinct combinations** of moves whose points add up to exactly `n`.\n\nOrder does not matter: `3 + 5` and `5 + 3` are the same combination. If `n` cannot be reached, return `0`.\n\n**Example 1:**\n```\nInput: n = 8\nOutput: 1\nExplanation: The only combination is 3 + 5.\n```\n\n**Example 2:**\n```\nInput: n = 13\nOutput: 2\nExplanation: The combinations are 3 + 10 and 3 + 5 + 5.\n```\n\n**Example 3:**\n```\nInput: n = 20\nOutput: 4\nExplanation: The combinations are 10 + 10, 5 + 5 + 10, 5 + 5 + 5 + 5, and 3 + 3 + 3 + 3 + 3 + 5.\n```",
+  "examples": [
+    {
+      "input": "n = 8",
+      "output": "1",
+      "explanation": "The only combination is 3 + 5."
+    },
+    {
+      "input": "n = 13",
+      "output": "2",
+      "explanation": "The combinations are 3 + 10 and 3 + 5 + 5."
+    },
+    {
+      "input": "n = 20",
+      "output": "4",
+      "explanation": "The combinations are 10 + 10, 5 + 5 + 10, 5 + 5 + 5 + 5, and 3 + 3 + 3 + 3 + 3 + 5."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1000",
+    "Each move scores exactly 3, 5 or 10 points",
+    "The answer fits in a 64-bit signed integer"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countScoreWays(self, n: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countScoreWays(n) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public long countScoreWays(int n) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    long long countScoreWays(int n) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 8",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 13",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 20",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 100",
+      "expected_output": "44",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force recursively tries every sequence of moves and deduplicates, which is exponential and overcounts permutations unless carefully pruned. Treat it as unbounded coin change counting combinations: dp[0] = 1, and for each move value p in (3, 5, 10) (outer loop), for i from p to n, dp[i] += dp[i - p]. Iterating the move values in the outer loop ensures each multiset is counted exactly once. The answer is dp[n], computed in O(n) time and O(n) space (3 passes over the array).",
+  "hints": [
+    "This is the 'coin change, count the ways' pattern with coins 3, 5 and 10.",
+    "To avoid counting 3 + 5 and 5 + 3 separately, fix the order in which move types are considered.",
+    "dp[0] = 1; for p in (3, 5, 10): for i from p to n: dp[i] += dp[i - p]. Return dp[n]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you count ordered sequences of moves instead (where 3 + 5 and 5 + 3 differ)?",
+    "How would you generalise this to an arbitrary list of move values?"
+  ]
+}

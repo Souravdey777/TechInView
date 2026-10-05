@@ -1,0 +1,81 @@
+{
+  "title": "Cutting Ribbons",
+  "slug": "cutting-ribbons",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": [
+    "meta",
+    "amazon",
+    "google"
+  ],
+  "description": "You are given an array `ribbons` where `ribbons[i]` is the length of the `i`-th ribbon, and an integer `k`.\n\nYou may cut any ribbon into any number of pieces of **positive integer** length, or leave it uncut. Leftover scraps may be thrown away.\n\nReturn the **largest** positive integer `x` such that you can obtain at least `k` pieces that each have length exactly `x`. If no positive length allows `k` pieces, return `0`.\n\n**Example 1:**\n```\nInput: ribbons = [12,8,6], k = 4\nOutput: 6\nExplanation: Length 6 yields 2 + 1 + 1 = 4 pieces. Length 7 yields only 1 + 1 + 0 = 2 pieces.\n```\n\n**Example 2:**\n```\nInput: ribbons = [10,4,7], k = 5\nOutput: 3\nExplanation: Length 3 yields 3 + 1 + 2 = 6 pieces. Length 4 yields only 2 + 1 + 1 = 4 pieces.\n```\n\n**Example 3:**\n```\nInput: ribbons = [3,2,4], k = 10\nOutput: 0\nExplanation: Even length 1 gives only 3 + 2 + 4 = 9 pieces, which is fewer than 10.\n```",
+  "examples": [
+    {
+      "input": "ribbons = [12,8,6], k = 4",
+      "output": "6",
+      "explanation": "Length 6 yields 2 + 1 + 1 = 4 pieces. Length 7 yields only 1 + 1 + 0 = 2 pieces."
+    },
+    {
+      "input": "ribbons = [10,4,7], k = 5",
+      "output": "3",
+      "explanation": "Length 3 yields 3 + 1 + 2 = 6 pieces. Length 4 yields only 2 + 1 + 1 = 4 pieces."
+    },
+    {
+      "input": "ribbons = [3,2,4], k = 10",
+      "output": "0",
+      "explanation": "Even length 1 gives only 3 + 2 + 4 = 9 pieces, which is fewer than 10."
+    }
+  ],
+  "constraints": [
+    "1 <= ribbons.length <= 10^5",
+    "1 <= ribbons[i] <= 10^5",
+    "1 <= k <= 10^9"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxLength(self, ribbons: list[int], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxLength(ribbons, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxLength(int[] ribbons, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxLength(vector<int>& ribbons, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "ribbons = [12,8,6], k = 4",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "ribbons = [10,4,7], k = 5",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "ribbons = [3,2,4], k = 10",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "ribbons = [100000], k = 1",
+      "expected_output": "100000",
+      "is_hidden": true
+    },
+    {
+      "input": "ribbons = [1,1,1,100000], k = 100000",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries every length x from max(ribbons) down to 1 and counts sum(r // x) pieces, stopping at the first x that yields at least k, which costs O(n * max(ribbons)) time. The piece count is non-increasing as x grows, so binary search x in [1, max(ribbons)] for the largest length whose count is at least k; if even x = 1 fails, return 0. Each check is O(n), so the total is O(n log(max(ribbons))) time and O(1) space.",
+  "hints": [
+    "If you can get k pieces of length x, can you also get k pieces of any shorter length?",
+    "Given a fixed length x, the number of pieces you can produce is easy to compute from each ribbon independently.",
+    "Binary search x over [1, max(ribbons)] using count(x) = sum(r // x for r in ribbons) >= k; return the largest passing x, or 0 if none passes."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log(max(ribbons)))",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would the solution change if piece lengths could be real numbers and you needed the answer to a given precision?",
+    "What if each ribbon could be cut at most a fixed number of times?"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "Assembly Line Scheduling",
+  "slug": "assembly-line-scheduling",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "oracle"
+  ],
+  "description": "A factory has two assembly lines, line `0` and line `1`, each with `n` stations numbered `0` to `n - 1`. A product must pass through stations `0, 1, ..., n - 1` in order, visiting exactly one of the two lines at each station index.\n\n- `a[i][j]` is the time spent at station `j` of line `i`.\n- `t[i][j]` (for `0 <= j < n - 1`) is the time to transfer the product from line `i` right after station `j` to the **other** line, before station `j + 1`. Staying on the same line costs no transfer time.\n- `e[i]` is the time to enter line `i` before station `0`.\n- `x[i]` is the time to exit line `i` after station `n - 1`.\n\nReturn the minimum total time to build one product. When `n == 1`, `t` is `[[],[]]`.\n\n**Example 1:**\n```\nInput: a = [[4,5,3],[2,10,1]], t = [[7,4],[9,2]], e = [10,12], x = [18,7]\nOutput: 31\nExplanation: Enter line 0 (10), stations 0 and 1 on line 0 (4 + 5), transfer to line 1 after station 1 (4), station 2 on line 1 (1), exit line 1 (7): 10 + 4 + 5 + 4 + 1 + 7 = 31.\n```\n\n**Example 2:**\n```\nInput: a = [[3,2,6],[5,1,4]], t = [[2,3],[1,2]], e = [1,2], x = [3,1]\nOutput: 12\nExplanation: Enter line 0 (1), station 0 on line 0 (3), transfer to line 1 (2), stations 1 and 2 on line 1 (1 + 4), exit line 1 (1): 1 + 3 + 2 + 1 + 4 + 1 = 12.\n```\n\n**Example 3:**\n```\nInput: a = [[5],[6]], t = [[],[]], e = [2,1], x = [3,1]\nOutput: 8\nExplanation: With a single station, line 0 costs 2 + 5 + 3 = 10 and line 1 costs 1 + 6 + 1 = 8, so the answer is 8.\n```",
+  "examples": [
+    {
+      "input": "a = [[4,5,3],[2,10,1]], t = [[7,4],[9,2]], e = [10,12], x = [18,7]",
+      "output": "31",
+      "explanation": "Enter line 0 (10), stations 0 and 1 on line 0 (4 + 5), transfer to line 1 after station 1 (4), station 2 on line 1 (1), exit line 1 (7): 10 + 4 + 5 + 4 + 1 + 7 = 31."
+    },
+    {
+      "input": "a = [[3,2,6],[5,1,4]], t = [[2,3],[1,2]], e = [1,2], x = [3,1]",
+      "output": "12",
+      "explanation": "Enter line 0 (1), station 0 on line 0 (3), transfer to line 1 (2), stations 1 and 2 on line 1 (1 + 4), exit line 1 (1): 1 + 3 + 2 + 1 + 4 + 1 = 12."
+    },
+    {
+      "input": "a = [[5],[6]], t = [[],[]], e = [2,1], x = [3,1]",
+      "output": "8",
+      "explanation": "With a single station, line 0 costs 2 + 5 + 3 = 10 and line 1 costs 1 + 6 + 1 = 8, so the answer is 8."
+    }
+  ],
+  "constraints": [
+    "a.length == 2 and 1 <= a[i].length == n <= 1000",
+    "t.length == 2 and t[i].length == n - 1",
+    "e.length == 2 and x.length == 2",
+    "1 <= a[i][j], t[i][j], e[i], x[i] <= 1000"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def assemblyLine(self, a: list[list[int]], t: list[list[int]], e: list[int], x: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function assemblyLine(a, t, e, x) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int assemblyLine(int[][] a, int[][] t, int[] e, int[] x) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int assemblyLine(vector<vector<int>>& a, vector<vector<int>>& t, vector<int>& e, vector<int>& x) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "a = [[4,5,3],[2,10,1]], t = [[7,4],[9,2]], e = [10,12], x = [18,7]",
+      "expected_output": "31",
+      "is_hidden": false
+    },
+    {
+      "input": "a = [[3,2,6],[5,1,4]], t = [[2,3],[1,2]], e = [1,2], x = [3,1]",
+      "expected_output": "12",
+      "is_hidden": false
+    },
+    {
+      "input": "a = [[5],[6]], t = [[],[]], e = [2,1], x = [3,1]",
+      "expected_output": "8",
+      "is_hidden": false
+    },
+    {
+      "input": "a = [[1,1,1,1],[1,1,1,1]], t = [[5,5,5],[5,5,5]], e = [3,3], x = [2,2]",
+      "expected_output": "9",
+      "is_hidden": true
+    },
+    {
+      "input": "a = [[1,100,1,100],[100,1,100,1]], t = [[1,1,1],[1,1,1]], e = [1,1], x = [1,1]",
+      "expected_output": "9",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates the 2^n choices of line per station and sums entry, station, transfer, and exit times. The optimal approach is DP: let f0[j] and f1[j] be the fastest time to finish station j on line 0 or line 1. Then f0[0] = e[0] + a[0][0], f1[0] = e[1] + a[1][0], and for j >= 1, f0[j] = min(f0[j-1], f1[j-1] + t[1][j-1]) + a[0][j] and f1[j] = min(f1[j-1], f0[j-1] + t[0][j-1]) + a[1][j]. The answer is min(f0[n-1] + x[0], f1[n-1] + x[1]). This is O(n) time and O(1) extra space with two rolling variables.",
+  "hints": [
+    "At each station the product is on one of two lines. What is the minimum information you need to carry from station j - 1 to station j?",
+    "Keep the best time to finish station j on each line. Reaching line 0 at station j comes either from line 0 at j - 1 or from line 1 at j - 1 plus a transfer.",
+    "f0 = min(f0, f1 + t[1][j-1]) + a[0][j] and f1 = min(f1, f0 + t[0][j-1]) + a[1][j] (update both from the old values). Start with entry times and finish by adding exit times."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you reconstruct which line is used at each station?",
+    "How does the solution generalise to k assembly lines with a k x k transfer-time matrix between consecutive stations?"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "title": "Car Pooling",
+  "slug": "car-pooling",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "uber",
+    "bloomberg"
+  ],
+  "description": "A car has `capacity` empty seats and only drives east, so it never turns back. You are given `trips`, where `trips[i] = [numPassengers, from, to]` means a group of `numPassengers` people must be picked up at kilometre `from` and dropped off at kilometre `to` (with `from < to`).\n\nPassengers dropped off at a point leave the car **before** new passengers are picked up at that same point, so a trip ending at `x` never overlaps with a trip starting at `x`.\n\nReturn `true` if the car can complete every trip without ever carrying more than `capacity` passengers, otherwise return `false`.\n\n**Example 1:**\n```\nInput: trips = [[2,1,5],[3,3,7]], capacity = 4\nOutput: false\nExplanation: Between kilometres 3 and 5 both groups are aboard: 2 + 3 = 5 passengers, which exceeds 4.\n```\n\n**Example 2:**\n```\nInput: trips = [[2,1,5],[3,3,7]], capacity = 5\nOutput: true\nExplanation: The peak load is 5 between kilometres 3 and 5, which fits exactly.\n```\n\n**Example 3:**\n```\nInput: trips = [[3,2,7],[3,7,9],[8,3,9]], capacity = 11\nOutput: true\nExplanation: The group of 3 leaves at kilometre 7 just before the next group of 3 boards there. The peak load is 3 + 8 = 11, which fits.\n```",
+  "examples": [
+    {
+      "input": "trips = [[2,1,5],[3,3,7]], capacity = 4",
+      "output": "false",
+      "explanation": "Between kilometres 3 and 5 both groups are aboard: 2 + 3 = 5 passengers, which exceeds 4."
+    },
+    {
+      "input": "trips = [[2,1,5],[3,3,7]], capacity = 5",
+      "output": "true",
+      "explanation": "The peak load is 5 between kilometres 3 and 5, which fits exactly."
+    },
+    {
+      "input": "trips = [[3,2,7],[3,7,9],[8,3,9]], capacity = 11",
+      "output": "true",
+      "explanation": "The group of 3 leaves at kilometre 7 just before the next group of 3 boards there. The peak load is 3 + 8 = 11, which fits."
+    }
+  ],
+  "constraints": [
+    "1 <= trips.length <= 1000",
+    "trips[i].length == 3",
+    "1 <= numPassengers <= 100",
+    "0 <= from < to <= 1000",
+    "1 <= capacity <= 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def carPooling(self, trips: list[list[int]], capacity: int) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function carPooling(trips, capacity) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean carPooling(int[][] trips, int capacity) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool carPooling(vector<vector<int>>& trips, int capacity) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "trips = [[2,1,5],[3,3,7]], capacity = 4",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "trips = [[2,1,5],[3,3,7]], capacity = 5",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "trips = [[3,2,7],[3,7,9],[8,3,9]], capacity = 11",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "trips = [[5,0,1000]], capacity = 4",
+      "expected_output": "false",
+      "is_hidden": true
+    },
+    {
+      "input": "trips = [[4,0,3],[4,3,6],[4,6,1000]], capacity = 4",
+      "expected_output": "true",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force adds each trip's passengers to every kilometre in [from, to) and checks whether any kilometre exceeds capacity, costing O(k * L) where L is the road length. The optimal approach is a sweep with a difference array over the 0..1000 kilometre range (or sorting pickup/drop-off events when coordinates are large): add numPassengers at from and subtract at to, then take a running sum and return false the moment it exceeds capacity. Because drop-offs at to are applied at the same index as pickups at to, the order rule is handled automatically. This is O(k + L) time and O(L) space, or O(k log k) time with event sorting.",
+  "hints": [
+    "The passenger count only changes at pickup and drop-off points. Do you need to look at every kilometre?",
+    "Record +numPassengers at from and -numPassengers at to, then sweep along the road keeping a running total.",
+    "With coordinates up to 1000, a difference array of size 1001 works: running sum over it, return false as soon as it exceeds capacity. Sorting events (drop-offs before pickups on ties) works for large coordinates."
+  ],
+  "optimal_complexity": {
+    "time": "O(k + L)",
+    "space": "O(L)"
+  },
+  "follow_up_questions": [
+    "How would you handle coordinates up to 10^9, where a difference array is too large?",
+    "What is the minimum capacity needed to complete all trips?"
+  ]
+}

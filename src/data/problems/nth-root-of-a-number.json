@@ -1,0 +1,81 @@
+{
+  "title": "Nth Root Of A Number",
+  "slug": "nth-root-of-a-number",
+  "difficulty": "easy",
+  "category": "binary-search",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given two positive integers `n` and `m`.\n\nReturn the positive integer `x` such that `x` raised to the power `n` equals `m` exactly (that is, `x^n == m`). If no such integer exists, return `-1`.\n\nDo not rely on floating-point power or root functions to decide the answer; compute it with integer arithmetic.\n\n**Example 1:**\n```\nInput: n = 3, m = 27\nOutput: 3\nExplanation: 3 * 3 * 3 = 27, so the cube root of 27 is the integer 3.\n```\n\n**Example 2:**\n```\nInput: n = 4, m = 69\nOutput: -1\nExplanation: 2^4 = 16 and 3^4 = 81, so 69 has no integer 4th root.\n```\n\n**Example 3:**\n```\nInput: n = 1, m = 14\nOutput: 14\nExplanation: Any number is its own 1st root.\n```",
+  "examples": [
+    {
+      "input": "n = 3, m = 27",
+      "output": "3",
+      "explanation": "3 * 3 * 3 = 27, so the cube root of 27 is the integer 3."
+    },
+    {
+      "input": "n = 4, m = 69",
+      "output": "-1",
+      "explanation": "2^4 = 16 and 3^4 = 81, so 69 has no integer 4th root."
+    },
+    {
+      "input": "n = 1, m = 14",
+      "output": "14",
+      "explanation": "Any number is its own 1st root."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 30",
+    "1 <= m <= 10^9",
+    "If an integer root exists it is unique and positive"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def nthRoot(self, n: int, m: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function nthRoot(n, m) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int nthRoot(int n, int m) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int nthRoot(int n, int m) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 3, m = 27",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 4, m = 69",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, m = 14",
+      "expected_output": "14",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 30, m = 1",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 2, m = 999950884",
+      "expected_output": "31622",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries x = 1, 2, 3, ... computing x^n until it reaches or exceeds m, which takes O(m^(1/n) * n) time — fine for large n but up to about 10^9 steps when n = 1. Since x^n is strictly increasing in x, binary search x in [1, m]: compute mid^n with repeated multiplication, stopping early as soon as the running product exceeds m (this prevents overflow in fixed-width languages). If mid^n == m return mid, if it is smaller move right, otherwise move left; return -1 if the search ends. Time is O(n log m) (or O(log n * log m) with fast exponentiation and capping) and space is O(1).",
+  "hints": [
+    "The function f(x) = x^n is strictly increasing for positive x. What does that let you search for efficiently?",
+    "Binary search x between 1 and m, comparing mid^n to m. Be careful: mid^n can be astronomically large.",
+    "When computing mid^n, multiply step by step and bail out with 'too big' as soon as the product exceeds m. Return mid on an exact match, otherwise -1 after the search."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log m)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you return the floor of the nth root when m is not a perfect nth power?",
+    "How would you compute the real-valued nth root to six decimal places?"
+  ]
+}

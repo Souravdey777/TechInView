@@ -1,0 +1,83 @@
+{
+  "title": "Minimum Cost for Cutting Cake I",
+  "slug": "minimum-cost-for-cutting-cake-i",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "goldman-sachs"
+  ],
+  "description": "An `m x n` cake must be cut into `m * n` pieces of size `1 x 1`. You are given:\n\n- `horizontalCut` of length `m - 1`, where `horizontalCut[i]` is the cost of cutting along horizontal line `i`.\n- `verticalCut` of length `n - 1`, where `verticalCut[j]` is the cost of cutting along vertical line `j`.\n\nIn one step you take any piece that is not yet `1 x 1` and cut it straight across along one of its internal grid lines. Cutting a single piece along line `i` costs exactly the line's cost, and that cost is **not** shared: if the same line runs through several separate pieces, each of those pieces must be cut individually and each cut is paid for.\n\nReturn the minimum total cost to reduce the whole cake to `1 x 1` pieces. If `m == n == 1` the cake needs no cuts and the answer is `0`.\n\n**Example 1:**\n```\nInput: m = 2, n = 3, horizontalCut = [4], verticalCut = [2,6]\nOutput: 18\nExplanation: Cut vertical line 1 first (cost 6), giving two pieces. Cut the horizontal line through both pieces (4 + 4 = 8). Then vertical line 0 runs through two pieces (2 + 2 = 4). Total 6 + 8 + 4 = 18.\n```\n\n**Example 2:**\n```\nInput: m = 1, n = 3, horizontalCut = [], verticalCut = [2,7]\nOutput: 9\nExplanation: There are no horizontal lines. Each vertical line is cut once through the single row: 2 + 7 = 9.\n```\n\n**Example 3:**\n```\nInput: m = 3, n = 3, horizontalCut = [1,3], verticalCut = [5,1]\nOutput: 16\nExplanation: Take the most expensive line first. Vertical line 0 (cost 5) once: 5. Horizontal line 1 (cost 3) through 2 columns: 6. Horizontal line 0 (cost 1) through 2 columns: 2. Vertical line 1 (cost 1) through 3 rows: 3. Total 5 + 6 + 2 + 3 = 16.\n```",
+  "examples": [
+    {
+      "input": "m = 2, n = 3, horizontalCut = [4], verticalCut = [2,6]",
+      "output": "18",
+      "explanation": "Cut vertical line 1 first (cost 6), giving two pieces. Cut the horizontal line through both pieces (4 + 4 = 8). Then vertical line 0 runs through two pieces (2 + 2 = 4). Total 6 + 8 + 4 = 18."
+    },
+    {
+      "input": "m = 1, n = 3, horizontalCut = [], verticalCut = [2,7]",
+      "output": "9",
+      "explanation": "There are no horizontal lines. Each vertical line is cut once through the single row: 2 + 7 = 9."
+    },
+    {
+      "input": "m = 3, n = 3, horizontalCut = [1,3], verticalCut = [5,1]",
+      "output": "16",
+      "explanation": "Take the most expensive line first. Vertical line 0 (cost 5) once: 5. Horizontal line 1 (cost 3) through 2 columns: 6. Horizontal line 0 (cost 1) through 2 columns: 2. Vertical line 1 (cost 1) through 3 rows: 3. Total 5 + 6 + 2 + 3 = 16."
+    }
+  ],
+  "constraints": [
+    "1 <= m, n <= 20",
+    "horizontalCut.length == m - 1",
+    "verticalCut.length == n - 1",
+    "1 <= horizontalCut[i], verticalCut[i] <= 1000"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumCost(self, m: int, n: int, horizontalCut: list[int], verticalCut: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumCost(m, n, horizontalCut, verticalCut) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minimumCost(int m, int n, int[] horizontalCut, int[] verticalCut) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumCost(int m, int n, vector<int>& horizontalCut, vector<int>& verticalCut) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "m = 2, n = 3, horizontalCut = [4], verticalCut = [2,6]",
+      "expected_output": "18",
+      "is_hidden": false
+    },
+    {
+      "input": "m = 1, n = 3, horizontalCut = [], verticalCut = [2,7]",
+      "expected_output": "9",
+      "is_hidden": false
+    },
+    {
+      "input": "m = 3, n = 3, horizontalCut = [1,3], verticalCut = [5,1]",
+      "expected_output": "16",
+      "is_hidden": false
+    },
+    {
+      "input": "m = 1, n = 1, horizontalCut = [], verticalCut = []",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "m = 4, n = 2, horizontalCut = [7,7,7], verticalCut = [7]",
+      "expected_output": "49",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A direct DP over sub-rectangles works: f(r1, r2, c1, c2) is the minimum cost to finish a sub-cake, trying every internal horizontal or vertical line as the next cut and summing the two halves, which is O(m^2 n^2 (m + n)) time and O(m^2 n^2) space and fits these limits; for version I this memoised sub-rectangle DP is the expected interview answer. The optimal follow-up is greedy: every line must eventually be cut, and a line is paid once per piece it crosses, so expensive lines should be cut early while they cross few pieces. Sort all cuts by cost descending and process them, keeping counts of horizontal pieces and vertical pieces; a horizontal cut costs its value times the current number of vertical pieces (and increments the horizontal count), and vice versa. An exchange argument shows swapping any out-of-order adjacent pair never helps. This is O((m + n) log(m + n)) time and O(m + n) space for sorting.",
+  "hints": [
+    "Every grid line must be cut at some point. What determines how many times you pay for a particular line?",
+    "A horizontal line is paid once for every vertical strip that exists when you cut it. Would you rather cut the expensive lines early or late?",
+    "Sort all cuts by cost in decreasing order. Track how many horizontal and vertical pieces exist; a horizontal cut costs cost * (vertical pieces) and adds one horizontal piece, and symmetrically for vertical cuts. Break ties either way."
+  ],
+  "optimal_complexity": {
+    "time": "O((m + n) log(m + n))",
+    "space": "O(m + n)"
+  },
+  "follow_up_questions": [
+    "Prove that the greedy order is optimal using an exchange argument.",
+    "How would you handle m and n up to 10^5 (Cutting Cake II)?"
+  ]
+}

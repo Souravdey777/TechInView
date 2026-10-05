@@ -1,0 +1,82 @@
+{
+  "title": "Wiggle Subsequence",
+  "slug": "wiggle-subsequence",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "A sequence is called a *wiggle sequence* if the differences between consecutive elements are all non-zero and strictly alternate between positive and negative. The first difference may be either positive or negative. A sequence with a single element counts as a wiggle sequence, and so does a two-element sequence whose elements differ.\n\nA *subsequence* is formed by deleting zero or more elements from `nums` without changing the order of the rest.\n\nGiven an integer array `nums`, return the length of its longest wiggle subsequence. Note that equal adjacent values can never both appear consecutively in a wiggle sequence, so an array of identical values has answer `1`.\n\n**Example 1:**\n```\nInput: nums = [1,7,4,9,2,5]\nOutput: 6\nExplanation: The whole array wiggles: the differences are +6, -3, +5, -7, +3.\n```\n\n**Example 2:**\n```\nInput: nums = [1,17,5,10,13,15,10,5,16,8]\nOutput: 7\nExplanation: One longest choice is [1,17,10,13,10,16,8] with differences +16, -7, +3, -3, +6, -8.\n```\n\n**Example 3:**\n```\nInput: nums = [1,2,3,4,5,6,7,8,9]\nOutput: 2\nExplanation: The array only rises, so the best is any two different elements, such as [1,9].\n```",
+  "examples": [
+    {
+      "input": "nums = [1,7,4,9,2,5]",
+      "output": "6",
+      "explanation": "The whole array wiggles: the differences are +6, -3, +5, -7, +3."
+    },
+    {
+      "input": "nums = [1,17,5,10,13,15,10,5,16,8]",
+      "output": "7",
+      "explanation": "One longest choice is [1,17,10,13,10,16,8] with differences +16, -7, +3, -3, +6, -8."
+    },
+    {
+      "input": "nums = [1,2,3,4,5,6,7,8,9]",
+      "output": "2",
+      "explanation": "The array only rises, so the best is any two different elements, such as [1,9]."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 1000",
+    "0 <= nums[i] <= 1000",
+    "Adjacent equal values may appear in nums and never count as a direction change"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def wiggleMaxLength(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function wiggleMaxLength(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int wiggleMaxLength(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int wiggleMaxLength(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,7,4,9,2,5]",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,17,5,10,13,15,10,5,16,8]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3,4,5,6,7,8,9]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,5,5,5]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [3,3,1,1,2,2,0,0,5,5,4]",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force enumerates every subsequence and checks whether it wiggles, which is O(2^n * n). A dynamic-programming version keeps up[i] and down[i], the longest wiggle subsequence ending at index i whose last difference is positive or negative, filling each from all earlier j in O(n^2). The optimal solution notices that only the best values so far matter: keep two counters up and down, both starting at 1. Scanning left to right, if nums[i] > nums[i-1] set up = down + 1; if nums[i] < nums[i-1] set down = up + 1; equal neighbours change nothing. The answer is max(up, down). Equivalently, count the turning points (local peaks and valleys) after collapsing runs of equal values. This is O(n) time and O(1) space.",
+  "hints": [
+    "Picture the array as a line graph. Which points would you keep to make it zig-zag as much as possible?",
+    "Track two quantities as you scan: the best wiggle length whose last step went up, and the best whose last step went down.",
+    "Start up = down = 1. When nums[i] > nums[i-1], up = down + 1; when nums[i] < nums[i-1], down = up + 1; skip equal values. Return max(up, down)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you return the actual subsequence rather than its length?",
+    "How does the greedy relate to counting local peaks and valleys, and how do you handle plateaus of equal values?"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "title": "Most Frequent IDs",
+  "slug": "most-frequent-ids",
+  "difficulty": "medium",
+  "category": "heap",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You maintain a collection of IDs that starts out empty. You are given two arrays `nums` and `freq` of equal length `n`. At step `i`:\n\n- if `freq[i] > 0`, add `freq[i]` copies of ID `nums[i]` to the collection;\n- if `freq[i] < 0`, remove `-freq[i]` copies of ID `nums[i]` from the collection.\n\nIt is guaranteed that a removal never takes the count of an ID below zero.\n\nReturn an array `ans` of length `n` where `ans[i]` is the count of the most frequent ID in the collection right after step `i`. If the collection is empty after a step, `ans[i]` is `0`.\n\n**Example 1:**\n```\nInput: nums = [2,3,2,1], freq = [3,2,-3,1]\nOutput: [3,3,2,2]\nExplanation: After step 0: {2:3} -> 3. After step 1: {2:3, 3:2} -> 3. After step 2: {2:0, 3:2} -> 2. After step 3: {3:2, 1:1} -> 2.\n```\n\n**Example 2:**\n```\nInput: nums = [5,5,3], freq = [2,-2,1]\nOutput: [2,0,1]\nExplanation: After step 0 ID 5 appears twice -> 2. Step 1 removes both copies, leaving the collection empty -> 0. Step 2 adds one copy of 3 -> 1.\n```\n\n**Example 3:**\n```\nInput: nums = [7], freq = [4]\nOutput: [4]\nExplanation: A single step adds four copies of ID 7, so the answer is 4.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,3,2,1], freq = [3,2,-3,1]",
+      "output": "[3,3,2,2]",
+      "explanation": "After step 0: {2:3} -> 3. After step 1: {2:3, 3:2} -> 3. After step 2: {2:0, 3:2} -> 2. After step 3: {3:2, 1:1} -> 2."
+    },
+    {
+      "input": "nums = [5,5,3], freq = [2,-2,1]",
+      "output": "[2,0,1]",
+      "explanation": "After step 0 ID 5 appears twice -> 2. Step 1 removes both copies, leaving the collection empty -> 0. Step 2 adds one copy of 3 -> 1."
+    },
+    {
+      "input": "nums = [7], freq = [4]",
+      "output": "[4]",
+      "explanation": "A single step adds four copies of ID 7, so the answer is 4."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length == freq.length <= 10^5",
+    "1 <= nums[i] <= 10^5",
+    "-10^5 <= freq[i] <= 10^5",
+    "freq[i] != 0",
+    "The count of any ID never becomes negative"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def mostFrequentIDs(self, nums: list[int], freq: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function mostFrequentIDs(nums, freq) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public long[] mostFrequentIDs(int[] nums, int[] freq) {\n        // Write your solution here\n        return new long[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<long long> mostFrequentIDs(vector<int>& nums, vector<int>& freq) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,3,2,1], freq = [3,2,-3,1]",
+      "expected_output": "[3,3,2,2]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,5,3], freq = [2,-2,1]",
+      "expected_output": "[2,0,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7], freq = [4]",
+      "expected_output": "[4]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,1,2], freq = [2,2,-2,-2]",
+      "expected_output": "[2,2,2,0]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [4,4,9], freq = [100000,-50000,99999]",
+      "expected_output": "[100000,50000,99999]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force keeps a hash map of counts and scans all of its values after each step to find the maximum, giving O(n * u) time where u is the number of distinct IDs. The optimal approach keeps the hash map plus a max-heap of (count, id) entries with lazy deletion: after updating an ID's count, push its new (count, id) pair; when reading the answer, pop heap tops whose stored count no longer matches the current count in the map, then the top is the true maximum (or 0 if the heap is empty). Every pushed entry is popped at most once, so time is O(n log n) and space is O(n). A sorted multiset of counts or a count-of-counts map with a sorted container works equally well.",
+  "hints": [
+    "You need the maximum of a set of values that change one at a time. Which structure gives fast maximum queries?",
+    "Counts can decrease, and a heap cannot update arbitrary entries. Can you leave stale entries in the heap and deal with them later?",
+    "Push (count, id) after every update; before answering, pop while the top's count differs from the map's current count for that id. An empty heap means the answer is 0."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you also return which ID is most frequent, breaking ties by the smallest ID?",
+    "Could a balanced BST or sorted multiset of counts replace the lazy heap, and what are the trade-offs?"
+  ]
+}

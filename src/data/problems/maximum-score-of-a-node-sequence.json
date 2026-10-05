@@ -1,0 +1,83 @@
+{
+  "title": "Maximum Score of a Node Sequence",
+  "slug": "maximum-score-of-a-node-sequence",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an undirected graph with `n` nodes labelled `0` to `n - 1`. Each node `i` has a score `scores[i]`, and `edges[j] = [a, b]` connects nodes `a` and `b`.\n\nA sequence of nodes is **valid** when it has exactly **4** nodes, all of them distinct, and every pair of consecutive nodes in the sequence is connected by an edge. In other words, it is a simple path with 3 edges.\n\nThe score of a sequence is the sum of the scores of its nodes. Return the **maximum** score of any valid sequence, or `-1` if no valid sequence exists.\n\n**Example 1:**\n```\nInput: scores = [4,7,1,6,3], edges = [[0,1],[1,2],[2,3],[3,4],[1,3]]\nOutput: 20\nExplanation: The sequence 0 -> 1 -> 3 -> 4 is valid and scores 4 + 7 + 6 + 3 = 20. No other 4-node path scores higher.\n```\n\n**Example 2:**\n```\nInput: scores = [3,5,2,8], edges = [[0,1],[0,2],[0,3]]\nOutput: -1\nExplanation: The graph is a star centred at node 0. Any path can visit at most 3 nodes, so no valid 4-node sequence exists.\n```\n\n**Example 3:**\n```\nInput: scores = [5,2,9,8,4], edges = [[0,1],[1,2],[2,3],[0,2],[1,3],[2,4]]\nOutput: 24\nExplanation: The sequence 0 -> 2 -> 3 -> 1 is valid and scores 5 + 9 + 8 + 2 = 24. Node 4 only touches node 2, so any path using it ends there and scores at most 4 + 9 + 8 + 2 = 23.\n```",
+  "examples": [
+    {
+      "input": "scores = [4,7,1,6,3], edges = [[0,1],[1,2],[2,3],[3,4],[1,3]]",
+      "output": "20",
+      "explanation": "The sequence 0 -> 1 -> 3 -> 4 is valid and scores 4 + 7 + 6 + 3 = 20. No other 4-node path scores higher."
+    },
+    {
+      "input": "scores = [3,5,2,8], edges = [[0,1],[0,2],[0,3]]",
+      "output": "-1",
+      "explanation": "The graph is a star centred at node 0. Any path can visit at most 3 nodes, so no valid 4-node sequence exists."
+    },
+    {
+      "input": "scores = [5,2,9,8,4], edges = [[0,1],[1,2],[2,3],[0,2],[1,3],[2,4]]",
+      "output": "24",
+      "explanation": "The sequence 0 -> 2 -> 3 -> 1 is valid and scores 5 + 9 + 8 + 2 = 24. Node 4 only touches node 2, so any path using it ends there and scores at most 4 + 9 + 8 + 2 = 23."
+    }
+  ],
+  "constraints": [
+    "4 <= n == scores.length <= 5 * 10^4",
+    "1 <= scores[i] <= 10^8",
+    "0 <= edges.length <= 5 * 10^4",
+    "edges[j].length == 2, 0 <= a, b <= n - 1, a != b",
+    "There are no duplicate edges"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumScore(self, scores: list[int], edges: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumScore(scores, edges) {\n    // Write your solution here\n    return 0;\n}",
+    "java": "class Solution {\n    public int maximumScore(int[] scores, int[][] edges) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maximumScore(vector<int>& scores, vector<vector<int>>& edges) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "scores = [4,7,1,6,3], edges = [[0,1],[1,2],[2,3],[3,4],[1,3]]",
+      "expected_output": "20",
+      "is_hidden": false
+    },
+    {
+      "input": "scores = [3,5,2,8], edges = [[0,1],[0,2],[0,3]]",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "scores = [5,2,9,8,4], edges = [[0,1],[1,2],[2,3],[0,2],[1,3],[2,4]]",
+      "expected_output": "24",
+      "is_hidden": false
+    },
+    {
+      "input": "scores = [1,2,3,4], edges = [[0,1],[1,2],[2,3]]",
+      "expected_output": "10",
+      "is_hidden": true
+    },
+    {
+      "input": "scores = [10,1,1,1,9,8,7,100000000], edges = [[0,4],[0,5],[0,6],[4,1],[5,2],[6,3],[4,5],[7,1]]",
+      "expected_output": "100000020",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates every 3-edge path, which can be O(e * d^2) or worse for high-degree nodes. The key observation is that every valid sequence a - x - y - b has a middle edge (x, y); fix that edge and you need the best neighbour a of x and the best neighbour b of y such that all four nodes are distinct. Only the top 3 neighbours by score of each node can ever matter, because at most two candidates (the other middle node and the other endpoint) are excluded. So precompute, for every node, its 3 highest-scoring neighbours, then for each edge try the 3 x 3 combinations and keep the best valid sum, returning -1 if none is valid. Use 64-bit arithmetic for the sum. This runs in O(n + e log d) (or O(n + e) with a fixed-size top-3 list) time and O(n + e) space.",
+  "hints": [
+    "Every 4-node path has a middle edge. What if you enumerated that middle edge instead of the whole path?",
+    "For a fixed middle edge (x, y), you want the best neighbour of x and the best neighbour of y, but they must differ from each other and from x and y. How many top neighbours do you really need to keep?",
+    "Store the top 3 neighbours by score for every node; for each edge (x, y), try all pairs (a from top3[x], b from top3[y]) with a, b, x, y distinct and track the maximum sum."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + e)",
+    "space": "O(n + e)"
+  },
+  "follow_up_questions": [
+    "How would you generalise this to a sequence of exactly 5 nodes?",
+    "What if scores could be negative?"
+  ]
+}

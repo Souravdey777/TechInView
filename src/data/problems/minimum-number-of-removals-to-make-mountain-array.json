@@ -1,0 +1,82 @@
+{
+  "title": "Minimum Number of Removals to Make Mountain Array",
+  "slug": "minimum-number-of-removals-to-make-mountain-array",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "Call an array a **mountain** when it has at least 3 elements and there is some peak index `p` with `0 < p < length - 1` such that the values strictly increase from index `0` up to `p` and then strictly decrease from `p` to the last index. Plateaus (equal neighbours) are not allowed on either side.\n\nYou are given an integer array `nums`. You may delete any elements you like; the remaining elements keep their original relative order. Return the **smallest number of deletions** needed so that what remains is a mountain.\n\nThe input is guaranteed to allow at least one mountain to be formed.\n\n**Example 1:**\n```\nInput: nums = [1,3,1]\nOutput: 0\nExplanation: The array already climbs strictly to 3 and then drops strictly, so nothing needs to be removed.\n```\n\n**Example 2:**\n```\nInput: nums = [4,2,5,7,3,1]\nOutput: 1\nExplanation: Removing the 4 leaves [2,5,7,3,1], which rises strictly to 7 and then falls strictly. One removal is the minimum because the original array dips from 4 to 2 before the peak.\n```\n\n**Example 3:**\n```\nInput: nums = [2,1,1,5,6,2,3,1]\nOutput: 3\nExplanation: One optimal choice removes the values at indices 0, 1 and 5, leaving [1,5,6,3,1].\n```",
+  "examples": [
+    {
+      "input": "nums = [1,3,1]",
+      "output": "0",
+      "explanation": "The array already climbs strictly to 3 and then drops strictly, so nothing needs to be removed."
+    },
+    {
+      "input": "nums = [4,2,5,7,3,1]",
+      "output": "1",
+      "explanation": "Removing the 4 leaves [2,5,7,3,1], which rises strictly to 7 and then falls strictly. One removal is the minimum because the original array dips from 4 to 2 before the peak."
+    },
+    {
+      "input": "nums = [2,1,1,5,6,2,3,1]",
+      "output": "3",
+      "explanation": "One optimal choice removes the values at indices 0, 1 and 5, leaving [1,5,6,3,1]."
+    }
+  ],
+  "constraints": [
+    "3 <= nums.length <= 1000",
+    "1 <= nums[i] <= 10^9",
+    "It is guaranteed that some sequence of deletions turns nums into a mountain array"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumMountainRemovals(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumMountainRemovals(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minimumMountainRemovals(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumMountainRemovals(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,3,1]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,2,5,7,3,1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,1,1,5,6,2,3,1]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3,4,5,1]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [9,8,1,7,6,5,4,3,2,1,2,2,2]",
+      "expected_output": "5",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every subset of elements to keep and checks whether it forms a mountain, which is O(2^n * n) and hopeless beyond tiny inputs. The key observation is that keeping the most elements is the same as choosing a peak i and keeping the longest strictly increasing subsequence ending at i plus the longest strictly decreasing subsequence starting at i. Compute inc[i] = length of the LIS ending at i (left to right) and dec[i] = length of the longest strictly decreasing subsequence starting at i (an LIS computed right to left). Only indices with inc[i] >= 2 and dec[i] >= 2 can be peaks, because the peak needs at least one element on each side. The answer is n - max(inc[i] + dec[i] - 1) over valid peaks. With the simple O(n^2) LIS DP this runs in O(n^2) time; with patience sorting and binary search each pass becomes O(n log n), giving O(n log n) overall and O(n) space.",
+  "hints": [
+    "Instead of thinking about what to delete, think about what to keep: the longest possible mountain subsequence.",
+    "Fix a candidate peak index. The left side is an increasing subsequence ending there and the right side is a decreasing subsequence starting there.",
+    "Compute the LIS length ending at each index from the left and from the right. A peak needs both values to be at least 2; maximise left + right - 1 and subtract from n."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you reconstruct one actual mountain subsequence of maximum length, not just the number of deletions?",
+    "How does the answer change if plateaus of equal values were allowed on the slopes (non-strict mountain)?"
+  ]
+}

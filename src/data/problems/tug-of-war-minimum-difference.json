@@ -1,0 +1,81 @@
+{
+  "title": "Tug Of War Minimum Difference",
+  "slug": "tug-of-war-minimum-difference",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "goldman-sachs"
+  ],
+  "description": "You are given an integer array `nums` of length `n`. Divide its elements into two teams so that every element belongs to exactly one team and the team sizes differ by at most one: when `n` is even both teams have `n / 2` elements; when `n` is odd one team has `(n - 1) / 2` elements and the other has `(n + 1) / 2`.\n\nReturn the smallest possible absolute difference between the two teams' sums. When `n = 1`, one team is empty (sum `0`).\n\n**Example 1:**\n```\nInput: nums = [3,4,5,-3,100,1,89,54,23,20]\nOutput: 0\nExplanation: The teams {4,100,1,23,20} and {3,5,-3,89,54} each have five elements and both sum to 148.\n```\n\n**Example 2:**\n```\nInput: nums = [1,2,3]\nOutput: 0\nExplanation: With three elements the teams have sizes 1 and 2. Choosing {3} and {1,2} gives sums 3 and 3.\n```\n\n**Example 3:**\n```\nInput: nums = [10,20]\nOutput: 10\nExplanation: Each team gets one element, so the difference is |10 - 20| = 10.\n```",
+  "examples": [
+    {
+      "input": "nums = [3,4,5,-3,100,1,89,54,23,20]",
+      "output": "0",
+      "explanation": "The teams {4,100,1,23,20} and {3,5,-3,89,54} each have five elements and both sum to 148."
+    },
+    {
+      "input": "nums = [1,2,3]",
+      "output": "0",
+      "explanation": "With three elements the teams have sizes 1 and 2. Choosing {3} and {1,2} gives sums 3 and 3."
+    },
+    {
+      "input": "nums = [10,20]",
+      "output": "10",
+      "explanation": "Each team gets one element, so the difference is |10 - 20| = 10."
+    }
+  ],
+  "constraints": [
+    "`1 <= nums.length <= 20`",
+    "`-1000 <= nums[i] <= 1000`",
+    "Team sizes must differ by at most 1"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def tugOfWar(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function tugOfWar(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int tugOfWar(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int tugOfWar(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [3,4,5,-3,100,1,89,54,23,20]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [10,20]",
+      "expected_output": "10",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-7]",
+      "expected_output": "7",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1000,-1000,999,-999,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,1000]",
+      "expected_output": "910",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Let S be the total. Choosing the smaller team (size floor(n/2)) fixes the other, and the difference is |S - 2 * chosen|. The brute force enumerates all 2^n bitmasks and keeps those with exactly floor(n/2) bits, costing O(n * 2^n). Backtracking does the same more efficiently: walk the indices, either adding nums[i] to the team or skipping it, carry the running sum and count, prune when the remaining elements are too few to fill the team or the team is already full, and evaluate |S - 2 * sum| when the team reaches size floor(n/2). That visits C(n, n/2) leaves, which for n = 20 is 184,756, giving O(C(n, n/2)) time and O(n) space. For much larger n (around 30-40) a meet-in-the-middle split with sorting and binary search by subset size brings it to O(2^(n/2) * n).",
+  "hints": [
+    "Fixing one team determines the other, so you only need to choose floor(n/2) elements.",
+    "If the chosen team sums to x, the difference is |total - 2x|. Backtrack over indices, deciding include or exclude, and track both the running sum and how many you have picked.",
+    "Prune when the team is full or when not enough elements remain to fill it; evaluate the difference only when exactly floor(n/2) elements are chosen."
+  ],
+  "optimal_complexity": {
+    "time": "O(C(n, n/2))",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you also return the two teams, not just the difference?",
+    "If n were 40, how would meet-in-the-middle reduce the search?"
+  ]
+}

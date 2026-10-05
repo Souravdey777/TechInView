@@ -1,0 +1,82 @@
+{
+  "title": "Jump Game III",
+  "slug": "jump-game-iii",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "meta"
+  ],
+  "description": "You are given an array of non-negative integers `arr` and a starting index `start`. Standing at index `i`, you may jump either to `i + arr[i]` or to `i - arr[i]`, as long as the destination stays inside the array (between `0` and `arr.length - 1`). Jumps that would leave the array are not allowed.\n\nReturn `true` if you can reach **any** index whose value is `0` (possibly `start` itself), and `false` otherwise.\n\n**Example 1:**\n```\nInput: arr = [4,2,3,0,3,1,2], start = 5\nOutput: true\nExplanation: From index 5 jump back 1 to index 4, then back 3 to index 1, then forward 2 to index 3, which holds 0.\n```\n\n**Example 2:**\n```\nInput: arr = [4,2,3,0,3,1,2], start = 0\nOutput: true\nExplanation: From index 0 jump forward 4 to index 4, then back 3 to index 1, then forward 2 to index 3.\n```\n\n**Example 3:**\n```\nInput: arr = [3,0,2,1,2], start = 2\nOutput: false\nExplanation: From index 2 you can reach indices 0, 4 and 3, but every jump from those lands back on 0, 2, 3 or 4. Index 1, the only 0, is never reached.\n```",
+  "examples": [
+    {
+      "input": "arr = [4,2,3,0,3,1,2], start = 5",
+      "output": "true",
+      "explanation": "From index 5 jump back 1 to index 4, then back 3 to index 1, then forward 2 to index 3, which holds 0."
+    },
+    {
+      "input": "arr = [4,2,3,0,3,1,2], start = 0",
+      "output": "true",
+      "explanation": "From index 0 jump forward 4 to index 4, then back 3 to index 1, then forward 2 to index 3."
+    },
+    {
+      "input": "arr = [3,0,2,1,2], start = 2",
+      "output": "false",
+      "explanation": "From index 2 you can reach indices 0, 4 and 3, but every jump from those lands back on 0, 2, 3 or 4. Index 1, the only 0, is never reached."
+    }
+  ],
+  "constraints": [
+    "1 <= arr.length <= 5 * 10^4",
+    "0 <= arr[i] < arr.length",
+    "0 <= start < arr.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def canReach(self, arr: list[int], start: int) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function canReach(arr, start) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean canReach(int[] arr, int start) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool canReach(vector<int>& arr, int start) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "arr = [4,2,3,0,3,1,2], start = 5",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [4,2,3,0,3,1,2], start = 0",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [3,0,2,1,2], start = 2",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [0], start = 0",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "arr = [1,1,1,1,1,1,1,1,1,1], start = 5",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Treat each index as a graph node with up to two outgoing edges, i + arr[i] and i - arr[i]. A naive recursive search without memory can loop forever (or take exponential time) because indices can be revisited. The optimal solution runs BFS or DFS from start with a visited set: pop an index, return true if arr[i] is 0, otherwise push each in-range unvisited neighbour. Every index is processed at most once, so it takes O(n) time and O(n) space (the visited marks can also be stored in-place by negating arr[i]).",
+  "hints": [
+    "Think of each index as a node and each allowed jump as an edge. What question are you really asking about this graph?",
+    "Without remembering where you have been, the search can bounce between the same indices forever.",
+    "Run BFS or DFS from start, marking indices visited; return true as soon as you pop an index whose value is 0, and false once the frontier is empty."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you return the minimum number of jumps needed to reach a zero?",
+    "Can you mark visited indices without extra memory, and what are the trade-offs of mutating the input?"
+  ]
+}

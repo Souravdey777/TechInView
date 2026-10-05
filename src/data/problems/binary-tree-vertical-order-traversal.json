@@ -1,0 +1,85 @@
+{
+  "title": "Binary Tree Vertical Order Traversal",
+  "slug": "binary-tree-vertical-order-traversal",
+  "difficulty": "medium",
+  "category": "trees",
+  "company_tags": [
+    "meta",
+    "amazon",
+    "google",
+    "microsoft",
+    "bloomberg",
+    "uber"
+  ],
+  "description": "Given the `root` of a binary tree, return its node values grouped by **vertical column**, with columns ordered from left to right.\n\nPlace the root in column 0; a left child sits one column to the left of its parent and a right child one column to the right. Within each column, list values from **top to bottom**. If two nodes share the same row and column, list the one that appears **further left in level order** (that is, the one a breadth-first traversal visiting left children before right children reaches first) before the other. Return an empty list for an empty tree. The tree is given in level-order form, with `null` marking missing children.\n\n**Example 1:**\n```\nInput: root = [3,9,20,null,null,15,7]\nOutput: [[9],[3,15],[20],[7]]\nExplanation: Column -1 holds 9, column 0 holds 3 then 15, column 1 holds 20, and column 2 holds 7.\n```\n\n**Example 2:**\n```\nInput: root = [3,9,8,4,0,1,7]\nOutput: [[4],[9],[3,0,1],[8],[7]]\nExplanation: Nodes 0 and 1 both sit in column 0 on the same row; 0 comes first because it appears further left in level order.\n```\n\n**Example 3:**\n```\nInput: root = []\nOutput: []\nExplanation: An empty tree has no columns.\n```",
+  "examples": [
+    {
+      "input": "root = [3,9,20,null,null,15,7]",
+      "output": "[[9],[3,15],[20],[7]]",
+      "explanation": "Column -1 holds 9, column 0 holds 3 then 15, column 1 holds 20, and column 2 holds 7."
+    },
+    {
+      "input": "root = [3,9,8,4,0,1,7]",
+      "output": "[[4],[9],[3,0,1],[8],[7]]",
+      "explanation": "Nodes 0 and 1 both sit in column 0 on the same row; 0 comes first because it appears further left in level order."
+    },
+    {
+      "input": "root = []",
+      "output": "[]",
+      "explanation": "An empty tree has no columns."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [0, 100].",
+    "-100 <= Node.val <= 100",
+    "The tree is given in level-order form, with null for missing children.",
+    "Node values are not necessarily unique."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def verticalOrder(self, root: TreeNode | None) -> list[list[int]]:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction verticalOrder(root) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public List<List<Integer>> verticalOrder(TreeNode root) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    vector<vector<int>> verticalOrder(TreeNode* root) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [3,9,20,null,null,15,7]",
+      "expected_output": "[[9],[3,15],[20],[7]]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [3,9,8,4,0,1,7]",
+      "expected_output": "[[4],[9],[3,0,1],[8],[7]]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = []",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [3,9,8,4,0,1,7,null,null,null,2,5]",
+      "expected_output": "[[4],[9,5],[3,0,1],[8,2],[7]]",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [-1,-2,null,-3,null,-4]",
+      "expected_output": "[[-4],[-3],[-2],[-1]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach uses DFS to record (column, row, visit order) for every node and then sorts all entries, costing O(n log n) time. The optimal approach does a breadth-first traversal carrying each node's column: BFS naturally visits nodes top to bottom and left to right, so appending each value to a hash map keyed by column already yields the required order within a column. Track the minimum and maximum column seen, then output the lists from min to max column. This runs in O(n) time and O(n) space.",
+  "hints": [
+    "Assign every node a column number relative to the root: left child is column - 1, right child is column + 1.",
+    "Which traversal visits nodes top to bottom and, within a row, left to right? Using it means you never have to sort inside a column.",
+    "Run BFS with (node, column) pairs, append values to a map from column to list, track the min and max column, and emit the lists in column order."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would the problem change if nodes in the same row and column had to be sorted by value instead?",
+    "Can you compute the column range in a first pass so you can use an array instead of a hash map?"
+  ]
+}

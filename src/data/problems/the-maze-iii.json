@@ -1,0 +1,82 @@
+{
+  "title": "The Maze III",
+  "slug": "the-maze-iii",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "A ball sits in a maze given as an `m x n` grid, where `0` is an open cell and `1` is a wall. The area outside the grid acts as a wall too. The ball moves by rolling **up (`u`), down (`d`), left (`l`) or right (`r`)**: once pushed it keeps rolling until the next cell would be a wall, and only then may you choose a new direction. There is a hole in the maze: if the ball rolls over the hole cell it drops in immediately, even mid-roll.\n\nGiven the ball's starting cell `ball = [row, col]` and the `hole = [row, col]`, return the instruction string (made of `'u'`, `'d'`, `'l'`, `'r'`) that drops the ball into the hole while travelling the **fewest cells**. Distance is the number of empty cells moved over, not counting the start cell. If several instruction strings achieve the same shortest distance, return the **lexicographically smallest** one. If the hole cannot be reached, return `\"impossible\"`.\n\n**Example 1:**\n```\nInput: maze = [[0,0,0],[0,1,0],[0,0,0]], ball = [2,2], hole = [0,0]\nOutput: \"lu\"\nExplanation: Both \"lu\" (left 2 cells, then up 2 cells) and \"ul\" (up 2, then left 2) travel 4 cells. They tie, so the lexicographically smaller string \"lu\" is returned.\n```\n\n**Example 2:**\n```\nInput: maze = [[0,0,0,0,0],[0,1,0,1,0],[0,0,0,0,0]], ball = [0,4], hole = [2,1]\nOutput: \"dl\"\nExplanation: Roll down 2 cells to (2,4), then roll left; the ball passes (2,3) and (2,2) and drops into the hole at (2,1) for a total distance of 5. Every other route is longer.\n```\n\n**Example 3:**\n```\nInput: maze = [[0,0,0,0],[1,1,0,1],[0,0,0,0]], ball = [2,0], hole = [0,1]\nOutput: \"impossible\"\nExplanation: Rolling right sends the ball all the way to (2,3), where up is a wall; it can never stop under the opening at column 2, so it cannot reach the top row.\n```",
+  "examples": [
+    {
+      "input": "maze = [[0,0,0],[0,1,0],[0,0,0]], ball = [2,2], hole = [0,0]",
+      "output": "\"lu\"",
+      "explanation": "Both \"lu\" (left 2 cells, then up 2 cells) and \"ul\" (up 2, then left 2) travel 4 cells. They tie, so the lexicographically smaller string \"lu\" is returned."
+    },
+    {
+      "input": "maze = [[0,0,0,0,0],[0,1,0,1,0],[0,0,0,0,0]], ball = [0,4], hole = [2,1]",
+      "output": "\"dl\"",
+      "explanation": "Roll down 2 cells to (2,4), then roll left; the ball passes (2,3) and (2,2) and drops into the hole at (2,1) for a total distance of 5. Every other route is longer."
+    },
+    {
+      "input": "maze = [[0,0,0,0],[1,1,0,1],[0,0,0,0]], ball = [2,0], hole = [0,1]",
+      "output": "\"impossible\"",
+      "explanation": "Rolling right sends the ball all the way to (2,3), where up is a wall; it can never stop under the opening at column 2, so it cannot reach the top row."
+    }
+  ],
+  "constraints": [
+    "m == maze.length, n == maze[i].length",
+    "1 <= m, n <= 100",
+    "maze[i][j] is 0 or 1",
+    "ball and hole are both empty cells and ball != hole"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findShortestWay(self, maze: list[list[int]], ball: list[int], hole: list[int]) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function findShortestWay(maze, ball, hole) {\n    // Write your solution here\n    return \"\";\n}",
+    "java": "class Solution {\n    public String findShortestWay(int[][] maze, int[] ball, int[] hole) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string findShortestWay(vector<vector<int>>& maze, vector<int>& ball, vector<int>& hole) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "maze = [[0,0,0],[0,1,0],[0,0,0]], ball = [2,2], hole = [0,0]",
+      "expected_output": "\"lu\"",
+      "is_hidden": false
+    },
+    {
+      "input": "maze = [[0,0,0,0,0],[0,1,0,1,0],[0,0,0,0,0]], ball = [0,4], hole = [2,1]",
+      "expected_output": "\"dl\"",
+      "is_hidden": false
+    },
+    {
+      "input": "maze = [[0,0,0,0],[1,1,0,1],[0,0,0,0]], ball = [2,0], hole = [0,1]",
+      "expected_output": "\"impossible\"",
+      "is_hidden": false
+    },
+    {
+      "input": "maze = [[0,0,0,0,0]], ball = [0,0], hole = [0,2]",
+      "expected_output": "\"r\"",
+      "is_hidden": true
+    },
+    {
+      "input": "maze = [[0,0,0,0],[0,1,1,0],[0,0,0,0],[1,0,1,0]], ball = [3,1], hole = [0,3]",
+      "expected_output": "\"uru\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Each stopping position of the ball is a node and each roll is an edge whose weight is the number of cells travelled. A brute force DFS that tries all instruction sequences is exponential. The optimal approach is Dijkstra where the priority key is the pair (distance, instruction string), so ties in distance are broken lexicographically automatically. From each popped state, roll in each of the four directions, stopping early if the hole is crossed, and push the new state if its (distance, path) pair beats the best known for that cell. The first time the hole is popped, its path is the answer; if the queue empties, return \"impossible\". Each node relaxes four rolls of length up to max(m, n), giving O(m * n * max(m, n) * log(m * n)) time (string comparisons add a factor proportional to path length) and O(m * n) space.",
+  "hints": [
+    "The ball only makes decisions where it stops. What are the nodes and edges of the graph you need to search?",
+    "Edges have different lengths (cells rolled), so plain BFS is not enough. How can you make a shortest-path algorithm also prefer smaller strings on ties?",
+    "Run Dijkstra keyed by (distance, path string); when simulating a roll, stop as soon as the ball lands on the hole, and return the path the first time the hole is popped."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n * max(m, n) * log(m * n))",
+    "space": "O(m * n)"
+  },
+  "follow_up_questions": [
+    "How would you return all shortest instruction strings instead of just the smallest?",
+    "What changes if the ball must stop exactly on the hole rather than falling in mid-roll?"
+  ]
+}

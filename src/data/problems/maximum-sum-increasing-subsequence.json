@@ -1,0 +1,82 @@
+{
+  "title": "Maximum Sum Increasing Subsequence",
+  "slug": "maximum-sum-increasing-subsequence",
+  "difficulty": "easy",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "google",
+    "adobe"
+  ],
+  "description": "Given an integer array `nums`, choose a subsequence (keep elements in their original order, possibly skipping some) whose values are **strictly increasing** from left to right. Return the largest possible **sum** of such a subsequence.\n\nA subsequence must contain at least one element, and a single element is always strictly increasing.\n\n**Example 1:**\n```\nInput: nums = [1,101,2,3,100,4,5]\nOutput: 106\nExplanation: The subsequence [1,2,3,100] sums to 106, which beats [1,101] (102) and [1,2,3,4,5] (15).\n```\n\n**Example 2:**\n```\nInput: nums = [3,4,5,10]\nOutput: 22\nExplanation: The whole array is already strictly increasing, so take all of it: 3 + 4 + 5 + 10 = 22.\n```\n\n**Example 3:**\n```\nInput: nums = [10,5,4,3]\nOutput: 10\nExplanation: The array is decreasing, so every increasing subsequence has one element; the largest is 10.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,101,2,3,100,4,5]",
+      "output": "106",
+      "explanation": "The subsequence [1,2,3,100] sums to 106, which beats [1,101] (102) and [1,2,3,4,5] (15)."
+    },
+    {
+      "input": "nums = [3,4,5,10]",
+      "output": "22",
+      "explanation": "The whole array is already strictly increasing, so take all of it: 3 + 4 + 5 + 10 = 22."
+    },
+    {
+      "input": "nums = [10,5,4,3]",
+      "output": "10",
+      "explanation": "The array is decreasing, so every increasing subsequence has one element; the largest is 10."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 1000",
+    "1 <= nums[i] <= 10^4",
+    "The answer fits in a 32-bit signed integer"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxSumIS(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxSumIS(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxSumIS(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxSumIS(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,101,2,3,100,4,5]",
+      "expected_output": "106",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,4,5,10]",
+      "expected_output": "22",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [10,5,4,3]",
+      "expected_output": "10",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7]",
+      "expected_output": "7",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [5,5,5,6,1,2,2,3]",
+      "expected_output": "11",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries all 2^n subsequences, keeping those that are strictly increasing, which is O(2^n * n). Instead, adapt the classic LIS DP: let dp[i] be the best sum of a strictly increasing subsequence that ends at index i. Start with dp[i] = nums[i], and for every j < i with nums[j] < nums[i] set dp[i] = max(dp[i], dp[j] + nums[i]). The answer is max(dp). This takes O(n^2) time and O(n) space. That is the expected answer for this size; as a follow-up, a Fenwick tree keyed by compressed values can answer the prefix-max query faster.",
+  "hints": [
+    "This is a close cousin of Longest Increasing Subsequence. What would you track per index instead of a length?",
+    "For each index i, consider the best increasing subsequence that must end exactly at nums[i]. Which earlier indices can it extend?",
+    "Set dp[i] = nums[i], then for each j < i with nums[j] < nums[i], update dp[i] = max(dp[i], dp[j] + nums[i]). Return the maximum over all dp[i]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you get this down to O(n log n) using a Fenwick tree or segment tree keyed by value?",
+    "How would the solution change if nums could contain negative numbers?"
+  ]
+}

@@ -17,6 +17,7 @@ type FacetChipProps = {
   disabled?: boolean;
   title?: string;
   className?: string;
+  "aria-expanded"?: boolean;
 };
 
 /**
@@ -33,11 +34,13 @@ export function FacetChip({
   disabled = false,
   title,
   className,
+  "aria-expanded": ariaExpanded,
 }: FacetChipProps) {
   return (
     <button
       type="button"
-      aria-pressed={isActive}
+      aria-pressed={ariaExpanded === undefined ? isActive : undefined}
+      aria-expanded={ariaExpanded}
       disabled={disabled}
       title={title}
       onClick={onClick}

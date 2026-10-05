@@ -1,0 +1,82 @@
+{
+  "title": "Divide Intervals Into Minimum Number Of Groups",
+  "slug": "minimum-number-of-groups-to-divide-intervals",
+  "difficulty": "medium",
+  "category": "heap",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given a list of `intervals`, where `intervals[i] = [left, right]` covers every integer from `left` to `right` **inclusive**.\n\nSplit all the intervals into groups so that every interval belongs to exactly one group and no two intervals in the same group intersect. Two intervals intersect if they share at least one integer, so `[1, 5]` and `[5, 8]` intersect.\n\nReturn the minimum number of groups needed.\n\n**Example 1:**\n```\nInput: intervals = [[5,10],[6,8],[1,5],[2,3],[1,10]]\nOutput: 3\nExplanation: At point 5 the intervals [5,10], [1,5] and [1,10] all overlap, so at least 3 groups are required, and 3 suffice: {[1,5],[6,8]}, {[2,3],[5,10]}, {[1,10]}.\n```\n\n**Example 2:**\n```\nInput: intervals = [[1,3],[5,6],[8,10],[11,13]]\nOutput: 1\nExplanation: No two intervals overlap, so they all fit in one group.\n```\n\n**Example 3:**\n```\nInput: intervals = [[1,4],[4,6],[7,9]]\nOutput: 2\nExplanation: [1,4] and [4,6] share the point 4, so they need separate groups; [7,9] can join either. The answer is 2.\n```",
+  "examples": [
+    {
+      "input": "intervals = [[5,10],[6,8],[1,5],[2,3],[1,10]]",
+      "output": "3",
+      "explanation": "At point 5 the intervals [5,10], [1,5] and [1,10] all overlap, so at least 3 groups are required, and 3 suffice: {[1,5],[6,8]}, {[2,3],[5,10]}, {[1,10]}."
+    },
+    {
+      "input": "intervals = [[1,3],[5,6],[8,10],[11,13]]",
+      "output": "1",
+      "explanation": "No two intervals overlap, so they all fit in one group."
+    },
+    {
+      "input": "intervals = [[1,4],[4,6],[7,9]]",
+      "output": "2",
+      "explanation": "[1,4] and [4,6] share the point 4, so they need separate groups; [7,9] can join either. The answer is 2."
+    }
+  ],
+  "constraints": [
+    "1 <= intervals.length <= 10^5",
+    "intervals[i].length == 2",
+    "1 <= left <= right <= 10^6"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minGroups(self, intervals: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minGroups(intervals) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minGroups(int[][] intervals) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minGroups(vector<vector<int>>& intervals) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "intervals = [[5,10],[6,8],[1,5],[2,3],[1,10]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "intervals = [[1,3],[5,6],[8,10],[11,13]]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "intervals = [[1,4],[4,6],[7,9]]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "intervals = [[1,1]]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "intervals = [[2,5],[2,5],[2,5],[6,7]]",
+      "expected_output": "3",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force places each interval into the first existing group with no conflict by checking every member, which is O(n^2). The answer equals the maximum number of intervals covering any single point. To compute it, sort intervals by left endpoint and keep a min-heap of the right endpoints of each group's last interval. For each interval, if the smallest right endpoint is strictly less than the current left, that group is free, so replace its end with the current right; otherwise open a new group by pushing the right endpoint. The heap size at the end is the answer, in O(n log n) time and O(n) space. An equivalent sweep sorts +1 events at left and -1 events at right + 1 and tracks the running maximum.",
+  "hints": [
+    "Think about a single point on the number line: how many groups are forced by the intervals that cover it?",
+    "Process intervals in order of their start and track when each existing group becomes free again.",
+    "Keep a min-heap of group end times. Reuse the earliest-ending group only if its end is strictly less than the new interval's left (endpoints are inclusive); otherwise push a new group."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you also return an actual assignment of intervals to groups?",
+    "Given that coordinates are bounded by 10^6, how could a difference array give an O(n + C) solution?"
+  ]
+}

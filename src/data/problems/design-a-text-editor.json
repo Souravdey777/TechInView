@@ -1,0 +1,82 @@
+{
+  "title": "Design A Text Editor",
+  "slug": "design-a-text-editor",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "apple"
+  ],
+  "description": "Design a simple text editor with a cursor. The cursor always sits between two characters (or at either end of the text), and it can never move outside the text.\n\nImplement the `TextEditor` class:\n\n- `TextEditor()` creates an editor holding empty text with the cursor at position 0.\n- `void addText(string text)` inserts `text` at the cursor. The cursor ends up immediately to the right of the inserted text.\n- `int deleteText(int k)` deletes up to `k` characters to the **left** of the cursor (like pressing backspace `k` times) and returns the number of characters actually removed.\n- `string cursorLeft(int k)` moves the cursor left by up to `k` positions, stopping at the start of the text. It returns the last `min(10, len)` characters to the left of the cursor after the move, where `len` is the number of characters left of the cursor (an empty string if there are none).\n- `string cursorRight(int k)` moves the cursor right by up to `k` positions, stopping at the end of the text, and returns the same 10-character window as `cursorLeft`.\n\nCan you make every call run in `O(k)` time?\n\n**Example 1:**\n```\nInput:\n[\"TextEditor\",\"addText\",\"cursorLeft\",\"deleteText\",\"addText\",\"cursorRight\"]\n[[],[\"helloworld\"],[5],[2],[\"xy\"],[10]]\nOutput: [null,null,\"hello\",2,null,\"helxyworld\"]\nExplanation: Start empty. addText(\"helloworld\") puts the cursor at the end. cursorLeft(5) moves it between \"hello\" and \"world\" and returns \"hello\". deleteText(2) removes \"lo\" and returns 2, leaving \"hel|world\". addText(\"xy\") gives \"helxy|world\". cursorRight(10) can only move 5 steps to the end of the 10-character text and returns all 10 characters, \"helxyworld\".\n```\n\n**Example 2:**\n```\nInput:\n[\"TextEditor\",\"addText\",\"deleteText\",\"cursorLeft\",\"addText\",\"cursorRight\",\"deleteText\"]\n[[],[\"abcdefghijklm\"],[20],[3],[\"code\"],[2],[1]]\nOutput: [null,null,13,\"\",null,\"code\",1]\nExplanation: deleteText(20) can only remove the 13 existing characters and returns 13. cursorLeft(3) on empty text returns \"\". addText(\"code\") gives \"code|\". cursorRight(2) cannot move and returns \"code\". deleteText(1) removes \"e\" and returns 1.\n```\n\n**Example 3:**\n```\nInput:\n[\"TextEditor\",\"addText\",\"cursorLeft\",\"addText\",\"cursorLeft\",\"cursorRight\"]\n[[],[\"abcdefghijklmn\"],[2],[\"z\"],[20],[3]]\nOutput: [null,null,\"cdefghijkl\",null,\"\",\"abc\"]\nExplanation: After \"abcdefghijklmn\" and cursorLeft(2) the 10 characters left of the cursor are \"cdefghijkl\". Inserting \"z\" yields \"abcdefghijklz|mn\". cursorLeft(20) stops at position 0 and returns \"\". cursorRight(3) moves to after \"abc\" and returns \"abc\".\n```",
+  "examples": [
+    {
+      "input": "[\"TextEditor\",\"addText\",\"cursorLeft\",\"deleteText\",\"addText\",\"cursorRight\"], [[],[\"helloworld\"],[5],[2],[\"xy\"],[10]]",
+      "output": "[null,null,\"hello\",2,null,\"helxyworld\"]",
+      "explanation": "Start empty. addText(\"helloworld\") puts the cursor at the end. cursorLeft(5) moves it between \"hello\" and \"world\" and returns \"hello\". deleteText(2) removes \"lo\" and returns 2, leaving \"hel|world\". addText(\"xy\") gives \"helxy|world\". cursorRight(10) can only move 5 steps to the end of the 10-character text and returns all 10 characters, \"helxyworld\"."
+    },
+    {
+      "input": "[\"TextEditor\",\"addText\",\"deleteText\",\"cursorLeft\",\"addText\",\"cursorRight\",\"deleteText\"], [[],[\"abcdefghijklm\"],[20],[3],[\"code\"],[2],[1]]",
+      "output": "[null,null,13,\"\",null,\"code\",1]",
+      "explanation": "deleteText(20) can only remove the 13 existing characters and returns 13. cursorLeft(3) on empty text returns \"\". addText(\"code\") gives \"code|\". cursorRight(2) cannot move and returns \"code\". deleteText(1) removes \"e\" and returns 1."
+    },
+    {
+      "input": "[\"TextEditor\",\"addText\",\"cursorLeft\",\"addText\",\"cursorLeft\",\"cursorRight\"], [[],[\"abcdefghijklmn\"],[2],[\"z\"],[20],[3]]",
+      "output": "[null,null,\"cdefghijkl\",null,\"\",\"abc\"]",
+      "explanation": "After \"abcdefghijklmn\" and cursorLeft(2) the 10 characters left of the cursor are \"cdefghijkl\". Inserting \"z\" yields \"abcdefghijklz|mn\". cursorLeft(20) stops at position 0 and returns \"\". cursorRight(3) moves to after \"abc\" and returns \"abc\"."
+    }
+  ],
+  "constraints": [
+    "1 <= text.length, k <= 40",
+    "text consists only of lowercase English letters",
+    "At most 2 * 10^4 calls in total are made to addText, deleteText, cursorLeft and cursorRight"
+  ],
+  "starter_code": {
+    "python": "class TextEditor:\n    def __init__(self):\n        # Initialize your data structure here\n        pass\n\n    def addText(self, text: str) -> None:\n        pass\n\n    def deleteText(self, k: int) -> int:\n        pass\n\n    def cursorLeft(self, k: int) -> str:\n        pass\n\n    def cursorRight(self, k: int) -> str:\n        pass",
+    "javascript": "function TextEditor() {\n    // Initialize your data structure here\n}\n\nTextEditor.prototype.addText = function(text) {\n    // Write your solution here\n};\n\nTextEditor.prototype.deleteText = function(k) {\n    // Write your solution here\n};\n\nTextEditor.prototype.cursorLeft = function(k) {\n    // Write your solution here\n};\n\nTextEditor.prototype.cursorRight = function(k) {\n    // Write your solution here\n};",
+    "java": "class TextEditor {\n    public TextEditor() {\n        // Initialize your data structure here\n    }\n\n    public void addText(String text) {\n        // Write your solution here\n    }\n\n    public int deleteText(int k) {\n        // Write your solution here\n        return 0;\n    }\n\n    public String cursorLeft(int k) {\n        // Write your solution here\n        return \"\";\n    }\n\n    public String cursorRight(int k) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class TextEditor {\npublic:\n    TextEditor() {\n        // Initialize your data structure here\n    }\n\n    void addText(string text) {\n        // Write your solution here\n    }\n\n    int deleteText(int k) {\n        // Write your solution here\n        return 0;\n    }\n\n    string cursorLeft(int k) {\n        // Write your solution here\n        return \"\";\n    }\n\n    string cursorRight(int k) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"TextEditor\",\"addText\",\"cursorLeft\",\"deleteText\",\"addText\",\"cursorRight\"], [[],[\"helloworld\"],[5],[2],[\"xy\"],[10]]",
+      "expected_output": "[null,null,\"hello\",2,null,\"helxyworld\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"TextEditor\",\"addText\",\"deleteText\",\"cursorLeft\",\"addText\",\"cursorRight\",\"deleteText\"], [[],[\"abcdefghijklm\"],[20],[3],[\"code\"],[2],[1]]",
+      "expected_output": "[null,null,13,\"\",null,\"code\",1]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"TextEditor\",\"addText\",\"cursorLeft\",\"addText\",\"cursorLeft\",\"cursorRight\"], [[],[\"abcdefghijklmn\"],[2],[\"z\"],[20],[3]]",
+      "expected_output": "[null,null,\"cdefghijkl\",null,\"\",\"abc\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"TextEditor\",\"deleteText\",\"cursorLeft\",\"cursorRight\",\"addText\",\"cursorRight\",\"deleteText\"], [[],[3],[1],[1],[\"a\"],[5],[1]]",
+      "expected_output": "[null,0,\"\",\"\",null,\"a\",1]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"TextEditor\",\"addText\",\"cursorLeft\",\"addText\",\"cursorRight\",\"cursorLeft\",\"deleteText\",\"cursorRight\"], [[],[\"abcdefghijklmnopqrst\"],[15],[\"xyz\"],[40],[8],[4],[2]]",
+      "expected_output": "[null,null,\"abcde\",null,\"klmnopqrst\",\"xyzfghijkl\",4,\"dexyzfghmn\"]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The naive approach stores one string plus a cursor index and rebuilds the string on every insert or delete, costing O(n) per operation where n is the document length. The optimal design keeps two stacks (or dynamic arrays): left holds the characters before the cursor in order and right holds the characters after the cursor in reverse order. addText pushes each character onto left; deleteText pops min(k, len(left)) characters from left; cursorLeft moves min(k, len(left)) characters from left to right; cursorRight moves min(k, len(right)) from right to left. The returned string is simply the last min(10, len(left)) characters of left. Every operation runs in O(k) time, which is optimal since k characters may change, and total space is O(n).",
+  "hints": [
+    "Everything happens at the cursor. What if you split the document into the part before the cursor and the part after it?",
+    "Store the text left of the cursor and the text right of the cursor as two stacks so that edits and moves only touch their tops.",
+    "Keep the right part reversed so its top is the character immediately after the cursor. Moving the cursor transfers characters between the stacks one at a time, and the report is the top 10 characters of the left stack in order."
+  ],
+  "optimal_complexity": {
+    "time": "O(k) per operation",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you support undo and redo of addText and deleteText?",
+    "Could a gap buffer or a rope give better cache behaviour or support jumping the cursor to an arbitrary position?"
+  ]
+}

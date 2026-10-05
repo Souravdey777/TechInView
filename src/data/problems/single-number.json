@@ -1,0 +1,85 @@
+{
+  "title": "Single Number",
+  "slug": "single-number",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "apple",
+    "microsoft",
+    "adobe",
+    "bloomberg"
+  ],
+  "description": "You are given a non-empty integer array `nums` in which every value occurs exactly **twice**, except for one value that occurs exactly **once**. Return that lone value.\n\nYour solution should run in linear time and use only constant extra space.\n\n**Example 1:**\n```\nInput: nums = [2,2,1]\nOutput: 1\nExplanation: 2 appears twice and 1 appears once.\n```\n\n**Example 2:**\n```\nInput: nums = [4,1,2,1,2]\nOutput: 4\nExplanation: 1 and 2 each appear twice, leaving 4 as the only unpaired value.\n```\n\n**Example 3:**\n```\nInput: nums = [1]\nOutput: 1\nExplanation: With a single element, that element is the answer.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,2,1]",
+      "output": "1",
+      "explanation": "2 appears twice and 1 appears once."
+    },
+    {
+      "input": "nums = [4,1,2,1,2]",
+      "output": "4",
+      "explanation": "1 and 2 each appear twice, leaving 4 as the only unpaired value."
+    },
+    {
+      "input": "nums = [1]",
+      "output": "1",
+      "explanation": "With a single element, that element is the answer."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 3 * 10^4",
+    "nums.length is odd",
+    "-3 * 10^4 <= nums[i] <= 3 * 10^4",
+    "Exactly one value appears once; every other value appears exactly twice"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def singleNumber(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function singleNumber(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int singleNumber(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,2,1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,1,2,1,2]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-30000,1,1]",
+      "expected_output": "-30000",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [7,-3,7,5,5,-3,30000,0,0]",
+      "expected_output": "30000",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force counts occurrences with a hash map (O(n) time, O(n) space) or sorts and checks adjacent pairs (O(n log n) time). Another trick is 2 * sum(set(nums)) - sum(nums), still O(n) space. The optimal solution uses XOR: x ^ x = 0 and x ^ 0 = x, and XOR is commutative and associative, so XOR-ing every element cancels all paired values and leaves only the single one. This takes O(n) time and O(1) extra space.",
+  "hints": [
+    "Is there an operation that makes two equal values cancel each other out, regardless of order?",
+    "Look at bitwise operators. What is a ^ a? What is a ^ 0?",
+    "XOR is commutative and associative, so the order of the elements does not matter. Think about what is left after every pair cancels."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve it if every other value appeared three times instead of twice (Single Number II)?",
+    "How would you find the two values that each appear once when all others appear twice (Single Number III)?"
+  ]
+}

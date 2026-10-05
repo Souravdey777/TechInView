@@ -1,0 +1,81 @@
+{
+  "title": "Count Number of Special Subsequences",
+  "slug": "count-number-of-special-subsequences",
+  "difficulty": "hard",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "Call a sequence **special** if it is made of one or more `0`s, followed by one or more `1`s, followed by one or more `2`s (in that order, nothing else). For example `[0,1,2]` and `[0,0,1,1,1,2]` are special, while `[2,1,0]`, `[1]` and `[0,1,2,0]` are not.\n\nYou are given an array `nums` whose values are only `0`, `1` or `2`. Return how many **subsequences** of `nums` are special. Because the count can be huge, return it **modulo** `10^9 + 7`.\n\nA subsequence keeps the original relative order but may skip elements. Two subsequences are counted separately if they use a different **set of indices**, even when their values look identical. If no special subsequence exists, return `0`.\n\n**Example 1:**\n```\nInput: nums = [0,1,2,2]\nOutput: 3\nExplanation: The special subsequences are [0,1,2] (using the first 2), [0,1,2] (using the second 2) and [0,1,2,2].\n```\n\n**Example 2:**\n```\nInput: nums = [2,2,0,0]\nOutput: 0\nExplanation: Every 2 comes before every 0, so no subsequence can have 0s, then 1s, then 2s. There are also no 1s at all.\n```\n\n**Example 3:**\n```\nInput: nums = [0,1,2,0,1,2]\nOutput: 7\nExplanation: Exactly 7 index sets form a special subsequence, for example indices (0,1,2), (3,4,5), (0,1,5) and (0,1,2,5).\n```",
+  "examples": [
+    {
+      "input": "nums = [0,1,2,2]",
+      "output": "3",
+      "explanation": "The special subsequences are [0,1,2] (using the first 2), [0,1,2] (using the second 2) and [0,1,2,2]."
+    },
+    {
+      "input": "nums = [2,2,0,0]",
+      "output": "0",
+      "explanation": "Every 2 comes before every 0, so no subsequence can have 0s, then 1s, then 2s. There are also no 1s at all."
+    },
+    {
+      "input": "nums = [0,1,2,0,1,2]",
+      "output": "7",
+      "explanation": "Exactly 7 index sets form a special subsequence, for example indices (0,1,2), (3,4,5), (0,1,5) and (0,1,2,5)."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "0 <= nums[i] <= 2",
+    "Return the answer modulo 10^9 + 7"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countSpecialSubsequences(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countSpecialSubsequences(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int countSpecialSubsequences(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int countSpecialSubsequences(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [0,1,2,2]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,2,0,0]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,1,2,0,1,2]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,0,1,1,2,2]",
+      "expected_output": "27",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [2,1,0,2,1,0]",
+      "expected_output": "0",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates all 2^n subsequences and checks each for the 0s-then-1s-then-2s shape, which is O(2^n * n) and hopeless for large inputs. The optimal solution scans once while keeping three counters: end0 = number of non-empty subsequences made only of 0s, end1 = number of valid 0s-then-1s subsequences, end2 = number of fully special subsequences. When we see a 0 it can extend any existing all-zero subsequence, be skipped, or start a new one: end0 = 2*end0 + 1. A 1 can extend an existing end1 sequence or not (2*end1) or be the first 1 after any end0 sequence: end1 = 2*end1 + end0. Similarly a 2 gives end2 = 2*end2 + end1. All arithmetic is done modulo 10^9+7, and end2 is the answer. This is O(n) time and O(1) space.",
+  "hints": [
+    "Think about which partial shapes a subsequence can be in as you scan left to right: only 0s so far, 0s then 1s, or complete.",
+    "Keep a count for each partial shape. When a new element arrives, each existing subsequence of a compatible shape can either take it or ignore it.",
+    "For a 1: new count of '0s then 1s' = 2 * (old count of '0s then 1s') + (count of 'only 0s'). Write the analogous updates for 0 and 2 and take everything modulo 10^9+7."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you generalise this to sequences of k distinct phases 0, 1, ..., k-1?",
+    "How would the counting change if two subsequences with identical values (but different indices) should be counted only once?"
+  ]
+}

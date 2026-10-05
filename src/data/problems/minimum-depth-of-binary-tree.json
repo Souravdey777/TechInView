@@ -1,0 +1,84 @@
+{
+  "title": "Minimum Depth of Binary Tree",
+  "slug": "minimum-depth-of-binary-tree",
+  "difficulty": "easy",
+  "category": "trees",
+  "company_tags": [
+    "amazon",
+    "meta",
+    "microsoft",
+    "google",
+    "bloomberg"
+  ],
+  "description": "Given the `root` of a binary tree, find its minimum depth: the number of nodes along the shortest path that starts at the root and ends at a **leaf** (a node with no children).\n\nReturn `0` for an empty tree. The tree is given in level-order, with `null` marking a missing child. Note that a node with only one child is not a leaf, so a path cannot stop there.\n\n**Example 1:**\n```\n    3\n   / \\\n  9  20\n    /  \\\n   15   7\n\nInput: root = [3,9,20,null,null,15,7]\nOutput: 2\nExplanation: Node 9 is a leaf at depth 2, which is shallower than leaves 15 and 7 at depth 3.\n```\n\n**Example 2:**\n```\nInput: root = [2,null,3,null,4,null,5,null,6]\nOutput: 5\nExplanation: The tree is a chain leaning right; the only leaf is 6, five nodes from the top.\n```\n\n**Example 3:**\n```\nInput: root = []\nOutput: 0\nExplanation: An empty tree has depth 0.\n```",
+  "examples": [
+    {
+      "input": "root = [3,9,20,null,null,15,7]",
+      "output": "2",
+      "explanation": "Node 9 is a leaf at depth 2, which is shallower than leaves 15 and 7 at depth 3."
+    },
+    {
+      "input": "root = [2,null,3,null,4,null,5,null,6]",
+      "output": "5",
+      "explanation": "The tree is a chain leaning right; the only leaf is 6, five nodes from the top."
+    },
+    {
+      "input": "root = []",
+      "output": "0",
+      "explanation": "An empty tree has depth 0."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [0, 100].",
+    "-1000 <= Node.val <= 1000",
+    "A leaf is a node whose left and right children are both null.",
+    "The tree height is at most 100, and the tree may be fully skewed."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def minDepth(self, root: TreeNode | None) -> int:\n        # Write your solution here\n        return 0",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction minDepth(root) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int minDepth(TreeNode root) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int minDepth(TreeNode* root) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [3,9,20,null,null,15,7]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [2,null,3,null,4,null,5,null,6]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "root = []",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1,2]",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [-1,-2,-3,-4,null,null,-5,-6]",
+      "expected_output": "3",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach enumerates every root-to-leaf path, records each length, and takes the minimum; that is O(n) time but stores paths and explores the whole tree. A recursive DFS computing 1 + min(minDepth(left), minDepth(right)) is close, but must special-case nodes with a single child (use the depth of the existing side, not 0). The optimal approach is BFS level by level: the first leaf dequeued is guaranteed to be on the shallowest level, so you can return immediately. Worst-case time is O(n) and space is O(w) for the widest level, which is O(n) in the worst case, but on lopsided trees BFS often stops far earlier than DFS.",
+  "hints": [
+    "Be careful about what counts as a leaf: a node with one child does not end a path.",
+    "Exploring the tree level by level lets you stop as soon as you meet any leaf.",
+    "Run BFS with (node, depth) pairs and return the depth of the first node whose left and right are both null; return 0 for an empty root."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Why does the naive 1 + min(left, right) recursion give the wrong answer for a node with only one child?",
+    "How would you return the actual shortest root-to-leaf path instead of just its length?"
+  ]
+}

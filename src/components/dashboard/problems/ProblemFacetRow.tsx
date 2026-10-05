@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { FacetChip } from "@/components/dashboard/problems/FacetChip";
 import { LABEL } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
 import {
   PROGRESS_CONFIG,
   categoryLabel,
+  companyLabel,
   type FacetCounts,
   type ProblemFacets,
   type ProblemProgress,
@@ -30,7 +32,11 @@ type ProblemFacetRowProps = {
   onCategoryChange: (category: string) => void;
   onProgressChange: (progress: ProblemProgress | "all") => void;
   onFreeOnlyChange: (freeOnly: boolean) => void;
+  onCompanyChange: (company: string) => void;
 };
+
+/** Chips past this many collapse behind "More" so the row stays one or two lines. */
+const COMPANY_CHIP_LIMIT = 10;
 
 /**
  * The scope rows under the search: topic, your own progress, and the
@@ -44,7 +50,19 @@ export function ProblemFacetRow({
   onCategoryChange,
   onProgressChange,
   onFreeOnlyChange,
+  onCompanyChange,
 }: ProblemFacetRowProps) {
+  const [showAllCompanies, setShowAllCompanies] = useState(false);
+  const companies = Object.entries(counts.company)
+    .sort(([a, x], [b, y]) => y - x || a.localeCompare(b))
+    .map(([tag]) => tag);
+  const visibleCompanies = showAllCompanies
+    ? companies
+    : companies.slice(0, COMPANY_CHIP_LIMIT);
+  if (facets.company !== "all" && !visibleCompanies.includes(facets.company)) {
+    visibleCompanies.push(facets.company);
+  }
+
   return (
     <>
       <div
@@ -75,6 +93,46 @@ export function ProblemFacetRow({
           );
         })}
       </div>
+
+      {companies.length > 0 ? (
+        <div
+          role="group"
+          aria-label="Filter by company"
+          className="flex flex-wrap items-center gap-2"
+        >
+          <span className={FACET_ROW_LABEL}>Company</span>
+          <FacetChip
+            label="Any"
+            isActive={facets.company === "all"}
+            onClick={() => onCompanyChange("all")}
+          />
+          {visibleCompanies.map((tag) => {
+            const isActive = facets.company === tag;
+            return (
+              <FacetChip
+                key={tag}
+                label={companyLabel(tag)}
+                count={counts.company[tag] ?? 0}
+                isActive={isActive}
+                onClick={() => onCompanyChange(isActive ? "all" : tag)}
+              />
+            );
+          })}
+          {companies.length > COMPANY_CHIP_LIMIT ? (
+            <FacetChip
+              bare
+              label={
+                showAllCompanies
+                  ? "Fewer"
+                  : `+${companies.length - COMPANY_CHIP_LIMIT} more`
+              }
+              isActive={false}
+              aria-expanded={showAllCompanies}
+              onClick={() => setShowAllCompanies((open) => !open)}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       {showProgress ? (
         <div

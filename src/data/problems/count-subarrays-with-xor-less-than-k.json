@@ -1,0 +1,81 @@
+{
+  "title": "Count Subarrays With XOR Less Than K",
+  "slug": "count-subarrays-with-xor-less-than-k",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "Given an integer array `nums` and an integer `k`, return the number of contiguous non-empty subarrays whose bitwise XOR of all elements is **strictly less than** `k`.\n\n**Example 1:**\n```\nInput: nums = [1,2,3], k = 3\nOutput: 4\nExplanation: Subarray XORs are [1]=1, [2]=2, [3]=3, [1,2]=3, [2,3]=1, [1,2,3]=0. Four of them (1, 2, 1, 0) are below 3.\n```\n\n**Example 2:**\n```\nInput: nums = [4,1,3,2], k = 5\nOutput: 8\nExplanation: The XORs 4, 1, 3, 2, 1^3=2, 3^2=1, 1^3^2=0 and 4^1^3^2=4 are all below 5; only 4^1=5 and 4^1^3=6 are not.\n```\n\n**Example 3:**\n```\nInput: nums = [5,5,5], k = 1\nOutput: 2\nExplanation: Only a XOR of 0 is below 1, which happens for the two subarrays [5,5].\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3], k = 3",
+      "output": "4",
+      "explanation": "Subarray XORs are [1]=1, [2]=2, [3]=3, [1,2]=3, [2,3]=1, [1,2,3]=0. Four of them (1, 2, 1, 0) are below 3."
+    },
+    {
+      "input": "nums = [4,1,3,2], k = 5",
+      "output": "8",
+      "explanation": "The XORs 4, 1, 3, 2, 1^3=2, 3^2=1, 1^3^2=0 and 4^1^3^2=4 are all below 5; only 4^1=5 and 4^1^3=6 are not."
+    },
+    {
+      "input": "nums = [5,5,5], k = 1",
+      "output": "2",
+      "explanation": "Only a XOR of 0 is below 1, which happens for the two subarrays [5,5]."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "0 <= nums[i] < 2^20",
+    "0 <= k <= 2^20"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countSubarrays(self, nums: list[int], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countSubarrays(nums, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public long countSubarrays(int[] nums, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    long long countSubarrays(vector<int>& nums, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3], k = 3",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,1,3,2], k = 5",
+      "expected_output": "8",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,5,5], k = 1",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,7,1], k = 0",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [0,0,0,0], k = 1",
+      "expected_output": "10",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: enumerate every start index and extend the end while keeping a running XOR, counting values below k, which is O(n^2) time. Optimal: the XOR of nums[i..j] equals prefix[j+1] ^ prefix[i], so count pairs of prefixes (earlier, later) whose XOR is below k. Keep a binary trie of earlier prefix values (starting with 0) where every node stores how many prefixes pass through it. For the current prefix p, walk bits from the most significant: if k has a 1 at this bit, every stored value whose bit equals p's bit gives XOR 0 here and is therefore smaller than k regardless of the lower bits, so add that child's count and continue down the child that makes the XOR bit 1; if k has a 0, you must follow the child that keeps the XOR bit 0. Then insert p. Each query and insert is O(B), so total O(n * B) time and O(n * B) space with B = 21 bits.",
+  "hints": [
+    "Rewrite the XOR of a subarray as the XOR of two prefix XOR values, so you are counting pairs of prefixes rather than subarrays.",
+    "Store earlier prefix values in a binary trie where each node keeps a count of values passing through it. Compare the XOR with k one bit at a time from the top.",
+    "At a bit where k is 1, all stored values that make the XOR bit 0 are already smaller than k, so add that child's count and continue on the other branch; where k is 0, you can only continue on the branch that keeps the XOR bit 0."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * B)",
+    "space": "O(n * B)"
+  },
+  "follow_up_questions": [
+    "How would you count subarrays whose XOR lies within a range [lo, hi]?",
+    "Could you answer the same question for many different k values over a fixed array efficiently?"
+  ]
+}

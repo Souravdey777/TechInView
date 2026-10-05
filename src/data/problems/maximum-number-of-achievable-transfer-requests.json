@@ -1,0 +1,82 @@
+{
+  "title": "Maximum Number Of Achievable Transfer Requests",
+  "slug": "maximum-number-of-achievable-transfer-requests",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "There are `n` buildings numbered `0` to `n - 1`. Each building is currently full, and employees have filed transfer requests. `requests[i] = [from_i, to_i]` means one employee wants to move out of building `from_i` and into building `to_i` (they may be the same building).\n\nYou may approve any subset of the requests, as long as, after approving them, every building ends up with exactly as many people as it started with. In other words, for every building the number of approved requests leaving it equals the number of approved requests arriving at it.\n\nReturn the largest number of requests that can be approved. Approving no requests is always valid, so the answer is at least `0`.\n\n**Example 1:**\n```\nInput: n = 5, requests = [[0,1],[1,0],[0,1],[1,2],[2,0],[3,4]]\nOutput: 5\nExplanation: Approve [0,1],[1,0] (a swap) and [0,1],[1,2],[2,0] (a cycle). Every building's inflow equals its outflow. [3,4] cannot be approved because nobody moves back into building 3.\n```\n\n**Example 2:**\n```\nInput: n = 3, requests = [[0,0],[1,2],[2,1]]\nOutput: 3\nExplanation: [0,0] keeps an employee in place, and [1,2] with [2,1] is a swap. All three can be approved.\n```\n\n**Example 3:**\n```\nInput: n = 4, requests = [[0,3],[3,1],[1,2],[2,0]]\nOutput: 4\nExplanation: The four requests form one cycle 0 -> 3 -> 1 -> 2 -> 0, so approving all of them keeps every building balanced.\n```",
+  "examples": [
+    {
+      "input": "n = 5, requests = [[0,1],[1,0],[0,1],[1,2],[2,0],[3,4]]",
+      "output": "5",
+      "explanation": "Approve [0,1],[1,0] (a swap) and [0,1],[1,2],[2,0] (a cycle). Every building's inflow equals its outflow. [3,4] cannot be approved because nobody moves back into building 3."
+    },
+    {
+      "input": "n = 3, requests = [[0,0],[1,2],[2,1]]",
+      "output": "3",
+      "explanation": "[0,0] keeps an employee in place, and [1,2] with [2,1] is a swap. All three can be approved."
+    },
+    {
+      "input": "n = 4, requests = [[0,3],[3,1],[1,2],[2,0]]",
+      "output": "4",
+      "explanation": "The four requests form one cycle 0 -> 3 -> 1 -> 2 -> 0, so approving all of them keeps every building balanced."
+    }
+  ],
+  "constraints": [
+    "`1 <= n <= 20`",
+    "`1 <= requests.length <= 16`",
+    "`requests[i].length == 2`",
+    "`0 <= from_i, to_i < n`"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumRequests(self, n: int, requests: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumRequests(n, requests) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maximumRequests(int n, int[][] requests) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maximumRequests(int n, vector<vector<int>>& requests) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 5, requests = [[0,1],[1,0],[0,1],[1,2],[2,0],[3,4]]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, requests = [[0,0],[1,2],[2,1]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 4, requests = [[0,3],[3,1],[1,2],[2,0]]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, requests = [[0,1]]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 3, requests = [[0,1],[1,2],[2,0],[0,1],[1,2],[2,0],[0,2],[2,1],[1,0],[0,0],[1,1],[2,2],[0,1],[1,0],[2,0],[0,2]]",
+      "expected_output": "16",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "With at most 16 requests, try every subset. The brute force enumerates all 2^m bitmasks, applies each chosen request to a balance array of size n, and checks that every balance is zero, costing O(2^m * (m + n)). The backtracking version walks the requests in order and for each one either takes it (balance[from] -= 1, balance[to] += 1) or skips it, recursing until all requests are decided; at the leaf it checks whether all balances are zero and updates the best count. Prune a branch when the count taken so far plus the requests remaining cannot beat the current best, and you can also iterate masks in decreasing popcount order to stop at the first valid one. Worst-case time is O(2^m * n) with O(n + m) space for the balance array and recursion stack.",
+  "hints": [
+    "The number of requests is tiny. Can you afford to look at every subset of them?",
+    "A subset is valid exactly when, for every building, approved departures equal approved arrivals. Track a net-change array as you go.",
+    "Backtrack over requests with include/exclude choices, updating the net-change array on the way down and undoing it on the way back, and record the count whenever all entries are zero at the end."
+  ],
+  "optimal_complexity": {
+    "time": "O(2^m * n)",
+    "space": "O(n + m)"
+  },
+  "follow_up_questions": [
+    "If the number of requests were large (thousands), how would you model this as a flow or cycle-decomposition problem?",
+    "How would you return which requests to approve, not just how many?"
+  ]
+}

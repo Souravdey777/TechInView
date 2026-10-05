@@ -1,0 +1,83 @@
+{
+  "title": "My Calendar I",
+  "slug": "my-calendar-i",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "uber",
+    "bloomberg"
+  ],
+  "description": "You are building the booking engine for a personal calendar. Each event occupies the half-open time range `[start, end)`, meaning it covers every real number `t` with `start <= t < end`. Two events conflict (a *double booking*) when their ranges share at least one moment. Events that merely touch, such as `[10, 20)` and `[20, 30)`, do **not** conflict.\n\nImplement the `MyCalendar` class:\n\n- `MyCalendar()` creates an empty calendar.\n- `boolean book(int start, int end)` tries to add the event `[start, end)`. If it does not overlap any event already stored, store it and return `true`. Otherwise leave the calendar unchanged and return `false`.\n\nRejected events are never stored, so they cannot block later requests.\n\nThe input lists the operation names and their argument lists. The output lists each call's return value, using `null` for the constructor.\n\n**Example 1:**\n```\nInput: [\"MyCalendar\",\"book\",\"book\",\"book\"], [[],[10,20],[15,25],[20,30]]\nOutput: [null,true,false,true]\nExplanation: [10,20) is booked. [15,25) overlaps it on [15,20), so it is rejected. [20,30) only touches [10,20) at 20, which is allowed.\n```\n\n**Example 2:**\n```\nInput: [\"MyCalendar\",\"book\",\"book\",\"book\",\"book\"], [[],[5,10],[1,5],[3,8],[10,12]]\nOutput: [null,true,true,false,true]\nExplanation: [5,10) and [1,5) touch but do not overlap. [3,8) overlaps both stored events and is rejected. [10,12) starts exactly where [5,10) ends.\n```\n\n**Example 3:**\n```\nInput: [\"MyCalendar\",\"book\",\"book\",\"book\"], [[],[0,100],[50,60],[100,101]]\nOutput: [null,true,false,true]\nExplanation: [50,60) lies inside [0,100) and is rejected. [100,101) begins right after [0,100) ends.\n```",
+  "examples": [
+    {
+      "input": "[\"MyCalendar\",\"book\",\"book\",\"book\"], [[],[10,20],[15,25],[20,30]]",
+      "output": "[null,true,false,true]",
+      "explanation": "[10,20) is booked. [15,25) overlaps it on [15,20), so it is rejected. [20,30) only touches [10,20) at 20, which is allowed."
+    },
+    {
+      "input": "[\"MyCalendar\",\"book\",\"book\",\"book\",\"book\"], [[],[5,10],[1,5],[3,8],[10,12]]",
+      "output": "[null,true,true,false,true]",
+      "explanation": "[5,10) and [1,5) touch but do not overlap. [3,8) overlaps both stored events and is rejected. [10,12) starts exactly where [5,10) ends."
+    },
+    {
+      "input": "[\"MyCalendar\",\"book\",\"book\",\"book\"], [[],[0,100],[50,60],[100,101]]",
+      "output": "[null,true,false,true]",
+      "explanation": "[50,60) lies inside [0,100) and is rejected. [100,101) begins right after [0,100) ends."
+    }
+  ],
+  "constraints": [
+    "0 <= start < end <= 10^9",
+    "At most 1000 calls will be made to book",
+    "Event ranges are half-open: [start, end)"
+  ],
+  "starter_code": {
+    "python": "class MyCalendar:\n    def __init__(self):\n        # Initialize your data structure here\n        pass\n\n    def book(self, start: int, end: int) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function MyCalendar() {\n    // Initialize your data structure here\n}\n\nMyCalendar.prototype.book = function(start, end) {\n    // Write your solution here\n};",
+    "java": "class MyCalendar {\n    public MyCalendar() {\n        // Initialize your data structure here\n    }\n\n    public boolean book(int start, int end) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class MyCalendar {\npublic:\n    MyCalendar() {\n        // Initialize your data structure here\n    }\n\n    bool book(int start, int end) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"MyCalendar\",\"book\",\"book\",\"book\"], [[],[10,20],[15,25],[20,30]]",
+      "expected_output": "[null,true,false,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MyCalendar\",\"book\",\"book\",\"book\",\"book\"], [[],[5,10],[1,5],[3,8],[10,12]]",
+      "expected_output": "[null,true,true,false,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MyCalendar\",\"book\",\"book\",\"book\"], [[],[0,100],[50,60],[100,101]]",
+      "expected_output": "[null,true,false,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MyCalendar\",\"book\",\"book\",\"book\",\"book\",\"book\"], [[],[0,1],[1,2],[0,1],[2,1000000000],[999999999,1000000000]]",
+      "expected_output": "[null,true,true,false,true,false]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"MyCalendar\",\"book\",\"book\",\"book\",\"book\",\"book\",\"book\"], [[],[20,30],[10,20],[30,40],[15,35],[5,10],[19,21]]",
+      "expected_output": "[null,true,true,true,false,true,false]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force keeps every accepted event in a list and, for each new request [s, e), scans all of them, rejecting if any stored [x, y) satisfies s < y and x < e; that is O(n) per call and O(n^2) overall, which is fine for 1000 calls. The optimal approach keeps accepted events in a structure sorted by start time (a balanced BST / TreeMap, or a sorted list with binary search). For a new request, find the stored event with the greatest start <= s and the one with the smallest start > s; the request is valid only if the previous event ends at or before s and the next event starts at or after e. This gives O(log n) per booking (O(n) insertion with a plain sorted array) and O(n) space.",
+  "hints": [
+    "Two half-open intervals [a, b) and [c, d) overlap exactly when each one starts before the other ends. Write that condition down first.",
+    "Checking against every stored event works, but if the events were kept sorted by start time, how many of them would you really need to look at?",
+    "Keep accepted events sorted by start. For a new [s, e), only the nearest event starting at or before s and the nearest event starting after s can conflict: check prev.end <= s and next.start >= e."
+  ],
+  "optimal_complexity": {
+    "time": "O(log n) per book",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you also support cancelling a previously booked event?",
+    "How would you return the list of conflicting events instead of just false?"
+  ]
+}

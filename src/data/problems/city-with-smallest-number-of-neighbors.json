@@ -1,0 +1,84 @@
+{
+  "title": "Find The City With The Smallest Number Of Neighbors",
+  "slug": "city-with-smallest-number-of-neighbors",
+  "difficulty": "medium",
+  "category": "heap",
+  "company_tags": [
+    "amazon",
+    "google",
+    "uber",
+    "microsoft"
+  ],
+  "description": "There are `n` cities numbered `0` to `n - 1`. Each entry `edges[i] = [from, to, weight]` is an undirected road of length `weight` between two cities. You are also given an integer `distanceThreshold`.\n\nFor each city, count how many **other** cities can be reached through some path whose total length is at most `distanceThreshold`. Return the city with the smallest such count. If several cities tie, return the one with the **largest** index.\n\n**Example 1:**\n```\nInput: n = 4, edges = [[0,1,3],[1,2,1],[1,3,4],[2,3,1]], distanceThreshold = 4\nOutput: 3\nExplanation: Within distance 4: city 0 reaches {1,2}, city 1 reaches {0,2,3}, city 2 reaches {0,1,3}, city 3 reaches {1,2}. Cities 0 and 3 tie with 2 neighbours; the larger index 3 is returned.\n```\n\n**Example 2:**\n```\nInput: n = 5, edges = [[0,1,2],[0,4,8],[1,2,3],[1,4,2],[2,3,1],[3,4,1]], distanceThreshold = 2\nOutput: 0\nExplanation: City 0 reaches only city 1 within distance 2, while every other city reaches at least two others, so the answer is 0.\n```\n\n**Example 3:**\n```\nInput: n = 3, edges = [[0,1,5]], distanceThreshold = 3\nOutput: 2\nExplanation: No road is short enough, so every city has 0 reachable neighbours. All three tie and the largest index, 2, is returned.\n```",
+  "examples": [
+    {
+      "input": "n = 4, edges = [[0,1,3],[1,2,1],[1,3,4],[2,3,1]], distanceThreshold = 4",
+      "output": "3",
+      "explanation": "Within distance 4: city 0 reaches {1,2}, city 1 reaches {0,2,3}, city 2 reaches {0,1,3}, city 3 reaches {1,2}. Cities 0 and 3 tie with 2 neighbours; the larger index 3 is returned."
+    },
+    {
+      "input": "n = 5, edges = [[0,1,2],[0,4,8],[1,2,3],[1,4,2],[2,3,1],[3,4,1]], distanceThreshold = 2",
+      "output": "0",
+      "explanation": "City 0 reaches only city 1 within distance 2, while every other city reaches at least two others, so the answer is 0."
+    },
+    {
+      "input": "n = 3, edges = [[0,1,5]], distanceThreshold = 3",
+      "output": "2",
+      "explanation": "No road is short enough, so every city has 0 reachable neighbours. All three tie and the largest index, 2, is returned."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 100",
+    "1 <= edges.length <= n * (n - 1) / 2",
+    "edges[i].length == 3, 0 <= from < to < n",
+    "1 <= weight, distanceThreshold <= 10^4",
+    "All pairs (from, to) are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findTheCity(self, n: int, edges: list[list[int]], distanceThreshold: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findTheCity(n, edges, distanceThreshold) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int findTheCity(int n, int[][] edges, int distanceThreshold) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findTheCity(int n, vector<vector<int>>& edges, int distanceThreshold) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 4, edges = [[0,1,3],[1,2,1],[1,3,4],[2,3,1]], distanceThreshold = 4",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 5, edges = [[0,1,2],[0,4,8],[1,2,3],[1,4,2],[2,3,1],[3,4,1]], distanceThreshold = 2",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, edges = [[0,1,5]], distanceThreshold = 3",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, edges = [[0,1,5]], distanceThreshold = 4",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 4, edges = [[0,1,10],[1,2,1],[0,2,2],[2,3,10]], distanceThreshold = 3",
+      "expected_output": "3",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "We need all-pairs shortest distances. A brute force could enumerate paths with DFS from each city, which is exponential. The optimal approach runs Dijkstra with a min-heap from each city, costing O(n * E log n) time and O(n + E) space, which is best on sparse graphs. Floyd-Warshall is a simpler alternative that fills an n x n matrix in O(n^3) time and O(n^2) space, also fine for n <= 100. After computing distances, count for each city the other cities within the threshold and scan cities in increasing index, updating the answer whenever the count is less than or equal to the best so far so ties resolve to the largest index.",
+  "hints": [
+    "You need the shortest distance between every pair of cities, not just from one source.",
+    "Either run Dijkstra (with a min-heap) from every city, or use a dynamic-programming all-pairs algorithm since n is at most 100.",
+    "After computing distances, count neighbours within the threshold for each city and use '<=' while scanning indices in increasing order so ties pick the largest index."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * E log n)",
+    "space": "O(n + E)"
+  },
+  "follow_up_questions": [
+    "When would running Dijkstra from each node beat Floyd-Warshall, and why?",
+    "How would you answer many different distanceThreshold queries efficiently after a single preprocessing step?"
+  ]
+}

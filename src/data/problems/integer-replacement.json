@@ -1,0 +1,83 @@
+{
+  "title": "Integer Replacement",
+  "slug": "integer-replacement",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "Given a positive integer `n`, you may apply these operations repeatedly:\n\n- If `n` is even, replace `n` with `n / 2`.\n- If `n` is odd, replace `n` with either `n + 1` or `n - 1`.\n\nReturn the minimum number of operations needed for `n` to become `1`. If `n` is already `1`, return `0`.\n\n**Example 1:**\n```\nInput: n = 8\nOutput: 3\nExplanation: 8 -> 4 -> 2 -> 1 takes 3 halvings.\n```\n\n**Example 2:**\n```\nInput: n = 7\nOutput: 4\nExplanation: 7 -> 8 -> 4 -> 2 -> 1 takes 4 steps (7 -> 6 -> 3 -> 2 -> 1 also takes 4).\n```\n\n**Example 3:**\n```\nInput: n = 15\nOutput: 5\nExplanation: 15 -> 16 -> 8 -> 4 -> 2 -> 1 takes 5 steps, which beats going down via 14.\n```",
+  "examples": [
+    {
+      "input": "n = 8",
+      "output": "3",
+      "explanation": "8 -> 4 -> 2 -> 1 takes 3 halvings."
+    },
+    {
+      "input": "n = 7",
+      "output": "4",
+      "explanation": "7 -> 8 -> 4 -> 2 -> 1 takes 4 steps (7 -> 6 -> 3 -> 2 -> 1 also takes 4)."
+    },
+    {
+      "input": "n = 15",
+      "output": "5",
+      "explanation": "15 -> 16 -> 8 -> 4 -> 2 -> 1 takes 5 steps, which beats going down via 14."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 2^31 - 1",
+    "If n is even, the only move is n / 2",
+    "If n is odd, you may replace n with n + 1 or n - 1",
+    "Intermediate values may exceed 2^31 - 1 (use 64-bit arithmetic)"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def integerReplacement(self, n: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function integerReplacement(n) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int integerReplacement(int n) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int integerReplacement(int n) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 8",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 7",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 15",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 2147483647",
+      "expected_output": "32",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A memoised recursion works directly: f(1) = 0, f(even n) = 1 + f(n / 2), f(odd n) = 1 + min(f(n - 1), f(n + 1)). Because every odd step is immediately followed by a halving, only O(log n) distinct values are visited, giving O(log n) time and space (be careful that n + 1 can exceed 32-bit range in fixed-width languages). The optimal greedy uses bits: when n is odd, prefer the move that produces more trailing zeros, i.e. go to n - 1 if n % 4 == 1 or n == 3, otherwise go to n + 1. This takes O(log n) time and O(1) space.",
+  "hints": [
+    "Even numbers have only one choice. Focus on what to do when n is odd.",
+    "A recursion with memoisation over n only visits about 2 * log2(n) values. Why?",
+    "Look at the last two bits of an odd n: if they are 01 (or n is 3), subtracting 1 is better; if they are 11, adding 1 creates more trailing zeros. Use a wider integer type for n + 1 to avoid overflow."
+  ],
+  "optimal_complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Prove why the n % 4 rule is optimal, including the n == 3 special case.",
+    "What if a third operation, n -> n * 2 for odd n, were also allowed?"
+  ]
+}

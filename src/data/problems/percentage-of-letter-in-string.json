@@ -1,0 +1,82 @@
+{
+  "title": "Percentage of Letter in String",
+  "slug": "percentage-of-letter-in-string",
+  "difficulty": "easy",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given a string `s` and a single character `letter`. Return the percentage of characters in `s` that are equal to `letter`, **rounded down** to the nearest whole number.\n\nIn other words, compute `floor(count * 100 / s.length)` where `count` is the number of positions holding `letter`. Return the result as an integer between `0` and `100`.\n\n**Example 1:**\n```\nInput: s = \"foobar\", letter = \"o\"\nOutput: 33\nExplanation: The letter \"o\" appears 2 times out of 6 characters. 2 / 6 = 33.33...%, which rounds down to 33.\n```\n\n**Example 2:**\n```\nInput: s = \"aabbb\", letter = \"b\"\nOutput: 60\nExplanation: \"b\" appears 3 times out of 5 characters, exactly 60%.\n```\n\n**Example 3:**\n```\nInput: s = \"jjjj\", letter = \"k\"\nOutput: 0\nExplanation: \"k\" never appears, so the percentage is 0.\n```",
+  "examples": [
+    {
+      "input": "s = \"foobar\", letter = \"o\"",
+      "output": "33",
+      "explanation": "The letter \"o\" appears 2 times out of 6 characters. 2 / 6 = 33.33...%, which rounds down to 33."
+    },
+    {
+      "input": "s = \"aabbb\", letter = \"b\"",
+      "output": "60",
+      "explanation": "\"b\" appears 3 times out of 5 characters, exactly 60%."
+    },
+    {
+      "input": "s = \"jjjj\", letter = \"k\"",
+      "output": "0",
+      "explanation": "\"k\" never appears, so the percentage is 0."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 100",
+    "s consists of lowercase English letters",
+    "letter is a single lowercase English letter",
+    "The answer is an integer in the range [0, 100]"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def percentageLetter(self, s: str, letter: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function percentageLetter(s, letter) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int percentageLetter(String s, String letter) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int percentageLetter(string s, string letter) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"foobar\", letter = \"o\"",
+      "expected_output": "33",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aabbb\", letter = \"b\"",
+      "expected_output": "60",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"jjjj\", letter = \"k\"",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\", letter = \"a\"",
+      "expected_output": "100",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abcdefg\", letter = \"g\"",
+      "expected_output": "14",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force and optimal solutions coincide here: scan the string once and count how many characters equal letter, then return (count * 100) / n using integer (floor) division. Multiplying by 100 before dividing avoids floating-point rounding issues such as 0.29 * 100 = 28.999... A naive version that builds a filtered copy of the string costs O(n) extra space; counting in place gives O(n) time and O(1) space.",
+  "hints": [
+    "You only need two numbers: how many characters match, and the length of the string.",
+    "Be careful with floating-point division — 1/3 * 100 may not give exactly what you expect.",
+    "Count matches in a single pass. Multiply before you divide and use integer division so the result rounds down."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you report the percentage of every letter at once in a single pass?",
+    "What changes if the result must be rounded to the nearest integer instead of floored?"
+  ]
+}

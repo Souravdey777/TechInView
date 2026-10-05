@@ -1,0 +1,84 @@
+{
+  "title": "Length Of The Longest Valid Substring",
+  "slug": "length-of-the-longest-valid-substring",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft"
+  ],
+  "description": "You are given a string `word` and an array of strings `forbidden`. A substring of `word` is **valid** if none of the strings in `forbidden` appears anywhere inside it as a substring.\n\nReturn the length of the longest valid substring of `word`. The empty substring is always valid, so the answer is `0` when every character of `word` is itself forbidden.\n\n**Example 1:**\n```\nInput: word = \"programmer\", forbidden = [\"mm\",\"ro\"]\nOutput: 5\nExplanation: \"ro\" sits at indices 1-2 and \"mm\" at 6-7. \"ogram\" (indices 2-6) avoids both and has length 5; stretching it either way would include a forbidden pair.\n```\n\n**Example 2:**\n```\nInput: word = \"bananas\", forbidden = [\"nan\",\"s\"]\nOutput: 4\nExplanation: \"bana\" (indices 0-3) is valid. Any substring reaching index 4 from before index 3 contains \"nan\", and anything ending at index 6 contains \"s\".\n```\n\n**Example 3:**\n```\nInput: word = \"abc\", forbidden = [\"d\"]\nOutput: 3\nExplanation: The forbidden string never occurs, so the whole word is valid.\n```",
+  "examples": [
+    {
+      "input": "word = \"programmer\", forbidden = [\"mm\",\"ro\"]",
+      "output": "5",
+      "explanation": "\"ro\" sits at indices 1-2 and \"mm\" at 6-7. \"ogram\" (indices 2-6) avoids both and has length 5; stretching it either way would include a forbidden pair."
+    },
+    {
+      "input": "word = \"bananas\", forbidden = [\"nan\",\"s\"]",
+      "output": "4",
+      "explanation": "\"bana\" (indices 0-3) is valid. Any substring reaching index 4 from before index 3 contains \"nan\", and anything ending at index 6 contains \"s\"."
+    },
+    {
+      "input": "word = \"abc\", forbidden = [\"d\"]",
+      "output": "3",
+      "explanation": "The forbidden string never occurs, so the whole word is valid."
+    }
+  ],
+  "constraints": [
+    "1 <= word.length <= 10^5",
+    "word consists only of lowercase English letters",
+    "1 <= forbidden.length <= 10^5",
+    "1 <= forbidden[i].length <= 10",
+    "forbidden[i] consists only of lowercase English letters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def longestValidSubstring(self, word: str, forbidden: list[str]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function longestValidSubstring(word, forbidden) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int longestValidSubstring(String word, List<String> forbidden) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int longestValidSubstring(string word, vector<string>& forbidden) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "word = \"programmer\", forbidden = [\"mm\",\"ro\"]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "word = \"bananas\", forbidden = [\"nan\",\"s\"]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "word = \"abc\", forbidden = [\"d\"]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "word = \"aaaa\", forbidden = [\"a\"]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "word = \"abcdefghijklm\", forbidden = [\"cdefghijkl\",\"m\"]",
+      "expected_output": "11",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force checks every substring against every forbidden string, which is far too slow (O(n^2 * m * L)). Put forbidden strings in a hash set and use a sliding window instead: extend the right end r one character at a time, and for each start position i from r down to max(left, r - 9) check whether word[i..r] is forbidden. If it is, any valid window ending at r must start after i, so set left = i + 1 and stop. The window [left, r] is then the longest valid substring ending at r, and the answer is the maximum r - left + 1. Since forbidden strings are at most 10 long, each step does at most 10 lookups of length up to 10, giving O(n * L^2) time with L = 10 and O(m * L) space for the set.",
+  "hints": [
+    "The forbidden strings are very short. How far back from the current position can a forbidden occurrence that ends here start?",
+    "For each right end r, you only need to check substrings word[i..r] with r - i < 10 against a hash set of forbidden strings.",
+    "Keep a left boundary: when word[i..r] is forbidden, move left to i + 1 (checking i from r downward, stopping at left), then update the best length with r - left + 1."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * L^2)",
+    "space": "O(m * L)"
+  },
+  "follow_up_questions": [
+    "How would a trie or Aho-Corasick automaton improve the per-step cost?",
+    "How would you count all valid substrings instead of finding the longest?"
+  ]
+}

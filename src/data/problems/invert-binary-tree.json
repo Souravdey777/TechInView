@@ -1,0 +1,85 @@
+{
+  "title": "Invert Binary Tree",
+  "slug": "invert-binary-tree",
+  "difficulty": "easy",
+  "category": "trees",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "apple",
+    "bloomberg"
+  ],
+  "description": "You are handed the `root` of a binary tree. Flip the tree into its mirror image: at **every** node, the left child becomes the right child and vice versa. Return the root of the flipped tree.\n\nThe tree is given in level-order, with `null` marking a missing child. The expected output is the level-order serialization of the mirrored tree (trailing `null`s omitted).\n\n**Example 1:**\n```\n     4              4\n   /   \\          /   \\\n  2     7   =>   7     2\n / \\   / \\      / \\   / \\\n1   3 6   9    9   6 3   1\n\nInput: root = [4,2,7,1,3,6,9]\nOutput: [4,7,2,9,6,3,1]\nExplanation: Swapping children at every level reverses each level: [2,7] becomes [7,2] and [1,3,6,9] becomes [9,6,3,1].\n```\n\n**Example 2:**\n```\nInput: root = [2,1,3]\nOutput: [2,3,1]\nExplanation: The root's two children trade places.\n```\n\n**Example 3:**\n```\nInput: root = []\nOutput: []\nExplanation: An empty tree mirrors to an empty tree.\n```",
+  "examples": [
+    {
+      "input": "root = [4,2,7,1,3,6,9]",
+      "output": "[4,7,2,9,6,3,1]",
+      "explanation": "Swapping children at every level reverses each level: [2,7] becomes [7,2] and [1,3,6,9] becomes [9,6,3,1]."
+    },
+    {
+      "input": "root = [2,1,3]",
+      "output": "[2,3,1]",
+      "explanation": "The root's two children trade places."
+    },
+    {
+      "input": "root = []",
+      "output": "[]",
+      "explanation": "An empty tree mirrors to an empty tree."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [0, 100].",
+    "-100 <= Node.val <= 100",
+    "The tree height is at most 100, and the tree may be fully skewed.",
+    "Node values are not necessarily unique."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def invertTree(self, root: TreeNode | None) -> TreeNode | None:\n        # Write your solution here\n        return None",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction invertTree(root) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public TreeNode invertTree(TreeNode root) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* invertTree(TreeNode* root) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [4,2,7,1,3,6,9]",
+      "expected_output": "[4,7,2,9,6,3,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [2,1,3]",
+      "expected_output": "[2,3,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = []",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1]",
+      "expected_output": "[1]",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [-1,-2,null,-3,null,-4]",
+      "expected_output": "[-1,null,-2,null,-3,null,-4]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force idea is to read the tree level by level into lists, reverse each level, and rebuild a new tree from those reversed levels; it works but needs O(n) extra storage and awkward bookkeeping for missing children. The clean solution is recursive: invert the left subtree, invert the right subtree, then swap the two pointers on the current node (or swap first and recurse — order does not matter). Every node is visited exactly once, giving O(n) time and O(h) space for the call stack, where h is the tree height (O(n) for a skewed tree). An iterative BFS or DFS with an explicit queue/stack that swaps children as each node is popped achieves the same bounds.",
+  "hints": [
+    "Think about what has to happen at a single node for the whole tree to end up mirrored.",
+    "If both subtrees of a node were already mirrored, what is the one remaining step for that node?",
+    "Recurse on the left and right children, then swap node.left and node.right; the empty tree is the base case."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "follow_up_questions": [
+    "How would you invert the tree iteratively, and which data structure would you use?",
+    "How would you check whether one tree is the mirror image of another without modifying either?"
+  ]
+}

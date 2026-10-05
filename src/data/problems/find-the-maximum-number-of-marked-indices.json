@@ -1,0 +1,81 @@
+{
+  "title": "Find The Maximum Number Of Marked Indices",
+  "slug": "find-the-maximum-number-of-marked-indices",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given an integer array `nums`. Initially every index is unmarked.\n\nYou may repeat the following move any number of times: choose two **different, currently unmarked** indices `i` and `j` such that `2 * nums[i] <= nums[j]`, and mark both of them.\n\nReturn the largest possible number of marked indices after performing moves optimally. Because indices are always marked in pairs, the answer is always even.\n\n**Example 1:**\n```\nInput: nums = [1,6,3,2,8]\nOutput: 4\nExplanation: Pair value 1 with 3 (2 <= 3) and value 2 with 6 (4 <= 6). The 8 has no partner left, so 4 indices are marked.\n```\n\n**Example 2:**\n```\nInput: nums = [4,1,9,2]\nOutput: 4\nExplanation: Pair value 1 with 4 (2 <= 4) and value 2 with 9 (4 <= 9). All four indices are marked.\n```\n\n**Example 3:**\n```\nInput: nums = [10,15,12]\nOutput: 0\nExplanation: The smallest value doubled is 20, which is larger than every other value, so no pair can be formed.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,6,3,2,8]",
+      "output": "4",
+      "explanation": "Pair value 1 with 3 (2 <= 3) and value 2 with 6 (4 <= 6). The 8 has no partner left, so 4 indices are marked."
+    },
+    {
+      "input": "nums = [4,1,9,2]",
+      "output": "4",
+      "explanation": "Pair value 1 with 4 (2 <= 4) and value 2 with 9 (4 <= 9). All four indices are marked."
+    },
+    {
+      "input": "nums = [10,15,12]",
+      "output": "0",
+      "explanation": "The smallest value doubled is 20, which is larger than every other value, so no pair can be formed."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "1 <= nums[i] <= 10^9",
+    "nums is not necessarily sorted and may contain duplicate values"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxNumOfMarkedIndices(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxNumOfMarkedIndices(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxNumOfMarkedIndices(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxNumOfMarkedIndices(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,6,3,2,8]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,1,9,2]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [10,15,12]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,2,2,3,4,4,8,9]",
+      "expected_output": "8",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries every sequence of pairings (essentially every matching), which is exponential. Sort the array first. If an optimal answer uses p pairs, we can assume the smaller elements of the pairs are the p smallest values and the larger elements are the p largest values, matched in order (a[i] with a[n - p + i]). This makes feasibility of p pairs monotonic, so you can binary search p in [0, n / 2] with an O(n) check. Even simpler, a greedy two-pointer works: let i scan the first half and j scan the second half starting at n / 2; whenever 2 * a[i] <= a[j], pair them and advance both, otherwise advance only j. Count pairs and return twice that. Total time O(n log n) for sorting, O(1) extra space.",
+  "hints": [
+    "Sorting helps. In an optimal solution, which elements should play the role of the 'small' side of each pair?",
+    "At most n / 2 pairs exist. Try matching the smallest half against the largest half — if p pairs are possible, the p smallest values can be matched with the p largest values in order.",
+    "After sorting, use two pointers: i over indices [0, n/2) and j starting at n/2. If 2 * a[i] <= a[j], count a pair and move both; otherwise move j. Return 2 * pairs."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve it if the condition were k * nums[i] <= nums[j] for a given k?",
+    "Can you prove why matching the smallest half against the largest half never loses to any other matching?"
+  ]
+}

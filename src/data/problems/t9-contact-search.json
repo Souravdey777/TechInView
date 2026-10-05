@@ -1,0 +1,84 @@
+{
+  "title": "T9 Contact Search",
+  "slug": "t9-contact-search",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "apple",
+    "microsoft"
+  ],
+  "description": "Old phones let you search contacts by pressing keypad digits, where each digit stands for a group of letters:\n\n- `2`: abc, `3`: def, `4`: ghi, `5`: jkl\n- `6`: mno, `7`: pqrs, `8`: tuv, `9`: wxyz\n\nYou are given an array of distinct lowercase `contacts` and a string `digits` made of characters `2`-`9`. Convert each contact name to its digit sequence using the keypad above. Return every contact whose digit sequence **starts with** `digits`, sorted in ascending lexicographic order. Return an empty list if none match.\n\n**Example 1:**\n```\nInput: contacts = [\"john\",\"kate\",\"joe\",\"lily\",\"jim\"], digits = \"56\"\nOutput: [\"joe\",\"john\"]\nExplanation: \"john\" encodes to 5646 and \"joe\" to 563, both starting with 56. \"kate\" (5283), \"lily\" (5459) and \"jim\" (546) do not.\n```\n\n**Example 2:**\n```\nInput: contacts = [\"amy\",\"bob\",\"cat\"], digits = \"9\"\nOutput: []\nExplanation: None of the names start with w, x, y or z.\n```\n\n**Example 3:**\n```\nInput: contacts = [\"anna\",\"bob\",\"cody\"], digits = \"262\"\nOutput: [\"bob\"]\nExplanation: \"bob\" encodes to 262. \"anna\" is 2662 and \"cody\" is 2639, so they do not start with 262.\n```",
+  "examples": [
+    {
+      "input": "contacts = [\"john\",\"kate\",\"joe\",\"lily\",\"jim\"], digits = \"56\"",
+      "output": "[\"joe\",\"john\"]",
+      "explanation": "\"john\" encodes to 5646 and \"joe\" to 563, both starting with 56. \"kate\" (5283), \"lily\" (5459) and \"jim\" (546) do not."
+    },
+    {
+      "input": "contacts = [\"amy\",\"bob\",\"cat\"], digits = \"9\"",
+      "output": "[]",
+      "explanation": "None of the names start with w, x, y or z."
+    },
+    {
+      "input": "contacts = [\"anna\",\"bob\",\"cody\"], digits = \"262\"",
+      "output": "[\"bob\"]",
+      "explanation": "\"bob\" encodes to 262. \"anna\" is 2662 and \"cody\" is 2639, so they do not start with 262."
+    }
+  ],
+  "constraints": [
+    "1 <= contacts.length <= 10^4",
+    "1 <= contacts[i].length <= 20",
+    "contacts[i] consists of lowercase English letters; all contacts are distinct",
+    "1 <= digits.length <= 20",
+    "digits consists of characters '2' through '9'"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def t9Search(self, contacts: list[str], digits: str) -> list[str]:\n        # Write your solution here\n        pass",
+    "javascript": "function t9Search(contacts, digits) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<String> t9Search(String[] contacts, String digits) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<string> t9Search(vector<string>& contacts, string digits) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "contacts = [\"john\",\"kate\",\"joe\",\"lily\",\"jim\"], digits = \"56\"",
+      "expected_output": "[\"joe\",\"john\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "contacts = [\"amy\",\"bob\",\"cat\"], digits = \"9\"",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "contacts = [\"anna\",\"bob\",\"cody\"], digits = \"262\"",
+      "expected_output": "[\"bob\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "contacts = [\"bob\",\"amy\"], digits = \"26294\"",
+      "expected_output": "[]",
+      "is_hidden": true
+    },
+    {
+      "input": "contacts = [\"cody\",\"bob\",\"anna\",\"coe\",\"adam\"], digits = \"26\"",
+      "expected_output": "[\"anna\",\"bob\",\"cody\",\"coe\"]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: encode every contact into its digit string and keep those whose encoding starts with digits, then sort; this is O(n * L + m log m) per query and is fine for one query. For repeated queries, build a trie over the digit encodings (at most 8 children per node) and store at each node the contact names that end there. A query walks down the trie along digits and collects every name in the reached subtree, then sorts them (or keeps names sorted during collection by inserting contacts in sorted order). Building is O(n * L), each query is O(D + size of subtree + m log m) where m is the number of results, and space is O(n * L).",
+  "hints": [
+    "First turn each name into the sequence of keys you would press to type it.",
+    "Once names are digit strings, the task is a plain prefix search. A trie keyed by digits (8 possible children) groups all names sharing a digit prefix.",
+    "Walk the trie along the typed digits; every name stored in the subtree below that node matches. Collect them and sort the result before returning."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * L + m log m)",
+    "space": "O(n * L)"
+  },
+  "follow_up_questions": [
+    "How would you also match digits against the start of any word in a multi-word contact name?",
+    "How would you update results incrementally as the user types one more digit?"
+  ]
+}

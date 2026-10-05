@@ -1,0 +1,85 @@
+{
+  "title": "Diameter of Binary Tree",
+  "slug": "diameter-of-binary-tree",
+  "difficulty": "easy",
+  "category": "trees",
+  "company_tags": [
+    "meta",
+    "amazon",
+    "google",
+    "microsoft",
+    "bloomberg",
+    "uber"
+  ],
+  "description": "Given the `root` of a binary tree, return its diameter: the number of **edges** on the longest path between any two nodes in the tree. The path does not have to pass through the root.\n\nThe tree is given in level-order, with `null` marking a missing child. A tree with a single node has diameter `0`.\n\n**Example 1:**\n```\n      1\n     / \\\n    2   3\n   / \\\n  4   5\n\nInput: root = [1,2,3,4,5]\nOutput: 3\nExplanation: The path 4 -> 2 -> 1 -> 3 (or 5 -> 2 -> 1 -> 3) uses 3 edges.\n```\n\n**Example 2:**\n```\nInput: root = [1,2]\nOutput: 1\nExplanation: The only path, 2 -> 1, has a single edge.\n```\n\n**Example 3:**\n```\n        1\n       /\n      2\n     / \\\n    3   4\n   /     \\\n  5       6\n\nInput: root = [1,2,null,3,4,5,null,null,6]\nOutput: 4\nExplanation: The longest path 5 -> 3 -> 2 -> 4 -> 6 has 4 edges and does not touch the root.\n```",
+  "examples": [
+    {
+      "input": "root = [1,2,3,4,5]",
+      "output": "3",
+      "explanation": "The path 4 -> 2 -> 1 -> 3 (or 5 -> 2 -> 1 -> 3) uses 3 edges."
+    },
+    {
+      "input": "root = [1,2]",
+      "output": "1",
+      "explanation": "The only path, 2 -> 1, has a single edge."
+    },
+    {
+      "input": "root = [1,2,null,3,4,5,null,null,6]",
+      "output": "4",
+      "explanation": "The longest path 5 -> 3 -> 2 -> 4 -> 6 has 4 edges and does not touch the root."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [1, 100].",
+    "-100 <= Node.val <= 100",
+    "Path length is counted in edges, not nodes, and the path does not need to pass through the root.",
+    "The tree height is at most 100, and the tree may be fully skewed."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def diameterOfBinaryTree(self, root: TreeNode | None) -> int:\n        # Write your solution here\n        return 0",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction diameterOfBinaryTree(root) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int diameterOfBinaryTree(TreeNode root) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int diameterOfBinaryTree(TreeNode* root) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [1,2,3,4,5]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1,2]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1,2,null,3,4,5,null,null,6]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [1,2,3,4,5,null,null,6,null,null,7,8,null,null,9]",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Any longest path has a highest node where it bends, and its length there equals height(left) + height(right) measured in edges. The brute-force approach tries every node as that bend point and calls a separate height function for each, which is O(n^2) on a skewed tree. The optimal approach does a single post-order DFS that returns each subtree's height (in nodes) while updating a running maximum with leftHeight + rightHeight at every node; that sum is exactly the number of edges in the longest path bending at the node. This visits each node once for O(n) time and O(h) recursion space.",
+  "hints": [
+    "Every path has one topmost node. What is the longest path whose topmost node is a given node?",
+    "That longest path goes down to the deepest point on the left and the deepest point on the right, so it depends only on the two subtree heights.",
+    "Write a DFS that returns 1 + max(left, right) and, before returning, updates a global best with left + right."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "follow_up_questions": [
+    "How would you return the actual node values on the longest path, not just its length?",
+    "How would you compute the diameter of a general tree where each node can have any number of children?"
+  ]
+}

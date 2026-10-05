@@ -1,0 +1,84 @@
+{
+  "title": "Minimum Genetic Mutation",
+  "slug": "minimum-genetic-mutation",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "A gene is an 8-character string made only of the letters `'A'`, `'C'`, `'G'` and `'T'`. A **mutation** changes exactly one character of a gene into another of these letters.\n\nYou are given a `startGene`, a target `endGene`, and a list `bank` of valid genes. Every gene produced by a mutation (including `endGene` itself) must appear in `bank` to count as a legal step. `startGene` is always considered valid, even if it is not in `bank`.\n\nReturn the **minimum** number of mutations needed to turn `startGene` into `endGene`. If `startGene` already equals `endGene`, return `0`. If it cannot be done, return `-1`.\n\n**Example 1:**\n```\nInput: startGene = \"GATTACAG\", endGene = \"GATTACAT\", bank = [\"GATTACAT\"]\nOutput: 1\nExplanation: Changing the last character from 'G' to 'T' produces endGene, which is in the bank, so one mutation suffices.\n```\n\n**Example 2:**\n```\nInput: startGene = \"CCGGTTAA\", endGene = \"CCGATTAC\", bank = [\"CCGGTTAC\",\"CCGGTAAC\",\"CCGATTAC\"]\nOutput: 2\nExplanation: CCGGTTAA -> CCGGTTAC -> CCGATTAC. Each step changes one character and lands on a bank gene.\n```\n\n**Example 3:**\n```\nInput: startGene = \"AAAAAAAA\", endGene = \"CCCCCCCC\", bank = [\"AAAACCCC\",\"CCCCCCCC\"]\nOutput: -1\nExplanation: No bank gene is exactly one character away from AAAAAAAA, so endGene cannot be reached.\n```",
+  "examples": [
+    {
+      "input": "startGene = \"GATTACAG\", endGene = \"GATTACAT\", bank = [\"GATTACAT\"]",
+      "output": "1",
+      "explanation": "Changing the last character from 'G' to 'T' produces endGene, which is in the bank, so one mutation suffices."
+    },
+    {
+      "input": "startGene = \"CCGGTTAA\", endGene = \"CCGATTAC\", bank = [\"CCGGTTAC\",\"CCGGTAAC\",\"CCGATTAC\"]",
+      "output": "2",
+      "explanation": "CCGGTTAA -> CCGGTTAC -> CCGATTAC. Each step changes one character and lands on a bank gene."
+    },
+    {
+      "input": "startGene = \"AAAAAAAA\", endGene = \"CCCCCCCC\", bank = [\"AAAACCCC\",\"CCCCCCCC\"]",
+      "output": "-1",
+      "explanation": "No bank gene is exactly one character away from AAAAAAAA, so endGene cannot be reached."
+    }
+  ],
+  "constraints": [
+    "startGene.length == endGene.length == bank[i].length == 8",
+    "0 <= bank.length <= 10",
+    "startGene, endGene and bank[i] contain only the characters 'A', 'C', 'G' and 'T'",
+    "bank may contain duplicate genes; duplicates have no extra effect"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minMutation(self, startGene: str, endGene: str, bank: list[str]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minMutation(startGene, endGene, bank) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minMutation(String startGene, String endGene, String[] bank) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minMutation(string startGene, string endGene, vector<string>& bank) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "startGene = \"GATTACAG\", endGene = \"GATTACAT\", bank = [\"GATTACAT\"]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "startGene = \"CCGGTTAA\", endGene = \"CCGATTAC\", bank = [\"CCGGTTAC\",\"CCGGTAAC\",\"CCGATTAC\"]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "startGene = \"AAAAAAAA\", endGene = \"CCCCCCCC\", bank = [\"AAAACCCC\",\"CCCCCCCC\"]",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "startGene = \"AAAAAAAA\", endGene = \"AAAAAAAA\", bank = []",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "startGene = \"AAAAAAAA\", endGene = \"AAAAACCC\", bank = [\"AAAAAAAC\",\"AAAAAACC\",\"AAAAACCC\",\"CAAAAAAA\"]",
+      "expected_output": "3",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Model each gene as a node in an unweighted graph where two genes are connected if they differ in exactly one position and the destination is in the bank. A brute-force DFS that explores every mutation path and keeps the shortest one can blow up exponentially with the number of paths. The optimal approach is breadth-first search from startGene: put the bank in a hash set, and for each dequeued gene try all 8 positions times 4 letters, enqueuing any unvisited neighbour that is in the bank. The first time endGene is dequeued (or generated) its depth is the answer; if the queue empties, return -1. With bank size n and gene length L = 8, each of the n genes tries L * 4 candidates and building or hashing each candidate costs O(L), so this runs in O(n * L^2 * 4) time (effectively O(n) since L is fixed at 8) and O(n) space.",
+  "hints": [
+    "Think of every gene as a node and a single valid mutation as an edge. What kind of search finds the fewest edges between two nodes?",
+    "Breadth-first search from startGene explores genes in order of mutation count. Store the bank in a set so you can check whether a candidate gene is legal in O(1).",
+    "For each gene popped from the queue, try replacing each of the 8 positions with each of 'A', 'C', 'G', 'T'; enqueue unseen candidates that are in the bank with distance + 1, and return the distance as soon as you reach endGene."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * L^2 * 4)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would bidirectional BFS reduce the search space, and when does it help most?",
+    "How would you return the actual sequence of genes along one shortest mutation path?"
+  ]
+}

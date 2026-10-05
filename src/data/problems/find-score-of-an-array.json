@@ -1,0 +1,80 @@
+{
+  "title": "Find Score Of An Array",
+  "slug": "find-score-of-an-array",
+  "difficulty": "medium",
+  "category": "heap",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given an array `nums` of positive integers. Start with `score = 0` and every element unmarked, then repeat the following until every element is marked:\n\n1. Pick the smallest unmarked element. If several unmarked elements share that value, pick the one with the smallest index.\n2. Add its value to `score`.\n3. Mark that element and its immediate left and right neighbours (if they exist). Marking an already marked element has no effect.\n\nReturn the final `score`.\n\n**Example 1:**\n```\nInput: nums = [2,1,3,4,5,2]\nOutput: 7\nExplanation: Pick 1 (index 1), marking indices 0-2. Next smallest unmarked is 2 at index 5, marking indices 4-5. Then 4 at index 3 remains. Score = 1 + 2 + 4 = 7.\n```\n\n**Example 2:**\n```\nInput: nums = [2,3,5,1,3,2]\nOutput: 5\nExplanation: Pick 1 (index 3), marking indices 2-4. Two 2s remain unmarked; the lower index 0 is taken first, marking indices 0-1. Then 2 at index 5. Score = 1 + 2 + 2 = 5.\n```\n\n**Example 3:**\n```\nInput: nums = [1]\nOutput: 1\nExplanation: The only element is picked once, giving a score of 1.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,1,3,4,5,2]",
+      "output": "7",
+      "explanation": "Pick 1 (index 1), marking indices 0-2. Next smallest unmarked is 2 at index 5, marking indices 4-5. Then 4 at index 3 remains. Score = 1 + 2 + 4 = 7."
+    },
+    {
+      "input": "nums = [2,3,5,1,3,2]",
+      "output": "5",
+      "explanation": "Pick 1 (index 3), marking indices 2-4. Two 2s remain unmarked; the lower index 0 is taken first, marking indices 0-1. Then 2 at index 5. Score = 1 + 2 + 2 = 5."
+    },
+    {
+      "input": "nums = [1]",
+      "output": "1",
+      "explanation": "The only element is picked once, giving a score of 1."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "1 <= nums[i] <= 10^6", "Ties in value are broken by choosing the smaller index", "The answer may exceed the 32-bit range, so use a 64-bit integer"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findScore(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findScore(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public long findScore(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    long long findScore(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,1,3,4,5,2]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,3,5,1,3,2]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,1,1,1,1]",
+      "expected_output": "3",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [5,4,3,2,1]",
+      "expected_output": "9",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A direct simulation scans the whole array for the smallest unmarked element on every round, which is O(n^2) in the worst case. The optimal approach notes that the order of picks is simply the elements sorted by (value, index): sort the pairs once (or push them into a min-heap), walk through them, skip any element that is already marked, and otherwise add its value and mark it plus its two neighbours in a boolean array. Sorting dominates, so the time is O(n log n) and the extra space is O(n) for the pairs and the marked array.",
+  "hints": [
+    "The element chosen at each step is always the next one in a fixed ordering. What is that ordering?",
+    "Sort (value, index) pairs, or use a min-heap keyed by value then index, so ties are broken by the smaller index automatically.",
+    "Iterate the sorted pairs with a boolean marked array: skip already marked entries; otherwise add the value and mark index-1, index and index+1."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Can you solve it in O(n) time without sorting by exploiting runs of strictly decreasing values?",
+    "How would the algorithm change if marking an element also marked the two elements on each side (a radius of 2)?"
+  ]
+}

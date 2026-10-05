@@ -85,7 +85,7 @@ test("a diagram only lands on a structured example with the same input", () => {
 });
 
 test("every catalog diagram finds its structured example", () => {
-  // 12 fences across the catalog draw the input as ASCII above `Input:`. Losing
+  // 26 fences across the catalog draw the input as ASCII above `Input:`. Losing
   // one to a wording change in either list should fail here, not silently drop
   // the picture off the page.
   let carried = 0;
@@ -104,7 +104,7 @@ test("every catalog diagram finds its structured example", () => {
     carried += attached;
   }
 
-  assert.equal(carried, 12);
+  assert.equal(carried, 26);
 });
 
 test("no example survives in the prose the page renders", () => {

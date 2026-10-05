@@ -1,0 +1,81 @@
+{
+  "title": "Smallest Subarrays With Maximum Bitwise OR",
+  "slug": "smallest-subarrays-with-maximum-bitwise-or",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given an array `nums` of non-negative integers. For each index `i`, let `best_i` be the largest bitwise OR you can get from a non-empty subarray that starts at `i` (this is just the OR of `nums[i..n-1]`).\n\nReturn an array `answer` of the same length where `answer[i]` is the length of the **shortest** subarray starting at `i` whose bitwise OR equals `best_i`. A subarray always has length at least 1, so if `best_i` is 0 the answer is 1.\n\n**Example 1:**\n```\nInput: nums = [4,0,1,2,4]\nOutput: [4,4,3,2,1]\nExplanation: From index 0 the maximum OR is 7, which needs the bits of 4, 1 and 2, so [4,0,1,2] (length 4) is shortest. From index 1 you need [0,1,2,4] (length 4), from index 2 [1,2,4] (length 3), from index 3 [2,4] (length 2) and from index 4 just [4].\n```\n\n**Example 2:**\n```\nInput: nums = [1,2]\nOutput: [2,1]\nExplanation: From index 0 you need both elements to get OR 3. From index 1 the single element 2 is already the maximum.\n```\n\n**Example 3:**\n```\nInput: nums = [0,0]\nOutput: [1,1]\nExplanation: Every OR is 0, so the shortest subarray of length 1 already achieves the maximum.\n```",
+  "examples": [
+    {
+      "input": "nums = [4,0,1,2,4]",
+      "output": "[4,4,3,2,1]",
+      "explanation": "From index 0 the maximum OR is 7, which needs the bits of 4, 1 and 2, so [4,0,1,2] (length 4) is shortest. From index 1 you need [0,1,2,4] (length 4), from index 2 [1,2,4] (length 3), from index 3 [2,4] (length 2) and from index 4 just [4]."
+    },
+    {
+      "input": "nums = [1,2]",
+      "output": "[2,1]",
+      "explanation": "From index 0 you need both elements to get OR 3. From index 1 the single element 2 is already the maximum."
+    },
+    {
+      "input": "nums = [0,0]",
+      "output": "[1,1]",
+      "explanation": "Every OR is 0, so the shortest subarray of length 1 already achieves the maximum."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "0 <= nums[i] <= 10^9",
+    "The returned array has the same length as nums"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def smallestSubarrays(self, nums: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function smallestSubarrays(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] smallestSubarrays(int[] nums) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> smallestSubarrays(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [4,0,1,2,4]",
+      "expected_output": "[4,4,3,2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2]",
+      "expected_output": "[2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,0]",
+      "expected_output": "[1,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0]",
+      "expected_output": "[1]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [8,4,2,1,0,15,0]",
+      "expected_output": "[4,5,4,3,2,1,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force computes, for each i, the suffix OR and then extends a subarray from i until it matches, costing O(n^2). The optimal approach scans from right to left while remembering, for each of the ~30 bit positions, the nearest index at or after i where that bit is set. At index i, update the stored index for every bit set in nums[i]; the shortest subarray must reach the farthest of those nearest positions, so answer[i] = max(i, max over bits of last[bit]) - i + 1. This is O(n * 30) = O(n) time and O(30) = O(1) extra space besides the output.",
+  "hints": [
+    "The maximum OR starting at i is the OR of the whole suffix. Which bits does the subarray need to collect?",
+    "For each bit, only the closest index at or after i that has that bit set matters.",
+    "Iterate from right to left keeping last[b] for each of the 30 bits; answer[i] is (the largest last[b] among bits seen, or i if none) minus i plus 1."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * 30)",
+    "space": "O(30)"
+  },
+  "follow_up_questions": [
+    "How would you answer the same question for bitwise AND (minimum AND) instead?",
+    "How would you return the subarray with the maximum OR among all subarrays of exactly length k?"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "title": "Minimum Possible Integer After At Most K Adjacent Swaps On Digits",
+  "slug": "minimum-possible-integer-after-at-most-k-adjacent-swaps-on-digits",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google"
+  ],
+  "description": "You are given a string `num` holding the digits of a very large integer and an integer `k`. In one move you may swap any two **adjacent** digits of `num`. You may perform at most `k` moves.\n\nReturn the smallest number you can obtain, as a string of the same length. Leading zeros are allowed in the result and must be kept (do not strip them).\n\n**Example 1:**\n```\nInput: num = \"5341\", k = 3\nOutput: \"1534\"\nExplanation: Move \"1\" three places to the front with three swaps: 5341 -> 5314 -> 5134 -> 1534.\n```\n\n**Example 2:**\n```\nInput: num = \"907\", k = 1\nOutput: \"097\"\nExplanation: One swap brings \"0\" to the front: \"097\". Leading zeros are kept.\n```\n\n**Example 3:**\n```\nInput: num = \"123\", k = 5\nOutput: \"123\"\nExplanation: The digits are already in ascending order, so no swap can make the number smaller.\n```",
+  "examples": [
+    {
+      "input": "num = \"5341\", k = 3",
+      "output": "\"1534\"",
+      "explanation": "Move \"1\" three places to the front with three swaps: 5341 -> 5314 -> 5134 -> 1534."
+    },
+    {
+      "input": "num = \"907\", k = 1",
+      "output": "\"097\"",
+      "explanation": "One swap brings \"0\" to the front: \"097\". Leading zeros are kept."
+    },
+    {
+      "input": "num = \"123\", k = 5",
+      "output": "\"123\"",
+      "explanation": "The digits are already in ascending order, so no swap can make the number smaller."
+    }
+  ],
+  "constraints": [
+    "1 <= num.length <= 3 * 10^4",
+    "num consists only of digits and has no leading zeros",
+    "1 <= k <= 10^9"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minInteger(self, num: str, k: int) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function minInteger(num, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String minInteger(String num, int k) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string minInteger(string num, int k) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "num = \"5341\", k = 3",
+      "expected_output": "\"1534\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num = \"907\", k = 1",
+      "expected_output": "\"097\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num = \"123\", k = 5",
+      "expected_output": "\"123\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num = \"9438957234785635408\", k = 23",
+      "expected_output": "\"0345989723478563548\"",
+      "is_hidden": true
+    },
+    {
+      "input": "num = \"4321\", k = 1000000000",
+      "expected_output": "\"1234\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The greedy rule is: for each output position from left to right, bring the smallest digit that can reach it within the remaining k swaps, preferring its earliest occurrence. The naive implementation scans up to k positions ahead and physically shifts the string, costing O(n^2). To make it fast, keep ten queues of original indices for each digit and a Fenwick tree marking which original indices have already been moved out. The cost to bring original index p to the current front is p minus the number of already-removed indices before p, which the Fenwick tree answers in O(log n). For each position try digits 0..9, take the first whose front index has cost <= k, subtract the cost, mark it removed and append the digit. Remaining digits keep their relative order. Total O(10 * n log n) time and O(n) space.",
+  "hints": [
+    "The leftmost digit matters most. With the swaps you have, what is the smallest digit you can drag to the front?",
+    "Always pick the earliest occurrence of that smallest reachable digit, since it costs the fewest swaps. Then repeat for the next position with the remaining budget.",
+    "Store each digit's original positions in a queue. The real distance of original index p to the front is p minus how many earlier indices were already moved out; maintain that count with a Fenwick tree so each check is O(log n)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you find the maximum possible integer instead?",
+    "If swaps could exchange any two positions (not only adjacent ones), how would the greedy change?"
+  ]
+}

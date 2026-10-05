@@ -1,0 +1,82 @@
+{
+  "title": "Minimum Bracket Reversals",
+  "slug": "minimum-bracket-reversals",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "adobe",
+    "oracle"
+  ],
+  "description": "You are given a string `s` made up only of the characters `'{'` and `'}'`. In one move you may pick any single character and **reverse** it, turning `'{'` into `'}'` or vice versa.\n\nReturn the minimum number of moves needed to make `s` balanced. A string is balanced when every `'{'` can be matched with a later `'}'` and every `'}'` closes an earlier `'{'` (for example `\"{{}}\"` and `\"{}{}\"` are balanced, `\"}{\"` is not). If no sequence of moves can balance the string, return `-1`.\n\n**Example 1:**\n```\nInput: s = \"}{{}}{{{\"\nOutput: 3\nExplanation: After cancelling the matched \"{{}}\", the leftover is \"}{{{\" with c = 1 unmatched '}' and o = 3 unmatched '{'. The answer is ceil(1/2) + ceil(3/2) = 1 + 2 = 3, for example \"}{{{\" -> \"{{}}\" by flipping positions 0, 2 and 3 of the leftover.\n```\n\n**Example 2:**\n```\nInput: s = \"{{}{{{}{{}}{{\"\nOutput: -1\nExplanation: The string has odd length 13, so it can never be balanced.\n```\n\n**Example 3:**\n```\nInput: s = \"}}{{\"\nOutput: 2\nExplanation: Flip the first '}' to '{' and the last '{' to '}' giving \"{}{}\": 2 reversals.\n```",
+  "examples": [
+    {
+      "input": "s = \"}{{}}{{{\"",
+      "output": "3",
+      "explanation": "After cancelling the matched \"{{}}\", the leftover is \"}{{{\" with c = 1 unmatched '}' and o = 3 unmatched '{'. The answer is ceil(1/2) + ceil(3/2) = 1 + 2 = 3, for example \"}{{{\" -> \"{{}}\" by flipping positions 0, 2 and 3 of the leftover."
+    },
+    {
+      "input": "s = \"{{}{{{}{{}}{{\"",
+      "output": "-1",
+      "explanation": "The string has odd length 13, so it can never be balanced."
+    },
+    {
+      "input": "s = \"}}{{\"",
+      "output": "2",
+      "explanation": "Flip the first '}' to '{' and the last '{' to '}' giving \"{}{}\": 2 reversals."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^5",
+    "s[i] is either '{' or '}'",
+    "The length of s may be odd"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countRev(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countRev(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int countRev(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int countRev(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"}{{}}{{{\"",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"{{}{{{}{{}}{{\"",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"}}{{\"",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"}{\"",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"{{{{}}\"",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every subset of positions to flip and checks balance, O(2^n * n). The optimal approach scans once with a stack (or just a counter): push '{', and when a '}' arrives pop a matching '{' if one exists, otherwise record an unmatched '}'. What remains is c unmatched '}' followed by o unmatched '{'. If the length is odd return -1; otherwise each pair of same-type leftovers costs one flip and a mixed '}{' pair costs two, giving ceil(c/2) + ceil(o/2). This runs in O(n) time and O(1) extra space when counters replace the stack.",
+  "hints": [
+    "Already-matched pairs never need to change. Strip them out first and look at what is left.",
+    "After removing matched pairs with a stack, the leftover always looks like some '}' characters followed by some '{' characters. When is it impossible?",
+    "With c leftover '}' and o leftover '{' (c + o even), pairs like '}}' or '{{' need one flip and a final '}{' needs two: the answer is ceil(c/2) + ceil(o/2)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you also return one balanced string that achieves the minimum number of reversals?",
+    "What changes if the string contains several bracket types such as (), [] and {}?"
+  ]
+}

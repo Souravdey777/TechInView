@@ -1,0 +1,82 @@
+{
+  "title": "Minimize the Total Price of the Trips",
+  "slug": "minimize-the-total-price-of-the-trips",
+  "difficulty": "hard",
+  "category": "trees",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are given an undirected tree with `n` nodes labelled `0` to `n - 1`, where `edges[i] = [a_i, b_i]` connects `a_i` and `b_i`. Each node has an even price `price[i]`.\n\nYou also have a list of trips, where `trips[i] = [start_i, end_i]` means you travel from `start_i` to `end_i` along the unique path in the tree. The cost of a trip is the sum of the prices of every node on its path, including both endpoints (a trip with `start_i == end_i` costs just that node's price). If a node is visited by several trips, its price is paid once per trip.\n\nBefore any trip starts, you may pick a set of nodes, **no two of which are adjacent**, and halve the price of each picked node. The set may be empty. Return the minimum possible total cost of all the trips.\n\n**Example 1:**\n```\nInput: n = 4, edges = [[0,1],[1,2],[1,3]], price = [2,2,10,6], trips = [[0,3],[2,1],[2,3]]\nOutput: 23\nExplanation: Halve nodes 0, 2 and 3 (no two of them are adjacent), so prices become [1,2,5,3]. Trip 0 -> 1 -> 3 costs 6, trip 2 -> 1 costs 7 and trip 2 -> 1 -> 3 costs 10, for a total of 23.\n```\n\n**Example 2:**\n```\nInput: n = 2, edges = [[0,1]], price = [2,2], trips = [[0,0]]\nOutput: 1\nExplanation: Halve node 0. The only trip stays at node 0 and costs 1.\n```\n\n**Example 3:**\n```\nInput: n = 3, edges = [[0,1],[1,2]], price = [4,8,6], trips = [[0,2]]\nOutput: 13\nExplanation: The trip visits all three nodes. Halving node 1 alone gives 4 + 4 + 6 = 14, while halving nodes 0 and 2 gives 2 + 8 + 3 = 13, which is the minimum.\n```",
+  "examples": [
+    {
+      "input": "n = 4, edges = [[0,1],[1,2],[1,3]], price = [2,2,10,6], trips = [[0,3],[2,1],[2,3]]",
+      "output": "23",
+      "explanation": "Halve nodes 0, 2 and 3 (no two of them are adjacent), so prices become [1,2,5,3]. Trip 0 -> 1 -> 3 costs 6, trip 2 -> 1 costs 7 and trip 2 -> 1 -> 3 costs 10, for a total of 23."
+    },
+    {
+      "input": "n = 2, edges = [[0,1]], price = [2,2], trips = [[0,0]]",
+      "output": "1",
+      "explanation": "Halve node 0. The only trip stays at node 0 and costs 1."
+    },
+    {
+      "input": "n = 3, edges = [[0,1],[1,2]], price = [4,8,6], trips = [[0,2]]",
+      "output": "13",
+      "explanation": "The trip visits all three nodes. Halving node 1 alone gives 4 + 4 + 6 = 14, while halving nodes 0 and 2 gives 2 + 8 + 3 = 13, which is the minimum."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 50",
+    "edges.length == n - 1 and the edges form a valid tree.",
+    "price.length == n, and every price[i] is even with 2 <= price[i] <= 1000",
+    "1 <= trips.length <= 100",
+    "0 <= start_i, end_i < n"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumTotalPrice(self, n: int, edges: list[list[int]], price: list[int], trips: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumTotalPrice(n, edges, price, trips) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minimumTotalPrice(int n, int[][] edges, int[] price, int[][] trips) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumTotalPrice(int n, vector<vector<int>>& edges, vector<int>& price, vector<vector<int>>& trips) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 4, edges = [[0,1],[1,2],[1,3]], price = [2,2,10,6], trips = [[0,3],[2,1],[2,3]]",
+      "expected_output": "23",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, edges = [[0,1]], price = [2,2], trips = [[0,0]]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, edges = [[0,1],[1,2]], price = [4,8,6], trips = [[0,2]]",
+      "expected_output": "13",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, edges = [], price = [2], trips = [[0,0],[0,0]]",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 6, edges = [[0,1],[1,2],[1,3],[3,4],[3,5]], price = [2,10,4,8,6,2], trips = [[0,4],[2,5],[4,5],[1,1]]",
+      "expected_output": "53",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach enumerates every independent set of nodes to halve, recomputes the cost of all trips, and keeps the minimum, which is exponential in n. The optimal approach first notes that trips in a tree follow unique paths, so the total cost is the sum over nodes of count[v] * price[v], where count[v] is how many trips pass through v; compute count by walking each trip's path with a DFS (O(n * trips)). Then choosing which nodes to halve is a maximum-weight independent set on a tree, solved with a two-state DP: for each node, full[v] = count[v] * price[v] + sum of min(full[c], half[c]) over children, and half[v] = count[v] * price[v] / 2 + sum of full[c] over children. The answer is min(full[root], half[root]). This runs in O(n * t) time for the counts plus O(n) for the DP, with O(n) space.",
+  "hints": [
+    "Since paths in a tree are unique, each trip's cost only depends on which nodes it passes through. Can you separate how often each node is used from which nodes get halved?",
+    "Count how many trips visit each node. The total cost then becomes a weighted sum over nodes, and the halving choice must avoid picking two adjacent nodes.",
+    "Root the tree and use a DP with two states per node: halved (children must be full price) or not halved (each child takes the cheaper of its two states). Weight each node by visitCount * price."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * t)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you speed up counting trip visits for many trips, for example with LCA and prefix sums on the tree?",
+    "What changes if you are allowed to halve at most k nodes?"
+  ]
+}

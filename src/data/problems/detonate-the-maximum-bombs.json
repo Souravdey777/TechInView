@@ -1,0 +1,83 @@
+{
+  "title": "Detonate the Maximum Bombs",
+  "slug": "detonate-the-maximum-bombs",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft"
+  ],
+  "description": "You are given a list of `bombs`, where `bombs[i] = [x, y, r]` places a bomb at integer point `(x, y)` with blast radius `r`. When a bomb explodes, every bomb whose centre lies within or exactly on the edge of its blast circle (Euclidean distance `<= r`) also explodes, and those explosions can trigger further bombs in a chain.\n\nNote that reach is **not symmetric**: bomb A reaching bomb B does not imply B reaches A, because their radii may differ.\n\nYou may manually set off exactly **one** bomb. Return the **maximum** total number of bombs that can explode, including the one you set off.\n\n**Example 1:**\n```\nInput: bombs = [[0,0,2],[3,0,1],[2,0,1]]\nOutput: 3\nExplanation: Setting off bomb 0 at (0,0) reaches bomb 2 at distance 2. Bomb 2 then reaches bomb 1 at distance 1. All 3 bombs explode.\n```\n\n**Example 2:**\n```\nInput: bombs = [[1,1,1],[10,10,1]]\nOutput: 1\nExplanation: The bombs are too far apart to affect each other, so at most 1 explodes.\n```\n\n**Example 3:**\n```\nInput: bombs = [[0,0,1],[0,3,5],[5,0,2]]\nOutput: 2\nExplanation: Bomb 1 at (0,3) with radius 5 reaches bomb 0 (distance 3) but not bomb 2 (distance about 5.83). Bomb 0 and bomb 2 reach nothing. The best is 2.\n```",
+  "examples": [
+    {
+      "input": "bombs = [[0,0,2],[3,0,1],[2,0,1]]",
+      "output": "3",
+      "explanation": "Setting off bomb 0 at (0,0) reaches bomb 2 at distance 2. Bomb 2 then reaches bomb 1 at distance 1. All 3 bombs explode."
+    },
+    {
+      "input": "bombs = [[1,1,1],[10,10,1]]",
+      "output": "1",
+      "explanation": "The bombs are too far apart to affect each other, so at most 1 explodes."
+    },
+    {
+      "input": "bombs = [[0,0,1],[0,3,5],[5,0,2]]",
+      "output": "2",
+      "explanation": "Bomb 1 at (0,3) with radius 5 reaches bomb 0 (distance 3) but not bomb 2 (distance about 5.83). Bomb 0 and bomb 2 reach nothing. The best is 2."
+    }
+  ],
+  "constraints": [
+    "1 <= bombs.length <= 100",
+    "bombs[i].length == 3",
+    "0 <= x, y <= 10^5",
+    "1 <= r <= 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumDetonation(self, bombs: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumDetonation(bombs) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maximumDetonation(int[][] bombs) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maximumDetonation(vector<vector<int>>& bombs) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "bombs = [[0,0,2],[3,0,1],[2,0,1]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "bombs = [[1,1,1],[10,10,1]]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "bombs = [[0,0,1],[0,3,5],[5,0,2]]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "bombs = [[5,5,1]]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "bombs = [[1,1,100000],[100000,100000,1],[50000,50000,1]]",
+      "expected_output": "2",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Model each bomb as a node and add a directed edge i -> j when the squared distance between their centres is at most r_i squared (use integer arithmetic with 64-bit values to avoid floating-point error). Building this graph checks every ordered pair, O(n^2). Then the answer is the largest number of nodes reachable from any single start node, found by running a BFS or DFS from every bomb, which costs O(n) * O(n^2) = O(n^3) in the worst case. Union-find does not work here because the edges are directed. With n <= 100 this brute-force-per-start approach is the intended optimal solution: O(n^3) time and O(n^2) space for the adjacency lists.",
+  "hints": [
+    "Can one bomb's explosion be described as an edge in a graph? Is that edge two-way?",
+    "Bomb i triggers bomb j when (xi - xj)^2 + (yi - yj)^2 <= ri^2. Compare squared values to avoid square roots.",
+    "Build a directed graph of these edges, then run a BFS/DFS from every bomb and count the visited nodes; return the maximum."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^3)",
+    "space": "O(n^2)"
+  },
+  "follow_up_questions": [
+    "Why does a union-find approach give wrong answers for this problem?",
+    "How could you reduce work by contracting strongly connected components first?"
+  ]
+}

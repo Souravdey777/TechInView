@@ -1,0 +1,82 @@
+{
+  "title": "Maximum Length of Repeated Subarray",
+  "slug": "maximum-length-of-repeated-subarray",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "Given two integer arrays `nums1` and `nums2`, return the length of the **longest contiguous subarray** that appears in both arrays (same values in the same order). If the arrays share no common value, return `0`.\n\n**Example 1:**\n```\nInput: nums1 = [1,2,3,2,1], nums2 = [3,2,1,4,7]\nOutput: 3\nExplanation: The subarray [3,2,1] appears in both arrays, and no longer common subarray exists.\n```\n\n**Example 2:**\n```\nInput: nums1 = [0,0,0,0,0], nums2 = [0,0,0,0,0]\nOutput: 5\nExplanation: The two arrays are identical, so the whole array of length 5 is shared.\n```\n\n**Example 3:**\n```\nInput: nums1 = [1,2,3], nums2 = [4,5,6]\nOutput: 0\nExplanation: The arrays have no value in common, so the answer is 0.\n```",
+  "examples": [
+    {
+      "input": "nums1 = [1,2,3,2,1], nums2 = [3,2,1,4,7]",
+      "output": "3",
+      "explanation": "The subarray [3,2,1] appears in both arrays, and no longer common subarray exists."
+    },
+    {
+      "input": "nums1 = [0,0,0,0,0], nums2 = [0,0,0,0,0]",
+      "output": "5",
+      "explanation": "The two arrays are identical, so the whole array of length 5 is shared."
+    },
+    {
+      "input": "nums1 = [1,2,3], nums2 = [4,5,6]",
+      "output": "0",
+      "explanation": "The arrays have no value in common, so the answer is 0."
+    }
+  ],
+  "constraints": [
+    "1 <= nums1.length, nums2.length <= 1000",
+    "0 <= nums1[i], nums2[i] <= 100",
+    "A subarray must be contiguous and non-empty; return 0 if the arrays share no element"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findLength(self, nums1: list[int], nums2: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findLength(nums1, nums2) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int findLength(int[] nums1, int[] nums2) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findLength(vector<int>& nums1, vector<int>& nums2) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums1 = [1,2,3,2,1], nums2 = [3,2,1,4,7]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums1 = [0,0,0,0,0], nums2 = [0,0,0,0,0]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "nums1 = [1,2,3], nums2 = [4,5,6]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums1 = [7], nums2 = [7]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums1 = [1,2,1,2,1,2,3], nums2 = [2,1,2,1,2,3,9]",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force tries every pair of starting indices (i, j) and extends while the elements match, costing O(m * n * min(m, n)). The optimal dynamic programming approach defines dp[i][j] as the length of the longest common subarray ending exactly at nums1[i-1] and nums2[j-1]: if the two values are equal, dp[i][j] = dp[i-1][j-1] + 1, otherwise 0. The answer is the maximum entry. This takes O(m * n) time and can use O(min(m, n)) space by keeping one row (iterating the inner index backwards). Binary search on the length with rolling hashes gives O((m + n) log min(m, n)) as an alternative.",
+  "hints": [
+    "A common subarray must end somewhere in each array. What could you track for every pair of ending positions?",
+    "Let dp[i][j] be the length of the longest common subarray that ends exactly at nums1[i-1] and nums2[j-1]. How does it relate to dp[i-1][j-1]?",
+    "dp[i][j] = dp[i-1][j-1] + 1 when nums1[i-1] == nums2[j-1], else 0. Track the max; a single row iterated backwards is enough."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n)",
+    "space": "O(min(m, n))"
+  },
+  "follow_up_questions": [
+    "How would binary search plus rolling hash (Rabin-Karp) speed this up for very long arrays?",
+    "How does this differ from the Longest Common Subsequence problem, and what changes in the recurrence?"
+  ]
+}

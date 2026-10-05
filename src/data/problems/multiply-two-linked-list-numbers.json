@@ -1,0 +1,83 @@
+{
+  "title": "Multiply Two Linked List Numbers",
+  "slug": "multiply-two-linked-list-numbers",
+  "difficulty": "hard",
+  "category": "linked-lists",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "google",
+    "adobe"
+  ],
+  "description": "Two non-negative integers are stored in singly linked lists `list1` and `list2`, one decimal digit per node, with the **most significant digit first**. The numbers can be far too large to fit in any built-in integer type, so you must not convert them to native integers.\n\nReturn the product as a new linked list of digits in the same most-significant-first format. The result must have **no leading zeros**; if the product is zero, return the single-node list `[0]`.\n\n**Example 1:**\n```\nInput: list1 = [1,2], list2 = [3]\nOutput: [3,6]\nExplanation: 12 * 3 = 36.\n```\n\n**Example 2:**\n```\nInput: list1 = [9,9], list2 = [9,9]\nOutput: [9,8,0,1]\nExplanation: 99 * 99 = 9801.\n```\n\n**Example 3:**\n```\nInput: list1 = [0], list2 = [4,5]\nOutput: [0]\nExplanation: Anything multiplied by zero is zero, returned as a single 0 digit.\n```",
+  "examples": [
+    {
+      "input": "list1 = [1,2], list2 = [3]",
+      "output": "[3,6]",
+      "explanation": "12 * 3 = 36."
+    },
+    {
+      "input": "list1 = [9,9], list2 = [9,9]",
+      "output": "[9,8,0,1]",
+      "explanation": "99 * 99 = 9801."
+    },
+    {
+      "input": "list1 = [0], list2 = [4,5]",
+      "output": "[0]",
+      "explanation": "Anything multiplied by zero is zero, returned as a single 0 digit."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in each list is in the range [1, 200].",
+    "0 <= Node.val <= 9",
+    "Neither input has leading zeros, except the number 0 itself, which is represented as [0].",
+    "Do not convert the whole lists to built-in integer or big-integer types."
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def multiplyLists(self, list1: ListNode | None, list2: ListNode | None) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction multiplyLists(list1, list2) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode multiplyLists(ListNode list1, ListNode list2) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* multiplyLists(ListNode* list1, ListNode* list2) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "list1 = [1,2], list2 = [3]",
+      "expected_output": "[3,6]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [9,9], list2 = [9,9]",
+      "expected_output": "[9,8,0,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [0], list2 = [4,5]",
+      "expected_output": "[0]",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [0], list2 = [0]",
+      "expected_output": "[0]",
+      "is_hidden": true
+    },
+    {
+      "input": "list1 = [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9], list2 = [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]",
+      "expected_output": "[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: repeatedly add list1 to an accumulator list2-value times, which is exponential in the number of digits and infeasible. Optimal: grade-school long multiplication. Read both lists into digit arrays (or reverse them), allocate a result array of length n + m, and for each pair of digits i, j add a[i] * b[j] into position i + j + 1 (indexing from the most significant end), then propagate carries from right to left. Skip leading zeros and build the output linked list from the remaining digits, returning [0] if all digits are zero. This takes O(n * m) time and O(n + m) space.",
+  "hints": [
+    "How do you multiply two long numbers on paper, digit by digit?",
+    "The product of an n-digit and an m-digit number has at most n + m digits; the product of digit i and digit j contributes to a fixed position.",
+    "Accumulate a[i] * b[j] into result[i + j + 1], then sweep right to left carrying overflow into the previous position. Strip leading zeros (keeping one if the product is 0) and build the list."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * m)",
+    "space": "O(n + m)"
+  },
+  "follow_up_questions": [
+    "How would you return the product if the digits were stored least significant first?",
+    "Could you speed this up for very long numbers, for example with Karatsuba multiplication?"
+  ]
+}

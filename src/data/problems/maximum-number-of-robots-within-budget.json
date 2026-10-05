@@ -1,0 +1,82 @@
+{
+  "title": "Maximum Number of Robots Within Budget",
+  "slug": "maximum-number-of-robots-within-budget",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "There are `n` robots in a row. Robot `i` has a charge time `chargeTimes[i]` and a running cost `runningCosts[i]`. You also have an integer `budget`.\n\nIf you run a group of `k` robots, the total cost is\n\n`max(chargeTimes of the group) + k * sum(runningCosts of the group)`.\n\nYou may only run a **contiguous** block of robots. Return the largest `k` such that some block of `k` consecutive robots has total cost **at most** `budget`. If not even one robot fits, return `0`.\n\n**Example 1:**\n```\nInput: chargeTimes = [3,6,1,3,4], runningCosts = [2,1,3,4,5], budget = 25\nOutput: 3\nExplanation: Running the first three robots costs max(3,6,1) + 3 * (2+1+3) = 6 + 18 = 24, which fits in 25. Every window of four robots costs more than 25.\n```\n\n**Example 2:**\n```\nInput: chargeTimes = [11,12,19], runningCosts = [10,8,7], budget = 19\nOutput: 0\nExplanation: Even a single robot costs at least 11 + 1 * 10 = 21, which exceeds 19, so no robots can run.\n```\n\n**Example 3:**\n```\nInput: chargeTimes = [1,1,1,1], runningCosts = [1,1,1,1], budget = 17\nOutput: 4\nExplanation: All four robots cost 1 + 4 * 4 = 17, exactly the budget.\n```",
+  "examples": [
+    {
+      "input": "chargeTimes = [3,6,1,3,4], runningCosts = [2,1,3,4,5], budget = 25",
+      "output": "3",
+      "explanation": "Running the first three robots costs max(3,6,1) + 3 * (2+1+3) = 6 + 18 = 24, which fits in 25. Every window of four robots costs more than 25."
+    },
+    {
+      "input": "chargeTimes = [11,12,19], runningCosts = [10,8,7], budget = 19",
+      "output": "0",
+      "explanation": "Even a single robot costs at least 11 + 1 * 10 = 21, which exceeds 19, so no robots can run."
+    },
+    {
+      "input": "chargeTimes = [1,1,1,1], runningCosts = [1,1,1,1], budget = 17",
+      "output": "4",
+      "explanation": "All four robots cost 1 + 4 * 4 = 17, exactly the budget."
+    }
+  ],
+  "constraints": [
+    "chargeTimes.length == runningCosts.length == n",
+    "1 <= n <= 5 * 10^4",
+    "1 <= chargeTimes[i], runningCosts[i] <= 10^5",
+    "1 <= budget <= 10^15"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumRobots(self, chargeTimes: list[int], runningCosts: list[int], budget: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumRobots(chargeTimes, runningCosts, budget) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maximumRobots(int[] chargeTimes, int[] runningCosts, long budget) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maximumRobots(vector<int>& chargeTimes, vector<int>& runningCosts, long long budget) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "chargeTimes = [3,6,1,3,4], runningCosts = [2,1,3,4,5], budget = 25",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "chargeTimes = [11,12,19], runningCosts = [10,8,7], budget = 19",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "chargeTimes = [1,1,1,1], runningCosts = [1,1,1,1], budget = 17",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "chargeTimes = [5], runningCosts = [1], budget = 6",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "chargeTimes = [100000,1,100000,1,100000], runningCosts = [100000,100000,100000,100000,100000], budget = 1000000000000000",
+      "expected_output": "5",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force evaluates every window (i, j), computing its max charge time and running-cost sum incrementally, which is O(n^2). Because adding robots never decreases the cost, a sliding window works. Expand the right end one robot at a time, maintaining the running sum of runningCosts and a monotonic deque of indices whose chargeTimes are decreasing, so the front of the deque is the window maximum. While max + size * sum exceeds the budget, shrink from the left: subtract its running cost and pop it from the deque front if it is that index. Record the window size after each step. Each index enters and leaves the deque once, so the total time is O(n) with O(n) space. Binary search on k with a fixed-size sliding window also works in O(n log n).",
+  "hints": [
+    "If a block of robots is too expensive, any larger block containing it is also too expensive. Which technique does that monotonicity suggest?",
+    "Use a sliding window over the robots. The running-cost sum is easy to maintain; what structure gives you the window maximum of chargeTimes quickly?",
+    "Keep a deque of indices with decreasing chargeTimes so its front is the window max. Shrink from the left while max + size * sum > budget, and track the largest window size."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you solve this with binary search on the answer, and what is the trade-off versus the sliding window?",
+    "What changes if the robots no longer need to be consecutive?"
+  ]
+}

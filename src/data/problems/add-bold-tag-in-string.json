@@ -1,0 +1,84 @@
+{
+  "title": "Add Bold Tag in String",
+  "slug": "add-bold-tag-in-string",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft"
+  ],
+  "description": "You are given a string `s` and an array of strings `words`. Every occurrence of any word inside `s` should be shown in bold.\n\nMark each character of `s` that is covered by at least one occurrence of a word. Then wrap every maximal run of marked characters in a single `<b>` and `</b>` pair. Overlapping occurrences and occurrences that touch end-to-start must end up inside the **same** pair of tags. Return the resulting string. If nothing matches, return `s` unchanged.\n\n**Example 1:**\n```\nInput: s = \"hello42world\", words = [\"hell\",\"world\"]\nOutput: \"<b>hell</b>o42<b>world</b>\"\nExplanation: \"hell\" covers indices 0-3 and \"world\" covers 7-11; the two runs are separated by \"o42\", so they get separate tags.\n```\n\n**Example 2:**\n```\nInput: s = \"mmnnop\", words = [\"mm\",\"mn\",\"nop\"]\nOutput: \"<b>mmnnop</b>\"\nExplanation: \"mm\" covers 0-1 and \"mn\" covers 1-2, so they overlap; \"nop\" covers 3-5 and touches that run. Everything merges into one bold block.\n```\n\n**Example 3:**\n```\nInput: s = \"abcdef\", words = [\"xy\",\"fg\"]\nOutput: \"abcdef\"\nExplanation: Neither word appears in s, so no tags are added.\n```",
+  "examples": [
+    {
+      "input": "s = \"hello42world\", words = [\"hell\",\"world\"]",
+      "output": "\"<b>hell</b>o42<b>world</b>\"",
+      "explanation": "\"hell\" covers indices 0-3 and \"world\" covers 7-11; the two runs are separated by \"o42\", so they get separate tags."
+    },
+    {
+      "input": "s = \"mmnnop\", words = [\"mm\",\"mn\",\"nop\"]",
+      "output": "\"<b>mmnnop</b>\"",
+      "explanation": "\"mm\" covers 0-1 and \"mn\" covers 1-2, so they overlap; \"nop\" covers 3-5 and touches that run. Everything merges into one bold block."
+    },
+    {
+      "input": "s = \"abcdef\", words = [\"xy\",\"fg\"]",
+      "output": "\"abcdef\"",
+      "explanation": "Neither word appears in s, so no tags are added."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 1000",
+    "1 <= words.length <= 100",
+    "1 <= words[i].length <= 1000",
+    "s and words[i] consist of English letters and digits",
+    "All values in words are unique"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def addBoldTag(self, s: str, words: list[str]) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function addBoldTag(s, words) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String addBoldTag(String s, String[] words) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string addBoldTag(string s, vector<string>& words) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"hello42world\", words = [\"hell\",\"world\"]",
+      "expected_output": "\"<b>hell</b>o42<b>world</b>\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"mmnnop\", words = [\"mm\",\"mn\",\"nop\"]",
+      "expected_output": "\"<b>mmnnop</b>\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abcdef\", words = [\"xy\",\"fg\"]",
+      "expected_output": "\"abcdef\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aaabbcc\", words = [\"aaa\",\"aab\",\"bc\"]",
+      "expected_output": "\"<b>aaabbc</b>c\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"ab12\", words = [\"a\",\"b\",\"12\",\"x\"]",
+      "expected_output": "\"<b>ab12</b>\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: for every start index i and every word w, check whether s starts with w at i and mark those characters bold; this is O(n * m * L) time for n = len(s), m words of max length L. With a trie: insert all words, then from each index i walk the trie along s[i:] and remember the farthest end j of any word reached; mark s[i..j-1] as bold (or maintain a running 'bold until' pointer). Finally scan once, opening <b> when entering a bold run and closing </b> when leaving it, which merges overlapping and adjacent ranges automatically. The trie walk costs O(n * L) time and the trie uses O(total word length) space, plus O(n) for the bold mask.",
+  "hints": [
+    "Instead of thinking about tags directly, first decide for each character of s whether it should be bold.",
+    "From each starting index you want the longest word that starts there. A trie of the words lets you find every match starting at i in a single walk.",
+    "Keep a boolean mask (or a running 'bold until' index). After filling it, build the output by inserting <b> where a bold run begins and </b> where it ends, so touching ranges merge naturally."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * L + W)",
+    "space": "O(n + W)"
+  },
+  "follow_up_questions": [
+    "How would you support case-insensitive matching while keeping the original casing of s?",
+    "If s were extremely long and words fixed, how would Aho-Corasick improve the matching phase?"
+  ]
+}

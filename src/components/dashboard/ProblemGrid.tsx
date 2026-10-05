@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FIELD, FOCUS, LABEL, LINK_ARROW } from "@/components/marketing/ds";
@@ -19,13 +19,16 @@ import {
 } from "@/components/dashboard/problems/ProblemRow";
 import {
   EMPTY_FACETS,
+  SORT_LABELS,
   computeFacetCounts,
+  sortProblems,
   filterProblems,
   hasActiveFacets,
   summarizeBank,
   type BankProblem,
   type ProblemBankSummary,
   type ProblemFacets,
+  type ProblemSort,
 } from "@/components/dashboard/problems/catalogue";
 
 const DIFFICULTY_ORDER: readonly (DifficultyLevel | "all")[] = [
@@ -34,6 +37,9 @@ const DIFFICULTY_ORDER: readonly (DifficultyLevel | "all")[] = [
   "medium",
   "hard",
 ];
+
+/** Rows rendered per scroll step; the full bank is filtered client-side, only rendering is paged. */
+const PAGE_SIZE = 40;
 
 type ProblemGridProps = {
   problems: BankProblem[];
@@ -49,6 +55,11 @@ type ProblemGridProps = {
  */
 export function ProblemGrid({ problems, summary }: ProblemGridProps) {
   const [facets, setFacets] = useState<ProblemFacets>(EMPTY_FACETS);
+  const [sort, setSort] = useState<ProblemSort>("default");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  // Typing stays responsive while 2,000 rows re-filter behind it.
+  const deferredFacets = useDeferredValue(facets);
 
   const derivedSummary = useMemo(() => summarizeBank(problems), [problems]);
   const bank = summary ?? derivedSummary;
@@ -68,13 +79,35 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
   }, [problems]);
 
   const counts = useMemo(
-    () => computeFacetCounts(problems, facets),
-    [problems, facets]
+    () => computeFacetCounts(problems, deferredFacets),
+    [problems, deferredFacets]
   );
   const filtered = useMemo(
-    () => filterProblems(problems, facets),
-    [problems, facets]
+    () => sortProblems(filterProblems(problems, deferredFacets), sort),
+    [problems, deferredFacets, sort]
   );
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
+  // New filters or sort start back at the first page.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [deferredFacets, sort]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((count) => count + PAGE_SIZE);
+        }
+      },
+      { rootMargin: "600px 0px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, visibleCount]);
 
   const isFiltered = hasActiveFacets(facets);
   const query = facets.search.trim();
@@ -88,6 +121,7 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
 
   function clearFacets() {
     setFacets(EMPTY_FACETS);
+    setSort("default");
   }
 
   return (
@@ -96,7 +130,8 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
 
       {problems.length > 0 ? (
         <div className="space-y-5">
-          <div className="relative md:max-w-[520px]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1 md:max-w-[520px]">
             <Search
               aria-hidden="true"
               className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-subtle"
@@ -122,6 +157,22 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
                 <X className="h-3.5 w-3.5" />
               </button>
             ) : null}
+          </div>
+          <label className="flex items-center gap-3">
+            <span className={LABEL}>Sort</span>
+            <select
+              value={sort}
+              onChange={(event) => setSort(event.target.value as ProblemSort)}
+              aria-label="Sort problems"
+              className={cn(FIELD, "w-auto cursor-pointer bg-brand-deep py-2.5 pr-10")}
+            >
+              {(Object.keys(SORT_LABELS) as ProblemSort[]).map((value) => (
+                <option key={value} value={value}>
+                  {SORT_LABELS[value]}
+                </option>
+              ))}
+            </select>
+          </label>
           </div>
 
           <div
@@ -158,6 +209,7 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
             onCategoryChange={(category) => update("category", category)}
             onProgressChange={(progress) => update("progress", progress)}
             onFreeOnlyChange={(freeOnly) => update("freeOnly", freeOnly)}
+            onCompanyChange={(company) => update("company", company)}
           />
         </div>
       ) : null}
@@ -208,10 +260,28 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
               </div>
 
               <div className="divide-y divide-white/[0.08] border-y border-white/[0.08]">
-                {filtered.map((problem) => (
+                {visible.map((problem) => (
                   <ProblemRow key={problem.id} problem={problem} />
                 ))}
               </div>
+
+              {hasMore ? (
+                <div
+                  ref={sentinelRef}
+                  className="flex flex-col items-center gap-3 py-8"
+                >
+                  <p className={LABEL} aria-live="polite">
+                    Showing {visible.length} of {filtered.length}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                  >
+                    Load more
+                  </Button>
+                </div>
+              ) : null}
             </>
           ) : (
             <div className="border-y border-white/[0.08] py-16 text-center">

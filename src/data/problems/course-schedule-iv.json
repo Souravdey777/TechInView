@@ -1,0 +1,84 @@
+{
+  "title": "Course Schedule IV",
+  "slug": "course-schedule-iv",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "meta"
+  ],
+  "description": "You are planning `numCourses` courses labelled `0` to `numCourses - 1`. Each `prerequisites[i] = [a, b]` says course `a` must be completed **before** course `b`. Prerequisite chains are transitive: if `a` comes before `b` and `b` comes before `c`, then `a` is also a prerequisite of `c`.\n\nYou are also given `queries`, where `queries[j] = [u, v]` asks: is course `u` a (direct or indirect) prerequisite of course `v`?\n\nReturn a boolean array `answer` where `answer[j]` is the answer to the `j`-th query, in the same order as `queries`. The prerequisite graph has no cycles.\n\n**Example 1:**\n```\nInput: numCourses = 4, prerequisites = [[0,1],[1,2],[3,2]], queries = [[0,2],[2,0],[3,1],[3,2]]\nOutput: [true,false,false,true]\nExplanation: 0 -> 1 -> 2, so 0 is an indirect prerequisite of 2. Course 2 is not before 0. Course 3 only leads to 2, not to 1. Course 3 is a direct prerequisite of 2.\n```\n\n**Example 2:**\n```\nInput: numCourses = 2, prerequisites = [], queries = [[1,0],[0,1]]\nOutput: [false,false]\nExplanation: With no prerequisites, no course depends on any other.\n```\n\n**Example 3:**\n```\nInput: numCourses = 3, prerequisites = [[1,2],[1,0],[2,0]], queries = [[1,0],[1,2]]\nOutput: [true,true]\nExplanation: Course 1 directly precedes both 0 and 2.\n```",
+  "examples": [
+    {
+      "input": "numCourses = 4, prerequisites = [[0,1],[1,2],[3,2]], queries = [[0,2],[2,0],[3,1],[3,2]]",
+      "output": "[true,false,false,true]",
+      "explanation": "0 -> 1 -> 2, so 0 is an indirect prerequisite of 2. Course 2 is not before 0. Course 3 only leads to 2, not to 1. Course 3 is a direct prerequisite of 2."
+    },
+    {
+      "input": "numCourses = 2, prerequisites = [], queries = [[1,0],[0,1]]",
+      "output": "[false,false]",
+      "explanation": "With no prerequisites, no course depends on any other."
+    },
+    {
+      "input": "numCourses = 3, prerequisites = [[1,2],[1,0],[2,0]], queries = [[1,0],[1,2]]",
+      "output": "[true,true]",
+      "explanation": "Course 1 directly precedes both 0 and 2."
+    }
+  ],
+  "constraints": [
+    "2 <= numCourses <= 100",
+    "0 <= prerequisites.length <= numCourses * (numCourses - 1) / 2",
+    "All prerequisite pairs are distinct, a != b, and the graph is acyclic",
+    "1 <= queries.length <= 10^4",
+    "0 <= u, v <= numCourses - 1 and u != v"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def checkIfPrerequisite(self, numCourses: int, prerequisites: list[list[int]], queries: list[list[int]]) -> list[bool]:\n        # Write your solution here\n        pass",
+    "javascript": "function checkIfPrerequisite(numCourses, prerequisites, queries) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<Boolean> checkIfPrerequisite(int numCourses, int[][] prerequisites, int[][] queries) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<bool> checkIfPrerequisite(int numCourses, vector<vector<int>>& prerequisites, vector<vector<int>>& queries) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "numCourses = 4, prerequisites = [[0,1],[1,2],[3,2]], queries = [[0,2],[2,0],[3,1],[3,2]]",
+      "expected_output": "[true,false,false,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "numCourses = 2, prerequisites = [], queries = [[1,0],[0,1]]",
+      "expected_output": "[false,false]",
+      "is_hidden": false
+    },
+    {
+      "input": "numCourses = 3, prerequisites = [[1,2],[1,0],[2,0]], queries = [[1,0],[1,2]]",
+      "expected_output": "[true,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "numCourses = 2, prerequisites = [[1,0]], queries = [[0,1],[1,0]]",
+      "expected_output": "[false,true]",
+      "is_hidden": true
+    },
+    {
+      "input": "numCourses = 5, prerequisites = [[4,3],[3,2],[2,1],[1,0]], queries = [[4,0],[0,4],[2,0],[3,1],[1,3]]",
+      "expected_output": "[true,false,true,true,false]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force answers each query with its own DFS/BFS from u looking for v, costing O(q * (n + e)). Since there are many queries but at most 100 courses, precompute full reachability instead. Either run a BFS/DFS from every course to fill an n x n boolean table (O(n * (n + e))), or use Floyd-Warshall-style transitive closure: reach[i][j] |= reach[i][k] && reach[k][j] for every intermediate k, which is O(n^3). A topological-order variant propagates each node's ancestor set to its children. After precomputation every query is an O(1) lookup, for a total of O(n^3 + q) time and O(n^2) space.",
+  "hints": [
+    "Each query is a reachability question in a directed graph. How expensive is answering each one from scratch?",
+    "There are far more queries than courses. Consider precomputing reachability for every pair of courses once.",
+    "Build an n x n table: start with direct edges, then for every middle course k set reach[i][j] = true when reach[i][k] and reach[k][j]. Answer queries by lookup."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^3 + q)",
+    "space": "O(n^2)"
+  },
+  "follow_up_questions": [
+    "How would you speed up the closure using bitsets?",
+    "If prerequisites could be added between queries, how would you keep the reachability table up to date?"
+  ]
+}

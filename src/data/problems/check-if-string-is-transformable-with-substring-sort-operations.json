@@ -1,0 +1,80 @@
+{
+  "title": "Check If String Is Transformable With Substring Sort Operations",
+  "slug": "check-if-string-is-transformable-with-substring-sort-operations",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are given two strings `s` and `t` of equal length, both made of digits. In one operation you may pick any non-empty substring of `s` and sort its digits in **ascending** order in place.\n\nReturn `true` if `s` can be turned into exactly `t` using any number of operations (including zero), otherwise return `false`.\n\n**Example 1:**\n```\nInput: s = \"53412\", t = \"35124\"\nOutput: true\nExplanation: Sort the substring \"53\" to get \"35412\", then sort the substring \"412\" to get \"35124\".\n```\n\n**Example 2:**\n```\nInput: s = \"4132\", t = \"1423\"\nOutput: true\nExplanation: Sort the substring \"41\" to get \"1432\", then sort the substring \"32\" to get \"1423\".\n```\n\n**Example 3:**\n```\nInput: s = \"1324\", t = \"3124\"\nOutput: false\nExplanation: In t the digit 3 sits before the 1, but in s the 1 is ahead of the 3. Sorting only ever moves a smaller digit forward past larger ones, so 3 can never overtake 1.\n```",
+  "examples": [
+    {
+      "input": "s = \"53412\", t = \"35124\"",
+      "output": "true",
+      "explanation": "Sort the substring \"53\" to get \"35412\", then sort the substring \"412\" to get \"35124\"."
+    },
+    {
+      "input": "s = \"4132\", t = \"1423\"",
+      "output": "true",
+      "explanation": "Sort the substring \"41\" to get \"1432\", then sort the substring \"32\" to get \"1423\"."
+    },
+    {
+      "input": "s = \"1324\", t = \"3124\"",
+      "output": "false",
+      "explanation": "In t the digit 3 sits before the 1, but in s the 1 is ahead of the 3. Sorting only ever moves a smaller digit forward past larger ones, so 3 can never overtake 1."
+    }
+  ],
+  "constraints": [
+    "s.length == t.length",
+    "1 <= s.length <= 10^5",
+    "s and t consist only of digits '0' to '9'"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def isTransformable(self, s: str, t: str) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function isTransformable(s, t) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean isTransformable(String s, String t) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool isTransformable(string s, string t) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"53412\", t = \"35124\"",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"4132\", t = \"1423\"",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"1324\", t = \"3124\"",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"1\", t = \"2\"",
+      "expected_output": "false",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"12345\", t = \"12435\"",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force runs a BFS over every string reachable by sorting substrings, which explodes combinatorially. The key insight is that sorting a substring can be decomposed into swaps of adjacent pairs where the left digit is larger, so a digit can move left only past strictly larger digits, and never past a smaller one. Keep ten queues holding the positions of each digit in s. Scan t from left to right: for digit d, take the earliest unused position p of d in s (from its queue). If any smaller digit 0..d-1 still has an unused position before p, that smaller digit would have to be overtaken, so return false. Otherwise pop p and continue. If a queue is empty (digit counts differ) return false. Each step checks at most 10 queues, giving O(10 * n) time and O(n) space.",
+  "hints": [
+    "Any sort of a substring can be simulated by repeatedly swapping two adjacent digits where the left one is larger.",
+    "So a digit can only travel left past strictly larger digits. Which digits does the i-th character of t have to jump over in s?",
+    "Store the positions of each digit 0-9 in s in queues. For each character d of t, take the front position p of d's queue and fail if any digit smaller than d has a queued position less than p; otherwise pop it."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "What changes if the operation sorts a substring in descending order instead?",
+    "How would you count the minimum number of adjacent swaps needed when the transformation is possible?"
+  ]
+}

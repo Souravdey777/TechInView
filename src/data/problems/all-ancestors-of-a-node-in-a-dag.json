@@ -1,0 +1,83 @@
+{
+  "title": "All Ancestors of a Node in a Directed Acyclic Graph",
+  "slug": "all-ancestors-of-a-node-in-a-dag",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given a directed acyclic graph with `n` nodes numbered `0` to `n - 1`, and a list `edges` where `edges[i] = [from, to]` is a directed edge from `from` to `to`.\n\nNode `u` is an **ancestor** of node `v` if there is a path of one or more edges from `u` to `v`.\n\nReturn a list `answer` of length `n` where `answer[i]` contains every ancestor of node `i`, **sorted in ascending order**. A node with no ancestors gets an empty list.\n\n**Example 1:**\n```\nInput: n = 5, edges = [[0,2],[1,2],[2,3],[3,4],[1,4]]\nOutput: [[],[],[0,1],[0,1,2],[0,1,2,3]]\nExplanation: Nodes 0 and 1 have no incoming edges. Node 2 is reached from 0 and 1. Node 3 is reached through 2, so its ancestors are 0, 1, 2. Node 4 is reached through 3 and directly from 1, giving 0, 1, 2, 3.\n```\n\n**Example 2:**\n```\nInput: n = 3, edges = []\nOutput: [[],[],[]]\nExplanation: With no edges, no node has any ancestor.\n```\n\n**Example 3:**\n```\nInput: n = 4, edges = [[3,0],[3,1],[0,2],[1,2]]\nOutput: [[3],[3],[0,1,3],[]]\nExplanation: Node 3 points to both 0 and 1, which both point to 2. So nodes 0 and 1 each have ancestor 3, node 2 has ancestors 0, 1 and 3, and node 3 has none.\n```",
+  "examples": [
+    {
+      "input": "n = 5, edges = [[0,2],[1,2],[2,3],[3,4],[1,4]]",
+      "output": "[[],[],[0,1],[0,1,2],[0,1,2,3]]",
+      "explanation": "Nodes 0 and 1 have no incoming edges. Node 2 is reached from 0 and 1. Node 3 is reached through 2, so its ancestors are 0, 1, 2. Node 4 is reached through 3 and directly from 1, giving 0, 1, 2, 3."
+    },
+    {
+      "input": "n = 3, edges = []",
+      "output": "[[],[],[]]",
+      "explanation": "With no edges, no node has any ancestor."
+    },
+    {
+      "input": "n = 4, edges = [[3,0],[3,1],[0,2],[1,2]]",
+      "output": "[[3],[3],[0,1,3],[]]",
+      "explanation": "Node 3 points to both 0 and 1, which both point to 2. So nodes 0 and 1 each have ancestor 3, node 2 has ancestors 0, 1 and 3, and node 3 has none."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1000",
+    "0 <= edges.length <= min(2000, n * (n - 1) / 2)",
+    "edges[i].length == 2 and 0 <= from, to <= n - 1, from != to",
+    "There are no duplicate edges",
+    "The graph is acyclic"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def getAncestors(self, n: int, edges: list[list[int]]) -> list[list[int]]:\n        # Write your solution here\n        pass",
+    "javascript": "function getAncestors(n, edges) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<Integer>> getAncestors(int n, int[][] edges) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> getAncestors(int n, vector<vector<int>>& edges) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 5, edges = [[0,2],[1,2],[2,3],[3,4],[1,4]]",
+      "expected_output": "[[],[],[0,1],[0,1,2],[0,1,2,3]]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, edges = []",
+      "expected_output": "[[],[],[]]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 4, edges = [[3,0],[3,1],[0,2],[1,2]]",
+      "expected_output": "[[3],[3],[0,1,3],[]]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, edges = []",
+      "expected_output": "[[]]",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 5, edges = [[4,3],[3,2],[2,1],[1,0],[4,0]]",
+      "expected_output": "[[1,2,3,4],[2,3,4],[3,4],[4],[]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force check of every pair (u, v) with a separate path search costs O(n^2 * (n + e)). A cleaner approach runs one DFS/BFS per node on the reversed graph (edges flipped to point from child to parent) and collects everything it reaches, then sorts; that is O(n * (n + e) + n^2 log n). An equally efficient alternative runs one DFS from each source node u on the original graph and appends u to every node it reaches; iterating u from 0 to n - 1 produces each ancestor list already sorted, avoiding the sort. The forward-DFS variant (iterating u in ascending order) therefore reaches O(n * (n + e)) time with no sorting, while the reversed-graph variant adds the O(n^2 log n) sort; both need O(n^2) space for the output itself.",
+  "hints": [
+    "An ancestor of v is any node that can reach v. Which direction of traversal finds them naturally?",
+    "You could reverse the edges and search from each node, or search forward from each node and record it in everything it reaches.",
+    "Loop u from 0 to n - 1, DFS forward from u, and append u to the list of every visited node. The lists come out sorted automatically."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * (n + e))",
+    "space": "O(n^2)"
+  },
+  "follow_up_questions": [
+    "How would you use a topological order and set unions (or bitsets) to compute all ancestor sets in one pass?",
+    "How would you answer 'is u an ancestor of v' queries quickly if the graph were huge and only a few queries arrived?"
+  ]
+}

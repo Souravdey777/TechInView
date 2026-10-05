@@ -1,0 +1,82 @@
+{
+  "title": "Iterator for Combination",
+  "slug": "iterator-for-combination",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "Design an iterator over all combinations of a fixed length drawn from a string of characters.\n\nImplement the `CombinationIterator` class:\n\n- `CombinationIterator(String characters, int combinationLength)` receives a string of **sorted, distinct** lowercase letters and the length of each combination.\n- `String next()` returns the next combination of length `combinationLength` in **lexicographic order**. Characters inside a combination keep their original order from `characters`.\n- `boolean hasNext()` returns `true` if at least one more combination remains, otherwise `false`.\n\nEvery call to `next` is guaranteed to be valid (there is always a combination left when it is called).\n\n**Example 1:**\n```\nInput: [\"CombinationIterator\",\"next\",\"next\",\"hasNext\",\"next\",\"next\",\"next\",\"next\",\"hasNext\"], [[\"pqrs\",2],[],[],[],[],[],[],[],[]]\nOutput: [null,\"pq\",\"pr\",true,\"ps\",\"qr\",\"qs\",\"rs\",false]\nExplanation: The 2-letter combinations of \"pqrs\" in lexicographic order are pq, pr, ps, qr, qs, rs. After rs is returned there are none left.\n```\n\n**Example 2:**\n```\nInput: [\"CombinationIterator\",\"next\",\"next\",\"next\",\"next\",\"hasNext\"], [[\"wxyz\",3],[],[],[],[],[]]\nOutput: [null,\"wxy\",\"wxz\",\"wyz\",\"xyz\",false]\nExplanation: The 3-letter combinations of \"wxyz\" are wxy, wxz, wyz, xyz in order; after all four, hasNext is false.\n```\n\n**Example 3:**\n```\nInput: [\"CombinationIterator\",\"hasNext\",\"next\",\"hasNext\"], [[\"k\",1],[],[],[]]\nOutput: [null,true,\"k\",false]\nExplanation: With a single character and length 1 there is exactly one combination, \"k\".\n```",
+  "examples": [
+    {
+      "input": "[\"CombinationIterator\",\"next\",\"next\",\"hasNext\",\"next\",\"next\",\"next\",\"next\",\"hasNext\"], [[\"pqrs\",2],[],[],[],[],[],[],[],[]]",
+      "output": "[null,\"pq\",\"pr\",true,\"ps\",\"qr\",\"qs\",\"rs\",false]",
+      "explanation": "The 2-letter combinations of \"pqrs\" in lexicographic order are pq, pr, ps, qr, qs, rs. After rs is returned there are none left."
+    },
+    {
+      "input": "[\"CombinationIterator\",\"next\",\"next\",\"next\",\"next\",\"hasNext\"], [[\"wxyz\",3],[],[],[],[],[]]",
+      "output": "[null,\"wxy\",\"wxz\",\"wyz\",\"xyz\",false]",
+      "explanation": "The 3-letter combinations of \"wxyz\" are wxy, wxz, wyz, xyz in order; after all four, hasNext is false."
+    },
+    {
+      "input": "[\"CombinationIterator\",\"hasNext\",\"next\",\"hasNext\"], [[\"k\",1],[],[],[]]",
+      "output": "[null,true,\"k\",false]",
+      "explanation": "With a single character and length 1 there is exactly one combination, \"k\"."
+    }
+  ],
+  "constraints": [
+    "1 <= combinationLength <= characters.length <= 15",
+    "characters consists of sorted, distinct lowercase English letters",
+    "At most 10^4 calls in total are made to next and hasNext",
+    "Every call to next is valid"
+  ],
+  "starter_code": {
+    "python": "class CombinationIterator:\n    def __init__(self, characters: str, combinationLength: int):\n        # Initialize your data structure here\n        pass\n\n    def next(self) -> str:\n        pass\n\n    def hasNext(self) -> bool:\n        pass",
+    "javascript": "function CombinationIterator(characters, combinationLength) {\n    // Initialize your data structure here\n}\n\nCombinationIterator.prototype.next = function() {\n    // Write your solution here\n};\n\nCombinationIterator.prototype.hasNext = function() {\n    // Write your solution here\n};",
+    "java": "class CombinationIterator {\n    public CombinationIterator(String characters, int combinationLength) {\n        // Initialize your data structure here\n    }\n\n    public String next() {\n        // Write your solution here\n        return \"\";\n    }\n\n    public boolean hasNext() {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class CombinationIterator {\npublic:\n    CombinationIterator(string characters, int combinationLength) {\n        // Initialize your data structure here\n    }\n\n    string next() {\n        // Write your solution here\n        return \"\";\n    }\n\n    bool hasNext() {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"CombinationIterator\",\"next\",\"next\",\"hasNext\",\"next\",\"next\",\"next\",\"next\",\"hasNext\"], [[\"pqrs\",2],[],[],[],[],[],[],[],[]]",
+      "expected_output": "[null,\"pq\",\"pr\",true,\"ps\",\"qr\",\"qs\",\"rs\",false]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"CombinationIterator\",\"next\",\"next\",\"next\",\"next\",\"hasNext\"], [[\"wxyz\",3],[],[],[],[],[]]",
+      "expected_output": "[null,\"wxy\",\"wxz\",\"wyz\",\"xyz\",false]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"CombinationIterator\",\"hasNext\",\"next\",\"hasNext\"], [[\"k\",1],[],[],[]]",
+      "expected_output": "[null,true,\"k\",false]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"CombinationIterator\",\"hasNext\",\"next\",\"hasNext\"], [[\"abcde\",5],[],[],[]]",
+      "expected_output": "[null,true,\"abcde\",false]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"CombinationIterator\",\"next\",\"next\",\"hasNext\",\"next\",\"next\",\"hasNext\"], [[\"abcd\",1],[],[],[],[],[],[]]",
+      "expected_output": "[null,\"a\",\"b\",true,\"c\",\"d\",false]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The simplest approach precomputes every combination up front with backtracking (or bitmasks), stores them in lexicographic order, and serves them with an index; this costs O(C(n, k) * k) time and space at construction and O(1) per call. A leaner approach keeps only the current combination as k indices into characters, starting at [0, 1, ..., k-1]. To advance, find the rightmost index i that can still grow (idx[i] < n - k + i), increment it, and reset every index after it to consecutive values; if no such index exists, the iterator is exhausted. Each next is O(k) time and the iterator uses O(k) space, with hasNext in O(1) by tracking an exhausted flag.",
+  "hints": [
+    "The total number of combinations is at most C(15, 7) = 6435, so generating them all is feasible. But can you avoid storing them?",
+    "Represent the current combination by k increasing indices into characters. The first combination uses indices 0 through k-1.",
+    "To get the next combination, find the rightmost index i with idx[i] < n - k + i, increment it, and set idx[j] = idx[j-1] + 1 for every j > i. If no such i exists, there are no more combinations."
+  ],
+  "optimal_complexity": {
+    "time": "O(k) per next, O(1) per hasNext",
+    "space": "O(k)"
+  },
+  "follow_up_questions": [
+    "How would you support characters that contain duplicates while still producing distinct combinations?",
+    "How would you jump directly to the m-th combination in lexicographic order without iterating?"
+  ]
+}

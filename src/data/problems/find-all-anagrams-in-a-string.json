@@ -1,0 +1,84 @@
+{
+  "title": "Find All Anagrams in a String",
+  "slug": "find-all-anagrams-in-a-string",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "meta",
+    "google",
+    "microsoft",
+    "uber",
+    "bloomberg"
+  ],
+  "description": "Given two strings `s` and `p`, find every position in `s` where a substring of length `p.length` begins that is an **anagram** of `p` — that is, it uses exactly the same letters as `p` with the same counts, in any order.\n\nReturn the starting indices of all such substrings in **ascending order**. If there are none (including when `p` is longer than `s`), return an empty array `[]`. Overlapping matches are all reported.\n\n**Example 1:**\n```\nInput: s = \"dogxgodo\", p = \"god\"\nOutput: [0,4]\nExplanation: The window \"dog\" at index 0 and the window \"god\" at index 4 are anagrams of \"god\"; they do not overlap.\n```\n\n**Example 2:**\n```\nInput: s = \"mnmnm\", p = \"nm\"\nOutput: [0,1,2,3]\nExplanation: Every window of length 2 (\"mn\", \"nm\", \"mn\", \"nm\") is an anagram of \"nm\"; overlapping matches count.\n```\n\n**Example 3:**\n```\nInput: s = \"hello\", p = \"xyz\"\nOutput: []\nExplanation: No window of s contains the letters x, y and z, so the result is empty.\n```",
+  "examples": [
+    {
+      "input": "s = \"dogxgodo\", p = \"god\"",
+      "output": "[0,4]",
+      "explanation": "The window \"dog\" at index 0 and the window \"god\" at index 4 are anagrams of \"god\"; they do not overlap."
+    },
+    {
+      "input": "s = \"mnmnm\", p = \"nm\"",
+      "output": "[0,1,2,3]",
+      "explanation": "Every window of length 2 (\"mn\", \"nm\", \"mn\", \"nm\") is an anagram of \"nm\"; overlapping matches count."
+    },
+    {
+      "input": "s = \"hello\", p = \"xyz\"",
+      "output": "[]",
+      "explanation": "No window of s contains the letters x, y and z, so the result is empty."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length, p.length <= 3 * 10^4",
+    "s and p consist of lowercase English letters",
+    "Indices in the output must be in increasing order"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findAnagrams(self, s: str, p: str) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function findAnagrams(s, p) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<Integer> findAnagrams(String s, String p) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> findAnagrams(string s, string p) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"dogxgodo\", p = \"god\"",
+      "expected_output": "[0,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"mnmnm\", p = \"nm\"",
+      "expected_output": "[0,1,2,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"hello\", p = \"xyz\"",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\", p = \"ab\"",
+      "expected_output": "[]",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"aaaaa\", p = \"aa\"",
+      "expected_output": "[0,1,2,3]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force checks each of the n - m + 1 windows of s by sorting it or counting its letters from scratch and comparing with p, costing O(n * m). The optimal solution uses a fixed-length sliding window of size m = p.length with a 26-entry frequency array for p and one for the current window. Moving the window right adds one letter and removes one letter in O(1), and whenever the two arrays are equal (or a running counter of matching letters reaches 26) the window's start index is appended. Iterating left to right naturally yields ascending indices. This takes O(n) time (times the constant 26 for array comparison) and O(1) extra space besides the output.",
+  "hints": [
+    "An anagram of p has the same letter counts as p — the order inside the window does not matter.",
+    "All candidate windows have the same length as p. Instead of recounting each window, update the counts as the window slides by one position.",
+    "Maintain count arrays for p and for s[i..i+m-1]. Each step add s[i+m-1], compare with p's counts, record i on a match, then remove s[i]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you adapt the solution if p could contain uppercase letters, digits and symbols?",
+    "Can you avoid comparing two 26-length arrays on every step by tracking how many letters currently match?"
+  ]
+}

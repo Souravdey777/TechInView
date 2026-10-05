@@ -1,0 +1,81 @@
+{
+  "title": "Array Nesting",
+  "slug": "array-nesting",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "apple",
+    "google",
+    "amazon"
+  ],
+  "description": "You are given an array `nums` of length `n` that is a permutation of the integers `0` to `n - 1` (every value appears exactly once).\n\nFor a starting index `k`, build the set `s[k]` by repeatedly following values as indices: start with `nums[k]`, then add `nums[nums[k]]`, then `nums[nums[nums[k]]]`, and so on, stopping just before an element would be added a second time.\n\nReturn the size of the largest set `s[k]` over all `k`.\n\n**Example 1:**\n```\nInput: nums = [5,4,0,3,1,6,2]\nOutput: 4\nExplanation: Starting at k = 0: nums[0] = 5, nums[5] = 6, nums[6] = 2, nums[2] = 0, which is already in the set, so s[0] = {5, 6, 2, 0} has size 4.\n```\n\n**Example 2:**\n```\nInput: nums = [0,1,2]\nOutput: 1\nExplanation: Every element points to itself, so each set has exactly one element.\n```\n\n**Example 3:**\n```\nInput: nums = [1,2,0]\nOutput: 3\nExplanation: 0 -> 1 -> 2 -> 0 forms a single loop through every element, so every set has size 3.\n```",
+  "examples": [
+    {
+      "input": "nums = [5,4,0,3,1,6,2]",
+      "output": "4",
+      "explanation": "Starting at k = 0: nums[0] = 5, nums[5] = 6, nums[6] = 2, nums[2] = 0, which is already in the set, so s[0] = {5, 6, 2, 0} has size 4."
+    },
+    {
+      "input": "nums = [0,1,2]",
+      "output": "1",
+      "explanation": "Every element points to itself, so each set has exactly one element."
+    },
+    {
+      "input": "nums = [1,2,0]",
+      "output": "3",
+      "explanation": "0 -> 1 -> 2 -> 0 forms a single loop through every element, so every set has size 3."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "0 <= nums[i] < nums.length",
+    "All values of nums are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def arrayNesting(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function arrayNesting(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int arrayNesting(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int arrayNesting(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [5,4,0,3,1,6,2]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,1,2]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,0]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,0,3,4,2,6,7,8,9,5]",
+      "expected_output": "5",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Because nums is a permutation, following i -> nums[i] splits the indices into disjoint cycles, and s[k] is exactly the cycle containing k. The brute force walks the chain from every starting index, costing up to O(n) per start and O(n^2) overall. The optimal approach notices that all members of one cycle produce the same set, so each element only needs to be visited once: iterate over indices, and for each unvisited one, walk its cycle while marking elements visited (in a boolean array, or in-place by overwriting with a sentinel) and counting the length. Track the maximum length. This is O(n) time and O(1) extra space with in-place marking (O(n) with a separate visited array).",
+  "hints": [
+    "Try drawing an arrow from each index i to nums[i]. Since every value appears exactly once, what shape do the arrows form?",
+    "If two different starting points lie on the same loop, do their sets differ?",
+    "Walk each cycle once, marking every element you pass as visited and counting its length; skip already-visited starts. Return the longest count."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How can you mark visited elements without an extra array, and how would you restore the input afterwards?",
+    "What changes if nums is not guaranteed to be a permutation (values may repeat)?"
+  ]
+}

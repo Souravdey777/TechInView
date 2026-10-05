@@ -1,0 +1,81 @@
+{
+  "title": "Number of Equal Count Substrings",
+  "slug": "number-of-equal-count-substrings",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given a string `s` of lowercase English letters and a positive integer `count`.\n\nA substring is called an **equal count substring** if every distinct letter that appears in it appears **exactly** `count` times.\n\nReturn the number of equal count substrings of `s`. Substrings are counted by position, so identical text at different positions is counted separately. Return `0` if there are none.\n\n**Example 1:**\n```\nInput: s = \"xxyyxy\", count = 2\nOutput: 4\nExplanation: The qualifying substrings are \"xx\" (indices 0-1), \"yy\" (indices 2-3), \"xxyy\" (indices 0-3) and \"xyyx\" (indices 1-4). In each, every letter that appears does so exactly twice.\n```\n\n**Example 2:**\n```\nInput: s = \"abcd\", count = 2\nOutput: 0\nExplanation: Every letter appears only once in the whole string, so no substring can contain a letter exactly twice.\n```\n\n**Example 3:**\n```\nInput: s = \"a\", count = 5\nOutput: 0\nExplanation: The string is shorter than count, so no substring qualifies.\n```",
+  "examples": [
+    {
+      "input": "s = \"xxyyxy\", count = 2",
+      "output": "4",
+      "explanation": "The qualifying substrings are \"xx\" (indices 0-1), \"yy\" (indices 2-3), \"xxyy\" (indices 0-3) and \"xyyx\" (indices 1-4). In each, every letter that appears does so exactly twice."
+    },
+    {
+      "input": "s = \"abcd\", count = 2",
+      "output": "0",
+      "explanation": "Every letter appears only once in the whole string, so no substring can contain a letter exactly twice."
+    },
+    {
+      "input": "s = \"a\", count = 5",
+      "output": "0",
+      "explanation": "The string is shorter than count, so no substring qualifies."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 3 * 10^4",
+    "1 <= count <= 3 * 10^4",
+    "s consists only of lowercase English letters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def equalCountSubstrings(self, s: str, count: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function equalCountSubstrings(s, count) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int equalCountSubstrings(String s, int count) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int equalCountSubstrings(string s, int count) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"xxyyxy\", count = 2",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abcd\", count = 2",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\", count = 5",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"zzzzz\", count = 1",
+      "expected_output": "5",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"aabbccaabbcc\", count = 2",
+      "expected_output": "18",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates all O(n^2) substrings and checks their letter frequencies, which is O(26 * n^2) even with incremental counting. The key observation is that a valid substring with u distinct letters has length exactly u * count, and u ranges from 1 to 26. So for each u, slide a fixed-size window of length u * count across s while maintaining a frequency array and a counter of how many letters currently have frequency exactly count; the window is valid when that counter equals u (equivalently, every non-zero frequency equals count). Each of the 26 passes is O(n), giving O(26 * n) = O(n) time and O(26) = O(1) space.",
+  "hints": [
+    "If a substring is valid and contains u distinct letters, what must its length be?",
+    "There are at most 26 possible values of u, so each one fixes the window size to u * count. Try a fixed-size sliding window for each.",
+    "While sliding, maintain letter frequencies and a counter of letters whose frequency is exactly count; update it only when a frequency moves into or out of the value count, and check whether it equals u."
+  ],
+  "optimal_complexity": {
+    "time": "O(26 * n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you count substrings where every distinct letter appears at least `count` times?",
+    "What changes if the alphabet were all Unicode characters rather than 26 letters?"
+  ]
+}

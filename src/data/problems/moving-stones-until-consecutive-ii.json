@@ -1,0 +1,81 @@
+{
+  "title": "Moving Stones Until Consecutive II",
+  "slug": "moving-stones-until-consecutive-ii",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "Stones sit on an infinite number line at the distinct integer positions given in `stones`.\n\nA stone is an **endpoint stone** if it is at the smallest or the largest position. In one move you pick up an endpoint stone and place it on an unoccupied integer position such that it is **no longer** an endpoint stone (that is, strictly between the new smallest and largest remaining positions). The game ends when the stones occupy consecutive positions, after which no move is possible.\n\nReturn an array `[minimumMoves, maximumMoves]`: the fewest and the most moves you can make before the game ends.\n\n**Example 1:**\n```\nInput: stones = [1,5,6,12]\nOutput: [2,5]\nExplanation: Minimum: move 1 to 7, then 12 to 8, for [5,6,7,8]. Maximum: move 1 to 7, then 5 to 8, 6 to 9, 7 to 10 and 8 to 11, ending at [9,10,11,12] after 5 moves.\n```\n\n**Example 2:**\n```\nInput: stones = [6,5,4,3,10]\nOutput: [2,3]\nExplanation: Minimum: move 3 to 8, then 10 to 7, for [4,5,6,7,8]. Maximum: move 3 to 7, then 4 to 8, then 5 to 9, for [6,7,8,9,10].\n```\n\n**Example 3:**\n```\nInput: stones = [100,101,104,102,103]\nOutput: [0,0]\nExplanation: The stones already occupy 100-104 consecutively, so no move can be made.\n```",
+  "examples": [
+    {
+      "input": "stones = [1,5,6,12]",
+      "output": "[2,5]",
+      "explanation": "Minimum: move 1 to 7, then 12 to 8, for [5,6,7,8]. Maximum: move 1 to 7, then 5 to 8, 6 to 9, 7 to 10 and 8 to 11, ending at [9,10,11,12] after 5 moves."
+    },
+    {
+      "input": "stones = [6,5,4,3,10]",
+      "output": "[2,3]",
+      "explanation": "Minimum: move 3 to 8, then 10 to 7, for [4,5,6,7,8]. Maximum: move 3 to 7, then 4 to 8, then 5 to 9, for [6,7,8,9,10]."
+    },
+    {
+      "input": "stones = [100,101,104,102,103]",
+      "output": "[0,0]",
+      "explanation": "The stones already occupy 100-104 consecutively, so no move can be made."
+    }
+  ],
+  "constraints": [
+    "3 <= stones.length <= 10^4",
+    "1 <= stones[i] <= 10^9",
+    "All values in stones are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def numMovesStonesII(self, stones: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function numMovesStonesII(stones) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] numMovesStonesII(int[] stones) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> numMovesStonesII(vector<int>& stones) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "stones = [1,5,6,12]",
+      "expected_output": "[2,5]",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [6,5,4,3,10]",
+      "expected_output": "[2,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [100,101,104,102,103]",
+      "expected_output": "[0,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "stones = [1,2,5]",
+      "expected_output": "[2,2]",
+      "is_hidden": true
+    },
+    {
+      "input": "stones = [1,1000000000,500,501]",
+      "expected_output": "[2,999999498]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Simulating moves with search is exponential. Sort the stones (n of them). For the maximum: the first move must abandon one endpoint, discarding either the gap stones[1] - stones[0] - 1 or stones[n-1] - stones[n-2] - 1; after that every empty slot inside the span can be filled one at a time, so max = (stones[n-1] - stones[0] + 1 - n) - min(both edge gaps). For the minimum: slide a window over the sorted stones looking for the target block of n consecutive positions [stones[i], stones[i] + n - 1]; the moves needed are n minus the number of stones already inside. The one exception is when n - 1 stones are already consecutive and the last stone is more than one slot away, which needs 2 moves rather than 1. Sorting dominates: O(n log n) time and O(1) extra space (O(n) if sorting is not in place).",
+  "hints": [
+    "Sort the stones. Think separately about the most moves and the fewest moves.",
+    "For the maximum, the first move discards the gap at one end; afterwards you can fill every remaining empty slot one move at a time. For the minimum, consider a window of n consecutive positions and count how many stones already lie inside it.",
+    "Use two pointers so that stones[j] - stones[i] < n; the cost is n - (j - i + 1), except when j - i + 1 = n - 1 and the window is already consecutive (stones[j] - stones[i] = n - 2), where the cost is 2 instead of 1."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Why does the special case of n - 1 consecutive stones need two moves instead of one?",
+    "How does the problem change if any stone (not only endpoints) may be moved?"
+  ]
+}

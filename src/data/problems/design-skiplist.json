@@ -1,0 +1,77 @@
+{
+  "title": "Design Skiplist",
+  "slug": "design-skiplist",
+  "difficulty": "hard",
+  "category": "linked-lists",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "Implement a **skiplist** without using any built-in ordered containers or libraries. A skiplist stores sorted values in several layers of linked lists, where each higher layer skips over more nodes, so that searching, inserting, and deleting take O(log n) time on average.\n\nImplement the `Skiplist` class:\n\n- `Skiplist()` creates an empty skiplist.\n- `bool search(int target)` returns `true` if `target` is present at least once, otherwise `false`.\n- `void add(int num)` inserts `num`. Duplicate values are allowed and each copy is stored separately.\n- `bool erase(int num)` removes **one** copy of `num` and returns `true`; if `num` is not present, it does nothing and returns `false`.\n\nThe input lists the method names and their arguments; the output lists the return value of each call, with `null` for the constructor and for `add`.\n\n**Example 1:**\n```\nInput: [\"Skiplist\",\"add\",\"add\",\"add\",\"search\",\"erase\",\"search\",\"erase\",\"search\"], [[],[5],[3],[5],[5],[5],[5],[5],[5]]\nOutput: [null,null,null,null,true,true,true,true,false]\nExplanation: Two copies of 5 are added. The first erase removes one copy, so 5 is still found; the second erase removes the last copy, so the final search returns false.\n```\n\n**Example 2:**\n```\nInput: [\"Skiplist\",\"search\",\"add\",\"erase\",\"erase\",\"search\"], [[],[7],[7],[8],[7],[7]]\nOutput: [null,false,null,false,true,false]\nExplanation: 7 is not found initially. After adding 7, erasing 8 fails because 8 is absent, erasing 7 succeeds, and 7 can no longer be found.\n```",
+  "examples": [
+    {
+      "input": "[\"Skiplist\",\"add\",\"add\",\"add\",\"search\",\"erase\",\"search\",\"erase\",\"search\"], [[],[5],[3],[5],[5],[5],[5],[5],[5]]",
+      "output": "[null,null,null,null,true,true,true,true,false]",
+      "explanation": "Two copies of 5 are added. The first erase removes one copy, so 5 is still found; the second erase removes the last copy, so the final search returns false."
+    },
+    {
+      "input": "[\"Skiplist\",\"search\",\"add\",\"erase\",\"erase\",\"search\"], [[],[7],[7],[8],[7],[7]]",
+      "output": "[null,false,null,false,true,false]",
+      "explanation": "7 is not found initially. After adding 7, erasing 8 fails because 8 is absent, erasing 7 succeeds, and 7 can no longer be found."
+    }
+  ],
+  "constraints": [
+    "0 <= num, target <= 2 * 10^4",
+    "At most 5 * 10^4 calls will be made to search, add, and erase in total.",
+    "Built-in sorted containers (TreeMap, std::set, bisect-based structures, etc.) must not be used."
+  ],
+  "starter_code": {
+    "python": "class Skiplist:\n    def __init__(self):\n        # Initialize your data structure here\n        pass\n\n    def search(self, target: int) -> bool:\n        pass\n\n    def add(self, num: int) -> None:\n        pass\n\n    def erase(self, num: int) -> bool:\n        pass",
+    "javascript": "function Skiplist() {\n    // Initialize your data structure here\n}\n\nSkiplist.prototype.search = function(target) {\n    // Write your solution here\n};\n\nSkiplist.prototype.add = function(num) {\n    // Write your solution here\n};\n\nSkiplist.prototype.erase = function(num) {\n    // Write your solution here\n};",
+    "java": "class Skiplist {\n    public Skiplist() {\n        // Initialize your data structure here\n    }\n\n    public boolean search(int target) {\n        // Write your solution here\n        return false;\n    }\n\n    public void add(int num) {\n        // Write your solution here\n    }\n\n    public boolean erase(int num) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Skiplist {\npublic:\n    Skiplist() {\n        // Initialize your data structure here\n    }\n\n    bool search(int target) {\n        // Write your solution here\n        return false;\n    }\n\n    void add(int num) {\n        // Write your solution here\n    }\n\n    bool erase(int num) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"Skiplist\",\"add\",\"add\",\"add\",\"search\",\"erase\",\"search\",\"erase\",\"search\"], [[],[5],[3],[5],[5],[5],[5],[5],[5]]",
+      "expected_output": "[null,null,null,null,true,true,true,true,false]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"Skiplist\",\"search\",\"add\",\"erase\",\"erase\",\"search\"], [[],[7],[7],[8],[7],[7]]",
+      "expected_output": "[null,false,null,false,true,false]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"Skiplist\",\"add\",\"add\",\"add\",\"search\",\"search\",\"erase\",\"search\",\"search\"], [[],[1],[2],[3],[0],[4],[0],[1],[2]]",
+      "expected_output": "[null,null,null,null,false,false,false,true,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"Skiplist\",\"add\",\"add\",\"add\",\"add\",\"erase\",\"erase\",\"search\",\"erase\",\"search\",\"search\"], [[],[0],[20000],[0],[10],[0],[10],[0],[0],[0],[20000]]",
+      "expected_output": "[null,null,null,null,null,true,true,true,true,false,true]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"Skiplist\",\"erase\",\"search\",\"add\",\"add\",\"erase\",\"search\",\"erase\",\"erase\"], [[],[3],[3],[3],[3],[3],[3],[3],[3]]",
+      "expected_output": "[null,false,false,null,null,true,true,true,false]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: a single sorted linked list supports all three operations but each one needs a linear scan, so they cost O(n). Optimal: build a skiplist with a sentinel head that has a forward pointer per level (e.g. up to 16 levels). To search, start at the top level, move right while the next value is less than the target, then drop down a level; at the bottom, check whether the next node equals the target. For add, record the last node visited on each level (the update array), pick a random height by flipping a coin (each extra level with probability 1/2), and splice the new node in after the recorded node on each of its levels. For erase, find the update array the same way, and if the bottom-level next node equals num, unlink that node from every level where it appears. Expected time is O(log n) per operation with O(n) expected space.",
+  "hints": [
+    "A plain sorted linked list is too slow because you must walk it node by node. How could extra 'express lane' pointers help you skip ahead?",
+    "Give each node a random number of levels (coin flips), and keep a head sentinel that spans every level. Search from the top level down.",
+    "While descending, remember the rightmost node visited on each level whose next value is less than the key; that array tells you exactly where to splice a new node in or unlink an existing one on every level."
+  ],
+  "optimal_complexity": {
+    "time": "O(log n) expected per operation",
+    "space": "O(n) expected"
+  },
+  "follow_up_questions": [
+    "How does the choice of promotion probability (1/2 vs 1/4) affect speed and memory?",
+    "How would you add a method that returns the k-th smallest value in O(log n) expected time?"
+  ]
+}

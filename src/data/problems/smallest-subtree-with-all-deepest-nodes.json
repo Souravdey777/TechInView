@@ -1,0 +1,82 @@
+{
+  "title": "Smallest Subtree With All Deepest Nodes",
+  "slug": "smallest-subtree-with-all-deepest-nodes",
+  "difficulty": "medium",
+  "category": "trees",
+  "company_tags": [
+    "meta",
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "Given the `root` of a binary tree with distinct values, find the **deepest** nodes: the nodes whose distance from the root is the largest. Return the smallest subtree that contains all of them, that is, the subtree rooted at their **lowest common ancestor**.\n\nIf there is only one deepest node, the answer is that node itself (a subtree with just that node and its descendants, which are none). The returned subtree is serialised in level-order form starting from its root, with `null` marking missing children (trailing `null`s omitted).\n\n**Example 1:**\n```\nInput: root = [3,5,1,6,2,0,8,null,null,7,4]\nOutput: [2,7,4]\nExplanation: The deepest nodes are 7 and 4 at depth 3. Their lowest common ancestor is 2, so the subtree rooted at 2 is returned.\n```\n\n**Example 2:**\n```\nInput: root = [1]\nOutput: [1]\nExplanation: The root is the only, and therefore deepest, node.\n```\n\n**Example 3:**\n```\nInput: root = [0,1,3,null,2]\nOutput: [2]\nExplanation: Node 2 is the single deepest node, so the answer is the subtree containing only 2.\n```",
+  "examples": [
+    {
+      "input": "root = [3,5,1,6,2,0,8,null,null,7,4]",
+      "output": "[2,7,4]",
+      "explanation": "The deepest nodes are 7 and 4 at depth 3. Their lowest common ancestor is 2, so the subtree rooted at 2 is returned."
+    },
+    {
+      "input": "root = [1]",
+      "output": "[1]",
+      "explanation": "The root is the only, and therefore deepest, node."
+    },
+    {
+      "input": "root = [0,1,3,null,2]",
+      "output": "[2]",
+      "explanation": "Node 2 is the single deepest node, so the answer is the subtree containing only 2."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [1, 500].",
+    "0 <= Node.val <= 500",
+    "All node values are unique."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def subtreeWithAllDeepest(self, root: TreeNode | None) -> TreeNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction subtreeWithAllDeepest(root) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public TreeNode subtreeWithAllDeepest(TreeNode root) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* subtreeWithAllDeepest(TreeNode* root) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [3,5,1,6,2,0,8,null,null,7,4]",
+      "expected_output": "[2,7,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1]",
+      "expected_output": "[1]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [0,1,3,null,2]",
+      "expected_output": "[2]",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1,2,3,4,null,null,5]",
+      "expected_output": "[1,2,3,4,null,null,5]",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [1,2,null,3,4]",
+      "expected_output": "[2,3,4]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach first finds the maximum depth and the set of deepest nodes with one traversal, then searches for their lowest common ancestor with repeated subtree checks, which can cost O(n^2). The optimal approach is a single post-order DFS that returns, for each node, the height of its subtree together with the answer for that subtree. If the left and right heights are equal, the current node is the LCA of the deepest nodes below it; otherwise, the answer comes from the taller side. The root's returned answer is the result. This visits each node once for O(n) time and O(h) recursion space.",
+  "hints": [
+    "The answer is the lowest common ancestor of all nodes at maximum depth.",
+    "Compare the depths of a node's left and right subtrees. What does it mean if they are equal? If one is deeper?",
+    "Write a DFS returning (height, candidate). If heights are equal the candidate is the node itself; otherwise propagate the candidate from the deeper child with height + 1."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "follow_up_questions": [
+    "How would you return the values of the deepest nodes themselves rather than their common subtree?",
+    "How would you solve this iteratively with a BFS that records parent pointers, then walks the deepest level's nodes upward until they meet?"
+  ]
+}

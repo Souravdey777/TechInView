@@ -1,0 +1,81 @@
+{
+  "title": "Maximal Range That Each Element Is Maximum In It",
+  "slug": "maximal-range-that-each-element-is-maximum-in-it",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given a 0-indexed array `nums` of **distinct** integers. For each index `i`, find the longest contiguous subarray that contains index `i` and in which `nums[i]` is the largest element.\n\nReturn an array `ans` of the same length where `ans[i]` is the length of that subarray. Since each element is trivially the maximum of the subarray consisting of itself, every `ans[i]` is at least `1`.\n\n**Example 1:**\n```\nInput: nums = [2,8,1,6,3]\nOutput: [1,5,1,3,1]\nExplanation: 2 is blocked by 8 on its right, so only [2]. 8 is the largest, so it covers all 5 elements. 6 is blocked by 8 on its left and reaches the end: [1,6,3] has length 3. 1 and 3 are alone.\n```\n\n**Example 2:**\n```\nInput: nums = [9,6,3]\nOutput: [3,2,1]\nExplanation: The array is strictly decreasing, so each element extends right to the end but never left: ans[i] = n - i.\n```\n\n**Example 3:**\n```\nInput: nums = [7,3,9]\nOutput: [2,1,3]\nExplanation: 7 extends right over 3 to give length 2, 3 is alone, and 9 covers the whole array.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,8,1,6,3]",
+      "output": "[1,5,1,3,1]",
+      "explanation": "2 is blocked by 8 on its right, so only [2]. 8 is the largest, so it covers all 5 elements. 6 is blocked by 8 on its left and reaches the end: [1,6,3] has length 3. 1 and 3 are alone."
+    },
+    {
+      "input": "nums = [9,6,3]",
+      "output": "[3,2,1]",
+      "explanation": "The array is strictly decreasing, so each element extends right to the end but never left: ans[i] = n - i."
+    },
+    {
+      "input": "nums = [7,3,9]",
+      "output": "[2,1,3]",
+      "explanation": "7 extends right over 3 to give length 2, 3 is alone, and 9 covers the whole array."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "1 <= nums[i] <= 10^5",
+    "All values in nums are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumLengthOfRanges(self, nums: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumLengthOfRanges(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] maximumLengthOfRanges(int[] nums) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> maximumLengthOfRanges(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,8,1,6,3]",
+      "expected_output": "[1,5,1,3,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [9,6,3]",
+      "expected_output": "[3,2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7,3,9]",
+      "expected_output": "[2,1,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5]",
+      "expected_output": "[1]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [5,4,3,2,1]",
+      "expected_output": "[5,4,3,2,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force expands left and right from every index while neighbours are smaller, O(n^2) in the worst case (e.g. a sorted array). The optimal solution uses a monotonic decreasing stack to compute, for every index, its previous greater element L[i] and next greater element R[i] (with -1 and n as sentinels). nums[i] is the maximum of every subarray strictly between those two, so ans[i] = R[i] - L[i] - 1. A single pass that pops smaller elements when a larger one arrives fills both arrays. Time O(n), space O(n).",
+  "hints": [
+    "The range for nums[i] stops exactly at the first larger element on each side.",
+    "So the problem reduces to finding the previous greater and the next greater element of every index.",
+    "Use a stack of indices with decreasing values: when nums[i] pops index j, set R[j] = i; after popping, the stack top (or -1) is L[i]. Then ans[i] = R[i] - L[i] - 1."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you handle duplicates if 'maximum' allowed ties?",
+    "Can you use the same ranges to compute the sum of maximums over all subarrays?"
+  ]
+}

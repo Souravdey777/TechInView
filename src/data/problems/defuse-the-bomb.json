@@ -1,0 +1,81 @@
+{
+  "title": "Defuse The Bomb",
+  "slug": "defuse-the-bomb",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given a **circular** integer array `code` of length `n` and an integer `k`. Build a new array of the same length where each position `i` is replaced as follows, using the **original** values for every replacement:\n\n- If `k > 0`, replace `code[i]` with the sum of the next `k` elements after it.\n- If `k < 0`, replace `code[i]` with the sum of the previous `|k|` elements before it.\n- If `k == 0`, replace `code[i]` with `0`.\n\nBecause the array is circular, the element after `code[n - 1]` is `code[0]` and the element before `code[0]` is `code[n - 1]`. Return the decrypted array.\n\n**Example 1:**\n```\nInput: code = [5,7,1,4], k = 3\nOutput: [12,10,16,13]\nExplanation: Each element becomes the sum of the next 3: [7+1+4, 1+4+5, 4+5+7, 5+7+1] = [12,10,16,13].\n```\n\n**Example 2:**\n```\nInput: code = [2,4,9,3], k = -2\nOutput: [12,5,6,13]\nExplanation: Each element becomes the sum of the previous 2: [3+9, 2+3, 4+2, 9+4] = [12,5,6,13].\n```\n\n**Example 3:**\n```\nInput: code = [1,2,3,4], k = 0\nOutput: [0,0,0,0]\nExplanation: When k is 0 every element becomes 0.\n```",
+  "examples": [
+    {
+      "input": "code = [5,7,1,4], k = 3",
+      "output": "[12,10,16,13]",
+      "explanation": "Each element becomes the sum of the next 3: [7+1+4, 1+4+5, 4+5+7, 5+7+1] = [12,10,16,13]."
+    },
+    {
+      "input": "code = [2,4,9,3], k = -2",
+      "output": "[12,5,6,13]",
+      "explanation": "Each element becomes the sum of the previous 2: [3+9, 2+3, 4+2, 9+4] = [12,5,6,13]."
+    },
+    {
+      "input": "code = [1,2,3,4], k = 0",
+      "output": "[0,0,0,0]",
+      "explanation": "When k is 0 every element becomes 0."
+    }
+  ],
+  "constraints": [
+    "1 <= code.length <= 100",
+    "1 <= code[i] <= 100",
+    "-(code.length - 1) <= k <= code.length - 1"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def decrypt(self, code: list[int], k: int) -> list[int]:\n        # Write your solution here\n        return []",
+    "javascript": "function decrypt(code, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] decrypt(int[] code, int k) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> decrypt(vector<int>& code, int k) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "code = [5,7,1,4], k = 3",
+      "expected_output": "[12,10,16,13]",
+      "is_hidden": false
+    },
+    {
+      "input": "code = [2,4,9,3], k = -2",
+      "expected_output": "[12,5,6,13]",
+      "is_hidden": false
+    },
+    {
+      "input": "code = [1,2,3,4], k = 0",
+      "expected_output": "[0,0,0,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "code = [10], k = 0",
+      "expected_output": "[0]",
+      "is_hidden": true
+    },
+    {
+      "input": "code = [1,2,3,4,5], k = -4",
+      "expected_output": "[14,13,12,11,10]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force approach computes each output position independently by summing |k| neighbours with modular indexing, which costs O(n * |k|) time and O(n) output space. The optimal approach uses a sliding window of size |k| over the circular array: for k > 0 the window for i is indices i+1..i+k, and for k < 0 it is i-|k|..i-1 (mod n). Compute the first window sum, then for each next i add the element entering the window and subtract the one leaving it. This gives O(n) time and O(1) extra space beyond the output.",
+  "hints": [
+    "Use modular arithmetic (index % n) so you never fall off either end of the circular array.",
+    "Adjacent positions share all but one element of their windows. How can you reuse the previous sum?",
+    "Maintain a window [start, end] of length |k| (start = 1, end = k for k > 0; start = n - |k|, end = n - 1 for k < 0). Record the sum for i, then subtract code[start % n], add code[(end + 1) % n], and shift both ends right by one."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you handle k values larger than n by wrapping around more than once?",
+    "How would you apply the decryption repeatedly m times efficiently?"
+  ]
+}

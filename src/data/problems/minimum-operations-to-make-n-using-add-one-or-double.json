@@ -1,0 +1,82 @@
+{
+  "title": "Minimum Operations to Make N Using Add One or Double",
+  "slug": "minimum-operations-to-make-n-using-add-one-or-double",
+  "difficulty": "easy",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You start with the value `0`. In one operation you can either **add 1** to the current value or **double** it (multiply by 2).\n\nGiven a non-negative integer `n`, return the minimum number of operations needed to reach exactly `n`. For `n = 0` the answer is `0`.\n\n**Example 1:**\n```\nInput: n = 5\nOutput: 4\nExplanation: 0 -> 1 (add) -> 2 (double) -> 4 (double) -> 5 (add).\n```\n\n**Example 2:**\n```\nInput: n = 8\nOutput: 4\nExplanation: 0 -> 1 (add) -> 2 (double) -> 4 (double) -> 8 (double).\n```\n\n**Example 3:**\n```\nInput: n = 7\nOutput: 5\nExplanation: 0 -> 1 -> 2 -> 3 -> 6 -> 7 using add, double, add, double, add.\n```",
+  "examples": [
+    {
+      "input": "n = 5",
+      "output": "4",
+      "explanation": "0 -> 1 (add) -> 2 (double) -> 4 (double) -> 5 (add)."
+    },
+    {
+      "input": "n = 8",
+      "output": "4",
+      "explanation": "0 -> 1 (add) -> 2 (double) -> 4 (double) -> 8 (double)."
+    },
+    {
+      "input": "n = 7",
+      "output": "5",
+      "explanation": "0 -> 1 -> 2 -> 3 -> 6 -> 7 using add, double, add, double, add."
+    }
+  ],
+  "constraints": [
+    "0 <= n <= 10^9",
+    "You start from 0",
+    "Each operation is either +1 or x2"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minOperations(self, n: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minOperations(n) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minOperations(int n) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minOperations(int n) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 5",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 8",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 7",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 0",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 1000000000",
+      "expected_output": "42",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A BFS or forward DP over all values 0..n (dp[i] = 1 + min(dp[i-1], dp[i/2] if i is even)) works in O(n) time and space but is too slow for n = 10^9. Think backwards from n instead: if n is odd, the last operation must have been an add, so subtract 1; if n is even and positive, halving is never worse than subtracting twice, so divide by 2. Repeat until reaching 0, counting steps. Equivalently, for n > 0 the answer is popcount(n) + bitLength(n) - 1. This runs in O(log n) time and O(1) space.",
+  "hints": [
+    "A forward DP over every value up to n works for small n. Can you reason backwards from n instead?",
+    "Working backwards, an odd value can only have come from an add-1. For an even value, compare halving against subtracting 1 twice.",
+    "While n > 0: if n is odd do n -= 1, else n //= 2, and count each step. (For n > 0 this equals the number of set bits plus the bit length minus 1.)"
+  ],
+  "optimal_complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "What if you could also subtract 1 — how does the greedy change?",
+    "How would you generalise to 'add 1 or multiply by k' for an arbitrary k >= 2?"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "title": "Tree of Coprimes",
+  "slug": "tree-of-coprimes",
+  "difficulty": "hard",
+  "category": "trees",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are given a tree with `n` nodes labelled `0` to `n - 1`, rooted at node `0`. Node `i` holds the value `nums[i]`, and `edges[j] = [u_j, v_j]` is an undirected edge between `u_j` and `v_j`.\n\nTwo values `x` and `y` are **coprime** when `gcd(x, y) == 1`. An **ancestor** of node `i` is any node on the path from `i` up to the root, not including `i` itself.\n\nReturn an array `ans` of length `n` where `ans[i]` is the label of the **closest** ancestor of node `i` (the one with the greatest depth) whose value is coprime with `nums[i]`, or `-1` if no ancestor qualifies.\n\n**Example 1:**\n```\nInput: nums = [2,3,3,2], edges = [[0,1],[1,2],[1,3]]\nOutput: [-1,0,0,1]\nExplanation: Node 0 has no ancestors. Nodes 1 and 2 (value 3) are coprime with node 0 (value 2); node 2 skips node 1 because gcd(3, 3) = 3. Node 3 (value 2) is coprime with its parent node 1 (value 3).\n```\n\n**Example 2:**\n```\nInput: nums = [5,6,10,2,3,6,15], edges = [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6]]\nOutput: [-1,0,-1,0,0,0,-1]\nExplanation: Node 2 (value 10) shares a factor with its only ancestor 5. Node 3 (value 2) shares a factor with 6 but is coprime with 5, so its answer is node 0. Node 6 (value 15) shares a factor with both 10 and 5, so it has no answer.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,3,3,2], edges = [[0,1],[1,2],[1,3]]",
+      "output": "[-1,0,0,1]",
+      "explanation": "Node 0 has no ancestors. Nodes 1 and 2 (value 3) are coprime with node 0 (value 2); node 2 skips node 1 because gcd(3, 3) = 3. Node 3 (value 2) is coprime with its parent node 1 (value 3)."
+    },
+    {
+      "input": "nums = [5,6,10,2,3,6,15], edges = [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6]]",
+      "output": "[-1,0,-1,0,0,0,-1]",
+      "explanation": "Node 2 (value 10) shares a factor with its only ancestor 5. Node 3 (value 2) shares a factor with 6 but is coprime with 5, so its answer is node 0. Node 6 (value 15) shares a factor with both 10 and 5, so it has no answer."
+    }
+  ],
+  "constraints": [
+    "nums.length == n",
+    "1 <= n <= 10^5",
+    "1 <= nums[i] <= 50",
+    "edges.length == n - 1 and the edges form a valid tree.",
+    "0 <= u_j, v_j < n and u_j != v_j"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def getCoprimes(self, nums: list[int], edges: list[list[int]]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function getCoprimes(nums, edges) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] getCoprimes(int[] nums, int[][] edges) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> getCoprimes(vector<int>& nums, vector<vector<int>>& edges) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,3,3,2], edges = [[0,1],[1,2],[1,3]]",
+      "expected_output": "[-1,0,0,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,6,10,2,3,6,15], edges = [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6]]",
+      "expected_output": "[-1,0,-1,0,0,0,-1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,1,1], edges = [[1,0],[2,1]]",
+      "expected_output": "[-1,0,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7], edges = []",
+      "expected_output": "[-1]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [2,4,6,8,3,9], edges = [[0,1],[1,2],[2,3],[3,4],[4,5]]",
+      "expected_output": "[-1,-1,-1,-1,3,3]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach walks from every node up through all of its ancestors and checks gcd at each step, costing O(n * h), which is O(n^2) on a path-shaped tree. The optimal approach exploits the tiny value range 1..50. During a DFS from the root, keep for each value v a stack of (node, depth) for the ancestors currently on the path with that value. At node u, check all values v in 1..50 that are coprime with nums[u] (precomputed) and take the top of each non-empty stack with the greatest depth as the answer. Push u onto its value's stack before visiting children and pop it afterwards. With V = 50 as the size of the value range, this takes O(n * V) time and O(n) space, and an iterative DFS avoids recursion limits on deep trees.",
+  "hints": [
+    "Checking every ancestor is too slow on deep trees. What is unusually small in the constraints?",
+    "Values are at most 50. For the current root-to-node path, you only need the deepest ancestor holding each value.",
+    "DFS while maintaining, for each value 1..50, a stack of (node, depth) on the current path. At each node, check the 50 values coprime with it and pick the deepest stack top; push before recursing and pop after."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * V)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would your approach change if values could be as large as 10^9?",
+    "How would you answer the same question if you needed the farthest coprime ancestor instead of the closest?"
+  ]
+}

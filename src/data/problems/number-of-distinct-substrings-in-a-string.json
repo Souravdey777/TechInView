@@ -1,0 +1,83 @@
+{
+  "title": "Number of Distinct Substrings in a String",
+  "slug": "number-of-distinct-substrings-in-a-string",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "Given a string `s`, return how many **distinct non-empty substrings** it contains. A substring is a contiguous block of characters; two substrings count once if they spell the same text, no matter where they occur.\n\n**Example 1:**\n```\nInput: s = \"abab\"\nOutput: 7\nExplanation: The 10 substrings collapse to 7 distinct ones: \"a\", \"b\", \"ab\", \"ba\", \"aba\", \"bab\" and \"abab\".\n```\n\n**Example 2:**\n```\nInput: s = \"abcab\"\nOutput: 12\nExplanation: There are 15 substrings in total; \"a\", \"b\" and \"ab\" each appear twice, so 15 - 3 = 12 are distinct.\n```\n\n**Example 3:**\n```\nInput: s = \"aaa\"\nOutput: 3\nExplanation: The distinct substrings are \"a\", \"aa\" and \"aaa\".\n```",
+  "examples": [
+    {
+      "input": "s = \"abab\"",
+      "output": "7",
+      "explanation": "The 10 substrings collapse to 7 distinct ones: \"a\", \"b\", \"ab\", \"ba\", \"aba\", \"bab\" and \"abab\"."
+    },
+    {
+      "input": "s = \"abcab\"",
+      "output": "12",
+      "explanation": "There are 15 substrings in total; \"a\", \"b\" and \"ab\" each appear twice, so 15 - 3 = 12 are distinct."
+    },
+    {
+      "input": "s = \"aaa\"",
+      "output": "3",
+      "explanation": "The distinct substrings are \"a\", \"aa\" and \"aaa\"."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 500",
+    "s consists of lowercase English letters only",
+    "The empty substring is not counted",
+    "The answer fits in a 32-bit signed integer (at most s.length * (s.length + 1) / 2)"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countDistinct(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countDistinct(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int countDistinct(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int countDistinct(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"abab\"",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abcab\"",
+      "expected_output": "12",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aaa\"",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"z\"",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abab\"",
+      "expected_output": "7",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: generate all O(n^2) substrings and put them in a hash set; since each substring costs O(n) to build and hash, that is O(n^3) time and up to O(n^3) memory. Trie approach: every substring is a prefix of some suffix, so insert each suffix s[i:] into a trie character by character and count every newly created node. Each distinct substring corresponds to exactly one trie node (excluding the root), so the count of created nodes is the answer. This runs in O(n^2) time and O(n^2) space in the worst case. A suffix array with LCP (answer = n(n+1)/2 - sum of LCP) or a suffix automaton brings it to O(n log n) or O(n).",
+  "hints": [
+    "Every substring of s is a prefix of one of the suffixes of s.",
+    "If you insert all suffixes into a trie, each distinct substring corresponds to exactly one node in that trie.",
+    "Insert s[i:] for every i, walking from the root and creating children as needed; increment a counter every time you create a new node and return it."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n^2)"
+  },
+  "follow_up_questions": [
+    "Can you solve it in O(n log n) using a suffix array and the LCP array?",
+    "How would you count the distinct substrings of exactly length k efficiently?"
+  ]
+}

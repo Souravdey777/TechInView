@@ -1,0 +1,81 @@
+{
+  "title": "Find Longest Special Substring That Occurs Thrice",
+  "slug": "find-longest-special-substring-that-occurs-thrice",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given a string `s` of lowercase English letters. A string is **special** if it consists of a single character repeated one or more times (for example `\"a\"`, `\"zzz\"`).\n\nReturn the length of the longest special substring that occurs **at least three times** in `s`. Occurrences are counted by starting position and are allowed to overlap. Return `-1` if no special substring occurs three or more times.\n\n**Example 1:**\n```\nInput: s = \"bbbcbbb\"\nOutput: 2\nExplanation: \"bb\" occurs twice in each \"bbb\" block, 4 times in total. \"bbb\" occurs only twice, once per block.\n```\n\n**Example 2:**\n```\nInput: s = \"abcdef\"\nOutput: -1\nExplanation: Every character appears once, so no special substring occurs three times.\n```\n\n**Example 3:**\n```\nInput: s = \"abcaba\"\nOutput: 1\nExplanation: \"a\" occurs at indices 0, 3 and 5. No longer special substring repeats three times.\n```",
+  "examples": [
+    {
+      "input": "s = \"bbbcbbb\"",
+      "output": "2",
+      "explanation": "\"bb\" occurs twice in each \"bbb\" block, 4 times in total. \"bbb\" occurs only twice, once per block."
+    },
+    {
+      "input": "s = \"abcdef\"",
+      "output": "-1",
+      "explanation": "Every character appears once, so no special substring occurs three times."
+    },
+    {
+      "input": "s = \"abcaba\"",
+      "output": "1",
+      "explanation": "\"a\" occurs at indices 0, 3 and 5. No longer special substring repeats three times."
+    }
+  ],
+  "constraints": [
+    "3 <= s.length <= 5 * 10^5",
+    "s consists only of lowercase English letters",
+    "Occurrences may overlap; return -1 if no special substring occurs at least three times"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumLength(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumLength(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maximumLength(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maximumLength(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"bbbcbbb\"",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abcdef\"",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abcaba\"",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aaa\"",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"aaaaabbbbbbaaaccc\"",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates every special substring, counts occurrences in a hash map, and takes the longest with count >= 3, which is O(n^2). The optimal approach splits s into maximal runs of the same character and, for each letter, keeps only its three longest run lengths a >= b >= c (missing ones treated as 0). A special substring of that letter of length L occurs three times if: the longest run alone gives three copies (L = a - 2), the top two runs together give three (L = min(a - 1, b)), or each of the top three runs gives one (L = c). The answer for the letter is max(a - 2, min(a - 1, b), c), and the overall answer is the maximum over letters, or -1 if it is 0. This runs in O(n) time and O(1) space (26 letters x 3 lengths).",
+  "hints": [
+    "Break the string into maximal blocks of one repeated character. How many copies of a length-L special string does a block of length m contain?",
+    "A block of length m contains m - L + 1 overlapping copies of a length-L run. For each letter, only its few longest blocks matter.",
+    "For each letter, keep only its three longest blocks and work out the longest L that one, two or three of those blocks can supply three times."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you generalize to substrings that occur at least k times?",
+    "How would you solve it with binary search on the length plus a sliding-window check?"
+  ]
+}

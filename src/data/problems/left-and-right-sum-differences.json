@@ -1,0 +1,81 @@
+{
+  "title": "Left And Right Sum Differences",
+  "slug": "left-and-right-sum-differences",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "bloomberg"
+  ],
+  "description": "Given an integer array `nums` of length `n`, build an array `answer` of length `n` where:\n\n- `leftSum[i]` is the sum of the elements strictly to the **left** of index `i` (`0` if there are none),\n- `rightSum[i]` is the sum of the elements strictly to the **right** of index `i` (`0` if there are none),\n- `answer[i] = |leftSum[i] - rightSum[i]|`.\n\nReturn `answer`.\n\n**Example 1:**\n```\nInput: nums = [10,4,8,3]\nOutput: [15,1,11,22]\nExplanation: leftSum = [0,10,14,22] and rightSum = [15,11,3,0], so the absolute differences are [15,1,11,22].\n```\n\n**Example 2:**\n```\nInput: nums = [1]\nOutput: [0]\nExplanation: Both sums are 0 for the only element.\n```\n\n**Example 3:**\n```\nInput: nums = [2,5,1]\nOutput: [6,1,7]\nExplanation: leftSum = [0,2,7] and rightSum = [6,1,0], giving [6,1,7].\n```",
+  "examples": [
+    {
+      "input": "nums = [10,4,8,3]",
+      "output": "[15,1,11,22]",
+      "explanation": "leftSum = [0,10,14,22] and rightSum = [15,11,3,0], so the absolute differences are [15,1,11,22]."
+    },
+    {
+      "input": "nums = [1]",
+      "output": "[0]",
+      "explanation": "Both sums are 0 for the only element."
+    },
+    {
+      "input": "nums = [2,5,1]",
+      "output": "[6,1,7]",
+      "explanation": "leftSum = [0,2,7] and rightSum = [6,1,0], giving [6,1,7]."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 1000",
+    "1 <= nums[i] <= 10^5",
+    "answer.length == nums.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def leftRightDifference(self, nums: list[int]) -> list[int]:\n        # Write your solution here\n        return []",
+    "javascript": "function leftRightDifference(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] leftRightDifference(int[] nums) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> leftRightDifference(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [10,4,8,3]",
+      "expected_output": "[15,1,11,22]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "[0]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,5,1]",
+      "expected_output": "[6,1,7]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7,7]",
+      "expected_output": "[7,7]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [100000,1,1,1,100000]",
+      "expected_output": "[100003,2,0,2,100003]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach recomputes the left and right sums from scratch for every index, costing O(n^2) time and O(1) extra space. The optimal approach first computes the total sum, then sweeps left to right maintaining a running left sum: at index i the right sum is total - leftSum - nums[i], so answer[i] = |leftSum - (total - leftSum - nums[i])|, after which nums[i] is added to leftSum. This runs in O(n) time with O(1) extra space beyond the output.",
+  "hints": [
+    "Recomputing both sums for every index works but repeats a lot of addition. What can you precompute?",
+    "If you know the total sum and the sum to the left of i, you can derive the sum to the right of i.",
+    "rightSum = total - leftSum - nums[i]. Keep leftSum as a running total while scanning once from left to right."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you find the index that minimises |leftSum - rightSum| (the closest-to-balanced pivot)?",
+    "How would you answer these values efficiently if elements of nums can be updated between queries?"
+  ]
+}

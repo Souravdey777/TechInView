@@ -1,0 +1,81 @@
+{
+  "title": "Count Bowl Subarrays",
+  "slug": "count-bowl-subarrays",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": [
+    "amazon",
+    "google",
+    "bloomberg"
+  ],
+  "description": "You are given an array `nums` of **distinct** integers. A subarray `nums[l..r]` is called a **bowl** when:\n\n- its length is at least `3` (that is, `r - l + 1 >= 3`), and\n- both endpoints are strictly larger than every element strictly between them: `min(nums[l], nums[r]) > max(nums[l + 1..r - 1])`.\n\nReturn the number of bowl subarrays in `nums`.\n\n**Example 1:**\n```\nInput: nums = [4,1,3,2,6]\nOutput: 3\nExplanation: The bowls are [4,1,3], [3,2,6] and the whole array [4,1,3,2,6] (both 4 and 6 exceed every middle value).\n```\n\n**Example 2:**\n```\nInput: nums = [6,2,1,7]\nOutput: 2\nExplanation: The bowls are [2,1,7] and [6,2,1,7]. [6,2,1] is not a bowl because its endpoint 1 is smaller than the middle 2.\n```\n\n**Example 3:**\n```\nInput: nums = [1,2,3]\nOutput: 0\nExplanation: The only length-3 subarray has endpoint 1, which is smaller than the middle element 2, so there are no bowls.\n```",
+  "examples": [
+    {
+      "input": "nums = [4,1,3,2,6]",
+      "output": "3",
+      "explanation": "The bowls are [4,1,3], [3,2,6] and the whole array [4,1,3,2,6] (both 4 and 6 exceed every middle value)."
+    },
+    {
+      "input": "nums = [6,2,1,7]",
+      "output": "2",
+      "explanation": "The bowls are [2,1,7] and [6,2,1,7]. [6,2,1] is not a bowl because its endpoint 1 is smaller than the middle 2."
+    },
+    {
+      "input": "nums = [1,2,3]",
+      "output": "0",
+      "explanation": "The only length-3 subarray has endpoint 1, which is smaller than the middle element 2, so there are no bowls."
+    }
+  ],
+  "constraints": [
+    "3 <= nums.length <= 10^5",
+    "1 <= nums[i] <= 10^9",
+    "All values in nums are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def bowlSubarrays(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function bowlSubarrays(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public long bowlSubarrays(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    long long bowlSubarrays(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [4,1,3,2,6]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [6,2,1,7]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,2,1]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [9,7,5,3,1,2,4,6,8]",
+      "expected_output": "7",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force checks every pair (l, r) with r - l >= 2 and computes the interior maximum, O(n^2) with a running maximum. Observe that the endpoints of a bowl are exactly the nearest greater elements on both sides of its interior maximum, so each element is the interior maximum of at most one bowl and the answer is at most n - 2. A monotonic decreasing stack captures both in one pass: when nums[r] pops an element, the popped element was an interior maximum and if the stack is still non-empty after the pop, the new top and nums[r] are the two endpoints of exactly one bowl whose interior maximum is the popped element; every bowl is counted exactly once this way. Count those pops, O(n) time and O(n) space.",
+  "hints": [
+    "Look at the largest element strictly inside a bowl. Because the values are distinct, the two endpoints must be its nearest greater element on the left and its nearest greater element on the right.",
+    "Maintain a stack whose values strictly decrease from bottom to top while scanning left to right.",
+    "When nums[i] pops an element and the stack is still non-empty afterwards, the new top, the popped element and nums[i] bound a bowl: add 1 for each such pop."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would the counting change if equal values were allowed and the inequality became non-strict?",
+    "Can you return the bowl with the largest length or sum instead of just the count?"
+  ]
+}

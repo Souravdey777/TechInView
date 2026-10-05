@@ -1,0 +1,80 @@
+{
+  "title": "Number of Beautiful Partitions",
+  "slug": "number-of-beautiful-partitions",
+  "difficulty": "hard",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are given a string `s` of digits `'1'` to `'9'` and two integers `k` and `minLength`. Call the digits `'2'`, `'3'`, `'5'` and `'7'` **prime**; every other digit is **non-prime**.\n\nA partition of `s` into exactly `k` non-empty, contiguous, non-overlapping substrings (covering the whole string in order) is **beautiful** if every substring:\n\n- starts with a prime digit,\n- ends with a non-prime digit, and\n- has length at least `minLength`.\n\nReturn the number of beautiful partitions of `s`, **modulo** `10^9 + 7`. Return `0` if none exist.\n\n**Example 1:**\n```\nInput: s = \"23542185131\", k = 3, minLength = 2\nOutput: 3\nExplanation: The beautiful partitions are \"2354|218|5131\", \"2354|21851|31\" and \"2354218|51|31\".\n```\n\n**Example 2:**\n```\nInput: s = \"23542185131\", k = 3, minLength = 3\nOutput: 1\nExplanation: Only \"2354|218|5131\" works; every other split has a piece shorter than 3 or a piece with the wrong first/last digit.\n```\n\n**Example 3:**\n```\nInput: s = \"3312958\", k = 3, minLength = 1\nOutput: 1\nExplanation: The only beautiful partition is \"331|29|58\".\n```",
+  "examples": [
+    {
+      "input": "s = \"23542185131\", k = 3, minLength = 2",
+      "output": "3",
+      "explanation": "The beautiful partitions are \"2354|218|5131\", \"2354|21851|31\" and \"2354218|51|31\"."
+    },
+    {
+      "input": "s = \"23542185131\", k = 3, minLength = 3",
+      "output": "1",
+      "explanation": "Only \"2354|218|5131\" works; every other split has a piece shorter than 3 or a piece with the wrong first/last digit."
+    },
+    {
+      "input": "s = \"3312958\", k = 3, minLength = 1",
+      "output": "1",
+      "explanation": "The only beautiful partition is \"331|29|58\"."
+    }
+  ],
+  "constraints": [
+    "1 <= k, minLength <= s.length <= 1000",
+    "s consists only of the digits '1' to '9'",
+    "Return the answer modulo 10^9 + 7"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def beautifulPartitions(self, s: str, k: int, minLength: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function beautifulPartitions(s, k, minLength) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int beautifulPartitions(String s, int k, int minLength) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int beautifulPartitions(string s, int k, int minLength) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"23542185131\", k = 3, minLength = 2",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"23542185131\", k = 3, minLength = 3",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"3312958\", k = 3, minLength = 1",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"22\", k = 1, minLength = 1",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"783938233588472343879134266968\", k = 4, minLength = 6",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force chooses k-1 cut positions out of n-1, which is combinatorial (O(C(n, k))). Note that a cut is only legal between a non-prime digit and a following prime digit. Use DP: dp[j][i] is the number of ways to split the prefix s[0..i-1] into j beautiful pieces, where i must be a legal cut (or n). Then dp[j][i] = sum of dp[j-1][p] over legal cut points p with i - p >= minLength. Maintaining a running prefix sum over p as i advances makes each transition O(1). Check up front that s[0] is prime and s[n-1] is non-prime, otherwise the answer is 0. The answer is dp[k][n] modulo 10^9+7. Time is O(n * k) and space is O(n * k), reducible to O(n).",
+  "hints": [
+    "A piece boundary can only fall between a non-prime digit and a prime digit. Identify all such legal cut points first.",
+    "Let dp[j][i] count ways to split s[0..i) into j beautiful pieces ending exactly at a legal cut i. Each new piece must have length at least minLength.",
+    "dp[j][i] = sum of dp[j-1][p] for legal cuts p <= i - minLength. Keep a running prefix sum over p so each step is O(1); the answer is dp[k][n]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * k)",
+    "space": "O(n * k)"
+  },
+  "follow_up_questions": [
+    "How would you reduce the memory to O(n)?",
+    "How would you also enforce a maximum length on every piece?"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "Largest Time For Given Digits",
+  "slug": "largest-time-for-given-digits",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an array `arr` of exactly four digits. Arrange all four digits, using each one exactly once, into a 24-hour time `\"HH:MM\"`, where `HH` is between `00` and `23` and `MM` is between `00` and `59`.\n\nReturn the latest such time as a string in `\"HH:MM\"` format (always two digits for the hour and two for the minute). If no arrangement forms a valid time, return an empty string `\"\"`.\n\n**Example 1:**\n```\nInput: arr = [1,2,3,4]\nOutput: \"23:41\"\nExplanation: Valid arrangements include 12:34, 21:43 and 23:41. The latest of them is 23:41.\n```\n\n**Example 2:**\n```\nInput: arr = [5,5,5,5]\nOutput: \"\"\nExplanation: Every arrangement gives 55:55, which is not a valid hour, so no time can be formed.\n```\n\n**Example 3:**\n```\nInput: arr = [0,0,1,0]\nOutput: \"10:00\"\nExplanation: The possible times are 00:01, 00:10, 01:00 and 10:00. The latest is 10:00.\n```",
+  "examples": [
+    {
+      "input": "arr = [1,2,3,4]",
+      "output": "\"23:41\"",
+      "explanation": "Valid arrangements include 12:34, 21:43 and 23:41. The latest of them is 23:41."
+    },
+    {
+      "input": "arr = [5,5,5,5]",
+      "output": "\"\"",
+      "explanation": "Every arrangement gives 55:55, which is not a valid hour, so no time can be formed."
+    },
+    {
+      "input": "arr = [0,0,1,0]",
+      "output": "\"10:00\"",
+      "explanation": "The possible times are 00:01, 00:10, 01:00 and 10:00. The latest is 10:00."
+    }
+  ],
+  "constraints": [
+    "`arr.length == 4`",
+    "`0 <= arr[i] <= 9`",
+    "Each element of `arr` must be used exactly once",
+    "Return `\"\"` when no valid time exists"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def largestTimeFromDigits(self, arr: list[int]) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function largestTimeFromDigits(arr) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String largestTimeFromDigits(int[] arr) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string largestTimeFromDigits(vector<int>& arr) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "arr = [1,2,3,4]",
+      "expected_output": "\"23:41\"",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [5,5,5,5]",
+      "expected_output": "\"\"",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [0,0,1,0]",
+      "expected_output": "\"10:00\"",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [2,0,6,6]",
+      "expected_output": "\"06:26\"",
+      "is_hidden": true
+    },
+    {
+      "input": "arr = [0,0,0,0]",
+      "expected_output": "\"00:00\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Since there are only 4! = 24 orderings of the digits, the straightforward approach is also optimal: generate every permutation (by backtracking with a used[] array, or by three nested index loops where the fourth index is 6 - i - j - k), build hours = 10*a + b and minutes = 10*c + d, skip it if hours >= 24 or minutes >= 60, and track the maximum value of hours*60 + minutes. If nothing was valid return an empty string, otherwise format the best value with zero padding. A greedy approach that picks the largest possible first digit fails on inputs like [2,0,6,6] (it would choose 2 and get stuck, while 06:26 is the answer), which is why exhaustive search over the tiny space is preferred. Time O(1) (24 permutations) and space O(1).",
+  "hints": [
+    "Only 24 orderings of four digits exist. Trying them all is perfectly fine.",
+    "For each ordering, check whether the first two digits form an hour below 24 and the last two form a minute below 60.",
+    "Compare candidates as total minutes (hours * 60 + minutes), keep the maximum, and remember to zero-pad when formatting. Be careful: greedily taking the largest first digit does not always work, e.g. [2,0,6,6]."
+  ],
+  "optimal_complexity": {
+    "time": "O(1)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you return the earliest valid time instead?",
+    "What changes if the clock is 12-hour, or if you are given six digits and must form HH:MM:SS?"
+  ]
+}

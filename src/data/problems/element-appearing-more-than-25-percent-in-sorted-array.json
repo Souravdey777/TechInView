@@ -1,0 +1,83 @@
+{
+  "title": "Element Appearing More Than 25 Percent In Sorted Array",
+  "slug": "element-appearing-more-than-25-percent-in-sorted-array",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "bloomberg"
+  ],
+  "description": "You are given an integer array `arr` sorted in **non-decreasing** order. Exactly one value occurs in `arr` **strictly more than 25%** of the time, that is, more than `arr.length / 4` times.\n\nReturn that value. The input is guaranteed to contain exactly one such value.\n\n**Example 1:**\n```\nInput: arr = [3,5,5,5,5,8,9,9]\nOutput: 5\nExplanation: The array has 8 elements, so the target must appear more than 2 times. The value 5 appears 4 times; 9 appears exactly 2 times, which is not enough.\n```\n\n**Example 2:**\n```\nInput: arr = [4]\nOutput: 4\nExplanation: A single element makes up 100% of the array.\n```\n\n**Example 3:**\n```\nInput: arr = [1,1,2,3,4]\nOutput: 1\nExplanation: The value 1 appears 2 times out of 5, which is more than 5 / 4 = 1.25.\n```",
+  "examples": [
+    {
+      "input": "arr = [3,5,5,5,5,8,9,9]",
+      "output": "5",
+      "explanation": "The array has 8 elements, so the target must appear more than 2 times. The value 5 appears 4 times; 9 appears exactly 2 times, which is not enough."
+    },
+    {
+      "input": "arr = [4]",
+      "output": "4",
+      "explanation": "A single element makes up 100% of the array."
+    },
+    {
+      "input": "arr = [1,1,2,3,4]",
+      "output": "1",
+      "explanation": "The value 1 appears 2 times out of 5, which is more than 5 / 4 = 1.25."
+    }
+  ],
+  "constraints": [
+    "1 <= arr.length <= 10^4",
+    "0 <= arr[i] <= 10^5",
+    "arr is sorted in non-decreasing order",
+    "Exactly one value appears more than arr.length / 4 times"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findSpecialInteger(self, arr: list[int]) -> int:\n        # Write your solution here\n        return 0",
+    "javascript": "function findSpecialInteger(arr) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int findSpecialInteger(int[] arr) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findSpecialInteger(vector<int>& arr) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "arr = [3,5,5,5,5,8,9,9]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [4]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [1,1,2,3,4]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [1,2,3,4,5,6,7,8,9,10,11,12,12,12,12]",
+      "expected_output": "12",
+      "is_hidden": true
+    },
+    {
+      "input": "arr = [0,0,0,1,2,3,4,5]",
+      "expected_output": "0",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force approach counts occurrences with a hash map and returns the value whose count exceeds n / 4, using O(n) time and O(n) space. Because the array is sorted, equal values are contiguous, so a run longer than n / 4 means arr[i] == arr[i + q] for q = floor(n / 4); a single scan comparing those two positions finds the answer in O(n) time and O(1) space. Going further, the answer must occupy one of the positions n/4, n/2 or 3n/4, so for each of those three candidates you can binary-search its first and last occurrence and return the one whose span exceeds n / 4, giving O(log n) time and O(1) space.",
+  "hints": [
+    "The array is sorted, so all copies of a value sit next to each other. How long must the winning run be?",
+    "If a value occupies more than n / 4 consecutive slots, then arr[i] equals arr[i + n/4] for some i.",
+    "For O(log n), note the answer must cover index n/4, n/2 or 3n/4. Binary-search the first and last positions of each of those three candidates and check the span length."
+  ],
+  "optimal_complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "What changes if the array is not sorted? Can you still use O(1) extra space?",
+    "How would you find all values that appear more than n / 3 times in an unsorted array?"
+  ]
+}

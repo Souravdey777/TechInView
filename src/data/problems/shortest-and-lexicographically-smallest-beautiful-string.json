@@ -1,0 +1,81 @@
+{
+  "title": "Shortest And Lexicographically Smallest Beautiful String",
+  "slug": "shortest-and-lexicographically-smallest-beautiful-string",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given a binary string `s` and a positive integer `k`. A substring of `s` is **beautiful** if it contains exactly `k` characters equal to `'1'`.\n\nAmong all beautiful substrings, consider only those of the **shortest** possible length, and return the **lexicographically smallest** of them. If `s` has no beautiful substring (fewer than `k` ones), return the empty string `\"\"`.\n\n**Example 1:**\n```\nInput: s = \"0110101\", k = 2\nOutput: \"11\"\nExplanation: Two 1s cannot fit in fewer than 2 characters, and \"11\" at indices 1-2 is the only length-2 substring with exactly two 1s.\n```\n\n**Example 2:**\n```\nInput: s = \"1011\", k = 2\nOutput: \"11\"\nExplanation: Beautiful substrings of length 2 exist only as \"11\" (indices 2-3); \"101\" and longer ones are not shortest.\n```\n\n**Example 3:**\n```\nInput: s = \"000\", k = 1\nOutput: \"\"\nExplanation: There is no '1' at all, so no substring is beautiful.\n```",
+  "examples": [
+    {
+      "input": "s = \"0110101\", k = 2",
+      "output": "\"11\"",
+      "explanation": "Two 1s cannot fit in fewer than 2 characters, and \"11\" at indices 1-2 is the only length-2 substring with exactly two 1s."
+    },
+    {
+      "input": "s = \"1011\", k = 2",
+      "output": "\"11\"",
+      "explanation": "Beautiful substrings of length 2 exist only as \"11\" (indices 2-3); \"101\" and longer ones are not shortest."
+    },
+    {
+      "input": "s = \"000\", k = 1",
+      "output": "\"\"",
+      "explanation": "There is no '1' at all, so no substring is beautiful."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 100",
+    "1 <= k <= s.length",
+    "s consists only of '0' and '1'"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def shortestBeautifulSubstring(self, s: str, k: int) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function shortestBeautifulSubstring(s, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String shortestBeautifulSubstring(String s, int k) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string shortestBeautifulSubstring(string s, int k) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"0110101\", k = 2",
+      "expected_output": "\"11\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"1011\", k = 2",
+      "expected_output": "\"11\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"000\", k = 1",
+      "expected_output": "\"\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"1111\", k = 4",
+      "expected_output": "\"1111\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"0110100110\", k = 2",
+      "expected_output": "\"11\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates all O(n^2) substrings, counts ones in each, and keeps the best by (length, lexicographic order), costing O(n^3). A tighter approach observes that a shortest beautiful substring must start and end with '1'. Collect the indices of all ones; every window of k consecutive ones, from ones[i] to ones[i + k - 1], is a candidate. Compare candidates first by length, then lexicographically (strings of equal length compare character by character). There are O(n) candidates, each compared in O(n), giving O(n^2) worst case time (O(n) to find the minimum length) and O(n) space. A two-pointer sliding window that shrinks while the window has more than k ones or starts with '0' yields the same candidates.",
+  "hints": [
+    "Can a shortest beautiful substring begin or end with a '0'?",
+    "Record the positions of every '1'. Each block of k consecutive ones defines exactly one candidate substring.",
+    "Pick the minimum candidate length, then among candidates of that length return the smallest string; return \"\" when there are fewer than k ones."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you return the count of shortest beautiful substrings instead?",
+    "How would you handle very long strings (10^6 characters) efficiently when comparing candidates?"
+  ]
+}

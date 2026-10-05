@@ -1,3 +1,5 @@
+import registry from "@/data/problem-execution.json";
+
 export type ExecutionLanguage = "python" | "javascript";
 
 type PythonCallTarget =
@@ -25,9 +27,16 @@ const LINKED_LIST_RETURN_SLUGS = new Set([
   "merge-two-sorted-lists",
   "remove-nth-node-from-end",
   "reverse-linked-list",
+  ...registry.linked_list_return,
 ]);
 
+// Tree params are any arg named root/root1/root2...; these slugs also return a tree.
+// Bulk-generated problems declare their runner shape in src/data/problem-execution.json.
+const TREE_RETURN_SLUGS = new Set<string>(registry.tree_return);
+
 const TREE_INPUT_SLUGS = new Set([
+  ...TREE_RETURN_SLUGS,
+  ...registry.tree_input,
   "binary-tree-level-order-traversal",
   "binary-tree-right-side-view",
   "kth-smallest-element-in-bst",
@@ -39,6 +48,7 @@ const TREE_INPUT_SLUGS = new Set([
 
 const LINKED_LIST_INPUT_SLUGS = new Set([
   "linked-list-cycle",
+  ...registry.linked_list_input,
   ...LINKED_LIST_RETURN_SLUGS,
 ]);
 
@@ -49,6 +59,7 @@ const CLASS_OPERATION_SLUGS = new Set([
   "implement-trie",
   "lru-cache",
   "min-stack",
+  ...registry.class_api,
 ]);
 
 const CODEC_SLUGS = new Set(["serialize-and-deserialize-binary-tree"]);
@@ -66,7 +77,16 @@ const COMPARISON_MODES: Record<string, ComparisonMode> = {
   "find-peak-element": "peak-index",
   "longest-palindromic-substring": "longest-palindrome",
   "reorganize-string": "reorganize-string",
+  ...(registry.comparison_modes as Record<string, ComparisonMode>),
 };
+
+function isTreeParam(name: string): boolean {
+  return /^root\d*$/.test(name);
+}
+
+function isLinkedListParam(name: string): boolean {
+  return /^(head\w*|list\d+|l\d+)$/.test(name);
+}
 
 export function getProblemExecutionSupport(problemSlug?: string) {
   return {
@@ -643,16 +663,17 @@ function buildPythonDriver(problemSlug: string | undefined, userCode: string, st
     return [`__result = ${callExpression}`, "print(json.dumps(_linked_list_to_array(__result)))"].join("\n");
   }
 
-  if (problemSlug && LINKED_LIST_RETURN_SLUGS.has(problemSlug)) {
+  if (problemSlug && LINKED_LIST_INPUT_SLUGS.has(problemSlug)) {
     const rawArgs = params.map((param) => {
-      if (param.name === "head" || param.name === "list1" || param.name === "list2") {
+      if (isLinkedListParam(param.name)) {
         return `_build_linked_list(${normalizePythonArgument(param.value)})`;
       }
       return normalizePythonArgument(param.value);
     });
     const callExpression = buildPythonCallExpression(target, rawArgs);
     if (!callExpression) return null;
-    return [`__result = ${callExpression}`, "print(json.dumps(_linked_list_to_array(__result)))"].join("\n");
+    const output = LINKED_LIST_RETURN_SLUGS.has(problemSlug) ? "_linked_list_to_array(__result)" : "__result";
+    return [`__result = ${callExpression}`, `print(json.dumps(${output}))`].join("\n");
   }
 
   if (problemSlug === "clone-graph") {
@@ -683,13 +704,14 @@ function buildPythonDriver(problemSlug: string | undefined, userCode: string, st
 
   if (problemSlug && TREE_INPUT_SLUGS.has(problemSlug)) {
     const rawArgs = params.map((param) =>
-      param.name === "root"
+      isTreeParam(param.name)
         ? `_build_tree(${normalizePythonArgument(param.value)})`
         : normalizePythonArgument(param.value)
     );
     const callExpression = buildPythonCallExpression(target, rawArgs);
     if (!callExpression) return null;
-    return [`__result = ${callExpression}`, "print(json.dumps(__result))"].join("\n");
+    const output = TREE_RETURN_SLUGS.has(problemSlug) ? "_tree_to_array(__result)" : "__result";
+    return [`__result = ${callExpression}`, `print(json.dumps(${output}))`].join("\n");
   }
 
   const rawArgs = params.map((param) => normalizePythonArgument(param.value));
@@ -763,19 +785,14 @@ function buildJavascriptDriver(
     ].join("\n");
   }
 
-  if (problemSlug && LINKED_LIST_RETURN_SLUGS.has(problemSlug)) {
-    const rawArgs = params.map((param) => {
-      if (param.name === "head" || param.name === "list1" || param.name === "list2") {
-        return `buildLinkedList(${param.value})`;
-      }
-      return param.value;
-    });
+  if (problemSlug && LINKED_LIST_INPUT_SLUGS.has(problemSlug)) {
+    const rawArgs = params.map((param) =>
+      isLinkedListParam(param.name) ? `buildLinkedList(${param.value})` : param.value
+    );
     const callExpression = buildJavascriptCallExpression(target, rawArgs);
     if (!callExpression) return null;
-    return [
-      `const __result = ${callExpression};`,
-      "console.log(JSON.stringify(linkedListToArray(__result)));",
-    ].join("\n");
+    const output = LINKED_LIST_RETURN_SLUGS.has(problemSlug) ? "linkedListToArray(__result)" : "__result";
+    return [`const __result = ${callExpression};`, `console.log(JSON.stringify(${output}));`].join("\n");
   }
 
   if (problemSlug === "clone-graph") {
@@ -806,11 +823,12 @@ function buildJavascriptDriver(
 
   if (problemSlug && TREE_INPUT_SLUGS.has(problemSlug)) {
     const rawArgs = params.map((param) =>
-      param.name === "root" ? `buildTree(${param.value})` : param.value
+      isTreeParam(param.name) ? `buildTree(${param.value})` : param.value
     );
     const callExpression = buildJavascriptCallExpression(target, rawArgs);
     if (!callExpression) return null;
-    return [`const __result = ${callExpression};`, "console.log(JSON.stringify(__result));"].join("\n");
+    const output = TREE_RETURN_SLUGS.has(problemSlug) ? "treeToArray(__result)" : "__result";
+    return [`const __result = ${callExpression};`, `console.log(JSON.stringify(${output}));`].join("\n");
   }
 
   const rawArgs = params.map((param) => param.value);

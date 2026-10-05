@@ -1,0 +1,58 @@
+{
+  "tree_input": [
+    "all-nodes-distance-k-in-binary-tree",
+    "balanced-binary-tree",
+    "binary-tree-inorder-traversal",
+    "binary-tree-postorder-traversal",
+    "binary-tree-preorder-traversal",
+    "binary-tree-vertical-order-traversal",
+    "count-nodes-equal-to-sum-of-descendants",
+    "diameter-of-binary-tree",
+    "flip-binary-tree-to-match-preorder-traversal",
+    "maximum-width-of-binary-tree",
+    "minimum-depth-of-binary-tree",
+    "path-sum",
+    "same-tree",
+    "symmetric-tree"
+  ],
+  "tree_return": [
+    "construct-binary-search-tree-from-preorder-traversal",
+    "delete-node-in-bst",
+    "insert-into-bst",
+    "invert-binary-tree",
+    "recover-a-tree-from-preorder-traversal",
+    "recover-binary-search-tree",
+    "smallest-subtree-with-all-deepest-nodes",
+    "trim-a-binary-search-tree"
+  ],
+  "linked_list_input": [
+    "count-pairs-from-two-linked-lists-with-sum",
+    "linked-list-cycle-entry-index"
+  ],
+  "linked_list_return": [
+    "linked-list-frequency",
+    "merge-two-sorted-lists-in-descending-order",
+    "multiply-two-linked-list-numbers",
+    "reverse-alternate-k-groups",
+    "reverse-nodes-in-k-group",
+    "sort-list-sorted-by-absolute-values"
+  ],
+  "class_api": [
+    "design-a-leaderboard",
+    "design-a-text-editor",
+    "design-skiplist",
+    "exam-room",
+    "iterator-for-combination",
+    "lfu-cache",
+    "map-sum-pairs",
+    "my-calendar-i",
+    "my-calendar-ii",
+    "zigzag-iterator"
+  ],
+  "comparison_modes": {
+    "all-nodes-distance-k-in-binary-tree": "sort-flat",
+    "flip-binary-tree-to-match-preorder-traversal": "sort-flat",
+    "single-number-iii": "sort-flat",
+    "word-ladder-ii": "sort-outer"
+  }
+}

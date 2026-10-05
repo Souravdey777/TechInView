@@ -1,0 +1,81 @@
+{
+  "title": "Minimum Incompatibility",
+  "slug": "minimum-incompatibility",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an integer array `nums` and an integer `k`, where `nums.length` is divisible by `k`. Split all of the elements of `nums` into exactly `k` groups so that:\n\n- every group has the same size, `nums.length / k`, and\n- no group contains the same value twice.\n\nThe **incompatibility** of a group is its largest element minus its smallest element (a group of size 1 has incompatibility 0). Return the **minimum possible sum** of incompatibilities across all `k` groups, or `-1` if no valid split exists.\n\n**Example 1:**\n```\nInput: nums = [1,2,1,4], k = 2\nOutput: 4\nExplanation: The best split is [1,2] and [1,4], with incompatibilities 1 and 3, totalling 4. The two 1s must go to different groups.\n```\n\n**Example 2:**\n```\nInput: nums = [6,3,8,1,3,1,2,2], k = 4\nOutput: 6\nExplanation: One optimal split is [1,2], [2,3], [6,8] and [1,3], giving 1 + 1 + 2 + 2 = 6.\n```\n\n**Example 3:**\n```\nInput: nums = [5,3,3,6,3,3], k = 3\nOutput: -1\nExplanation: There are four 3s but only three groups, so two 3s would have to share a group, which is not allowed.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,1,4], k = 2",
+      "output": "4",
+      "explanation": "The best split is [1,2] and [1,4], with incompatibilities 1 and 3, totalling 4. The two 1s must go to different groups."
+    },
+    {
+      "input": "nums = [6,3,8,1,3,1,2,2], k = 4",
+      "output": "6",
+      "explanation": "One optimal split is [1,2], [2,3], [6,8] and [1,3], giving 1 + 1 + 2 + 2 = 6."
+    },
+    {
+      "input": "nums = [5,3,3,6,3,3], k = 3",
+      "output": "-1",
+      "explanation": "There are four 3s but only three groups, so two 3s would have to share a group, which is not allowed."
+    }
+  ],
+  "constraints": [
+    "1 <= k <= nums.length <= 16",
+    "nums.length is divisible by k",
+    "1 <= nums[i] <= nums.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumIncompatibility(self, nums: list[int], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumIncompatibility(nums, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minimumIncompatibility(int[] nums, int k) {\n        // Write your solution here\n        return -1;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumIncompatibility(vector<int>& nums, int k) {\n        // Write your solution here\n        return -1;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,1,4], k = 2",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [6,3,8,1,3,1,2,2], k = 4",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,3,3,6,3,3], k = 3",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,1], k = 2",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8], k = 8",
+      "expected_output": "8",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries every assignment of elements to groups, which explodes combinatorially. Since n <= 16, use bitmask DP. First, if any value appears more than k times, return -1. Precompute, for every mask with exactly n/k bits whose chosen values are all distinct, its incompatibility (max - min). Then let dp[mask] be the minimum total for having used exactly the elements in mask (a multiple of n/k elements). To avoid counting the same partition in different orders, always build the next group from submasks of the unused elements that include the lowest unused index. Transition dp[mask | sub] = min(dp[mask] + cost[sub]). The answer is dp[full], or -1 if unreachable. Enumerating submasks of complements costs O(3^n) in the worst case, with O(2^n) space.",
+  "hints": [
+    "With at most 16 elements, think about representing a set of chosen indices as a bitmask.",
+    "Precompute the incompatibility of every valid group: a mask with exactly n/k bits and no repeated value.",
+    "Let dp[mask] be the best total cost for the used indices in mask; extend it by a valid group drawn from the unused indices that contains the lowest unused index, so each partition is counted once."
+  ],
+  "optimal_complexity": {
+    "time": "O(3^n)",
+    "space": "O(2^n)"
+  },
+  "follow_up_questions": [
+    "Why does forcing the next group to contain the lowest unused index keep the DP correct while cutting the work?",
+    "How would you return the actual groups that achieve the minimum, not just the sum?"
+  ]
+}

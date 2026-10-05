@@ -1,0 +1,76 @@
+{
+  "title": "Maximum AND Sum of Array",
+  "slug": "maximum-and-sum-of-array",
+  "difficulty": "hard",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are given an integer array `nums` of length `n` and an integer `numSlots` with `2 * numSlots >= n`. There are `numSlots` slots numbered `1` to `numSlots`.\n\nPlace every number of `nums` into some slot so that each slot holds **at most two** numbers (slots may stay empty). The **AND sum** of a placement is the sum over all numbers of `num AND slotNumber`, where `slotNumber` is the slot that number was placed in.\n\nReturn the **maximum** AND sum that can be achieved.\n\n**Example 1:**\n```\nInput: nums = [1,2,3,4,5,6], numSlots = 3\nOutput: 9\nExplanation: Place 1 and 4 in slot 1, 2 and 6 in slot 2, 3 and 5 in slot 3. The AND sum is (1 AND 1) + (4 AND 1) + (2 AND 2) + (6 AND 2) + (3 AND 3) + (5 AND 3) = 1 + 0 + 2 + 2 + 3 + 1 = 9.\n```\n\n**Example 2:**\n```\nInput: nums = [1,3,10,4,7,1], numSlots = 9\nOutput: 24\nExplanation: Place both 1s in slot 1, 3 in slot 3, 4 in slot 4, 7 in slot 7 and 10 in slot 8. The AND sum is 1 + 1 + 3 + 4 + 7 + 8 = 24. Slots 2, 5, 6 and 9 stay empty.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3,4,5,6], numSlots = 3",
+      "output": "9",
+      "explanation": "Place 1 and 4 in slot 1, 2 and 6 in slot 2, 3 and 5 in slot 3. The AND sum is (1 AND 1) + (4 AND 1) + (2 AND 2) + (6 AND 2) + (3 AND 3) + (5 AND 3) = 1 + 0 + 2 + 2 + 3 + 1 = 9."
+    },
+    {
+      "input": "nums = [1,3,10,4,7,1], numSlots = 9",
+      "output": "24",
+      "explanation": "Place both 1s in slot 1, 3 in slot 3, 4 in slot 4, 7 in slot 7 and 10 in slot 8. The AND sum is 1 + 1 + 3 + 4 + 7 + 8 = 24. Slots 2, 5, 6 and 9 stay empty."
+    }
+  ],
+  "constraints": [
+    "n == nums.length",
+    "1 <= numSlots <= 9",
+    "1 <= n <= 2 * numSlots",
+    "1 <= nums[i] <= 15"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumANDSum(self, nums: list[int], numSlots: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumANDSum(nums, numSlots) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maximumANDSum(int[] nums, int numSlots) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maximumANDSum(vector<int>& nums, int numSlots) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3,4,5,6], numSlots = 3",
+      "expected_output": "9",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,3,10,4,7,1], numSlots = 9",
+      "expected_output": "24",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7,7], numSlots = 1",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1], numSlots = 1",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [15,14,13,12,11,10,9,8,7,6,5,4], numSlots = 6",
+      "expected_output": "41",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every slot for every number, up to numSlots^n placements, which explodes quickly. Instead treat each slot as two separate positions, giving 2 * numSlots <= 18 positions, and do bitmask DP over which positions are filled. Let dp[mask] be the best AND sum after placing the first popcount(mask) numbers into the positions in mask. For each mask, the next number is nums[popcount(mask)] (skip if all numbers are placed); for every free position p, its slot number is p / 2 + 1, and dp[mask | (1 << p)] = max(..., dp[mask] + (num AND slot)). The answer is the maximum dp value over masks with popcount equal to n. A ternary-state DP (0/1/2 per slot) is an equivalent alternative. Time is O(numSlots * 4^numSlots) and space is O(4^numSlots).",
+  "hints": [
+    "A slot that holds up to two items can be modelled as two separate single-capacity positions.",
+    "With at most 18 positions, a bitmask of filled positions is small enough to enumerate. The number of set bits tells you which element of nums to place next.",
+    "dp[mask | (1 << p)] = max(dp[mask | (1 << p)], dp[mask] + (nums[popcount(mask)] & (p / 2 + 1))) for every free position p. Take the best dp over masks with exactly n bits set."
+  ],
+  "optimal_complexity": {
+    "time": "O(numSlots * 4^numSlots)",
+    "space": "O(4^numSlots)"
+  },
+  "follow_up_questions": [
+    "How would you adapt the DP if each slot could hold up to three numbers?",
+    "Could this be modelled as a maximum-weight bipartite matching instead of a bitmask DP?"
+  ]
+}
