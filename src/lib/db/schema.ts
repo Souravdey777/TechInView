@@ -42,15 +42,6 @@ export const hireRecommendationEnum = pgEnum("hire_recommendation", [
   "no_hire",
 ]);
 
-export const interviewerPersonaEnum = pgEnum("interviewer_persona", [
-  "tia",
-  "google",
-  "meta",
-  "amazon",
-  "apple",
-  "netflix",
-]);
-
 export const interviewModeEnum = pgEnum("interview_mode", [
   "general_dsa",
   "targeted_loop",
@@ -136,9 +127,6 @@ export const interviews = pgTable("interviews", {
   problem_id: uuid("problem_id")
     .references(() => problems.id, { onDelete: "restrict" }),
   status: interviewStatusEnum("status").default("in_progress").notNull(),
-  interviewer_persona: interviewerPersonaEnum("interviewer_persona")
-    .default("tia")
-    .notNull(),
   mode: interviewModeEnum("mode").default("general_dsa").notNull(),
   round_type: roundTypeEnum("round_type").default("coding").notNull(),
   round_title: text("round_title"),
@@ -199,7 +187,6 @@ export const generatedLoops = pgTable("generated_loops", {
   loop_name: text("loop_name").notNull(),
   summary: text("summary").notNull(),
   confidence: text("confidence").notNull(),
-  persona_id: interviewerPersonaEnum("persona_id").default("tia").notNull(),
   similar_company_fallback: boolean("similar_company_fallback").default(false).notNull(),
   created_at: timestamp("created_at", { withTimezone: true })
     .default(sql`now()`)

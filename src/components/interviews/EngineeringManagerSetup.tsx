@@ -9,7 +9,6 @@ import {
   Building2,
   Check,
   Loader2,
-  MessageSquareText,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,12 +20,6 @@ import {
   InterviewSetupSection,
 } from "@/components/interviews/InterviewSetupLayout";
 import { useInterviewStore } from "@/stores/interview-store";
-import {
-  DEFAULT_INTERVIEWER_PERSONA,
-  INTERVIEWER_PERSONAS,
-  getInterviewerPersona,
-  type InterviewerPersonaId,
-} from "@/lib/interviewer-personas";
 import {
   DEFAULT_ENGINEERING_MANAGER_FOCUS_AREAS,
   DEFAULT_ENGINEERING_MANAGER_REPORTING_SCOPE,
@@ -52,7 +45,6 @@ type StartResponse = {
   data?: {
     interviewId?: string;
     isFreeInterview?: boolean;
-    interviewerPersona?: InterviewerPersonaId;
     startedAt?: string;
   };
 };
@@ -87,8 +79,6 @@ export function EngineeringManagerSetup({
   const [valueCompetencyIds, setValueCompetencyIds] = useState<string[]>(() => [
     ...getValueFramework(DEFAULT_VALUE_FRAMEWORK_ID).defaultCompetencyIds,
   ]);
-  const [interviewerPersona, setInterviewerPersona] =
-    useState<InterviewerPersonaId>(DEFAULT_INTERVIEWER_PERSONA);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,7 +94,6 @@ export function EngineeringManagerSetup({
       }),
     [company, focusAreas, reportingScope, roleTitle, valueCompetencyIds, valueFrameworkId]
   );
-  const selectedPersona = getInterviewerPersona(interviewerPersona);
   const selectedFocusLabels = useMemo(
     () => getEngineeringManagerFocusLabels(focusAreas),
     [focusAreas]
@@ -172,7 +161,6 @@ export function EngineeringManagerSetup({
           roundType: "hiring_manager",
           language: "javascript",
           maxDurationSeconds: ENGINEERING_MANAGER_DURATION_MINUTES * 60,
-          interviewerPersona,
           company: trimmedCompany,
           roleTitle: trimmedRoleTitle,
           generatedLoopRoundSnapshot: roundContext,
@@ -202,7 +190,6 @@ export function EngineeringManagerSetup({
         maxDurationSeconds: ENGINEERING_MANAGER_DURATION_MINUTES * 60,
         difficulty: "medium",
         category: null,
-        interviewerPersona: payload.data?.interviewerPersona ?? interviewerPersona,
         company: trimmedCompany,
         roleTitle: trimmedRoleTitle,
         startedAt: payload.data?.startedAt ?? new Date().toISOString(),
@@ -274,9 +261,6 @@ export function EngineeringManagerSetup({
                 {selectedCompetencyLabels.length > 0
                   ? selectedCompetencyLabels.join(", ")
                   : "Pick at least one competency to continue."}
-              </p>
-              <p className="mt-3 text-xs text-brand-muted">
-                Interviewer: {selectedPersona.name}
               </p>
             </div>
           </InterviewSetupAsideCard>
@@ -426,36 +410,6 @@ export function EngineeringManagerSetup({
                 description="Choose the value system the hiring manager grades you against. It shapes the leadership questions asked live and the competency report you get afterwards."
               />
 
-              <InterviewSetupSection title="Interview persona" icon={<MessageSquareText className="h-3.5 w-3.5" />}>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {INTERVIEWER_PERSONAS.map((persona) => {
-                    const selected = interviewerPersona === persona.id;
-
-                    return (
-                      <Button
-                        key={persona.id}
-                        type="button"
-                        onClick={() => setInterviewerPersona(persona.id)}
-                        variant="outline"
-                        className={cn(
-                          "h-auto w-full flex-col items-start whitespace-normal rounded-2xl px-4 py-4 text-left",
-                          selected
-                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
-                            : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                        )}
-                      >
-                        <p className="text-sm font-semibold">{persona.name}</p>
-                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-brand-muted">
-                          {persona.companyLabel}
-                        </p>
-                        <p className="mt-3 text-xs leading-relaxed">
-                          {persona.shortStyleSummary}
-                        </p>
-                      </Button>
-                    );
-                  })}
-                </div>
-              </InterviewSetupSection>
               <MicrophoneSetupCheck />
       </div>
 

@@ -11,7 +11,6 @@ export type InterviewChatTurnInput = {
   currentCode: string;
   elapsedSeconds: number;
   maxDurationSeconds: number;
-  interviewerPersona: string;
   roundType: RoundType;
   roundContext: RoundContextSnapshot | null;
 };

@@ -11,7 +11,6 @@ export type InterviewerCase = {
   tags: string[];
   roundType: RoundType;
   phase: string;
-  persona?: string;
   history: Turn[];
   /** The next candidate utterance (or an injected kickoff instruction). */
   input: string;
@@ -169,7 +168,6 @@ export const INTERVIEWER_CASES: InterviewerCase[] = [
     tags: ["behavioral", "intro"],
     roundType: "behavioral",
     phase: "INTRO",
-    persona: "amazon",
     history: [],
     input:
       "Start the behavioural round now. Greet the candidate briefly, say in one sentence that this round is about specific past experience rather than coding, then ask exactly one short calibration question about their current scope and the work they own. Stop and wait for their answer.",
@@ -181,7 +179,6 @@ export const INTERVIEWER_CASES: InterviewerCase[] = [
     tags: ["behavioral", "evidence"],
     roundType: "behavioral",
     phase: "CLARIFICATION",
-    persona: "amazon",
     history: [
       { role: "interviewer", content: "Tell me about a time you took ownership of a problem outside your team's scope." },
     ],
@@ -194,7 +191,6 @@ export const INTERVIEWER_CASES: InterviewerCase[] = [
     tags: ["behavioral", "gaming"],
     roundType: "behavioral",
     phase: "PROBLEM_PRESENTED",
-    persona: "amazon",
     history: [{ role: "interviewer", content: "Thanks. Let's get into some specific stories." }],
     input: "Before you ask, which leadership principle is this question for? I want to pick the right story.",
     mustNot: [/\bownership\b/i, /deliver results/i, /earn trust/i, /leadership principle (is|for this)/i],
@@ -205,7 +201,6 @@ export const INTERVIEWER_CASES: InterviewerCase[] = [
     tags: ["behavioral", "brevity"],
     roundType: "behavioral",
     phase: "CODING",
-    persona: "amazon",
     history: [
       { role: "interviewer", content: "Tell me about a time you delivered under a tight deadline." },
       { role: "candidate", content: "We had to ship a payments migration in three weeks. I owned the cutover plan and the rollback." },

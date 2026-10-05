@@ -200,7 +200,7 @@ function buildDimensionsFootnote(dimensions: readonly DimensionAverage[]) {
   const below = dimensions.filter((entry) => entry.average < HIRE_LINE);
 
   if (below.length === 0) {
-    return `Every dimension clears the hire line of ${HIRE_LINE}. Reach for harder problems or a company persona to keep the bar moving.`;
+    return `Every dimension clears the hire line of ${HIRE_LINE}. Reach for harder problems or a targeted loop to keep the bar moving.`;
   }
 
   if (below.length === 1) {

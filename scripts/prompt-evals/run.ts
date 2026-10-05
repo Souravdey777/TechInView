@@ -105,7 +105,6 @@ async function runInterviewer(c: InterviewerCase, client: Anthropic) {
     roundContext,
     currentPhase: c.phase,
     totalMinutes: 45,
-    interviewerPersonaId: c.persona ?? "tia",
     hasCandidateCode: Boolean(c.code),
     problemAlreadyPresented: hasPresentedProblem(c.history, problem?.title),
   });
@@ -154,7 +153,6 @@ async function runScorer(c: ScorerCase, client: Anthropic) {
     mode: c.mode,
     roundType: c.roundType,
     roundTitle: roundContext?.title ?? "Coding Round",
-    interviewerPersonaId: c.roundType === "behavioral" ? "amazon" : "tia",
     problem: problem ? { title: problem.title!, description: problem.description!, optimal_complexity: { time: "O(n)", space: "O(n)" } } : null,
     roundContext,
   });

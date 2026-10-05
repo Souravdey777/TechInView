@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectOption } from "@/components/ui/select";
@@ -13,6 +13,13 @@ import {
 } from "@/components/dashboard/settings/SettingsRack";
 import { useSupabase } from "@/hooks/useSupabase";
 import { SUPPORTED_LANGUAGES } from "@/lib/constants";
+import {
+  INTERVIEWER,
+  INTERVIEWER_VOICES,
+  getInterviewerVoice,
+  setInterviewerVoice,
+  type InterviewerVoiceId,
+} from "@/lib/interviewer";
 import {
   PUBLIC_PROFILE_BIO_MAX_LENGTH,
   PUBLIC_PROFILE_LINK_CONFIG,
@@ -106,6 +113,9 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
     initialProfile.is_public_profile ?? false
   );
 
+  const [interviewerVoice, setInterviewerVoiceState] = useState<InterviewerVoiceId>(
+    INTERVIEWER.voiceModel
+  );
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const normalizedUsername = normalizePublicUsername(username);
@@ -120,6 +130,14 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
     savedIsPublicProfile &&
     savedUsername === normalizedUsername &&
     hasValidUsernamePreview;
+
+  // Read after mount: the stored voice lives in localStorage, which the server render cannot see.
+  useEffect(() => setInterviewerVoiceState(getInterviewerVoice()), []);
+
+  const selectVoice = (id: InterviewerVoiceId) => {
+    setInterviewerVoiceState(id);
+    setInterviewerVoice(id);
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -264,7 +282,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
           <SettingsField
             label="Target company"
             htmlFor="settings-target-company"
-            hint="Tunes the interviewer persona suggested on setup."
+            hint="Prefills the company for targeted loops on setup."
           >
             <Select
               id="settings-target-company"
@@ -322,6 +340,35 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                     )}
                   >
                     {LANGUAGE_LABELS[lang]}
+                  </button>
+                );
+              })}
+            </div>
+          </SettingsField>
+
+          <SettingsField
+            label="Interviewer voice"
+            hint={`How ${INTERVIEWER.name} sounds in voice rounds. Saved on this device and used from your next round.`}
+            className="sm:col-span-2"
+          >
+            <div className="flex flex-wrap gap-2">
+              {INTERVIEWER_VOICES.map((voice) => {
+                const isSelected = interviewerVoice === voice.id;
+                return (
+                  <button
+                    key={voice.id}
+                    type="button"
+                    onClick={() => selectVoice(voice.id)}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "h-9 rounded-md border px-3 text-xs font-medium transition-colors",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-card",
+                      isSelected
+                        ? "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan"
+                        : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/20 hover:text-brand-text"
+                    )}
+                  >
+                    {voice.label}
                   </button>
                 );
               })}

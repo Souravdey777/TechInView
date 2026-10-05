@@ -30,10 +30,7 @@ import {
   type HireRecommendation,
   type RoundScoreDimension,
 } from "@/lib/constants";
-import {
-  getInterviewerPersona,
-  resolveInterviewerPersona,
-} from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import type { CompetencyReport } from "@/types";
 
@@ -48,7 +45,7 @@ type EngineeringManagerScores = StoreLikeResult["scores"];
 type EngineeringManagerTranscript = StoreLikeResult["transcript"];
 
 const INTERVIEW_SELECT_COLUMNS =
-  "id, round_type, interviewer_persona, language, overall_score, scores, feedback_summary, hire_recommendation, round_title, round_context_snapshot, competency_report, company_snapshot, role_title_snapshot, messages(*)";
+  "id, round_type, language, overall_score, scores, feedback_summary, hire_recommendation, round_title, round_context_snapshot, competency_report, company_snapshot, role_title_snapshot, messages(*)";
 
 /**
  * The shared five dimensions, relabelled for a leadership lens. A hiring
@@ -376,9 +373,6 @@ function buildDbResult(interview: Record<string, unknown>): StoreLikeResult {
       roundContext?.title ??
       "Engineering Manager Round",
     interviewId: interview.id as string,
-    interviewerPersona: resolveInterviewerPersona(
-      (interview.interviewer_persona as string | null | undefined) ?? null
-    ),
     finalCode: "",
     language: (interview.language as string | null) ?? "javascript",
     transcript,
@@ -495,7 +489,7 @@ export function EngineeringManagerResults({
     return <NoResultState />;
   }
 
-  const interviewer = getInterviewerPersona(result.interviewerPersona);
+  const interviewer = INTERVIEWER;
   const round = result.roundContext;
   const valueLens = round?.valuesContext ?? null;
   const hasScores = Boolean(result.overallScore !== null && result.scores);

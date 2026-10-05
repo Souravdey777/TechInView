@@ -8,7 +8,7 @@
 
 import type { RoundType } from "@/lib/constants";
 import { PHASE_ORDER_PROMPT_LIST } from "@/lib/interview-phases";
-import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import { buildValuesPromptBlock } from "@/lib/interview-values";
 
@@ -30,7 +30,6 @@ type PromptOptions = {
   roundContext?: RoundContextSnapshot | null;
   currentPhase: string;
   totalMinutes: number;
-  interviewerPersonaId?: string | null;
   currentCode?: string;
   minutesElapsed?: number;
   hasCandidateCode?: boolean;
@@ -140,7 +139,7 @@ function codingPhaseInstruction(
 
   switch (currentPhase) {
     case "INTRO":
-      return "You are in the INTRO phase. A generic instruction to start the interview is not evidence that calibration is complete. If the conversation does not yet contain the candidate's answer to an introduction or calibration question, introduce yourself warmly and ask exactly one short question about their software engineering and coding interview experience. Do not ask about their preferred language. Then stop and wait without presenting the problem. Once the candidate has answered that question, briefly acknowledge the answer and present the problem exactly once in one concise spoken turn. After completing that narration, transition to PROBLEM_PRESENTED and ask exactly one opening clarification question. Before presenting, inspect the conversation: if any assistant turn has already named or described the problem, do not narrate it again.";
+      return "You are in the INTRO phase. A generic instruction to start the interview is not evidence that calibration is complete. If the conversation does not yet contain the candidate's answer to an introduction or calibration question, introduce yourself warmly and ask exactly one short question about their software engineering and coding interview experience. Do not ask about their preferred language. Then stop and wait without presenting the problem. Once the candidate has answered that question, first call `set_interview_phase` with PROBLEM_PRESENTED without saying anything, then in your next spoken turn briefly acknowledge the answer, present the problem exactly once, and end with exactly one opening clarification question. Before presenting, inspect the conversation: if any assistant turn has already named or described the problem, do not narrate it again.";
     case "PROBLEM_PRESENTED":
       return "The problem has already been presented. Never repeat its title, statement, examples, or constraints unless the candidate explicitly asks you to repeat or clarify something. Let the candidate read it, then ask exactly one brief clarification-oriented prompt and wait.";
     case "CLARIFICATION":
@@ -300,15 +299,13 @@ const ROUND_ROLE: Record<RoundType, string> = {
   hiring_manager: "engineering hiring manager running a hiring-manager round",
 };
 
-function buildPersonaBlock(roundType: RoundType, interviewerPersonaId?: string | null): string {
-  const persona = getInterviewerPersona(interviewerPersonaId);
+function buildInterviewerBlock(roundType: RoundType): string {
+  return `You are ${INTERVIEWER.name}, a FAANG-calibrated generalist ${ROUND_ROLE[roundType] ?? ROUND_ROLE.coding}.
 
-  return `You are ${persona.name}, a ${persona.companyLabel === "Generalist" ? "FAANG-calibrated generalist" : `${persona.companyLabel}-style`} ${ROUND_ROLE[roundType] ?? ROUND_ROLE.coding}.
-
-Your persona:
-- ${persona.shortStyleSummary}
-- ${persona.interviewStylePrompt}
-- Calibration notes: ${persona.calibrationNotes}
+Your style:
+- ${INTERVIEWER.shortStyleSummary}
+- ${INTERVIEWER.interviewStylePrompt}
+- Calibration notes: ${INTERVIEWER.calibrationNotes}
 - Speak concisely because this is a live voice conversation
 - Ask one question at a time, then stop and let the candidate answer
 - Prefer targeted probes over broad lectures; your best turns are short, specific, and hard to dodge
@@ -380,7 +377,7 @@ ${sections || emptySectionsText}
 }
 
 function basePrompt(options: PromptOptions): string {
-  return `${buildPersonaBlock(options.roundType, options.interviewerPersonaId)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
+  return `${buildInterviewerBlock(options.roundType)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
 
 ## Active Round Type: ${options.roundType}
 ## Current Phase (conversation context): ${options.currentPhase}
@@ -426,7 +423,7 @@ export function buildVoiceSystemPrompt(options: PromptOptions): string {
         ? ""
         : "- `get_workspace_notes`: Retrieve the candidate's structured notes from the workspace before making claims about what they have already written down.";
 
-  return `${buildPersonaBlock(options.roundType, options.interviewerPersonaId)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
+  return `${buildInterviewerBlock(options.roundType)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
 
 ## Active Round Type: ${options.roundType}
 ## Current Phase (conversation context): ${options.currentPhase}
@@ -450,7 +447,9 @@ When the conversation naturally moves to a new phase, call the \`set_interview_p
 - Advance when the conversation naturally moves on.
 - Do not skip far ahead unless the candidate has clearly already done that work.
 - If uncertain, keep the same phase or advance by one step only.
-- For INTRO to PROBLEM_PRESENTED, finish saying the problem exactly once before calling \`set_interview_phase\`. After that call, never narrate the problem again unless the candidate explicitly requests repetition.
+- Call \`set_interview_phase\` BEFORE you speak in a turn, never after. Every function result starts a new spoken turn, so anything said before the call gets heard twice.
+- After any function result, never repeat or paraphrase what you already said. If your question has already been asked, say nothing and wait.
+- For INTRO to PROBLEM_PRESENTED, call \`set_interview_phase\` first, then say the problem exactly once. After that, never narrate the problem again unless the candidate explicitly requests repetition.
 
 ## Available functions
 - \`set_interview_phase\`: Update the UI phase when the conversation transitions.
@@ -469,8 +468,6 @@ When you mention arrays, examples, or complexity, say them in spoken English rat
  * Output must be a JSON object `{reply, phase}`.
  */
 export function buildChatSystemPrompt(options: PromptOptions): string {
-  const persona = getInterviewerPersona(options.interviewerPersonaId);
-
   return `${basePrompt(options)}
 
 ## Phase you report (authoritative for the UI after this turn)
@@ -481,7 +478,7 @@ After this reply, set JSON field "phase" to the single phase that best matches w
 
 ## OUTPUT FORMAT (mandatory)
 Reply with ONLY a single JSON object, no other text, no markdown fences:
-{"reply":"<what ${persona.name} says aloud, plain text, 1-3 short sentences>","phase":"<one of ${PHASE_ORDER_PROMPT_LIST}>"}
+{"reply":"<what ${INTERVIEWER.name} says aloud, plain text, 1-3 short sentences>","phase":"<one of ${PHASE_ORDER_PROMPT_LIST}>"}
 
 The "reply" string must be natural speech only (no JSON inside it). Escape quotes inside reply if needed.`;
 }

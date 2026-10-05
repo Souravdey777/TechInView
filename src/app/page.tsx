@@ -15,7 +15,7 @@ import {
 } from "@/lib/constants";
 import { buildHomeJsonLd } from "@/lib/site-seo";
 import { serializeJsonLd } from "@/lib/blog-seo";
-import { INTERVIEWER_PERSONAS, getInterviewerPersona, type InterviewerPersonaId } from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import { cn } from "@/lib/utils";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
@@ -49,15 +49,6 @@ const GAPS = [
   },
 ];
 
-const PERSONA_SPOTLIGHT: Record<InterviewerPersonaId, { bestFor: string; edge: string }> = {
-  tia: { bestFor: "Good first round", edge: "Warm generalist. One probe at a time, Socratic hints, a general big-tech bar." },
-  google: { bestFor: "Structure and clarity", edge: "Wants assumptions named, invariants stated and tradeoffs argued before you optimize." },
-  meta: { bestFor: "Speed and optimization", edge: "Fast and direct. Challenges a slow approach right away and expects you to converge." },
-  amazon: { bestFor: "Edge cases and ownership", edge: "Asks what breaks, how you tested it, and whether you would ship it as written." },
-  apple: { bestFor: "Precision and polish", edge: "Tightens loose wording and rough code. Rewards tidy, deliberate choices." },
-  netflix: { bestFor: "Senior-bar autonomy", edge: "Few hints. Expects you to make the call, defend it and self-correct." },
-};
-
 const SAMPLE_DIMS = [
   { name: "Problem solving", short: "PROBLEM SOLVING", score: 84 },
   { name: "Code quality", short: "CODE QUALITY", score: 76 },
@@ -75,7 +66,7 @@ const FAQS = [
   {
     question: "Which interview rounds can I practice?",
     answer:
-      "DSA coding interviews with six interviewer personas (a generalist plus Google, Meta, Amazon, Apple and Netflix styles), Technical Q&A, Engineering Manager and Behavioral rounds. Behavioral and Engineering Manager rounds are graded against a value lens you pick, such as Amazon Leadership Principles or Googleyness. System Design and Machine Coding are not available yet.",
+      "DSA coding interviews, Technical Q&A, Engineering Manager and Behavioral rounds. Behavioral and Engineering Manager rounds are graded against a value lens you pick, such as Amazon Leadership Principles or Googleyness. System Design and Machine Coding are not available yet.",
   },
   {
     question: "Which programming languages can I use?",
@@ -126,7 +117,6 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
   const practiceSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=ai_interview");
   const previewSignupHref = practiceSignupHref;
   const buyHref = buildAuthHref("/signup");
-  const tia = getInterviewerPersona("tia");
 
   const singlePrice = CREDIT_PACKS.single.displayPrices[priceKey];
   const packs = PACK_IDS.map((id) => {
@@ -182,7 +172,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               </div>
             </div>
             <div style={{ "--i": 3 } as React.CSSProperties} className="hero-rise mt-16 flex flex-wrap gap-x-10 gap-y-3 border-t border-white/[0.08] pt-5 font-mono text-xs uppercase tracking-[0.06em] text-brand-muted">
-              <LiveStatus name={tia.name} />
+              <LiveStatus name={INTERVIEWER.name} />
               <span>Voice-first rounds</span>
               <span>Python + JS run live</span>
               <span>Scorecard after every round</span>
@@ -201,9 +191,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               <Eyebrow n="01">Interview room</Eyebrow>
               <h2 className={cn(H2, "max-w-[16ch]")}>The interviewer on one side. Your code on the other.</h2>
             </div>
-            <InterviewRoomDemo
-              personas={INTERVIEWER_PERSONAS.map(({ id, name, companyLabel }) => ({ id, name, companyLabel }))}
-            />
+            <InterviewRoomDemo name={INTERVIEWER.name} />
           </LandingReveal>
         </section>
 
@@ -244,51 +232,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </LandingReveal>
         </section>
 
-        {/* ── 04 Interviewers ── */}
-        <section id="interviewers" className={cn("scroll-mt-20 py-[120px]", PAD)}>
-          <LandingReveal className="mx-auto max-w-[1320px]">
-            <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
-              <div>
-                <Eyebrow n="04">Interviewers</Eyebrow>
-                <h2 className={cn(H2, "max-w-[16ch]")}>Six interviewers. Each one runs the round differently.</h2>
-              </div>
-              <p className="max-w-[360px] text-[15px] leading-relaxed text-brand-muted">
-                Start with {tia.name}, the generalist. Switch to a company-style persona when you are rehearsing for a
-                specific loop. Styles are based on publicly described interview formats; TechInView is not affiliated
-                with these companies.
-              </p>
-            </div>
-            <div className="reveal-stagger grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] border-l border-t border-white/[0.08]">
-              {INTERVIEWER_PERSONAS.map((p, i) => {
-                const spot = PERSONA_SPOTLIGHT[p.id];
-                return (
-                  <div
-                    key={p.id}
-                    tabIndex={0}
-                    className="group flex min-h-[280px] flex-col justify-between gap-8 border-b border-r border-white/[0.08] p-8 outline-none transition-colors hover:bg-brand-card focus-visible:bg-brand-card"
-                  >
-                    <div className="flex justify-between font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">
-                      <span>0{i + 1}</span>
-                      <span>{p.companyLabel}</span>
-                    </div>
-                    <div>
-                      <h3 className="mb-1.5 text-4xl font-normal tracking-[-0.03em]">{p.name}</h3>
-                      <div className="mb-4 font-mono text-xs text-brand-cyan">{spot.bestFor}</div>
-                      <p className="min-h-[46px] text-[15px] leading-normal text-brand-muted group-hover:hidden group-focus-visible:hidden">
-                        {spot.edge}
-                      </p>
-                      <p className="hidden min-h-[46px] text-[15px] leading-normal text-brand-text group-hover:block group-focus-visible:block">
-                        “{p.greeting}”
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </LandingReveal>
-        </section>
-
-        {/* ── 05 Scorecard ── */}
+        {/* ── 04 Scorecard ── */}
         <section id="score" className={cn("relative py-[120px]", PAD)}>
           <div
             aria-hidden
@@ -298,10 +242,10 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             <ScoreCard
               dims={SAMPLE_DIMS}
               overall={77}
-              personaName={tia.name}
+              interviewerName={INTERVIEWER.name}
               header={
                 <>
-                  <Eyebrow n="05">After the round</Eyebrow>
+                  <Eyebrow n="04">After the round</Eyebrow>
                   <h2 className={H2}>Scored on five dimensions, with notes on each.</h2>
                   <p className="mb-10 mt-7 max-w-[440px] text-[17px] leading-relaxed text-brand-muted">
                     An overall score out of 100, a hire recommendation, written feedback per dimension and the full
@@ -322,7 +266,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </LandingReveal>
         </section>
 
-        {/* ── 06 Pricing ── */}
+        {/* ── 05 Pricing ── */}
         <section id="pricing" className={cn("relative scroll-mt-20 py-[120px]", PAD)}>
           <div
             aria-hidden
@@ -331,7 +275,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           <LandingReveal className="relative mx-auto max-w-[1320px]">
             <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
               <div>
-                <Eyebrow n="06">Pricing</Eyebrow>
+                <Eyebrow n="05">Pricing</Eyebrow>
                 <h2 className={H2}>Interview packs, not a subscription.</h2>
               </div>
               <p className="max-w-[360px] text-[15px] leading-relaxed text-brand-muted">
@@ -372,11 +316,11 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </LandingReveal>
         </section>
 
-        {/* ── 07 FAQ ── */}
+        {/* ── 06 FAQ ── */}
         <section id="faq" className={cn("scroll-mt-20 py-[120px]", PAD)}>
           <LandingReveal className="mx-auto grid max-w-[1320px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] gap-16">
             <div>
-              <Eyebrow n="07">FAQ</Eyebrow>
+              <Eyebrow n="06">FAQ</Eyebrow>
               <h2 className={cn(H2, "max-w-[12ch]")}>Before your first round.</h2>
             </div>
             <div className="reveal-stagger border-t border-white/[0.08]">

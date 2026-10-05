@@ -5,7 +5,6 @@ import type {
   RoundType,
   SupportedLanguage,
 } from "@/lib/constants";
-import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { RoundValuesContext } from "@/lib/interview-values";
 import type { ExperienceLevel } from "@/types";
 
@@ -62,7 +61,6 @@ export type GeneratedLoop = {
   jdSignals: string[];
   summary: string;
   confidence: LoopConfidence;
-  personaId: InterviewerPersonaId;
   similarCompanyFallback: boolean;
   rounds: GeneratedLoopRound[];
   createdAt: string;
@@ -96,7 +94,6 @@ export type StartRoundPayload = {
   generatedLoopRoundId?: string | null;
   generatedLoopSummary?: LoopSummarySnapshot | null;
   generatedLoopRoundSnapshot?: RoundContextSnapshot | null;
-  interviewerPersona?: string;
 };
 
 export type LoopSummarySnapshot = {

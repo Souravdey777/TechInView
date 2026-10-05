@@ -24,7 +24,6 @@ test("voice interviewer receives full public problem context and adaptive policy
     problem,
     currentPhase: "APPROACH_DISCUSSION",
     totalMinutes: 45,
-    interviewerPersonaId: "google",
     hasCandidateCode: true,
   });
 
@@ -45,7 +44,6 @@ test("chat and voice prompts share evidence, anti-leak, and one-question rules",
     problem,
     currentPhase: "TESTING",
     totalMinutes: 45,
-    interviewerPersonaId: "tia",
   };
   const voicePrompt = buildVoiceSystemPrompt(options);
   const chatPrompt = buildChatSystemPrompt(options);
@@ -68,7 +66,6 @@ test("discussion interviewers stay voice-first when no workspace exists", () => 
     problem: null,
     currentPhase: "CODING",
     totalMinutes: 30,
-    interviewerPersonaId: "netflix",
     hasWorkspaceNotes: false,
   });
 
@@ -84,7 +81,6 @@ test("coding introduction requires candidate calibration before presenting the p
     problem,
     currentPhase: "INTRO",
     totalMinutes: 45,
-    interviewerPersonaId: "tia",
   });
 
   assert.match(voicePrompt, /generic instruction to start the interview is not evidence/i);
@@ -102,12 +98,11 @@ test("presented-problem phase forbids unsolicited repetition", () => {
     problem,
     currentPhase: "PROBLEM_PRESENTED",
     totalMinutes: 45,
-    interviewerPersonaId: "tia",
   });
 
   assert.match(voicePrompt, /problem has already been presented/i);
   assert.match(voicePrompt, /Never repeat its title, statement, examples, or constraints/i);
-  assert.match(voicePrompt, /finish saying the problem exactly once before calling `set_interview_phase`/i);
+  assert.match(voicePrompt, /Call `set_interview_phase` BEFORE you speak in a turn, never after/);
 });
 
 // ─── Repeated problem narration ───────────────────────────────────────────────

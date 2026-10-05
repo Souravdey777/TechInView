@@ -54,7 +54,7 @@ export function SampleReportPreview() {
       <ScoreCard
         dims={dims}
         overall={SAMPLE_OVERALL}
-        personaName="Tia"
+        interviewerName="Tia"
         header={
           <div className="mb-10">
             <p className={cn(LABEL, "text-brand-cyan")} role="note">

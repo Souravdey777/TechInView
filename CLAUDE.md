@@ -10,7 +10,7 @@ multi-round prep surface:
 
 - DSA Practice Mode
 - DSA AI Interview Mode
-- company-specific interviewer personas
+- a single AI interviewer, Tia
 - targeted loop generation from company + role + JD
 - Technical Q&A rounds
 - Engineering Manager / hiring-manager rounds
@@ -28,7 +28,7 @@ prep.
 | Landing, pricing, SEO, blog | Live | Marketing site, blog, legal pages, and practice index are all in-repo. |
 | DSA Practice Mode | Live | `/practice` + `/practice/[slug]`, persisted attempts, solo coding workflow. |
 | DSA AI Interview Mode | Live | `/interview/setup` -> `/interview/[id]` -> `/results/[id]`. |
-| Interviewer personas | Live | `tia`, `google`, `meta`, `amazon`, `apple`, `netflix`. |
+| Interviewer | Live | One interviewer, Tia, defined in `src/lib/interviewer.ts`. Company personas were removed; company focus comes from the value lens and targeted loops. |
 | Technical Q&A | Live | Dedicated setup, runtime, and results routes exist. |
 | Engineering Manager | Live | Dedicated setup, runtime, and results routes exist. |
 | Targeted loop generation | Live | JD-driven loop generation API and storage are implemented. |
@@ -157,7 +157,7 @@ prep.
 
 - `src/app/interview/setup/page.tsx`
   - The central DSA setup experience. Handles Practice vs AI interview, free
-    trial logic, targeted loops, persona selection, and problem selection.
+    trial logic, targeted loops, and problem selection.
 - `src/components/interview/InterviewRoom.tsx`
   - The main runtime for coding interviews. Wires Deepgram events, editor
     state, agent tools, transcript updates, and resume behavior.
@@ -165,7 +165,7 @@ prep.
   - Voice Agent transport, event handling, injected context, and function-call
     handling.
 - `src/app/api/interview/start/route.ts`
-  - Canonical place where interview mode, round type, persona, free-trial
+  - Canonical place where interview mode, round type, free-trial
     rules, and persistence come together.
 - `src/lib/ai/interviewer-system-prompt.ts`
   - Round-aware prompt generation for voice interviews.
@@ -250,6 +250,10 @@ The core tables are:
 
 ## Product Guardrails
 
+- There is one interviewer (Tia). The DB still has the `interviewer_persona`
+  enum and `interviews.interviewer_persona` / `generated_loops.persona_id`
+  columns (default `'tia'`), but they are no longer in the Drizzle schema or
+  read by the app. Do not reintroduce per-company personas.
 - Do not treat TechInView as DSA-only anymore. New work should fit the
   multi-round product shape.
 - Do not assume all rounds share the same runtime. Coding rounds, Technical
@@ -292,7 +296,7 @@ The core tables are:
 ## Practical Advice For Future Work
 
 - Start with `src/app/api/interview/start/route.ts` when debugging why a round
-  launches with the wrong mode, persona, duration, or gating behavior.
+  launches with the wrong mode, duration, or gating behavior.
 - Start with `src/components/interview/InterviewRoom.tsx` when debugging runtime
   voice, code, or tool-call issues.
 - Start with `src/lib/dashboard/models.ts` when dashboard cards and route

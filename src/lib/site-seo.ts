@@ -99,7 +99,7 @@ export function buildHomeJsonLd(input: {
       publisher: { "@id": organization["@id"] },
       isPartOf: { "@id": websiteId },
       featureList: [
-        "Voice AI interviewer with company-style personas",
+        "Voice AI interviewer calibrated to a FAANG-level bar",
         "Live code editor with Python and JavaScript test execution",
         "Five-dimension scoring and hire recommendation for coding rounds",
         "Full transcript and per-dimension feedback",

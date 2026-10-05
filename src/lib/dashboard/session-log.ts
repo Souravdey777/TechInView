@@ -7,7 +7,7 @@ import {
   getPracticeResultsHref,
   type PracticeInterviewKind,
 } from "@/lib/dashboard/models";
-import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import { formatDuration } from "@/lib/utils";
 
 export type SessionLogKey = PracticeInterviewKind | "practice";
@@ -47,7 +47,6 @@ export type RoundLogInput = {
   status: "completed" | "abandoned" | "in_progress";
   title: string;
   language: string | null;
-  interviewerPersona: string | null;
   durationSeconds: number | null;
   score: number | null;
   verdict: HireRecommendation | null;
@@ -75,10 +74,6 @@ export function buildRoundLogRow(
   round: RoundLogInput,
   take: number | null
 ): SessionLogRow {
-  const persona = round.interviewerPersona
-    ? getInterviewerPersona(round.interviewerPersona)
-    : null;
-
   const verdict =
     round.status !== "completed"
       ? {
@@ -100,7 +95,7 @@ export function buildRoundLogRow(
     typeLabel: [DASHBOARD_FILTER_LABELS[round.kind], round.language ? titleCase(round.language) : null]
       .filter(Boolean)
       .join(" · "),
-    interviewerLabel: persona ? `${persona.name} · ${persona.companyLabel}` : "Interviewer",
+    interviewerLabel: INTERVIEWER.name,
     durationLabel:
       typeof round.durationSeconds === "number" && round.durationSeconds > 0
         ? formatDuration(round.durationSeconds)
