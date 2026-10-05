@@ -1,0 +1,82 @@
+{
+  "title": "Can Make Arithmetic Progression From Sequence",
+  "slug": "can-make-arithmetic-progression-from-sequence",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "You are given an integer array `arr`. An **arithmetic progression** is a sequence in which the difference between every pair of neighbouring elements is the same constant.\n\nDecide whether the elements of `arr` can be **reordered** so that they form an arithmetic progression. Return `true` if some ordering works, otherwise `false`. Every element must be used exactly once, and duplicates are allowed (a constant difference of `0` is valid).\n\n**Example 1:**\n```\nInput: arr = [3,5,1]\nOutput: true\nExplanation: Sorted, the values are 1, 3, 5, and each step is +2.\n```\n\n**Example 2:**\n```\nInput: arr = [1,2,4]\nOutput: false\nExplanation: Sorted, the steps are +1 and +2; no ordering gives a single common difference.\n```\n\n**Example 3:**\n```\nInput: arr = [7,7,7]\nOutput: true\nExplanation: All steps are 0, which is a valid common difference.\n```",
+  "examples": [
+    {
+      "input": "arr = [3,5,1]",
+      "output": "true",
+      "explanation": "Sorted, the values are 1, 3, 5, and each step is +2."
+    },
+    {
+      "input": "arr = [1,2,4]",
+      "output": "false",
+      "explanation": "Sorted, the steps are +1 and +2; no ordering gives a single common difference."
+    },
+    {
+      "input": "arr = [7,7,7]",
+      "output": "true",
+      "explanation": "All steps are 0, which is a valid common difference."
+    }
+  ],
+  "constraints": [
+    "2 <= arr.length <= 1000",
+    "-10^6 <= arr[i] <= 10^6",
+    "arr may contain duplicate values"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def canMakeArithmeticProgression(self, arr: list[int]) -> bool:\n        # Write your solution here\n        return False",
+    "javascript": "function canMakeArithmeticProgression(arr) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean canMakeArithmeticProgression(int[] arr) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool canMakeArithmeticProgression(vector<int>& arr) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "arr = [3,5,1]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [1,2,4]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [7,7,7]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [5,-1]",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "arr = [-3,9,1,-7,5,-11,4]",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force would try every permutation and check whether neighbouring differences are equal, which is O(n! * n) and hopeless. Observing that any arithmetic progression is monotonic, it suffices to sort the array and check that every adjacent difference equals arr[1] - arr[0]: O(n log n) time, O(1) extra space (or O(n) if sorting copies). An O(n) alternative computes min and max, derives the step d = (max - min) / (n - 1), rejects if it is not an integer, and then verifies that each value maps to a distinct slot (value - min) / d using a set or in-place placement; when d is 0 all values must be equal.",
+  "hints": [
+    "If a valid ordering exists, what can you say about whether it is increasing or decreasing?",
+    "Sorting puts the elements in the only order that could possibly work (up to reversal). What should you check afterwards?",
+    "After sorting, compare every adjacent difference with arr[1] - arr[0]. For an O(n) solution, use min, max and the required step (max - min) / (n - 1), then confirm each value lands on a unique position."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Can you solve it in O(n) time without sorting?",
+    "How would you handle the case where you may remove at most one element to make the rest an arithmetic progression?"
+  ]
+}

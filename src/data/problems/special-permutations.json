@@ -1,0 +1,82 @@
+{
+  "title": "Special Permutations",
+  "slug": "special-permutations",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft"
+  ],
+  "description": "You are given an array `nums` of `n` **distinct** positive integers. A permutation of `nums` is **special** if for every adjacent pair of positions `i` and `i + 1`, one of the two values divides the other, that is `nums[i] % nums[i + 1] == 0` or `nums[i + 1] % nums[i] == 0`.\n\nReturn the number of special permutations of `nums`, modulo `10^9 + 7`.\n\n**Example 1:**\n```\nInput: nums = [1,2,3]\nOutput: 2\nExplanation: 1 divides everything, but 2 and 3 do not divide each other, so they cannot be adjacent. The valid orders are [2,1,3] and [3,1,2].\n```\n\n**Example 2:**\n```\nInput: nums = [2,4,8]\nOutput: 6\nExplanation: Every pair has one value dividing the other, so all 3! = 6 permutations are special.\n```\n\n**Example 3:**\n```\nInput: nums = [3,5,7]\nOutput: 0\nExplanation: No pair of these values divides each other, so no permutation can be special.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3]",
+      "output": "2",
+      "explanation": "1 divides everything, but 2 and 3 do not divide each other, so they cannot be adjacent. The valid orders are [2,1,3] and [3,1,2]."
+    },
+    {
+      "input": "nums = [2,4,8]",
+      "output": "6",
+      "explanation": "Every pair has one value dividing the other, so all 3! = 6 permutations are special."
+    },
+    {
+      "input": "nums = [3,5,7]",
+      "output": "0",
+      "explanation": "No pair of these values divides each other, so no permutation can be special."
+    }
+  ],
+  "constraints": [
+    "2 <= nums.length <= 14",
+    "1 <= nums[i] <= 10^9",
+    "All values in nums are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def specialPerm(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function specialPerm(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int specialPerm(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int specialPerm(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,4,8]",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,5,7]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2]",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192]",
+      "expected_output": "178290591",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force generates all n! permutations and checks each adjacent pair, which is far too slow for n = 14. Note that whether a partial permutation can be extended depends only on which elements are already used and which element is last. Define dp[mask][last] = number of ways to order the elements in mask so that the arrangement is special and ends with nums[last]. Start with dp[1 << i][i] = 1, and for each state try every unused next element that divides or is divided by nums[last]. The answer is the sum of dp[full][last] over all last, modulo 10^9 + 7. There are 2^n * n states with n transitions each, giving O(2^n * n^2) time and O(2^n * n) space.",
+  "hints": [
+    "Generating all permutations is n!, which is too many. What information about a partial arrangement actually matters for extending it?",
+    "To decide what can come next you only need the set of used elements and the last element placed. How many such states exist?",
+    "Use dp[mask][last]: number of special arrangements of the elements in mask ending at index last. Transition to mask | (1 << next) when nums[next] and nums[last] divide one another. Sum dp over the full mask and take the result modulo 10^9 + 7."
+  ],
+  "optimal_complexity": {
+    "time": "O(2^n * n^2)",
+    "space": "O(2^n * n)"
+  },
+  "follow_up_questions": [
+    "Can you precompute the compatibility graph to speed up transitions?",
+    "How would you return one valid special permutation (or report none) instead of the count?"
+  ]
+}

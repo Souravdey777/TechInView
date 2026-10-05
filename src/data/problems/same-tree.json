@@ -1,0 +1,84 @@
+{
+  "title": "Same Tree",
+  "slug": "same-tree",
+  "difficulty": "easy",
+  "category": "trees",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "meta",
+    "bloomberg"
+  ],
+  "description": "Given the roots of two binary trees, `root1` and `root2`, decide whether they are identical. Two trees count as identical only when they have exactly the same shape **and** every pair of nodes in matching positions holds the same value.\n\nReturn `true` if they are identical and `false` otherwise. The tree is given in level-order, with `null` marking a missing child. Two empty trees are identical.\n\n**Example 1:**\n```\nInput: root1 = [1,2,3], root2 = [1,2,3]\nOutput: true\nExplanation: Both trees have root 1 with left child 2 and right child 3.\n```\n\n**Example 2:**\n```\nInput: root1 = [1,2], root2 = [1,null,2]\nOutput: false\nExplanation: In the first tree 2 is a left child; in the second it is a right child, so the shapes differ.\n```\n\n**Example 3:**\n```\nInput: root1 = [1,2,1], root2 = [1,1,2]\nOutput: false\nExplanation: The shapes match, but the left children hold 2 and 1 respectively.\n```",
+  "examples": [
+    {
+      "input": "root1 = [1,2,3], root2 = [1,2,3]",
+      "output": "true",
+      "explanation": "Both trees have root 1 with left child 2 and right child 3."
+    },
+    {
+      "input": "root1 = [1,2], root2 = [1,null,2]",
+      "output": "false",
+      "explanation": "In the first tree 2 is a left child; in the second it is a right child, so the shapes differ."
+    },
+    {
+      "input": "root1 = [1,2,1], root2 = [1,1,2]",
+      "output": "false",
+      "explanation": "The shapes match, but the left children hold 2 and 1 respectively."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in each tree is in the range [0, 100].",
+    "-10^4 <= Node.val <= 10^4",
+    "Either tree (or both) may be empty, and the two trees may have different numbers of nodes.",
+    "The tree height is at most 100, and the tree may be fully skewed."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isSameTree(self, root1: TreeNode | None, root2: TreeNode | None) -> bool:\n        # Write your solution here\n        return False",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction isSameTree(root1, root2) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public boolean isSameTree(TreeNode root1, TreeNode root2) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    bool isSameTree(TreeNode* root1, TreeNode* root2) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root1 = [1,2,3], root2 = [1,2,3]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "root1 = [1,2], root2 = [1,null,2]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "root1 = [1,2,1], root2 = [1,1,2]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "root1 = [], root2 = []",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "root1 = [1,2,3,null,4], root2 = [1,2,3,null,4,5]",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach serializes both trees (for example a preorder walk that also records null markers) and compares the two sequences; this is O(n) time but allocates O(n) extra memory for the strings or lists. The optimal approach compares the trees in lockstep recursively: if both nodes are null they match; if exactly one is null or their values differ they do not; otherwise the answer is the AND of comparing the two left subtrees and the two right subtrees. It stops at the first mismatch, runs in O(n) time where n is the smaller tree's size, and uses O(h) recursion space.",
+  "hints": [
+    "Identical trees must agree at the root and then recursively in both subtrees.",
+    "Handle the null cases first: what if both nodes are missing, or only one of them is?",
+    "Return true when both are null, false when one is null or the values differ, and otherwise recurse on (left, left) and (right, right)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "follow_up_questions": [
+    "How would you solve this iteratively with a queue of node pairs?",
+    "How would you check whether one tree appears as a subtree anywhere inside another?"
+  ]
+}

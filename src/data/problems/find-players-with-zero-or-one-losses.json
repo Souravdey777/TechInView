@@ -1,0 +1,84 @@
+{
+  "title": "Find Players With Zero or One Losses",
+  "slug": "find-players-with-zero-or-one-losses",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given the results of a tournament as an array `matches`, where `matches[i] = [winner_i, loser_i]` records that player `winner_i` beat player `loser_i`.\n\nReturn a list `answer` of length 2:\n\n- `answer[0]` contains every player who never lost a match.\n- `answer[1]` contains every player who lost exactly one match.\n\nOnly players who appear in at least one match are considered. Both lists must be sorted in **increasing** order, and a list with no players is returned as `[]`.\n\n**Example 1:**\n```\nInput: matches = [[1,3],[2,3],[3,6],[5,6],[5,7],[4,5],[4,8],[4,9],[10,4],[10,9]]\nOutput: [[1,2,10],[4,5,7,8]]\nExplanation: Players 1, 2 and 10 never lost. Players 4, 5, 7 and 8 lost once each. Players 3, 6 and 9 lost twice.\n```\n\n**Example 2:**\n```\nInput: matches = [[2,3],[1,3],[5,4],[6,4]]\nOutput: [[1,2,5,6],[]]\nExplanation: Players 1, 2, 5 and 6 never lost. Players 3 and 4 each lost twice, so the second list is empty.\n```\n\n**Example 3:**\n```\nInput: matches = [[1,2]]\nOutput: [[1],[2]]\nExplanation: Player 1 has no losses and player 2 has exactly one.\n```",
+  "examples": [
+    {
+      "input": "matches = [[1,3],[2,3],[3,6],[5,6],[5,7],[4,5],[4,8],[4,9],[10,4],[10,9]]",
+      "output": "[[1,2,10],[4,5,7,8]]",
+      "explanation": "Players 1, 2 and 10 never lost. Players 4, 5, 7 and 8 lost once each. Players 3, 6 and 9 lost twice."
+    },
+    {
+      "input": "matches = [[2,3],[1,3],[5,4],[6,4]]",
+      "output": "[[1,2,5,6],[]]",
+      "explanation": "Players 1, 2, 5 and 6 never lost. Players 3 and 4 each lost twice, so the second list is empty."
+    },
+    {
+      "input": "matches = [[1,2]]",
+      "output": "[[1],[2]]",
+      "explanation": "Player 1 has no losses and player 2 has exactly one."
+    }
+  ],
+  "constraints": [
+    "1 <= matches.length <= 10^5",
+    "matches[i].length == 2",
+    "1 <= winner_i, loser_i <= 10^5",
+    "winner_i != loser_i",
+    "No pair [winner_i, loser_i] appears more than once"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findWinners(self, matches: list[list[int]]) -> list[list[int]]:\n        # Write your solution here\n        pass",
+    "javascript": "function findWinners(matches) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<Integer>> findWinners(int[][] matches) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> findWinners(vector<vector<int>>& matches) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "matches = [[1,3],[2,3],[3,6],[5,6],[5,7],[4,5],[4,8],[4,9],[10,4],[10,9]]",
+      "expected_output": "[[1,2,10],[4,5,7,8]]",
+      "is_hidden": false
+    },
+    {
+      "input": "matches = [[2,3],[1,3],[5,4],[6,4]]",
+      "expected_output": "[[1,2,5,6],[]]",
+      "is_hidden": false
+    },
+    {
+      "input": "matches = [[1,2]]",
+      "expected_output": "[[1],[2]]",
+      "is_hidden": false
+    },
+    {
+      "input": "matches = [[1,2],[2,3],[3,1]]",
+      "expected_output": "[[],[1,2,3]]",
+      "is_hidden": true
+    },
+    {
+      "input": "matches = [[100000,1],[100000,2],[3,100000],[2,1]]",
+      "expected_output": "[[3],[2,100000]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force collects every player and, for each one, scans all matches to count its losses, which is O(p * m). The optimal approach makes one pass building a hash map from player to loss count, inserting each winner with count 0 if absent and incrementing the loser's count. Then gather players with count 0 and count 1 and sort each list. This is O(m + p log p) time and O(p) space, where m is the number of matches and p the number of distinct players. Since player ids are bounded by 10^5, a counting array indexed by id (with -1 for players who never appeared) avoids the sort and gives O(m + maxId) time.",
+  "hints": [
+    "What single number per player decides which list (if any) they belong to?",
+    "Remember that a player who only ever won must still be recorded, even though they never appear as a loser.",
+    "Build a map of losses in one pass (winners get 0 if unseen, losers get +1), then collect ids with 0 and with 1 losses and sort both lists."
+  ],
+  "optimal_complexity": {
+    "time": "O(m + p log p)",
+    "space": "O(p)"
+  },
+  "follow_up_questions": [
+    "How would you avoid sorting by using the bounded range of player ids?",
+    "How would you process matches arriving as a stream and answer the query at any moment?"
+  ]
+}

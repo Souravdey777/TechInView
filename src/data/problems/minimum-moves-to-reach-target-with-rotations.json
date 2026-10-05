@@ -1,0 +1,80 @@
+{
+  "title": "Minimum Moves to Reach Target with Rotations",
+  "slug": "minimum-moves-to-reach-target-with-rotations",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "A snake occupies **two adjacent cells** in an `n x n` grid, where `0` is an empty cell and `1` is blocked. It starts horizontally, covering `(0, 0)` and `(0, 1)`, and wants to end horizontally covering `(n - 1, n - 2)` and `(n - 1, n - 1)`.\n\nEach move is one of:\n\n- **Move right**: shift both cells one column right, if both destination cells are empty.\n- **Move down**: shift both cells one row down, if both destination cells are empty.\n- **Rotate clockwise**: when horizontal at `(r, c)` and `(r, c + 1)`, become vertical at `(r, c)` and `(r + 1, c)`; requires `(r + 1, c)` and `(r + 1, c + 1)` to be empty.\n- **Rotate counterclockwise**: when vertical at `(r, c)` and `(r + 1, c)`, become horizontal at `(r, c)` and `(r, c + 1)`; requires `(r, c + 1)` and `(r + 1, c + 1)` to be empty.\n\nThe snake may never leave the grid. Return the **minimum number of moves** to reach the target position, or `-1` if it cannot be reached.\n\n**Example 1:**\n```\nInput: grid = [[0,0,0],[0,0,0],[0,0,0]]\nOutput: 3\nExplanation: Move right to cover (0,1)-(0,2), then move down twice to reach (2,1)-(2,2).\n```\n\n**Example 2:**\n```\nInput: grid = [[0,0,0,0],[1,1,0,0],[0,0,0,0],[0,1,0,0]]\nOutput: 5\nExplanation: Move right twice to (0,2)-(0,3), then move down three times through the empty rightmost two columns to (3,2)-(3,3).\n```\n\n**Example 3:**\n```\nInput: grid = [[0,0,1],[0,1,0],[0,0,0]]\nOutput: -1\nExplanation: The snake cannot move right because (0,2) is blocked, cannot move down because (1,1) is blocked, and cannot rotate for the same reason, so it is stuck.\n```",
+  "examples": [
+    {
+      "input": "grid = [[0,0,0],[0,0,0],[0,0,0]]",
+      "output": "3",
+      "explanation": "Move right to cover (0,1)-(0,2), then move down twice to reach (2,1)-(2,2)."
+    },
+    {
+      "input": "grid = [[0,0,0,0],[1,1,0,0],[0,0,0,0],[0,1,0,0]]",
+      "output": "5",
+      "explanation": "Move right twice to (0,2)-(0,3), then move down three times through the empty rightmost two columns to (3,2)-(3,3)."
+    },
+    {
+      "input": "grid = [[0,0,1],[0,1,0],[0,0,0]]",
+      "output": "-1",
+      "explanation": "The snake cannot move right because (0,2) is blocked, cannot move down because (1,1) is blocked, and cannot rotate for the same reason, so it is stuck."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 100",
+    "grid[i][j] is 0 or 1",
+    "The starting cells and the target cells are always empty"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumMoves(self, grid: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumMoves(grid) {\n    // Write your solution here\n    return 0;\n}",
+    "java": "class Solution {\n    public int minimumMoves(int[][] grid) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumMoves(vector<vector<int>>& grid) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "grid = [[0,0,0],[0,0,0],[0,0,0]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0,0,0,0],[1,1,0,0],[0,0,0,0],[0,1,0,0]]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0,0,1],[0,1,0],[0,0,0]]",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0,0],[0,0]]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "grid = [[0,0,0,0,0,1],[1,1,0,0,1,0],[0,0,0,0,1,1],[0,0,1,0,1,0],[0,1,1,0,0,0],[0,1,1,0,0,0]]",
+      "expected_output": "11",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Describe the snake by its tail cell (r, c) and its orientation (horizontal or vertical), giving at most 2 * n^2 states. A brute force DFS over move sequences is exponential and still has to track visited states. Since every move costs 1, BFS from the start state (0, 0, horizontal) finds the shortest number of moves: from each state, generate the moves that are legal (checking the cells each one requires to be empty and in bounds), skip already-visited states, and return the level at which (n - 1, n - 2, horizontal) is reached, or -1 if the queue empties. This is O(n^2) time and O(n^2) space.",
+  "hints": [
+    "What is the smallest amount of information that fully describes where the snake is?",
+    "A position can be encoded as (tail row, tail column, orientation). With unit-cost moves, which search gives the minimum number of moves?",
+    "BFS over (r, c, orientation) states; for each, try move-right, move-down and the one rotation valid for the current orientation, checking that every required cell is empty, and stop when you reach (n-1, n-2, horizontal)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n^2)"
+  },
+  "follow_up_questions": [
+    "How would you reconstruct the actual sequence of moves?",
+    "What if the snake were three cells long?"
+  ]
+}

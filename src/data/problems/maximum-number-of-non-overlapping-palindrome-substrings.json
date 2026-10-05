@@ -1,0 +1,76 @@
+{
+  "title": "Maximum Number of Non-Overlapping Palindrome Substrings",
+  "slug": "maximum-number-of-non-overlapping-palindrome-substrings",
+  "difficulty": "hard",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given a string `s` of lowercase English letters and a positive integer `k`. Choose a set of substrings of `s` such that:\n\n- every chosen substring has length **at least `k`**,\n- every chosen substring is a **palindrome** (reads the same forwards and backwards), and\n- no two chosen substrings **overlap** (they share no index).\n\nReturn the **maximum** number of substrings you can choose. Return `0` if no valid substring exists.\n\n**Example 1:**\n```\nInput: s = \"abaccdbbd\", k = 3\nOutput: 2\nExplanation: Choose \"aba\" (indices 0-2) and \"dbbd\" (indices 5-8). Both are palindromes of length at least 3 and they do not overlap.\n```\n\n**Example 2:**\n```\nInput: s = \"adbcda\", k = 2\nOutput: 0\nExplanation: No substring of length 2 or more is a palindrome.\n```",
+  "examples": [
+    {
+      "input": "s = \"abaccdbbd\", k = 3",
+      "output": "2",
+      "explanation": "Choose \"aba\" (indices 0-2) and \"dbbd\" (indices 5-8). Both are palindromes of length at least 3 and they do not overlap."
+    },
+    {
+      "input": "s = \"adbcda\", k = 2",
+      "output": "0",
+      "explanation": "No substring of length 2 or more is a palindrome."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 2000",
+    "1 <= k <= s.length",
+    "s consists of lowercase English letters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxPalindromes(self, s: str, k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxPalindromes(s, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxPalindromes(String s, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxPalindromes(string s, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"abaccdbbd\", k = 3",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"adbcda\", k = 2",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aaa\", k = 1",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\", k = 1",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abcbaxyzzyx\", k = 5",
+      "expected_output": "2",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force checks every subset of palindromic substrings for overlaps, which is exponential. Key observation: it is never worse to use a palindrome of length exactly k or k+1, because any longer palindrome contains a centred palindrome of length k or k+1 that frees up more room. So a DP over positions works: dp[i] is the best count using s[0..i-1]; dp[i] = dp[i-1], and if s[i-k..i-1] is a palindrome then dp[i] = max(dp[i], dp[i-k] + 1), and likewise for s[i-k-1..i-1]. Equivalently, a greedy scan with expand-around-centre picks the earliest-ending palindrome of length >= k and restarts after it. Each palindrome check is O(k), giving O(n * k) time and O(n) space (or O(n^2) with a precomputed palindrome table).",
+  "hints": [
+    "If a long palindrome is chosen, consider shrinking it from both ends. Does a shorter one ever make the answer worse?",
+    "You only need to consider palindromes of length exactly k or k + 1. Think of a DP over prefix lengths.",
+    "dp[i] = max(dp[i-1], dp[i-k] + 1 if s[i-k:i] is a palindrome, dp[i-k-1] + 1 if s[i-k-1:i] is a palindrome). Return dp[n]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * k)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you return the chosen substrings themselves?",
+    "How would you solve it if each palindrome also had a weight and you wanted the maximum total weight?"
+  ]
+}

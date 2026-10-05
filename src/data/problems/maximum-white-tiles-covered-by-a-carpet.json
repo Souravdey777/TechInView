@@ -1,0 +1,83 @@
+{
+  "title": "Maximum White Tiles Covered By A Carpet",
+  "slug": "maximum-white-tiles-covered-by-a-carpet",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given a 2D array `tiles` where `tiles[i] = [l_i, r_i]` means every integer position from `l_i` to `r_i` (inclusive) is a **white** tile. The ranges do not overlap, but they are **not** necessarily given in sorted order. Every position not covered by a range is not white.\n\nYou also have one carpet that covers exactly `carpetLen` consecutive integer positions, and you may place it starting at any integer position.\n\nReturn the maximum number of white tiles the carpet can cover.\n\n**Example 1:**\n```\nInput: tiles = [[2,6],[9,10],[14,20],[23,24]], carpetLen = 8\nOutput: 7\nExplanation: Place the carpet on positions 14 through 21. It covers the whole range 14-20, which is 7 white tiles. No other placement of length 8 covers more.\n```\n\n**Example 2:**\n```\nInput: tiles = [[15,17],[3,4],[8,9]], carpetLen = 3\nOutput: 3\nExplanation: Placing the carpet on positions 15-17 covers 3 white tiles. The ranges are not necessarily given in sorted order.\n```\n\n**Example 3:**\n```\nInput: tiles = [[2,4],[7,9]], carpetLen = 6\nOutput: 4\nExplanation: Positions 2-7 cover tiles 2, 3, 4 and 7, i.e. 4 white tiles. No placement of length 6 covers more, because the gap 5-6 always lies inside any window that touches both ranges.\n```",
+  "examples": [
+    {
+      "input": "tiles = [[2,6],[9,10],[14,20],[23,24]], carpetLen = 8",
+      "output": "7",
+      "explanation": "Place the carpet on positions 14 through 21. It covers the whole range 14-20, which is 7 white tiles. No other placement of length 8 covers more."
+    },
+    {
+      "input": "tiles = [[15,17],[3,4],[8,9]], carpetLen = 3",
+      "output": "3",
+      "explanation": "Placing the carpet on positions 15-17 covers 3 white tiles. The ranges are not necessarily given in sorted order."
+    },
+    {
+      "input": "tiles = [[2,4],[7,9]], carpetLen = 6",
+      "output": "4",
+      "explanation": "Positions 2-7 cover tiles 2, 3, 4 and 7, i.e. 4 white tiles. No placement of length 6 covers more, because the gap 5-6 always lies inside any window that touches both ranges."
+    }
+  ],
+  "constraints": [
+    "1 <= tiles.length <= 5 * 10^4",
+    "tiles[i].length == 2",
+    "1 <= l_i <= r_i <= 10^9",
+    "1 <= carpetLen <= 10^9",
+    "The ranges in tiles are pairwise non-overlapping"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumWhiteTiles(self, tiles: list[list[int]], carpetLen: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumWhiteTiles(tiles, carpetLen) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maximumWhiteTiles(int[][] tiles, int carpetLen) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maximumWhiteTiles(vector<vector<int>>& tiles, int carpetLen) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "tiles = [[2,6],[9,10],[14,20],[23,24]], carpetLen = 8",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "tiles = [[15,17],[3,4],[8,9]], carpetLen = 3",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "tiles = [[2,4],[7,9]], carpetLen = 6",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "tiles = [[1,1000000000]], carpetLen = 1000000000",
+      "expected_output": "1000000000",
+      "is_hidden": true
+    },
+    {
+      "input": "tiles = [[8,8],[1,3],[5,6],[10,20]], carpetLen = 4",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries every starting position and counts covered white cells, which is far too slow since coordinates reach 10^9. Key observation: some optimal placement starts at the left end of a tile range (sliding a carpet right until its start hits a range start never loses tiles). So sort the ranges, build prefix sums of range lengths, and for each range i place the carpet at [l_i, l_i + carpetLen - 1]. Binary search the last range j whose start is <= the carpet end; the covered count is the full lengths of ranges i..j-1 (from prefix sums) plus the partial overlap of range j, min(r_j, end) - l_j + 1. A two-pointer sliding window replaces the binary search with the same idea. Time is O(n log n) and space O(n).",
+  "hints": [
+    "Coordinates are huge, so you cannot simulate every position. Where is it always safe to start the carpet?",
+    "An optimal carpet can always be aligned to start at the left end of some white range. Sort the ranges and consider only those n starting points.",
+    "With prefix sums of range lengths, binary search the last range starting at or before l_i + carpetLen - 1; add the fully covered ranges plus the partial overlap of that last range."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you handle the case where the input ranges may overlap?",
+    "What if you had two carpets that cannot overlap each other?"
+  ]
+}

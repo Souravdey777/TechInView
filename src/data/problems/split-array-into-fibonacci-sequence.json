@@ -1,0 +1,82 @@
+{
+  "title": "Split Array Into Fibonacci Sequence",
+  "slug": "split-array-into-fibonacci-sequence",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": [
+    "google",
+    "amazon",
+    "bloomberg"
+  ],
+  "description": "You are given a string `num` made of digits. Cut it into consecutive pieces, read each piece as a non-negative integer, and check whether the resulting list `f` is *Fibonacci-like*:\n\n- `f` has at least 3 numbers.\n- `f[i] + f[i+1] == f[i+2]` for every valid `i`.\n- Every number fits in a signed 32-bit integer, i.e. `0 <= f[i] <= 2^31 - 1`.\n- No piece has a leading zero, except the piece `\"0\"` itself.\n\nAll digits of `num` must be used, in order.\n\nSeveral splits may work, so the answer is fixed by search order: try lengths for the first number from shortest to longest, and for each, try lengths for the second number from shortest to longest. Once the first two numbers are chosen, the rest of the sequence is forced. Return the first sequence found in this order as an array of integers, or an empty array `[]` if no split works.\n\n**Example 1:**\n```\nInput: num = \"1101111\"\nOutput: [11,0,11,11]\nExplanation: Starting with 1 leads nowhere. Starting with 11, the second number 0 gives 11 + 0 = 11, then 0 + 11 = 11, consuming the whole string.\n```\n\n**Example 2:**\n```\nInput: num = \"112358130\"\nOutput: []\nExplanation: The prefix splits as 1,1,2,3,5,8,13 but the trailing \"0\" breaks the pattern, and no other choice of the first two numbers works.\n```\n\n**Example 3:**\n```\nInput: num = \"123456579\"\nOutput: [123,456,579]\nExplanation: 123 + 456 = 579, which uses every digit. No shorter choice for the first two numbers succeeds.\n```",
+  "examples": [
+    {
+      "input": "num = \"1101111\"",
+      "output": "[11,0,11,11]",
+      "explanation": "Starting with 1 leads nowhere. Starting with 11, the second number 0 gives 11 + 0 = 11, then 0 + 11 = 11, consuming the whole string."
+    },
+    {
+      "input": "num = \"112358130\"",
+      "output": "[]",
+      "explanation": "The prefix splits as 1,1,2,3,5,8,13 but the trailing \"0\" breaks the pattern, and no other choice of the first two numbers works."
+    },
+    {
+      "input": "num = \"123456579\"",
+      "output": "[123,456,579]",
+      "explanation": "123 + 456 = 579, which uses every digit. No shorter choice for the first two numbers succeeds."
+    }
+  ],
+  "constraints": [
+    "`1 <= num.length <= 200`",
+    "`num` contains only digits `0`-`9`",
+    "Every number in the returned sequence must satisfy `0 <= x <= 2^31 - 1`",
+    "Return `[]` if no valid split exists"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def splitIntoFibonacci(self, num: str) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function splitIntoFibonacci(num) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<Integer> splitIntoFibonacci(String num) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> splitIntoFibonacci(string num) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "num = \"1101111\"",
+      "expected_output": "[11,0,11,11]",
+      "is_hidden": false
+    },
+    {
+      "input": "num = \"112358130\"",
+      "expected_output": "[]",
+      "is_hidden": false
+    },
+    {
+      "input": "num = \"123456579\"",
+      "expected_output": "[123,456,579]",
+      "is_hidden": false
+    },
+    {
+      "input": "num = \"0000\"",
+      "expected_output": "[0,0,0,0]",
+      "is_hidden": true
+    },
+    {
+      "input": "num = \"539834657215398346785398346991079669377161950407626991734534318677529701785098211336528511\"",
+      "expected_output": "[]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force would try every way to place cut points, 2^(n-1) splits, and validate each, which is exponential. The key observation is that the first two numbers determine the whole sequence. So backtrack: choose the first number's length (shortest first), then the second's (shortest first), and after that only check whether the string continues with exactly f[-1] + f[-2]; if not, abandon that branch. Prune pieces that start with '0' and have length > 1, and stop extending a piece once it exceeds 2^31 - 1 (at most 10 digits). There are O(10 * 10) choices for the first two numbers and each greedy extension scans the string once, giving O(n) work per choice, so O(n) overall with a constant factor of about 100 (O(n * 10^2) if stated loosely). Extra space is O(n) for the result list and recursion.",
+  "hints": [
+    "Once you pick the first two numbers, is there any freedom left in the rest of the split?",
+    "Enumerate the length of the first and second numbers (each at most 10 digits because of the 32-bit limit), and then greedily check that the remaining string spells out the sums.",
+    "Reject any piece that starts with '0' unless it is exactly \"0\", stop as soon as a value exceeds 2^31 - 1, and require at least three numbers before declaring success."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you count all valid Fibonacci-like splits instead of returning one?",
+    "How would you handle arbitrarily large numbers (no 32-bit limit) efficiently?"
+  ]
+}

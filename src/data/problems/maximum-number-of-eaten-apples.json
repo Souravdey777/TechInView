@@ -1,0 +1,81 @@
+{
+  "title": "Maximum Number Of Eaten Apples",
+  "slug": "maximum-number-of-eaten-apples",
+  "difficulty": "medium",
+  "category": "heap",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "An apple tree is observed for `n` days. On day `i` (0-indexed) it produces `apples[i]` apples, and those apples go bad at the start of day `i + days[i]`, so they can be eaten on days `i` through `i + days[i] - 1`. On some days the tree produces nothing; this is shown as `apples[i] == 0` and `days[i] == 0`.\n\nYou may eat **at most one** apple per day, and you may keep eating after day `n - 1` as long as you still hold apples that have not gone bad.\n\nReturn the maximum total number of apples you can eat.\n\n**Example 1:**\n```\nInput: apples = [1,2,3,5,2], days = [3,2,1,4,2]\nOutput: 7\nExplanation: Eat one apple every day from day 0 to day 6, always from the batch that spoils soonest (e.g. the day-4 apples are eaten on days 4 and 5 before returning to the day-3 batch, which lasts through day 6). From day 7 everything has gone bad. Total = 7.\n```\n\n**Example 2:**\n```\nInput: apples = [3,0,0,0,0,2], days = [3,0,0,0,0,2]\nOutput: 5\nExplanation: Eat the three day-0 apples on days 0, 1 and 2, nothing is available on days 3 and 4, then eat the two day-5 apples on days 5 and 6. Total = 5.\n```\n\n**Example 3:**\n```\nInput: apples = [2,1], days = [1,1]\nOutput: 2\nExplanation: The day-0 apples spoil after one day, so only one can be eaten on day 0. The day-1 apple is eaten on day 1. Total = 2.\n```",
+  "examples": [
+    {
+      "input": "apples = [1,2,3,5,2], days = [3,2,1,4,2]",
+      "output": "7",
+      "explanation": "Eat one apple every day from day 0 to day 6, always from the batch that spoils soonest (e.g. the day-4 apples are eaten on days 4 and 5 before returning to the day-3 batch, which lasts through day 6). From day 7 everything has gone bad. Total = 7."
+    },
+    {
+      "input": "apples = [3,0,0,0,0,2], days = [3,0,0,0,0,2]",
+      "output": "5",
+      "explanation": "Eat the three day-0 apples on days 0, 1 and 2, nothing is available on days 3 and 4, then eat the two day-5 apples on days 5 and 6. Total = 5."
+    },
+    {
+      "input": "apples = [2,1], days = [1,1]",
+      "output": "2",
+      "explanation": "The day-0 apples spoil after one day, so only one can be eaten on day 0. The day-1 apple is eaten on day 1. Total = 2."
+    }
+  ],
+  "constraints": [
+    "n == apples.length == days.length",
+    "1 <= n <= 2 * 10^4",
+    "0 <= apples[i], days[i] <= 2 * 10^4",
+    "apples[i] == 0 if and only if days[i] == 0"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def eatenApples(self, apples: list[int], days: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function eatenApples(apples, days) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int eatenApples(int[] apples, int[] days) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int eatenApples(vector<int>& apples, vector<int>& days) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "apples = [1,2,3,5,2], days = [3,2,1,4,2]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "apples = [3,0,0,0,0,2], days = [3,0,0,0,0,2]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "apples = [2,1], days = [1,1]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "apples = [0,0,0], days = [0,0,0]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "apples = [10,1], days = [3,10]",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tracks every individual apple with its expiry and on each day linearly scans for the one that spoils soonest, which is O(total apples * n). The optimal greedy always eats the apple with the earliest expiry, since postponing a long-lasting apple never hurts. Keep a min-heap of batches keyed by expiry day (i + days[i]) with a remaining count. Each day, push the new batch if any, discard batches whose expiry is on or before the current day or whose count is zero, then eat one apple from the top batch. Continue past day n - 1 until the heap is empty. Each batch is pushed and popped once, so a plain day-by-day simulation costs O((n + D) log n) where D is the number of extra days simulated. Compressing the post-n phase, by eating min(count, expiry - day) apples from the top batch in one step, makes every heap operation correspond to a batch, giving O(n log n) time and O(n) space.",
+  "hints": [
+    "When several apples are available, which one should you eat today so that you lose as few as possible later?",
+    "Store batches of apples as (expiry day, remaining count) in a priority queue ordered by expiry.",
+    "Each day: add today's batch, pop batches that have expired (expiry <= today) or are empty, then eat one from the top. Keep looping after the last day until the heap is empty."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How can you skip ahead after day n - 1 instead of simulating one day at a time?",
+    "What if you could eat up to m apples per day instead of one?"
+  ]
+}

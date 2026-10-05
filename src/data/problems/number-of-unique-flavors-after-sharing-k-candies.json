@@ -1,0 +1,81 @@
+{
+  "title": "Number Of Unique Flavors After Sharing K Candies",
+  "slug": "number-of-unique-flavors-after-sharing-k-candies",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "amazon",
+    "google",
+    "meta"
+  ],
+  "description": "You are given an integer array `candies`, where `candies[i]` is the flavor id of the `i`-th candy, and an integer `k`.\n\nYou must give away **exactly** `k` **consecutive** candies (a contiguous subarray of length `k`) and keep all the rest. Return the **maximum** number of distinct flavors among the candies you keep.\n\nIf `k = 0` you keep every candy; if `k` equals the array length you keep nothing and the answer is `0`.\n\n**Example 1:**\n```\nInput: candies = [5,1,5,2,7,1], k = 2\nOutput: 4\nExplanation: Give away indices 0-1 = [5,1]. You keep [5,2,7,1], which still has all 4 flavors.\n```\n\n**Example 2:**\n```\nInput: candies = [2,2,2,2,3,3], k = 2\nOutput: 2\nExplanation: Giving away any 2 consecutive candies still leaves at least one 2 and one 3, e.g. give away [2,2] at indices 0-1 and keep flavors {2,3}.\n```\n\n**Example 3:**\n```\nInput: candies = [2,4,5], k = 0\nOutput: 3\nExplanation: Nothing is given away, so all 3 flavors are kept.\n```",
+  "examples": [
+    {
+      "input": "candies = [5,1,5,2,7,1], k = 2",
+      "output": "4",
+      "explanation": "Give away indices 0-1 = [5,1]. You keep [5,2,7,1], which still has all 4 flavors."
+    },
+    {
+      "input": "candies = [2,2,2,2,3,3], k = 2",
+      "output": "2",
+      "explanation": "Giving away any 2 consecutive candies still leaves at least one 2 and one 3, e.g. give away [2,2] at indices 0-1 and keep flavors {2,3}."
+    },
+    {
+      "input": "candies = [2,4,5], k = 0",
+      "output": "3",
+      "explanation": "Nothing is given away, so all 3 flavors are kept."
+    }
+  ],
+  "constraints": [
+    "1 <= candies.length <= 10^5",
+    "1 <= candies[i] <= 10^5",
+    "0 <= k <= candies.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def shareCandies(self, candies: list[int], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function shareCandies(candies, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int shareCandies(int[] candies, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int shareCandies(vector<int>& candies, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "candies = [5,1,5,2,7,1], k = 2",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "candies = [2,2,2,2,3,3], k = 2",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "candies = [2,4,5], k = 0",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "candies = [1,1,2], k = 3",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "candies = [1,2,3,1,2,3,4,4], k = 4",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries each of the n - k + 1 windows to give away and counts the distinct flavors outside it with a set, costing O(n * (n - k)) time. The optimal approach starts with a frequency map of all candies outside the first window [0, k), then slides the window one step at a time: the candy entering the window is removed from the kept map (dropping the flavor when its count hits 0) and the candy leaving the window is added back. The number of keys in the map after each step is the kept-distinct count, and the maximum over all positions is the answer. This is O(n) time and O(n) space for the hash map.",
+  "hints": [
+    "Instead of counting what you give away, think about maintaining the counts of what you keep.",
+    "The given-away block is a fixed-length window of size k. Moving it one step right changes exactly two candies' status.",
+    "Keep a frequency map of candies outside the window; when a candy enters the window decrement its count (delete at 0), when one leaves increment it, and track the maximum map size."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "What if the k candies you give away did not have to be consecutive?",
+    "How would you also return which window to give away (the leftmost one on ties)?"
+  ]
+}

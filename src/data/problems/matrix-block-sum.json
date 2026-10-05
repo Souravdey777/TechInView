@@ -1,0 +1,82 @@
+{
+  "title": "Matrix Block Sum",
+  "slug": "matrix-block-sum",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "Given an `m x n` integer matrix `mat` and an integer `k`, return a matrix `answer` of the same size where `answer[i][j]` is the sum of every `mat[r][c]` with:\n\n- `i - k <= r <= i + k`\n- `j - k <= c <= j + k`\n- `(r, c)` is a valid cell inside the matrix\n\nIn other words, each output cell holds the sum of the square block of radius `k` centred on it, clipped at the matrix edges.\n\n**Example 1:**\n```\nInput: mat = [[1,2,3],[4,5,6],[7,8,9]], k = 1\nOutput: [[12,21,16],[27,45,33],[24,39,28]]\nExplanation: answer[0][0] sums the clipped block rows 0..1, cols 0..1: 1+2+4+5 = 12. answer[1][1] covers the whole matrix: 45.\n```\n\n**Example 2:**\n```\nInput: mat = [[1,2,3],[4,5,6],[7,8,9]], k = 2\nOutput: [[45,45,45],[45,45,45],[45,45,45]]\nExplanation: With k = 2 every block covers the entire 3x3 matrix, so every cell is 45.\n```\n\n**Example 3:**\n```\nInput: mat = [[1,1,1,1]], k = 1\nOutput: [[2,3,3,2]]\nExplanation: Single row: each block covers the cell and up to one neighbour on each side (3 cells); the two ends see only 2 cells.\n```",
+  "examples": [
+    {
+      "input": "mat = [[1,2,3],[4,5,6],[7,8,9]], k = 1",
+      "output": "[[12,21,16],[27,45,33],[24,39,28]]",
+      "explanation": "answer[0][0] sums the clipped block rows 0..1, cols 0..1: 1+2+4+5 = 12. answer[1][1] covers the whole matrix: 45."
+    },
+    {
+      "input": "mat = [[1,2,3],[4,5,6],[7,8,9]], k = 2",
+      "output": "[[45,45,45],[45,45,45],[45,45,45]]",
+      "explanation": "With k = 2 every block covers the entire 3x3 matrix, so every cell is 45."
+    },
+    {
+      "input": "mat = [[1,1,1,1]], k = 1",
+      "output": "[[2,3,3,2]]",
+      "explanation": "Single row: each block covers the cell and up to one neighbour on each side (3 cells); the two ends see only 2 cells."
+    }
+  ],
+  "constraints": [
+    "m == mat.length",
+    "n == mat[i].length",
+    "1 <= m, n, k <= 100",
+    "1 <= mat[i][j] <= 100"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def matrixBlockSum(self, mat: list[list[int]], k: int) -> list[list[int]]:\n        # Write your solution here\n        pass",
+    "javascript": "function matrixBlockSum(mat, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[][] matrixBlockSum(int[][] mat, int k) {\n        // Write your solution here\n        return new int[0][0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> matrixBlockSum(vector<vector<int>>& mat, int k) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "mat = [[1,2,3],[4,5,6],[7,8,9]], k = 1",
+      "expected_output": "[[12,21,16],[27,45,33],[24,39,28]]",
+      "is_hidden": false
+    },
+    {
+      "input": "mat = [[1,2,3],[4,5,6],[7,8,9]], k = 2",
+      "expected_output": "[[45,45,45],[45,45,45],[45,45,45]]",
+      "is_hidden": false
+    },
+    {
+      "input": "mat = [[1,1,1,1]], k = 1",
+      "expected_output": "[[2,3,3,2]]",
+      "is_hidden": false
+    },
+    {
+      "input": "mat = [[100]], k = 100",
+      "expected_output": "[[100]]",
+      "is_hidden": true
+    },
+    {
+      "input": "mat = [[1],[2],[3],[4]], k = 1",
+      "expected_output": "[[3],[6],[9],[7]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force sums the block for every cell directly, costing O(m * n * k^2). The optimal approach builds a 2D prefix-sum table P of size (m+1) x (n+1) where P[i][j] is the sum of the rectangle from (0,0) to (i-1,j-1). Each block sum then comes from four lookups with the clipped bounds r1 = max(0, i-k), r2 = min(m-1, i+k), c1 = max(0, j-k), c2 = min(n-1, j+k): P[r2+1][c2+1] - P[r1][c2+1] - P[r2+1][c1] + P[r1][c1]. This is O(m * n) time and O(m * n) space.",
+  "hints": [
+    "Many blocks overlap heavily. Is there a way to get any rectangle's sum without re-adding its cells?",
+    "Precompute a 2D prefix-sum table so that any rectangle sum is a combination of a few table entries.",
+    "Clip the block to the matrix bounds, then use inclusion-exclusion: P[r2+1][c2+1] - P[r1][c2+1] - P[r2+1][c1] + P[r1][c1]."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n)",
+    "space": "O(m * n)"
+  },
+  "follow_up_questions": [
+    "How would you support point updates to mat while still answering block sums quickly (2D Fenwick tree)?",
+    "Can you compute the result using a sliding window per row and column instead of a full prefix table?"
+  ]
+}

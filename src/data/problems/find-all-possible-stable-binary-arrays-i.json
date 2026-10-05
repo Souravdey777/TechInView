@@ -1,0 +1,81 @@
+{
+  "title": "Find All Possible Stable Binary Arrays I",
+  "slug": "find-all-possible-stable-binary-arrays-i",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are given three positive integers `zero`, `one`, and `limit`. A binary array `arr` is **stable** when:\n\n- `arr` contains exactly `zero` occurrences of `0`.\n- `arr` contains exactly `one` occurrences of `1`.\n- No block of consecutive equal values in `arr` is longer than `limit` (equivalently, every subarray longer than `limit` contains both a `0` and a `1`).\n\nReturn the number of stable binary arrays. Since the count can be large, return it modulo `10^9 + 7`.\n\n**Example 1:**\n```\nInput: zero = 1, one = 1, limit = 2\nOutput: 2\nExplanation: The only arrays with one 0 and one 1 are [0,1] and [1,0]; both have runs of length 1, so both are stable.\n```\n\n**Example 2:**\n```\nInput: zero = 2, one = 2, limit = 1\nOutput: 2\nExplanation: No two equal values may be adjacent, so only the alternating arrays [0,1,0,1] and [1,0,1,0] qualify.\n```\n\n**Example 3:**\n```\nInput: zero = 3, one = 2, limit = 2\nOutput: 7\nExplanation: There are 10 arrays with three 0s and two 1s. The three that contain a run of three 0s ([0,0,0,1,1], [1,0,0,0,1], [1,1,0,0,0]) are not stable, leaving 7.\n```",
+  "examples": [
+    {
+      "input": "zero = 1, one = 1, limit = 2",
+      "output": "2",
+      "explanation": "The only arrays with one 0 and one 1 are [0,1] and [1,0]; both have runs of length 1, so both are stable."
+    },
+    {
+      "input": "zero = 2, one = 2, limit = 1",
+      "output": "2",
+      "explanation": "No two equal values may be adjacent, so only the alternating arrays [0,1,0,1] and [1,0,1,0] qualify."
+    },
+    {
+      "input": "zero = 3, one = 2, limit = 2",
+      "output": "7",
+      "explanation": "There are 10 arrays with three 0s and two 1s. The three that contain a run of three 0s ([0,0,0,1,1], [1,0,0,0,1], [1,1,0,0,0]) are not stable, leaving 7."
+    }
+  ],
+  "constraints": [
+    "1 <= zero <= 200",
+    "1 <= one <= 200",
+    "1 <= limit <= 200",
+    "Return the answer modulo 10^9 + 7"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def numberOfStableArrays(self, zero: int, one: int, limit: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function numberOfStableArrays(zero, one, limit) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int numberOfStableArrays(int zero, int one, int limit) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int numberOfStableArrays(int zero, int one, int limit) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "zero = 1, one = 1, limit = 2",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "zero = 2, one = 2, limit = 1",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "zero = 3, one = 2, limit = 2",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "zero = 5, one = 3, limit = 1",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "zero = 60, one = 55, limit = 4",
+      "expected_output": "26393689",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates all C(zero + one, one) arrangements and checks run lengths, which is exponential. Instead, use dp[i][j][b] = number of stable arrays using i zeros and j ones that end with bit b. To end with a 0, append a 0 to any array of (i-1, j) ending in either bit, then subtract the arrays that would now end in a run of limit + 1 zeros: those are exactly arrays of (i - limit - 1, j) ending in 1 followed by limit + 1 zeros. So dp[i][j][0] = dp[i-1][j][0] + dp[i-1][j][1] - dp[i-limit-1][j][1] (when i > limit), and symmetrically for dp[i][j][1]. Base cases: dp[i][0][0] = 1 for 1 <= i <= limit and dp[0][j][1] = 1 for 1 <= j <= limit. The answer is dp[zero][one][0] + dp[zero][one][1] mod 10^9 + 7. This runs in O(zero * one) time and space (a simpler version that loops over the last run length is O(zero * one * limit), also fine here).",
+  "hints": [
+    "Think of the array as alternating blocks of 0s and 1s, each block of length between 1 and limit.",
+    "Define a DP state on how many 0s and 1s you have placed and which bit the array currently ends with. How can you extend it by a whole block?",
+    "dp[i][j][0] = sum over block length k in 1..min(limit, i) of dp[i-k][j][1] (plus the case where the whole array so far is a single block). Use prefix sums or the subtraction trick dp[i-1][j][0] + dp[i-1][j][1] - dp[i-limit-1][j][1] to drop the inner loop. Take everything modulo 10^9 + 7."
+  ],
+  "optimal_complexity": {
+    "time": "O(zero * one)",
+    "space": "O(zero * one)"
+  },
+  "follow_up_questions": [
+    "How would you handle zero and one up to 1000 (version II)?",
+    "Can you reduce memory to O(one) by keeping only the needed rows?"
+  ]
+}

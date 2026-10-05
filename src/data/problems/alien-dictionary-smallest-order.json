@@ -1,0 +1,85 @@
+{
+  "title": "Alien Dictionary Smallest Order",
+  "slug": "alien-dictionary-smallest-order",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "meta",
+    "amazon",
+    "microsoft",
+    "uber",
+    "bloomberg",
+    "apple"
+  ],
+  "description": "An alien language uses a subset of the lowercase English letters, but in an unknown order. You receive a list `words` that is claimed to be sorted lexicographically according to the alien alphabet (with the usual rule that a proper prefix sorts before any longer word that extends it).\n\nReturn a string containing **every distinct letter that appears in `words`, each exactly once**, in an order consistent with that sorting. Letters not appearing in `words` must not be included.\n\nUsually several orders are consistent. To make the answer unique, return the **lexicographically smallest** valid order under the normal English alphabet. If no order can make `words` sorted (for example, the constraints contradict each other, or a word appears after a longer word that it is a prefix of), return the empty string `\"\"`.\n\n**Example 1:**\n```\nInput: words = [\"ba\",\"bc\",\"ac\",\"cab\"]\nOutput: \"bac\"\nExplanation: Comparing \"ba\"/\"bc\" gives a < c, and \"bc\"/\"ac\" gives b < a. The only order containing all three letters is b, a, c.\n```\n\n**Example 2:**\n```\nInput: words = [\"zx\",\"zy\",\"yx\"]\nOutput: \"xzy\"\nExplanation: The rules are x < y (from \"zx\"/\"zy\") and z < y (from \"zy\"/\"yx\"). Both \"xzy\" and \"zxy\" are valid; \"xzy\" is lexicographically smaller.\n```\n\n**Example 3:**\n```\nInput: words = [\"abc\",\"ab\"]\nOutput: \"\"\nExplanation: \"ab\" is a proper prefix of \"abc\" but comes after it, which no alphabet can explain.\n```",
+  "examples": [
+    {
+      "input": "words = [\"ba\",\"bc\",\"ac\",\"cab\"]",
+      "output": "\"bac\"",
+      "explanation": "Comparing \"ba\"/\"bc\" gives a < c, and \"bc\"/\"ac\" gives b < a. The only order containing all three letters is b, a, c."
+    },
+    {
+      "input": "words = [\"zx\",\"zy\",\"yx\"]",
+      "output": "\"xzy\"",
+      "explanation": "The rules are x < y (from \"zx\"/\"zy\") and z < y (from \"zy\"/\"yx\"). Both \"xzy\" and \"zxy\" are valid; \"xzy\" is lexicographically smaller."
+    },
+    {
+      "input": "words = [\"abc\",\"ab\"]",
+      "output": "\"\"",
+      "explanation": "\"ab\" is a proper prefix of \"abc\" but comes after it, which no alphabet can explain."
+    }
+  ],
+  "constraints": [
+    "1 <= words.length <= 100",
+    "1 <= words[i].length <= 100",
+    "words[i] consists only of lowercase English letters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def alienOrder(self, words: list[str]) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function alienOrder(words) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String alienOrder(String[] words) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string alienOrder(vector<string>& words) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "words = [\"ba\",\"bc\",\"ac\",\"cab\"]",
+      "expected_output": "\"bac\"",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"zx\",\"zy\",\"yx\"]",
+      "expected_output": "\"xzy\"",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"abc\",\"ab\"]",
+      "expected_output": "\"\"",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"z\",\"x\",\"z\"]",
+      "expected_output": "\"\"",
+      "is_hidden": true
+    },
+    {
+      "input": "words = [\"wrt\",\"wrf\",\"er\",\"ett\",\"rftt\"]",
+      "expected_output": "\"wertf\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries every permutation of the distinct letters and checks whether words is sorted under it, returning the smallest one that works; that is O(U! * C) and hopeless beyond a handful of letters. The optimal approach derives ordering constraints from each adjacent pair of words: the first differing position gives an edge x -> y, and if there is no differing position but the first word is longer, the input is invalid. Then run Kahn's topological sort using a min-heap instead of a queue, always emitting the smallest available letter, which yields the lexicographically smallest valid order. If fewer than all distinct letters get emitted, there is a cycle and the answer is \"\". With C total characters and U <= 26 distinct letters, time is O(C + U^2) (O(C) to scan the words, up to U^2 edge relaxations, plus O(U log U) heap work, which U^2 dominates) and space O(U^2) for the edge set.",
+  "hints": [
+    "Only adjacent words in the list give you useful information, and only at their first differing character.",
+    "Turn those facts into a directed graph over letters and look for a topological order. Watch out for a longer word placed before its own prefix.",
+    "Run Kahn's algorithm with a min-heap of zero in-degree letters so the smallest available letter is always placed next; if the result misses any letter, a cycle exists and you return the empty string."
+  ],
+  "optimal_complexity": {
+    "time": "O(C + U^2)",
+    "space": "O(U^2)"
+  },
+  "follow_up_questions": [
+    "How would you detect whether the valid order is unique?",
+    "How would you return all valid orders, and how many could there be?"
+  ]
+}

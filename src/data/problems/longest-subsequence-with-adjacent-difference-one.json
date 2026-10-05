@@ -1,0 +1,82 @@
+{
+  "title": "Longest Subsequence With Adjacent Difference One",
+  "slug": "longest-subsequence-with-adjacent-difference-one",
+  "difficulty": "easy",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "adobe",
+    "google"
+  ],
+  "description": "Given an integer array `nums`, pick a subsequence (keep the original order, skipping any elements you like) such that every two **consecutive** picked elements differ by **exactly 1** in absolute value (`|x - y| == 1`). The values may go up and down.\n\nReturn the length of the longest such subsequence. A single element is always valid, so the answer is at least `1`.\n\n**Example 1:**\n```\nInput: nums = [10,9,4,5,4,8,6]\nOutput: 3\nExplanation: Both [10,9,8] and [4,5,4] are valid subsequences of length 3, and none of length 4 exists.\n```\n\n**Example 2:**\n```\nInput: nums = [1,2,3,2,3,7,2,1]\nOutput: 7\nExplanation: Take [1,2,3,2,3,2,1], skipping only the 7. Each neighbouring pair differs by exactly 1.\n```\n\n**Example 3:**\n```\nInput: nums = [5,5,5]\nOutput: 1\nExplanation: Equal neighbours differ by 0, so only single-element subsequences are valid.\n```",
+  "examples": [
+    {
+      "input": "nums = [10,9,4,5,4,8,6]",
+      "output": "3",
+      "explanation": "Both [10,9,8] and [4,5,4] are valid subsequences of length 3, and none of length 4 exists."
+    },
+    {
+      "input": "nums = [1,2,3,2,3,7,2,1]",
+      "output": "7",
+      "explanation": "Take [1,2,3,2,3,2,1], skipping only the 7. Each neighbouring pair differs by exactly 1."
+    },
+    {
+      "input": "nums = [5,5,5]",
+      "output": "1",
+      "explanation": "Equal neighbours differ by 0, so only single-element subsequences are valid."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-10^9 <= nums[i] <= 10^9",
+    "A single element is a valid subsequence"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def longestSubsequence(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function longestSubsequence(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int longestSubsequence(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int longestSubsequence(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [10,9,4,5,4,8,6]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3,2,3,7,2,1]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,5,5]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [42]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [-1,0,-1,-2,1000000000,999999999,-3]",
+      "expected_output": "5",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force checks all 2^n subsequences. The standard O(n^2) DP sets dp[i] = 1 + max(dp[j]) over j < i with |nums[i] - nums[j]| == 1. Because the only values that can precede nums[i] are nums[i] - 1 and nums[i] + 1, you can replace the inner loop with a hash map best[v] = longest valid subsequence seen so far that ends with value v. For each x, cur = 1 + max(best[x-1], best[x+1]) (missing keys count as 0), then best[x] = max(best[x], cur) and update the global answer. This is O(n) time and O(n) space.",
+  "hints": [
+    "Try the LIS-style DP first: what is the longest valid subsequence that ends exactly at index i?",
+    "For a subsequence ending with value x, the previous picked value can only be x - 1 or x + 1. Do you really need to scan all earlier indices?",
+    "Keep a map best[value]. For each x: cur = 1 + max(best.get(x-1, 0), best.get(x+1, 0)); best[x] = max(best.get(x, 0), cur); track the maximum cur."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you change the solution if consecutive elements must differ by at most k instead of exactly 1?",
+    "How would you return one longest subsequence itself?"
+  ]
+}

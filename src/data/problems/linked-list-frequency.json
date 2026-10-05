@@ -1,0 +1,81 @@
+{
+  "title": "Linked List Frequency",
+  "slug": "linked-list-frequency",
+  "difficulty": "medium",
+  "category": "linked-lists",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given the `head` of a singly linked list of integers. Build and return a **new** linked list that contains one node per *distinct* value of the input, where each node stores **how many times** that value occurs.\n\nThe output nodes must appear in the order in which each distinct value is **first seen** while walking the input from the head. The output therefore has exactly as many nodes as there are distinct values; the values themselves are not part of the output, only their counts.\n\n**Example 1:**\n```\nInput: head = [4,8,8,4,2,8]\nOutput: [2,3,1]\nExplanation: Distinct values in order of first appearance are 4, 8, 2. Value 4 occurs 2 times, 8 occurs 3 times, and 2 occurs once.\n```\n\n**Example 2:**\n```\nInput: head = [10,10,10,20,20,30]\nOutput: [3,2,1]\nExplanation: 10 appears 3 times, then 20 appears 2 times, then 30 appears once.\n```\n\n**Example 3:**\n```\nInput: head = [7]\nOutput: [1]\nExplanation: A single node gives a single distinct value with frequency 1.\n```",
+  "examples": [
+    {
+      "input": "head = [4,8,8,4,2,8]",
+      "output": "[2,3,1]",
+      "explanation": "Distinct values in order of first appearance are 4, 8, 2. Value 4 occurs 2 times, 8 occurs 3 times, and 2 occurs once."
+    },
+    {
+      "input": "head = [10,10,10,20,20,30]",
+      "output": "[3,2,1]",
+      "explanation": "10 appears 3 times, then 20 appears 2 times, then 30 appears once."
+    },
+    {
+      "input": "head = [7]",
+      "output": "[1]",
+      "explanation": "A single node gives a single distinct value with frequency 1."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the list is in the range [1, 10^5].",
+    "-10^5 <= Node.val <= 10^5",
+    "The output list is ordered by the first occurrence of each distinct value in the input."
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def frequenciesOfElements(self, head: ListNode | None) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction frequenciesOfElements(head) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode frequenciesOfElements(ListNode head) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* frequenciesOfElements(ListNode* head) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "head = [4,8,8,4,2,8]",
+      "expected_output": "[2,3,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [10,10,10,20,20,30]",
+      "expected_output": "[3,2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [7]",
+      "expected_output": "[1]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [-1,-1,-1,-1]",
+      "expected_output": "[4]",
+      "is_hidden": true
+    },
+    {
+      "input": "head = [5,-5,5,0,-5,0,0,100000]",
+      "expected_output": "[2,2,3,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: for every node, check whether its value already appeared earlier; if not, scan the rest of the list to count it and append that count to the result. This is O(n^2) time and O(1) extra space besides the output. Optimal: make one pass with a hash map from value to count while recording distinct values in first-seen order (an insertion-ordered dictionary does both). Then build the output list by walking that order and creating one node per count. This runs in O(n) time with O(d) extra space, where d is the number of distinct values.",
+  "hints": [
+    "Think about what you need to remember about each value you have already passed.",
+    "A hash map can track counts, but you also need to preserve the order in which values first appeared.",
+    "Record a value in an ordered list (or use an insertion-ordered map) the first time you see it, increment its count each time, then emit one new node per recorded value with its count."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(d)"
+  },
+  "follow_up_questions": [
+    "How would you return the frequencies ordered by value instead of by first appearance?",
+    "If the input list is already sorted, can you compute the answer in O(1) extra space?"
+  ]
+}

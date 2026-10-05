@@ -1,0 +1,83 @@
+{
+  "title": "Loud and Rich",
+  "slug": "loud-and-rich",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "There are `n` people labelled `0` to `n - 1`. Each person has a distinct amount of money and a distinct level of quietness.\n\nYou are given `richer`, where `richer[i] = [a, b]` means person `a` has strictly more money than person `b`. This list is only partial information, but it is logically consistent (it never implies someone is richer than themselves). You are also given `quiet`, where `quiet[i]` is person `i`'s quietness; all values in `quiet` are distinct and a smaller value means quieter.\n\nReturn an array `answer` of length `n` where `answer[x]` is the person `y` with the **smallest** `quiet[y]` among all people who are **known** to have at least as much money as `x`. Person `x` always counts (they have as much money as themselves). \"Known\" means derivable by following `richer` pairs, directly or through a chain.\n\nBecause quietness values are distinct, each `answer[x]` is unique.\n\n**Example 1:**\n```\nInput: richer = [[0,1],[1,2]], quiet = [2,0,1]\nOutput: [0,1,1]\nExplanation: Wealth order is 0 > 1 > 2. For person 0, only person 0 qualifies, so the answer is 0. For person 1, candidates are {0, 1}; person 1 is quietest (0). For person 2, candidates are {0, 1, 2}; person 1 is still quietest.\n```\n\n**Example 2:**\n```\nInput: richer = [], quiet = [0]\nOutput: [0]\nExplanation: There is only one person and they are trivially the answer for themselves.\n```\n\n**Example 3:**\n```\nInput: richer = [[2,0],[2,1],[3,2]], quiet = [1,3,2,4]\nOutput: [0,2,2,3]\nExplanation: Person 0 is known to be poorer than 2 and 3, so candidates are {0, 2, 3} with quietness 1, 2, 4 -> person 0. Person 1: {1, 2, 3} with quietness 3, 2, 4 -> person 2. Person 2: {2, 3} -> person 2. Person 3: only themselves.\n```",
+  "examples": [
+    {
+      "input": "richer = [[0,1],[1,2]], quiet = [2,0,1]",
+      "output": "[0,1,1]",
+      "explanation": "Wealth order is 0 > 1 > 2. For person 0, only person 0 qualifies, so the answer is 0. For person 1, candidates are {0, 1}; person 1 is quietest (0). For person 2, candidates are {0, 1, 2}; person 1 is still quietest."
+    },
+    {
+      "input": "richer = [], quiet = [0]",
+      "output": "[0]",
+      "explanation": "There is only one person and they are trivially the answer for themselves."
+    },
+    {
+      "input": "richer = [[2,0],[2,1],[3,2]], quiet = [1,3,2,4]",
+      "output": "[0,2,2,3]",
+      "explanation": "Person 0 is known to be poorer than 2 and 3, so candidates are {0, 2, 3} with quietness 1, 2, 4 -> person 0. Person 1: {1, 2, 3} with quietness 3, 2, 4 -> person 2. Person 2: {2, 3} -> person 2. Person 3: only themselves."
+    }
+  ],
+  "constraints": [
+    "n == quiet.length",
+    "1 <= n <= 500",
+    "0 <= quiet[i] < n and all quiet[i] are distinct",
+    "0 <= richer.length <= n * (n - 1) / 2, all pairs distinct, a != b",
+    "The richer relation contains no cycles"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def loudAndRich(self, richer: list[list[int]], quiet: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function loudAndRich(richer, quiet) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] loudAndRich(int[][] richer, int[] quiet) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> loudAndRich(vector<vector<int>>& richer, vector<int>& quiet) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "richer = [[0,1],[1,2]], quiet = [2,0,1]",
+      "expected_output": "[0,1,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "richer = [], quiet = [0]",
+      "expected_output": "[0]",
+      "is_hidden": false
+    },
+    {
+      "input": "richer = [[2,0],[2,1],[3,2]], quiet = [1,3,2,4]",
+      "expected_output": "[0,2,2,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "richer = [], quiet = [2,0,1]",
+      "expected_output": "[0,1,2]",
+      "is_hidden": true
+    },
+    {
+      "input": "richer = [[1,0],[2,0],[3,1],[3,2]], quiet = [3,2,4,0]",
+      "expected_output": "[3,3,3,3]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: for every person x, run a DFS/BFS over 'is richer than x' edges to collect everyone known to be at least as rich, then pick the quietest; that is O(n * (n + m)) where m = richer.length. The optimal approach reverses the view: build a graph from each person to the people directly richer than them, then memoise answer[x] = the quieter of x and answer[y] for every direct richer neighbour y. Because the relation is a DAG, a DFS with memoisation (or a topological sort from richest to poorest that pushes the best candidate downward) computes each answer once, for O(n + m) time and O(n + m) space.",
+  "hints": [
+    "Model people as nodes and 'a is richer than b' as directed edges. Who is in x's candidate set?",
+    "If y is directly richer than x, then everyone in y's candidate set is also in x's. Can you reuse y's answer?",
+    "Memoise: answer[x] starts as x, then for each directly-richer y take answer[y] if quiet[answer[y]] is smaller. A DFS over the DAG fills every entry once."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + m)",
+    "space": "O(n + m)"
+  },
+  "follow_up_questions": [
+    "How would you solve it iteratively with Kahn's topological sort instead of recursion?",
+    "If new richer pairs arrive online, how would you update the answers without recomputing everything?"
+  ]
+}

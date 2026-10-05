@@ -1,0 +1,82 @@
+{
+  "title": "Count Pairs From Two Linked Lists With Sum",
+  "slug": "count-pairs-from-two-linked-lists-with-sum",
+  "difficulty": "medium",
+  "category": "linked-lists",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "You are given two singly linked lists `list1` and `list2` and an integer `x`. Within each list, all values are **distinct** (a value may appear in both lists, though). Neither list is guaranteed to be sorted.\n\nReturn the number of pairs `(a, b)` such that `a` is a node of `list1`, `b` is a node of `list2`, and `a.val + b.val == x`. If no such pair exists, return `0`.\n\n**Example 1:**\n```\nInput: list1 = [1,2,3,4,5,6], list2 = [11,12,13], x = 15\nOutput: 3\nExplanation: The valid pairs are (2, 13), (3, 12) and (4, 11).\n```\n\n**Example 2:**\n```\nInput: list1 = [7,5,1,3], list2 = [3,5,2,8], x = 10\nOutput: 2\nExplanation: The valid pairs are (7, 3) and (5, 5). The same value may be used once from each list.\n```\n\n**Example 3:**\n```\nInput: list1 = [1], list2 = [2], x = 5\nOutput: 0\nExplanation: 1 + 2 = 3, so no pair sums to 5.\n```",
+  "examples": [
+    {
+      "input": "list1 = [1,2,3,4,5,6], list2 = [11,12,13], x = 15",
+      "output": "3",
+      "explanation": "The valid pairs are (2, 13), (3, 12) and (4, 11)."
+    },
+    {
+      "input": "list1 = [7,5,1,3], list2 = [3,5,2,8], x = 10",
+      "output": "2",
+      "explanation": "The valid pairs are (7, 3) and (5, 5). The same value may be used once from each list."
+    },
+    {
+      "input": "list1 = [1], list2 = [2], x = 5",
+      "output": "0",
+      "explanation": "1 + 2 = 3, so no pair sums to 5."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in each list is in the range [1, 10^4].",
+    "-10^5 <= Node.val <= 10^5",
+    "-2 * 10^5 <= x <= 2 * 10^5",
+    "All values within list1 are distinct, and all values within list2 are distinct."
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def countPairs(self, list1: ListNode | None, list2: ListNode | None, x: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction countPairs(list1, list2, x) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public int countPairs(ListNode list1, ListNode list2, int x) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    int countPairs(ListNode* list1, ListNode* list2, int x) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "list1 = [1,2,3,4,5,6], list2 = [11,12,13], x = 15",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [7,5,1,3], list2 = [3,5,2,8], x = 10",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [1], list2 = [2], x = 5",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "list1 = [-3,0,5,9], list2 = [3,-5,10,-9], x = 0",
+      "expected_output": "3",
+      "is_hidden": true
+    },
+    {
+      "input": "list1 = [100000,-100000], list2 = [100000,4], x = 200000",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: for each node of list1, walk all of list2 and count nodes whose value equals x - a.val, giving O(n * m) time and O(1) space. Optimal: insert every value of list2 into a hash set in one pass, then walk list1 and, for each value a, check whether x - a is in the set; because values are distinct within each list, each match is exactly one pair. This is O(n + m) time and O(m) space. If extra space is not allowed, sort both lists (e.g. merge sort on the lists) and use a two-pointer sweep from the smallest of one and the largest of the other, which is O(n log n + m log m) time.",
+  "hints": [
+    "For a fixed node in list1, exactly which value would its partner in list2 need to have?",
+    "Checking membership of that partner value repeatedly is the expensive part. Which structure gives O(1) lookups?",
+    "Store all of list2's values in a hash set, then for every value a in list1 count it whenever x - a is in the set."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + m)",
+    "space": "O(m)"
+  },
+  "follow_up_questions": [
+    "How would you count pairs if values inside each list could repeat?",
+    "Can you solve it with O(1) extra space if both lists are sorted, one ascending and one descending?"
+  ]
+}

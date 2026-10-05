@@ -1,0 +1,84 @@
+{
+  "title": "Replace Words",
+  "slug": "replace-words",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "uber"
+  ],
+  "description": "You have a `dictionary` of **roots**. Any word that begins with a root is a **derivative** of that root.\n\nGiven a `sentence` of words separated by single spaces, replace every derivative with the root it begins with. If a word begins with several roots, use the **shortest** one. A word that begins with no root is left as is (a word equal to a root also stays the same).\n\nReturn the resulting sentence, with words still separated by single spaces.\n\n**Example 1:**\n```\nInput: dictionary = [\"go\",\"gold\",\"sun\"], sentence = \"golden sunsets go by\"\nOutput: \"go sun go by\"\nExplanation: \"golden\" has roots \"go\" and \"gold\"; the shorter \"go\" wins. \"sunsets\" becomes \"sun\", \"go\" is already a root, and \"by\" has no root so it stays.\n```\n\n**Example 2:**\n```\nInput: dictionary = [\"ab\",\"x\"], sentence = \"abc xyz yes\"\nOutput: \"ab x yes\"\nExplanation: \"abc\" starts with \"ab\" and \"xyz\" starts with \"x\". \"yes\" matches no root and is unchanged.\n```\n\n**Example 3:**\n```\nInput: dictionary = [\"re\",\"rep\",\"pre\"], sentence = \"repeat the prefix test\"\nOutput: \"re the pre test\"\nExplanation: \"repeat\" matches both \"re\" and \"rep\"; the shortest root \"re\" is used. \"prefix\" becomes \"pre\". The other words have no root.\n```",
+  "examples": [
+    {
+      "input": "dictionary = [\"go\",\"gold\",\"sun\"], sentence = \"golden sunsets go by\"",
+      "output": "\"go sun go by\"",
+      "explanation": "\"golden\" has roots \"go\" and \"gold\"; the shorter \"go\" wins. \"sunsets\" becomes \"sun\", \"go\" is already a root, and \"by\" has no root so it stays."
+    },
+    {
+      "input": "dictionary = [\"ab\",\"x\"], sentence = \"abc xyz yes\"",
+      "output": "\"ab x yes\"",
+      "explanation": "\"abc\" starts with \"ab\" and \"xyz\" starts with \"x\". \"yes\" matches no root and is unchanged."
+    },
+    {
+      "input": "dictionary = [\"re\",\"rep\",\"pre\"], sentence = \"repeat the prefix test\"",
+      "output": "\"re the pre test\"",
+      "explanation": "\"repeat\" matches both \"re\" and \"rep\"; the shortest root \"re\" is used. \"prefix\" becomes \"pre\". The other words have no root."
+    }
+  ],
+  "constraints": [
+    "1 <= dictionary.length <= 1000",
+    "1 <= dictionary[i].length <= 100",
+    "1 <= sentence.length <= 10^5",
+    "dictionary[i] and the words of sentence consist of lowercase English letters",
+    "sentence has no leading or trailing spaces and words are separated by exactly one space"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def replaceWords(self, dictionary: list[str], sentence: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function replaceWords(dictionary, sentence) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String replaceWords(List<String> dictionary, String sentence) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string replaceWords(vector<string>& dictionary, string sentence) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "dictionary = [\"go\",\"gold\",\"sun\"], sentence = \"golden sunsets go by\"",
+      "expected_output": "\"go sun go by\"",
+      "is_hidden": false
+    },
+    {
+      "input": "dictionary = [\"ab\",\"x\"], sentence = \"abc xyz yes\"",
+      "expected_output": "\"ab x yes\"",
+      "is_hidden": false
+    },
+    {
+      "input": "dictionary = [\"re\",\"rep\",\"pre\"], sentence = \"repeat the prefix test\"",
+      "expected_output": "\"re the pre test\"",
+      "is_hidden": false
+    },
+    {
+      "input": "dictionary = [\"b\",\"bb\",\"bbb\"], sentence = \"bbqsauce bxy cabb dbbb\"",
+      "expected_output": "\"b b cabb dbbb\"",
+      "is_hidden": true
+    },
+    {
+      "input": "dictionary = [\"cat\"], sentence = \"cat\"",
+      "expected_output": "\"cat\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force checks every root against every word with a startswith test and keeps the shortest match, costing O(W * D * L) for W words, D roots and root length L. A better approach puts the roots in a hash set and, for each word, checks its prefixes from length 1 upward, stopping at the first one in the set; since only prefixes up to the longest root length R need checking, that is O(S * R) for S total sentence characters. The optimal approach inserts all roots into a trie, then walks each word through the trie character by character and stops at the first node that marks the end of a root (that is automatically the shortest), or keeps the word if the path breaks. Total time is O(total characters in dictionary + total characters in sentence) and space is O(total characters in dictionary).",
+  "hints": [
+    "For each word you only care about the shortest root that is a prefix of it. Which prefixes of the word are worth checking, and in what order?",
+    "Checking prefixes from shortest to longest lets you stop at the first match. A set of roots makes each check fast.",
+    "Build a trie of roots with an end-of-root marker. Walk each word through the trie; the first end marker you hit gives the replacement, and falling off the trie means the word stays unchanged."
+  ],
+  "optimal_complexity": {
+    "time": "O(N + S)",
+    "space": "O(N)"
+  },
+  "follow_up_questions": [
+    "How would you change the solution to replace each word with its longest matching root instead?",
+    "If the dictionary is updated frequently while sentences are processed, how would you keep lookups efficient?"
+  ]
+}

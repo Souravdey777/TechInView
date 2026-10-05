@@ -1,0 +1,82 @@
+{
+  "title": "Minimum Swaps To Group All Ones Together",
+  "slug": "minimum-swaps-to-group-all-ones-together",
+  "difficulty": "medium",
+  "category": "sliding-window",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "meta"
+  ],
+  "description": "You are given a binary array `data` (each element is `0` or `1`). The array is **not** circular.\n\nIn one swap you may exchange the values at any two positions (they do not need to be adjacent). Return the minimum number of swaps required to place all the `1`s in one contiguous block, anywhere in the array.\n\nIf the array contains zero or one `1`, it is already grouped and the answer is `0`.\n\n**Example 1:**\n```\nInput: data = [0,1,1,0,1,0,1]\nOutput: 1\nExplanation: There are four 1s. The window at indices 1-4 is [1,1,0,1], which already holds three of them, so one swap moves the last 1 into its 0.\n```\n\n**Example 2:**\n```\nInput: data = [0,0,0,1,0]\nOutput: 0\nExplanation: There is only a single 1, so it is already grouped.\n```\n\n**Example 3:**\n```\nInput: data = [1,0,1,0,1,0,0,1,1,0,1]\nOutput: 3\nExplanation: There are six 1s. The best window of length 6 is indices 3-8 = [0,1,0,0,1,1], which already holds three 1s, so three swaps bring in the remaining three.\n```",
+  "examples": [
+    {
+      "input": "data = [0,1,1,0,1,0,1]",
+      "output": "1",
+      "explanation": "There are four 1s. The window at indices 1-4 is [1,1,0,1], which already holds three of them, so one swap moves the last 1 into its 0."
+    },
+    {
+      "input": "data = [0,0,0,1,0]",
+      "output": "0",
+      "explanation": "There is only a single 1, so it is already grouped."
+    },
+    {
+      "input": "data = [1,0,1,0,1,0,0,1,1,0,1]",
+      "output": "3",
+      "explanation": "There are six 1s. The best window of length 6 is indices 3-8 = [0,1,0,0,1,1], which already holds three 1s, so three swaps bring in the remaining three."
+    }
+  ],
+  "constraints": [
+    "1 <= data.length <= 10^5",
+    "data[i] is either 0 or 1",
+    "The array is linear, not circular"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minSwaps(self, data: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minSwaps(data) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minSwaps(int[] data) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minSwaps(vector<int>& data) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "data = [0,1,1,0,1,0,1]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "data = [0,0,0,1,0]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "data = [1,0,1,0,1,0,0,1,1,0,1]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "data = [0,0,0]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "data = [1,1,0,0,1,1,1,0,1,0,1,1]",
+      "expected_output": "2",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Let k be the total number of 1s. The final grouped block must occupy some window of length k, and the swaps needed for a given window equal the number of 0s inside it (each 0 is swapped with an outside 1). Brute force checks every window and counts its 1s from scratch, costing O(n * k). The optimal approach slides a fixed window of length k across the array, maintaining the count of 1s in O(1) per step, and returns k minus the maximum count seen. This runs in O(n) time with O(1) extra space; if k <= 1 the answer is immediately 0.",
+  "hints": [
+    "Once the 1s are grouped, how long is the block they occupy?",
+    "For a fixed window of that length, how many swaps does it take to fill it entirely with 1s?",
+    "Slide a window of length k (the number of 1s) and track how many 1s it contains; the answer is k minus the largest such count."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve it if the array were circular (the last element is adjacent to the first)?",
+    "What if only adjacent swaps were allowed?"
+  ]
+}

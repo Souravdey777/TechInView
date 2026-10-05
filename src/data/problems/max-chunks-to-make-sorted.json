@@ -1,0 +1,82 @@
+{
+  "title": "Max Chunks To Make Sorted",
+  "slug": "max-chunks-to-make-sorted",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an integer array `arr` of length `n` that is a permutation of the integers `0` through `n - 1` (every value appears exactly once).\n\nCut `arr` into one or more contiguous, non-empty pieces (\"chunks\"). Then sort each chunk on its own and glue the chunks back together in their original order. The cut is valid if the glued result is the fully sorted array `[0, 1, ..., n - 1]`.\n\nReturn the **largest number of chunks** a valid cut can produce. A single chunk (the whole array) is always valid, so the answer is at least `1`.\n\n**Example 1:**\n```\nInput: arr = [4,3,2,1,0]\nOutput: 1\nExplanation: 0 is at the last index, so every proper prefix is missing 0 and can't sort into its final position; the whole array must be one chunk.\n```\n\n**Example 2:**\n```\nInput: arr = [1,0,2,3,4]\nOutput: 4\nExplanation: Cut into [1,0], [2], [3], [4]. Sorting [1,0] gives [0,1], and the result is [0,1,2,3,4]. That is 4 chunks.\n```\n\n**Example 3:**\n```\nInput: arr = [0,2,1,4,3]\nOutput: 3\nExplanation: Cut into [0], [2,1], [4,3]. Sorting each gives [0], [1,2], [3,4], which concatenate to the sorted array.\n```",
+  "examples": [
+    {
+      "input": "arr = [4,3,2,1,0]",
+      "output": "1",
+      "explanation": "0 is at the last index, so every proper prefix is missing 0 and can't sort into its final position; the whole array must be one chunk."
+    },
+    {
+      "input": "arr = [1,0,2,3,4]",
+      "output": "4",
+      "explanation": "Cut into [1,0], [2], [3], [4]. Sorting [1,0] gives [0,1], and the result is [0,1,2,3,4]. That is 4 chunks."
+    },
+    {
+      "input": "arr = [0,2,1,4,3]",
+      "output": "3",
+      "explanation": "Cut into [0], [2,1], [4,3]. Sorting each gives [0], [1,2], [3,4], which concatenate to the sorted array."
+    }
+  ],
+  "constraints": [
+    "n == arr.length",
+    "1 <= n <= 10",
+    "0 <= arr[i] < n",
+    "All values of arr are distinct (arr is a permutation of 0..n-1)"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxChunksToSorted(self, arr: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxChunksToSorted(arr) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxChunksToSorted(int[] arr) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxChunksToSorted(vector<int>& arr) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "arr = [4,3,2,1,0]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [1,0,2,3,4]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [0,2,1,4,3]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "arr = [0]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "arr = [0,1,2,3,4,5,6,7,8,9]",
+      "expected_output": "10",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every set of cut positions (2^(n-1) options), sorts each chunk and checks the result, costing O(2^n * n log n). The key observation is that a chunk boundary can be placed right after index i exactly when the first i + 1 elements are precisely the values 0..i, which for a permutation is equivalent to max(arr[0..i]) == i. So scan left to right keeping a running maximum and count every index where the running maximum equals the index. Each such index closes a chunk. This runs in O(n) time and O(1) extra space.",
+  "hints": [
+    "When is it safe to end a chunk at some index? Think about which values must already be in the prefix for the sorted chunks to line up.",
+    "A prefix arr[0..i] can be its own group of chunks only if it contains exactly the values 0..i. Since arr is a permutation, there is a single number that tells you this.",
+    "Track the running maximum while scanning. Whenever the running maximum equals the current index, you can close a chunk there; count those positions."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve this if arr can contain duplicates and arbitrary values (Max Chunks To Make Sorted II)?",
+    "Can you also return the actual chunk boundaries, not just the count?"
+  ]
+}

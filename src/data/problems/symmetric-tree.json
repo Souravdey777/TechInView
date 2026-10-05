@@ -1,0 +1,85 @@
+{
+  "title": "Symmetric Tree",
+  "slug": "symmetric-tree",
+  "difficulty": "easy",
+  "category": "trees",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "bloomberg",
+    "linkedin",
+    "meta",
+    "google"
+  ],
+  "description": "Given the `root` of a binary tree, determine whether it is symmetric, meaning the left half is an exact mirror reflection of the right half across a vertical line through the root (both in shape and in values).\n\nReturn `true` if it is symmetric and `false` otherwise. The tree is given in level-order, with `null` marking a missing child. A single node is symmetric, and an empty tree is considered symmetric.\n\n**Example 1:**\n```\n      1\n    /   \\\n   2     2\n  / \\   / \\\n 3   4 4   3\n\nInput: root = [1,2,2,3,4,4,3]\nOutput: true\nExplanation: The left subtree [2,3,4] mirrors the right subtree [2,4,3].\n```\n\n**Example 2:**\n```\nInput: root = [1,2,2,null,3,null,3]\nOutput: false\nExplanation: Both 3s are right children; a mirror would need one of them to be a left child.\n```\n\n**Example 3:**\n```\nInput: root = [1]\nOutput: true\nExplanation: A lone root is trivially its own mirror.\n```",
+  "examples": [
+    {
+      "input": "root = [1,2,2,3,4,4,3]",
+      "output": "true",
+      "explanation": "The left subtree [2,3,4] mirrors the right subtree [2,4,3]."
+    },
+    {
+      "input": "root = [1,2,2,null,3,null,3]",
+      "output": "false",
+      "explanation": "Both 3s are right children; a mirror would need one of them to be a left child."
+    },
+    {
+      "input": "root = [1]",
+      "output": "true",
+      "explanation": "A lone root is trivially its own mirror."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [0, 100].",
+    "-100 <= Node.val <= 100",
+    "Node values may repeat, so symmetry must be checked by position, not by value alone.",
+    "The tree height is at most 100, and the tree may be fully skewed."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isSymmetric(self, root: TreeNode | None) -> bool:\n        # Write your solution here\n        return False",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction isSymmetric(root) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public boolean isSymmetric(TreeNode root) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    bool isSymmetric(TreeNode* root) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "root = [1,2,2,3,4,4,3]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1,2,2,null,3,null,3]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "root = [1]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "root = []",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "root = [1,2,2,2,null,2]",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach builds a mirrored copy of the tree and then checks the copy and the original for equality, costing O(n) time and O(n) extra memory for the copy. A simpler alternative collects each level (including null placeholders) with BFS and checks whether every level reads the same forwards and backwards. The optimal approach compares the two halves directly with a helper isMirror(a, b): both null is a match, one null or different values is a mismatch, otherwise a.left must mirror b.right and a.right must mirror b.left. Calling isMirror(root.left, root.right) visits each node once for O(n) time and O(h) recursion space.",
+  "hints": [
+    "Symmetry is about comparing the left subtree against the right subtree, not each subtree against itself.",
+    "Two subtrees mirror each other when their roots match and the outer pair and inner pair of children also mirror each other.",
+    "Write isMirror(a, b) that checks a.val == b.val, then recurses on (a.left, b.right) and (a.right, b.left); start it with (root.left, root.right)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "follow_up_questions": [
+    "Can you solve it iteratively using a queue that holds pairs of nodes to compare?",
+    "How would you check symmetry if the tree were given only as its level-order array, without building nodes?"
+  ]
+}

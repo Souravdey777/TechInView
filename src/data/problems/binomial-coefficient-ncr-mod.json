@@ -1,0 +1,82 @@
+{
+  "title": "Binomial Coefficient nCr Mod",
+  "slug": "binomial-coefficient-ncr-mod",
+  "difficulty": "easy",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "goldman-sachs",
+    "adobe"
+  ],
+  "description": "Given two non-negative integers `n` and `r`, return `C(n, r)` — the number of ways to choose `r` items from `n` distinct items — **modulo** `10^9 + 7`.\n\nBuild it with dynamic programming using Pascal's rule `C(i, j) = C(i-1, j-1) + C(i-1, j)`. By definition `C(n, 0) = 1` (including `C(0, 0) = 1`), and when `r > n` the answer is `0`.\n\n**Example 1:**\n```\nInput: n = 5, r = 2\nOutput: 10\nExplanation: There are 10 ways to choose 2 items from 5: (5 * 4) / 2 = 10.\n```\n\n**Example 2:**\n```\nInput: n = 3, r = 5\nOutput: 0\nExplanation: You cannot choose 5 items from only 3, so the answer is 0.\n```\n\n**Example 3:**\n```\nInput: n = 10, r = 3\nOutput: 120\nExplanation: (10 * 9 * 8) / (3 * 2 * 1) = 120.\n```",
+  "examples": [
+    {
+      "input": "n = 5, r = 2",
+      "output": "10",
+      "explanation": "There are 10 ways to choose 2 items from 5: (5 * 4) / 2 = 10."
+    },
+    {
+      "input": "n = 3, r = 5",
+      "output": "0",
+      "explanation": "You cannot choose 5 items from only 3, so the answer is 0."
+    },
+    {
+      "input": "n = 10, r = 3",
+      "output": "120",
+      "explanation": "(10 * 9 * 8) / (3 * 2 * 1) = 120."
+    }
+  ],
+  "constraints": [
+    "0 <= n <= 1000",
+    "0 <= r <= 1000",
+    "Return the answer modulo 10^9 + 7"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def nCr(self, n: int, r: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function nCr(n, r) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int nCr(int n, int r) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int nCr(int n, int r) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 5, r = 2",
+      "expected_output": "10",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, r = 5",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 10, r = 3",
+      "expected_output": "120",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 0, r = 0",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 1000, r = 500",
+      "expected_output": "159835829",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The naive recursion C(n, r) = C(n-1, r-1) + C(n-1, r) without memoization recomputes overlapping subproblems and is exponential. Computing n! / (r! (n-r)!) directly overflows, and division does not work under a modulus without modular inverses. Pascal's rule turns this into a table: fill rows i = 0..n, with C(i, 0) = 1 and each cell the sum of the two cells above, taken mod 10^9 + 7. Using a single 1-D row of size r + 1 updated from right to left gives O(n * r) time and O(r) space. Return 0 immediately if r > n. (Outside the Pascal-DP requirement, precomputed factorials with modular inverses via Fermat's little theorem answer each query in O(1) after O(n) preprocessing.)",
+  "hints": [
+    "Each C(n, r) can be expressed through two smaller binomial coefficients. Which identity is that?",
+    "Pascal's triangle is a 2-D table, but each row only depends on the previous one. Can you keep just one row?",
+    "If r > n return 0. Otherwise keep row[0..r] with row[0] = 1, and for i from 1 to n update j from min(i, r) down to 1: row[j] = (row[j] + row[j-1]) % MOD. Return row[r]."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * r)",
+    "space": "O(r)"
+  },
+  "follow_up_questions": [
+    "How would precomputed factorials and modular inverses (Fermat's little theorem) answer many (n, r) queries with n up to 10^6 in O(1) each after O(n) setup?",
+    "Why must the 1-D row be updated from right to left?"
+  ]
+}

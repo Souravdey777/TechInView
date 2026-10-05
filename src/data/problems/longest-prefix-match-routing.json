@@ -1,0 +1,80 @@
+{
+  "title": "Longest Prefix Match Routing",
+  "slug": "longest-prefix-match-routing",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "apple",
+    "oracle"
+  ],
+  "description": "A router stores a table of routes, each given as a binary string prefix in the array `routes` (the route's index is its position in the array). An address, also a binary string, **matches** a route when the route is a prefix of the address (a route longer than the address never matches).\n\nFor every address in `addresses`, return the index of the matching route with the **longest** prefix. Since all routes are distinct, at most one route of each length can match, so the answer is unique. If no route matches, return `-1` for that address.\n\nReturn the answers as an array in the same order as `addresses`.\n\n**Example 1:**\n```\nInput: routes = [\"1\",\"10\",\"101\",\"0\"], addresses = [\"1011\",\"1100\",\"0001\"]\nOutput: [2,0,3]\nExplanation: \"1011\" matches \"1\", \"10\" and \"101\"; the longest is \"101\" at index 2. \"1100\" only matches \"1\" (index 0). \"0001\" matches \"0\" (index 3).\n```\n\n**Example 2:**\n```\nInput: routes = [\"11\",\"011\"], addresses = [\"10\",\"0110\",\"111\"]\nOutput: [-1,1,0]\nExplanation: \"10\" starts with neither route. \"0110\" starts with \"011\" (index 1). \"111\" starts with \"11\" (index 0).\n```",
+  "examples": [
+    {
+      "input": "routes = [\"1\",\"10\",\"101\",\"0\"], addresses = [\"1011\",\"1100\",\"0001\"]",
+      "output": "[2,0,3]",
+      "explanation": "\"1011\" matches \"1\", \"10\" and \"101\"; the longest is \"101\" at index 2. \"1100\" only matches \"1\" (index 0). \"0001\" matches \"0\" (index 3)."
+    },
+    {
+      "input": "routes = [\"11\",\"011\"], addresses = [\"10\",\"0110\",\"111\"]",
+      "output": "[-1,1,0]",
+      "explanation": "\"10\" starts with neither route. \"0110\" starts with \"011\" (index 1). \"111\" starts with \"11\" (index 0)."
+    }
+  ],
+  "constraints": [
+    "1 <= routes.length <= 10^4",
+    "1 <= routes[i].length <= 32",
+    "1 <= addresses.length <= 10^4",
+    "1 <= addresses[j].length <= 32",
+    "routes[i] and addresses[j] consist only of '0' and '1'; all routes are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def routeLookup(self, routes: list[str], addresses: list[str]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function routeLookup(routes, addresses) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] routeLookup(String[] routes, String[] addresses) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> routeLookup(vector<string>& routes, vector<string>& addresses) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "routes = [\"1\",\"10\",\"101\",\"0\"], addresses = [\"1011\",\"1100\",\"0001\"]",
+      "expected_output": "[2,0,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "routes = [\"11\",\"011\"], addresses = [\"10\",\"0110\",\"111\"]",
+      "expected_output": "[-1,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "routes = [\"0\",\"00\",\"000\"], addresses = [\"0000\",\"001\",\"1\"]",
+      "expected_output": "[2,1,-1]",
+      "is_hidden": false
+    },
+    {
+      "input": "routes = [\"1011\"], addresses = [\"101\",\"1011\",\"10110\"]",
+      "expected_output": "[-1,0,0]",
+      "is_hidden": true
+    },
+    {
+      "input": "routes = [\"0\",\"1\",\"01\",\"10\",\"011\"], addresses = [\"0111\",\"1000\",\"0010\",\"11\"]",
+      "expected_output": "[4,3,0,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: for each address check every route with startswith and keep the longest match, O(q * r * L). Optimal: build a binary trie from the routes, storing the route index at the node where each route ends. For each address walk the trie bit by bit, remembering the most recent node that carries a route index; stop when the next child is missing or the address is exhausted, and return the remembered index (or -1). Building is O(r * L) and each lookup is O(L) with L <= 32, giving O((r + q) * L) time and O(r * L) space.",
+  "hints": [
+    "All routes that match an address lie along a single path from the root of a prefix tree.",
+    "Build a binary trie of routes and tag each node where a route ends with that route's index.",
+    "Walk the trie following the address bits and keep the index of the last tagged node you passed; that is the longest match. Stop as soon as a child is missing."
+  ],
+  "optimal_complexity": {
+    "time": "O((r + q) * L)",
+    "space": "O(r * L)"
+  },
+  "follow_up_questions": [
+    "How would a compressed (Patricia / radix) trie reduce memory for real IPv4 tables?",
+    "How would you support inserting and deleting routes while lookups are happening?"
+  ]
+}

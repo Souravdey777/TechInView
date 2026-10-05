@@ -1,0 +1,82 @@
+{
+  "title": "Minimize Deviation in Array",
+  "slug": "minimize-deviation-in-array",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given an array `nums` of positive integers. You may apply the following moves to any element, as many times as you like and in any order:\n\n- If the element is **even**, replace it with half of itself.\n- If the element is **odd**, replace it with double itself.\n\nThe **deviation** of the array is its maximum element minus its minimum element. Return the smallest deviation you can reach.\n\n**Example 1:**\n```\nInput: nums = [1,2,3,4]\nOutput: 1\nExplanation: Double the 1 and halve the 4 to get [2,2,3,2]. The largest value is 3 and the smallest is 2, so the deviation is 1. A deviation of 0 is impossible because 3 can only be 3 or 6.\n```\n\n**Example 2:**\n```\nInput: nums = [3,5]\nOutput: 1\nExplanation: Double 3 into 6 and leave 5 alone. The array [6,5] has deviation 6 - 5 = 1, and the deviation can never be 0 because no reachable value of 3 (3 or 6) equals a reachable value of 5 (5 or 10).\n```\n\n**Example 3:**\n```\nInput: nums = [4,1,5,20,3]\nOutput: 3\nExplanation: One optimal result is [2,2,5,5,3] (halve 4, double 1, halve 20 twice), with deviation 5 - 2 = 3.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3,4]",
+      "output": "1",
+      "explanation": "Double the 1 and halve the 4 to get [2,2,3,2]. The largest value is 3 and the smallest is 2, so the deviation is 1. A deviation of 0 is impossible because 3 can only be 3 or 6."
+    },
+    {
+      "input": "nums = [3,5]",
+      "output": "1",
+      "explanation": "Double 3 into 6 and leave 5 alone. The array [6,5] has deviation 6 - 5 = 1, and the deviation can never be 0 because no reachable value of 3 (3 or 6) equals a reachable value of 5 (5 or 10)."
+    },
+    {
+      "input": "nums = [4,1,5,20,3]",
+      "output": "3",
+      "explanation": "One optimal result is [2,2,5,5,3] (halve 4, double 1, halve 20 twice), with deviation 5 - 2 = 3."
+    }
+  ],
+  "constraints": [
+    "2 <= nums.length <= 5 * 10^4",
+    "1 <= nums[i] <= 10^9",
+    "Each operation may be applied to any element any number of times"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumDeviation(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumDeviation(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minimumDeviation(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumDeviation(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3,4]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,5]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,1,5,20,3]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [8,8]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1000000000,999999999,7,3]",
+      "expected_output": "999999993",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Every number can only take a small set of values: an odd x can become x or 2x, while an even x can be halved repeatedly until it turns odd. A brute force enumerates every combination of reachable values and takes the best max - min, which is exponential. The standard approach first normalises each number to its largest reachable value (double the odd ones), so from then on the only useful move is to halve the current maximum. Put all values in a max-heap and track the current minimum. Repeatedly pop the maximum, update the answer with max - min, and if the maximum is even push max/2 (updating the minimum); stop as soon as the maximum is odd, because it can no longer shrink and the deviation can only be governed by it. Each value is halved at most about log(M) times, giving O(n log n log M) time and O(n) space.",
+  "hints": [
+    "Each number can only reach a handful of values. Can you normalise every number so that only one direction of move is ever needed?",
+    "After doubling every odd number once, every element is at its largest possible value, and the only remaining move is halving even numbers. Which element is worth halving?",
+    "Use a max-heap and keep the current minimum. Pop the max, record max - min, and halve it if it is even; once the max is odd you can stop."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n log M)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Why is it safe to stop as soon as the maximum element is odd?",
+    "How would you also return the final array that achieves the minimum deviation?"
+  ]
+}

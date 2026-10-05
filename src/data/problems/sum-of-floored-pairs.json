@@ -1,0 +1,80 @@
+{
+  "title": "Sum of Floored Pairs",
+  "slug": "sum-of-floored-pairs",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are given an array of positive integers `nums`. Compute the sum of `floor(nums[i] / nums[j])` over **all ordered pairs** of indices `(i, j)` with `0 <= i, j < nums.length`, including pairs where `i == j`.\n\nBecause the total can be very large, return it **modulo `10^9 + 7`**.\n\n**Example 1:**\n```\nInput: nums = [2,5,9]\nOutput: 10\nExplanation: The pairs give floor(2/2)=1, floor(2/5)=0, floor(2/9)=0, floor(5/2)=2, floor(5/5)=1, floor(5/9)=0, floor(9/2)=4, floor(9/5)=1, floor(9/9)=1. Their total is 10.\n```\n\n**Example 2:**\n```\nInput: nums = [7,7,7,7,7,7,7]\nOutput: 49\nExplanation: Every one of the 7 * 7 = 49 ordered pairs contributes floor(7/7) = 1.\n```\n\n**Example 3:**\n```\nInput: nums = [1,2,3]\nOutput: 9\nExplanation: Dividing everything by 1 gives 1 + 2 + 3 = 6, dividing by 2 gives 0 + 1 + 1 = 2, and dividing by 3 gives 0 + 0 + 1 = 1. The total is 9.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,5,9]",
+      "output": "10",
+      "explanation": "The pairs give floor(2/2)=1, floor(2/5)=0, floor(2/9)=0, floor(5/2)=2, floor(5/5)=1, floor(5/9)=0, floor(9/2)=4, floor(9/5)=1, floor(9/9)=1. Their total is 10."
+    },
+    {
+      "input": "nums = [7,7,7,7,7,7,7]",
+      "output": "49",
+      "explanation": "Every one of the 7 * 7 = 49 ordered pairs contributes floor(7/7) = 1."
+    },
+    {
+      "input": "nums = [1,2,3]",
+      "output": "9",
+      "explanation": "Dividing everything by 1 gives 1 + 2 + 3 = 6, dividing by 2 gives 0 + 1 + 1 = 2, and dividing by 3 gives 0 + 0 + 1 = 1. The total is 9."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "1 <= nums[i] <= 10^5",
+    "Pairs (i, j) include i == j, and the sum is returned modulo 10^9 + 7"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def sumOfFlooredPairs(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function sumOfFlooredPairs(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int sumOfFlooredPairs(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int sumOfFlooredPairs(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,5,9]",
+      "expected_output": "10",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7,7,7,7,7,7,7]",
+      "expected_output": "49",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3]",
+      "expected_output": "9",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,1,1,100000,100000,99999,50000]",
+      "expected_output": "1050019",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force evaluates all n^2 ordered pairs directly, which is O(n^2) and too slow for 10^5 elements. Instead, count how many times each value occurs and build a prefix-sum array over values up to the maximum M. For each distinct divisor d (with count c_d), the numerators in the range [q*d, (q+1)*d - 1] all contribute exactly q, so for q = 1, 2, ... add c_d * q * (number of elements in that value range), read in O(1) from the prefix sums. The inner loop runs M/d times per distinct d, and summing M/d over d gives the harmonic bound O(M log M). Total time is O(n + M log M) with O(M) extra space; take the modulo as you accumulate.",
+  "hints": [
+    "Values are bounded by 10^5, so think in terms of value counts rather than individual pairs.",
+    "For a fixed divisor d, every numerator in the range [q*d, (q+1)*d - 1] gives the same quotient q. How can you count the numbers in such a range quickly?",
+    "Build a prefix sum over value frequencies. For each distinct d, loop q over multiples of d, adding freq[d] * q * (count of values in [q*d, (q+1)*d - 1]); the harmonic series keeps this near O(M log M)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + M log M)",
+    "space": "O(M)"
+  },
+  "follow_up_questions": [
+    "Why does iterating over multiples of every distinct divisor stay within O(M log M) total work?",
+    "How would you adapt this if values could be as large as 10^9 but the array were short?"
+  ]
+}

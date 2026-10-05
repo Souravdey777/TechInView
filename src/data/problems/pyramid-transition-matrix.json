@@ -1,0 +1,82 @@
+{
+  "title": "Pyramid Transition Matrix",
+  "slug": "pyramid-transition-matrix",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are stacking lettered blocks into a pyramid. Each row has one block fewer than the row below it, and every block rests on two adjacent blocks of the row beneath.\n\nThe string `bottom` is the bottom row. A block with letter `T` may sit on a left block `L` and a right block `R` only if the three-letter string `L + R + T` appears in the list `allowed` (first two characters are the supporting pair, left then right, and the third is the block placed on top). Each pattern may be reused any number of times.\n\nReturn `true` if you can build rows all the way up to a single block at the top, and `false` otherwise. A `bottom` of length 1 is already a finished pyramid.\n\n**Example 1:**\n```\nInput: bottom = \"BCD\", allowed = [\"BCC\",\"CDE\",\"CEA\",\"FFF\"]\nOutput: true\nExplanation: On B,C we can place C (\"BCC\") and on C,D we can place E (\"CDE\"). The second row \"CE\" supports A (\"CEA\"), giving a single block at the top.\n```\n\n**Example 2:**\n```\nInput: bottom = \"AAAA\", allowed = [\"AAB\",\"AAC\",\"BCD\",\"BBE\",\"DEF\"]\nOutput: false\nExplanation: Every block in the row above AAAA must be B or C. Pairs CB and CC have no pattern, and the rows reachable through BB->E and BC->D never give a pair that can support the top, so the pyramid cannot be finished.\n```\n\n**Example 3:**\n```\nInput: bottom = \"AB\", allowed = [\"ABC\"]\nOutput: true\nExplanation: The pair A,B supports C, which is the single top block.\n```",
+  "examples": [
+    {
+      "input": "bottom = \"BCD\", allowed = [\"BCC\",\"CDE\",\"CEA\",\"FFF\"]",
+      "output": "true",
+      "explanation": "On B,C we can place C (\"BCC\") and on C,D we can place E (\"CDE\"). The second row \"CE\" supports A (\"CEA\"), giving a single block at the top."
+    },
+    {
+      "input": "bottom = \"AAAA\", allowed = [\"AAB\",\"AAC\",\"BCD\",\"BBE\",\"DEF\"]",
+      "output": "false",
+      "explanation": "Every block in the row above AAAA must be B or C. Pairs CB and CC have no pattern, and the rows reachable through BB->E and BC->D never give a pair that can support the top, so the pyramid cannot be finished."
+    },
+    {
+      "input": "bottom = \"AB\", allowed = [\"ABC\"]",
+      "output": "true",
+      "explanation": "The pair A,B supports C, which is the single top block."
+    }
+  ],
+  "constraints": [
+    "`1 <= bottom.length <= 6`",
+    "`0 <= allowed.length <= 216`",
+    "`allowed[i].length == 3`",
+    "All letters are from the set `{'A','B','C','D','E','F'}`",
+    "All strings in `allowed` are unique"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def pyramidTransition(self, bottom: str, allowed: list[str]) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function pyramidTransition(bottom, allowed) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean pyramidTransition(String bottom, List<String> allowed) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool pyramidTransition(string bottom, vector<string>& allowed) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "bottom = \"BCD\", allowed = [\"BCC\",\"CDE\",\"CEA\",\"FFF\"]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "bottom = \"AAAA\", allowed = [\"AAB\",\"AAC\",\"BCD\",\"BBE\",\"DEF\"]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "bottom = \"AB\", allowed = [\"ABC\"]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "bottom = \"A\", allowed = []",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "bottom = \"AAAAAA\", allowed = [\"AAB\",\"AAC\",\"ABA\",\"ACA\",\"BAA\",\"CAA\",\"BBB\",\"CCC\",\"BCD\",\"CBD\"]",
+      "expected_output": "true",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: build every possible next row by taking the Cartesian product of allowed top letters for each adjacent pair, then recurse on each candidate row until the row has length 1; this is exponential in the number of blocks (up to 6^(n(n-1)/2)). Improve it with backtracking plus memoization: index allowed as a map from the two-letter base to the list of possible top letters, fill the next row one position at a time and abandon a partial row as soon as some pair has no options, and memoize the result for each full row string that has already been proven buildable or not (rows over 6 letters with length <= 6 give at most about 6^6 distinct rows). With memoization the work is bounded by the number of distinct rows times the branching to build each, roughly O(A^n) where A = 6 is the alphabet size and n = bottom.length; space is O(A^n) for the memo plus O(n^2) recursion depth.",
+  "hints": [
+    "Build the pyramid row by row. The next row depends only on the current row, not on how you got there.",
+    "Turn `allowed` into a lookup from a two-letter base to the letters that can sit on it, and fill the next row one position at a time, backtracking when a pair has no options.",
+    "Many different paths lead to the same row string. Cache whether each row can reach the top so you never re-solve it."
+  ],
+  "optimal_complexity": {
+    "time": "O(A^n)",
+    "space": "O(A^n)"
+  },
+  "follow_up_questions": [
+    "How would you return one actual pyramid (all rows) instead of just true/false?",
+    "Could you represent each row as a bitmask of possible letters per position to speed up the search?"
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "title": "Sum of Distances in Tree",
+  "slug": "sum-of-distances-in-tree",
+  "difficulty": "hard",
+  "category": "trees",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "uber"
+  ],
+  "description": "You are given an undirected, connected tree with `n` nodes labelled `0` to `n - 1` and `n - 1` edges, where `edges[i] = [a_i, b_i]` connects nodes `a_i` and `b_i`.\n\nThe distance between two nodes is the number of edges on the path between them. Return an array `answer` of length `n` where `answer[i]` is the sum of the distances from node `i` to every other node.\n\n**Example 1:**\n```\nInput: n = 6, edges = [[0,1],[0,2],[2,3],[2,4],[2,5]]\nOutput: [8,12,6,10,10,10]\nExplanation: For node 0 the distances to nodes 1..5 are 1, 1, 2, 2, 2, which sum to 8. The other entries are computed the same way.\n```\n\n**Example 2:**\n```\nInput: n = 1, edges = []\nOutput: [0]\nExplanation: A single node has no other nodes to reach.\n```\n\n**Example 3:**\n```\nInput: n = 3, edges = [[0,1],[1,2]]\nOutput: [3,2,3]\nExplanation: The middle node 1 is one step from both ends (total 2); each end is 1 + 2 = 3 away from the others.\n```",
+  "examples": [
+    {
+      "input": "n = 6, edges = [[0,1],[0,2],[2,3],[2,4],[2,5]]",
+      "output": "[8,12,6,10,10,10]",
+      "explanation": "For node 0 the distances to nodes 1..5 are 1, 1, 2, 2, 2, which sum to 8. The other entries are computed the same way."
+    },
+    {
+      "input": "n = 1, edges = []",
+      "output": "[0]",
+      "explanation": "A single node has no other nodes to reach."
+    },
+    {
+      "input": "n = 3, edges = [[0,1],[1,2]]",
+      "output": "[3,2,3]",
+      "explanation": "The middle node 1 is one step from both ends (total 2); each end is 1 + 2 = 3 away from the others."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 3 * 10^4",
+    "edges.length == n - 1",
+    "edges[i].length == 2",
+    "0 <= a_i, b_i < n and a_i != b_i",
+    "The given edges form a valid tree."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def sumOfDistancesInTree(self, n: int, edges: list[list[int]]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function sumOfDistancesInTree(n, edges) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] sumOfDistancesInTree(int n, int[][] edges) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> sumOfDistancesInTree(int n, vector<vector<int>>& edges) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 6, edges = [[0,1],[0,2],[2,3],[2,4],[2,5]]",
+      "expected_output": "[8,12,6,10,10,10]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, edges = []",
+      "expected_output": "[0]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, edges = [[0,1],[1,2]]",
+      "expected_output": "[3,2,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, edges = [[1,0]]",
+      "expected_output": "[1,1]",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 5, edges = [[3,4],[0,1],[2,3],[1,2]]",
+      "expected_output": "[10,7,6,7,10]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach runs a BFS or DFS from every node and adds up the distances, costing O(n^2) time, which is too slow for n = 3 * 10^4. The optimal approach uses rerooting with two DFS passes. Root the tree at 0; the first post-order pass computes count[v] (the size of v's subtree) and answer[0] as the sum of all depths. The second pre-order pass moves the root from a parent p to a child c: the count[c] nodes in c's subtree each get one step closer and the other n - count[c] nodes each get one step farther, so answer[c] = answer[p] - count[c] + (n - count[c]). Both passes are linear, giving O(n) time and O(n) space.",
+  "hints": [
+    "Computing the answer for one node is easy with a single traversal. The challenge is reusing that work for all nodes.",
+    "If you know the answer for a node p, how does the total change when you move to its neighbour c? Which nodes get closer and which get farther?",
+    "Do one DFS to get subtree sizes and the answer for the root, then a second DFS where answer[child] = answer[parent] - size[child] + (n - size[child])."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would the rerooting formula change if every edge had a positive weight?",
+    "How would you find the node that minimizes the sum of distances (the tree's median) without computing every answer?"
+  ]
+}

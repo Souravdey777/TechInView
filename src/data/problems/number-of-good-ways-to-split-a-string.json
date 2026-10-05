@@ -1,0 +1,80 @@
+{
+  "title": "Number of Good Ways to Split a String",
+  "slug": "number-of-good-ways-to-split-a-string",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "Given a string `s`, you may cut it once into a non-empty left part `p` and a non-empty right part `q` so that `p + q == s`. A cut is **good** if `p` and `q` contain the same number of **distinct** letters.\n\nReturn the number of good cuts. A string of length 1 has no possible cut, so the answer for it is `0`.\n\n**Example 1:**\n```\nInput: s = \"abab\"\nOutput: 1\nExplanation: Splits are a|bab (1 vs 2 distinct), ab|ab (2 vs 2) and aba|b (2 vs 1). Only ab|ab is good.\n```\n\n**Example 2:**\n```\nInput: s = \"aaaa\"\nOutput: 3\nExplanation: Every split leaves just the letter 'a' on each side, so all 3 splits are good.\n```\n\n**Example 3:**\n```\nInput: s = \"abcde\"\nOutput: 0\nExplanation: All letters are different, so the left side has i distinct letters and the right side has 5 - i. They are never equal for an odd length.\n```",
+  "examples": [
+    {
+      "input": "s = \"abab\"",
+      "output": "1",
+      "explanation": "Splits are a|bab (1 vs 2 distinct), ab|ab (2 vs 2) and aba|b (2 vs 1). Only ab|ab is good."
+    },
+    {
+      "input": "s = \"aaaa\"",
+      "output": "3",
+      "explanation": "Every split leaves just the letter 'a' on each side, so all 3 splits are good."
+    },
+    {
+      "input": "s = \"abcde\"",
+      "output": "0",
+      "explanation": "All letters are different, so the left side has i distinct letters and the right side has 5 - i. They are never equal for an odd length."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^5",
+    "s consists of only lowercase English letters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def numSplits(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function numSplits(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int numSplits(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int numSplits(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"abab\"",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aaaa\"",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abcde\"",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"zzyzxz\"",
+      "expected_output": "2",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries each of the n - 1 cut positions and builds a set for each half to count distinct letters, costing O(n^2) time. The optimal approach precomputes two arrays in linear time: leftDistinct[i] is the number of distinct letters in s[0..i], built with a growing set, and rightDistinct[i] is the number of distinct letters in s[i..n-1], built from the right. A cut after index i is good when leftDistinct[i] == rightDistinct[i + 1]. Alternatively, keep a count map for the right part and a set for the left part, moving one character across per step. Either way the time is O(n) and the extra space is O(n) (or O(1) with 26-letter counters).",
+  "hints": [
+    "Rebuilding the distinct-letter count for both halves at every cut is quadratic. What changes when the cut moves one position to the right?",
+    "Moving the cut right moves exactly one character from the right part to the left part. Track letter counts for the right part and a seen-set for the left part.",
+    "Start with all characters counted in the right part. For each cut, move s[i] to the left: add it to the left set, decrement its right count and drop it from the right's distinct count when it reaches 0. Count cuts where the two distinct counts are equal."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you count good ways to split the string into three non-empty parts with equal distinct counts?",
+    "What changes if the alphabet is all Unicode characters instead of 26 lowercase letters?"
+  ]
+}

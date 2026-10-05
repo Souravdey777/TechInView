@@ -1,0 +1,84 @@
+{
+  "title": "Integer to Roman",
+  "slug": "integer-to-roman",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "google",
+    "adobe",
+    "bloomberg",
+    "apple"
+  ],
+  "description": "Roman numerals use seven symbols: `I` = 1, `V` = 5, `X` = 10, `L` = 50, `C` = 100, `D` = 500, `M` = 1000.\n\nNumbers are written from the largest value to the smallest by adding symbols. To avoid four identical symbols in a row, six **subtractive** pairs are used instead: `IV` = 4, `IX` = 9, `XL` = 40, `XC` = 90, `CD` = 400, `CM` = 900. Only these six pairs are allowed, and the symbols `I`, `X`, `C`, `M` may repeat at most three times in a row while `V`, `L`, `D` never repeat.\n\nGiven an integer `num`, return its standard Roman numeral representation as an uppercase string. Every input has exactly one valid representation under these rules.\n\n**Example 1:**\n```\nInput: num = 44\nOutput: \"XLIV\"\nExplanation: 40 = XL, 4 = IV, so 44 = \"XLIV\".\n```\n\n**Example 2:**\n```\nInput: num = 2024\nOutput: \"MMXXIV\"\nExplanation: 2000 = MM, 20 = XX, 4 = IV, so 2024 = \"MMXXIV\".\n```\n\n**Example 3:**\n```\nInput: num = 944\nOutput: \"CMXLIV\"\nExplanation: 900 = CM, 40 = XL, 4 = IV, so 944 = \"CMXLIV\".\n```",
+  "examples": [
+    {
+      "input": "num = 44",
+      "output": "\"XLIV\"",
+      "explanation": "40 = XL, 4 = IV, so 44 = \"XLIV\"."
+    },
+    {
+      "input": "num = 2024",
+      "output": "\"MMXXIV\"",
+      "explanation": "2000 = MM, 20 = XX, 4 = IV, so 2024 = \"MMXXIV\"."
+    },
+    {
+      "input": "num = 944",
+      "output": "\"CMXLIV\"",
+      "explanation": "900 = CM, 40 = XL, 4 = IV, so 944 = \"CMXLIV\"."
+    }
+  ],
+  "constraints": [
+    "1 <= num <= 3999",
+    "Use only the symbols I, V, X, L, C, D and M",
+    "Use the subtractive forms IV, IX, XL, XC, CD and CM instead of four repeated symbols"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def intToRoman(self, num: int) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function intToRoman(num) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String intToRoman(int num) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string intToRoman(int num) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "num = 44",
+      "expected_output": "\"XLIV\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num = 2024",
+      "expected_output": "\"MMXXIV\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num = 944",
+      "expected_output": "\"CMXLIV\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num = 1",
+      "expected_output": "\"I\"",
+      "is_hidden": true
+    },
+    {
+      "input": "num = 3999",
+      "expected_output": "\"MMMCMXCIX\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force idea is to repeatedly subtract 1 and build the numeral by hand-coded rules, which is clumsy and error-prone. The clean solution is greedy: list the 13 symbol values in descending order including the six subtractive pairs (1000 M, 900 CM, 500 D, 400 CD, 100 C, 90 XC, 50 L, 40 XL, 10 X, 9 IX, 5 V, 4 IV, 1 I). For each value, while num is at least that value, append its symbol and subtract it. An equivalent approach uses per-digit lookup tables for thousands, hundreds, tens and ones. Because num is bounded by 3999, both run in O(1) time and O(1) space.",
+  "hints": [
+    "Process the number from its largest place value down to the smallest.",
+    "Treat the subtractive pairs (900, 400, 90, 40, 9, 4) as if they were extra symbols of their own.",
+    "Keep a descending list of (value, symbol) pairs including CM, CD, XC, XL, IX, IV. Greedily append the symbol while num >= value, subtracting value each time."
+  ],
+  "optimal_complexity": {
+    "time": "O(1)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you implement the reverse conversion, Roman to Integer?",
+    "How would you validate that an arbitrary string is a well-formed Roman numeral?"
+  ]
+}

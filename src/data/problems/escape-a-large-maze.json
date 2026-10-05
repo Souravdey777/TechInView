@@ -1,0 +1,82 @@
+{
+  "title": "Escape a Large Maze",
+  "slug": "escape-a-large-maze",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "Picture a huge grid of `10^6 x 10^6` cells, with coordinates `(x, y)` where `0 <= x, y < 10^6`. A small list `blocked` marks the cells you may not enter; every other cell is open.\n\nYou start at `source = [sx, sy]` and want to reach `target = [tx, ty]`. In one move you may step to an adjacent cell (north, south, east or west) as long as it stays inside the grid and is not blocked.\n\nReturn `true` if the target can be reached from the source, otherwise `false`.\n\n**Example 1:**\n```\nInput: blocked = [[0,1],[1,0]], source = [0,0], target = [0,2]\nOutput: false\nExplanation: Both neighbours of the corner (0,0) are blocked, so the source is trapped and cannot reach (0,2).\n```\n\n**Example 2:**\n```\nInput: blocked = [], source = [0,0], target = [999999,999999]\nOutput: true\nExplanation: With nothing blocked, the opposite corner is reachable by walking along the edges of the grid.\n```\n\n**Example 3:**\n```\nInput: blocked = [[0,2],[1,1],[2,0]], source = [5,5], target = [0,0]\nOutput: false\nExplanation: The three blocked cells form a diagonal wall that seals the cells (0,0), (0,1) and (1,0) into the corner. The target is inside that pocket, so it cannot be reached.\n```",
+  "examples": [
+    {
+      "input": "blocked = [[0,1],[1,0]], source = [0,0], target = [0,2]",
+      "output": "false",
+      "explanation": "Both neighbours of the corner (0,0) are blocked, so the source is trapped and cannot reach (0,2)."
+    },
+    {
+      "input": "blocked = [], source = [0,0], target = [999999,999999]",
+      "output": "true",
+      "explanation": "With nothing blocked, the opposite corner is reachable by walking along the edges of the grid."
+    },
+    {
+      "input": "blocked = [[0,2],[1,1],[2,0]], source = [5,5], target = [0,0]",
+      "output": "false",
+      "explanation": "The three blocked cells form a diagonal wall that seals the cells (0,0), (0,1) and (1,0) into the corner. The target is inside that pocket, so it cannot be reached."
+    }
+  ],
+  "constraints": [
+    "0 <= blocked.length <= 200",
+    "blocked[i].length == 2 and 0 <= blocked[i][j] < 10^6",
+    "source.length == target.length == 2, with coordinates in [0, 10^6)",
+    "source != target, and neither source nor target is blocked",
+    "All blocked cells are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def isEscapePossible(self, blocked: list[list[int]], source: list[int], target: list[int]) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function isEscapePossible(blocked, source, target) {\n    // Write your solution here\n    return false;\n}",
+    "java": "class Solution {\n    public boolean isEscapePossible(int[][] blocked, int[] source, int[] target) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool isEscapePossible(vector<vector<int>>& blocked, vector<int>& source, vector<int>& target) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "blocked = [[0,1],[1,0]], source = [0,0], target = [0,2]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "blocked = [], source = [0,0], target = [999999,999999]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "blocked = [[0,2],[1,1],[2,0]], source = [5,5], target = [0,0]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "blocked = [[1,3],[2,2],[3,1]], source = [0,0], target = [4,4]",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "blocked = [[0,1],[1,1],[2,1]], source = [0,0], target = [0,3]",
+      "expected_output": "true",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A full BFS over 10^12 cells is impossible. The trick is that b blocked cells can only enclose a limited area: the largest pocket they can seal off (using a grid corner and a diagonal wall) contains about b * (b - 1) / 2 cells. So run a bounded BFS from the source: if it reaches the target, return true; if it explores more than b * (b - 1) / 2 cells, the source is not trapped. Do the same from the target, since the target could be the one enclosed. Return true only if both searches escape (or one directly reaches the other). Store blocked cells in a hash set encoded as x * 10^6 + y. Each search visits at most O(b^2) cells, so time and space are O(b^2).",
+  "hints": [
+    "The grid is far too large to search fully, but the number of blocked cells is tiny. What is the most area a small number of blocked cells can wall off?",
+    "With b blocked cells, the biggest enclosed region (a triangle against a grid corner) has roughly b * (b - 1) / 2 cells. If a BFS from a point visits more cells than that, can it be trapped?",
+    "Run a BFS from source capped at b * (b - 1) / 2 visited cells and another from target; return true if either reaches the other directly, or if both exceed the cap."
+  ],
+  "optimal_complexity": {
+    "time": "O(b^2)",
+    "space": "O(b^2)"
+  },
+  "follow_up_questions": [
+    "How would you handle the same question if movement allowed diagonal steps?",
+    "What if the number of blocked cells were large, say 10^5?"
+  ]
+}

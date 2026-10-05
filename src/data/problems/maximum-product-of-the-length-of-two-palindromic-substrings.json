@@ -1,0 +1,80 @@
+{
+  "title": "Maximum Product Of The Length Of Two Palindromic Substrings",
+  "slug": "maximum-product-of-the-length-of-two-palindromic-substrings",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "Given a string `s`, choose two substrings `s[i..j]` and `s[k..l]` (inclusive, 0-indexed) such that:\n\n- both substrings are palindromes,\n- both have **odd** length, and\n- they do not overlap, i.e. `j < k`.\n\nReturn the **maximum** possible value of `length1 * length2`. Since any single character is an odd-length palindrome and `s` has at least two characters, an answer always exists (at least `1`).\n\n**Example 1:**\n```\nInput: s = \"abaxyzyx\"\nOutput: 15\nExplanation: Take \"aba\" (indices 0-2, length 3) and \"xyzyx\" (indices 3-7, length 5). They do not overlap, so the product is 3 * 5 = 15.\n```\n\n**Example 2:**\n```\nInput: s = \"racecarxlevel\"\nOutput: 35\nExplanation: Take \"racecar\" (length 7) and \"level\" (length 5); they are separated by \"x\". Product 7 * 5 = 35.\n```\n\n**Example 3:**\n```\nInput: s = \"abc\"\nOutput: 1\nExplanation: No odd palindrome longer than 1 exists, so pick any two single characters: 1 * 1 = 1.\n```",
+  "examples": [
+    {
+      "input": "s = \"abaxyzyx\"",
+      "output": "15",
+      "explanation": "Take \"aba\" (indices 0-2, length 3) and \"xyzyx\" (indices 3-7, length 5). They do not overlap, so the product is 3 * 5 = 15."
+    },
+    {
+      "input": "s = \"racecarxlevel\"",
+      "output": "35",
+      "explanation": "Take \"racecar\" (length 7) and \"level\" (length 5); they are separated by \"x\". Product 7 * 5 = 35."
+    },
+    {
+      "input": "s = \"abc\"",
+      "output": "1",
+      "explanation": "No odd palindrome longer than 1 exists, so pick any two single characters: 1 * 1 = 1."
+    }
+  ],
+  "constraints": [
+    "2 <= s.length <= 10^5",
+    "s consists only of lowercase English letters",
+    "Both chosen substrings must have odd length and must not overlap; the answer is at most (n/2)^2 and fits in a 64-bit integer"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxProduct(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxProduct(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public long maxProduct(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    long long maxProduct(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"abaxyzyx\"",
+      "expected_output": "15",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"racecarxlevel\"",
+      "expected_output": "35",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abc\"",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"ab\"",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"ggbswiymmlevedhkbdhntnhdbkhdevelmmyiwsbgg\"",
+      "expected_output": "45",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates every pair of non-overlapping odd-length substrings and checks each for being a palindrome, which is O(n^4) or O(n^3) with expand-around-centre. The optimal solution runs Manacher's algorithm to get the odd palindrome radius at every centre in O(n). From the radii build pre[i] = longest odd palindrome ending at or before index i (sweep left to right, seed each palindrome's right end, then propagate backward with pre[i] >= pre[i+1] - 2 and forward with a running max), and symmetrically suf[i] = longest odd palindrome starting at or after i. The answer is the max over split points of pre[i] * suf[i+1]. Total O(n) time and O(n) space.",
+  "hints": [
+    "The two substrings are separated by some split point: one lies fully left of it, the other fully right.",
+    "If you knew, for every prefix, the longest odd palindrome inside it (and the same for every suffix), the answer is a single sweep over split points.",
+    "Use Manacher's algorithm for odd radii. A palindrome of length L centred at c ends at c + L/2; propagate that the best length ending at i - 1 is at least best ending at i minus 2, then take prefix maxima. Mirror the process for suffixes."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would the solution change if even-length palindromes were also allowed?",
+    "How would you maximise the product of three non-overlapping palindromic substrings?"
+  ]
+}

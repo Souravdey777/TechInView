@@ -1,0 +1,81 @@
+{
+  "title": "Minimum Cost to Split an Array",
+  "slug": "minimum-cost-to-split-an-array",
+  "difficulty": "hard",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an integer array `nums` and an integer `k`. Split `nums` into one or more non-empty contiguous subarrays (every element belongs to exactly one subarray).\n\nThe **importance** of a subarray is `k + t`, where `t` is the number of elements in that subarray whose value appears **at least twice** in the subarray (counting every copy). For example, in `[1,2,1,3,3,4]` the values `1` and `3` repeat, so `t = 4`.\n\nThe cost of a split is the sum of the importances of its subarrays. Return the **minimum** possible cost.\n\n**Example 1:**\n```\nInput: nums = [1,2,1,2,1,3,3], k = 2\nOutput: 8\nExplanation: Split into [1,2] and [1,2,1,3,3]. The first has importance 2 + 0 = 2. In the second, 1 appears twice and 3 appears twice, so t = 4 and importance = 2 + 4 = 6. Total 8.\n```\n\n**Example 2:**\n```\nInput: nums = [1,2,1,2,1], k = 2\nOutput: 6\nExplanation: Split into [1,2] (importance 2 + 0) and [1,2,1] (1 repeats twice, importance 2 + 2). Total 6.\n```\n\n**Example 3:**\n```\nInput: nums = [1,2,1,2,1], k = 5\nOutput: 10\nExplanation: Keep the whole array: every element's value repeats, so t = 5 and the importance is 5 + 5 = 10. Any split costs more because each extra piece adds 5.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,1,2,1,3,3], k = 2",
+      "output": "8",
+      "explanation": "Split into [1,2] and [1,2,1,3,3]. The first has importance 2 + 0 = 2. In the second, 1 appears twice and 3 appears twice, so t = 4 and importance = 2 + 4 = 6. Total 8."
+    },
+    {
+      "input": "nums = [1,2,1,2,1], k = 2",
+      "output": "6",
+      "explanation": "Split into [1,2] (importance 2 + 0) and [1,2,1] (1 repeats twice, importance 2 + 2). Total 6."
+    },
+    {
+      "input": "nums = [1,2,1,2,1], k = 5",
+      "output": "10",
+      "explanation": "Keep the whole array: every element's value repeats, so t = 5 and the importance is 5 + 5 = 10. Any split costs more because each extra piece adds 5."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 1000",
+    "0 <= nums[i] < nums.length",
+    "1 <= k <= 10^9"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minCost(self, nums: list[int], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minCost(nums, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minCost(int[] nums, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minCost(vector<int>& nums, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,1,2,1,3,3], k = 2",
+      "expected_output": "8",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,1,2,1], k = 2",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,1,2,1], k = 5",
+      "expected_output": "10",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4], k = 1",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [0,0,0,0,0,0], k = 3",
+      "expected_output": "9",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries all 2^(n-1) ways to place cuts and computes each subarray's importance, which is exponential. Use DP over prefixes: dp[i] is the minimum cost to split nums[i..n-1], with dp[n] = 0. For each i, extend j from i to n-1 while maintaining a frequency map and the running t value: when a value's count goes from 1 to 2, t increases by 2 (both copies now count); when it goes above 2, t increases by 1. Then dp[i] = min over j of k + t(i..j) + dp[j+1]. The answer is dp[0]. Time is O(n^2) and space is O(n).",
+  "hints": [
+    "Every split is a choice of where the first subarray ends, followed by an optimal split of what remains.",
+    "Let dp[i] be the cheapest way to split the suffix starting at i. When you grow a candidate first subarray one element at a time, you can update its repeated-element count incrementally.",
+    "While extending j from i, track counts: going from 1 to 2 adds 2 to t, going above 2 adds 1. dp[i] = min(k + t + dp[j+1])."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Can you reconstruct the actual optimal split, not just its cost?",
+    "How would you speed this up for n around 10^5 (hint: segment tree with lazy range updates)?"
+  ]
+}

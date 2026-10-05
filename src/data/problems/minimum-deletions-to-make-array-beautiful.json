@@ -1,0 +1,81 @@
+{
+  "title": "Minimum Deletions To Make Array Beautiful",
+  "slug": "minimum-deletions-to-make-array-beautiful",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "An array `arr` is called **beautiful** when:\n\n- its length is even, and\n- `arr[i] != arr[i + 1]` for every even index `i` (so each consecutive pair (arr[0], arr[1]), (arr[2], arr[3]), ... has two different values).\n\nThe empty array is beautiful. You are given an integer array `nums`. You may delete any elements; the remaining elements close up and keep their original relative order.\n\nReturn the minimum number of deletions needed to make `nums` beautiful.\n\n**Example 1:**\n```\nInput: nums = [7,7,7,3]\nOutput: 2\nExplanation: Delete two of the 7s to get [7,3], one pair of different values with even length.\n```\n\n**Example 2:**\n```\nInput: nums = [2,5,5,5,8]\nOutput: 1\nExplanation: Delete one of the 5s to get [2,5,5,8]: pairs (2,5) and (5,8) both differ. The original length is odd, so at least one deletion is needed.\n```\n\n**Example 3:**\n```\nInput: nums = [4]\nOutput: 1\nExplanation: A single element can never form a pair, so it must be deleted to leave the empty (beautiful) array.\n```",
+  "examples": [
+    {
+      "input": "nums = [7,7,7,3]",
+      "output": "2",
+      "explanation": "Delete two of the 7s to get [7,3], one pair of different values with even length."
+    },
+    {
+      "input": "nums = [2,5,5,5,8]",
+      "output": "1",
+      "explanation": "Delete one of the 5s to get [2,5,5,8]: pairs (2,5) and (5,8) both differ. The original length is odd, so at least one deletion is needed."
+    },
+    {
+      "input": "nums = [4]",
+      "output": "1",
+      "explanation": "A single element can never form a pair, so it must be deleted to leave the empty (beautiful) array."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "0 <= nums[i] <= 10^5",
+    "The empty array counts as beautiful"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minDeletion(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minDeletion(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minDeletion(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minDeletion(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [7,7,7,3]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,5,5,5,8]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,1,1,1]",
+      "expected_output": "4",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [0,1,0,1,0,1]",
+      "expected_output": "0",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every subset of deletions, O(2^n * n). A greedy stack simulation is optimal: build the kept sequence left to right; when the kept length is odd (the top starts a pair) and the next value equals the top, delete the next value, otherwise keep it. Pairing as early as possible never hurts because a deletion only shifts later parities, and you would have to delete one of two equal adjacent pair members anyway. At the end, if the kept length is odd, delete one more element. This needs only the last kept value and a parity bit: O(n) time, O(1) space.",
+  "hints": [
+    "Think of building the result one element at a time. Only the element that would be the partner of the current pair-starter matters.",
+    "Walk left to right tracking whether the next kept element starts a new pair or completes one. When completing a pair with an equal value, you must delete.",
+    "Greedily delete nums[i] if it would complete a pair whose first element is equal to it; otherwise keep it and flip parity. If the final kept length is odd, add one more deletion."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you return the resulting beautiful array instead of only the deletion count?",
+    "What if the condition were arr[i] != arr[i + 1] for every index i, not just even ones?"
+  ]
+}

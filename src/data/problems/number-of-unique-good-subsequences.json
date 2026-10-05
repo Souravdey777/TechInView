@@ -1,0 +1,80 @@
+{
+  "title": "Number of Unique Good Subsequences",
+  "slug": "number-of-unique-good-subsequences",
+  "difficulty": "hard",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "You are given a binary string `binary` (only characters `'0'` and `'1'`). A subsequence of `binary` is **good** if it is non-empty and has no leading zeros. The single-character string `\"0\"` is the only good subsequence allowed to start with `'0'`.\n\nReturn the number of **distinct** good subsequences of `binary`. Subsequences are compared as strings, so the same string produced from different index choices is counted only once. Return the answer **modulo** `10^9 + 7`.\n\nFor example, in `\"001\"` the strings `\"0\"` and `\"1\"` are good, while `\"00\"`, `\"01\"` and `\"001\"` are not because they start with a zero.\n\n**Example 1:**\n```\nInput: binary = \"001\"\nOutput: 2\nExplanation: The distinct non-empty subsequences are \"0\", \"1\", \"00\", \"01\" and \"001\". Only \"0\" and \"1\" have no leading zero (\"0\" itself is allowed).\n```\n\n**Example 2:**\n```\nInput: binary = \"11\"\nOutput: 2\nExplanation: The distinct good subsequences are \"1\" and \"11\".\n```\n\n**Example 3:**\n```\nInput: binary = \"101\"\nOutput: 5\nExplanation: The distinct good subsequences are \"0\", \"1\", \"10\", \"11\" and \"101\".\n```",
+  "examples": [
+    {
+      "input": "binary = \"001\"",
+      "output": "2",
+      "explanation": "The distinct non-empty subsequences are \"0\", \"1\", \"00\", \"01\" and \"001\". Only \"0\" and \"1\" have no leading zero (\"0\" itself is allowed)."
+    },
+    {
+      "input": "binary = \"11\"",
+      "output": "2",
+      "explanation": "The distinct good subsequences are \"1\" and \"11\"."
+    },
+    {
+      "input": "binary = \"101\"",
+      "output": "5",
+      "explanation": "The distinct good subsequences are \"0\", \"1\", \"10\", \"11\" and \"101\"."
+    }
+  ],
+  "constraints": [
+    "1 <= binary.length <= 10^5",
+    "binary[i] is either '0' or '1'",
+    "Return the answer modulo 10^9 + 7"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def numberOfUniqueGoodSubsequences(self, binary: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function numberOfUniqueGoodSubsequences(binary) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int numberOfUniqueGoodSubsequences(String binary) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int numberOfUniqueGoodSubsequences(string binary) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "binary = \"001\"",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "binary = \"11\"",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "binary = \"101\"",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "binary = \"0\"",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "binary = \"1110001101\"",
+      "expected_output": "89",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force generates every subsequence (2^n of them), filters out ones with a leading zero, and deduplicates with a set, costing O(2^n * n). The optimal approach counts distinct subsequences that start with '1', split by their last character: endsWith0 and endsWith1. Scanning left to right, a '1' can be appended to every distinct string counted so far or stand alone as \"1\", so endsWith1 = endsWith0 + endsWith1 + 1; a '0' can be appended to every existing string, so endsWith0 = endsWith0 + endsWith1 (it cannot start a new string). Recomputing the count this way automatically avoids duplicates because each distinct string is counted by its latest possible ending. Finally add 1 if the string contains any '0' to account for \"0\" itself. This runs in O(n) time and O(1) space, with all sums taken modulo 10^9+7.",
+  "hints": [
+    "Handle the special string \"0\" separately. Every other good subsequence must start with '1'.",
+    "Count distinct strings that start with '1', grouped by their last character. Think about what happens to those groups when you read another '0' or '1'.",
+    "On '1': ends1 = ends0 + ends1 + 1. On '0': ends0 = ends0 + ends1. Answer = ends0 + ends1 + (1 if any '0' exists), modulo 10^9+7."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you count distinct subsequences of a string over a general alphabet (no leading-zero rule)?",
+    "How would you return the lexicographically k-th good subsequence instead of the count?"
+  ]
+}

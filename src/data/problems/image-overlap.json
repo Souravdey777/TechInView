@@ -1,0 +1,82 @@
+{
+  "title": "Image Overlap",
+  "slug": "image-overlap",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given two binary images `img1` and `img2`, each an `n x n` grid of `0`s and `1`s.\n\nYou may slide `img1` by any whole number of cells left, right, up, and/or down, then lay it on top of `img2`. Rotations and flips are not allowed. Any `1` that slides outside the grid is discarded. The *overlap* of a placement is the number of positions where both images show a `1`.\n\nReturn the largest overlap achievable over all translations, including not moving at all. If either image contains no `1`, the answer is `0`.\n\n**Example 1:**\n```\nInput: img1 = [[1,1,0],[0,1,0],[0,1,0]], img2 = [[0,0,0],[0,1,1],[0,0,1]]\nOutput: 3\nExplanation: Shift img1 one cell right and one cell down. Its 1s at (0,0),(0,1),(1,1) land on (1,1),(1,2),(2,2), all of which are 1 in img2, for an overlap of 3.\n```\n\n**Example 2:**\n```\nInput: img1 = [[1]], img2 = [[1]]\nOutput: 1\nExplanation: With no shift, the single 1s line up.\n```\n\n**Example 3:**\n```\nInput: img1 = [[0]], img2 = [[0]]\nOutput: 0\nExplanation: There are no 1s, so no placement can overlap anything.\n```",
+  "examples": [
+    {
+      "input": "img1 = [[1,1,0],[0,1,0],[0,1,0]], img2 = [[0,0,0],[0,1,1],[0,0,1]]",
+      "output": "3",
+      "explanation": "Shift img1 one cell right and one cell down. Its 1s at (0,0),(0,1),(1,1) land on (1,1),(1,2),(2,2), all of which are 1 in img2, for an overlap of 3."
+    },
+    {
+      "input": "img1 = [[1]], img2 = [[1]]",
+      "output": "1",
+      "explanation": "With no shift, the single 1s line up."
+    },
+    {
+      "input": "img1 = [[0]], img2 = [[0]]",
+      "output": "0",
+      "explanation": "There are no 1s, so no placement can overlap anything."
+    }
+  ],
+  "constraints": [
+    "n == img1.length == img1[i].length",
+    "n == img2.length == img2[i].length",
+    "1 <= n <= 30",
+    "img1[i][j] and img2[i][j] are either 0 or 1"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def largestOverlap(self, img1: list[list[int]], img2: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function largestOverlap(img1, img2) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int largestOverlap(int[][] img1, int[][] img2) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int largestOverlap(vector<vector<int>>& img1, vector<vector<int>>& img2) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "img1 = [[1,1,0],[0,1,0],[0,1,0]], img2 = [[0,0,0],[0,1,1],[0,0,1]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "img1 = [[1]], img2 = [[1]]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "img1 = [[0]], img2 = [[0]]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "img1 = [[1,1,1],[1,1,1],[1,1,1]], img2 = [[1,1,1],[1,1,1],[1,1,1]]",
+      "expected_output": "9",
+      "is_hidden": true
+    },
+    {
+      "input": "img1 = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]], img2 = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force tries every shift (dx, dy) in the range -(n-1)..(n-1) for both axes and, for each, counts the cells where the shifted img1 and img2 are both 1, giving O(n^4) time and O(1) extra space, which is already fast for n <= 30. A better approach only looks at cells that matter: collect the coordinates of all 1s in each image, then for every pair (p in img1, q in img2) compute the translation vector q - p and increment a counter for it in a hash map. The largest count is the answer (0 if either list is empty). This runs in O(a * b) time, where a and b are the numbers of 1s (worst case O(n^4), much faster on sparse images), with O(n^2) space (there are at most (2n-1)^2 distinct translation vectors) for the map.",
+  "hints": [
+    "A translation is just a pair (dx, dy). How many distinct translations are there for an n x n grid?",
+    "Only the cells containing 1 can ever contribute to the overlap. Think about which translation would move a particular 1 in img1 onto a particular 1 in img2.",
+    "List the 1-coordinates of both images. For each pair, the vector (r2 - r1, c2 - c1) is the shift that aligns them; count how often each vector appears and return the maximum."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^4)",
+    "space": "O(n^2)"
+  },
+  "follow_up_questions": [
+    "How could you use 2D convolution or FFT to compute all translation overlaps faster for large images?",
+    "What changes if rotations by 90 degrees are also allowed?"
+  ]
+}

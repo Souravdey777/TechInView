@@ -1,0 +1,82 @@
+{
+  "title": "Minimum Number Of Moves To Make Palindrome",
+  "slug": "minimum-number-of-moves-to-make-palindrome",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "You are given a string `s` of lowercase English letters whose letters can be rearranged into a palindrome (this is guaranteed). In one move you may swap any two **adjacent** characters of `s`.\n\nReturn the **minimum** number of moves needed to turn `s` into a palindrome. Any palindrome is acceptable as the final string; only the number of moves is returned. If `s` is already a palindrome, return `0`.\n\n**Example 1:**\n```\nInput: s = \"abab\"\nOutput: 1\nExplanation: One swap turns \"abab\" into \"abba\" (swap positions 2 and 3); \"baab\" is also reachable in one swap.\n```\n\n**Example 2:**\n```\nInput: s = \"aabbc\"\nOutput: 4\nExplanation: Shift the second \"a\" to the end with 3 swaps (aabbc -> abbca), then one more swap turns the middle \"bbc\" into \"bcb\", giving \"abcba\". No palindrome is reachable in fewer moves.\n```\n\n**Example 3:**\n```\nInput: s = \"racecar\"\nOutput: 0\nExplanation: The string is already a palindrome, so 0 moves are needed.\n```",
+  "examples": [
+    {
+      "input": "s = \"abab\"",
+      "output": "1",
+      "explanation": "One swap turns \"abab\" into \"abba\" (swap positions 2 and 3); \"baab\" is also reachable in one swap."
+    },
+    {
+      "input": "s = \"aabbc\"",
+      "output": "4",
+      "explanation": "Shift the second \"a\" to the end with 3 swaps (aabbc -> abbca), then one more swap turns the middle \"bbc\" into \"bcb\", giving \"abcba\". No palindrome is reachable in fewer moves."
+    },
+    {
+      "input": "s = \"racecar\"",
+      "output": "0",
+      "explanation": "The string is already a palindrome, so 0 moves are needed."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 2000",
+    "s consists only of lowercase English letters",
+    "s can always be rearranged into a palindrome"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minMovesToMakePalindrome(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minMovesToMakePalindrome(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minMovesToMakePalindrome(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minMovesToMakePalindrome(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"abab\"",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aabbc\"",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"racecar\"",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"skwhhaaunskegmdtutlgtteunmuuludii\"",
+      "expected_output": "163",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force runs a BFS over all strings reachable by adjacent swaps until it finds a palindrome, which is exponential. The optimal greedy works from the outside in: look at the leftmost character, find its rightmost matching occurrence, and bubble that occurrence to the right end, adding the distance to the answer; then shrink both ends and repeat. If the leftmost character has no partner, it is the single odd-count letter: swap it one step to the right (count 1 move) and retry from the same left end; it drifts toward the centre and is never touched again once the outer pairs are fixed. Pairing with the outermost match never hurts because it avoids crossing that letter over other pairs. Each step scans and shifts O(n) characters, giving O(n^2) time (O(n log n) with a Fenwick tree over positions) and O(n) space.",
+  "hints": [
+    "Fix the outermost pair first. The leftmost character must end up mirrored at the right end.",
+    "For the leftmost character, use its rightmost matching occurrence and count how many adjacent swaps move it to the right end. Is any other choice ever better?",
+    "Repeat on the shrunk string. If the leftmost character has no partner, it is the unique odd letter: count the swaps to bring it to the middle (or skip it for now) and continue with the next character."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you speed this up to O(n log n) for strings of length 10^5?",
+    "How would you also return the resulting palindrome, or the lexicographically smallest palindrome reachable with the minimum moves?"
+  ]
+}

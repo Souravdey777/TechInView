@@ -1,0 +1,83 @@
+{
+  "title": "Palindromic Substrings",
+  "slug": "palindromic-substrings",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "meta",
+    "amazon",
+    "google",
+    "microsoft",
+    "linkedin"
+  ],
+  "description": "Given a string `s`, return the number of its substrings that are **palindromes** (read the same forwards and backwards).\n\nA substring is a contiguous, non-empty block of characters. Substrings are counted by **position**, not by content: two substrings with the same letters but different start or end indices are counted separately. Every single character is a palindrome on its own.\n\n**Example 1:**\n```\nInput: s = \"xyz\"\nOutput: 3\nExplanation: The palindromic substrings are \"x\", \"y\" and \"z\".\n```\n\n**Example 2:**\n```\nInput: s = \"bbb\"\nOutput: 6\nExplanation: The palindromic substrings are \"b\", \"b\", \"b\", \"bb\", \"bb\" and \"bbb\" — each occurrence counts separately.\n```\n\n**Example 3:**\n```\nInput: s = \"abba\"\nOutput: 6\nExplanation: The palindromic substrings are \"a\", \"b\", \"b\", \"a\", \"bb\" and \"abba\".\n```",
+  "examples": [
+    {
+      "input": "s = \"xyz\"",
+      "output": "3",
+      "explanation": "The palindromic substrings are \"x\", \"y\" and \"z\"."
+    },
+    {
+      "input": "s = \"bbb\"",
+      "output": "6",
+      "explanation": "The palindromic substrings are \"b\", \"b\", \"b\", \"bb\", \"bb\" and \"bbb\" — each occurrence counts separately."
+    },
+    {
+      "input": "s = \"abba\"",
+      "output": "6",
+      "explanation": "The palindromic substrings are \"a\", \"b\", \"b\", \"a\", \"bb\" and \"abba\"."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 1000",
+    "s consists of lowercase English letters",
+    "Substrings at different positions are counted separately even if they contain the same characters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countSubstrings(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countSubstrings(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int countSubstrings(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int countSubstrings(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"xyz\"",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"bbb\"",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abba\"",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abacdcaba\"",
+      "expected_output": "15",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates all O(n^2) substrings and checks each for being a palindrome in O(n), for O(n^3) total. The optimal practical approach is expand-around-center: every palindrome has a center that is either a single character (odd length) or the gap between two adjacent characters (even length), giving 2n - 1 centers. From each center, expand outward while the characters on both sides match, adding one to the count for every successful expansion. This runs in O(n^2) time and O(1) space. A DP table dp[i][j] = s[i]==s[j] and dp[i+1][j-1] also achieves O(n^2) time but uses O(n^2) space; Manacher's algorithm reaches O(n).",
+  "hints": [
+    "Checking every substring separately repeats a lot of work. Think about what a palindrome looks like from its middle.",
+    "Every palindrome is centered either on a character or between two characters. How many such centers are there?",
+    "For each of the 2n - 1 centers, expand left and right while s[left] == s[right], incrementing the count on each step."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you count only the distinct palindromic substrings instead?",
+    "How does Manacher's algorithm bring this down to linear time?"
+  ]
+}

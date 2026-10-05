@@ -1,0 +1,82 @@
+{
+  "title": "Sort Linked List Already Sorted Using Absolute Values",
+  "slug": "sort-list-sorted-by-absolute-values",
+  "difficulty": "medium",
+  "category": "linked-lists",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "meta",
+    "google"
+  ],
+  "description": "You are given the `head` of a singly linked list whose nodes are sorted in **non-decreasing order of absolute value**. Rearrange the nodes so that the list is sorted in **non-decreasing order of actual value**, and return the new head.\n\nAim for **O(n) time** and O(1) extra space by relinking nodes rather than running a general-purpose sort.\n\n**Example 1:**\n```\nInput: head = [1,-2,-3,4]\nOutput: [-3,-2,1,4]\nExplanation: By actual value, -3 < -2 < 1 < 4.\n```\n\n**Example 2:**\n```\nInput: head = [0,-1,1,-4,6]\nOutput: [-4,-1,0,1,6]\nExplanation: The negative nodes -1 and -4 move to the front in reverse order of their appearance; the non-negative nodes keep their order.\n```\n\n**Example 3:**\n```\nInput: head = [-7]\nOutput: [-7]\nExplanation: A single node is already sorted.\n```",
+  "examples": [
+    {
+      "input": "head = [1,-2,-3,4]",
+      "output": "[-3,-2,1,4]",
+      "explanation": "By actual value, -3 < -2 < 1 < 4."
+    },
+    {
+      "input": "head = [0,-1,1,-4,6]",
+      "output": "[-4,-1,0,1,6]",
+      "explanation": "The negative nodes -1 and -4 move to the front in reverse order of their appearance; the non-negative nodes keep their order."
+    },
+    {
+      "input": "head = [-7]",
+      "output": "[-7]",
+      "explanation": "A single node is already sorted."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the list is in the range [1, 10^5].",
+    "-5000 <= Node.val <= 5000",
+    "The list is sorted in non-decreasing order of absolute value."
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def sortLinkedList(self, head: ListNode | None) -> ListNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction sortLinkedList(head) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode sortLinkedList(ListNode head) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* sortLinkedList(ListNode* head) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "head = [1,-2,-3,4]",
+      "expected_output": "[-3,-2,1,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [0,-1,1,-4,6]",
+      "expected_output": "[-4,-1,0,1,6]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [-7]",
+      "expected_output": "[-7]",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [-1,-2,-3,-5000]",
+      "expected_output": "[-5000,-3,-2,-1]",
+      "is_hidden": true
+    },
+    {
+      "input": "head = [0,1,-1,1,-1,-2,5000]",
+      "expected_output": "[-2,-1,-1,0,1,1,5000]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: copy the values into an array, sort them, and write them back (or rebuild the list), which is O(n log n) time and O(n) space. Optimal: observe that when sorted by absolute value, the non-negative values already appear in ascending order while the negative values appear in descending order of actual value (larger magnitudes later). Walk the list with a prev pointer; whenever the current node is negative, unlink it from its position and insert it at the head. Since later negatives have larger magnitudes, each one belongs in front of all earlier ones, so head insertion produces the correct order. This is a single pass in O(n) time and O(1) extra space.",
+  "hints": [
+    "Look at the negative and non-negative values separately. In what order does each group already appear?",
+    "Non-negative values are already ascending. Negative values appear with increasing magnitude, meaning decreasing actual value.",
+    "Traverse once with prev and curr pointers; each time curr is negative, unlink it and move it to the front of the list (do not advance prev when you do this)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you solve it if the list were sorted by absolute value in non-increasing order?",
+    "Can you do the same for a doubly linked list, and does it get simpler?"
+  ]
+}

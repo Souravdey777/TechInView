@@ -1,0 +1,82 @@
+{
+  "title": "Minimum Deletions To Make String Balanced",
+  "slug": "minimum-deletions-to-make-string-balanced",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given a string `s` made only of the characters `'a'` and `'b'`. The string is **balanced** when no `'b'` appears anywhere before an `'a'`, i.e. it looks like some `'a'`s followed by some `'b'`s (either group may be empty).\n\nYou may delete any characters you like. Return the **minimum number of deletions** needed to make `s` balanced. An already balanced string needs `0` deletions.\n\n**Example 1:**\n```\nInput: s = \"abba\"\nOutput: 1\nExplanation: Deleting the final 'a' gives \"abb\", which is balanced. One deletion is unavoidable because a 'b' precedes that 'a'.\n```\n\n**Example 2:**\n```\nInput: s = \"babaab\"\nOutput: 2\nExplanation: Deleting the 'b's at indices 0 and 2 leaves \"aaab\", which is balanced. One deletion is not enough.\n```\n\n**Example 3:**\n```\nInput: s = \"aabb\"\nOutput: 0\nExplanation: All 'a's already come before all 'b's.\n```",
+  "examples": [
+    {
+      "input": "s = \"abba\"",
+      "output": "1",
+      "explanation": "Deleting the final 'a' gives \"abb\", which is balanced. One deletion is unavoidable because a 'b' precedes that 'a'."
+    },
+    {
+      "input": "s = \"babaab\"",
+      "output": "2",
+      "explanation": "Deleting the 'b's at indices 0 and 2 leaves \"aaab\", which is balanced. One deletion is not enough."
+    },
+    {
+      "input": "s = \"aabb\"",
+      "output": "0",
+      "explanation": "All 'a's already come before all 'b's."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^5",
+    "s[i] is either 'a' or 'b'",
+    "A deletion removes exactly one character"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumDeletions(self, s: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumDeletions(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minimumDeletions(String s) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumDeletions(string s) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"abba\"",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"babaab\"",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aabb\"",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"b\"",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"bababababa\"",
+      "expected_output": "5",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every split point k, deleting all 'b's before k and all 'a's from k onward, and counts them directly for O(n^2). Using prefix counts of 'b' and suffix counts of 'a' makes each split O(1), giving O(n). An even tighter one-pass DP scans left to right keeping bCount (number of 'b's seen) and res (min deletions for the prefix so far): on 'b' just increment bCount; on 'a' either delete this 'a' (res + 1) or delete every earlier 'b' (bCount), so res = min(res + 1, bCount). This is O(n) time and O(1) space.",
+  "hints": [
+    "A balanced string has a single boundary: everything left of it is 'a', everything right of it is 'b'. How many deletions does a given boundary cost?",
+    "Scan left to right and keep the answer for the prefix so far plus how many 'b's you have seen. Only an 'a' can create a new conflict.",
+    "When you see an 'a', you either delete it (res + 1) or delete all 'b's seen before it (bCount). So res = min(res + 1, bCount); on 'b', increment bCount."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you return one balanced string achieving the minimum, not just the count?",
+    "Generalise to a string over three letters 'a' < 'b' < 'c' that must end up sorted. What does the DP state look like?"
+  ]
+}

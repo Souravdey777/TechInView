@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { PROBLEM_CATEGORIES } from "@/lib/constants";
@@ -37,6 +37,9 @@ const CATEGORY_LABELS: Record<ProblemCategory, string> = {
   trie: "Trie",
 };
 
+/** Rows rendered per step. Every row is still in the page's ItemList JSON-LD for crawlers. */
+const PAGE_SIZE = 40;
+
 const DIFFICULTIES: (DifficultyLevel | "all")[] = ["all", "easy", "medium", "hard"];
 
 /** Shared column template: header and rows must agree. */
@@ -62,6 +65,8 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState<DifficultyLevel | "all">("all");
   const [category, setCategory] = useState<string>("all");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
     return problems
@@ -81,6 +86,29 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
         return left.isFreeSolverEnabled ? -1 : 1;
       });
   }, [problems, difficulty, category, search]);
+
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
+  // New filters start back at the first page.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [difficulty, category, search]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((count) => count + PAGE_SIZE);
+        }
+      },
+      { rootMargin: "600px 0px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, visibleCount]);
 
   const isFiltered = search !== "" || difficulty !== "all" || category !== "all";
   const reset = () => {
@@ -124,7 +152,9 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
 
       <div className="mb-4 flex items-center justify-between gap-4">
         <p className={LABEL} aria-live="polite">
-          Showing {filtered.length} of {problems.length}
+          {filtered.length === problems.length
+            ? `All ${problems.length} problems`
+            : `${filtered.length} of ${problems.length} problems`}
         </p>
         {isFiltered && (
           <button
@@ -148,7 +178,7 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
       </div>
 
       <ul className="m-0 list-none border-t border-white/[0.08] p-0">
-        {filtered.map((p, i) => {
+        {visible.map((p, i) => {
           const interviewHref = `/interview/setup?problem=${p.slug}&dsaExperience=ai_interview`;
           return (
             <li
@@ -214,6 +244,21 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
           );
         })}
       </ul>
+
+      {hasMore && (
+        <div ref={sentinelRef} className="flex flex-col items-center gap-3 py-8">
+          <p className={LABEL} aria-live="polite">
+            Showing {visible.length} of {filtered.length}
+          </p>
+          <button
+            type="button"
+            onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+            className={cn(CHIP, "px-5 py-2")}
+          >
+            Load more
+          </button>
+        </div>
+      )}
 
       {filtered.length === 0 && (
         <div className="border-b border-white/[0.08] py-16 text-center">

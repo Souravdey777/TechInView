@@ -1,0 +1,85 @@
+{
+  "title": "Remove Duplicates From Sorted Array",
+  "slug": "remove-duplicates-from-sorted-array",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "meta",
+    "microsoft",
+    "amazon",
+    "google",
+    "apple",
+    "bloomberg",
+    "adobe"
+  ],
+  "description": "You are given an integer array `nums` sorted in **non-decreasing** order. Remove the repeated values so that each distinct value appears exactly once, keeping the values in their original (sorted) order.\n\nReturn the array of unique values. In an in-place implementation this is the first `k` elements of `nums` after deduplication, where `k` is the number of distinct values; anything left beyond position `k` is ignored and must not be returned.\n\n**Example 1:**\n```\nInput: nums = [1,1,2]\nOutput: [1,2]\nExplanation: The second 1 is dropped, leaving the distinct values 1 and 2.\n```\n\n**Example 2:**\n```\nInput: nums = [0,0,1,1,1,2,2,3,3,4]\nOutput: [0,1,2,3,4]\nExplanation: Each run of equal values collapses to a single copy.\n```\n\n**Example 3:**\n```\nInput: nums = [-3,-3,-3]\nOutput: [-3]\nExplanation: Every element is the same value, so only one copy remains.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,1,2]",
+      "output": "[1,2]",
+      "explanation": "The second 1 is dropped, leaving the distinct values 1 and 2."
+    },
+    {
+      "input": "nums = [0,0,1,1,1,2,2,3,3,4]",
+      "output": "[0,1,2,3,4]",
+      "explanation": "Each run of equal values collapses to a single copy."
+    },
+    {
+      "input": "nums = [-3,-3,-3]",
+      "output": "[-3]",
+      "explanation": "Every element is the same value, so only one copy remains."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 3 * 10^4",
+    "-100 <= nums[i] <= 100",
+    "nums is sorted in non-decreasing order"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def removeDuplicates(self, nums: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function removeDuplicates(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] removeDuplicates(int[] nums) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> removeDuplicates(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,1,2]",
+      "expected_output": "[1,2]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,0,1,1,1,2,2,3,3,4]",
+      "expected_output": "[0,1,2,3,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-3,-3,-3]",
+      "expected_output": "[-3]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5]",
+      "expected_output": "[5]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [-100,-100,0,0,0,100]",
+      "expected_output": "[-100,0,100]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force inserts every value into an ordered set or a fresh list, skipping values already added, which takes O(n) time but O(n) extra space (or O(n log n) with a tree set). Because the input is sorted, duplicates are always adjacent, so the optimal approach uses two pointers in place: a write pointer k starts at 1, and a read pointer scans from index 1. Whenever nums[i] differs from nums[k - 1], copy it to nums[k] and increment k. The first k elements are the answer. This is O(n) time and O(1) extra space.",
+  "hints": [
+    "Since the array is sorted, where can copies of the same value appear relative to each other?",
+    "Use one pointer to read and another to mark the end of the unique prefix you have built so far.",
+    "Start a write index k = 1. For each i from 1, if nums[i] != nums[k - 1], write nums[k] = nums[i] and increment k. Return the first k elements."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you allow each value to appear at most twice instead of once?",
+    "What changes if the array is not sorted and you must still preserve first-occurrence order?"
+  ]
+}

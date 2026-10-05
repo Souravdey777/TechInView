@@ -1,0 +1,81 @@
+{
+  "title": "Valid Palindrome III",
+  "slug": "valid-palindrome-iii",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "meta",
+    "amazon",
+    "google"
+  ],
+  "description": "Given a string `s` and an integer `k`, return `true` if you can delete **at most** `k` characters from `s` (from any positions) so that the remaining characters, kept in their original order, form a palindrome. Otherwise return `false`.\n\nDeleting zero characters is allowed, so a string that is already a palindrome always returns `true`.\n\n**Example 1:**\n```\nInput: s = \"racxecar\", k = 1\nOutput: true\nExplanation: Remove the \"x\" to get \"racecar\".\n```\n\n**Example 2:**\n```\nInput: s = \"abcdef\", k = 3\nOutput: false\nExplanation: All letters differ, so the longest palindromic subsequence has length 1 and 5 removals would be needed, more than k = 3.\n```\n\n**Example 3:**\n```\nInput: s = \"abccxba\", k = 2\nOutput: true\nExplanation: Removing one \"c\" and the \"x\" gives \"abcba\", using exactly 2 removals.\n```",
+  "examples": [
+    {
+      "input": "s = \"racxecar\", k = 1",
+      "output": "true",
+      "explanation": "Remove the \"x\" to get \"racecar\"."
+    },
+    {
+      "input": "s = \"abcdef\", k = 3",
+      "output": "false",
+      "explanation": "All letters differ, so the longest palindromic subsequence has length 1 and 5 removals would be needed, more than k = 3."
+    },
+    {
+      "input": "s = \"abccxba\", k = 2",
+      "output": "true",
+      "explanation": "Removing one \"c\" and the \"x\" gives \"abcba\", using exactly 2 removals."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 1000",
+    "s consists only of lowercase English letters",
+    "1 <= k <= s.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def isValidPalindrome(self, s: str, k: int) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function isValidPalindrome(s, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean isValidPalindrome(String s, int k) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool isValidPalindrome(string s, int k) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"racxecar\", k = 1",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abcdef\", k = 3",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abccxba\", k = 2",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\", k = 1",
+      "expected_output": "true",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abcdeca\", k = 1",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every subset of at most k positions to delete and checks whether the remainder is a palindrome, which is exponential. The key observation is that the minimum number of deletions needed to make s a palindrome equals n minus the length of its longest palindromic subsequence (LPS). Compute the LPS with interval DP: dp[i][j] = dp[i+1][j-1] + 2 when s[i] == s[j], otherwise max(dp[i+1][j], dp[i][j-1]). Equivalently, LPS(s) is the longest common subsequence of s and its reverse. Return n - dp[0][n-1] <= k. This takes O(n^2) time, and keeping only one row of the table brings space down to O(n).",
+  "hints": [
+    "Instead of choosing which characters to delete, think about which characters you keep.",
+    "The characters you keep form a palindromic subsequence. The fewer deletions, the longer that subsequence.",
+    "Compute the longest palindromic subsequence with interval DP (or as the LCS of s and reverse(s)), then check n - LPS <= k. A rolling 1-D array keeps memory linear."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you return one actual palindrome obtained with the fewest deletions?",
+    "If k is very small compared to n, can you restrict the DP to a band around the diagonal to get O(n * k) time?"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "title": "Corporate Flight Bookings",
+  "slug": "corporate-flight-bookings",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "goldman-sachs"
+  ],
+  "description": "There are `n` flights numbered `1` to `n`. You are given a list `bookings`, where `bookings[i] = [first, last, seats]` means `seats` seats were reserved on **every** flight from `first` through `last`, inclusive.\n\nReturn an array `answer` of length `n` where `answer[i]` is the total number of seats reserved on flight `i + 1`.\n\n**Example 1:**\n```\nInput: bookings = [[1,2,10],[2,3,20],[2,5,25]], n = 5\nOutput: [10,55,45,25,25]\nExplanation: Flight 1: 10. Flight 2: 10 + 20 + 25 = 55. Flight 3: 20 + 25 = 45. Flights 4 and 5: 25 each.\n```\n\n**Example 2:**\n```\nInput: bookings = [[1,2,10],[2,2,15]], n = 2\nOutput: [10,25]\nExplanation: Flight 1 only gets the first booking (10). Flight 2 gets 10 + 15 = 25.\n```\n\n**Example 3:**\n```\nInput: bookings = [[3,3,5],[1,4,1]], n = 4\nOutput: [1,1,6,1]\nExplanation: Every flight gets 1 seat from the second booking, and flight 3 also gets 5, giving [1,1,6,1].\n```",
+  "examples": [
+    {
+      "input": "bookings = [[1,2,10],[2,3,20],[2,5,25]], n = 5",
+      "output": "[10,55,45,25,25]",
+      "explanation": "Flight 1: 10. Flight 2: 10 + 20 + 25 = 55. Flight 3: 20 + 25 = 45. Flights 4 and 5: 25 each."
+    },
+    {
+      "input": "bookings = [[1,2,10],[2,2,15]], n = 2",
+      "output": "[10,25]",
+      "explanation": "Flight 1 only gets the first booking (10). Flight 2 gets 10 + 15 = 25."
+    },
+    {
+      "input": "bookings = [[3,3,5],[1,4,1]], n = 4",
+      "output": "[1,1,6,1]",
+      "explanation": "Every flight gets 1 seat from the second booking, and flight 3 also gets 5, giving [1,1,6,1]."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 2 * 10^4",
+    "1 <= bookings.length <= 2 * 10^4",
+    "bookings[i].length == 3",
+    "1 <= first <= last <= n",
+    "1 <= seats <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def corpFlightBookings(self, bookings: list[list[int]], n: int) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function corpFlightBookings(bookings, n) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] corpFlightBookings(int[][] bookings, int n) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> corpFlightBookings(vector<vector<int>>& bookings, int n) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "bookings = [[1,2,10],[2,3,20],[2,5,25]], n = 5",
+      "expected_output": "[10,55,45,25,25]",
+      "is_hidden": false
+    },
+    {
+      "input": "bookings = [[1,2,10],[2,2,15]], n = 2",
+      "expected_output": "[10,25]",
+      "is_hidden": false
+    },
+    {
+      "input": "bookings = [[3,3,5],[1,4,1]], n = 4",
+      "expected_output": "[1,1,6,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "bookings = [[1,1,10000]], n = 1",
+      "expected_output": "[10000]",
+      "is_hidden": true
+    },
+    {
+      "input": "bookings = [[1,6,3],[1,6,3],[4,4,7],[6,6,1]], n = 6",
+      "expected_output": "[6,6,6,13,6,7]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force walks each booking's range and adds the seats to every flight in it, costing O(k * n) for k bookings. The optimal approach uses a difference array: for each booking add seats at index first - 1 and subtract seats at index last (if last < n). A single prefix-sum pass over the difference array then yields the total for every flight. This takes O(n + k) time and O(n) space for the output array.",
+  "hints": [
+    "Updating every flight in each range is too slow when ranges are long. Can you record just where a range starts and stops?",
+    "Use a difference array: mark +seats where a booking begins and -seats right after it ends.",
+    "diff[first-1] += seats; if last < n then diff[last] -= seats. The running prefix sum of diff is the answer."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + k)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you answer the same question if bookings arrive online and you must report a single flight's total after each one (hint: Fenwick tree)?",
+    "If n can be up to 10^9 but there are only a few thousand bookings, how would you report totals without allocating an array of size n (coordinate compression / sweep over booking endpoints)?"
+  ]
+}

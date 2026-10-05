@@ -1,0 +1,83 @@
+{
+  "title": "Longest Repeating Character Replacement",
+  "slug": "longest-repeating-character-replacement",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "uber"
+  ],
+  "description": "You are given a string `s` of uppercase English letters and an integer `k`. You may perform the following operation at most `k` times: pick any position in the string and change its character to any other uppercase letter.\n\nReturn the length of the **longest substring containing only one distinct letter** that you can obtain after performing at most `k` operations.\n\n**Example 1:**\n```\nInput: s = \"XXYXX\", k = 1\nOutput: 5\nExplanation: Replace the single 'Y' with 'X' to get \"XXXXX\", a run of 5 identical letters.\n```\n\n**Example 2:**\n```\nInput: s = \"PQPQQ\", k = 1\nOutput: 4\nExplanation: Replace the 'P' at index 2 with 'Q' to get \"PQQQQ\", which contains \"QQQQ\" of length 4.\n```\n\n**Example 3:**\n```\nInput: s = \"ABCDE\", k = 1\nOutput: 2\nExplanation: Changing one letter can make at most two adjacent letters equal, e.g. \"AACDE\", so the answer is 2.\n```",
+  "examples": [
+    {
+      "input": "s = \"XXYXX\", k = 1",
+      "output": "5",
+      "explanation": "Replace the single 'Y' with 'X' to get \"XXXXX\", a run of 5 identical letters."
+    },
+    {
+      "input": "s = \"PQPQQ\", k = 1",
+      "output": "4",
+      "explanation": "Replace the 'P' at index 2 with 'Q' to get \"PQQQQ\", which contains \"QQQQ\" of length 4."
+    },
+    {
+      "input": "s = \"ABCDE\", k = 1",
+      "output": "2",
+      "explanation": "Changing one letter can make at most two adjacent letters equal, e.g. \"AACDE\", so the answer is 2."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^5",
+    "s consists of only uppercase English letters",
+    "0 <= k <= s.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def characterReplacement(self, s: str, k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function characterReplacement(s, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int characterReplacement(String s, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int characterReplacement(string s, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"XXYXX\", k = 1",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"PQPQQ\", k = 1",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"ABCDE\", k = 1",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"A\", k = 0",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"AABCABBB\", k = 2",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every substring, counts its letter frequencies and checks whether length - maxFrequency <= k, costing O(n^2 * 26) or O(n^2) with incremental counts. The optimal approach is a sliding window: extend the right end one character at a time while tracking letter counts and the highest frequency seen in the window. If window length - maxFrequency exceeds k, the window needs too many replacements, so move the left end forward by one. maxFreq is never decreased when left advances; this is safe because a stale (too large) maxFreq only keeps the window from shrinking, and only a strictly larger maxFreq can ever produce a longer valid window. The window never shrinks below the best length found, and the answer is the largest valid window size. This runs in O(n) time and O(1) space (26 counters).",
+  "hints": [
+    "For a fixed substring, which letter should you keep, and how many replacements do you need for the rest?",
+    "A window is valid when (window length - count of its most frequent letter) <= k. Can you grow and slide a window based on that test?",
+    "Use a sliding window with 26 counters and a running maxFreq. Expand right; if (right - left + 1) - maxFreq > k, decrement the count of s[left] and advance left. Track the max window size."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Why is it safe to never decrease the stored maximum frequency when the window slides?",
+    "How would the solution change if the string could contain any Unicode characters?"
+  ]
+}

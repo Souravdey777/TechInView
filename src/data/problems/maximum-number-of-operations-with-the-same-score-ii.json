@@ -1,0 +1,82 @@
+{
+  "title": "Maximum Number of Operations With the Same Score II",
+  "slug": "maximum-number-of-operations-with-the-same-score-ii",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "You are given an integer array `nums`. While `nums` has at least two elements you may perform one of these operations:\n\n- Remove the first two elements.\n- Remove the last two elements.\n- Remove the first element and the last element.\n\nThe **score** of an operation is the sum of the two removed elements. Every operation you perform must have the same score as all the others. Return the maximum number of operations you can perform. You may stop at any time, and at least one operation is always possible.\n\n**Example 1:**\n```\nInput: nums = [1,4,2,3,5,0]\nOutput: 3\nExplanation: Remove the first two (1 + 4 = 5) to get [2,3,5,0], remove the first two again (2 + 3 = 5) to get [5,0], then remove them (5 + 0 = 5). That is 3 operations with score 5.\n```\n\n**Example 2:**\n```\nInput: nums = [3,2,6,1,4]\nOutput: 2\nExplanation: Remove the first and last (3 + 4 = 7) to get [2,6,1], then remove the last two (6 + 1 = 7) to get [2]. No more operations are possible.\n```\n\n**Example 3:**\n```\nInput: nums = [5,5,5]\nOutput: 1\nExplanation: Any first operation leaves a single element, so only 1 operation can be performed.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,4,2,3,5,0]",
+      "output": "3",
+      "explanation": "Remove the first two (1 + 4 = 5) to get [2,3,5,0], remove the first two again (2 + 3 = 5) to get [5,0], then remove them (5 + 0 = 5). That is 3 operations with score 5."
+    },
+    {
+      "input": "nums = [3,2,6,1,4]",
+      "output": "2",
+      "explanation": "Remove the first and last (3 + 4 = 7) to get [2,6,1], then remove the last two (6 + 1 = 7) to get [2]. No more operations are possible."
+    },
+    {
+      "input": "nums = [5,5,5]",
+      "output": "1",
+      "explanation": "Any first operation leaves a single element, so only 1 operation can be performed."
+    }
+  ],
+  "constraints": [
+    "2 <= nums.length <= 2000",
+    "0 <= nums[i] <= 1000",
+    "Each operation removes exactly two elements: the first two, the last two, or the first and last",
+    "Every operation performed must have the same score"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxOperations(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxOperations(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxOperations(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxOperations(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,4,2,3,5,0]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,2,6,1,4]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,5,5]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,1]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [3,2,1,2,3,4,1,1,4,2]",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The first operation fixes the target score, so there are only three candidates: nums[0]+nums[1], nums[n-2]+nums[n-1], and nums[0]+nums[n-1]. Brute force explores all three choices at every step, which is O(3^(n/2)). Since the remaining array is always a contiguous window nums[i..j], memoise f(i, j) = the maximum operations on that window for a fixed target: f(i, j) = max over the three moves whose pair sum equals the target of 1 + f(next window), and 0 if no move matches. Run it once per candidate score and take the best. There are O(n^2) windows and each is O(1), giving O(n^2) time and O(n^2) space.",
+  "hints": [
+    "Once you perform the first operation, the score for all later operations is fixed. How many possible scores are there?",
+    "After any sequence of operations, what shape does the remaining part of the array have?",
+    "For a fixed score, define f(i, j) as the best count for the window nums[i..j]. Try each of the three removals that matches the score and recurse; memoise on (i, j) and repeat for each of the three candidate scores."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^2)",
+    "space": "O(n^2)"
+  },
+  "follow_up_questions": [
+    "Can you reduce memory by processing windows in order of decreasing length?",
+    "What if any pair of elements (not only the ends) could be removed, as long as the score stays the same?"
+  ]
+}

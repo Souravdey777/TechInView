@@ -1,0 +1,80 @@
+{
+  "title": "Count Wildcard Pattern Matches",
+  "slug": "count-wildcard-pattern-matches",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given a dictionary `words` of distinct lowercase words and an array `patterns`. Each pattern consists of lowercase letters and the wildcard `.`, where `.` stands for exactly one arbitrary letter. A word matches a pattern when both have the same length and every non-wildcard character of the pattern equals the word's character in that position.\n\nReturn an array `answer` where `answer[i]` is the number of dictionary words that match `patterns[i]`.\n\n**Example 1:**\n```\nInput: words = [\"bad\",\"dad\",\"mad\",\"pad\",\"bat\"], patterns = [\"b..\",\".ad\",\"....\"]\nOutput: [2,4,0]\nExplanation: \"b..\" matches \"bad\" and \"bat\". \".ad\" matches \"bad\", \"dad\", \"mad\" and \"pad\". No word has length 4.\n```\n\n**Example 2:**\n```\nInput: words = [\"a\",\"b\",\"ab\"], patterns = [\".\",\"..\",\"a\",\"c\"]\nOutput: [2,1,1,0]\nExplanation: \".\" matches both one-letter words, \"..\" matches \"ab\", \"a\" matches itself, and \"c\" matches nothing.\n```",
+  "examples": [
+    {
+      "input": "words = [\"bad\",\"dad\",\"mad\",\"pad\",\"bat\"], patterns = [\"b..\",\".ad\",\"....\"]",
+      "output": "[2,4,0]",
+      "explanation": "\"b..\" matches \"bad\" and \"bat\". \".ad\" matches \"bad\", \"dad\", \"mad\" and \"pad\". No word has length 4."
+    },
+    {
+      "input": "words = [\"a\",\"b\",\"ab\"], patterns = [\".\",\"..\",\"a\",\"c\"]",
+      "output": "[2,1,1,0]",
+      "explanation": "\".\" matches both one-letter words, \"..\" matches \"ab\", \"a\" matches itself, and \"c\" matches nothing."
+    }
+  ],
+  "constraints": [
+    "1 <= words.length <= 2000",
+    "1 <= patterns.length <= 2000",
+    "1 <= words[i].length, patterns[j].length <= 15",
+    "words[i] consists of lowercase English letters; all words are distinct",
+    "patterns[j] consists of lowercase English letters and '.'"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countMatches(self, words: list[str], patterns: list[str]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function countMatches(words, patterns) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] countMatches(String[] words, String[] patterns) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> countMatches(vector<string>& words, vector<string>& patterns) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "words = [\"bad\",\"dad\",\"mad\",\"pad\",\"bat\"], patterns = [\"b..\",\".ad\",\"....\"]",
+      "expected_output": "[2,4,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"a\",\"b\",\"ab\"], patterns = [\".\",\"..\",\"a\",\"c\"]",
+      "expected_output": "[2,1,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"cat\",\"cot\",\"cut\",\"coat\"], patterns = [\"c.t\",\"..t.\",\"c..t\",\"cat\"]",
+      "expected_output": "[3,0,1,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"x\"], patterns = [\".\",\".x\",\"x\",\"y\"]",
+      "expected_output": "[1,0,1,0]",
+      "is_hidden": true
+    },
+    {
+      "input": "words = [\"abc\",\"abd\",\"acc\",\"bbc\",\"abcd\"], patterns = [\"...\",\"a..\",\"..c\",\"....\",\"a.c.\",\"abc\"]",
+      "expected_output": "[4,3,3,1,1,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: compare every pattern against every word character by character, O(p * n * L). Trie approach: insert all words into a trie, storing at each node how many words end there. For each pattern run a DFS: on a letter follow the single matching child, on '.' branch into every existing child, and when the pattern is exhausted add the end-count of the current node. Only paths that exist in the dictionary are explored, so the cost per pattern is bounded by the number of trie nodes reachable (worst case O(min(N, 26^d)) for d wildcards, N = trie size), and often far less than scanning all words. Building the trie is O(total characters) time and space.",
+  "hints": [
+    "Many words share prefixes; a trie lets a fixed letter in the pattern prune every word that disagrees at that position at once.",
+    "Walk the trie with the pattern: a letter moves to one child, a '.' must try every child of the current node.",
+    "Store an end-of-word counter on each node and, when the DFS consumes the whole pattern, add that node's counter to the result for this pattern."
+  ],
+  "optimal_complexity": {
+    "time": "O(W + p * N)",
+    "space": "O(W)"
+  },
+  "follow_up_questions": [
+    "How would you add support for a '*' wildcard that matches any sequence of letters?",
+    "If patterns arrive online while words are also being inserted, does your structure still work?"
+  ]
+}

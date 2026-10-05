@@ -1,0 +1,84 @@
+{
+  "title": "Minimum Cost to Separate Sentence Into Rows",
+  "slug": "minimum-cost-to-separate-sentence-into-rows",
+  "difficulty": "medium",
+  "category": "dp",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "You are given a string `sentence` of words separated by single spaces (no leading or trailing spaces) and an integer `k`. Split the sentence into one or more rows by placing line breaks between words; words keep their order and may not be broken across rows. Inside a row, words are separated by a single space, so a row's length is the sum of its word lengths plus the number of spaces between them. Every row must have length at most `k`.\n\nThe cost of a row with length `len` is `(k - len)^2`, and the total cost is the sum of the costs of all rows **except the last one**. Return the minimum possible total cost. Every word is guaranteed to fit on a row by itself, and a sentence that fits on a single row costs `0`.\n\n**Example 1:**\n```\nInput: sentence = \"the quick brown fox\", k = 10\nOutput: 1\nExplanation: Rows \"the quick\" (length 9, cost (10 - 9)^2 = 1) and \"brown fox\" (the last row, free). Total 1.\n```\n\n**Example 2:**\n```\nInput: sentence = \"a bb ccc dd e\", k = 6\nOutput: 4\nExplanation: Rows \"a bb\" (length 4, cost 4), \"ccc dd\" (length 6, cost 0), and \"e\" (last row, free). Total 4; any other split costs more.\n```\n\n**Example 3:**\n```\nInput: sentence = \"hello\", k = 5\nOutput: 0\nExplanation: The only row is the last row, so it costs nothing.\n```",
+  "examples": [
+    {
+      "input": "sentence = \"the quick brown fox\", k = 10",
+      "output": "1",
+      "explanation": "Rows \"the quick\" (length 9, cost (10 - 9)^2 = 1) and \"brown fox\" (the last row, free). Total 1."
+    },
+    {
+      "input": "sentence = \"a bb ccc dd e\", k = 6",
+      "output": "4",
+      "explanation": "Rows \"a bb\" (length 4, cost 4), \"ccc dd\" (length 6, cost 0), and \"e\" (last row, free). Total 4; any other split costs more."
+    },
+    {
+      "input": "sentence = \"hello\", k = 5",
+      "output": "0",
+      "explanation": "The only row is the last row, so it costs nothing."
+    }
+  ],
+  "constraints": [
+    "1 <= sentence.length <= 5000",
+    "1 <= k <= 5000",
+    "Every word's length is at most k",
+    "sentence consists of lowercase English letters and single spaces",
+    "sentence has no leading or trailing spaces"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumCost(self, sentence: str, k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumCost(sentence, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minimumCost(String sentence, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumCost(string sentence, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "sentence = \"the quick brown fox\", k = 10",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "sentence = \"a bb ccc dd e\", k = 6",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "sentence = \"hello\", k = 5",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "sentence = \"a\", k = 1",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "sentence = \"ab c de fgh i jk lmn o\", k = 7",
+      "expected_output": "5",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force tries every set of break points between words, which is 2^(w-1) splits for w words. Instead let dp[i] be the minimum cost to lay out words i..w-1 where word i starts a new row. For each i, extend the row word by word while its length stays within k: if the row reaches the final word the cost is 0 (last row is free); otherwise the candidate is (k - len)^2 + dp[j + 1]. Since a row holds at most min(w, k / 2 + 1) words, this is O(w * min(w, k)) time and O(w) space.",
+  "hints": [
+    "Only the positions of the line breaks matter. Can you describe the best layout of the remaining words starting from some word i?",
+    "Let dp[i] be the minimum cost for words i..end given that word i starts a row. Which rows can start at word i?",
+    "For each i, grow the row one word at a time while its length (letters plus single spaces) is at most k. If the row includes the last word, its cost is 0; otherwise add (k - len)^2 + dp[next]. Compute dp from right to left."
+  ],
+  "optimal_complexity": {
+    "time": "O(w * min(w, k))",
+    "space": "O(w)"
+  },
+  "follow_up_questions": [
+    "How does this relate to the classic text justification / word wrap problem, and why does greedy line filling fail for squared costs?",
+    "How would you reconstruct the actual rows that achieve the minimum cost?"
+  ]
+}

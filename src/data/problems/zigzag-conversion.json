@@ -1,0 +1,83 @@
+{
+  "title": "Zigzag Conversion",
+  "slug": "zigzag-conversion",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "adobe",
+    "apple"
+  ],
+  "description": "Imagine writing the characters of a string `s` in a zigzag across `numRows` rows: you go **down** row by row from the top row to the bottom row, then diagonally **up** row by row back to the top, then down again, and so on. For example, with `numRows = 3` the characters `ABCDEFG` are laid out as:\n\n```\nA   E\nB D F\nC   G\n```\n\nAfter placing every character, read the rows from top to bottom, each row left to right, and concatenate them. Return that string (`\"AEBDFCG\"` in the example above).\n\nIf `numRows` is `1`, or is at least the length of `s`, the zigzag never turns and the result equals `s`.\n\n**Example 1:**\n```\nInput: s = \"ABCDEFGHIJ\", numRows = 3\nOutput: \"AEIBDFHJCG\"\nExplanation: Rows are \"AEI\", \"BDFHJ\" and \"CG\". Concatenating them gives \"AEIBDFHJCG\".\n```\n\n**Example 2:**\n```\nInput: s = \"ABCDEFGHIJ\", numRows = 4\nOutput: \"AGBFHCEIDJ\"\nExplanation: Rows are \"AG\", \"BFH\", \"CEI\" and \"DJ\". Concatenating them gives \"AGBFHCEIDJ\".\n```\n\n**Example 3:**\n```\nInput: s = \"HELLO\", numRows = 1\nOutput: \"HELLO\"\nExplanation: With a single row there is no zigzag, so the string is unchanged.\n```",
+  "examples": [
+    {
+      "input": "s = \"ABCDEFGHIJ\", numRows = 3",
+      "output": "\"AEIBDFHJCG\"",
+      "explanation": "Rows are \"AEI\", \"BDFHJ\" and \"CG\". Concatenating them gives \"AEIBDFHJCG\"."
+    },
+    {
+      "input": "s = \"ABCDEFGHIJ\", numRows = 4",
+      "output": "\"AGBFHCEIDJ\"",
+      "explanation": "Rows are \"AG\", \"BFH\", \"CEI\" and \"DJ\". Concatenating them gives \"AGBFHCEIDJ\"."
+    },
+    {
+      "input": "s = \"HELLO\", numRows = 1",
+      "output": "\"HELLO\"",
+      "explanation": "With a single row there is no zigzag, so the string is unchanged."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 1000",
+    "s consists of English letters (upper and lower case), ',' and '.'",
+    "1 <= numRows <= 1000"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def convert(self, s: str, numRows: int) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function convert(s, numRows) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String convert(String s, int numRows) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string convert(string s, int numRows) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"ABCDEFGHIJ\", numRows = 3",
+      "expected_output": "\"AEIBDFHJCG\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"ABCDEFGHIJ\", numRows = 4",
+      "expected_output": "\"AGBFHCEIDJ\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"HELLO\", numRows = 1",
+      "expected_output": "\"HELLO\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"AB\", numRows = 5",
+      "expected_output": "\"AB\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"PAYPALISHIRING\", numRows = 2",
+      "expected_output": "\"PYAIHRNAPLSIIG\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force simulation fills a 2D grid of numRows x n cells by actually walking down and diagonally up, then scans the grid row by row skipping empty cells; that is O(numRows * n) time and space. The optimal approach keeps one string builder per row and walks through s once, appending each character to the current row and flipping direction whenever the top or bottom row is reached; finally the rows are concatenated. Alternatively, each row's characters can be read directly from s using the cycle length 2 * numRows - 2. Both run in O(n) time and O(n) space for the output.",
+  "hints": [
+    "You do not need to draw the full picture with empty cells — only the order of characters within each row matters.",
+    "As you walk through s, the row index goes 0, 1, ..., numRows-1, then back down to 0, and repeats. Handle numRows == 1 separately.",
+    "Keep a list of numRows strings, a current row and a direction. Append each character to rows[row], flip direction at row 0 and row numRows-1, step the row, and join the rows at the end."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "Can you compute the output directly using the cycle length 2 * numRows - 2 without building per-row buffers?",
+    "How would you reverse the process: given the zigzag-read string and numRows, recover the original?"
+  ]
+}

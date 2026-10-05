@@ -1,0 +1,83 @@
+{
+  "title": "Shortest Unsorted Continuous Subarray",
+  "slug": "shortest-unsorted-continuous-subarray",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "apple"
+  ],
+  "description": "Given an integer array `nums`, find one contiguous subarray such that, if you sort only that subarray in non-decreasing order, the entire array becomes sorted in non-decreasing order.\n\nReturn the **length of the shortest** such subarray. If `nums` is already sorted, return `0`. Non-decreasing order means equal adjacent values are allowed.\n\n**Example 1:**\n```\nInput: nums = [2,6,4,8,10,9,15]\nOutput: 5\nExplanation: Sorting the slice [6,4,8,10,9] (indices 1 to 5) gives [2,4,6,8,9,10,15]. No shorter slice works, so the answer is 5.\n```\n\n**Example 2:**\n```\nInput: nums = [1,2,3,4]\nOutput: 0\nExplanation: The array is already sorted, so nothing needs to be sorted.\n```\n\n**Example 3:**\n```\nInput: nums = [1,3,2,2,2]\nOutput: 4\nExplanation: Sorting indices 1 to 4 ([3,2,2,2]) gives [1,2,2,2,3]. Equal values count as sorted, but the 3 must move past all the 2s.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,6,4,8,10,9,15]",
+      "output": "5",
+      "explanation": "Sorting the slice [6,4,8,10,9] (indices 1 to 5) gives [2,4,6,8,9,10,15]. No shorter slice works, so the answer is 5."
+    },
+    {
+      "input": "nums = [1,2,3,4]",
+      "output": "0",
+      "explanation": "The array is already sorted, so nothing needs to be sorted."
+    },
+    {
+      "input": "nums = [1,3,2,2,2]",
+      "output": "4",
+      "explanation": "Sorting indices 1 to 4 ([3,2,2,2]) gives [1,2,2,2,3]. Equal values count as sorted, but the 3 must move past all the 2s."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^4",
+    "-10^5 <= nums[i] <= 10^5",
+    "The answer is between 0 and nums.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findUnsortedSubarray(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findUnsortedSubarray(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int findUnsortedSubarray(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findUnsortedSubarray(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,6,4,8,10,9,15]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3,4]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,3,2,2,2]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [5,-3,-3,2,2,-100000,100000]",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force copies and sorts the array, then finds the first and last indices where the sorted copy differs from the original; the answer is the distance between them plus one (or 0 if none differ). That costs O(n log n) time and O(n) space. The optimal approach uses two linear passes: scanning left to right while tracking the running maximum, the last index whose value is smaller than the running maximum is the right boundary; scanning right to left while tracking the running minimum, the last index (leftmost) whose value is larger than the running minimum is the left boundary. If no right boundary is found the array is sorted and the answer is 0. This runs in O(n) time with O(1) extra space.",
+  "hints": [
+    "Compare the array with its sorted version. Where do they first and last disagree?",
+    "Without sorting: an element must be inside the window if something before it is larger, or something after it is smaller.",
+    "Scan left to right keeping the running max; the last index with nums[i] < max is the right end. Scan right to left keeping the running min; the last index with nums[i] > min is the left end."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you solve it with a monotonic stack and explain how it compares to the two-pass approach?",
+    "How would you return the actual start and end indices instead of just the length?"
+  ]
+}

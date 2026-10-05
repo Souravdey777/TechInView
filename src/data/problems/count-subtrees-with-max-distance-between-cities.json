@@ -1,0 +1,81 @@
+{
+  "title": "Count Subtrees With Max Distance Between Cities",
+  "slug": "count-subtrees-with-max-distance-between-cities",
+  "difficulty": "hard",
+  "category": "trees",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "There are `n` cities numbered `1` to `n`, connected by `n - 1` bidirectional roads so that the cities form a tree. `edges[i] = [u_i, v_i]` is a road between `u_i` and `v_i`.\n\nA **subtree** here is any non-empty subset of cities that is connected using only roads between cities in the subset. Two subtrees are different if their sets of cities differ. The **diameter** of a subtree is the largest number of roads on the path between any two of its cities.\n\nReturn an array of length `n - 1` whose `d`-th entry (1-indexed, so index `d - 1`) is the number of subtrees whose diameter is exactly `d`. Single-city subtrees have diameter 0 and are not counted.\n\n**Example 1:**\n```\nInput: n = 4, edges = [[1,2],[2,3],[2,4]]\nOutput: [3,4,0]\nExplanation: The connected subsets of size 2 ({1,2}, {2,3}, {2,4}) have diameter 1. The subsets {1,2,3}, {1,2,4}, {2,3,4} and {1,2,3,4} have diameter 2. No subset has diameter 3.\n```\n\n**Example 2:**\n```\nInput: n = 2, edges = [[1,2]]\nOutput: [1]\nExplanation: The only connected subset with at least two cities is {1,2}, with diameter 1.\n```\n\n**Example 3:**\n```\nInput: n = 3, edges = [[1,2],[2,3]]\nOutput: [2,1]\nExplanation: {1,2} and {2,3} have diameter 1, and {1,2,3} has diameter 2.\n```",
+  "examples": [
+    {
+      "input": "n = 4, edges = [[1,2],[2,3],[2,4]]",
+      "output": "[3,4,0]",
+      "explanation": "The connected subsets of size 2 ({1,2}, {2,3}, {2,4}) have diameter 1. The subsets {1,2,3}, {1,2,4}, {2,3,4} and {1,2,3,4} have diameter 2. No subset has diameter 3."
+    },
+    {
+      "input": "n = 2, edges = [[1,2]]",
+      "output": "[1]",
+      "explanation": "The only connected subset with at least two cities is {1,2}, with diameter 1."
+    },
+    {
+      "input": "n = 3, edges = [[1,2],[2,3]]",
+      "output": "[2,1]",
+      "explanation": "{1,2} and {2,3} have diameter 1, and {1,2,3} has diameter 2."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 15",
+    "edges.length == n - 1",
+    "1 <= u_i, v_i <= n and u_i != v_i",
+    "The edges form a valid tree."
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countSubgraphsForEachDiameter(self, n: int, edges: list[list[int]]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function countSubgraphsForEachDiameter(n, edges) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] countSubgraphsForEachDiameter(int n, int[][] edges) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> countSubgraphsForEachDiameter(int n, vector<vector<int>>& edges) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 4, edges = [[1,2],[2,3],[2,4]]",
+      "expected_output": "[3,4,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, edges = [[1,2]]",
+      "expected_output": "[1]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, edges = [[1,2],[2,3]]",
+      "expected_output": "[2,1]",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 5, edges = [[1,2],[2,3],[3,4],[4,5]]",
+      "expected_output": "[4,3,2,1]",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 7, edges = [[1,2],[1,3],[2,4],[2,5],[3,6],[3,7]]",
+      "expected_output": "[6,9,6,9,0,0]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "With n at most 15, enumerating subsets is the intended baseline. Precompute all-pairs distances in the tree with Floyd-Warshall or a BFS from each node (O(n^2) or O(n^3)). Then for every bitmask of cities: the subset is connected exactly when the number of edges with both endpoints inside equals the subset size minus one, and its diameter is the maximum precomputed distance over pairs inside the subset (tree distances are preserved inside a connected subtree). Increment the count for that diameter if it is at least 1. This costs O(2^n * n^2) time and O(n^2) space. A smarter alternative fixes each pair (a, b) as the diameter endpoints and counts subtrees containing both where every node is no farther than allowed from a and b, which takes O(n^3) time: O(n^2) pairs times an O(n) tree DP that counts the valid subtrees rooted at a.",
+  "hints": [
+    "n is at most 15. How many subsets of cities are there in total?",
+    "For each subset, you need two facts: is it connected, and what is its largest pairwise distance? A tree subset with k nodes is connected exactly when it contains k - 1 edges.",
+    "Precompute all-pairs distances once. Then for every bitmask, count internal edges to test connectivity and take the max distance among its pairs as the diameter."
+  ],
+  "optimal_complexity": {
+    "time": "O(2^n * n^2)",
+    "space": "O(n^2)"
+  },
+  "follow_up_questions": [
+    "How would you solve this for n up to a few hundred, where enumerating subsets is impossible?",
+    "How would you count subtrees whose diameter is at most d using a tree DP?"
+  ]
+}

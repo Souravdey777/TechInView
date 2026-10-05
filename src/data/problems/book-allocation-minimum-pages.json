@@ -1,0 +1,83 @@
+{
+  "title": "Book Allocation Minimum Pages",
+  "slug": "book-allocation-minimum-pages",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "adobe",
+    "goldman-sachs"
+  ],
+  "description": "You are given an array `pages` where `pages[i]` is the number of pages in the `i`-th book, and an integer `k`, the number of students.\n\nDistribute **all** books among the `k` students so that:\n\n- every student receives **at least one** book,\n- each student receives a **contiguous** block of books (in the given order), and\n- every book goes to exactly one student.\n\nAmong all valid distributions, minimise the largest number of pages assigned to any single student, and return that minimum. If a valid distribution is impossible (more students than books), return `-1`.\n\n**Example 1:**\n```\nInput: pages = [12,34,67,90], k = 2\nOutput: 113\nExplanation: Give books [12, 34, 67] (113 pages) to the first student and [90] to the second. Every other split has a larger maximum.\n```\n\n**Example 2:**\n```\nInput: pages = [15,17,20], k = 2\nOutput: 32\nExplanation: Split into [15, 17] (32 pages) and [20]. The alternative [15] and [17, 20] has a maximum of 37.\n```\n\n**Example 3:**\n```\nInput: pages = [5,10], k = 3\nOutput: -1\nExplanation: There are only 2 books but 3 students, and each student must receive at least one book.\n```",
+  "examples": [
+    {
+      "input": "pages = [12,34,67,90], k = 2",
+      "output": "113",
+      "explanation": "Give books [12, 34, 67] (113 pages) to the first student and [90] to the second. Every other split has a larger maximum."
+    },
+    {
+      "input": "pages = [15,17,20], k = 2",
+      "output": "32",
+      "explanation": "Split into [15, 17] (32 pages) and [20]. The alternative [15] and [17, 20] has a maximum of 37."
+    },
+    {
+      "input": "pages = [5,10], k = 3",
+      "output": "-1",
+      "explanation": "There are only 2 books but 3 students, and each student must receive at least one book."
+    }
+  ],
+  "constraints": [
+    "1 <= pages.length <= 10^5",
+    "1 <= pages[i] <= 10^4",
+    "1 <= k <= 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findPages(self, pages: list[int], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findPages(pages, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int findPages(int[] pages, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findPages(vector<int>& pages, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "pages = [12,34,67,90], k = 2",
+      "expected_output": "113",
+      "is_hidden": false
+    },
+    {
+      "input": "pages = [15,17,20], k = 2",
+      "expected_output": "32",
+      "is_hidden": false
+    },
+    {
+      "input": "pages = [5,10], k = 3",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "pages = [7], k = 1",
+      "expected_output": "7",
+      "is_hidden": true
+    },
+    {
+      "input": "pages = [10,20,30,40], k = 4",
+      "expected_output": "40",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries every way to place k - 1 dividers between the n books and takes the minimum of the maximum block sum, which is O(C(n-1, k-1) * n) and infeasible for large inputs. Instead, binary search on the answer M in [max(pages), sum(pages)]. For a candidate M, greedily assign books left to right, starting a new student whenever adding the next book would exceed M; if this uses at most k students, M is feasible (since k <= n, any spare students can be given single books split off from existing blocks without increasing the maximum). Feasibility is monotonic in M, so find the smallest feasible M. Return -1 up front when k > n. Time is O(n log(sum(pages))) and space O(1).",
+  "hints": [
+    "First handle the impossible case. Then think about the answer itself: what is the smallest it could ever be, and the largest?",
+    "Fix a page limit M. Can you check in one left-to-right pass whether the books can be split so no student exceeds M?",
+    "Binary search M in [max(pages), sum(pages)]; greedily count students needed under limit M and treat M as feasible when that count is <= k."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log(sum(pages)))",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you also return the actual split points of the optimal allocation?",
+    "How does this relate to the 'Split Array Largest Sum' and 'Painter's Partition' problems?"
+  ]
+}

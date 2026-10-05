@@ -1,0 +1,85 @@
+{
+  "title": "Search Suggestions System",
+  "slug": "search-suggestions-system",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "bloomberg",
+    "apple"
+  ],
+  "description": "You are building autocomplete for a store. Given an array of strings `products` and a string `searchWord`, simulate the user typing `searchWord` one character at a time.\n\nAfter each character is typed, the current prefix is the first `i` characters of `searchWord`. Suggest **at most three** products that start with that prefix. If more than three products match, return the three that are **lexicographically smallest**, in ascending lexicographic order. If none match, return an empty list for that step.\n\nReturn a list of `searchWord.length` lists, one per typed character, in typing order.\n\n**Example 1:**\n```\nInput: products = [\"apple\",\"apricot\",\"banana\",\"app\",\"apex\"], searchWord = \"apr\"\nOutput: [[\"apex\",\"app\",\"apple\"],[\"apex\",\"app\",\"apple\"],[\"apricot\"]]\nExplanation: Sorted products are apex, app, apple, apricot, banana. Prefixes \"a\" and \"ap\" both match the first four, so the first three are returned. Only \"apricot\" matches \"apr\".\n```\n\n**Example 2:**\n```\nInput: products = [\"kiwi\"], searchWord = \"kix\"\nOutput: [[\"kiwi\"],[\"kiwi\"],[]]\nExplanation: \"kiwi\" matches \"k\" and \"ki\", but no product starts with \"kix\", so the last list is empty.\n```\n\n**Example 3:**\n```\nInput: products = [\"bag\",\"baggage\",\"banner\",\"box\",\"cloth\"], searchWord = \"bags\"\nOutput: [[\"bag\",\"baggage\",\"banner\"],[\"bag\",\"baggage\",\"banner\"],[\"bag\",\"baggage\"],[]]\nExplanation: \"b\" matches four products; the three smallest are bag, baggage, banner. \"ba\" matches the same three. \"bag\" matches bag and baggage, and nothing starts with \"bags\".\n```",
+  "examples": [
+    {
+      "input": "products = [\"apple\",\"apricot\",\"banana\",\"app\",\"apex\"], searchWord = \"apr\"",
+      "output": "[[\"apex\",\"app\",\"apple\"],[\"apex\",\"app\",\"apple\"],[\"apricot\"]]",
+      "explanation": "Sorted products are apex, app, apple, apricot, banana. Prefixes \"a\" and \"ap\" both match the first four, so the first three are returned. Only \"apricot\" matches \"apr\"."
+    },
+    {
+      "input": "products = [\"kiwi\"], searchWord = \"kix\"",
+      "output": "[[\"kiwi\"],[\"kiwi\"],[]]",
+      "explanation": "\"kiwi\" matches \"k\" and \"ki\", but no product starts with \"kix\", so the last list is empty."
+    },
+    {
+      "input": "products = [\"bag\",\"baggage\",\"banner\",\"box\",\"cloth\"], searchWord = \"bags\"",
+      "output": "[[\"bag\",\"baggage\",\"banner\"],[\"bag\",\"baggage\",\"banner\"],[\"bag\",\"baggage\"],[]]",
+      "explanation": "\"b\" matches four products; the three smallest are bag, baggage, banner. \"ba\" matches the same three. \"bag\" matches bag and baggage, and nothing starts with \"bags\"."
+    }
+  ],
+  "constraints": [
+    "1 <= products.length <= 1000",
+    "1 <= products[i].length <= 3000",
+    "1 <= searchWord.length <= 1000",
+    "products[i] and searchWord consist of lowercase English letters",
+    "All strings in products are unique"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def suggestedProducts(self, products: list[str], searchWord: str) -> list[list[str]]:\n        # Write your solution here\n        pass",
+    "javascript": "function suggestedProducts(products, searchWord) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<String>> suggestedProducts(String[] products, String searchWord) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<string>> suggestedProducts(vector<string>& products, string searchWord) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "products = [\"apple\",\"apricot\",\"banana\",\"app\",\"apex\"], searchWord = \"apr\"",
+      "expected_output": "[[\"apex\",\"app\",\"apple\"],[\"apex\",\"app\",\"apple\"],[\"apricot\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "products = [\"kiwi\"], searchWord = \"kix\"",
+      "expected_output": "[[\"kiwi\"],[\"kiwi\"],[]]",
+      "is_hidden": false
+    },
+    {
+      "input": "products = [\"bag\",\"baggage\",\"banner\",\"box\",\"cloth\"], searchWord = \"bags\"",
+      "expected_output": "[[\"bag\",\"baggage\",\"banner\"],[\"bag\",\"baggage\",\"banner\"],[\"bag\",\"baggage\"],[]]",
+      "is_hidden": false
+    },
+    {
+      "input": "products = [\"havana\"], searchWord = \"tatiana\"",
+      "expected_output": "[[],[],[],[],[],[],[]]",
+      "is_hidden": true
+    },
+    {
+      "input": "products = [\"mobile\",\"mouse\",\"moneypot\",\"monitor\",\"mousepad\"], searchWord = \"mouse\"",
+      "expected_output": "[[\"mobile\",\"moneypot\",\"monitor\"],[\"mobile\",\"moneypot\",\"monitor\"],[\"mouse\",\"mousepad\"],[\"mouse\",\"mousepad\"],[\"mouse\",\"mousepad\"]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: for each prefix of searchWord, scan every product, collect those that start with the prefix, sort them, and take the first three, which costs O(m * n * L + m * n log n) for m prefix lengths, n products and length L. The optimal approach sorts products once, then for each prefix binary-searches for the first product that is >= the prefix and takes up to three consecutive products from that index that still start with the prefix. Because the matches for a prefix form a contiguous block in sorted order, this is correct. Time is O(n log n * L) for sorting plus O(m * log n * L) for the searches, and auxiliary space is O(n) for the sort (O(log n) for an in-place sort), excluding the O(m) output lists. A trie storing the three smallest words per node is an alternative with similar cost.",
+  "hints": [
+    "If the products were sorted, where would all products sharing a given prefix appear relative to each other?",
+    "After sorting, the products that match a prefix form one contiguous block. You only need the first three entries of that block.",
+    "For each prefix, binary search (bisect_left) for the first product >= prefix, then take up to three products from there, stopping as soon as one no longer starts with the prefix."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n * L + m * log n * L)",
+    "space": "O(n) excluding output"
+  },
+  "follow_up_questions": [
+    "How would you design this with a trie so each new character is answered in O(1) after preprocessing?",
+    "How would you rank suggestions by popularity instead of lexicographic order?"
+  ]
+}

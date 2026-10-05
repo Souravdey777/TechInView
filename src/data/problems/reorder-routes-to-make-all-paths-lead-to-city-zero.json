@@ -1,0 +1,85 @@
+{
+  "title": "Reorder Routes to Make All Paths Lead to the City Zero",
+  "slug": "reorder-routes-to-make-all-paths-lead-to-city-zero",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": [
+    "amazon",
+    "google",
+    "meta",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "A country has `n` cities numbered `0` to `n - 1`, linked by exactly `n - 1` one-way roads. If you ignore the directions, the roads form a tree, so there is exactly one route between any two cities. Each `connections[i] = [a, b]` is a road that can only be driven from city `a` to city `b`.\n\nCity `0` is hosting a big event and everyone must be able to drive there. You may reverse the direction of any road. Return the **minimum number of roads you must reverse** so that every city can reach city `0`.\n\nIt is guaranteed that a valid reorientation always exists (the underlying undirected graph is connected).\n\n**Example 1:**\n```\nInput: n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]\nOutput: 2\nExplanation: Roads 1->0 and 3->2 already point toward city 0. Road 1->2 points away from 0 and must become 2->1, and road 3->4 must become 4->3. That is 2 reversals.\n```\n\n**Example 2:**\n```\nInput: n = 3, connections = [[1,0],[2,0]]\nOutput: 0\nExplanation: Both roads already lead into city 0, so nothing needs to change.\n```\n\n**Example 3:**\n```\nInput: n = 4, connections = [[0,1],[1,2],[2,3]]\nOutput: 3\nExplanation: Every road on the chain points away from city 0, so all 3 must be reversed.\n```",
+  "examples": [
+    {
+      "input": "n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]",
+      "output": "2",
+      "explanation": "Roads 1->0 and 3->2 already point toward city 0. Road 1->2 points away from 0 and must become 2->1, and road 3->4 must become 4->3. That is 2 reversals."
+    },
+    {
+      "input": "n = 3, connections = [[1,0],[2,0]]",
+      "output": "0",
+      "explanation": "Both roads already lead into city 0, so nothing needs to change."
+    },
+    {
+      "input": "n = 4, connections = [[0,1],[1,2],[2,3]]",
+      "output": "3",
+      "explanation": "Every road on the chain points away from city 0, so all 3 must be reversed."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 5 * 10^4",
+    "connections.length == n - 1",
+    "connections[i].length == 2",
+    "0 <= a, b <= n - 1 and a != b",
+    "Ignoring direction, the roads form a tree"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minReorder(self, n: int, connections: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minReorder(n, connections) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int minReorder(int n, int[][] connections) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minReorder(int n, vector<vector<int>>& connections) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, connections = [[1,0],[2,0]]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 4, connections = [[0,1],[1,2],[2,3]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, connections = [[0,1]]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 6, connections = [[0,1],[2,0],[3,1],[1,4],[5,4]]",
+      "expected_output": "2",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force idea is, for every city, to search for a directed path to 0 and greedily flip edges along the way, which can cost O(n^2) and is awkward to keep minimal. The key observation is that because the graph is a tree, every edge must end up pointing toward city 0 (i.e. from child to parent when the tree is rooted at 0), and edges are independent. So build an undirected adjacency list where each neighbour carries a flag: cost 1 if the original edge goes in the traversal direction (away from 0) and cost 0 if it was stored reversed. Run a single DFS or BFS from city 0 and sum the flags of the edges you traverse. Each edge is visited once, giving O(n) time and O(n) space.",
+  "hints": [
+    "Root the tree at city 0. Which direction must each edge point in the final layout?",
+    "Every edge should go from a child toward its parent. Edges that already do so cost nothing; edges that go parent -> child must be flipped.",
+    "Store each road in both endpoints' adjacency lists with a marker saying whether it is the original direction. Traverse from 0 and count original-direction edges you walk along."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you return the actual list of roads to reverse, not just the count?",
+    "What changes if the road network can contain cycles (a general directed graph) and you want the fewest reversals so all cities reach 0?"
+  ]
+}

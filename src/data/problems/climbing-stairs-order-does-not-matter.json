@@ -1,0 +1,81 @@
+{
+  "title": "Climbing Stairs Order Does Not Matter",
+  "slug": "climbing-stairs-order-does-not-matter",
+  "difficulty": "easy",
+  "category": "dp",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "You need to climb a staircase of `n` steps, moving either `1` or `2` steps at a time. Unlike the classic version, the **order of moves does not matter**: two climbs that use the same number of 1-steps and the same number of 2-steps count as the same way (for example `1+2` and `2+1` are one way).\n\nReturn the number of distinct ways to reach exactly step `n`.\n\n**Example 1:**\n```\nInput: n = 4\nOutput: 3\nExplanation: The distinct combinations are {1,1,1,1}, {1,1,2} and {2,2}.\n```\n\n**Example 2:**\n```\nInput: n = 5\nOutput: 3\nExplanation: The distinct combinations are {1,1,1,1,1}, {1,1,1,2} and {1,2,2}.\n```\n\n**Example 3:**\n```\nInput: n = 1\nOutput: 1\nExplanation: The only option is a single 1-step.\n```",
+  "examples": [
+    {
+      "input": "n = 4",
+      "output": "3",
+      "explanation": "The distinct combinations are {1,1,1,1}, {1,1,2} and {2,2}."
+    },
+    {
+      "input": "n = 5",
+      "output": "3",
+      "explanation": "The distinct combinations are {1,1,1,1,1}, {1,1,1,2} and {1,2,2}."
+    },
+    {
+      "input": "n = 1",
+      "output": "1",
+      "explanation": "The only option is a single 1-step."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 10^4",
+    "Each move climbs exactly 1 or 2 steps",
+    "The answer fits in a 32-bit signed integer"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countWays(self, n: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countWays(n) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int countWays(int n) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int countWays(int n) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 4",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 5",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2",
+      "expected_output": "2",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 10000",
+      "expected_output": "5001",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force search lists every ordered sequence of moves and deduplicates by sorted multiset, which is exponential. Treat it instead as a coin-change count with coins {1, 2}: process the step sizes one at a time in the outer loop so each combination is counted once regardless of order. dp[0] = 1; for step in (1, 2), for i from step to n, dp[i] += dp[i - step]. This intermediate DP is O(n) time and O(n) space. The optimal approach notices that the number of 2-steps can be any value from 0 to floor(n/2) (the rest are 1-steps) which gives the closed form floor(n/2) + 1 in O(1) time and O(1) space.",
+  "hints": [
+    "Because order does not matter, a way is fully described by how many of each step size it uses.",
+    "This is the 'coin change ways' pattern. Which loop goes outside — the step sizes or the target — so that 1+2 and 2+1 are not counted twice?",
+    "Loop over step sizes in the outer loop: dp[0] = 1, then for step in (1, 2) and i from step to n do dp[i] += dp[i - step]. Alternatively, count how many 2-steps fit: floor(n/2) + 1."
+  ],
+  "optimal_complexity": {
+    "time": "O(1)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would the answer change if the allowed steps were {1, 2, 3}?",
+    "Can you explain why swapping the two loops counts ordered sequences instead of combinations?"
+  ]
+}

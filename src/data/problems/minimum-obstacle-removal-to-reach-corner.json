@@ -1,0 +1,82 @@
+{
+  "title": "Minimum Obstacle Removal to Reach Corner",
+  "slug": "minimum-obstacle-removal-to-reach-corner",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an `m x n` binary grid. A cell containing `0` is empty and can be walked through; a cell containing `1` is an obstacle that must be removed before you can enter it.\n\nStarting at the top-left cell `(0, 0)`, you may move one step up, down, left or right to any cell inside the grid. Return the **minimum number of obstacles** you must remove so that you can reach the bottom-right cell `(m - 1, n - 1)`.\n\nThe start and end cells are always empty, so the answer is always defined (it may be `0`).\n\n**Example 1:**\n```\nInput: grid = [[0,1,1],[1,1,0],[1,0,0]]\nOutput: 2\nExplanation: Go down twice to (2,0), removing the obstacles at (1,0) and (2,0), then walk right through empty cells to (2,2). At least two obstacles block every route.\n```\n\n**Example 2:**\n```\nInput: grid = [[0,0,1,0],[1,0,1,0],[1,0,0,0]]\nOutput: 0\nExplanation: The path (0,0) -> (0,1) -> (1,1) -> (2,1) -> (2,2) -> (2,3) only uses empty cells, so nothing needs to be removed.\n```\n\n**Example 3:**\n```\nInput: grid = [[0,1,0],[0,1,0],[0,1,0]]\nOutput: 1\nExplanation: Column 1 is a full wall, so at least one obstacle must go. Removing (0,1) and walking along the top row is enough.\n```",
+  "examples": [
+    {
+      "input": "grid = [[0,1,1],[1,1,0],[1,0,0]]",
+      "output": "2",
+      "explanation": "Go down twice to (2,0), removing the obstacles at (1,0) and (2,0), then walk right through empty cells to (2,2). At least two obstacles block every route."
+    },
+    {
+      "input": "grid = [[0,0,1,0],[1,0,1,0],[1,0,0,0]]",
+      "output": "0",
+      "explanation": "The path (0,0) -> (0,1) -> (1,1) -> (2,1) -> (2,2) -> (2,3) only uses empty cells, so nothing needs to be removed."
+    },
+    {
+      "input": "grid = [[0,1,0],[0,1,0],[0,1,0]]",
+      "output": "1",
+      "explanation": "Column 1 is a full wall, so at least one obstacle must go. Removing (0,1) and walking along the top row is enough."
+    }
+  ],
+  "constraints": [
+    "m == grid.length, n == grid[i].length",
+    "1 <= m, n <= 10^5 and 2 <= m * n <= 10^5",
+    "grid[i][j] is either 0 or 1",
+    "grid[0][0] == grid[m - 1][n - 1] == 0"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def minimumObstacles(self, grid: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function minimumObstacles(grid) {\n    // Write your solution here\n    return 0;\n}",
+    "java": "class Solution {\n    public int minimumObstacles(int[][] grid) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int minimumObstacles(vector<vector<int>>& grid) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "grid = [[0,1,1],[1,1,0],[1,0,0]]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0,0,1,0],[1,0,1,0],[1,0,0,0]]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0,1,0],[0,1,0],[0,1,0]]",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0,1,1,1,0]]",
+      "expected_output": "3",
+      "is_hidden": true
+    },
+    {
+      "input": "grid = [[0],[1],[1],[0]]",
+      "expected_output": "2",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Treat each cell as a node, with the cost of entering a neighbouring cell equal to its value (0 or 1); the answer is the shortest path from (0, 0) to (m - 1, n - 1). A brute force DFS over all routes is exponential, and a plain Dijkstra with a heap works in O(mn log(mn)). Because every edge weight is 0 or 1, 0-1 BFS is optimal: keep a deque of cells, push a neighbour to the front when entering it costs 0 and to the back when it costs 1, and only relax a cell when its distance improves. The distance of the bottom-right cell is the answer. This runs in O(m * n) time and O(m * n) space.",
+  "hints": [
+    "Reframe the grid as a graph. What is the 'cost' of stepping into an empty cell versus an obstacle cell?",
+    "It is a shortest-path problem where every edge weight is either 0 or 1. Is there something faster and simpler than Dijkstra for that special case?",
+    "Use 0-1 BFS: a deque where neighbours reached at cost 0 go to the front and those at cost 1 go to the back, updating dist only when it improves; return dist[m-1][n-1]."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n)",
+    "space": "O(m * n)"
+  },
+  "follow_up_questions": [
+    "What if removing an obstacle had a different cost per cell?",
+    "How would you also return one path that achieves the minimum?"
+  ]
+}

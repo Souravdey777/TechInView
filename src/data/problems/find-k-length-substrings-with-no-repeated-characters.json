@@ -1,0 +1,80 @@
+{
+  "title": "Find K-Length Substrings With No Repeated Characters",
+  "slug": "find-k-length-substrings-with-no-repeated-characters",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google"
+  ],
+  "description": "Given a string `s` and an integer `k`, count how many substrings of `s` have length exactly `k` and contain **no repeated characters**.\n\nSubstrings are counted by position: two equal substrings that start at different indices are counted separately. If `k` is larger than the length of `s`, the answer is `0`.\n\n**Example 1:**\n```\nInput: s = \"abcabc\", k = 3\nOutput: 4\nExplanation: The windows of length 3 are abc, bca, cab, abc. All four have distinct characters, and repeated substrings at different positions are each counted.\n```\n\n**Example 2:**\n```\nInput: s = \"home\", k = 5\nOutput: 0\nExplanation: k is longer than s, so there are no substrings of length 5.\n```\n\n**Example 3:**\n```\nInput: s = \"aabcd\", k = 2\nOutput: 3\nExplanation: The windows are aa, ab, bc, cd. Only aa has a repeated character, so the answer is 3.\n```",
+  "examples": [
+    {
+      "input": "s = \"abcabc\", k = 3",
+      "output": "4",
+      "explanation": "The windows of length 3 are abc, bca, cab, abc. All four have distinct characters, and repeated substrings at different positions are each counted."
+    },
+    {
+      "input": "s = \"home\", k = 5",
+      "output": "0",
+      "explanation": "k is longer than s, so there are no substrings of length 5."
+    },
+    {
+      "input": "s = \"aabcd\", k = 2",
+      "output": "3",
+      "explanation": "The windows are aa, ab, bc, cd. Only aa has a repeated character, so the answer is 3."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^4",
+    "s consists of lowercase English letters",
+    "1 <= k <= 10^4"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def numKLenSubstrNoRepeats(self, s: str, k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function numKLenSubstrNoRepeats(s, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int numKLenSubstrNoRepeats(String s, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int numKLenSubstrNoRepeats(string s, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"abcabc\", k = 3",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"home\", k = 5",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aabcd\", k = 2",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"aaaa\", k = 1",
+      "expected_output": "4",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abcdefghij\", k = 10",
+      "expected_output": "1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force examines each of the n - k + 1 windows and builds a set of its characters to check whether all k are distinct, costing O(n * k) time. The optimal approach uses a sliding window with a character count array: expand the right edge one character at a time, and whenever the new character is already in the window or the window grows beyond k, shrink from the left. Each time the window length reaches exactly k with no duplicates, increment the answer. Note that any k > 26 immediately gives 0 for lowercase letters. Each character enters and leaves the window at most once, so time is O(n) and space is O(1) (26 counters).",
+  "hints": [
+    "Every candidate substring is a window of fixed length k. Do you really need to rebuild the set of characters for every window from scratch?",
+    "Slide a window across s while keeping counts of the characters inside it. When the incoming character is already present, move the left edge until it is not.",
+    "Whenever the window has exactly k characters (and therefore no duplicates thanks to the shrinking rule), count it, then move the left edge by one so the next window can form. Return 0 early if k > 26."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you return the number of distinct such substrings instead of counting by position?",
+    "How would you find the longest substring with no repeated characters using the same window technique?"
+  ]
+}

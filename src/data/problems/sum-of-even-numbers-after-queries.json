@@ -1,0 +1,83 @@
+{
+  "title": "Sum of Even Numbers After Queries",
+  "slug": "sum-of-even-numbers-after-queries",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "bloomberg"
+  ],
+  "description": "You are given an integer array `nums` and an array `queries` where `queries[i] = [val_i, index_i]`.\n\nProcess the queries in order. For query `i`, first add `val_i` to `nums[index_i]` (the change persists for later queries), then record the sum of all **even** values currently in `nums`. Negative even numbers and `0` count as even.\n\nReturn an array `answer` where `answer[i]` is the sum recorded after the `i`-th query.\n\n**Example 1:**\n```\nInput: nums = [1,2,3,4], queries = [[1,0],[-3,1],[-4,0],[2,3]]\nOutput: [8,6,2,4]\nExplanation: After [1,0] nums = [2,2,3,4], even sum 8. After [-3,1] nums = [2,-1,3,4], even sum 6. After [-4,0] nums = [-2,-1,3,4], even sum 2. After [2,3] nums = [-2,-1,3,6], even sum 4.\n```\n\n**Example 2:**\n```\nInput: nums = [1], queries = [[4,0]]\nOutput: [0]\nExplanation: nums becomes [5], which has no even values, so the sum is 0.\n```\n\n**Example 3:**\n```\nInput: nums = [0,-2,5], queries = [[3,2],[-1,0]]\nOutput: [6,6]\nExplanation: After [3,2] nums = [0,-2,8], even sum 6. After [-1,0] nums = [-1,-2,8], even sum 6.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3,4], queries = [[1,0],[-3,1],[-4,0],[2,3]]",
+      "output": "[8,6,2,4]",
+      "explanation": "After [1,0] nums = [2,2,3,4], even sum 8. After [-3,1] nums = [2,-1,3,4], even sum 6. After [-4,0] nums = [-2,-1,3,4], even sum 2. After [2,3] nums = [-2,-1,3,6], even sum 4."
+    },
+    {
+      "input": "nums = [1], queries = [[4,0]]",
+      "output": "[0]",
+      "explanation": "nums becomes [5], which has no even values, so the sum is 0."
+    },
+    {
+      "input": "nums = [0,-2,5], queries = [[3,2],[-1,0]]",
+      "output": "[6,6]",
+      "explanation": "After [3,2] nums = [0,-2,8], even sum 6. After [-1,0] nums = [-1,-2,8], even sum 6."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^4",
+    "-10^4 <= nums[i] <= 10^4",
+    "1 <= queries.length <= 10^4",
+    "-10^4 <= val_i <= 10^4",
+    "0 <= index_i < nums.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def sumEvenAfterQueries(self, nums: list[int], queries: list[list[int]]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function sumEvenAfterQueries(nums, queries) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] sumEvenAfterQueries(int[] nums, int[][] queries) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> sumEvenAfterQueries(vector<int>& nums, vector<vector<int>>& queries) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3,4], queries = [[1,0],[-3,1],[-4,0],[2,3]]",
+      "expected_output": "[8,6,2,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1], queries = [[4,0]]",
+      "expected_output": "[0]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,-2,5], queries = [[3,2],[-1,0]]",
+      "expected_output": "[6,6]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-3,-5], queries = [[1,0],[-1,1],[2,0]]",
+      "expected_output": "[-2,-8,-6]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [10000,-10000], queries = [[-10000,0],[10000,1],[0,0]]",
+      "expected_output": "[-10000,0,0]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force applies each query and then re-sums every even element, costing O(n) per query and O(n * q) overall. The optimal approach maintains the running even sum: compute it once up front, and for each query, if the old nums[index] is even subtract it from the sum, apply the addition, and if the new value is even add it back. Record the sum after each query. This is O(n + q) time and O(1) extra space beyond the output.",
+  "hints": [
+    "Each query changes only one element. Does the whole sum really need to be recomputed?",
+    "Keep a running total of even values. How can one element's update affect that total?",
+    "Before updating nums[index], subtract it from the total if it is even; after updating, add it if the new value is even. Append the total."
+  ],
+  "optimal_complexity": {
+    "time": "O(n + q)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you also support range-add queries (add val to every element in [l, r]) efficiently?",
+    "Why does checking evenness with % behave correctly for negative numbers in some languages but not others?"
+  ]
+}

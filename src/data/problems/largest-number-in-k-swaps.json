@@ -1,0 +1,81 @@
+{
+  "title": "Largest Number In K Swaps",
+  "slug": "largest-number-in-k-swaps",
+  "difficulty": "medium",
+  "category": "backtracking",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "You are given a string `s` of digits representing a positive integer, and an integer `k`. In one swap you may exchange the digits at any two positions of the string.\n\nUsing **at most** `k` swaps, return the largest number that can be produced, as a string of the same length. You do not have to use all `k` swaps.\n\n**Example 1:**\n```\nInput: s = \"1234567\", k = 4\nOutput: \"7654321\"\nExplanation: Swap 1<->7, 2<->6 and 3<->5. Three swaps already give 7654321, the largest arrangement of these digits.\n```\n\n**Example 2:**\n```\nInput: s = \"3435335\", k = 3\nOutput: \"5543333\"\nExplanation: Bring a 5 to the front, then another 5 to the second position, then the 4 to the third position: 5543333.\n```\n\n**Example 3:**\n```\nInput: s = \"1034\", k = 2\nOutput: \"4301\"\nExplanation: Swap 1<->4 to get 4031, then 0<->3 to get 4301.\n```",
+  "examples": [
+    {
+      "input": "s = \"1234567\", k = 4",
+      "output": "\"7654321\"",
+      "explanation": "Swap 1<->7, 2<->6 and 3<->5. Three swaps already give 7654321, the largest arrangement of these digits."
+    },
+    {
+      "input": "s = \"3435335\", k = 3",
+      "output": "\"5543333\"",
+      "explanation": "Bring a 5 to the front, then another 5 to the second position, then the 4 to the third position: 5543333."
+    },
+    {
+      "input": "s = \"1034\", k = 2",
+      "output": "\"4301\"",
+      "explanation": "Swap 1<->4 to get 4031, then 0<->3 to get 4301."
+    }
+  ],
+  "constraints": [
+    "`1 <= s.length <= 12`",
+    "`s` consists of digits `0`-`9` and does not start with `0`",
+    "`1 <= k <= 5`"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findMaximumNum(self, s: str, k: int) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function findMaximumNum(s, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String findMaximumNum(String s, int k) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string findMaximumNum(string s, int k) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"1234567\", k = 4",
+      "expected_output": "\"7654321\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"3435335\", k = 3",
+      "expected_output": "\"5543333\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"1034\", k = 2",
+      "expected_output": "\"4301\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"9\", k = 1",
+      "expected_output": "\"9\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"129814999\", k = 1",
+      "expected_output": "\"929814991\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force tries every pair (i, j) for each of the k swaps, O((n^2)^k), keeping the maximum string seen at any depth. A pruned backtracking does much better: process positions left to right; at position i find the maximum digit in s[i..]; if s[i] already equals it, move on without spending a swap; otherwise, for every j > i holding that maximum digit, swap i and j, recurse on position i + 1 with k - 1, and swap back. Trying all positions of the max digit is necessary because which copy you move affects later positions (e.g. \"3435335\"). Record the best string at every node. In the worst case the branching is the number of copies of the max digit, giving roughly O(n^k) time (with an O(n) scan per step) and O(n) extra space for the recursion depth (at most min(k, n) levels plus the string).",
+  "hints": [
+    "To make a number as large as possible, the leftmost digits matter most. What should the first position hold?",
+    "At position i, the best you can do is place the largest digit from s[i..]. If it is already there, do not waste a swap.",
+    "When the largest digit appears several times to the right, try swapping with each occurrence, recurse with one fewer swap, then undo, and keep the best string seen anywhere in the search."
+  ],
+  "optimal_complexity": {
+    "time": "O(n^k)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "What changes if you must use exactly k swaps?",
+    "What if only adjacent swaps are allowed?"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "title": "Remove Sub-Folders from the Filesystem",
+  "slug": "remove-sub-folders-from-the-filesystem",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft"
+  ],
+  "description": "You are given an array `folder` of distinct absolute folder paths. Each path starts with `/` and is made of one or more segments of lowercase letters separated by `/`, such as `\"/a/bc/d\"`.\n\nA folder is a **sub-folder** of another listed folder `p` if its path starts with `p` followed by a `/`. Note that `\"/a/bc\"` is **not** a sub-folder of `\"/a/b\"`: the match must end on a segment boundary.\n\nRemove every folder that is a sub-folder of some other folder in the list and return the remaining folders **sorted in ascending lexicographic order**.\n\n**Example 1:**\n```\nInput: folder = [\"/lib\",\"/lib/js\",\"/src/app\",\"/src/app/ui\",\"/src/db\"]\nOutput: [\"/lib\",\"/src/app\",\"/src/db\"]\nExplanation: \"/lib/js\" lives inside \"/lib\" and \"/src/app/ui\" lives inside \"/src/app\", so both are removed.\n```\n\n**Example 2:**\n```\nInput: folder = [\"/var\",\"/var/log/nginx\",\"/var/log/app/old\"]\nOutput: [\"/var\"]\nExplanation: Both deeper folders sit somewhere under \"/var\", even though \"/var/log\" itself is not listed.\n```\n\n**Example 3:**\n```\nInput: folder = [\"/usr/bin\",\"/usr/binx\",\"/usr/lib\"]\nOutput: [\"/usr/bin\",\"/usr/binx\",\"/usr/lib\"]\nExplanation: \"/usr/binx\" starts with the characters \"/usr/bin\" but not at a segment boundary, so nothing is removed.\n```",
+  "examples": [
+    {
+      "input": "folder = [\"/lib\",\"/lib/js\",\"/src/app\",\"/src/app/ui\",\"/src/db\"]",
+      "output": "[\"/lib\",\"/src/app\",\"/src/db\"]",
+      "explanation": "\"/lib/js\" lives inside \"/lib\" and \"/src/app/ui\" lives inside \"/src/app\", so both are removed."
+    },
+    {
+      "input": "folder = [\"/var\",\"/var/log/nginx\",\"/var/log/app/old\"]",
+      "output": "[\"/var\"]",
+      "explanation": "Both deeper folders sit somewhere under \"/var\", even though \"/var/log\" itself is not listed."
+    },
+    {
+      "input": "folder = [\"/usr/bin\",\"/usr/binx\",\"/usr/lib\"]",
+      "output": "[\"/usr/bin\",\"/usr/binx\",\"/usr/lib\"]",
+      "explanation": "\"/usr/binx\" starts with the characters \"/usr/bin\" but not at a segment boundary, so nothing is removed."
+    }
+  ],
+  "constraints": [
+    "1 <= folder.length <= 4 * 10^4",
+    "2 <= folder[i].length <= 100",
+    "folder[i] contains only lowercase English letters and '/', starts with '/', and has no empty segments or trailing '/'",
+    "All entries of folder are unique"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def removeSubfolders(self, folder: list[str]) -> list[str]:\n        # Write your solution here\n        pass",
+    "javascript": "function removeSubfolders(folder) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<String> removeSubfolders(String[] folder) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<string> removeSubfolders(vector<string>& folder) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "folder = [\"/lib\",\"/lib/js\",\"/src/app\",\"/src/app/ui\",\"/src/db\"]",
+      "expected_output": "[\"/lib\",\"/src/app\",\"/src/db\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "folder = [\"/var\",\"/var/log/nginx\",\"/var/log/app/old\"]",
+      "expected_output": "[\"/var\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "folder = [\"/usr/bin\",\"/usr/binx\",\"/usr/lib\"]",
+      "expected_output": "[\"/usr/bin\",\"/usr/binx\",\"/usr/lib\"]",
+      "is_hidden": false
+    },
+    {
+      "input": "folder = [\"/x\"]",
+      "expected_output": "[\"/x\"]",
+      "is_hidden": true
+    },
+    {
+      "input": "folder = [\"/c/x\",\"/ab\",\"/a/b\",\"/c\",\"/a\",\"/abc/d\"]",
+      "expected_output": "[\"/a\",\"/ab\",\"/abc/d\",\"/c\"]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: for each folder, test it against every other folder to see whether some other path plus '/' is its prefix, giving O(n^2 * L) time. Better: build a trie keyed by path segments, marking the node where each folder ends. For each folder walk its segments; if you pass through a marked node before the last segment, it is a sub-folder and is dropped. Collect the survivors and sort them. Equivalently, sorting the paths first places every sub-folder right after its ancestor, so a single pass keeping the last kept root and checking startsWith(root + '/') also works. Both run in O(n * L * log n) time dominated by the sort (the trie walk itself is O(n * L)), with O(n * L) space.",
+  "hints": [
+    "A folder path is a sequence of segments, not just a string of characters. Think about what it means to share a prefix segment by segment.",
+    "Insert each path into a trie where each edge is one segment, and mark the node where a folder ends. A folder is redundant if its walk crosses a marked node before reaching its own end.",
+    "Alternatively, sort the paths: every sub-folder then appears after its ancestor. Keep the last kept folder and drop the current one if it starts with that folder followed by '/'."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * L * log n)",
+    "space": "O(n * L)"
+  },
+  "follow_up_questions": [
+    "How would you also report, for each remaining folder, how many sub-folders were removed under it?",
+    "How would you handle paths that may contain '.' and '..' segments that must be normalised first?"
+  ]
+}

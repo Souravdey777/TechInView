@@ -1,0 +1,83 @@
+{
+  "title": "Map Sum Pairs",
+  "slug": "map-sum-pairs",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "amazon",
+    "google",
+    "meta",
+    "bloomberg"
+  ],
+  "description": "Design a key-value store that can also total the values of all keys sharing a prefix.\n\nImplement the `MapSum` class:\n\n- `MapSum()` creates an empty store.\n- `void insert(String key, int val)` stores `val` under `key`. If `key` already exists, its old value is **replaced** by `val` (not added to it).\n- `int sum(String prefix)` returns the total of the values of every stored key that starts with `prefix` (a key equal to `prefix` counts). If no key matches, return `0`.\n\n**Example 1:**\n```\nInput: [\"MapSum\",\"insert\",\"insert\",\"sum\",\"sum\"], [[],[\"sunset\",8],[\"sunny\",5],[\"sun\"],[\"suns\"]]\nOutput: [null,null,null,13,8]\nExplanation: Both \"sunset\" and \"sunny\" start with \"sun\", so sum(\"sun\") is 8 + 5 = 13. Only \"sunset\" starts with \"suns\", giving 8.\n```\n\n**Example 2:**\n```\nInput: [\"MapSum\",\"insert\",\"insert\",\"sum\",\"insert\",\"sum\"], [[],[\"cat\",4],[\"car\",1],[\"ca\"],[\"cat\",10],[\"ca\"]]\nOutput: [null,null,null,5,null,11]\nExplanation: cat=4 and car=1 give sum(\"ca\") = 5. Inserting cat again replaces 4 with 10, so sum(\"ca\") becomes 10 + 1 = 11.\n```\n\n**Example 3:**\n```\nInput: [\"MapSum\",\"insert\",\"sum\",\"sum\"], [[],[\"dog\",7],[\"do\"],[\"cat\"]]\nOutput: [null,null,7,0]\nExplanation: \"dog\" starts with \"do\", giving 7. No key starts with \"cat\", so that sum is 0.\n```",
+  "examples": [
+    {
+      "input": "[\"MapSum\",\"insert\",\"insert\",\"sum\",\"sum\"], [[],[\"sunset\",8],[\"sunny\",5],[\"sun\"],[\"suns\"]]",
+      "output": "[null,null,null,13,8]",
+      "explanation": "Both \"sunset\" and \"sunny\" start with \"sun\", so sum(\"sun\") is 8 + 5 = 13. Only \"sunset\" starts with \"suns\", giving 8."
+    },
+    {
+      "input": "[\"MapSum\",\"insert\",\"insert\",\"sum\",\"insert\",\"sum\"], [[],[\"cat\",4],[\"car\",1],[\"ca\"],[\"cat\",10],[\"ca\"]]",
+      "output": "[null,null,null,5,null,11]",
+      "explanation": "cat=4 and car=1 give sum(\"ca\") = 5. Inserting cat again replaces 4 with 10, so sum(\"ca\") becomes 10 + 1 = 11."
+    },
+    {
+      "input": "[\"MapSum\",\"insert\",\"sum\",\"sum\"], [[],[\"dog\",7],[\"do\"],[\"cat\"]]",
+      "output": "[null,null,7,0]",
+      "explanation": "\"dog\" starts with \"do\", giving 7. No key starts with \"cat\", so that sum is 0."
+    }
+  ],
+  "constraints": [
+    "1 <= key.length, prefix.length <= 50",
+    "key and prefix consist of lowercase English letters",
+    "1 <= val <= 1000",
+    "At most 50 calls in total are made to insert and sum"
+  ],
+  "starter_code": {
+    "python": "class MapSum:\n    def __init__(self):\n        # Initialize your data structure here\n        pass\n\n    def insert(self, key: str, val: int) -> None:\n        pass\n\n    def sum(self, prefix: str) -> int:\n        pass",
+    "javascript": "function MapSum() {\n    // Initialize your data structure here\n}\n\nMapSum.prototype.insert = function(key, val) {\n    // Write your solution here\n};\n\nMapSum.prototype.sum = function(prefix) {\n    // Write your solution here\n};",
+    "java": "class MapSum {\n    public MapSum() {\n        // Initialize your data structure here\n    }\n\n    public void insert(String key, int val) {\n        // Write your solution here\n    }\n\n    public int sum(String prefix) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class MapSum {\npublic:\n    MapSum() {\n        // Initialize your data structure here\n    }\n\n    void insert(string key, int val) {\n        // Write your solution here\n    }\n\n    int sum(string prefix) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"MapSum\",\"insert\",\"insert\",\"sum\",\"sum\"], [[],[\"sunset\",8],[\"sunny\",5],[\"sun\"],[\"suns\"]]",
+      "expected_output": "[null,null,null,13,8]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MapSum\",\"insert\",\"insert\",\"sum\",\"insert\",\"sum\"], [[],[\"cat\",4],[\"car\",1],[\"ca\"],[\"cat\",10],[\"ca\"]]",
+      "expected_output": "[null,null,null,5,null,11]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MapSum\",\"insert\",\"sum\",\"sum\"], [[],[\"dog\",7],[\"do\"],[\"cat\"]]",
+      "expected_output": "[null,null,7,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MapSum\",\"sum\",\"insert\",\"sum\"], [[],[\"a\"],[\"a\",5],[\"b\"]]",
+      "expected_output": "[null,0,null,0]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"MapSum\",\"insert\",\"insert\",\"sum\",\"sum\",\"insert\",\"sum\"], [[],[\"a\",3],[\"ab\",2],[\"ab\"],[\"abc\"],[\"a\",1],[\"a\"]]",
+      "expected_output": "[null,null,null,2,0,null,3]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute-force design keeps a plain hash map and, on each sum call, scans every key and adds the values of those starting with the prefix; insert is O(K) and sum is O(n * P) for n keys and prefix length P. The optimal design uses a trie where every node stores the running total of values of all keys passing through it, plus a hash map of current key values. On insert, compute delta = val - old value (0 if the key is new), update the map, and add delta to every node along the key's path. On sum, walk down the prefix and return the stored total at the final node, or 0 if the path breaks. Both operations run in O(L) time for string length L, and space is O(total characters inserted).",
+  "hints": [
+    "A plain dictionary makes insert easy, but sum has to scan every key. Which data structure groups keys by their prefixes?",
+    "Use a trie, and let each node remember the total value of all keys that pass through it. Then sum is just a walk down the prefix.",
+    "Overwrites are the tricky part: keep a separate map of each key's current value, and on insert add (val - oldValue) to every node on the key's path instead of val."
+  ],
+  "optimal_complexity": {
+    "time": "O(L) per operation",
+    "space": "O(total characters inserted)"
+  },
+  "follow_up_questions": [
+    "How would you support deleting a key while keeping sum correct?",
+    "How would you change the design if sum were called far more often than insert, or vice versa?"
+  ]
+}

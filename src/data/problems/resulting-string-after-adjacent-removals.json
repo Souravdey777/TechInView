@@ -1,0 +1,81 @@
+{
+  "title": "Resulting String After Adjacent Removals",
+  "slug": "resulting-string-after-adjacent-removals",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given a string `s` of lowercase English letters. Two letters are called **consecutive** if they are next to each other in the alphabet, treating the alphabet as circular: `'a'`/`'b'`, `'m'`/`'n'` and also `'z'`/`'a'` are consecutive (in either order), while `'a'`/`'c'` or two equal letters are not.\n\nWhile the string contains two adjacent characters that are consecutive letters, remove the **leftmost** such pair and close the gap. Return the string that remains when no more removals are possible (possibly the empty string `\"\"`).\n\n**Example 1:**\n```\nInput: s = \"xyzb\"\nOutput: \"zb\"\nExplanation: The leftmost consecutive pair is \"xy\"; removing it leaves \"zb\", and 'z' and 'b' are not consecutive.\n```\n\n**Example 2:**\n```\nInput: s = \"mlkp\"\nOutput: \"kp\"\nExplanation: \"ml\" is consecutive (order does not matter); removing it leaves \"kp\", which cannot shrink further.\n```\n\n**Example 3:**\n```\nInput: s = \"zadb\"\nOutput: \"db\"\nExplanation: \"za\" is consecutive because the alphabet wraps around; removing it leaves \"db\", which has no consecutive pair.\n```",
+  "examples": [
+    {
+      "input": "s = \"xyzb\"",
+      "output": "\"zb\"",
+      "explanation": "The leftmost consecutive pair is \"xy\"; removing it leaves \"zb\", and 'z' and 'b' are not consecutive."
+    },
+    {
+      "input": "s = \"mlkp\"",
+      "output": "\"kp\"",
+      "explanation": "\"ml\" is consecutive (order does not matter); removing it leaves \"kp\", which cannot shrink further."
+    },
+    {
+      "input": "s = \"zadb\"",
+      "output": "\"db\"",
+      "explanation": "\"za\" is consecutive because the alphabet wraps around; removing it leaves \"db\", which has no consecutive pair."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^5",
+    "s consists only of lowercase English letters",
+    "Adjacency wraps around: 'z' and 'a' are consecutive"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def resultingString(self, s: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function resultingString(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String resultingString(String s) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string resultingString(string s) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"xyzb\"",
+      "expected_output": "\"zb\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"mlkp\"",
+      "expected_output": "\"kp\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"zadb\"",
+      "expected_output": "\"db\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "\"a\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"bcbazyx\"",
+      "expected_output": "\"x\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Simulating literally (find the leftmost pair, splice it out, rescan) costs O(n^2). Notice that removals behave like matching parentheses: process characters left to right with a stack, and if the incoming character is consecutive (difference 1 or 25) with the stack top, pop the top instead of pushing; otherwise push. Every pair the stack removes is the leftmost removable pair at that moment, so the stack contents at the end are exactly the final string. Time O(n), space O(n).",
+  "hints": [
+    "Removing a pair can make the characters on either side of it become neighbours. What structure lets you look at the 'new' left neighbour instantly?",
+    "Walk through the string keeping the survivors on a stack; the current character only ever needs to be compared with the top of that stack.",
+    "Two letters x and y are consecutive when abs(x - y) is 1 or 25. Pop if the top matches that rule, otherwise push; join the stack at the end."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "What if removal required the two letters to be equal instead of consecutive?",
+    "How would you report the number of removal operations performed alongside the final string?"
+  ]
+}

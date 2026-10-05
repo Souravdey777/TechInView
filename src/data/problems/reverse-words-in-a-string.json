@@ -1,0 +1,84 @@
+{
+  "title": "Reverse Words in a String",
+  "slug": "reverse-words-in-a-string",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "microsoft",
+    "amazon",
+    "meta",
+    "apple",
+    "bloomberg",
+    "google"
+  ],
+  "description": "You are given a string `s` made of words separated by spaces. A **word** is any maximal run of non-space characters.\n\nReturn a new string containing the same words in **reverse order**, joined by exactly **one** space. The input may have leading spaces, trailing spaces, or several spaces between two words; none of that extra spacing should appear in the output (no leading or trailing spaces, no double spaces). The characters inside each word keep their original order.\n\n**Example 1:**\n```\nInput: s = \"code runs fast today\"\nOutput: \"today fast runs code\"\nExplanation: The four words are reversed and joined by single spaces.\n```\n\n**Example 2:**\n```\nInput: s = \"   keep it simple \"\nOutput: \"simple it keep\"\nExplanation: Leading and trailing spaces are dropped from the result.\n```\n\n**Example 3:**\n```\nInput: s = \"data   meets   logic\"\nOutput: \"logic meets data\"\nExplanation: Each run of three spaces between words collapses to a single space.\n```",
+  "examples": [
+    {
+      "input": "s = \"code runs fast today\"",
+      "output": "\"today fast runs code\"",
+      "explanation": "The four words are reversed and joined by single spaces."
+    },
+    {
+      "input": "s = \"   keep it simple \"",
+      "output": "\"simple it keep\"",
+      "explanation": "Leading and trailing spaces are dropped from the result."
+    },
+    {
+      "input": "s = \"data   meets   logic\"",
+      "output": "\"logic meets data\"",
+      "explanation": "Each run of three spaces between words collapses to a single space."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^4",
+    "s contains English letters (upper and lower case), digits, and spaces ' '",
+    "s contains at least one word"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def reverseWords(self, s: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function reverseWords(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String reverseWords(String s) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string reverseWords(string s) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"code runs fast today\"",
+      "expected_output": "\"today fast runs code\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"   keep it simple \"",
+      "expected_output": "\"simple it keep\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"data   meets   logic\"",
+      "expected_output": "\"logic meets data\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"   single   \"",
+      "expected_output": "\"single\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"  Bob    Loves  Alice   \"",
+      "expected_output": "\"Alice Loves Bob\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The straightforward approach splits s on whitespace (discarding empty pieces), reverses the list of words and joins them with single spaces; this is O(n) time and O(n) space and is perfectly acceptable. To do it with O(1) extra space on a mutable character array, first reverse the whole array, then reverse each individual word back to its correct spelling, and finally compact the array in place by removing extra spaces with a read/write pointer pair. Both variants run in O(n) time.",
+  "hints": [
+    "Start by identifying the words themselves and ignoring the spaces between them.",
+    "Most languages can split on whitespace and drop empty tokens; once you have the list of words, the ordering is easy.",
+    "For an in-place solution: reverse the entire string, then reverse each word individually, then squeeze out redundant spaces with two pointers."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "If the string were a mutable character array, could you solve it with O(1) extra space?",
+    "How would you reverse the words of a very large file that does not fit in memory?"
+  ]
+}

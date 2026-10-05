@@ -1,0 +1,82 @@
+{
+  "title": "Divide Nodes Into the Maximum Number of Groups",
+  "slug": "divide-nodes-into-the-maximum-number-of-groups",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given an undirected graph with `n` nodes labelled `1` to `n` (**1-indexed**) and a list `edges`, where `edges[i] = [a, b]` connects `a` and `b`. The graph may be disconnected.\n\nSplit all nodes into `m` groups numbered `1` to `m` so that:\n\n- every node belongs to exactly one group, and\n- for every edge `[a, b]`, if `a` is in group `x` and `b` is in group `y`, then `|x - y| == 1`.\n\nGroups may not be empty. Return the **largest** `m` for which such a split exists, or `-1` if no valid split exists at all.\n\n**Example 1:**\n```\nInput: n = 5, edges = [[1,2],[2,3],[3,4]]\nOutput: 5\nExplanation: Put nodes 1, 2, 3, 4 into groups 1, 2, 3, 4 in path order, and the isolated node 5 into its own group 5. Five groups is the maximum.\n```\n\n**Example 2:**\n```\nInput: n = 4, edges = [[1,2],[2,3],[3,4],[4,1]]\nOutput: 3\nExplanation: For the 4-cycle, use groups {1}, {2,4}, {3}. Every edge joins neighbouring groups, and 4 groups is impossible because 1 and 3 are only two steps apart along both sides of the cycle.\n```\n\n**Example 3:**\n```\nInput: n = 3, edges = [[1,2],[2,3],[3,1]]\nOutput: -1\nExplanation: Nodes 1, 2, 3 form a triangle. Edges force groups to alternate parity, which an odd cycle cannot do, so no valid split exists.\n```",
+  "examples": [
+    {
+      "input": "n = 5, edges = [[1,2],[2,3],[3,4]]",
+      "output": "5",
+      "explanation": "Put nodes 1, 2, 3, 4 into groups 1, 2, 3, 4 in path order, and the isolated node 5 into its own group 5. Five groups is the maximum."
+    },
+    {
+      "input": "n = 4, edges = [[1,2],[2,3],[3,4],[4,1]]",
+      "output": "3",
+      "explanation": "For the 4-cycle, use groups {1}, {2,4}, {3}. Every edge joins neighbouring groups, and 4 groups is impossible because 1 and 3 are only two steps apart along both sides of the cycle."
+    },
+    {
+      "input": "n = 3, edges = [[1,2],[2,3],[3,1]]",
+      "output": "-1",
+      "explanation": "Nodes 1, 2, 3 form a triangle. Edges force groups to alternate parity, which an odd cycle cannot do, so no valid split exists."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 500",
+    "0 <= edges.length <= 10^4",
+    "edges[i].length == 2, 1 <= a, b <= n, a != b",
+    "There is at most one edge between any pair of nodes"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def magnificentSets(self, n: int, edges: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function magnificentSets(n, edges) {\n    // Write your solution here\n    return 0;\n}",
+    "java": "class Solution {\n    public int magnificentSets(int n, int[][] edges) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int magnificentSets(int n, vector<vector<int>>& edges) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 5, edges = [[1,2],[2,3],[3,4]]",
+      "expected_output": "5",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 4, edges = [[1,2],[2,3],[3,4],[4,1]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, edges = [[1,2],[2,3],[3,1]]",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, edges = []",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 7, edges = [[1,2],[2,3],[3,4],[4,1],[5,6]]",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Adjacent groups alternate parity, so a valid split exists only if every connected component is bipartite; otherwise return -1. Components are independent, so the answer is the sum over components of the best group count for that component. Within a component, choosing a starting node and assigning each node group = BFS distance + 1 yields a valid split whose size is the BFS eccentricity + 1, and the maximum over all start nodes is optimal. A brute force that tries every assignment is exponential. The optimal approach runs a BFS from every node (detecting an odd cycle when an edge joins two nodes whose levels differ by anything other than 1), groups the results by component (e.g. via union-find or the smallest node reached), and sums the per-component maxima. This is O(n * (n + e)) time and O(n + e) space.",
+  "hints": [
+    "What does the condition |x - y| == 1 tell you about the parity of groups at the two ends of an edge? What kind of graph cannot satisfy it?",
+    "Handle each connected component separately. If you start a BFS from one node and put each node at layer (distance + 1), is the result always valid for a bipartite component?",
+    "BFS from every node to get its depth, return -1 if any edge joins nodes whose levels do not differ by exactly 1, keep the maximum depth per component, and add the per-component maxima."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * (n + e))",
+    "space": "O(n + e)"
+  },
+  "follow_up_questions": [
+    "How would you return an actual group assignment that achieves the maximum?",
+    "Can you speed up the per-component computation for very large trees?"
+  ]
+}

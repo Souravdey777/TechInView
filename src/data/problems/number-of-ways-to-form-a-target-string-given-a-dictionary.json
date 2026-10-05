@@ -1,0 +1,82 @@
+{
+  "title": "Number Of Ways To Form A Target String Given A Dictionary",
+  "slug": "number-of-ways-to-form-a-target-string-given-a-dictionary",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given a list of strings `words`, all of the **same length** `m`, and a string `target`. Think of `words` as a grid with `m` columns. Build `target` from left to right as follows:\n\n- To form `target[i]`, choose some word and some column `c` such that that word has the letter `target[i]` at column `c`.\n- The column chosen for `target[i + 1]` must be **strictly greater** than the column chosen for `target[i]`. Once a column is used, every column at or left of it becomes unusable for all words.\n- Different target characters may come from the same word or from different words.\n\nTwo ways are different if, for some `i`, they pick a different (word, column) for `target[i]`. Return the number of ways to form `target`. Because the answer can be huge, return it **modulo** `10^9 + 7`. If `target` cannot be formed, return `0`.\n\n**Example 1:**\n```\nInput: words = [\"abba\",\"baab\"], target = \"ab\"\nOutput: 6\nExplanation: Every column holds exactly one 'a' and one 'b'. Pick any two columns i < j, take 'a' from column i and 'b' from column j: there are 6 column pairs with 1 * 1 choices each, so 6 ways.\n```\n\n**Example 2:**\n```\nInput: words = [\"aa\",\"aa\"], target = \"aa\"\nOutput: 4\nExplanation: Column 0 offers 2 choices of 'a' and column 1 offers 2 choices, so there are 2 * 2 = 4 ways.\n```\n\n**Example 3:**\n```\nInput: words = [\"xyz\"], target = \"zx\"\nOutput: 0\nExplanation: The 'z' is only in column 2, and nothing to its right can supply 'x', so there are 0 ways.\n```",
+  "examples": [
+    {
+      "input": "words = [\"abba\",\"baab\"], target = \"ab\"",
+      "output": "6",
+      "explanation": "Every column holds exactly one 'a' and one 'b'. Pick any two columns i < j, take 'a' from column i and 'b' from column j: there are 6 column pairs with 1 * 1 choices each, so 6 ways."
+    },
+    {
+      "input": "words = [\"aa\",\"aa\"], target = \"aa\"",
+      "output": "4",
+      "explanation": "Column 0 offers 2 choices of 'a' and column 1 offers 2 choices, so there are 2 * 2 = 4 ways."
+    },
+    {
+      "input": "words = [\"xyz\"], target = \"zx\"",
+      "output": "0",
+      "explanation": "The 'z' is only in column 2, and nothing to its right can supply 'x', so there are 0 ways."
+    }
+  ],
+  "constraints": [
+    "1 <= words.length <= 1000",
+    "1 <= words[i].length <= 1000, and all words have the same length",
+    "1 <= target.length <= 1000",
+    "words[i] and target consist only of lowercase English letters"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def numWays(self, words: list[str], target: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function numWays(words, target) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int numWays(String[] words, String target) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int numWays(vector<string>& words, string target) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "words = [\"abba\",\"baab\"], target = \"ab\"",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"aa\",\"aa\"], target = \"aa\"",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"xyz\"], target = \"zx\"",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"ab\"], target = \"abc\"",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "words = [\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\",\"aaaaaaaaaaaaaaaaaaaa\"], target = \"aaaaaaaaaa\"",
+      "expected_output": "987067087",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force recursively tries, for each target character, every later column and every word that has the right letter there, which is exponential. Since only the column and the letter matter, not which word supplies it, precompute cnt[c][ch] = number of words with letter ch in column c (O(m * w) time for m columns). Then let dp[i] be the number of ways to have built target[0..i-1] using the columns processed so far. Process columns left to right; for each column update i from high to low: dp[i+1] += dp[i] * cnt[col][target[i]] (mod 1e9+7). Iterating i downward ensures one column is used for at most one target character. The answer is dp[t]. Time O(w * m + m * t), space O(26 * m + t).",
+  "hints": [
+    "Once you choose a column for a target character, it does not matter which specific word you take it from, only how many words have that letter there.",
+    "Precompute, for each column, how many words have each letter in it. Then think of a DP over (target index, column index).",
+    "Let dp[i] count ways to build the first i characters. For each column in order, for i from t-1 down to 0, add dp[i] * count[column][target[i]] into dp[i+1], taking everything modulo 10^9 + 7."
+  ],
+  "optimal_complexity": {
+    "time": "O(w * m + m * t)",
+    "space": "O(26 * m + t)"
+  },
+  "follow_up_questions": [
+    "How would you also enforce that consecutive target characters come from different words?",
+    "Can you reduce the DP's inner loop by only visiting target positions whose letter appears in the current column?"
+  ]
+}

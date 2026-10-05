@@ -1,0 +1,82 @@
+{
+  "title": "Maximum Subarray XOR",
+  "slug": "maximum-subarray-xor",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "goldman-sachs"
+  ],
+  "description": "Given an integer array `nums`, return the maximum value of `nums[i] ^ nums[i+1] ^ ... ^ nums[j]` over all contiguous non-empty subarrays (`0 <= i <= j < nums.length`), where `^` is bitwise XOR.\n\n**Example 1:**\n```\nInput: nums = [1,2,3,4]\nOutput: 7\nExplanation: The subarray [3,4] gives 3 ^ 4 = 7, which is the largest possible.\n```\n\n**Example 2:**\n```\nInput: nums = [8,1,2,12,7,6]\nOutput: 15\nExplanation: The subarray [1,2,12] gives 1 ^ 2 ^ 12 = 15.\n```\n\n**Example 3:**\n```\nInput: nums = [4,6]\nOutput: 6\nExplanation: The single-element subarray [6] gives 6, larger than 4 and 4 ^ 6 = 2.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3,4]",
+      "output": "7",
+      "explanation": "The subarray [3,4] gives 3 ^ 4 = 7, which is the largest possible."
+    },
+    {
+      "input": "nums = [8,1,2,12,7,6]",
+      "output": "15",
+      "explanation": "The subarray [1,2,12] gives 1 ^ 2 ^ 12 = 15."
+    },
+    {
+      "input": "nums = [4,6]",
+      "output": "6",
+      "explanation": "The single-element subarray [6] gives 6, larger than 4 and 4 ^ 6 = 2."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "0 <= nums[i] < 2^20",
+    "The chosen subarray must be contiguous and non-empty"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxSubarrayXor(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxSubarrayXor(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxSubarrayXor(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxSubarrayXor(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3,4]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [8,1,2,12,7,6]",
+      "expected_output": "15",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [4,6]",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1048575,1048575,524288,7]",
+      "expected_output": "1048575",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: try all O(n^2) subarrays, maintaining a running XOR from each start, for O(n^2) time and O(1) space. Optimal: let prefix[0] = 0 and prefix[j+1] = prefix[j] ^ nums[j]; the XOR of nums[i..j] equals prefix[j+1] ^ prefix[i]. So the task becomes finding the maximum XOR of two prefix values where the earlier index is smaller. Insert prefix[0] into a binary trie (bits from most significant to least), then for each next prefix query the trie greedily preferring the opposite bit at every level to maximise the XOR, update the answer, and insert the prefix. With B = 20 bits this is O(n * B) time and O(n * B) space.",
+  "hints": [
+    "XOR has a prefix-sum-like property: the XOR of a subarray can be written using two prefix XOR values.",
+    "If p[j] is the XOR of the first j elements, then the subarray i..j-1 has XOR p[j] ^ p[i]. Now you need the largest XOR between a new prefix and any earlier prefix (including 0).",
+    "Store earlier prefixes in a binary trie from the highest bit down. For the current prefix, walk the trie choosing the opposite bit whenever that child exists to build the maximum XOR greedily."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * B)",
+    "space": "O(n * B)"
+  },
+  "follow_up_questions": [
+    "How would you also return the start and end indices of a subarray achieving the maximum?",
+    "How would you find the maximum XOR subarray whose length is at most L?"
+  ]
+}

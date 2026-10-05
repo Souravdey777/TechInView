@@ -1,0 +1,81 @@
+{
+  "title": "Longest Chunked Palindrome Decomposition",
+  "slug": "longest-chunked-palindrome-decomposition",
+  "difficulty": "hard",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given a string `text`. Cut it into `k` non-empty consecutive chunks `c1, c2, ..., ck` so that:\n\n- concatenating the chunks in order gives back `text`, and\n- the chunk sequence reads the same from both ends: `c_i == c_(k-i+1)` for every `1 <= i <= k`.\n\nReturn the **largest** possible `k`. A single chunk (`k = 1`, the whole string) always satisfies the rule, so the answer is at least `1`. When `k` is odd, the middle chunk only has to equal itself.\n\n**Example 1:**\n```\nInput: text = \"volvo\"\nOutput: 3\nExplanation: Split as \"vo\" | \"l\" | \"vo\": the first and last chunks match and the middle chunk pairs with itself.\n```\n\n**Example 2:**\n```\nInput: text = \"abcabc\"\nOutput: 2\nExplanation: Split as \"abc\" | \"abc\". Any finer split fails because \"a\" does not equal \"c\".\n```\n\n**Example 3:**\n```\nInput: text = \"elephant\"\nOutput: 1\nExplanation: No prefix of length 1-4 (\"e\", \"el\", \"ele\", \"elep\") equals the suffix of the same length (\"t\", \"nt\", \"ant\", \"hant\"), so the whole string stays as one chunk.\n```",
+  "examples": [
+    {
+      "input": "text = \"volvo\"",
+      "output": "3",
+      "explanation": "Split as \"vo\" | \"l\" | \"vo\": the first and last chunks match and the middle chunk pairs with itself."
+    },
+    {
+      "input": "text = \"abcabc\"",
+      "output": "2",
+      "explanation": "Split as \"abc\" | \"abc\". Any finer split fails because \"a\" does not equal \"c\"."
+    },
+    {
+      "input": "text = \"elephant\"",
+      "output": "1",
+      "explanation": "No prefix of length 1-4 (\"e\", \"el\", \"ele\", \"elep\") equals the suffix of the same length (\"t\", \"nt\", \"ant\", \"hant\"), so the whole string stays as one chunk."
+    }
+  ],
+  "constraints": [
+    "1 <= text.length <= 1000",
+    "text consists only of lowercase English letters",
+    "Every chunk must be non-empty, so the answer k satisfies 1 <= k <= text.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def longestDecomposition(self, text: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function longestDecomposition(text) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int longestDecomposition(String text) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int longestDecomposition(string text) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "text = \"volvo\"",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "text = \"abcabc\"",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "text = \"elephant\"",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "text = \"a\"",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "text = \"ghiabcdefhelloadamhelloabcdefghi\"",
+      "expected_output": "7",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries every way to cut the string into chunks and checks the mirrored-equality condition, which is exponential; a memoised interval DP over (left, right) with every possible chunk length is O(n^3). The optimal approach is greedy: keep two pointers at the outer ends and grow a prefix chunk and a suffix chunk one character at a time; the moment they are equal, count 2 and restart with the remaining middle. Taking the shortest matching pair is always safe, because if a longer matching pair exists, the shorter one can be peeled off from both its ends without losing chunks. If a non-empty middle is left over (no pair matched), it contributes 1. Comparing chunks directly costs O(n^2) in the worst case; with rolling hashes the scan is O(n) time and O(1) extra space.",
+  "hints": [
+    "Look at the outermost chunks first: the first chunk must equal the last one.",
+    "Is it ever worse to choose the shortest prefix that equals a suffix of the same length?",
+    "Greedily grow a prefix and suffix from both ends; when they match, add 2 and continue on the middle. If something remains unmatched in the middle, add 1. Use a rolling hash to compare chunks in O(1)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you prove the greedy choice of the shortest matching prefix/suffix pair is optimal?",
+    "How would you avoid hash collisions while keeping linear time?"
+  ]
+}

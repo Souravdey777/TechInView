@@ -1,0 +1,83 @@
+{
+  "title": "Satisfiability of Equality Equations",
+  "slug": "satisfiability-of-equality-equations",
+  "difficulty": "medium",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an array of strings `equations`. Each string has exactly 4 characters and is either `\"x==y\"` or `\"x!=y\"`, where `x` and `y` are lowercase letters (possibly the same letter) acting as single-letter variable names.\n\nReturn `true` if it is possible to assign an integer to every variable so that **all** equations hold at the same time, and `false` otherwise.\n\n**Example 1:**\n```\nInput: equations = [\"a==b\",\"b!=a\"]\nOutput: false\nExplanation: The first equation forces a and b to be equal, which contradicts the second.\n```\n\n**Example 2:**\n```\nInput: equations = [\"x==y\",\"y==z\",\"x!=z\"]\nOutput: false\nExplanation: Equality is transitive: x == y and y == z mean x == z, contradicting x != z.\n```\n\n**Example 3:**\n```\nInput: equations = [\"a==b\",\"c!=d\",\"b==c\"]\nOutput: true\nExplanation: Give a, b, c the value 1 and d the value 2. Every equation holds.\n```",
+  "examples": [
+    {
+      "input": "equations = [\"a==b\",\"b!=a\"]",
+      "output": "false",
+      "explanation": "The first equation forces a and b to be equal, which contradicts the second."
+    },
+    {
+      "input": "equations = [\"x==y\",\"y==z\",\"x!=z\"]",
+      "output": "false",
+      "explanation": "Equality is transitive: x == y and y == z mean x == z, contradicting x != z."
+    },
+    {
+      "input": "equations = [\"a==b\",\"c!=d\",\"b==c\"]",
+      "output": "true",
+      "explanation": "Give a, b, c the value 1 and d the value 2. Every equation holds."
+    }
+  ],
+  "constraints": [
+    "1 <= equations.length <= 500",
+    "equations[i].length == 4",
+    "equations[i][0] and equations[i][3] are lowercase English letters",
+    "equations[i][1] is '=' or '!'",
+    "equations[i][2] is '='"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def equationsPossible(self, equations: list[str]) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function equationsPossible(equations) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean equationsPossible(String[] equations) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool equationsPossible(vector<string>& equations) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "equations = [\"a==b\",\"b!=a\"]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "equations = [\"x==y\",\"y==z\",\"x!=z\"]",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "equations = [\"a==b\",\"c!=d\",\"b==c\"]",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "equations = [\"a!=a\"]",
+      "expected_output": "false",
+      "is_hidden": true
+    },
+    {
+      "input": "equations = [\"a==a\",\"b!=c\",\"c==c\"]",
+      "expected_output": "true",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force search over assignments is infeasible, and a naive pairwise check misses transitive equalities. Instead treat equality as building groups: first process every '==' equation and union the two letters in a disjoint-set structure of 26 nodes. Then process every '!=' equation; if its two letters share a root (including the case x != x), the system is unsatisfiable, so return false. Otherwise return true. Processing all equalities before any inequality is essential. This is O(n * alpha(26)), effectively O(n) time, and O(1) extra space (26 parent slots).",
+  "hints": [
+    "Equality is transitive. How can you group variables that must all be equal?",
+    "Handle all '==' equations first to build the groups, and only then look at the '!=' equations.",
+    "Use union-find over the 26 letters: union for each '==', then for each '!=' return false if both letters have the same root."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you report which equation first makes the system unsatisfiable when equations arrive in order?",
+    "How would you extend this to support '<' and '>' constraints between variables?"
+  ]
+}

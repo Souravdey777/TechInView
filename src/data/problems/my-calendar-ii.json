@@ -1,0 +1,82 @@
+{
+  "title": "My Calendar II",
+  "slug": "my-calendar-ii",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "uber"
+  ],
+  "description": "Your calendar now tolerates some overlap: two events may share time, but three may not. Each event is the half-open range `[start, end)`, covering every `t` with `start <= t < end`. A *triple booking* happens when some moment is covered by three events at once. Events that only touch at an endpoint do not overlap.\n\nImplement the `MyCalendarTwo` class:\n\n- `MyCalendarTwo()` creates an empty calendar.\n- `boolean book(int start, int end)` tries to add the event `[start, end)`. If adding it would not create a triple booking, store it and return `true`. Otherwise leave the calendar unchanged and return `false`.\n\nRejected events are never stored.\n\nThe input lists the operation names and their argument lists. The output lists each call's return value, using `null` for the constructor.\n\n**Example 1:**\n```\nInput: [\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\",\"book\",\"book\"], [[],[10,20],[50,60],[10,40],[5,15],[5,10],[25,55]]\nOutput: [null,true,true,true,false,true,true]\nExplanation: [10,40) double-books [10,20). [5,15) would cover [10,15) a third time, so it is rejected. [5,10) only touches [10,20) and [10,40) at 10, so it is accepted. [25,55) double-books [25,40) and [50,55) but never triples.\n```\n\n**Example 2:**\n```\nInput: [\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\"], [[],[1,5],[2,6],[3,4],[5,7]]\nOutput: [null,true,true,false,true]\nExplanation: [1,5) and [2,6) overlap on [2,5). [3,4) falls inside that double-booked region, so it is rejected. [5,7) overlaps only [2,6), on [5,6).\n```\n\n**Example 3:**\n```\nInput: [\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\"], [[],[0,10],[0,10],[0,10],[10,20]]\nOutput: [null,true,true,false,true]\nExplanation: The same slot can be booked twice but not a third time. [10,20) only touches the existing events.\n```",
+  "examples": [
+    {
+      "input": "[\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\",\"book\",\"book\"], [[],[10,20],[50,60],[10,40],[5,15],[5,10],[25,55]]",
+      "output": "[null,true,true,true,false,true,true]",
+      "explanation": "[10,40) double-books [10,20). [5,15) would cover [10,15) a third time, so it is rejected. [5,10) only touches [10,20) and [10,40) at 10, so it is accepted. [25,55) double-books [25,40) and [50,55) but never triples."
+    },
+    {
+      "input": "[\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\"], [[],[1,5],[2,6],[3,4],[5,7]]",
+      "output": "[null,true,true,false,true]",
+      "explanation": "[1,5) and [2,6) overlap on [2,5). [3,4) falls inside that double-booked region, so it is rejected. [5,7) overlaps only [2,6), on [5,6)."
+    },
+    {
+      "input": "[\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\"], [[],[0,10],[0,10],[0,10],[10,20]]",
+      "output": "[null,true,true,false,true]",
+      "explanation": "The same slot can be booked twice but not a third time. [10,20) only touches the existing events."
+    }
+  ],
+  "constraints": [
+    "0 <= start < end <= 10^9",
+    "At most 1000 calls will be made to book",
+    "Event ranges are half-open: [start, end)"
+  ],
+  "starter_code": {
+    "python": "class MyCalendarTwo:\n    def __init__(self):\n        # Initialize your data structure here\n        pass\n\n    def book(self, start: int, end: int) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function MyCalendarTwo() {\n    // Initialize your data structure here\n}\n\nMyCalendarTwo.prototype.book = function(start, end) {\n    // Write your solution here\n};",
+    "java": "class MyCalendarTwo {\n    public MyCalendarTwo() {\n        // Initialize your data structure here\n    }\n\n    public boolean book(int start, int end) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class MyCalendarTwo {\npublic:\n    MyCalendarTwo() {\n        // Initialize your data structure here\n    }\n\n    bool book(int start, int end) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\",\"book\",\"book\"], [[],[10,20],[50,60],[10,40],[5,15],[5,10],[25,55]]",
+      "expected_output": "[null,true,true,true,false,true,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\"], [[],[1,5],[2,6],[3,4],[5,7]]",
+      "expected_output": "[null,true,true,false,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\"], [[],[0,10],[0,10],[0,10],[10,20]]",
+      "expected_output": "[null,true,true,false,true]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\",\"book\"], [[],[0,1000000000],[0,1000000000],[5,6],[999999999,1000000000],[0,1]]",
+      "expected_output": "[null,true,true,false,false,false]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"MyCalendarTwo\",\"book\",\"book\",\"book\",\"book\",\"book\",\"book\",\"book\"], [[],[10,20],[15,25],[20,30],[18,22],[25,28],[26,27],[30,35]]",
+      "expected_output": "[null,true,true,true,false,true,false,true]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force recomputes coverage for every request: for each candidate moment (all event endpoints) count how many stored events plus the new one cover it, rejecting on any count of 3; this is O(n^2) per call. The standard optimal-for-constraints approach keeps two lists: all accepted bookings, and the double-booked overlaps among them. For a request [s, e), first reject if it overlaps any interval in the overlaps list (that would be a triple). Otherwise, for every accepted booking that overlaps [s, e), append the intersection [max(s, x), min(e, y)) to the overlaps list, then store the booking. Each call is O(n) and total space is O(n). An alternative is a sweep-line difference map (TreeMap of +1/-1 at endpoints) that checks the running count stays below 3, at O(n) per call, or a segment tree with lazy max for O(log C) per call.",
+  "hints": [
+    "A triple booking can only happen where the new event lands on a region that is already double-booked.",
+    "Track two collections: the accepted events, and the regions where two accepted events overlap.",
+    "For [s, e): if it intersects any double-booked region, return false. Otherwise add its intersection with every accepted event, [max(s, x), min(e, y)), to the double-booked list and store it."
+  ],
+  "optimal_complexity": {
+    "time": "O(n) per book",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you generalise this to allow at most k overlapping events (My Calendar III style)?",
+    "How could a segment tree with lazy propagation make each booking O(log C)?"
+  ]
+}

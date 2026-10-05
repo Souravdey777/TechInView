@@ -1,0 +1,82 @@
+{
+  "title": "Shortest Cycle in a Graph",
+  "slug": "shortest-cycle-in-a-graph",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an **undirected**, unweighted graph with `n` nodes labelled `0` to `n - 1` and a list `edges`, where `edges[i] = [u, v]` connects `u` and `v`. There are no self-loops and no duplicate edges, and the graph may be disconnected.\n\nA cycle is a path that starts and ends at the same node, uses each edge at most once, and visits no node twice except the start/end node. Its length is the number of edges it contains.\n\nReturn the length of the **shortest** cycle in the graph, or `-1` if the graph has no cycle.\n\n**Example 1:**\n```\nInput: n = 7, edges = [[0,1],[1,2],[2,0],[3,4],[4,5],[5,6],[6,3]]\nOutput: 3\nExplanation: There are two cycles: 0-1-2-0 of length 3 and 3-4-5-6-3 of length 4. The shorter one has length 3.\n```\n\n**Example 2:**\n```\nInput: n = 5, edges = [[0,1],[1,2],[2,3],[3,0],[1,4],[4,3]]\nOutput: 4\nExplanation: Cycles 0-1-2-3-0, 0-1-4-3-0 and 1-2-3-4-1 all have 4 edges, and there is no triangle.\n```\n\n**Example 3:**\n```\nInput: n = 4, edges = [[0,1],[0,2]]\nOutput: -1\nExplanation: The graph is a tree (plus an isolated node 3), so it contains no cycle.\n```",
+  "examples": [
+    {
+      "input": "n = 7, edges = [[0,1],[1,2],[2,0],[3,4],[4,5],[5,6],[6,3]]",
+      "output": "3",
+      "explanation": "There are two cycles: 0-1-2-0 of length 3 and 3-4-5-6-3 of length 4. The shorter one has length 3."
+    },
+    {
+      "input": "n = 5, edges = [[0,1],[1,2],[2,3],[3,0],[1,4],[4,3]]",
+      "output": "4",
+      "explanation": "Cycles 0-1-2-3-0, 0-1-4-3-0 and 1-2-3-4-1 all have 4 edges, and there is no triangle."
+    },
+    {
+      "input": "n = 4, edges = [[0,1],[0,2]]",
+      "output": "-1",
+      "explanation": "The graph is a tree (plus an isolated node 3), so it contains no cycle."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 1000",
+    "0 <= edges.length <= 1000",
+    "edges[i].length == 2, 0 <= u, v <= n - 1, u != v",
+    "There are no repeated edges"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findShortestCycle(self, n: int, edges: list[list[int]]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function findShortestCycle(n, edges) {\n    // Write your solution here\n    return 0;\n}",
+    "java": "class Solution {\n    public int findShortestCycle(int n, int[][] edges) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int findShortestCycle(int n, vector<vector<int>>& edges) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 7, edges = [[0,1],[1,2],[2,0],[3,4],[4,5],[5,6],[6,3]]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 5, edges = [[0,1],[1,2],[2,3],[3,0],[1,4],[4,3]]",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 4, edges = [[0,1],[0,2]]",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, edges = [[0,1]]",
+      "expected_output": "-1",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 8, edges = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[5,6],[6,7]]",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force would remove each edge (u, v) in turn and run a BFS from u to find the shortest path to v without that edge; the cycle length is that distance + 1, giving O(e * (n + e)) time. An equally simple and common alternative is to run a BFS from every node s, recording each node's distance and BFS parent. Whenever the BFS sees an edge from u to an already-visited v that is not u's parent, it has found a closed walk through s of length dist[u] + dist[v] + 1; the minimum of these values over all starting nodes is exactly the shortest cycle (a walk may not be a simple cycle for that particular s, but it is never shorter than the true shortest cycle, and BFS from a node on the shortest cycle finds it exactly). Return -1 if nothing was found. This takes O(n * (n + e)) time and O(n + e) space.",
+  "hints": [
+    "Breadth-first search finds shortest distances from a single node. How could a BFS notice that it has closed a loop?",
+    "During BFS from s, an edge to an already-visited node that is not your BFS parent means two different paths from s meet; their lengths add up to a closed walk.",
+    "Run BFS from every node; for each non-tree edge (u, v) record dist[u] + dist[v] + 1 and keep the global minimum, returning -1 if none was ever found."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * (n + e))",
+    "space": "O(n + e)"
+  },
+  "follow_up_questions": [
+    "How would you find the shortest cycle in a weighted undirected graph?",
+    "How would the approach change for a directed graph?"
+  ]
+}

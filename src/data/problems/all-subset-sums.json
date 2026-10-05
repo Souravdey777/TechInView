@@ -1,0 +1,81 @@
+{
+  "title": "All Subset Sums",
+  "slug": "all-subset-sums",
+  "difficulty": "easy",
+  "category": "backtracking",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "Given an integer array `nums` of length `n`, consider every one of its `2^n` subsets (choose any positions, including choosing none). Compute the sum of each subset; the empty subset has sum `0`.\n\nReturn all `2^n` sums in a single array sorted in non-decreasing order. Subsets with the same sum each contribute their own entry, so duplicate values are kept.\n\n**Example 1:**\n```\nInput: nums = [2,3]\nOutput: [0,2,3,5]\nExplanation: The subsets are [], [2], [3] and [2,3], with sums 0, 2, 3 and 5.\n```\n\n**Example 2:**\n```\nInput: nums = [5,2,1]\nOutput: [0,1,2,3,5,6,7,8]\nExplanation: The eight subsets give sums 0, 5, 2, 1, 7, 6, 3 and 8, which sorted are 0,1,2,3,5,6,7,8.\n```\n\n**Example 3:**\n```\nInput: nums = [1,1]\nOutput: [0,1,1,2]\nExplanation: Picking either 1 alone gives sum 1. These are different subsets (different positions), so 1 appears twice.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,3]",
+      "output": "[0,2,3,5]",
+      "explanation": "The subsets are [], [2], [3] and [2,3], with sums 0, 2, 3 and 5."
+    },
+    {
+      "input": "nums = [5,2,1]",
+      "output": "[0,1,2,3,5,6,7,8]",
+      "explanation": "The eight subsets give sums 0, 5, 2, 1, 7, 6, 3 and 8, which sorted are 0,1,2,3,5,6,7,8."
+    },
+    {
+      "input": "nums = [1,1]",
+      "output": "[0,1,1,2]",
+      "explanation": "Picking either 1 alone gives sum 1. These are different subsets (different positions), so 1 appears twice."
+    }
+  ],
+  "constraints": [
+    "`1 <= nums.length <= 15`",
+    "`0 <= nums[i] <= 10^4`",
+    "The output has exactly `2^n` elements, sorted in non-decreasing order"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def subsetSums(self, nums: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function subsetSums(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<Integer> subsetSums(int[] nums) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> subsetSums(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,3]",
+      "expected_output": "[0,2,3,5]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,2,1]",
+      "expected_output": "[0,1,2,3,5,6,7,8]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,1]",
+      "expected_output": "[0,1,1,2]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0]",
+      "expected_output": "[0,0]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [4,4,0,7]",
+      "expected_output": "[0,0,4,4,4,4,7,7,8,8,11,11,11,11,15,15]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force iterates over all 2^n bitmasks and sums the selected elements for each, costing O(n * 2^n), then sorts in O(2^n * n). The backtracking approach recurses over the indices, at each index either including nums[i] in a running sum or excluding it, and records the running sum at each of the 2^n leaves, so the sums are produced in O(2^n) total work without recomputing; a final sort costs O(2^n log 2^n) = O(n * 2^n). An iterative equivalent starts from [0] and, for each number x, appends x + s for every existing sum s; if the list is kept sorted, merging the old list with its shifted copy avoids the final sort and achieves O(2^n) time. Space is O(2^n) for the output plus O(n) recursion depth.",
+  "hints": [
+    "Every element is either in a subset or not. That is a binary choice per index.",
+    "Recurse through the array carrying the current sum; when you pass the last index, record the sum. You will get exactly 2^n results.",
+    "Sort the collected sums before returning. For an extra step, keep the list sorted while building it by merging the old sums with the old sums plus the new element."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * 2^n)",
+    "space": "O(2^n)"
+  },
+  "follow_up_questions": [
+    "How would you return only the distinct subset sums, or count how many subsets reach a target sum?",
+    "With n up to 40, how could meet-in-the-middle help answer queries like the subset sum closest to a target?"
+  ]
+}

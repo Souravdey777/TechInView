@@ -164,7 +164,34 @@ export type ProblemFacets = {
   category: string;
   progress: ProblemProgress | "all";
   freeOnly: boolean;
+  /** Company tag slug, or "all". */
+  company: string;
 };
+
+export type ProblemSort = "default" | "easy-first" | "hard-first" | "title";
+
+export const SORT_LABELS: Record<ProblemSort, string> = {
+  default: "Recommended",
+  "easy-first": "Easy first",
+  "hard-first": "Hard first",
+  title: "A to Z",
+};
+
+const DIFFICULTY_RANK: Record<DifficultyLevel, number> = { easy: 0, medium: 1, hard: 2 };
+
+export function sortProblems(
+  problems: readonly BankProblem[],
+  sort: ProblemSort
+): BankProblem[] {
+  if (sort === "default") return [...problems];
+  const sign = sort === "hard-first" ? -1 : 1;
+  return [...problems].sort((a, b) =>
+    sort === "title"
+      ? a.title.localeCompare(b.title)
+      : sign * (DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty]) ||
+        a.title.localeCompare(b.title)
+  );
+}
 
 export const EMPTY_FACETS: ProblemFacets = {
   search: "",
@@ -172,6 +199,7 @@ export const EMPTY_FACETS: ProblemFacets = {
   category: "all",
   progress: "all",
   freeOnly: false,
+  company: "all",
 };
 
 export function hasActiveFacets(facets: ProblemFacets): boolean {
@@ -180,7 +208,8 @@ export function hasActiveFacets(facets: ProblemFacets): boolean {
     facets.difficulty !== "all" ||
     facets.category !== "all" ||
     facets.progress !== "all" ||
-    facets.freeOnly
+    facets.freeOnly ||
+    facets.company !== "all"
   );
 }
 
@@ -234,6 +263,13 @@ export function matchesFacets(
   if (ignore !== "freeOnly" && facets.freeOnly && !problem.isFreeSolverEnabled) {
     return false;
   }
+  if (
+    ignore !== "company" &&
+    facets.company !== "all" &&
+    !problem.companyTags.includes(facets.company)
+  ) {
+    return false;
+  }
   return true;
 }
 
@@ -250,6 +286,8 @@ export type FacetCounts = {
   category: Record<string, number>;
   progress: Record<ProblemProgress | "all", number>;
   free: number;
+  /** Keyed by company tag. */
+  company: Record<string, number>;
 };
 
 /**
@@ -274,8 +312,14 @@ export function computeFacetCounts(
     untouched: 0,
   };
   let free = 0;
+  const company: Record<string, number> = {};
 
   for (const problem of problems) {
+    if (matchesFacets(problem, facets, "company")) {
+      for (const tag of problem.companyTags) {
+        company[tag] = (company[tag] ?? 0) + 1;
+      }
+    }
     if (matchesFacets(problem, facets, "difficulty")) {
       difficulty.all += 1;
       difficulty[problem.difficulty] += 1;
@@ -296,5 +340,5 @@ export function computeFacetCounts(
     }
   }
 
-  return { difficulty, category, progress, free };
+  return { difficulty, category, progress, free, company };
 }

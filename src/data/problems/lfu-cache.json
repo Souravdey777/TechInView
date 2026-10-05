@@ -1,0 +1,81 @@
+{
+  "title": "LFU Cache",
+  "slug": "lfu-cache",
+  "difficulty": "hard",
+  "category": "linked-lists",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "meta",
+    "bloomberg",
+    "linkedin",
+    "uber"
+  ],
+  "description": "Design a cache with a fixed capacity that evicts the **least frequently used** key when it is full. Implement the `LFUCache` class:\n\n- `LFUCache(int capacity)` creates the cache with the given positive capacity.\n- `int get(int key)` returns the value stored for `key`, or `-1` if the key is not present.\n- `void put(int key, int value)` sets the value for `key`, inserting it if absent. If inserting a new key would exceed the capacity, first evict the key with the **lowest use count**. If several keys share that lowest count, evict the one among them that was **used least recently**.\n\nA key's use count starts at `1` when it is inserted and increases by `1` on every successful `get` and on every `put` that updates an existing key. Both `get` and `put` should run in **O(1)** average time.\n\nThe input lists the method names and their arguments; the output lists the return value of each call, with `null` for the constructor and for `put`.\n\n**Example 1:**\n```\nInput: [\"LFUCache\",\"put\",\"put\",\"get\",\"put\",\"put\",\"get\",\"get\",\"get\"], [[2],[1,10],[2,20],[2],[1,15],[3,30],[2],[1],[3]]\nOutput: [null,null,null,20,null,null,-1,15,30]\nExplanation: After get(2) and put(1,15), keys 1 and 2 both have count 2. Key 2 was used earlier (at get(2)) than key 1 (at put(1,15)), so put(3,30) evicts key 2.\n```\n\n**Example 2:**\n```\nInput: [\"LFUCache\",\"put\",\"get\",\"put\",\"get\",\"get\"], [[1],[5,5],[5],[6,6],[5],[6]]\nOutput: [null,null,5,null,-1,6]\nExplanation: With capacity 1, inserting key 6 must evict key 5, so get(5) returns -1 and get(6) returns 6.\n```",
+  "examples": [
+    {
+      "input": "[\"LFUCache\",\"put\",\"put\",\"get\",\"put\",\"put\",\"get\",\"get\",\"get\"], [[2],[1,10],[2,20],[2],[1,15],[3,30],[2],[1],[3]]",
+      "output": "[null,null,null,20,null,null,-1,15,30]",
+      "explanation": "After get(2) and put(1,15), keys 1 and 2 both have count 2. Key 2 was used earlier (at get(2)) than key 1 (at put(1,15)), so put(3,30) evicts key 2."
+    },
+    {
+      "input": "[\"LFUCache\",\"put\",\"get\",\"put\",\"get\",\"get\"], [[1],[5,5],[5],[6,6],[5],[6]]",
+      "output": "[null,null,5,null,-1,6]",
+      "explanation": "With capacity 1, inserting key 6 must evict key 5, so get(5) returns -1 and get(6) returns 6."
+    }
+  ],
+  "constraints": [
+    "1 <= capacity <= 10^4",
+    "0 <= key <= 10^5",
+    "0 <= value <= 10^9",
+    "At most 2 * 10^5 calls will be made to get and put in total."
+  ],
+  "starter_code": {
+    "python": "class LFUCache:\n    def __init__(self, capacity: int):\n        # Initialize your data structure here\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass",
+    "javascript": "function LFUCache(capacity) {\n    // Initialize your data structure here\n}\n\nLFUCache.prototype.get = function(key) {\n    // Write your solution here\n};\n\nLFUCache.prototype.put = function(key, value) {\n    // Write your solution here\n};",
+    "java": "class LFUCache {\n    public LFUCache(int capacity) {\n        // Initialize your data structure here\n    }\n\n    public int get(int key) {\n        // Write your solution here\n        return 0;\n    }\n\n    public void put(int key, int value) {\n        // Write your solution here\n    }\n}",
+    "cpp": "class LFUCache {\npublic:\n    LFUCache(int capacity) {\n        // Initialize your data structure here\n    }\n\n    int get(int key) {\n        // Write your solution here\n        return 0;\n    }\n\n    void put(int key, int value) {\n        // Write your solution here\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "[\"LFUCache\",\"put\",\"put\",\"get\",\"put\",\"put\",\"get\",\"get\",\"get\"], [[2],[1,10],[2,20],[2],[1,15],[3,30],[2],[1],[3]]",
+      "expected_output": "[null,null,null,20,null,null,-1,15,30]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"LFUCache\",\"put\",\"get\",\"put\",\"get\",\"get\"], [[1],[5,5],[5],[6,6],[5],[6]]",
+      "expected_output": "[null,null,5,null,-1,6]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"LFUCache\",\"put\",\"put\",\"put\",\"put\",\"get\",\"get\",\"get\"], [[2],[1,1],[1,2],[2,3],[3,4],[1],[2],[3]]",
+      "expected_output": "[null,null,null,null,null,2,-1,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "[\"LFUCache\",\"put\",\"put\",\"put\",\"get\",\"get\",\"put\",\"get\",\"get\",\"get\",\"get\"], [[3],[1,1],[2,2],[3,3],[1],[2],[4,4],[3],[4],[1],[2]]",
+      "expected_output": "[null,null,null,null,1,2,null,-1,4,1,2]",
+      "is_hidden": true
+    },
+    {
+      "input": "[\"LFUCache\",\"get\",\"put\",\"get\",\"put\",\"put\",\"get\",\"get\"], [[2],[0],[0,0],[0],[0,7],[1,1],[0],[1]]",
+      "expected_output": "[null,-1,null,0,null,null,7,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: keep a map of key -> (value, count, lastUsedTime) and on eviction scan every key for the smallest (count, lastUsedTime), which makes put O(capacity). Optimal: keep a map key -> node (value, count), a map count -> doubly linked list of nodes ordered from most to least recently used, and a variable minCount. On access, unlink the node from its count's list, increment its count, push it to the front of the new count's list, and bump minCount if the old list was the minimum and is now empty. On inserting a new key at capacity, remove the tail of the list for minCount (the least recently used among the least frequent), then insert the new node with count 1 and reset minCount to 1. Every operation is O(1) time with O(capacity) space.",
+  "hints": [
+    "Eviction depends on two things: how often a key was used and, as a tie-breaker, how recently. What structure orders items by recency in O(1)?",
+    "Group keys by their use count, keeping one recency-ordered list per count, and track the current minimum count.",
+    "Use key -> node and count -> doubly linked list maps. When a key is touched, move it from list[c] to the front of list[c+1] and update minCount if list[c] became empty; evict from the tail of list[minCount]; a new key always resets minCount to 1."
+  ],
+  "optimal_complexity": {
+    "time": "O(1) per operation",
+    "space": "O(capacity)"
+  },
+  "follow_up_questions": [
+    "How would you add a method that returns the current use count of a key in O(1)?",
+    "How would you make this cache safe for concurrent access from multiple threads?"
+  ]
+}

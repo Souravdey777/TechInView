@@ -1,0 +1,83 @@
+{
+  "title": "Maximum Number Of Alloys",
+  "slug": "maximum-number-of-alloys",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft"
+  ],
+  "description": "A factory produces alloys from `n` kinds of metal using one of `k` machines.\n\n- `composition[i][j]` is how many units of metal `j` machine `i` consumes to produce **one** alloy.\n- `stock[j]` is how many units of metal `j` you already own.\n- `cost[j]` is the price of buying one additional unit of metal `j`.\n- `budget` is the total amount of money you can spend on buying extra metal.\n\nYou must choose **exactly one** machine and produce all alloys with it. Return the maximum number of alloys you can produce without spending more than `budget`. The answer may be `0`.\n\n**Example 1:**\n```\nInput: n = 2, k = 2, budget = 20, composition = [[1,2],[3,1]], stock = [2,0], cost = [2,3]\nOutput: 3\nExplanation: Machine 0 makes 3 alloys by buying 1 unit of metal 0 (cost 2) and 6 units of metal 1 (cost 18), total 20. Machine 1 can make at most 2 alloys, because 3 alloys would cost 23.\n```\n\n**Example 2:**\n```\nInput: n = 3, k = 1, budget = 7, composition = [[2,1,1]], stock = [4,2,0], cost = [1,1,2]\nOutput: 2\nExplanation: For 2 alloys the stock covers metals 0 and 1, so only 2 units of metal 2 are bought for 4. A third alloy would cost 2 + 1 + 6 = 9, which is over budget.\n```\n\n**Example 3:**\n```\nInput: n = 2, k = 3, budget = 10, composition = [[2,1],[1,2],[1,1]], stock = [1,1], cost = [5,5]\nOutput: 2\nExplanation: Machine 2 uses one unit of each metal per alloy: 2 alloys need 2 of each, so buy 1 of each for 10. Machines 0 and 1 can make at most 1 alloy each. Best is 2.\n```",
+  "examples": [
+    {
+      "input": "n = 2, k = 2, budget = 20, composition = [[1,2],[3,1]], stock = [2,0], cost = [2,3]",
+      "output": "3",
+      "explanation": "Machine 0 makes 3 alloys by buying 1 unit of metal 0 (cost 2) and 6 units of metal 1 (cost 18), total 20. Machine 1 can make at most 2 alloys, because 3 alloys would cost 23."
+    },
+    {
+      "input": "n = 3, k = 1, budget = 7, composition = [[2,1,1]], stock = [4,2,0], cost = [1,1,2]",
+      "output": "2",
+      "explanation": "For 2 alloys the stock covers metals 0 and 1, so only 2 units of metal 2 are bought for 4. A third alloy would cost 2 + 1 + 6 = 9, which is over budget."
+    },
+    {
+      "input": "n = 2, k = 3, budget = 10, composition = [[2,1],[1,2],[1,1]], stock = [1,1], cost = [5,5]",
+      "output": "2",
+      "explanation": "Machine 2 uses one unit of each metal per alloy: 2 alloys need 2 of each, so buy 1 of each for 10. Machines 0 and 1 can make at most 1 alloy each. Best is 2."
+    }
+  ],
+  "constraints": [
+    "1 <= n, k <= 100",
+    "0 <= budget <= 10^8",
+    "composition.length == k and composition[i].length == n",
+    "1 <= composition[i][j] <= 100",
+    "stock.length == cost.length == n, 0 <= stock[j] <= 10^8, 1 <= cost[j] <= 100"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxNumberOfAlloys(self, n: int, k: int, budget: int, composition: list[list[int]], stock: list[int], cost: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxNumberOfAlloys(n, k, budget, composition, stock, cost) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maxNumberOfAlloys(int n, int k, int budget, List<List<Integer>> composition, List<Integer> stock, List<Integer> cost) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maxNumberOfAlloys(int n, int k, int budget, vector<vector<int>>& composition, vector<int>& stock, vector<int>& cost) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 2, k = 2, budget = 20, composition = [[1,2],[3,1]], stock = [2,0], cost = [2,3]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, k = 1, budget = 7, composition = [[2,1,1]], stock = [4,2,0], cost = [1,1,2]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, k = 3, budget = 10, composition = [[2,1],[1,2],[1,1]], stock = [1,1], cost = [5,5]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, k = 1, budget = 0, composition = [[3]], stock = [2], cost = [1]",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 2, k = 2, budget = 100000000, composition = [[1,1],[2,1]], stock = [100000000,0], cost = [1,1]",
+      "expected_output": "100000000",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force tries, for each machine, x = 1, 2, 3, ... alloys until the purchase cost sum_j max(0, composition[i][j] * x - stock[j]) * cost[j] exceeds the budget; this can take O(k * n * answer) time, and the answer can be around 2 * 10^8. The cost for a fixed machine is non-decreasing in x, so binary search x per machine instead: the upper bound is min(stock) + budget (each alloy needs at least one unit of every metal at price >= 1). Each feasibility check is O(n), giving O(k * n * log(budget + max(stock))) time and O(1) extra space. Take the maximum over all machines.",
+  "hints": [
+    "Handle each machine independently and take the best. For one machine, how do you compute the money needed to make x alloys?",
+    "The money needed for x alloys never decreases as x grows. Which search technique exploits that monotonic relationship?",
+    "For each machine, binary search x in [0, min(stock) + budget], checking sum over metals of max(0, comp[j] * x - stock[j]) * cost[j] <= budget. Watch for overflow in fixed-width languages."
+  ],
+  "optimal_complexity": {
+    "time": "O(k * n * log(budget + max(stock)))",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "What if you were allowed to split production across several machines?",
+    "How would you return which machine to use, breaking ties by the smallest machine index?"
+  ]
+}

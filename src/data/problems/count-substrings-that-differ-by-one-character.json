@@ -1,0 +1,80 @@
+{
+  "title": "Count Substrings That Differ by One Character",
+  "slug": "count-substrings-that-differ-by-one-character",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "google",
+    "amazon"
+  ],
+  "description": "Given two strings `s` and `t`, count the pairs `(x, y)` where `x` is a non-empty substring of `s`, `y` is a substring of `t` of the same length, and `x` and `y` differ in **exactly one** position.\n\nPairs are counted by position: a substring is identified by its start index and length, so the same text appearing at different places in `s` or `t` forms different pairs.\n\n**Example 1:**\n```\nInput: s = \"cd\", t = \"ce\"\nOutput: 4\nExplanation: The qualifying pairs are (\"c\",\"e\"), (\"d\",\"c\"), (\"d\",\"e\") and (\"cd\",\"ce\"). Each pair differs in exactly one position; (\"c\",\"c\") differs in none.\n```\n\n**Example 2:**\n```\nInput: s = \"a\", t = \"a\"\nOutput: 0\nExplanation: The only pair is (\"a\", \"a\"), which differs in zero positions, so nothing qualifies.\n```\n\n**Example 3:**\n```\nInput: s = \"abc\", t = \"abd\"\nOutput: 9\nExplanation: Of the 9 single-letter pairs, 7 differ (all except a/a and b/b). Among length-2 pairs only (\"bc\",\"bd\") differs in exactly one spot, and among length-3 pairs only (\"abc\",\"abd\"). Total: 7 + 1 + 1 = 9.\n```",
+  "examples": [
+    {
+      "input": "s = \"cd\", t = \"ce\"",
+      "output": "4",
+      "explanation": "The qualifying pairs are (\"c\",\"e\"), (\"d\",\"c\"), (\"d\",\"e\") and (\"cd\",\"ce\"). Each pair differs in exactly one position; (\"c\",\"c\") differs in none."
+    },
+    {
+      "input": "s = \"a\", t = \"a\"",
+      "output": "0",
+      "explanation": "The only pair is (\"a\", \"a\"), which differs in zero positions, so nothing qualifies."
+    },
+    {
+      "input": "s = \"abc\", t = \"abd\"",
+      "output": "9",
+      "explanation": "Of the 9 single-letter pairs, 7 differ (all except a/a and b/b). Among length-2 pairs only (\"bc\",\"bd\") differs in exactly one spot, and among length-3 pairs only (\"abc\",\"abd\"). Total: 7 + 1 + 1 = 9."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 100",
+    "1 <= t.length <= 100",
+    "s and t consist of lowercase English letters only"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countSubstrings(self, s: str, t: str) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countSubstrings(s, t) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int countSubstrings(String s, String t) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int countSubstrings(string s, string t) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"cd\", t = \"ce\"",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a\", t = \"a\"",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abc\", t = \"abd\"",
+      "expected_output": "9",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"xyz\", t = \"zxyz\"",
+      "expected_output": "8",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"abe\", t = \"bbc\"",
+      "expected_output": "10",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force enumerates every start i in s, every start j in t and every length, comparing character by character, which is O(n * m * min(n, m)) and still fine for length 100 if you stop once the mismatch count exceeds one. The optimal approach fixes each pair of positions (i, j) where s[i] != t[j] as the single mismatch, then counts how far the match extends to the left (left[i][j] = number of equal characters immediately before) and to the right (right[i][j] = number of equal characters immediately after). The mismatch contributes (left + 1) * (right + 1) pairs. Both tables come from simple DPs: left[i][j] = left[i-1][j-1] + 1 if s[i-1] == t[j-1], and similarly for right. Total time is O(n * m) with O(n * m) space (or O(1) extra by walking diagonals).",
+  "hints": [
+    "Every qualifying pair has exactly one mismatched position. Try anchoring your count on that position instead of on the substring boundaries.",
+    "For a mismatch at s[i] vs t[j], the pair can extend left over equal characters and right over equal characters, independently.",
+    "Precompute, for every (i, j), how many characters match immediately to the left and to the right along the diagonal. Each mismatch (i, j) contributes (left + 1) * (right + 1); sum these over all mismatches."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * m)",
+    "space": "O(n * m)"
+  },
+  "follow_up_questions": [
+    "How would you generalise the count to pairs that differ in at most k positions?",
+    "Can you reduce the extra space to O(1) by processing one diagonal at a time?"
+  ]
+}

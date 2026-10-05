@@ -1,0 +1,85 @@
+{
+  "title": "Shortest Path in a Grid with Obstacles Elimination",
+  "slug": "shortest-path-in-a-grid-with-obstacles-elimination",
+  "difficulty": "hard",
+  "category": "graphs",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given an `m x n` grid where `0` is an empty cell and `1` is an obstacle, and an integer `k`. In one step you may move up, down, left or right to a cell inside the grid.\n\nYou may walk through **at most `k` obstacles** in total (each obstacle cell you enter uses up one elimination). Return the **minimum number of steps** to go from the top-left cell `(0, 0)` to the bottom-right cell `(m - 1, n - 1)`, or `-1` if it is impossible.\n\nIf the grid has a single cell, the answer is `0`.\n\n**Example 1:**\n```\nInput: grid = [[0,1,0],[0,1,0],[0,1,0]], k = 1\nOutput: 4\nExplanation: Column 1 is a solid wall, so one elimination is needed. Path (0,0) -> (0,1) [eliminate] -> (0,2) -> (1,2) -> (2,2) takes 4 steps, which equals the Manhattan distance.\n```\n\n**Example 2:**\n```\nInput: grid = [[0,1,1],[1,1,1],[1,0,0]], k = 1\nOutput: -1\nExplanation: Every route from the corner must pass through at least two obstacles, but only one elimination is allowed.\n```\n\n**Example 3:**\n```\nInput: grid = [[0,0,0],[1,1,0],[0,0,0],[0,1,1],[0,0,0]], k = 1\nOutput: 6\nExplanation: Walk right to (0,2), down to (2,2), eliminate the obstacle at (3,2) and step down to (4,2): 6 steps.\n```",
+  "examples": [
+    {
+      "input": "grid = [[0,1,0],[0,1,0],[0,1,0]], k = 1",
+      "output": "4",
+      "explanation": "Column 1 is a solid wall, so one elimination is needed. Path (0,0) -> (0,1) [eliminate] -> (0,2) -> (1,2) -> (2,2) takes 4 steps, which equals the Manhattan distance."
+    },
+    {
+      "input": "grid = [[0,1,1],[1,1,1],[1,0,0]], k = 1",
+      "output": "-1",
+      "explanation": "Every route from the corner must pass through at least two obstacles, but only one elimination is allowed."
+    },
+    {
+      "input": "grid = [[0,0,0],[1,1,0],[0,0,0],[0,1,1],[0,0,0]], k = 1",
+      "output": "6",
+      "explanation": "Walk right to (0,2), down to (2,2), eliminate the obstacle at (3,2) and step down to (4,2): 6 steps."
+    }
+  ],
+  "constraints": [
+    "m == grid.length, n == grid[i].length",
+    "1 <= m, n <= 40",
+    "1 <= k <= m * n",
+    "grid[i][j] is 0 or 1",
+    "grid[0][0] == grid[m - 1][n - 1] == 0"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def shortestPath(self, grid: list[list[int]], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function shortestPath(grid, k) {\n    // Write your solution here\n    return 0;\n}",
+    "java": "class Solution {\n    public int shortestPath(int[][] grid, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int shortestPath(vector<vector<int>>& grid, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "grid = [[0,1,0],[0,1,0],[0,1,0]], k = 1",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0,1,1],[1,1,1],[1,0,0]], k = 1",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0,0,0],[1,1,0],[0,0,0],[0,1,1],[0,0,0]], k = 1",
+      "expected_output": "6",
+      "is_hidden": false
+    },
+    {
+      "input": "grid = [[0]], k = 1",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "grid = [[0,1,1],[1,1,1],[1,1,0]], k = 3",
+      "expected_output": "4",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force DFS that explores every path while tracking remaining eliminations is exponential. Instead, run BFS over states (row, col, eliminations remaining): all steps cost 1, so the first time BFS reaches the bottom-right cell the step count is minimal. Entering an obstacle decreases the remaining count, and moves that would make it negative are skipped. Track visited states in an m x n x (k + 1) table (or keep the best remaining-eliminations value per cell and only revisit a cell with strictly more remaining). A useful shortcut: if k >= m + n - 2, the Manhattan path is always achievable, so return m + n - 2 immediately. This runs in O(m * n * k) time and O(m * n * k) space.",
+  "hints": [
+    "Plain BFS on cells is not enough, because reaching a cell with more eliminations left is better than reaching it with fewer. What must the BFS state include?",
+    "Make the state (row, col, remaining). Entering an obstacle costs one elimination. Also consider: if k is large enough, can you just walk the Manhattan path?",
+    "BFS over (r, c, remaining) with a visited set; skip moves that would drop remaining below 0, return the level when (m-1, n-1) is dequeued, and short-circuit to m + n - 2 when k >= m + n - 2."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n * k)",
+    "space": "O(m * n * k)"
+  },
+  "follow_up_questions": [
+    "How would you solve it with A* using the Manhattan distance as the heuristic?",
+    "What if each obstacle had a different removal cost and you had a budget instead of a count?"
+  ]
+}

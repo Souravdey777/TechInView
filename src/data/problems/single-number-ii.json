@@ -1,0 +1,84 @@
+{
+  "title": "Single Number II",
+  "slug": "single-number-ii",
+  "difficulty": "medium",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "adobe",
+    "apple"
+  ],
+  "description": "You are given a non-empty integer array `nums` in which every value appears **exactly three times**, except for one value that appears **exactly once**. Return that single value.\n\nYour solution should run in linear time and use only constant extra space. Values may be negative.\n\n**Example 1:**\n```\nInput: nums = [2,2,3,2]\nOutput: 3\nExplanation: 2 appears three times and 3 appears once.\n```\n\n**Example 2:**\n```\nInput: nums = [0,1,0,1,0,1,99]\nOutput: 99\nExplanation: 0 and 1 each appear three times; 99 appears once.\n```\n\n**Example 3:**\n```\nInput: nums = [-4,7,-4,-4]\nOutput: 7\nExplanation: -4 appears three times, leaving 7 as the single value.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,2,3,2]",
+      "output": "3",
+      "explanation": "2 appears three times and 3 appears once."
+    },
+    {
+      "input": "nums = [0,1,0,1,0,1,99]",
+      "output": "99",
+      "explanation": "0 and 1 each appear three times; 99 appears once."
+    },
+    {
+      "input": "nums = [-4,7,-4,-4]",
+      "output": "7",
+      "explanation": "-4 appears three times, leaving 7 as the single value."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 3 * 10^4",
+    "nums.length % 3 == 1",
+    "-2^31 <= nums[i] <= 2^31 - 1",
+    "Exactly one value appears once; every other value appears exactly three times"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def singleNumber(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function singleNumber(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int singleNumber(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,2,3,2]",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,1,0,1,0,1,99]",
+      "expected_output": "99",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-4,7,-4,-4]",
+      "expected_output": "7",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [-2147483648]",
+      "expected_output": "-2147483648",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [2147483647,-2147483648,2147483647,2147483647,-2147483648,-1,-2147483648]",
+      "expected_output": "-1",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A hash map that counts occurrences finds the value with count 1 in O(n) time but uses O(n) space; sorting and scanning in steps of three takes O(n log n). The constant-space approach counts bits: for each of the 32 bit positions, sum that bit across all numbers; the sum modulo 3 is exactly the bit of the single number (treat bit 31 as the sign bit and convert back to a signed 32-bit value in languages with unbounded integers). An equivalent, slicker form keeps two bitmasks, ones and twos, updated as ones = (ones ^ x) & ~twos and twos = (twos ^ x) & ~ones, so that ones holds the bits seen once modulo 3. Both run in O(n) time and O(1) space.",
+  "hints": [
+    "XOR alone cancels pairs, not triples. What happens to each individual bit position if you count it across all numbers?",
+    "For every bit position, the number of set bits across nums is a multiple of 3 plus the single number's bit. Use count % 3.",
+    "Build the answer bit by bit from (count of bit b) % 3 across 32 bits, fixing up the sign for bit 31; or maintain ones/twos masks with ones = (ones ^ x) & ~twos, twos = (twos ^ x) & ~ones."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Generalise: every value appears k times except one that appears once. How does the bit-count approach change?",
+    "Can you derive the ones/twos state machine as a 2-bit counter per bit position that resets at 3?"
+  ]
+}

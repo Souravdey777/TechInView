@@ -1,0 +1,82 @@
+{
+  "title": "Maximum Of Minimum Values In All Subarrays",
+  "slug": "maximum-of-minimum-values-in-all-subarrays",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": [
+    "amazon",
+    "google",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given an integer array `nums` of length `n`. For every window size `k` from `1` to `n`, look at every contiguous subarray of length `k`, take the minimum of each one, and then take the largest of those minimums.\n\nReturn an array `ans` of length `n` where `ans[k - 1]` is that value for window size `k`.\n\n**Example 1:**\n```\nInput: nums = [0,1,2,4]\nOutput: [4,2,1,0]\nExplanation: Size 1: minimums are 0,1,2,4 -> max 4. Size 2: minimums 0,1,2 -> 2. Size 3: minimums 0,1 -> 1. Size 4: minimum 0 -> 0.\n```\n\n**Example 2:**\n```\nInput: nums = [10,20,50,10]\nOutput: [50,20,10,10]\nExplanation: Size 1 -> 50. Size 2: windows give 10,20,10 -> 20. Size 3: windows give 10,10 -> 10. Size 4 -> 10.\n```\n\n**Example 3:**\n```\nInput: nums = [5]\nOutput: [5]\nExplanation: Only one window of size 1, whose minimum is 5.\n```",
+  "examples": [
+    {
+      "input": "nums = [0,1,2,4]",
+      "output": "[4,2,1,0]",
+      "explanation": "Size 1: minimums are 0,1,2,4 -> max 4. Size 2: minimums 0,1,2 -> 2. Size 3: minimums 0,1 -> 1. Size 4: minimum 0 -> 0."
+    },
+    {
+      "input": "nums = [10,20,50,10]",
+      "output": "[50,20,10,10]",
+      "explanation": "Size 1 -> 50. Size 2: windows give 10,20,10 -> 20. Size 3: windows give 10,10 -> 10. Size 4 -> 10."
+    },
+    {
+      "input": "nums = [5]",
+      "output": "[5]",
+      "explanation": "Only one window of size 1, whose minimum is 5."
+    }
+  ],
+  "constraints": [
+    "n == nums.length",
+    "1 <= n <= 10^5",
+    "0 <= nums[i] <= 10^9"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def findMaximums(self, nums: list[int]) -> list[int]:\n        # Write your solution here\n        pass",
+    "javascript": "function findMaximums(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int[] findMaximums(int[] nums) {\n        // Write your solution here\n        return new int[0];\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> findMaximums(vector<int>& nums) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [0,1,2,4]",
+      "expected_output": "[4,2,1,0]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [10,20,50,10]",
+      "expected_output": "[50,20,10,10]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5]",
+      "expected_output": "[5]",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,2,2]",
+      "expected_output": "[2,2,2]",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1,3,5,3,1]",
+      "expected_output": "[5,3,3,1,1]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force enumerates every window of every size and takes its minimum, O(n^3) (or O(n^2) with a running minimum). The optimal approach uses a monotonic stack to find, for each index i, the nearest smaller element on the left and on the right; nums[i] is then the minimum of a window of length w = right - left - 1, so it is a candidate for size w. Record the best candidate per length, then sweep from larger lengths to smaller ones taking a running maximum, because a value that is the minimum of a length-w window is also a valid lower bound for every shorter window size. Total time O(n), space O(n).",
+  "hints": [
+    "Instead of fixing a window and finding its minimum, fix an element and ask: what is the longest window in which it is the minimum?",
+    "A monotonic increasing stack gives the previous and next strictly smaller element of every index in one pass each.",
+    "Store best[len] = max value whose maximal window has length len, then for len from n-1 down to 1 set best[len] = max(best[len], best[len+1])."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you answer the symmetric question: the minimum over all windows of size k of the window maximum?",
+    "If only a single window size k were queried, how would you solve it with a monotonic deque?"
+  ]
+}

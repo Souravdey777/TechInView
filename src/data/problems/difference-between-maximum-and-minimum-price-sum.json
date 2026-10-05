@@ -1,0 +1,83 @@
+{
+  "title": "Difference Between Maximum and Minimum Price Sum",
+  "slug": "difference-between-maximum-and-minimum-price-sum",
+  "difficulty": "hard",
+  "category": "trees",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta"
+  ],
+  "description": "You are given an undirected tree with `n` nodes labelled `0` to `n - 1`, where `edges[i] = [a_i, b_i]` connects `a_i` and `b_i`, and an array `price` where `price[i]` is the (positive) price of node `i`.\n\nThe **price sum** of a path is the sum of the prices of all nodes on it. You may choose any node as the root. For a chosen root, consider every path that **starts at the root** and goes downward (a path consisting of the root alone is allowed). The **cost** of that rooting is the maximum price sum among those paths minus the minimum price sum among them.\n\nSince prices are positive, the minimum path is always the root alone. Return the largest cost over all possible choices of root.\n\n**Example 1:**\n```\nInput: n = 6, edges = [[0,1],[1,2],[1,3],[3,4],[3,5]], price = [9,8,7,6,10,5]\nOutput: 24\nExplanation: Root the tree at node 2. The most expensive path from it is 2 -> 1 -> 3 -> 4 with sum 7 + 8 + 6 + 10 = 31, and the cheapest is node 2 alone with sum 7, giving 31 - 7 = 24.\n```\n\n**Example 2:**\n```\nInput: n = 3, edges = [[0,1],[1,2]], price = [1,1,1]\nOutput: 2\nExplanation: Rooting at node 0, the longest path 0 -> 1 -> 2 costs 3 and the cheapest path (just node 0) costs 1, so the cost is 2.\n```\n\n**Example 3:**\n```\nInput: n = 1, edges = [], price = [5]\nOutput: 0\nExplanation: With a single node, the only path from the root is the root itself, so the difference is 0.\n```",
+  "examples": [
+    {
+      "input": "n = 6, edges = [[0,1],[1,2],[1,3],[3,4],[3,5]], price = [9,8,7,6,10,5]",
+      "output": "24",
+      "explanation": "Root the tree at node 2. The most expensive path from it is 2 -> 1 -> 3 -> 4 with sum 7 + 8 + 6 + 10 = 31, and the cheapest is node 2 alone with sum 7, giving 31 - 7 = 24."
+    },
+    {
+      "input": "n = 3, edges = [[0,1],[1,2]], price = [1,1,1]",
+      "output": "2",
+      "explanation": "Rooting at node 0, the longest path 0 -> 1 -> 2 costs 3 and the cheapest path (just node 0) costs 1, so the cost is 2."
+    },
+    {
+      "input": "n = 1, edges = [], price = [5]",
+      "output": "0",
+      "explanation": "With a single node, the only path from the root is the root itself, so the difference is 0."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 10^5",
+    "edges.length == n - 1 and the edges form a valid tree.",
+    "0 <= a_i, b_i < n and a_i != b_i",
+    "price.length == n",
+    "1 <= price[i] <= 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maxOutput(self, n: int, edges: list[list[int]], price: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maxOutput(n, edges, price) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public long maxOutput(int n, int[][] edges, int[] price) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    long long maxOutput(int n, vector<vector<int>>& edges, vector<int>& price) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "n = 6, edges = [[0,1],[1,2],[1,3],[3,4],[3,5]], price = [9,8,7,6,10,5]",
+      "expected_output": "24",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 3, edges = [[0,1],[1,2]], price = [1,1,1]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 1, edges = [], price = [5]",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "n = 2, edges = [[0,1]], price = [3,7]",
+      "expected_output": "7",
+      "is_hidden": true
+    },
+    {
+      "input": "n = 7, edges = [[0,1],[0,2],[1,3],[1,4],[2,5],[5,6]], price = [5,1,9,2,8,3,100000]",
+      "expected_output": "100018",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach roots the tree at every node and runs a DFS to find the heaviest root-starting path, costing O(n^2). The key observation is that the cost for root r equals the heaviest path starting at r with the price of r removed, which is a path between two nodes where exactly one endpoint's price is dropped (and since prices are positive, the best path ends at a leaf). A single post-order DFS computes, for each node u, two values: withEnd[u], the heaviest downward path from u including its bottom endpoint, and withoutEnd[u], the heaviest downward path from u that excludes its bottom endpoint's price. When combining children at u, update the answer with max(withEnd[a] + withoutEnd[b] + price[u]) over two different children a and b (tracking the best so far while iterating), then update withEnd[u] and withoutEnd[u]. This runs in O(n) time and O(n) space; an iterative DFS avoids recursion limits.",
+  "hints": [
+    "For a fixed root, the minimum price sum is just the root's own price. So you want the heaviest path that starts at the root, minus the root.",
+    "That is the heaviest path in the tree where one endpoint's price is not counted. Can you compute something like a diameter, but with one end discounted?",
+    "In one DFS, keep for each node the best downward sum including the bottom endpoint and the best excluding it. At each node, combine a child's 'including' value with another child's 'excluding' value (plus the node's price) to update the answer."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you solve it with rerooting DP instead, computing the heaviest path from every node?",
+    "What changes if prices can be zero or negative, so the minimum path is no longer just the root?"
+  ]
+}

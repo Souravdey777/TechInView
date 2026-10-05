@@ -1,0 +1,83 @@
+{
+  "title": "Contains Duplicate II",
+  "slug": "contains-duplicate-ii",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "google",
+    "meta",
+    "microsoft",
+    "adobe"
+  ],
+  "description": "You are given an integer array `nums` and a non-negative integer `k`. Determine whether there are two **different** indices `i` and `j` such that `nums[i] == nums[j]` and the distance between them, `|i - j|`, is at most `k`.\n\nReturn `true` if such a pair exists, otherwise return `false`. When `k` is `0` no valid pair can exist, so the answer is `false`.\n\n**Example 1:**\n```\nInput: nums = [1,2,3,1], k = 3\nOutput: true\nExplanation: The two 1s sit at indices 0 and 3, which are exactly 3 apart, and 3 <= k.\n```\n\n**Example 2:**\n```\nInput: nums = [1,0,1,1], k = 1\nOutput: true\nExplanation: The 1s at indices 2 and 3 are only 1 apart.\n```\n\n**Example 3:**\n```\nInput: nums = [1,2,3,1,2,3], k = 2\nOutput: false\nExplanation: Every repeated value is exactly 3 positions away from its twin, which is more than k = 2.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,2,3,1], k = 3",
+      "output": "true",
+      "explanation": "The two 1s sit at indices 0 and 3, which are exactly 3 apart, and 3 <= k."
+    },
+    {
+      "input": "nums = [1,0,1,1], k = 1",
+      "output": "true",
+      "explanation": "The 1s at indices 2 and 3 are only 1 apart."
+    },
+    {
+      "input": "nums = [1,2,3,1,2,3], k = 2",
+      "output": "false",
+      "explanation": "Every repeated value is exactly 3 positions away from its twin, which is more than k = 2."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-10^9 <= nums[i] <= 10^9",
+    "0 <= k <= 10^5"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def containsNearbyDuplicate(self, nums: list[int], k: int) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function containsNearbyDuplicate(nums, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean containsNearbyDuplicate(int[] nums, int k) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool containsNearbyDuplicate(vector<int>& nums, int k) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,2,3,1], k = 3",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,0,1,1], k = 1",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,3,1,2,3], k = 2",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,2,1], k = 0",
+      "expected_output": "false",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [-5,3,-5,3], k = 2",
+      "expected_output": "true",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force checks, for each index i, the next k indices for an equal value, costing O(n * min(n, k)) time and O(1) space. The optimal solution maintains a sliding-window hash set containing the values at the most recent k indices. At index i, if nums[i] is already in the set, an equal value lies within distance k, so return true; otherwise insert nums[i], and once the window holds more than k values remove nums[i - k]. If the scan finishes, return false. This runs in O(n) time and O(min(n, k)) space. An equivalent variant stores a map from each value to its last index and checks i - lastIndex <= k, which is also O(n) time but uses O(n) space.",
+  "hints": [
+    "For a repeated value, which earlier occurrence is the best candidate to compare the current index against?",
+    "Only the most recent previous index of a value matters. Store it as you scan from left to right.",
+    "Keep a set holding only the values in the current window of the last k indices. Before moving on, add the current value and evict the one that has fallen more than k positions behind."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(min(n, k))"
+  },
+  "follow_up_questions": [
+    "How would you change the solution if the condition were also |nums[i] - nums[j]| <= t (Contains Duplicate III)?",
+    "Can you bound the extra memory by k instead of n, and how?"
+  ]
+}

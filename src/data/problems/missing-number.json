@@ -1,0 +1,85 @@
+{
+  "title": "Missing Number",
+  "slug": "missing-number",
+  "difficulty": "easy",
+  "category": "arrays",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "apple",
+    "meta",
+    "google",
+    "bloomberg"
+  ],
+  "description": "You are given an array `nums` holding `n` **distinct** integers, all taken from the range `[0, n]`. Since the range contains `n + 1` values and the array has only `n`, exactly one value from the range is absent.\n\nReturn the missing value. Try to use `O(1)` extra space and `O(n)` time.\n\n**Example 1:**\n```\nInput: nums = [3,0,1]\nOutput: 2\nExplanation: n = 3, so the range is [0, 3]. The values 0, 1 and 3 are present, so 2 is missing.\n```\n\n**Example 2:**\n```\nInput: nums = [0,1]\nOutput: 2\nExplanation: n = 2, so the range is [0, 2]. Both 0 and 1 are present, so the missing value is 2.\n```\n\n**Example 3:**\n```\nInput: nums = [9,6,4,2,3,5,7,0,1]\nOutput: 8\nExplanation: n = 9, so the range is [0, 9]. Every value except 8 appears.\n```",
+  "examples": [
+    {
+      "input": "nums = [3,0,1]",
+      "output": "2",
+      "explanation": "n = 3, so the range is [0, 3]. The values 0, 1 and 3 are present, so 2 is missing."
+    },
+    {
+      "input": "nums = [0,1]",
+      "output": "2",
+      "explanation": "n = 2, so the range is [0, 2]. Both 0 and 1 are present, so the missing value is 2."
+    },
+    {
+      "input": "nums = [9,6,4,2,3,5,7,0,1]",
+      "output": "8",
+      "explanation": "n = 9, so the range is [0, 9]. Every value except 8 appears."
+    }
+  ],
+  "constraints": [
+    "n == nums.length",
+    "1 <= n <= 10^4",
+    "0 <= nums[i] <= n",
+    "All values in nums are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def missingNumber(self, nums: list[int]) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function missingNumber(nums) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int missingNumber(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int missingNumber(vector<int>& nums) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [3,0,1]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0,1]",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [9,6,4,2,3,5,7,0,1]",
+      "expected_output": "8",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [0]",
+      "expected_output": "1",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [1]",
+      "expected_output": "0",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute force checks each candidate 0..n for membership by scanning the array, costing O(n^2) time. Sorting and finding the first index where nums[i] != i takes O(n log n), and a hash set gives O(n) time but O(n) space. The optimal approach uses arithmetic: the sum of 0..n is n * (n + 1) / 2, so the missing number is that total minus the sum of the array. An equivalent overflow-safe method XORs every index 0..n with every element; all present values cancel and the missing one remains. Both run in O(n) time and O(1) space.",
+  "hints": [
+    "You know exactly which n + 1 values should be there. What quantity could you compute for the full range and compare?",
+    "The sum of 0..n has a closed form. How does it relate to the sum of the array?",
+    "Compute the expected total of 0..n with the closed-form formula and compare it with what the array actually sums to (XOR also works and avoids overflow)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you avoid integer overflow in languages with fixed-width integers?",
+    "How would you find two missing numbers from the range [0, n + 1]?"
+  ]
+}

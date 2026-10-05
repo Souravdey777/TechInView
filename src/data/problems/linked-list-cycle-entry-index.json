@@ -1,0 +1,84 @@
+{
+  "title": "Linked List Cycle Entry Index",
+  "slug": "linked-list-cycle-entry-index",
+  "difficulty": "medium",
+  "category": "linked-lists",
+  "company_tags": [
+    "amazon",
+    "microsoft",
+    "google",
+    "bloomberg",
+    "apple"
+  ],
+  "description": "A singly linked list may contain a cycle: the tail node's `next` pointer can link back to an earlier node. Because a cycle cannot be written out as a plain array, the list is described by its node values `head` plus an integer `pos`, the 0-based index of the node the tail links back to (`pos = -1` means there is no cycle).\n\nYour function receives `head` as an ordinary acyclic list together with `pos`. First restore the described structure: if `pos != -1`, connect the tail's `next` to the node at index `pos`. Then, **without using `pos` again and using only O(1) extra memory** (no hash sets of visited nodes), find the node where the cycle begins and return its 0-based index in the list. Return `-1` if the list has no cycle.\n\n> **Note:** The automated tests only compare the returned index, so they cannot detect whether you reused `pos`. Treat the \"no `pos`, O(1) memory\" rule as the real interview requirement: your interviewer will check that your solution uses Floyd's cycle detection.\n\n**Example 1:**\n```\nInput: head = [8,6,4,2], pos = 2\nOutput: 2\nExplanation: The tail (value 2) links back to index 2 (value 4), so the cycle begins at index 2.\n```\n\n**Example 2:**\n```\nInput: head = [9,9], pos = 0\nOutput: 0\nExplanation: The tail links back to the head, so the cycle starts at index 0. Note that values may repeat, so the answer must be an index, not a value.\n```\n\n**Example 3:**\n```\nInput: head = [5], pos = -1\nOutput: -1\nExplanation: There is no cycle.\n```",
+  "examples": [
+    {
+      "input": "head = [8,6,4,2], pos = 2",
+      "output": "2",
+      "explanation": "The tail (value 2) links back to index 2 (value 4), so the cycle begins at index 2."
+    },
+    {
+      "input": "head = [9,9], pos = 0",
+      "output": "0",
+      "explanation": "The tail links back to the head, so the cycle starts at index 0. Note that values may repeat, so the answer must be an index, not a value."
+    },
+    {
+      "input": "head = [5], pos = -1",
+      "output": "-1",
+      "explanation": "There is no cycle."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the list is in the range [1, 10^4].",
+    "-10^5 <= Node.val <= 10^5",
+    "pos is -1 or a valid index in the list.",
+    "Use O(1) extra memory to detect the cycle entry."
+  ],
+  "starter_code": {
+    "python": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def detectCycleIndex(self, head: ListNode | None, pos: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for singly-linked list.\n// function ListNode(val, next) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.next = (next===undefined ? null : next)\n// }\nfunction detectCycleIndex(head, pos) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public int detectCycleIndex(ListNode head, int pos) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    int detectCycleIndex(ListNode* head, int pos) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "head = [8,6,4,2], pos = 2",
+      "expected_output": "2",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [9,9], pos = 0",
+      "expected_output": "0",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [5], pos = -1",
+      "expected_output": "-1",
+      "is_hidden": false
+    },
+    {
+      "input": "head = [1,2,3,4,5], pos = 4",
+      "expected_output": "4",
+      "is_hidden": true
+    },
+    {
+      "input": "head = [5], pos = 0",
+      "expected_output": "0",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: walk the list storing every visited node (by identity) in a hash map together with its index; the first node seen twice is the cycle entry and its stored index is the answer. This is O(n) time but O(n) space. Optimal: after linking the tail to node pos, run Floyd's tortoise-and-hare algorithm. Move slow by one and fast by two until they meet (or fast reaches null, meaning no cycle, so return -1). Then reset one pointer to head and advance both one step at a time; they meet exactly at the cycle's entry node because the distance from the head to the entry equals the distance from the meeting point to the entry modulo the cycle length. Count the steps taken from the head during this second phase to obtain the entry index. This is O(n) time and O(1) extra space.",
+  "hints": [
+    "Two pointers moving at different speeds inside a cycle must eventually land on the same node. What does that tell you?",
+    "Once slow and fast meet, think about the distances: head to cycle entry versus meeting point to cycle entry.",
+    "After the meeting, restart one pointer from head and move both one step at a time, counting steps; the node where they meet again is the entry and the step count is its index."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you compute the length of the cycle once you have found the meeting point?",
+    "How would you detect whether two (possibly cyclic) linked lists share any node?"
+  ]
+}

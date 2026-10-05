@@ -1,0 +1,82 @@
+{
+  "title": "Maximum Score of a Good Subarray",
+  "slug": "maximum-score-of-a-good-subarray",
+  "difficulty": "hard",
+  "category": "arrays",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given an integer array `nums` (0-indexed) and an index `k`.\n\nThe **score** of a subarray `nums[i..j]` is `min(nums[i], nums[i+1], ..., nums[j]) * (j - i + 1)`. A subarray is **good** if it contains index `k`, that is `i <= k <= j`.\n\nReturn the highest score of any good subarray.\n\n**Example 1:**\n```\nInput: nums = [1,4,3,7,4,5], k = 3\nOutput: 15\nExplanation: The subarray from index 1 to 5 is [4,3,7,4,5]. Its minimum is 3 and its length is 5, so its score is 15.\n```\n\n**Example 2:**\n```\nInput: nums = [5,5,4,5,4,1,1,1], k = 0\nOutput: 20\nExplanation: The subarray from index 0 to 4 is [5,5,4,5,4], with minimum 4 and length 5, for a score of 20.\n```\n\n**Example 3:**\n```\nInput: nums = [2,6,1,8,8], k = 4\nOutput: 16\nExplanation: The subarray [8,8] at indices 3 to 4 has minimum 8 and length 2, for a score of 16. Extending further left pulls the minimum down to 1.\n```",
+  "examples": [
+    {
+      "input": "nums = [1,4,3,7,4,5], k = 3",
+      "output": "15",
+      "explanation": "The subarray from index 1 to 5 is [4,3,7,4,5]. Its minimum is 3 and its length is 5, so its score is 15."
+    },
+    {
+      "input": "nums = [5,5,4,5,4,1,1,1], k = 0",
+      "output": "20",
+      "explanation": "The subarray from index 0 to 4 is [5,5,4,5,4], with minimum 4 and length 5, for a score of 20."
+    },
+    {
+      "input": "nums = [2,6,1,8,8], k = 4",
+      "output": "16",
+      "explanation": "The subarray [8,8] at indices 3 to 4 has minimum 8 and length 2, for a score of 16. Extending further left pulls the minimum down to 1."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "1 <= nums[i] <= 2 * 10^4",
+    "0 <= k < nums.length"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def maximumScore(self, nums: list[int], k: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function maximumScore(nums, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public int maximumScore(int[] nums, int k) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int maximumScore(vector<int>& nums, int k) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [1,4,3,7,4,5], k = 3",
+      "expected_output": "15",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5,5,4,5,4,1,1,1], k = 0",
+      "expected_output": "20",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [2,6,1,8,8], k = 4",
+      "expected_output": "16",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [7], k = 0",
+      "expected_output": "7",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [20000,20000,1,20000,20000,20000], k = 2",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force checks every pair (i, j) with i <= k <= j and tracks the running minimum, which is O(n^2). The optimal approach is a greedy two-pointer expansion from k. Start with i = j = k and current minimum nums[k]. At each step, extend toward the side whose next element is larger (if one side is exhausted, extend the other), update the running minimum, and record min * (j - i + 1). Extending toward the larger neighbour never prematurely lowers the minimum, so every minimum value is paired with the widest window it allows. This is O(n) time and O(1) space. A monotonic-stack approach (largest rectangle in histogram restricted to rectangles covering k) also works in O(n).",
+  "hints": [
+    "Every good subarray contains index k, so think about growing a window outward from k.",
+    "When you widen the window by one element, which side should you choose so that the minimum drops as slowly as possible?",
+    "Use two pointers starting at k; always step toward the larger of nums[i-1] and nums[j+1], update the running minimum, and track min * width."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "Can you prove the greedy choice of always extending toward the larger neighbour never misses the optimal window?",
+    "How does this relate to the Largest Rectangle in Histogram problem, and how would a monotonic stack solve it?"
+  ]
+}

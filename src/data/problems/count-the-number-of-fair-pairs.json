@@ -1,0 +1,84 @@
+{
+  "title": "Count The Number Of Fair Pairs",
+  "slug": "count-the-number-of-fair-pairs",
+  "difficulty": "medium",
+  "category": "binary-search",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "You are given an integer array `nums` of length `n` and two integers `lower` and `upper`.\n\nA pair of indices `(i, j)` is called **fair** when `0 <= i < j < n` and the sum `nums[i] + nums[j]` falls inside the inclusive range `[lower, upper]`.\n\nReturn the total number of fair pairs. Pairs are counted by index, so duplicate values at different positions form distinct pairs. If `n < 2`, the answer is `0`.\n\n**Example 1:**\n```\nInput: nums = [2,5,1,4], lower = 5, upper = 7\nOutput: 4\nExplanation: The pair sums are 2+5=7, 2+1=3, 2+4=6, 5+1=6, 5+4=9 and 1+4=5. Four of them (7, 6, 6, 5) lie in [5, 7].\n```\n\n**Example 2:**\n```\nInput: nums = [1,7,9,2,5], lower = 11, upper = 11\nOutput: 1\nExplanation: Only 9 + 2 = 11 hits the target exactly.\n```\n\n**Example 3:**\n```\nInput: nums = [3,3,3], lower = 6, upper = 6\nOutput: 3\nExplanation: Every one of the three index pairs (0,1), (0,2), (1,2) sums to 6. Pairs are counted by index, so equal values still count separately.\n```",
+  "examples": [
+    {
+      "input": "nums = [2,5,1,4], lower = 5, upper = 7",
+      "output": "4",
+      "explanation": "The pair sums are 2+5=7, 2+1=3, 2+4=6, 5+1=6, 5+4=9 and 1+4=5. Four of them (7, 6, 6, 5) lie in [5, 7]."
+    },
+    {
+      "input": "nums = [1,7,9,2,5], lower = 11, upper = 11",
+      "output": "1",
+      "explanation": "Only 9 + 2 = 11 hits the target exactly."
+    },
+    {
+      "input": "nums = [3,3,3], lower = 6, upper = 6",
+      "output": "3",
+      "explanation": "Every one of the three index pairs (0,1), (0,2), (1,2) sums to 6. Pairs are counted by index, so equal values still count separately."
+    }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-10^9 <= nums[i] <= 10^9",
+    "-10^9 <= lower <= upper <= 10^9",
+    "The answer fits in a 64-bit signed integer"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def countFairPairs(self, nums: list[int], lower: int, upper: int) -> int:\n        # Write your solution here\n        pass",
+    "javascript": "function countFairPairs(nums, lower, upper) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public long countFairPairs(int[] nums, int lower, int upper) {\n        // Write your solution here\n        return 0;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    long long countFairPairs(vector<int>& nums, int lower, int upper) {\n        // Write your solution here\n        return 0;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "nums = [2,5,1,4], lower = 5, upper = 7",
+      "expected_output": "4",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [1,7,9,2,5], lower = 11, upper = 11",
+      "expected_output": "1",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [3,3,3], lower = 6, upper = 6",
+      "expected_output": "3",
+      "is_hidden": false
+    },
+    {
+      "input": "nums = [5], lower = 0, upper = 10",
+      "expected_output": "0",
+      "is_hidden": true
+    },
+    {
+      "input": "nums = [-1000000000,-5,0,5,1000000000,7,-7,3], lower = -2, upper = 2",
+      "expected_output": "6",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "The brute force checks every pair (i, j) with i < j and tests whether the sum lies in [lower, upper], costing O(n^2) time and O(1) space. Notice that the answer does not depend on the original order, because each unordered pair of positions is counted exactly once either way, so we can sort the array. Then count pairs with sum <= upper and subtract pairs with sum <= lower - 1. Counting pairs with sum <= T on a sorted array is a classic two-pointer sweep: with l at the start and r at the end, if a[l] + a[r] <= T then every index between l and r pairs with l, so add r - l and move l forward; otherwise move r back. Alternatively, for each i binary-search the range of j > i with lower - a[i] <= a[j] <= upper - a[i]. Either way the total is O(n log n) time for the sort and O(1) extra space (beyond the sort).",
+  "hints": [
+    "Does the order of the array actually matter for counting unordered pairs of positions?",
+    "After sorting, for a fixed element a[i], the valid partners form a contiguous block of the array. How can you find the block boundaries quickly?",
+    "Compute f(T) = number of pairs with sum <= T using two pointers on the sorted array; the answer is f(upper) - f(lower - 1)."
+  ],
+  "optimal_complexity": {
+    "time": "O(n log n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you count fair triples (i < j < k) with the sum in [lower, upper]?",
+    "If elements are inserted into nums one at a time and you must report the count after each insertion, which data structure would you use?"
+  ]
+}

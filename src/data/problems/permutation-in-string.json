@@ -1,0 +1,84 @@
+{
+  "title": "Permutation in String",
+  "slug": "permutation-in-string",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "microsoft",
+    "amazon",
+    "google",
+    "meta",
+    "oracle"
+  ],
+  "description": "Given two strings `s1` and `s2`, return `true` if some contiguous substring of `s2` is a rearrangement (permutation) of `s1`, and `false` otherwise.\n\nIn other words, determine whether `s2` contains a window of length `s1.length` that uses exactly the same letters as `s1`, with the same multiplicities, in any order. If `s1` is longer than `s2`, the answer is `false`.\n\n**Example 1:**\n```\nInput: s1 = \"xy\", s2 = \"pqyxr\"\nOutput: true\nExplanation: The substring \"yx\" starting at index 2 is a permutation of \"xy\".\n```\n\n**Example 2:**\n```\nInput: s1 = \"xy\", s2 = \"pxqyr\"\nOutput: false\nExplanation: \"x\" and \"y\" never sit next to each other, so no window of length 2 contains exactly one of each.\n```\n\n**Example 3:**\n```\nInput: s1 = \"tea\", s2 = \"sweatyx\"\nOutput: true\nExplanation: The window \"eat\" starting at index 2 uses the letters t, e and a once each.\n```",
+  "examples": [
+    {
+      "input": "s1 = \"xy\", s2 = \"pqyxr\"",
+      "output": "true",
+      "explanation": "The substring \"yx\" starting at index 2 is a permutation of \"xy\"."
+    },
+    {
+      "input": "s1 = \"xy\", s2 = \"pxqyr\"",
+      "output": "false",
+      "explanation": "\"x\" and \"y\" never sit next to each other, so no window of length 2 contains exactly one of each."
+    },
+    {
+      "input": "s1 = \"tea\", s2 = \"sweatyx\"",
+      "output": "true",
+      "explanation": "The window \"eat\" starting at index 2 uses the letters t, e and a once each."
+    }
+  ],
+  "constraints": [
+    "1 <= s1.length <= 10^4",
+    "1 <= s2.length <= 10^4",
+    "s1 and s2 consist of lowercase English letters",
+    "s1.length may exceed s2.length, in which case the answer is false"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def checkInclusion(self, s1: str, s2: str) -> bool:\n        # Write your solution here\n        pass",
+    "javascript": "function checkInclusion(s1, s2) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public boolean checkInclusion(String s1, String s2) {\n        // Write your solution here\n        return false;\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    bool checkInclusion(string s1, string s2) {\n        // Write your solution here\n        return false;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s1 = \"xy\", s2 = \"pqyxr\"",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s1 = \"xy\", s2 = \"pxqyr\"",
+      "expected_output": "false",
+      "is_hidden": false
+    },
+    {
+      "input": "s1 = \"tea\", s2 = \"sweatyx\"",
+      "expected_output": "true",
+      "is_hidden": false
+    },
+    {
+      "input": "s1 = \"abc\", s2 = \"ab\"",
+      "expected_output": "false",
+      "is_hidden": true
+    },
+    {
+      "input": "s1 = \"hello\", s2 = \"ooolleoooleh\"",
+      "expected_output": "false",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force generates every permutation of s1 and searches for it in s2, which is factorial and hopeless; a better brute force sorts every window of length m in s2 and compares it with sorted s1, costing O(n * m log m). The optimal approach keeps a fixed-size sliding window of length m = s1.length over s2 together with two 26-entry frequency arrays. Slide the window one character at a time, adding the incoming letter and removing the outgoing one, and return true as soon as the window counts equal the counts of s1 (or track how many of the 26 letters currently match to make each step O(1)). This runs in O(n) time with O(1) space.",
+  "hints": [
+    "Two strings are permutations of each other exactly when they have the same letter counts.",
+    "You only ever need to look at windows of s2 whose length equals s1.length. How can you update a window's counts when it moves by one?",
+    "Keep 26-length count arrays for s1 and the current window. Slide across s2, incrementing the new character and decrementing the one that leaves, and compare the arrays (or maintain a count of matching letters) after each step."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "follow_up_questions": [
+    "How would you return the starting indices of every matching window instead of a boolean?",
+    "What if the alphabet were arbitrary Unicode rather than 26 lowercase letters?"
+  ]
+}

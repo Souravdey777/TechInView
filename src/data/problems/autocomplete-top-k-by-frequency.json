@@ -1,0 +1,81 @@
+{
+  "title": "Autocomplete Top K by Frequency",
+  "slug": "autocomplete-top-k-by-frequency",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "linkedin",
+    "uber"
+  ],
+  "description": "You are building the suggestion box of a search bar. You are given an array `sentences` of distinct historical searches and a parallel array `counts`, where `counts[i]` is how many times `sentences[i]` was searched. You are also given an array of prefix `queries` and an integer `k`.\n\nFor each query, find all sentences that start with that query and return up to `k` of them, ordered by count **descending**; sentences with equal counts are ordered **lexicographically ascending** (by character codes, so a space sorts before any letter). If no sentence matches, the answer for that query is an empty list.\n\nReturn a list containing one answer list per query, in query order.\n\n**Example 1:**\n```\nInput: sentences = [\"go home\",\"golang\",\"google maps\",\"go fast\"], counts = [4,6,1,4], queries = [\"go \",\"gol\",\"x\"], k = 3\nOutput: [[\"go fast\",\"go home\"],[\"golang\"],[]]\nExplanation: \"go \" matches \"go home\" and \"go fast\" (both 4), and the tie puts \"go fast\" first. \"gol\" matches only \"golang\". Nothing starts with \"x\".\n```\n\n**Example 2:**\n```\nInput: sentences = [\"apple\",\"app\",\"apply\",\"ape\"], counts = [2,2,1,3], queries = [\"ap\",\"app\"], k = 2\nOutput: [[\"ape\",\"app\"],[\"app\",\"apple\"]]\nExplanation: For \"ap\" all four match: \"ape\" (3) first, then \"app\" and \"apple\" tie at 2 and \"app\" is lexicographically smaller. For \"app\", \"app\" and \"apple\" (2 each) beat \"apply\" (1).\n```",
+  "examples": [
+    {
+      "input": "sentences = [\"go home\",\"golang\",\"google maps\",\"go fast\"], counts = [4,6,1,4], queries = [\"go \",\"gol\",\"x\"], k = 3",
+      "output": "[[\"go fast\",\"go home\"],[\"golang\"],[]]",
+      "explanation": "\"go \" matches \"go home\" and \"go fast\" (both 4), and the tie puts \"go fast\" first. \"gol\" matches only \"golang\". Nothing starts with \"x\"."
+    },
+    {
+      "input": "sentences = [\"apple\",\"app\",\"apply\",\"ape\"], counts = [2,2,1,3], queries = [\"ap\",\"app\"], k = 2",
+      "output": "[[\"ape\",\"app\"],[\"app\",\"apple\"]]",
+      "explanation": "For \"ap\" all four match: \"ape\" (3) first, then \"app\" and \"apple\" tie at 2 and \"app\" is lexicographically smaller. For \"app\", \"app\" and \"apple\" (2 each) beat \"apply\" (1)."
+    }
+  ],
+  "constraints": [
+    "1 <= sentences.length == counts.length <= 1000, 1 <= sentences[i].length <= 100",
+    "1 <= counts[i] <= 10^5",
+    "1 <= queries.length <= 1000, 1 <= queries[j].length <= 100",
+    "1 <= k <= 10",
+    "sentences[i] and queries[j] consist of lowercase English letters and spaces; all sentences are distinct"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def autocomplete(self, sentences: list[str], counts: list[int], queries: list[str], k: int) -> list[list[str]]:\n        # Write your solution here\n        pass",
+    "javascript": "function autocomplete(sentences, counts, queries, k) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public List<List<String>> autocomplete(String[] sentences, int[] counts, String[] queries, int k) {\n        // Write your solution here\n        return new ArrayList<>();\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<vector<string>> autocomplete(vector<string>& sentences, vector<int>& counts, vector<string>& queries, int k) {\n        // Write your solution here\n        return {};\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "sentences = [\"go home\",\"golang\",\"google maps\",\"go fast\"], counts = [4,6,1,4], queries = [\"go \",\"gol\",\"x\"], k = 3",
+      "expected_output": "[[\"go fast\",\"go home\"],[\"golang\"],[]]",
+      "is_hidden": false
+    },
+    {
+      "input": "sentences = [\"apple\",\"app\",\"apply\",\"ape\"], counts = [2,2,1,3], queries = [\"ap\",\"app\"], k = 2",
+      "expected_output": "[[\"ape\",\"app\"],[\"app\",\"apple\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "sentences = [\"hello world\",\"hello\",\"help\"], counts = [4,4,9], queries = [\"hel\",\"hello \"], k = 2",
+      "expected_output": "[[\"help\",\"hello\"],[\"hello world\"]]",
+      "is_hidden": false
+    },
+    {
+      "input": "sentences = [\"a b\",\"a\",\"ab\",\"abc\"], counts = [4,4,4,1], queries = [\"a\",\"ab\",\"abcd\"], k = 2",
+      "expected_output": "[[\"a\",\"a b\"],[\"ab\",\"abc\"],[]]",
+      "is_hidden": true
+    },
+    {
+      "input": "sentences = [\"go\"], counts = [1], queries = [\"g\",\"go\",\"gone\"], k = 10",
+      "expected_output": "[[\"go\"],[\"go\"],[]]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: for each query scan every sentence, keep those that start with the query, sort by (-count, sentence) and take k; this is O(q * n * L + q * n log n). Trie approach: insert every sentence character by character, and at each node maintain a small list of the best k sentence indices under that node, ordered by (-count, sentence). Updating a node during insertion is O(k log k), so building costs O(n * L * k log k). A query then walks down the trie along its characters and returns the stored list at the final node (or an empty list if the path breaks), costing O(P + k). Overall time O(n * L * k log k + q * (P + k)) with O(n * L * k) space. Without per-node caching, you can instead DFS the subtree and use a heap of size k.",
+  "hints": [
+    "Every sentence that matches a query lives in the same part of a prefix tree.",
+    "Walk the trie along the query characters; all sentences in the subtree below that node are the candidates. Rank them by count descending, then by the string itself.",
+    "To answer each query in O(prefix length + k), store at every trie node the current top-k sentences for that subtree and update those lists as you insert each sentence."
+  ],
+  "optimal_complexity": {
+    "time": "O(n * L * k log k + q * (P + k))",
+    "space": "O(n * L * k)"
+  },
+  "follow_up_questions": [
+    "How would you support incrementing a sentence's count when a user submits a new search?",
+    "How would you scale this when the sentence set is too large to fit on one machine?"
+  ]
+}

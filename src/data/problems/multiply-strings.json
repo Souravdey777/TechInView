@@ -1,0 +1,84 @@
+{
+  "title": "Multiply Strings",
+  "slug": "multiply-strings",
+  "difficulty": "medium",
+  "category": "strings",
+  "company_tags": [
+    "meta",
+    "google",
+    "amazon",
+    "microsoft",
+    "apple",
+    "bloomberg"
+  ],
+  "description": "You are given two non-negative integers `num1` and `num2` written as decimal strings. Return their product, also as a decimal string.\n\nYou must not convert the inputs directly to integers or use any built-in big-integer library — implement the multiplication on the digits yourself.\n\nThe result must not have leading zeros; if the product is zero, return `\"0\"`.\n\n**Example 1:**\n```\nInput: num1 = \"12\", num2 = \"34\"\nOutput: \"408\"\nExplanation: 12 x 34 = 408.\n```\n\n**Example 2:**\n```\nInput: num1 = \"305\", num2 = \"27\"\nOutput: \"8235\"\nExplanation: 305 x 27 = 8235.\n```\n\n**Example 3:**\n```\nInput: num1 = \"0\", num2 = \"9876\"\nOutput: \"0\"\nExplanation: Anything multiplied by zero is zero, returned as the single digit \"0\".\n```",
+  "examples": [
+    {
+      "input": "num1 = \"12\", num2 = \"34\"",
+      "output": "\"408\"",
+      "explanation": "12 x 34 = 408."
+    },
+    {
+      "input": "num1 = \"305\", num2 = \"27\"",
+      "output": "\"8235\"",
+      "explanation": "305 x 27 = 8235."
+    },
+    {
+      "input": "num1 = \"0\", num2 = \"9876\"",
+      "output": "\"0\"",
+      "explanation": "Anything multiplied by zero is zero, returned as the single digit \"0\"."
+    }
+  ],
+  "constraints": [
+    "1 <= num1.length, num2.length <= 200",
+    "num1 and num2 consist of digits only",
+    "Neither num1 nor num2 has leading zeros, except the number 0 itself"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def multiply(self, num1: str, num2: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function multiply(num1, num2) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String multiply(String num1, String num2) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string multiply(string num1, string num2) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "num1 = \"12\", num2 = \"34\"",
+      "expected_output": "\"408\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num1 = \"305\", num2 = \"27\"",
+      "expected_output": "\"8235\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num1 = \"0\", num2 = \"9876\"",
+      "expected_output": "\"0\"",
+      "is_hidden": false
+    },
+    {
+      "input": "num1 = \"999\", num2 = \"999\"",
+      "expected_output": "\"998001\"",
+      "is_hidden": true
+    },
+    {
+      "input": "num1 = \"0\", num2 = \"0\"",
+      "expected_output": "\"0\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A simple approach mimics schoolbook multiplication literally: multiply num1 by each digit of num2 to produce a partial product string, shift it by appending zeros, and add all partial products with string addition; this is O(m * n) digit work but creates many intermediate strings. The optimal implementation uses a single integer array of length m + n: the product of digits num1[i] and num2[j] contributes to positions i + j and i + j + 1. Iterate i and j from the right, add the digit product plus the existing value at i + j + 1, store the ones digit there and carry the tens into i + j. Finally skip leading zeros and join the digits, returning \"0\" if nothing remains. This is O(m * n) time and O(m + n) space.",
+  "hints": [
+    "Think about how you multiply multi-digit numbers on paper, one digit at a time.",
+    "The product of an m-digit and an n-digit number has at most m + n digits. Where does the product of digit i of num1 and digit j of num2 land in that result?",
+    "Allocate an array res of size m + n. For i, j from the right: p = d1 * d2 + res[i+j+1]; res[i+j+1] = p % 10; res[i+j] += p // 10. Strip leading zeros at the end and return \"0\" if empty."
+  ],
+  "optimal_complexity": {
+    "time": "O(m * n)",
+    "space": "O(m + n)"
+  },
+  "follow_up_questions": [
+    "How could Karatsuba multiplication reduce the complexity for very long inputs?",
+    "How would you extend this to handle negative numbers or decimal points?"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "Longest Word With All Prefixes",
+  "slug": "longest-word-with-all-prefixes",
+  "difficulty": "medium",
+  "category": "trie",
+  "company_tags": [
+    "google",
+    "amazon",
+    "microsoft"
+  ],
+  "description": "You are given an array of strings `words`. A word is **buildable** if every one of its non-empty prefixes (including the word itself) also appears in `words`. For example, `\"cat\"` is buildable only if `\"c\"`, `\"ca\"` and `\"cat\"` are all in the array.\n\nReturn the longest buildable word. If several buildable words share the maximum length, return the one that is lexicographically smallest. If no word is buildable, return the empty string `\"\"`.\n\n**Example 1:**\n```\nInput: words = [\"m\",\"mo\",\"moo\",\"moon\",\"moons\"]\nOutput: \"moons\"\nExplanation: Every prefix of \"moons\" (\"m\", \"mo\", \"moo\", \"moon\") is in the list, and it is the longest such word.\n```\n\n**Example 2:**\n```\nInput: words = [\"t\",\"to\",\"top\",\"tops\",\"tap\",\"ta\",\"taps\",\"tip\",\"tipsy\"]\nOutput: \"taps\"\nExplanation: \"tops\" and \"taps\" are both buildable with length 4, and \"taps\" is lexicographically smaller. \"tipsy\" is not buildable because \"ti\" is missing.\n```\n\n**Example 3:**\n```\nInput: words = [\"dog\",\"og\",\"do\",\"go\"]\nOutput: \"\"\nExplanation: \"dog\" and \"do\" need \"d\", \"og\" needs \"o\", and \"go\" needs \"g\". None of those are present, so no word is buildable.\n```",
+  "examples": [
+    {
+      "input": "words = [\"m\",\"mo\",\"moo\",\"moon\",\"moons\"]",
+      "output": "\"moons\"",
+      "explanation": "Every prefix of \"moons\" (\"m\", \"mo\", \"moo\", \"moon\") is in the list, and it is the longest such word."
+    },
+    {
+      "input": "words = [\"t\",\"to\",\"top\",\"tops\",\"tap\",\"ta\",\"taps\",\"tip\",\"tipsy\"]",
+      "output": "\"taps\"",
+      "explanation": "\"tops\" and \"taps\" are both buildable with length 4, and \"taps\" is lexicographically smaller. \"tipsy\" is not buildable because \"ti\" is missing."
+    },
+    {
+      "input": "words = [\"dog\",\"og\",\"do\",\"go\"]",
+      "output": "\"\"",
+      "explanation": "\"dog\" and \"do\" need \"d\", \"og\" needs \"o\", and \"go\" needs \"g\". None of those are present, so no word is buildable."
+    }
+  ],
+  "constraints": [
+    "1 <= words.length <= 10^5",
+    "1 <= words[i].length <= 10^5",
+    "1 <= sum(words[i].length) <= 10^5",
+    "words[i] consists of lowercase English letters only"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def longestWord(self, words: list[str]) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function longestWord(words) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String longestWord(String[] words) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string longestWord(vector<string>& words) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "words = [\"m\",\"mo\",\"moo\",\"moon\",\"moons\"]",
+      "expected_output": "\"moons\"",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"t\",\"to\",\"top\",\"tops\",\"tap\",\"ta\",\"taps\",\"tip\",\"tipsy\"]",
+      "expected_output": "\"taps\"",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"dog\",\"og\",\"do\",\"go\"]",
+      "expected_output": "\"\"",
+      "is_hidden": false
+    },
+    {
+      "input": "words = [\"z\",\"y\",\"x\"]",
+      "expected_output": "\"x\"",
+      "is_hidden": true
+    },
+    {
+      "input": "words = [\"a\",\"ab\",\"abc\",\"b\",\"bc\",\"bcd\",\"abd\"]",
+      "expected_output": "\"abc\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "Brute force: put all words in a hash set and, for every word, check each of its prefixes in the set, keeping the best candidate by (length desc, lexicographic asc); this costs O(sum of L^2) because each prefix slice and hash is O(L). Optimal: insert every word into a trie and mark word-end nodes. A word is buildable exactly when every node along its path is marked as a word end, so a DFS/BFS from the root that only descends into marked children visits exactly the buildable words. Track the deepest word reached, breaking ties by lexicographic order (visiting children in alphabetical order and only replacing on strictly greater length does this automatically). Total time O(S) where S is the total number of characters, with O(S) space for the trie.",
+  "hints": [
+    "Checking a word means checking all of its prefixes. Which data structure stores many words so that their shared prefixes are shared too?",
+    "After inserting all words into a trie, a word is buildable exactly when every node on its path from the root is marked as the end of some word.",
+    "Run a DFS from the root that only moves into children flagged as word ends, visiting children in alphabetical order; update the answer only when you reach a strictly deeper node so ties keep the lexicographically smaller word."
+  ],
+  "optimal_complexity": {
+    "time": "O(S)",
+    "space": "O(S)"
+  },
+  "follow_up_questions": [
+    "How would you return all buildable words of maximum length instead of just one?",
+    "How would you handle words being added to the list one at a time while keeping the current answer up to date?"
+  ]
+}

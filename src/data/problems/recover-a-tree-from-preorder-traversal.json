@@ -1,0 +1,83 @@
+{
+  "title": "Recover a Tree From Preorder Traversal",
+  "slug": "recover-a-tree-from-preorder-traversal",
+  "difficulty": "hard",
+  "category": "trees",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "microsoft",
+    "bloomberg"
+  ],
+  "description": "A binary tree was written out as a single string by a preorder DFS. For each node, the writer emitted `D` dashes, where `D` is the node's depth (the root has depth 0), immediately followed by the node's value. Nothing separates one node from the next except the dashes.\n\nIf a node has exactly one child, that child is always its **left** child.\n\nGiven the string `traversal`, rebuild the tree and return its `root`. The output is the tree in level-order form, with `null` for missing children and trailing `null`s removed.\n\n**Example 1:**\n```\nInput: traversal = \"1-2--3---4-5\"\nOutput: [1,2,5,3,null,null,null,4]\nExplanation: Node 1 is the root. 2 (depth 1) is its left child, 3 (depth 2) is 2's left child, 4 (depth 3) is 3's left child, and 5 (depth 1) is the root's right child.\n```\n\n**Example 2:**\n```\nInput: traversal = \"1-2--3--4-5--6--7\"\nOutput: [1,2,5,3,4,6,7]\nExplanation: 2 and 5 are the children of 1; 3 and 4 are the children of 2; 6 and 7 are the children of 5.\n```\n\n**Example 3:**\n```\nInput: traversal = \"10-7--3-20\"\nOutput: [10,7,20,3]\nExplanation: 7 is the left child of 10, 3 is the left child of 7, and 20 returns to depth 1 as the right child of 10.\n```",
+  "examples": [
+    {
+      "input": "traversal = \"1-2--3---4-5\"",
+      "output": "[1,2,5,3,null,null,null,4]",
+      "explanation": "Node 1 is the root. 2 (depth 1) is its left child, 3 (depth 2) is 2's left child, 4 (depth 3) is 3's left child, and 5 (depth 1) is the root's right child."
+    },
+    {
+      "input": "traversal = \"1-2--3--4-5--6--7\"",
+      "output": "[1,2,5,3,4,6,7]",
+      "explanation": "2 and 5 are the children of 1; 3 and 4 are the children of 2; 6 and 7 are the children of 5."
+    },
+    {
+      "input": "traversal = \"10-7--3-20\"",
+      "output": "[10,7,20,3]",
+      "explanation": "7 is the left child of 10, 3 is the left child of 7, and 20 returns to depth 1 as the right child of 10."
+    }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [1, 1000].",
+    "1 <= Node.val <= 10^9",
+    "traversal is a valid encoding of some binary tree using only digits and '-'."
+  ],
+  "starter_code": {
+    "python": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def recoverFromPreorder(self, traversal: str) -> TreeNode | None:\n        # Write your solution here\n        pass",
+    "javascript": "// Definition for a binary tree node.\n// function TreeNode(val, left, right) {\n//     this.val = (val===undefined ? 0 : val)\n//     this.left = (left===undefined ? null : left)\n//     this.right = (right===undefined ? null : right)\n// }\nfunction recoverFromPreorder(traversal) {\n    // Write your solution here\n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public TreeNode recoverFromPreorder(String traversal) {\n        // Write your solution here\n        return null;\n    }\n}",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* recoverFromPreorder(string traversal) {\n        // Write your solution here\n        return nullptr;\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "traversal = \"1-2--3---4-5\"",
+      "expected_output": "[1,2,5,3,null,null,null,4]",
+      "is_hidden": false
+    },
+    {
+      "input": "traversal = \"1-2--3--4-5--6--7\"",
+      "expected_output": "[1,2,5,3,4,6,7]",
+      "is_hidden": false
+    },
+    {
+      "input": "traversal = \"10-7--3-20\"",
+      "expected_output": "[10,7,20,3]",
+      "is_hidden": false
+    },
+    {
+      "input": "traversal = \"7\"",
+      "expected_output": "[7]",
+      "is_hidden": true
+    },
+    {
+      "input": "traversal = \"1-401--349---90--88\"",
+      "expected_output": "[1,401,null,349,88,90]",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A brute-force approach first tokenizes the string into (depth, value) pairs and then, for each node, scans backwards through earlier tokens to find the most recent node at depth - 1 to attach it to, which costs O(n^2) in the worst case. The optimal approach parses in one pass with a stack that always holds the path from the root to the most recently created node. For each token, count the dashes to get depth d and read the digits for the value, pop the stack until its size equals d, then attach the new node as the left child of the stack top if that slot is empty, otherwise as the right child, and push it. The bottom of the stack is the root. This runs in O(n) time over the string length with O(h) extra space for the stack.",
+  "hints": [
+    "Split the string into nodes: the number of dashes before each number tells you its depth.",
+    "In preorder, a node's parent is the most recent earlier node whose depth is exactly one less. What data structure keeps the current root-to-node path?",
+    "Keep a stack of the current path. For a node at depth d, pop until the stack has d nodes, attach the node as left child if free, otherwise right, then push it."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "follow_up_questions": [
+    "How would you serialize a tree back into this dash format, and can that round-trip handle a node with only a right child?",
+    "Can you solve it recursively by passing the expected depth down and using a shared index into the string?"
+  ]
+}

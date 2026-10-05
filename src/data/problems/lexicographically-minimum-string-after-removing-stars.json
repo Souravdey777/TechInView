@@ -1,0 +1,82 @@
+{
+  "title": "Lexicographically Minimum String After Removing Stars",
+  "slug": "lexicographically-minimum-string-after-removing-stars",
+  "difficulty": "medium",
+  "category": "stacks-queues",
+  "company_tags": [
+    "google",
+    "amazon",
+    "meta",
+    "bloomberg"
+  ],
+  "description": "You are given a string `s` consisting of lowercase English letters and `'*'` characters.\n\nProcess the stars from left to right. For the leftmost remaining `'*'`, delete it together with the **smallest letter to its left** that has not been deleted yet. If that smallest letter appears several times to the left of the star, delete the **rightmost** of those occurrences (this choice keeps the final string lexicographically smallest). Repeat until no stars remain.\n\nReturn the resulting string. It is guaranteed that every `'*'` has at least one undeleted letter to its left when it is processed, so the operation is always possible. The result may be the empty string `\"\"`.\n\n**Example 1:**\n```\nInput: s = \"aaba*\"\nOutput: \"aab\"\nExplanation: The smallest letter left of the star is 'a', occurring at indices 0, 1 and 3. Remove the rightmost one (index 3) together with the star, leaving \"aab\".\n```\n\n**Example 2:**\n```\nInput: s = \"abc\"\nOutput: \"abc\"\nExplanation: There are no stars, so the string is unchanged.\n```\n\n**Example 3:**\n```\nInput: s = \"de*c*\"\nOutput: \"e\"\nExplanation: The first star removes 'd' (smallest of \"de\"), leaving \"ec*\". The second star removes 'c', leaving \"e\".\n```",
+  "examples": [
+    {
+      "input": "s = \"aaba*\"",
+      "output": "\"aab\"",
+      "explanation": "The smallest letter left of the star is 'a', occurring at indices 0, 1 and 3. Remove the rightmost one (index 3) together with the star, leaving \"aab\"."
+    },
+    {
+      "input": "s = \"abc\"",
+      "output": "\"abc\"",
+      "explanation": "There are no stars, so the string is unchanged."
+    },
+    {
+      "input": "s = \"de*c*\"",
+      "output": "\"e\"",
+      "explanation": "The first star removes 'd' (smallest of \"de\"), leaving \"ec*\". The second star removes 'c', leaving \"e\"."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^5",
+    "s consists only of lowercase English letters and '*'",
+    "Every '*' can be paired with an undeleted letter to its left (the input is always valid)"
+  ],
+  "starter_code": {
+    "python": "class Solution:\n    def clearStars(self, s: str) -> str:\n        # Write your solution here\n        pass",
+    "javascript": "function clearStars(s) {\n    // Write your solution here\n}",
+    "java": "class Solution {\n    public String clearStars(String s) {\n        // Write your solution here\n        return \"\";\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string clearStars(string s) {\n        // Write your solution here\n        return \"\";\n    }\n};"
+  },
+  "test_cases": [
+    {
+      "input": "s = \"aaba*\"",
+      "expected_output": "\"aab\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"abc\"",
+      "expected_output": "\"abc\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"de*c*\"",
+      "expected_output": "\"e\"",
+      "is_hidden": false
+    },
+    {
+      "input": "s = \"a*\"",
+      "expected_output": "\"\"",
+      "is_hidden": true
+    },
+    {
+      "input": "s = \"baab*a*c*\"",
+      "expected_output": "\"bbc\"",
+      "is_hidden": true
+    }
+  ],
+  "solution_approach": "A direct simulation rescans everything to the left of each star to find the smallest letter, which costs O(n^2). The optimal approach keeps 26 stacks of indices, one per letter. Scanning left to right, push each letter's index onto its stack; on a '*', find the smallest letter whose stack is non-empty and pop its top, which is exactly the rightmost occurrence of that letter, marking it deleted. Finally rebuild the string from the surviving letter indices in order. Time O(26 * n) = O(n), space O(n).",
+  "hints": [
+    "Deleting the rightmost copy of the smallest letter is what keeps earlier, more significant positions small. Which data structure gives you the most recent occurrence quickly?",
+    "Keep one stack of positions for each of the 26 letters; the top of a stack is the rightmost undeleted copy of that letter.",
+    "On each '*', scan letters 'a' to 'z' for the first non-empty stack, pop it and mark that index removed; at the end output the unmarked letters in their original order."
+  ],
+  "optimal_complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "follow_up_questions": [
+    "How would you adapt the solution if a star had to delete the largest letter to its left instead?",
+    "Could you solve it with a single priority queue, and how would you break ties in it?"
+  ]
+}
