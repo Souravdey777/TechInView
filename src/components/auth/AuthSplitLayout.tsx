@@ -5,13 +5,13 @@ import Link from "next/link";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { VoiceVisualizer } from "@/components/interview/VoiceVisualizer";
 import { CELL, GRID, H3, Kicker, LABEL, LEAD } from "@/components/marketing/ds";
-import { INTERVIEWER_PERSONAS } from "@/lib/interviewer-personas";
+import { PHASE_ORDER } from "@/lib/interview-phases";
 import { FREE_TRIAL_DURATION_MINUTES, FULL_INTERVIEW_DURATION_MINUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 // Only stats derived from code constants, so they cannot drift from the product.
 const PANEL_STATS: ReadonlyArray<{ value: string; label: string }> = [
-  { value: String(INTERVIEWER_PERSONAS.length), label: "Interviewers" },
+  { value: String(PHASE_ORDER.length), label: "Interview phases" },
   { value: `${FULL_INTERVIEW_DURATION_MINUTES}m`, label: "Full round" },
   { value: `${FREE_TRIAL_DURATION_MINUTES}m`, label: "Free preview" },
 ];

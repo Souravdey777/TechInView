@@ -27,7 +27,7 @@ import {
 } from "@/lib/interview-phases";
 import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
 import { getLiveInterviewModel } from "@/lib/ai/models";
-import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import { INTERVIEWER as interviewer, getInterviewerVoice } from "@/lib/interviewer";
 import { getPhaseLabelForRound } from "@/lib/loops/round-config";
 import { ENGINEERING_MANAGER_DURATION_MINUTES } from "@/lib/engineering-manager";
 import type { CompetencyReport } from "@/types";
@@ -98,10 +98,6 @@ export function EngineeringManagerInterviewRoom({
   const setRoomStartedAtMs = useInterviewStore((state) => state.setRoomStartedAtMs);
   const setRoomPhase = useInterviewStore((state) => state.setRoomPhase);
 
-  const interviewer = useMemo(
-    () => getInterviewerPersona(storeConfig?.interviewerPersona),
-    [storeConfig?.interviewerPersona]
-  );
   const maxDuration = storeConfig?.maxDurationSeconds ?? MAX_DURATION_SECONDS;
   const round = roundContext;
   // Value lens the round is graded against. Absent on snapshots created before
@@ -217,10 +213,9 @@ export function EngineeringManagerInterviewRoom({
         hasCandidateCode: false,
         hasWorkspaceNotes: false,
         totalMinutes: Math.round(maxDuration / 60),
-        interviewerPersonaId: interviewer.id,
       }),
       thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
-      voiceModel: interviewer.voiceModel,
+      voiceModel: getInterviewerVoice(),
       functions: agentFunctions,
       contextMessages: agentContextMessages,
       inputDeviceId: selectedDeviceId,
@@ -229,7 +224,6 @@ export function EngineeringManagerInterviewRoom({
       agentContextMessages,
       agentFunctions,
       currentPhase,
-      interviewer,
       maxDuration,
       round,
       selectedDeviceId,
@@ -423,7 +417,6 @@ export function EngineeringManagerInterviewRoom({
       currentCode: "",
       elapsedSeconds: Math.max(0, Math.floor((Date.now() - startTimeRef.current) / 1000)),
       maxDurationSeconds: maxDuration,
-      interviewerPersona: interviewer.id,
       roundType: "hiring_manager",
       roundContext: round,
     }),
@@ -483,7 +476,6 @@ export function EngineeringManagerInterviewRoom({
         },
         body: JSON.stringify({
           interviewId,
-          interviewerPersona: interviewer.id,
           mode: "targeted_loop",
           roundType: "hiring_manager",
           roundTitle: round.title,
@@ -524,7 +516,6 @@ export function EngineeringManagerInterviewRoom({
       roundType: "hiring_manager",
       roundTitle: round.title,
       interviewId,
-      interviewerPersona: interviewer.id,
       finalCode: "",
       language: storeConfig?.language ?? "javascript",
       transcript: transcriptRef.current,
@@ -552,7 +543,6 @@ export function EngineeringManagerInterviewRoom({
     agent,
     completeInterviewStore,
     interviewId,
-    interviewer.id,
     isScoring,
     round,
     router,

@@ -16,7 +16,7 @@ import { ROUND_SCORING_DIMENSIONS, SCORING_DIMENSIONS } from "@/lib/constants";
 import type { HireRecommendation, InterviewMode, RoundScoreDimension, RoundType, ScoringDimension } from "@/lib/constants";
 import { useInterviewStore } from "@/stores/interview-store";
 import { useSupabase } from "@/hooks/useSupabase";
-import { getInterviewerPersona, resolveInterviewerPersona } from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
 import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
 
@@ -190,7 +190,6 @@ export default function ResultsPage() {
               roundType: (interview.round_type as RoundType | null) ?? "coding",
               roundTitle: interview.round_title ?? prob?.title ?? "Interview Round",
               interviewId: interview.id,
-              interviewerPersona: resolveInterviewerPersona(interview.interviewer_persona),
               finalCode: interview.final_code ?? "",
               language: interview.language ?? "python",
               transcript: msgs.map((m) => ({
@@ -273,11 +272,7 @@ export default function ResultsPage() {
     return (
       <InterviewReviewGate
         interviewId={pageId}
-        interviewerName={getInterviewerPersona(
-          storeMatchesPage
-            ? storeResult?.interviewerPersona
-            : dbResult?.interviewerPersona
-        ).name}
+        interviewerName={INTERVIEWER.name}
         onComplete={() => setFeedbackCompleted(true)}
       />
     );
@@ -312,9 +307,7 @@ export default function ResultsPage() {
   const problemTitle = result.problemTitle ?? storeProblem?.title ?? "Interview";
   const problemDifficulty = result.problemDifficulty ?? storeProblem?.difficulty ?? setupConfig?.difficulty ?? "medium";
   const displayLanguage = formatLanguage(codeLanguage);
-  const interviewer = getInterviewerPersona(
-    result.interviewerPersona ?? setupConfig?.interviewerPersona
-  );
+  const interviewer = INTERVIEWER;
   const dimensionConfig = getDimensionConfig(mode) as Record<
     DimensionKey,
     { label: string; weight: number; description: string }

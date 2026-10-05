@@ -5,11 +5,6 @@ import {
   type RoundType,
   type SupportedLanguage,
 } from "@/lib/constants";
-import {
-  DEFAULT_INTERVIEWER_PERSONA,
-  type InterviewerPersonaId,
-  isCompanyPersonaId,
-} from "@/lib/interviewer-personas";
 import { REVIEWED_HISTORICAL_QUESTIONS } from "@/data/historical-questions";
 import { getWorkspaceSections } from "./round-config";
 import type {
@@ -54,18 +49,6 @@ export function normalizeCompany(company: string): string {
   const slug = slugify(company);
   if (!slug) return "generic";
   return slug;
-}
-
-export function chooseLoopPersonaId(company: string): InterviewerPersonaId {
-  if (isCompanyPersonaId(company)) return company;
-
-  for (const [personaId, companies] of Object.entries(SIMILAR_COMPANY_CLUSTERS)) {
-    if (companies.includes(company)) {
-      return personaId as InterviewerPersonaId;
-    }
-  }
-
-  return DEFAULT_INTERVIEWER_PERSONA;
 }
 
 export function extractJdSignals(jdText: string, roleTitle: string): string[] {
@@ -310,7 +293,6 @@ export function generateTargetedLoop(input: LoopGenerationInput): GeneratedLoop 
   const roleTitle = input.roleTitle.trim() || "Software Engineer";
   const jdText = input.jdText.trim();
   const jdSignals = extractJdSignals(jdText, roleTitle);
-  const personaId = chooseLoopPersonaId(company);
   const includeDesign = shouldIncludeSystemDesign(input.experienceLevel, jdSignals);
   const roundSequence: RoundType[] = includeDesign
     ? ["coding", "system_design", "behavioral", "hiring_manager"]
@@ -346,7 +328,6 @@ export function generateTargetedLoop(input: LoopGenerationInput): GeneratedLoop 
       ? `This loop mixes coding, system design, behavioral, and hiring-manager practice because the role signals both implementation depth and architectural ownership.`
       : `This loop prioritizes two coding rounds plus behavioral and hiring-manager practice because the role reads like an execution-heavy SWE IC loop.`,
     confidence: usedAnyFallback ? "medium" : "high",
-    personaId,
     similarCompanyFallback: usedAnyFallback,
     rounds,
     createdAt,
@@ -375,6 +356,5 @@ export function buildLoopStartPayload(
     generatedLoopRoundId: round.id,
     generatedLoopSummary: buildLoopSummary(loop),
     generatedLoopRoundSnapshot: buildRoundContextSnapshot(round),
-    interviewerPersona: loop.personaId,
   };
 }

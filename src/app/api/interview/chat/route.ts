@@ -39,7 +39,6 @@ export async function POST(request: Request) {
       currentCode,
       elapsedSeconds,
       maxDurationSeconds,
-      interviewerPersona,
     } = body as {
       message?: string;
       conversationHistory?: { role: string; content: string }[];
@@ -48,7 +47,6 @@ export async function POST(request: Request) {
       currentCode?: string;
       elapsedSeconds?: number;
       maxDurationSeconds?: number;
-      interviewerPersona?: string;
       roundType?: RoundType;
       roundContext?: RoundContextSnapshot | null;
     };
@@ -95,7 +93,6 @@ export async function POST(request: Request) {
       currentCode: typeof currentCode === "string" ? currentCode : "",
       minutesElapsed: minutes,
       totalMinutes,
-      interviewerPersonaId: interviewerPersona,
       // Same guard as the voice path: derived from the transcript, so a phase
       // that never advances cannot re-arm the "present the problem" instruction.
       problemAlreadyPresented: hasPresentedProblem(

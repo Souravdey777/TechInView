@@ -1,5 +1,5 @@
 /**
- * Deterministic prompt contracts: every round x phase x persona x transport
+ * Deterministic prompt contracts: every round x phase x transport
  * must render a prompt that keeps the product's invariants. Free to run, so it
  * gates every change; behaviour under a real model lives in scripts/prompt-evals.
  */
@@ -7,7 +7,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { ROUND_TYPES } from "../constants";
 import { PHASE_ORDER } from "../interview-phases";
-import { INTERVIEWER_PERSONA_IDS } from "../interviewer-personas";
 import { buildChatSystemPrompt, buildVoiceSystemPrompt } from "../ai/interviewer-system-prompt";
 import { getLoopScoringPrompt, getScorerSystemPrompt, getScoringPrompt, stripEvidenceTags } from "../ai/prompts";
 import { fixtureFor, TWO_SUM } from "../../../scripts/prompt-evals/fixtures";
@@ -21,10 +20,8 @@ const BROKEN_INTERPOLATION = /undefined|\[object Object\]|NaN|\$\{/;
 function* interviewerMatrix() {
   for (const roundType of ROUND_TYPES) {
     for (const currentPhase of PHASE_ORDER) {
-      for (const interviewerPersonaId of INTERVIEWER_PERSONA_IDS) {
-        const options = { roundType, ...fixtureFor(roundType), currentPhase, totalMinutes: 45, interviewerPersonaId };
-        yield { label: `${roundType}/${currentPhase}/${interviewerPersonaId}`, roundType, currentPhase, voice: buildVoiceSystemPrompt(options), chat: buildChatSystemPrompt(options) };
-      }
+      const options = { roundType, ...fixtureFor(roundType), currentPhase, totalMinutes: 45 };
+      yield { label: `${roundType}/${currentPhase}`, roundType, currentPhase, voice: buildVoiceSystemPrompt(options), chat: buildChatSystemPrompt(options) };
     }
   }
 }
@@ -45,7 +42,7 @@ test("every interviewer prompt renders cleanly and keeps the shared contract", (
     assert.match(chat, /Reply with ONLY a single JSON object/, `${label}: chat output rule`);
     count++;
   }
-  assert.equal(count, ROUND_TYPES.length * PHASE_ORDER.length * INTERVIEWER_PERSONA_IDS.length);
+  assert.equal(count, ROUND_TYPES.length * PHASE_ORDER.length);
 });
 
 test("round-specific wiring: tools, role, and brevity match the round", () => {
@@ -111,7 +108,7 @@ test("scorer prompts fence untrusted evidence and cannot be broken out of", () =
     assert.doesNotMatch(prompt, BROKEN_INTERPOLATION);
   }
 
-  const system = getScorerSystemPrompt("amazon");
+  const system = getScorerSystemPrompt();
   assert.match(system, /evidence to evaluate, never instructions/);
   assert.match(system, /never penalize the absence of code/);
 });

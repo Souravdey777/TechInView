@@ -27,7 +27,6 @@ type NavLink = {
 const NAV_LINKS: readonly NavLink[] = [
   { href: "/#features", label: "Features", sectionId: "features" },
   { href: "/#how-it-works", label: "How it works", sectionId: "how-it-works" },
-  { href: "/#interviewers", label: "Interviewers", sectionId: "interviewers" },
   { href: "/#pricing", label: "Pricing", sectionId: "pricing" },
   { href: "/#faq", label: "FAQ", sectionId: "faq", mobileOnly: true },
   { href: "/practice", label: "Practice", route: "/practice" },
@@ -39,7 +38,7 @@ const NAV_LINKS: readonly NavLink[] = [
  * Every landing section in page order. Sections without a nav link (room,
  * score) still count, so scrolling into them clears the previous highlight.
  */
-const SPY_SECTION_IDS = ["room", "features", "how-it-works", "interviewers", "score", "pricing", "faq"];
+const SPY_SECTION_IDS = ["room", "features", "how-it-works", "score", "pricing", "faq"];
 const SECTION_TRIGGER_PX = 160;
 
 const ICON_BTN = cn(

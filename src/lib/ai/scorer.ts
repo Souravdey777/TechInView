@@ -3,7 +3,6 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { getLoopScoringPrompt, getScorerSystemPrompt, getScoringPrompt } from "./prompts";
 import { ROUND_SCORING_DIMENSIONS, SCORING_DIMENSIONS, type InterviewMode, type RoundType } from "@/lib/constants";
-import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { CompetencyReport, InterviewResult } from "@/types";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import { resolveValueCompetencies } from "@/lib/interview-values";
@@ -213,7 +212,6 @@ type ScoreInterviewParams = {
   mode?: InterviewMode;
   roundType?: RoundType;
   roundTitle?: string;
-  interviewerPersonaId?: InterviewerPersonaId;
   problem?: {
     title: string;
     description: string;
@@ -236,7 +234,6 @@ export async function scoreInterview(
     roundType = "coding",
     roundTitle = "Interview Round",
     problem,
-    interviewerPersonaId,
     roundContext,
   } = params;
 
@@ -253,7 +250,6 @@ export async function scoreInterview(
           finalCode,
           testsPassed,
           testsTotal,
-          interviewerPersonaId,
           roundType,
           roundTitle,
           problem,
@@ -265,7 +261,6 @@ export async function scoreInterview(
           finalCode,
           testsPassed,
           testsTotal,
-          interviewerPersonaId,
           problem: {
             title: problem?.title ?? "Unknown Problem",
             description: problem?.description ?? "",
@@ -284,7 +279,7 @@ export async function scoreInterview(
     const response = await client.messages.parse({
       model: INTERVIEW_MODEL,
       max_tokens: maxTokens,
-      system: getScorerSystemPrompt(interviewerPersonaId),
+      system: getScorerSystemPrompt(),
       messages: [{ role: "user", content: prompt }],
       output_config: {
         format: zodOutputFormat(schema),
@@ -323,7 +318,6 @@ export async function scoreInterview(
         finalCode,
         testsPassed,
         testsTotal,
-        interviewerPersonaId,
         roundType,
         roundTitle,
         problem,

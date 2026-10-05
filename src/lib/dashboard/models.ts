@@ -53,19 +53,19 @@ export const PRACTICE_CARD_CONFIGS: readonly PracticeCardConfig[] = [
   {
     kind: "machine_coding",
     label: "Machine Coding",
-    shortDescription: "Practice FE, BE, or FS build rounds with persona, stack, and problem setup.",
+    shortDescription: "Practice FE, BE, or FS build rounds with stack and problem setup.",
     status: "coming_soon",
     href: "/interviews/machine-coding/setup",
-    setupHighlights: ["Persona", "Stack", "Problem"],
+    setupHighlights: ["Stack", "Problem"],
     ctaLabel: "Machine coding coming soon",
   },
   {
     kind: "system_design",
     label: "System Design",
-    shortDescription: "Practice design rounds with persona, stack, and system-design prompts.",
+    shortDescription: "Practice design rounds with stack and system-design prompts.",
     status: "coming_soon",
     href: "/interviews/system-design/setup",
-    setupHighlights: ["Persona", "Stack", "Prompt"],
+    setupHighlights: ["Stack", "Prompt"],
     ctaLabel: "System design coming soon",
   },
   {

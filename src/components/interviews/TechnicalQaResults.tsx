@@ -27,10 +27,7 @@ import {
   type HireRecommendation,
   type RoundScoreDimension,
 } from "@/lib/constants";
-import {
-  getInterviewerPersona,
-  resolveInterviewerPersona,
-} from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import { getTechnicalQaLanguageLabel } from "@/lib/technical-qa";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 
@@ -331,9 +328,6 @@ function buildDbResult(interview: Record<string, unknown>): StoreLikeResult {
     roundType: "technical_qa",
     roundTitle: (interview.round_title as string | null) ?? roundContext?.title ?? "Technical Q&A",
     interviewId: interview.id as string,
-    interviewerPersona: resolveInterviewerPersona(
-      (interview.interviewer_persona as string | null | undefined) ?? null
-    ),
     finalCode: "",
     language: (interview.language as string | null) ?? "javascript",
     transcript,
@@ -372,7 +366,7 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
       try {
         const { data } = await supabase
           .from("interviews")
-          .select("id, round_type, interviewer_persona, language, overall_score, scores, feedback_summary, hire_recommendation, round_title, round_context_snapshot, company_snapshot, role_title_snapshot, messages(*)")
+          .select("id, round_type, language, overall_score, scores, feedback_summary, hire_recommendation, round_title, round_context_snapshot, company_snapshot, role_title_snapshot, messages(*)")
           .eq("id", interviewId)
           .single();
 
@@ -434,7 +428,7 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
     return <NoResultState />;
   }
 
-  const interviewer = getInterviewerPersona(result.interviewerPersona);
+  const interviewer = INTERVIEWER;
   const round = result.roundContext;
   const languageLabel = getTechnicalQaLanguageLabel(result.language);
   const hasScores = Boolean(result.overallScore !== null && result.scores);

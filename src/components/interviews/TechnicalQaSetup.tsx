@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, ChevronRight, Loader2, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,8 @@ import {
   SetupCheckboxGrid,
   SetupRadioGrid,
 } from "@/components/interviews/setup/SetupChoiceGrid";
-import { InterviewerPersonaPicker } from "@/components/interviews/setup/InterviewerPersonaPicker";
 import { MicrophoneRack } from "@/components/interviews/setup/MicrophoneRack";
 import {
-  InterviewerVoiceCard,
   SessionFactsCard,
   SessionStepsCard,
   type SessionFact,
@@ -25,13 +23,7 @@ import {
 import { useInterviewStore } from "@/stores/interview-store";
 import { useSupabase } from "@/hooks/useSupabase";
 import { ROUND_SCORING_DIMENSIONS } from "@/lib/constants";
-import {
-  DEFAULT_INTERVIEWER_PERSONA,
-  INTERVIEWER_PERSONAS,
-  getDefaultInterviewerPersona,
-  getInterviewerPersona,
-  type InterviewerPersonaId,
-} from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import {
   TECHNICAL_QA_DURATION_MINUTES,
   TECHNICAL_QA_LANGUAGE_OPTIONS,
@@ -54,7 +46,6 @@ type StartResponse = {
   data?: {
     interviewId?: string;
     isFreeInterview?: boolean;
-    interviewerPersona?: InterviewerPersonaId;
     startedAt?: string;
   };
 };
@@ -65,12 +56,9 @@ export function TechnicalQaSetup() {
   const { supabase, user } = useSupabase();
   const [language, setLanguage] = useState<TechnicalQaLanguage>("javascript");
   const [frameworks, setFrameworks] = useState<string[]>(["react", "nextjs"]);
-  const [interviewerPersona, setInterviewerPersona] =
-    useState<InterviewerPersonaId>(DEFAULT_INTERVIEWER_PERSONA);
   const [credits, setCredits] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const personaTouchedRef = useRef(false);
 
   useEffect(() => {
     if (!user) return;
@@ -78,18 +66,13 @@ export function TechnicalQaSetup() {
     void (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("interview_credits, target_company")
+        .select("interview_credits")
         .eq("id", user.id)
         .single();
 
       if (!data) return;
 
       setCredits(data.interview_credits ?? 0);
-      if (!personaTouchedRef.current) {
-        setInterviewerPersona(
-          getDefaultInterviewerPersona(data.target_company ?? null, false)
-        );
-      }
     })();
   }, [supabase, user]);
 
@@ -105,7 +88,6 @@ export function TechnicalQaSetup() {
     () => buildTechnicalQaRoundContext({ language, frameworks }),
     [language, frameworks]
   );
-  const selectedPersona = getInterviewerPersona(interviewerPersona);
   const scoringDimensionCount = Object.keys(ROUND_SCORING_DIMENSIONS).length;
   const hasFrameworks = frameworks.length > 0;
   const isLocked = credits === 0;
@@ -163,7 +145,6 @@ export function TechnicalQaSetup() {
           roundType: "technical_qa",
           language,
           maxDurationSeconds: TECHNICAL_QA_DURATION_MINUTES * 60,
-          interviewerPersona,
           generatedLoopRoundSnapshot: roundContext,
         }),
       });
@@ -191,7 +172,6 @@ export function TechnicalQaSetup() {
         maxDurationSeconds: TECHNICAL_QA_DURATION_MINUTES * 60,
         difficulty: "medium",
         category: null,
-        interviewerPersona: payload.data?.interviewerPersona ?? interviewerPersona,
         startedAt: payload.data?.startedAt ?? new Date().toISOString(),
       });
 
@@ -305,40 +285,12 @@ export function TechnicalQaSetup() {
               </div>
             </SetupRack>
 
-            <SetupRack
-              index="02"
-              label="Interviewer"
-              note="Each has its own voice and scoring emphasis"
-            >
-              <InterviewerPersonaPicker
-                personas={INTERVIEWER_PERSONAS}
-                value={interviewerPersona}
-                isPersonaLocked={() => false}
-                onSelect={(personaId) => {
-                  personaTouchedRef.current = true;
-                  setInterviewerPersona(personaId);
-                }}
-              />
-
-              <div className="mt-4 rounded-xl border border-brand-border bg-brand-surface px-4 py-3">
-                <SetupMonoLabel>
-                  Calibration · {selectedPersona.name} ·{" "}
-                  {selectedPersona.companyLabel}
-                </SetupMonoLabel>
-                <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-                  {selectedPersona.calibrationNotes}
-                </p>
-              </div>
-            </SetupRack>
-
-            <MicrophoneRack index="03" interviewerName={selectedPersona.name} />
+            <MicrophoneRack index="02" interviewerName={INTERVIEWER.name} />
           </div>
 
           {/* ─── Summary rail ─── */}
           <div className="lg:col-span-4">
             <div className="flex flex-col gap-5 lg:sticky lg:top-8">
-              <InterviewerVoiceCard persona={selectedPersona} />
-
               <SessionFactsCard title="This session" facts={sessionFacts} />
 
               <SessionStepsCard title="How it runs" steps={SESSION_STEPS} />

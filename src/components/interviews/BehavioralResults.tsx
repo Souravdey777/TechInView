@@ -28,10 +28,7 @@ import {
   type HireRecommendation,
   type RoundScoreDimension,
 } from "@/lib/constants";
-import {
-  getInterviewerPersona,
-  resolveInterviewerPersona,
-} from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import type { CompetencyReport } from "@/types";
 
@@ -370,9 +367,6 @@ function buildDbResult(interview: Record<string, unknown>): StoreLikeResult {
     roundType: "behavioral",
     roundTitle: (interview.round_title as string | null) ?? roundContext?.title ?? "Behavioral Round",
     interviewId: interview.id as string,
-    interviewerPersona: resolveInterviewerPersona(
-      (interview.interviewer_persona as string | null | undefined) ?? null
-    ),
     finalCode: "",
     language: (interview.language as string | null) ?? "javascript",
     transcript,
@@ -413,7 +407,7 @@ export function BehavioralResults({ interviewId }: BehavioralResultsProps) {
       try {
         const { data } = await supabase
           .from("interviews")
-          .select("id, round_type, interviewer_persona, language, overall_score, scores, competency_report, feedback_summary, hire_recommendation, round_title, round_context_snapshot, company_snapshot, role_title_snapshot, messages(*)")
+          .select("id, round_type, language, overall_score, scores, competency_report, feedback_summary, hire_recommendation, round_title, round_context_snapshot, company_snapshot, role_title_snapshot, messages(*)")
           .eq("id", interviewId)
           .single();
 
@@ -475,7 +469,7 @@ export function BehavioralResults({ interviewId }: BehavioralResultsProps) {
     return <NoResultState />;
   }
 
-  const interviewer = getInterviewerPersona(result.interviewerPersona);
+  const interviewer = INTERVIEWER;
   const round = result.roundContext;
   // Store path carries the report the room just scored; the DB path normalizes
   // it out of jsonb in buildDbResult. Older results have neither.

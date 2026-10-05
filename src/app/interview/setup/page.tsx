@@ -35,13 +35,7 @@ import {
   type InterviewMode,
 } from "@/lib/constants";
 import { PHASE_ORDER } from "@/lib/interview-phases";
-import {
-  DEFAULT_INTERVIEWER_PERSONA,
-  INTERVIEWER_PERSONAS,
-  getDefaultInterviewerPersona,
-  getInterviewerPersona,
-  type InterviewerPersonaId,
-} from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import {
   buildLoopStartPayload,
 } from "@/lib/loops/generator";
@@ -61,10 +55,8 @@ import {
   DsaModePicker,
   type ModeChipTone,
 } from "@/components/interviews/setup/DsaModePicker";
-import { InterviewerPersonaPicker } from "@/components/interviews/setup/InterviewerPersonaPicker";
 import { MicrophoneRack } from "@/components/interviews/setup/MicrophoneRack";
 import {
-  InterviewerVoiceCard,
   SessionFactsCard,
   type SessionFact,
 } from "@/components/interviews/setup/SessionSummaryCards";
@@ -118,7 +110,6 @@ type SetupFormState = {
   category: Category;
   language: Language;
   duration: Duration;
-  interviewerPersona: InterviewerPersonaId;
 };
 
 type TargetedLoopFormState = {
@@ -393,7 +384,6 @@ function InterviewSetupInner() {
     category: "any",
     language: "python",
     duration: FULL_INTERVIEW_DURATION_MINUTES,
-    interviewerPersona: DEFAULT_INTERVIEWER_PERSONA,
   });
   const [targetedForm, setTargetedForm] = useState<TargetedLoopFormState>({
     company: "Google",
@@ -438,11 +428,6 @@ function InterviewSetupInner() {
           duration: shouldForcePreviewDefaults
             ? (FREE_TRIAL_DURATION_MINUTES as Duration)
             : f.duration,
-          interviewerPersona: shouldForcePreviewDefaults
-            ? DEFAULT_INTERVIEWER_PERSONA
-            : personaTouchedRef.current
-              ? f.interviewerPersona
-              : getDefaultInterviewerPersona(data.target_company ?? null, false),
         }));
         setTargetedForm((prev) => ({
           ...prev,
@@ -483,19 +468,12 @@ function InterviewSetupInner() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const personaTouchedRef = useRef(false);
   const isSpecificSelected = problemMode === "specific" && selectedProblem !== null;
   const hasCredits = (credits ?? 0) > 0;
   const isPracticeMode = interviewMode === "general_dsa" && dsaExperience === "practice";
   const isAiInterviewMode = interviewMode === "general_dsa" && dsaExperience === "ai_interview";
   const isPreviewSession = isAiInterviewMode && !hasCredits && isFreeTrialUser;
   const isAiModeLocked = isAiInterviewMode && !hasCredits && !isFreeTrialUser;
-  const selectedPersona = getInterviewerPersona(form.interviewerPersona);
-  const targetedPersona = getInterviewerPersona(
-    generatedLoop?.personaId ??
-      getDefaultInterviewerPersona(targetedForm.company.trim().toLowerCase(), false)
-  );
-  const activePersona = interviewMode === "targeted_loop" ? targetedPersona : selectedPersona;
   const availableQuestionTopics = Array.from(
     new Set(
       generatedLoop?.rounds.flatMap((round) =>
@@ -513,7 +491,6 @@ function InterviewSetupInner() {
       ...previous,
       difficulty: "easy",
       duration: FREE_TRIAL_DURATION_MINUTES as Duration,
-      interviewerPersona: DEFAULT_INTERVIEWER_PERSONA,
     }));
   }, [isPreviewSession]);
 
@@ -673,7 +650,6 @@ function InterviewSetupInner() {
           isFreeInterview?: boolean;
           mode?: InterviewMode;
           roundType?: RoundType;
-          interviewerPersona?: InterviewerPersonaId;
           round?: Parameters<typeof initFromSetup>[0]["roundContext"];
           generatedLoopSummary?: Parameters<typeof initFromSetup>[0]["loopSummary"];
           problem?: Parameters<typeof initFromSetup>[0]["problem"];
@@ -699,7 +675,6 @@ function InterviewSetupInner() {
         category:
           (body.category as string | null | undefined) ??
           (form.category === "any" ? null : form.category),
-        interviewerPersona: data.data?.interviewerPersona ?? form.interviewerPersona,
         generatedLoopId: (body.generatedLoopId as string | null | undefined) ?? null,
         generatedLoopRoundId: (body.generatedLoopRoundId as string | null | undefined) ?? null,
         company:
@@ -768,7 +743,6 @@ function InterviewSetupInner() {
       category: form.category,
       language: form.language,
       duration: form.duration,
-      interviewer_persona: form.interviewerPersona,
       problem_mode: problemMode,
       is_free_trial: isPreviewSession,
     });
@@ -780,7 +754,6 @@ function InterviewSetupInner() {
       category: form.category === "any" ? null : form.category,
       language: form.language,
       maxDurationSeconds: form.duration * 60,
-      interviewerPersona: form.interviewerPersona,
     };
 
     if (problemMode === "specific" && selectedProblem) {
@@ -934,9 +907,7 @@ function InterviewSetupInner() {
   const selectedLanguageLabel =
     LANGUAGES.find((lang) => lang.value === form.language)?.label ?? form.language;
   const selectedCategoryLabel = categoryLabel(form.category);
-  const rackIndex = isPracticeMode
-    ? { mode: "01", interviewer: "02", problem: "02", microphone: "03" }
-    : { mode: "01", interviewer: "02", problem: "03", microphone: "04" };
+  const rackIndex = { mode: "01", problem: "02", microphone: "03" };
   const aiModeStatus = isPreviewSession
     ? `${FREE_TRIAL_DURATION_MINUTES}-min preview`
     : isAiModeLocked
@@ -1018,7 +989,7 @@ function InterviewSetupInner() {
               <p className="text-sm font-semibold text-brand-text">5-Minute Audio Preview</p>
               <p className="text-xs text-brand-muted mt-1">
                 Your preview includes a {FREE_TRIAL_DURATION_MINUTES}-minute voice session with Tia, an easy random problem, and a basic score summary.
-                Buy an interview pack for company-specific personas, full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, specific problem selection, and detailed AI feedback.
+                Buy an interview pack for full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, specific problem selection, and detailed AI feedback.
               </p>
             </div>
           </div>
@@ -1198,9 +1169,6 @@ function InterviewSetupInner() {
                         {generatedLoop.summary}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-full border border-brand-border px-3 py-1 text-[11px] font-medium text-brand-muted">
-                          {targetedPersona.name} · {targetedPersona.companyLabel}
-                        </span>
                         {generatedLoop.jdSignals.map((signal) => (
                           <span
                             key={signal}
@@ -1304,41 +1272,6 @@ function InterviewSetupInner() {
           </>
         )}
 
-        {interviewMode === "general_dsa" && !isPracticeMode && (
-          <SetupRack
-            index={rackIndex.interviewer}
-            label="Interviewer"
-            note="Each has its own voice and scoring emphasis"
-          >
-            <InterviewerPersonaPicker
-              personas={INTERVIEWER_PERSONAS}
-              value={form.interviewerPersona}
-              isPersonaLocked={(personaId) =>
-                isPreviewSession && personaId !== DEFAULT_INTERVIEWER_PERSONA
-              }
-              onSelect={(personaId) => {
-                if (isPreviewSession && personaId !== DEFAULT_INTERVIEWER_PERSONA) return;
-                personaTouchedRef.current = true;
-                setForm((prev) => ({ ...prev, interviewerPersona: personaId }));
-              }}
-            />
-
-            <div className="mt-4 rounded-xl border border-brand-border bg-brand-surface px-4 py-3">
-              <SetupMonoLabel>
-                Calibration · {selectedPersona.name} · {selectedPersona.companyLabel}
-              </SetupMonoLabel>
-              <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-                {selectedPersona.calibrationNotes}
-              </p>
-            </div>
-
-            {isPreviewSession && (
-              <p className="mt-3 text-xs text-brand-amber">
-                Preview sessions are limited to Tia. Buy a pack to choose a company-specific interviewer.
-              </p>
-            )}
-          </SetupRack>
-        )}
 
         <SetupRack index={rackIndex.problem} label="Problem">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1609,7 +1542,7 @@ function InterviewSetupInner() {
         {!isPracticeMode && (
           <MicrophoneRack
             index={rackIndex.microphone}
-            interviewerName={activePersona.name}
+            interviewerName={INTERVIEWER.name}
           />
         )}
 
@@ -1618,8 +1551,6 @@ function InterviewSetupInner() {
           {/* ─── Summary rail ─── */}
           <div className="lg:col-span-4">
             <div className="flex flex-col gap-5 lg:sticky lg:top-8">
-              {!isPracticeMode && <InterviewerVoiceCard persona={activePersona} />}
-
               <SessionFactsCard title="This session" facts={sessionFacts} />
 
               {interviewMode === "general_dsa" && !isPracticeMode && (
@@ -1722,7 +1653,7 @@ function InterviewSetupInner() {
                 </div>
               ) : (
                 <div className="rounded-xl border border-brand-border bg-brand-card px-5 py-4 text-sm text-brand-muted">
-                  Generate a targeted loop above, then launch any round directly from the loop cards. The generated rounds will use {activePersona.name} as the interviewer calibration by default.
+                  Generate a targeted loop above, then launch any round directly from the loop cards.
                 </div>
               )}
             </div>

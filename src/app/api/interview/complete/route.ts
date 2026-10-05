@@ -6,13 +6,11 @@ import {
   getAuthenticatedApiUser,
   unauthorizedResponse,
 } from "@/lib/api-security";
-import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
 import type { InterviewMode, RoundType } from "@/lib/constants";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 
 type CompleteInterviewBody = {
   interviewId: string;
-  interviewerPersona?: string;
   mode?: InterviewMode;
   roundType?: RoundType;
   roundTitle?: string;
@@ -122,9 +120,6 @@ export async function POST(req: NextRequest) {
     const roundType = existingInterview.round_type ?? "coding";
     const roundContext =
       (existingInterview.round_context_snapshot as RoundContextSnapshot | null) ?? null;
-    const interviewerPersona = resolveInterviewerPersona(
-      existingInterview.interviewer_persona
-    );
     const resolvedRoundTitle =
       existingInterview.round_title ??
       roundContext?.title ??
@@ -143,7 +138,6 @@ export async function POST(req: NextRequest) {
           mode,
           roundType,
           roundTitle: resolvedRoundTitle,
-          interviewerPersonaId: interviewerPersona,
           problem: storedProblem
             ? {
                 title: storedProblem.title,
@@ -168,7 +162,6 @@ export async function POST(req: NextRequest) {
       userId: user.id,
       data: {
         status: "completed",
-        interviewer_persona: interviewerPersona,
         mode,
         round_type: roundType,
         round_title: resolvedRoundTitle,
@@ -211,7 +204,6 @@ export async function POST(req: NextRequest) {
 
     captureServerEvent(user.id, "interview_completed", {
       interview_id: interviewId,
-      interviewer_persona: interviewerPersona,
       mode,
       round_type: roundType,
       round_title: resolvedRoundTitle,

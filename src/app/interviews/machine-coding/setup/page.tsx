@@ -5,8 +5,8 @@ export default function MachineCodingSetupPage() {
     <SetupPageShell
       title="Machine Coding Setup"
       status="planned"
-      description="This setup page will let candidates choose persona, stack, and problem for scoped 45-minute FE, BE, and FS machine-coding rounds."
-      setupHighlights={["45 min", "Persona", "Stack", "Problem"]}
+      description="This setup page will let candidates choose stack and problem for scoped 45-minute FE, BE, and FS machine-coding rounds."
+      setupHighlights={["45 min", "Stack", "Problem"]}
       primaryHref="/prep-guru"
       primaryLabel="Ask Prep Guru instead"
       secondaryHref="/dashboard"

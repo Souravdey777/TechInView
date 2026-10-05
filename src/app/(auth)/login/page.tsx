@@ -68,8 +68,8 @@ export default function LoginPage() {
       kicker="Voice-first AI mock interviews"
       eyebrow="Welcome back"
       heading="Log in."
-      panelHeadline="Your interviewers are still awake."
-      panelSupporting={`Pick up practice where you left off, or use your ${FREE_TRIAL_DURATION_MINUTES}-minute voice preview with a company-style interviewer.`}
+      panelHeadline="Your interviewer is still awake."
+      panelSupporting={`Pick up practice where you left off, or use your ${FREE_TRIAL_DURATION_MINUTES}-minute voice preview with Tia, your AI interviewer.`}
       footer={
         <>
           No account yet?{" "}

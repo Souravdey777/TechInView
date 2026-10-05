@@ -5,7 +5,6 @@ import {
   getAuthenticatedApiUser,
   unauthorizedResponse,
 } from "@/lib/api-security";
-import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
 import {
   FREE_TRIAL_DURATION_SECONDS,
   FULL_INTERVIEW_DURATION_SECONDS,
@@ -50,7 +49,6 @@ type StartInterviewBody = {
   roleTitle?: string | null;
   maxDurationSeconds?: number;
   problemSlug?: string;
-  interviewerPersona?: string;
   mode?: InterviewMode;
   roundType?: RoundType;
   generatedLoopId?: string | null;
@@ -161,11 +159,6 @@ export async function POST(req: NextRequest) {
       maxDuration = FREE_TRIAL_DURATION_SECONDS;
     }
 
-    const interviewerPersona = resolveInterviewerPersona(body.interviewerPersona, {
-      isFreeTrial: isFreeInterview,
-      targetCompany,
-    });
-
     let problem = null;
     const roundTitle = generatedLoopRoundSnapshot?.title ?? null;
 
@@ -197,7 +190,6 @@ export async function POST(req: NextRequest) {
     const interview = await createInterviewWithEntitlement({
       userId: user.id,
       problemId: problem?.id ?? null,
-      interviewerPersona,
       language,
       maxDuration,
       isFreeTrial: isFreeInterview,
@@ -226,7 +218,6 @@ export async function POST(req: NextRequest) {
       difficulty: problem?.difficulty ?? generatedLoopRoundSnapshot?.difficulty ?? null,
       category: problem?.category ?? null,
       language,
-      interviewer_persona: interviewerPersona,
       is_free_trial: isFreeInterview,
       mode,
       round_type: roundType,
@@ -239,7 +230,6 @@ export async function POST(req: NextRequest) {
       data: {
         interviewId,
         isFreeInterview,
-        interviewerPersona,
         mode,
         roundType,
         round: generatedLoopRoundSnapshot,

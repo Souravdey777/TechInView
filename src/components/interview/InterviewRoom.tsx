@@ -38,7 +38,7 @@ import {
   hasPresentedProblem,
 } from "@/lib/ai/interviewer-system-prompt";
 import { getLiveInterviewModel } from "@/lib/ai/models";
-import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import { INTERVIEWER as interviewer, getInterviewerVoice } from "@/lib/interviewer";
 import type { RoundScoreDimension } from "@/lib/constants";
 import { ROUND_SCORING_DIMENSIONS } from "@/lib/constants";
 import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
@@ -114,10 +114,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
   const initialLanguage = (storeConfig?.language ?? "python") as SupportedLanguage;
   const maxDuration = storeConfig?.maxDurationSeconds ?? 45 * 60;
-  const interviewer = useMemo(
-    () => getInterviewerPersona(storeConfig?.interviewerPersona),
-    [storeConfig?.interviewerPersona],
-  );
 
   // ── Conversation state ──────────────────────────────────────────────────────
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -266,12 +262,11 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           hasCandidateCode,
           hasWorkspaceNotes: !isCodingRound,
           totalMinutes: Math.round(maxDuration / 60),
-          interviewerPersonaId: interviewer.id,
           problemAlreadyPresented,
         },
       ),
       thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
-      voiceModel: interviewer.voiceModel,
+      voiceModel: getInterviewerVoice(),
       functions: agentFunctions,
       contextMessages: agentContextMessages,
       inputDeviceId: selectedDeviceId,
@@ -284,7 +279,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       isCodingRound,
       maxDuration,
       problemAlreadyPresented,
-      interviewer,
       storeConfig?.isFreeInterview,
       roundType,
       selectedDeviceId,
@@ -555,7 +549,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           currentCode: codeRef.current,
           elapsedSeconds,
           maxDurationSeconds: maxDuration,
-          interviewerPersona: interviewer.id,
           roundType,
           roundContext: activeRound,
         });
@@ -574,7 +567,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         setIsSendingText(false);
       }
     },
-    [activeProblem, activeRound, agent, appendChatTurn, applyPhaseFromAgent, interviewer.id, maxDuration, roundType],
+    [activeProblem, activeRound, agent, appendChatTurn, applyPhaseFromAgent, maxDuration, roundType],
   );
 
   const handleSendText = useCallback((text: string) => sendTextTurn(text), [sendTextTurn]);
@@ -715,7 +708,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           interviewId,
-          interviewerPersona: interviewer.id,
           mode,
           roundType,
           roundTitle: round?.title ?? problem?.title ?? ROUND_TYPE_LABELS[roundType],
@@ -758,7 +750,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       roundType,
       roundTitle: round?.title ?? problem?.title ?? ROUND_TYPE_LABELS[roundType],
       interviewId,
-      interviewerPersona: interviewer.id,
       finalCode: code,
       language,
       transcript,
@@ -787,7 +778,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     code,
     completeInterviewStore,
     interviewId,
-    interviewer.id,
     language,
     mode,
     roundType,
@@ -1056,10 +1046,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
                 <span className="text-brand-text font-medium">{Math.ceil(timeLeft / 60)} minute{Math.ceil(timeLeft / 60) !== 1 ? "s" : ""}</span> remaining.</>
               ) : (
                 <>
-                  {interviewer.name}, your{" "}
-                  {interviewer.companyLabel === "Generalist"
-                    ? "AI interviewer"
-                    : `${interviewer.companyLabel}-style AI interviewer`}, will run this{" "}
+                  {interviewer.name}, your AI interviewer, will run this{" "}
                   <span className="text-brand-text font-medium">
                     {isCodingRound
                       ? "coding"

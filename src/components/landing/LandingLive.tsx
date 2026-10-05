@@ -161,10 +161,7 @@ const CODE = `def two_sum(nums, target):
             return [seen[complement], i]
         seen[num] = i`;
 
-type RoomPersona = { id: string; name: string; companyLabel: string };
-
-export function InterviewRoomDemo({ personas }: { personas: RoomPersona[] }) {
-  const [active, setActive] = useState(0);
+export function InterviewRoomDemo({ name }: { name: string }) {
   const [typed, setTyped] = useState(0);
   const orbState = useOrbState();
   const codeRef = useRef<HTMLDivElement>(null);
@@ -198,40 +195,21 @@ export function InterviewRoomDemo({ personas }: { personas: RoomPersona[] }) {
   }, []);
 
 
-  const cur = personas[active];
   const done = typed >= CODE.length;
   const typedLines = CODE.slice(0, typed).split("\n");
 
   return (
     <div className="overflow-hidden rounded-[20px] border border-white/[0.09] bg-brand-surface">
-      <div role="group" aria-label="Choose an interviewer" className="flex flex-wrap gap-1 border-b border-white/[0.07] p-2.5">
-        {personas.map((p, i) => (
-          <button
-            key={p.id}
-            type="button"
-            aria-pressed={i === active}
-            onClick={() => setActive(i)}
-            className={cn(
-              "rounded-[10px] border px-3.5 py-2 font-mono text-xs transition-colors",
-              i === active
-                ? "border-brand-cyan/40 bg-brand-cyan/[0.08] text-brand-cyan"
-                : "border-transparent text-brand-muted hover:text-brand-text"
-            )}
-          >
-            {p.name} · {p.companyLabel}
-          </button>
-        ))}
-      </div>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))]">
         <div className="flex flex-col gap-8 border-white/[0.07] p-6 sm:p-10 md:border-r">
           <div className="flex items-center gap-4">
             <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-brand-cyan/50 text-lg text-brand-cyan">
-              {cur.name[0]}
+              {name[0]}
             </div>
             <div>
               <div className="text-lg tracking-tight">
-                {cur.name} <span className="text-brand-subtle">({cur.companyLabel})</span>
+                {name}
               </div>
               <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-brand-muted">
                 AI interviewer · {STATE_LABEL[orbState]}
@@ -390,13 +368,13 @@ type Dim = { name: string; short: string; score: number };
 export function ScoreCard({
   dims,
   overall,
-  personaName,
+  interviewerName,
   header,
   footer,
 }: {
   dims: Dim[];
   overall: number;
-  personaName: string;
+  interviewerName: string;
   header: React.ReactNode;
   footer: React.ReactNode;
 }) {
@@ -458,7 +436,7 @@ export function ScoreCard({
       <div className="flex flex-col gap-3 rounded-[20px] border border-white/[0.09] bg-brand-surface p-7">
         <div className="flex justify-between font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">
           <span>Performance breakdown</span>
-          <span>{personaName} · sample round</span>
+          <span>{interviewerName} · sample round</span>
         </div>
         <svg viewBox="-40 0 400 320" className="mx-auto block w-full max-w-[520px] overflow-visible" role="img" aria-label="Sample five-dimension score radar">
           {[0.25, 0.5, 0.75, 1].map((l) => (

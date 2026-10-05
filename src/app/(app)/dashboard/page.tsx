@@ -30,7 +30,6 @@ type DashboardInterview = {
   id: string;
   status: string;
   language: string | null;
-  interviewer_persona: string | null;
   mode: string | null;
   round_type: string | null;
   round_title: string | null;
@@ -52,7 +51,7 @@ async function getDashboardInterviews(
 ): Promise<DashboardInterview[]> {
   const sharedSelect =
     "id, status, language, overall_score, scores, duration_seconds, started_at, completed_at, hire_recommendation, problems(title, difficulty, category)";
-  const fullSelect = `${sharedSelect}, interviewer_persona, mode, round_type, round_title`;
+  const fullSelect = `${sharedSelect}, mode, round_type, round_title`;
 
   const withRoundFields = await supabase
     .from("interviews")
@@ -66,7 +65,6 @@ async function getDashboardInterviews(
   }
 
   const shouldFallback =
-    isMissingColumn(withRoundFields.error, "interviewer_persona") ||
     isMissingColumn(withRoundFields.error, "mode") ||
     isMissingColumn(withRoundFields.error, "round_type") ||
     isMissingColumn(withRoundFields.error, "round_title");
@@ -88,7 +86,6 @@ async function getDashboardInterviews(
 
   return ((legacy.data ?? []) as unknown as DashboardInterview[]).map((interview) => ({
     ...interview,
-    interviewer_persona: null,
     mode: null,
     round_type: null,
     round_title: null,
@@ -240,7 +237,6 @@ export default async function DashboardPage() {
         status: rounds[index].status,
         title: rounds[index].title,
         language: interview.language,
-        interviewerPersona: interview.interviewer_persona,
         durationSeconds: interview.duration_seconds,
         score: rounds[index].score,
         verdict: rounds[index].verdict,

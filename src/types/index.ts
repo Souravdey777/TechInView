@@ -9,7 +9,6 @@ import type {
   RoundType,
   RoundScoreDimension,
 } from "@/lib/constants";
-import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
 import type { PublicProfileLinks } from "@/lib/public-profile";
 
@@ -114,7 +113,6 @@ export type Interview = {
   user_id: string;
   problem_id: string | null;
   status: InterviewStatus;
-  interviewer_persona: InterviewerPersonaId;
   mode: InterviewMode;
   round_type: RoundType;
   round_title: string | null;

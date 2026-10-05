@@ -29,7 +29,7 @@ import {
 } from "@/lib/interview-phases";
 import { buildVoiceSystemPrompt } from "@/lib/ai/interviewer-system-prompt";
 import { getLiveInterviewModel } from "@/lib/ai/models";
-import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import { INTERVIEWER as interviewer, getInterviewerVoice } from "@/lib/interviewer";
 import { getPhaseLabelForRound } from "@/lib/loops/round-config";
 import { BEHAVIORAL_DURATION_MINUTES } from "@/lib/behavioral";
 import type { CompetencyReport } from "@/types";
@@ -91,10 +91,6 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
   const setRoomStartedAtMs = useInterviewStore((state) => state.setRoomStartedAtMs);
   const setRoomPhase = useInterviewStore((state) => state.setRoomPhase);
 
-  const interviewer = useMemo(
-    () => getInterviewerPersona(storeConfig?.interviewerPersona),
-    [storeConfig?.interviewerPersona]
-  );
   const maxDuration = storeConfig?.maxDurationSeconds ?? MAX_DURATION_SECONDS;
   const round = roundContext;
 
@@ -218,10 +214,9 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
         hasCandidateCode: false,
         hasWorkspaceNotes: true,
         totalMinutes: Math.round(maxDuration / 60),
-        interviewerPersonaId: interviewer.id,
       }),
       thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
-      voiceModel: interviewer.voiceModel,
+      voiceModel: getInterviewerVoice(),
       functions: agentFunctions,
       contextMessages: agentContextMessages,
       inputDeviceId: selectedDeviceId,
@@ -230,7 +225,6 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
       agentContextMessages,
       agentFunctions,
       currentPhase,
-      interviewer,
       maxDuration,
       round,
       selectedDeviceId,
@@ -430,7 +424,6 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
       currentCode: "",
       elapsedSeconds: Math.max(0, Math.floor((Date.now() - startTimeRef.current) / 1000)),
       maxDurationSeconds: maxDuration,
-      interviewerPersona: interviewer.id,
       roundType: "behavioral",
       roundContext: round,
     }),
@@ -489,7 +482,6 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
         },
         body: JSON.stringify({
           interviewId,
-          interviewerPersona: interviewer.id,
           mode: "targeted_loop",
           roundType: "behavioral",
           roundTitle: round.title,
@@ -530,7 +522,6 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
       roundType: "behavioral",
       roundTitle: round.title,
       interviewId,
-      interviewerPersona: interviewer.id,
       finalCode: "",
       language: storeConfig?.language ?? "javascript",
       transcript: transcriptRef.current,
@@ -558,7 +549,6 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
     agent,
     completeInterviewStore,
     interviewId,
-    interviewer.id,
     isScoring,
     round,
     router,

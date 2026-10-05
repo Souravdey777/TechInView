@@ -5,8 +5,6 @@ import { localProblemCatalog, shouldUseLocalProblemCatalog } from "./local-probl
 import { eq, and, ilike, inArray, sql, desc, asc } from "drizzle-orm";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
-import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
-import { DEFAULT_INTERVIEWER_PERSONA } from "@/lib/interviewer-personas";
 import type {
   GeneratedLoop as GeneratedLoopSnapshot,
   HistoricalQuestion as HistoricalQuestionSnapshot,
@@ -49,12 +47,6 @@ function getDb() {
   return _db;
 }
 
-function isMissingInterviewerPersonaColumnError(error: unknown): boolean {
-  const err = error as { code?: string; message?: string; detail?: string };
-  const haystack = `${err?.message ?? ""} ${err?.detail ?? ""}`.toLowerCase();
-  return err?.code === "42703" && haystack.includes("interviewer_persona");
-}
-
 function isMissingSchemaObjectError(error: unknown, token: string): boolean {
   const err = error as { code?: string; message?: string; detail?: string };
   const haystack = `${err?.message ?? ""} ${err?.detail ?? ""}`.toLowerCase();
@@ -64,10 +56,9 @@ function isMissingSchemaObjectError(error: unknown, token: string): boolean {
   );
 }
 
-function withDefaultInterviewerPersona<T extends Record<string, unknown>>(row: T): Interview {
+function withLegacyInterviewDefaults<T extends Record<string, unknown>>(row: T): Interview {
   return {
     ...row,
-    interviewer_persona: DEFAULT_INTERVIEWER_PERSONA,
     mode: "general_dsa",
     round_type: "coding",
     round_title: null,
@@ -84,7 +75,6 @@ function stripRoundAwareInterviewFields(
   data: Partial<Omit<Interview, "id" | "user_id" | "problem_id" | "started_at">>
 ) {
   const {
-    interviewer_persona: _persona,
     mode: _mode,
     round_type: _roundType,
     round_title: _roundTitle,
@@ -706,7 +696,6 @@ export async function getRecentPracticeAttempts(
 export async function createInterview(params: {
   userId: string;
   problemId: string | null;
-  interviewerPersona: InterviewerPersonaId;
   language: string;
   maxDuration?: number;
   isFreeTrial?: boolean;
@@ -724,7 +713,6 @@ export async function createInterview(params: {
   const {
     userId,
     problemId,
-    interviewerPersona,
     language,
     maxDuration = 2700,
     isFreeTrial = false,
@@ -745,7 +733,6 @@ export async function createInterview(params: {
       .values({
         user_id: userId,
         problem_id: problemId,
-        interviewer_persona: interviewerPersona,
         mode,
         round_type: roundType,
         round_title: roundTitle,
@@ -764,7 +751,6 @@ export async function createInterview(params: {
     return results[0];
   } catch (error) {
     if (
-      !isMissingInterviewerPersonaColumnError(error) &&
       !isMissingSchemaObjectError(error, "mode") &&
       !isMissingSchemaObjectError(error, "round_type") &&
       !isMissingSchemaObjectError(error, "round_title")
@@ -803,7 +789,7 @@ export async function createInterview(params: {
         completed_at: schema.interviews.completed_at,
       });
 
-    return withDefaultInterviewerPersona(results[0]);
+    return withLegacyInterviewDefaults(results[0]);
   }
 }
 
@@ -862,7 +848,6 @@ export async function createInterviewWithEntitlement(
       .values({
         user_id: params.userId,
         problem_id: params.problemId,
-        interviewer_persona: params.interviewerPersona,
         mode: params.mode ?? "general_dsa",
         round_type: params.roundType ?? "coding",
         round_title: params.roundTitle ?? null,
@@ -887,45 +872,12 @@ export async function getInterview(
   interviewId: string
 ): Promise<Interview | undefined> {
   const db = getDb();
-  try {
-    const results = await db
-      .select()
-      .from(schema.interviews)
-      .where(eq(schema.interviews.id, interviewId))
-      .limit(1);
-    return results[0];
-  } catch (error) {
-    if (!isMissingInterviewerPersonaColumnError(error)) {
-      throw error;
-    }
-
-    const results = await db
-      .select({
-        id: schema.interviews.id,
-        user_id: schema.interviews.user_id,
-        problem_id: schema.interviews.problem_id,
-        status: schema.interviews.status,
-        language: schema.interviews.language,
-        duration_seconds: schema.interviews.duration_seconds,
-        max_duration_seconds: schema.interviews.max_duration_seconds,
-        final_code: schema.interviews.final_code,
-        code_passed_tests: schema.interviews.code_passed_tests,
-        tests_passed: schema.interviews.tests_passed,
-        tests_total: schema.interviews.tests_total,
-        overall_score: schema.interviews.overall_score,
-        scores: schema.interviews.scores,
-        feedback_summary: schema.interviews.feedback_summary,
-        hire_recommendation: schema.interviews.hire_recommendation,
-        is_free_trial: schema.interviews.is_free_trial,
-        started_at: schema.interviews.started_at,
-        completed_at: schema.interviews.completed_at,
-      })
-      .from(schema.interviews)
-      .where(eq(schema.interviews.id, interviewId))
-      .limit(1);
-
-    return results[0] ? withDefaultInterviewerPersona(results[0]) : undefined;
-  }
+  const results = await db
+    .select()
+    .from(schema.interviews)
+    .where(eq(schema.interviews.id, interviewId))
+    .limit(1);
+  return results[0];
 }
 
 export async function updateInterview(
@@ -942,7 +894,6 @@ export async function updateInterview(
     return results[0];
   } catch (error) {
     if (
-      !isMissingInterviewerPersonaColumnError(error) &&
       !isMissingSchemaObjectError(error, "mode") &&
       !isMissingSchemaObjectError(error, "round_type") &&
       !isMissingSchemaObjectError(error, "round_title")
@@ -976,7 +927,7 @@ export async function updateInterview(
         completed_at: schema.interviews.completed_at,
       });
 
-    return results[0] ? withDefaultInterviewerPersona(results[0]) : undefined;
+    return results[0] ? withLegacyInterviewDefaults(results[0]) : undefined;
   }
 }
 
@@ -1054,46 +1005,12 @@ export async function getUserInterviews(
   limit = 20
 ): Promise<Interview[]> {
   const db = getDb();
-  try {
-    return db
-      .select()
-      .from(schema.interviews)
-      .where(eq(schema.interviews.user_id, userId))
-      .orderBy(desc(schema.interviews.started_at))
-      .limit(limit);
-  } catch (error) {
-    if (!isMissingInterviewerPersonaColumnError(error)) {
-      throw error;
-    }
-
-    const rows = await db
-      .select({
-        id: schema.interviews.id,
-        user_id: schema.interviews.user_id,
-        problem_id: schema.interviews.problem_id,
-        status: schema.interviews.status,
-        language: schema.interviews.language,
-        duration_seconds: schema.interviews.duration_seconds,
-        max_duration_seconds: schema.interviews.max_duration_seconds,
-        final_code: schema.interviews.final_code,
-        code_passed_tests: schema.interviews.code_passed_tests,
-        tests_passed: schema.interviews.tests_passed,
-        tests_total: schema.interviews.tests_total,
-        overall_score: schema.interviews.overall_score,
-        scores: schema.interviews.scores,
-        feedback_summary: schema.interviews.feedback_summary,
-        hire_recommendation: schema.interviews.hire_recommendation,
-        is_free_trial: schema.interviews.is_free_trial,
-        started_at: schema.interviews.started_at,
-        completed_at: schema.interviews.completed_at,
-      })
-      .from(schema.interviews)
-      .where(eq(schema.interviews.user_id, userId))
-      .orderBy(desc(schema.interviews.started_at))
-      .limit(limit);
-
-    return rows.map((row) => withDefaultInterviewerPersona(row));
-  }
+  return db
+    .select()
+    .from(schema.interviews)
+    .where(eq(schema.interviews.user_id, userId))
+    .orderBy(desc(schema.interviews.started_at))
+    .limit(limit);
 }
 
 // ─── Message Queries ──────────────────────────────────────────────────────────
@@ -1338,7 +1255,6 @@ export async function createGeneratedLoop(params: {
         loop_name: params.loop.loopName,
         summary: params.loop.summary,
         confidence: params.loop.confidence,
-        persona_id: params.loop.personaId,
         similar_company_fallback: params.loop.similarCompanyFallback,
       })
       .returning({

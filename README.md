@@ -5,7 +5,7 @@
 <p align="center">
   Voice-first AI interview prep for software engineers.
   <br />
-  Practice DSA, simulate realistic mock interviews, and prepare for broader interview loops with persona-aware AI interviewers.
+  Practice DSA, simulate realistic mock interviews, and prepare for broader interview loops with a voice AI interviewer.
 </p>
 
 <p align="center">
@@ -25,7 +25,6 @@ prep system that covers:
 
 - free DSA practice
 - voice-based DSA interviews
-- company-style interviewer personas
 - targeted loop generation from company + role + JD
 - Technical Q&A rounds
 - Engineering Manager / hiring-manager rounds
@@ -40,7 +39,7 @@ next step.
 | --- | --- | --- |
 | DSA Practice Mode | Live | Solo problem solving with saved attempts and test runs |
 | DSA AI Interview Mode | Live | Voice-based coding interview with live editor and scoring |
-| Interviewer personas | Live | `tia`, `google`, `meta`, `amazon`, `apple`, `netflix` |
+| Interviewer | Live | Single interviewer, Tia (`src/lib/interviewer.ts`) |
 | Technical Q&A | Live | Stack-depth, no-code voice interview |
 | Engineering Manager | Live | Leadership, prioritization, and role-fit interview |
 | Targeted loop generation | Live | Company + role + JD -> likely interview loop |
@@ -54,7 +53,6 @@ next step.
 **Voice-first interviews**
 - Deepgram Voice Agent powers the real-time interview loop
 - Mic input, streamed audio responses, interruption handling, and text fallback
-- Company-style personas change tone, probing style, and scoring emphasis
 
 **Multiple interview formats**
 - DSA coding rounds with a live editor

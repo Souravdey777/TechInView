@@ -1,5 +1,5 @@
 import { ROUND_SCORING_DIMENSIONS, type RoundType } from "@/lib/constants";
-import { getInterviewerPersona } from "@/lib/interviewer-personas";
+import { INTERVIEWER } from "@/lib/interviewer";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import { buildValuesRubricBlock } from "@/lib/interview-values";
 
@@ -42,19 +42,15 @@ function formatTranscript(
 
 // ─── Scorer System Prompt ─────────────────────────────────────────────────────
 
-export function getScorerSystemPrompt(interviewerPersonaId?: string | null): string {
-  const persona = getInterviewerPersona(interviewerPersonaId);
-
+export function getScorerSystemPrompt(): string {
   return `You are an expert FAANG-level engineering hiring evaluator with 15+ years of experience conducting and calibrating technical interviews at companies including Google, Meta, Amazon, Apple, and Microsoft.
 
 Your job is to score completed technical interviews objectively and consistently. You have seen thousands of interview performances and can accurately distinguish between candidates who should receive a "Strong Hire" vs "No Hire" recommendation.
 
-Company calibration for this session:
-- Interview persona: ${persona.name} (${persona.companyLabel})
-- Persona style: ${persona.shortStyleSummary}
-- Calibration notes: ${persona.calibrationNotes}
-- Scoring emphasis: ${persona.scoringFocusPrompt}
-- Keep the shared five dimensions, their weights, and the global hire thresholds unchanged so scores remain comparable across personas.
+Calibration for this session:
+- Interviewer: ${INTERVIEWER.name}
+- Calibration notes: ${INTERVIEWER.calibrationNotes}
+- Scoring emphasis: ${INTERVIEWER.scoringFocusPrompt}
 
 Scoring principles:
 - Be honest and calibrated. A score of 70+ (Hire) means you would genuinely advocate for this candidate.
@@ -80,7 +76,6 @@ type ScoringPromptParams = {
   finalCode: string;
   testsPassed: number;
   testsTotal: number;
-  interviewerPersonaId?: string | null;
   problem: {
     title: string;
     description: string;
@@ -89,10 +84,9 @@ type ScoringPromptParams = {
 };
 
 export function getScoringPrompt(params: ScoringPromptParams): string {
-  const { transcript, finalCode, testsPassed, testsTotal, problem, interviewerPersonaId } = params;
-  const persona = getInterviewerPersona(interviewerPersonaId);
+  const { transcript, finalCode, testsPassed, testsTotal, problem } = params;
 
-  const transcriptText = formatTranscript(transcript, persona.name);
+  const transcriptText = formatTranscript(transcript, INTERVIEWER.name);
 
   const testSummary =
     testsTotal > 0
@@ -101,10 +95,9 @@ export function getScoringPrompt(params: ScoringPromptParams): string {
 
   return `Please evaluate this technical interview and return a JSON score object.
 
-## Interview Persona
-${persona.name} (${persona.companyLabel})
-Style: ${persona.shortStyleSummary}
-Calibration: ${persona.scoringFocusPrompt}
+## Interviewer
+${INTERVIEWER.name}
+Calibration: ${INTERVIEWER.scoringFocusPrompt}
 
 ## Problem
 **Title:** ${problem.title}
@@ -194,7 +187,6 @@ type LoopScoringPromptParams = {
   finalCode: string;
   testsPassed: number;
   testsTotal: number;
-  interviewerPersonaId?: string | null;
   roundType: RoundType;
   roundTitle: string;
   problem?: {
@@ -216,14 +208,12 @@ export function getLoopScoringPrompt(params: LoopScoringPromptParams): string {
     finalCode,
     testsPassed,
     testsTotal,
-    interviewerPersonaId,
     roundType,
     roundTitle,
     problem,
     roundContext,
     includeCompetencyReport = false,
   } = params;
-  const persona = getInterviewerPersona(interviewerPersonaId);
   const valuesContext = roundContext?.valuesContext ?? null;
   const competencyRubric = includeCompetencyReport
     ? buildValuesRubricBlock(valuesContext)
@@ -245,7 +235,7 @@ Report calibration:
 `
     : "";
 
-  const transcriptText = formatTranscript(transcript, persona.name);
+  const transcriptText = formatTranscript(transcript, INTERVIEWER.name);
 
   const testSummary =
     testsTotal > 0
@@ -261,10 +251,9 @@ Report calibration:
 
   return `Please evaluate this targeted interview round and return a JSON score object.
 
-## Interview Persona
-${persona.name} (${persona.companyLabel})
-Style: ${persona.shortStyleSummary}
-Calibration: ${persona.scoringFocusPrompt}
+## Interviewer
+${INTERVIEWER.name}
+Calibration: ${INTERVIEWER.scoringFocusPrompt}
 
 ## Round
 Type: ${roundType}

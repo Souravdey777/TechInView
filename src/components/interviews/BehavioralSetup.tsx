@@ -8,7 +8,6 @@ import {
   Building2,
   Check,
   Loader2,
-  MessageSquareText,
   NotebookPen,
   Sparkles,
 } from "lucide-react";
@@ -23,12 +22,6 @@ import {
 import { MicrophoneSetupCheck } from "@/components/interviews/MicrophoneSetupCheck";
 import { ValueLensPicker } from "@/components/interviews/setup/ValueLensPicker";
 import { useInterviewStore } from "@/stores/interview-store";
-import {
-  DEFAULT_INTERVIEWER_PERSONA,
-  INTERVIEWER_PERSONAS,
-  getInterviewerPersona,
-  type InterviewerPersonaId,
-} from "@/lib/interviewer-personas";
 import {
   BEHAVIORAL_DURATION_MINUTES,
   BEHAVIORAL_SCENARIO_OPTIONS,
@@ -50,7 +43,6 @@ type StartResponse = {
   data?: {
     interviewId?: string;
     isFreeInterview?: boolean;
-    interviewerPersona?: InterviewerPersonaId;
     startedAt?: string;
   };
 };
@@ -90,8 +82,6 @@ export function BehavioralSetup({
   const [scenarioFocus, setScenarioFocus] = useState<string[]>(
     DEFAULT_BEHAVIORAL_SCENARIO_FOCUS
   );
-  const [interviewerPersona, setInterviewerPersona] =
-    useState<InterviewerPersonaId>(DEFAULT_INTERVIEWER_PERSONA);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,7 +96,6 @@ export function BehavioralSetup({
       }),
     [company, roleTitle, scenarioFocus, valueCompetencyIds, valueFrameworkId]
   );
-  const selectedPersona = getInterviewerPersona(interviewerPersona);
   const selectedCompetencyLabels = useMemo(
     () => getValueCompetencyLabels(valueFrameworkId, valueCompetencyIds),
     [valueCompetencyIds, valueFrameworkId]
@@ -177,7 +166,6 @@ export function BehavioralSetup({
           roundType: "behavioral",
           language: "javascript",
           maxDurationSeconds: BEHAVIORAL_DURATION_MINUTES * 60,
-          interviewerPersona,
           company: trimmedCompany,
           roleTitle: trimmedRoleTitle,
           generatedLoopRoundSnapshot: roundContext,
@@ -207,7 +195,6 @@ export function BehavioralSetup({
         maxDurationSeconds: BEHAVIORAL_DURATION_MINUTES * 60,
         difficulty: "medium",
         category: null,
-        interviewerPersona: payload.data?.interviewerPersona ?? interviewerPersona,
         company: trimmedCompany,
         roleTitle: trimmedRoleTitle,
         startedAt: payload.data?.startedAt ?? new Date().toISOString(),
@@ -273,9 +260,6 @@ export function BehavioralSetup({
                 {selectedScenarioLabels.length > 0
                   ? selectedScenarioLabels.join(", ")
                   : "No scenario context selected. The interviewer will pick the situations."}
-              </p>
-              <p className="mt-3 text-xs text-brand-muted">
-                Interviewer: {selectedPersona.name}
               </p>
             </div>
           </InterviewSetupAsideCard>
@@ -397,37 +381,6 @@ export function BehavioralSetup({
           </div>
         </InterviewSetupSection>
 
-        <InterviewSetupSection
-          title="Interview persona"
-          icon={<MessageSquareText className="h-3.5 w-3.5" />}
-        >
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {INTERVIEWER_PERSONAS.map((persona) => {
-              const selected = interviewerPersona === persona.id;
-
-              return (
-                <Button
-                  key={persona.id}
-                  type="button"
-                  onClick={() => setInterviewerPersona(persona.id)}
-                  variant="outline"
-                  className={cn(
-                    "h-auto w-full flex-col items-start whitespace-normal rounded-2xl px-4 py-4 text-left",
-                    selected
-                      ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
-                      : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                  )}
-                >
-                  <p className="text-sm font-semibold">{persona.name}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.14em] text-brand-muted">
-                    {persona.companyLabel}
-                  </p>
-                  <p className="mt-3 text-xs leading-relaxed">{persona.shortStyleSummary}</p>
-                </Button>
-              );
-            })}
-          </div>
-        </InterviewSetupSection>
         <MicrophoneSetupCheck />
       </div>
 

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { InterviewMode, RoundType } from "@/lib/constants";
-import type { InterviewerPersonaId } from "@/lib/interviewer-personas";
 import type { LoopSummarySnapshot, RoundContextSnapshot } from "@/lib/loops/types";
 import type { CompetencyReport } from "@/types";
 
@@ -57,7 +56,6 @@ type SetupConfig = {
   category: string | null;
   language: string;
   maxDurationSeconds: number;
-  interviewerPersona: InterviewerPersonaId;
   generatedLoopId: string | null;
   generatedLoopRoundId: string | null;
   company: string | null;
@@ -74,7 +72,6 @@ type InterviewResult = {
   roundType: RoundType;
   roundTitle: string;
   interviewId: string;
-  interviewerPersona: InterviewerPersonaId;
   finalCode: string;
   language: string;
   transcript: StoreMessage[];
@@ -142,7 +139,6 @@ type InterviewStore = {
     maxDurationSeconds: number;
     difficulty: string;
     category: string | null;
-    interviewerPersona: InterviewerPersonaId;
     generatedLoopId?: string | null;
     generatedLoopRoundId?: string | null;
     company?: string | null;
@@ -216,7 +212,6 @@ export const useInterviewStore = create<InterviewStore>()(
             category: config.category,
             language: config.language,
             maxDurationSeconds: config.maxDurationSeconds,
-            interviewerPersona: config.interviewerPersona,
             generatedLoopId: config.generatedLoopId ?? null,
             generatedLoopRoundId: config.generatedLoopRoundId ?? null,
             company: config.company ?? null,

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scoreInterview } from "@/lib/ai/scorer";
-import { resolveInterviewerPersona } from "@/lib/interviewer-personas";
 import type { InterviewMode, RoundType } from "@/lib/constants";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import {
@@ -14,7 +13,6 @@ type ScoreRequestBody = {
   finalCode: string;
   testsPassed: number;
   testsTotal: number;
-  interviewerPersona?: string;
   mode?: InterviewMode;
   roundType?: RoundType;
   roundTitle?: string;
@@ -93,8 +91,6 @@ export async function POST(req: NextRequest) {
       roundTitle,
       roundContext,
     } = body;
-    const interviewerPersona = resolveInterviewerPersona(body.interviewerPersona);
-
     if (
       !Array.isArray(transcript) ||
       transcript.length === 0 ||
@@ -132,7 +128,6 @@ export async function POST(req: NextRequest) {
       mode,
       roundType,
       roundTitle: roundTitle ?? roundContext?.title ?? problem?.title ?? "Interview Round",
-      interviewerPersonaId: interviewerPersona,
       problem: problem
         ? {
             title: problem?.title ?? "Unknown Problem",
