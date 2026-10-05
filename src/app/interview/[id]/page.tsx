@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { DesktopInterviewGate } from "@/components/shared/DesktopInterviewGate";
-import { FullPageLoader } from "@/components/shared/LoadingSpinner";
+import { RoomSkeleton } from "@/components/shared/RoomSkeleton";
 
 const InterviewRoom = dynamic(
   () =>
@@ -12,7 +12,7 @@ const InterviewRoom = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <FullPageLoader message="Loading interview room..." />,
+    loading: () => <RoomSkeleton variant="coding" />,
   }
 );
 

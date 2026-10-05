@@ -52,12 +52,16 @@ type StartResponse = {
   };
 };
 
+/** Grid value for "no frameworks, core language only"; never sent as a framework. */
+const BASICS_ONLY = "__basics";
+
 export function TechnicalQaSetup() {
   const router = useRouter();
   const initFromSetup = useInterviewStore((state) => state.initFromSetup);
   const { supabase, user } = useSupabase();
   const [language, setLanguage] = useState<TechnicalQaLanguage>("javascript");
   const [frameworks, setFrameworks] = useState<string[]>(["react", "nextjs"]);
+  const [basicsOnly, setBasicsOnly] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,15 +96,16 @@ export function TechnicalQaSetup() {
   );
   const scoringDimensionCount = Object.keys(ROUND_SCORING_DIMENSIONS).length;
   const hasFrameworks = frameworks.length > 0;
+  const hasStack = basicsOnly || hasFrameworks;
   const isLocked = credits === 0;
-  const isDisabled = !hasFrameworks || isCreating;
+  const isDisabled = !hasStack || isCreating;
 
   const sessionFacts: SessionFact[] = [
     { label: "Duration", value: `${TECHNICAL_QA_DURATION_MINUTES} min` },
     { label: "Stack", value: getTechnicalQaLanguageShortLabel(language) },
     {
       label: "Frameworks",
-      value: hasFrameworks ? `${frameworks.length} selected` : "None yet",
+      value: basicsOnly ? "Basics only" : hasFrameworks ? `${frameworks.length} selected` : "None yet",
     },
     { label: "Scored on", value: `${scoringDimensionCount} dimensions` },
     {
@@ -114,7 +119,15 @@ export function TechnicalQaSetup() {
     },
   ];
 
+  // "Basics only" and specific frameworks are mutually exclusive.
   function toggleFramework(frameworkValue: string) {
+    if (frameworkValue === BASICS_ONLY) {
+      setBasicsOnly((current) => !current);
+      setFrameworks([]);
+      return;
+    }
+
+    setBasicsOnly(false);
     setFrameworks((current) =>
       current.includes(frameworkValue)
         ? current.filter((item) => item !== frameworkValue)
@@ -131,7 +144,7 @@ export function TechnicalQaSetup() {
   }
 
   async function handleStartInterview() {
-    if (frameworks.length === 0 || isCreating) return;
+    if (!hasStack || isCreating) return;
 
     setIsCreating(true);
     setError(null);
@@ -251,17 +264,26 @@ export function TechnicalQaSetup() {
                 className="mt-5 border-t border-white/[0.08] pt-5"
                 label="Frameworks of expertise"
                 note={
-                  hasFrameworks
-                    ? `${frameworks.length} selected`
-                    : "Pick at least one"
+                  basicsOnly
+                    ? "Language basics only"
+                    : hasFrameworks
+                      ? `${frameworks.length} selected`
+                      : "Pick one, or basics only"
                 }
                 ariaLabel="Frameworks of expertise"
-                values={frameworks}
+                values={basicsOnly ? [BASICS_ONLY] : frameworks}
                 onToggle={toggleFramework}
-                options={frameworkOptions.map((option) => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
+                options={[
+                  {
+                    value: BASICS_ONLY,
+                    label: "Language basics only",
+                    caption: `Core ${getTechnicalQaLanguageShortLabel(language)} only, no frameworks.`,
+                  },
+                  ...frameworkOptions.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  })),
+                ]}
               />
 
               <div className="mt-5 rounded-[16px] border border-white/[0.08] px-4 py-3">
@@ -345,9 +367,9 @@ export function TechnicalQaSetup() {
                   </Link>
                 </Button>
 
-                {!hasFrameworks && !isLocked ? (
+                {!hasStack && !isLocked ? (
                   <p className="text-center text-xs text-brand-amber">
-                    Select at least one framework above to continue.
+                    Pick a framework above, or choose language basics only.
                   </p>
                 ) : null}
 

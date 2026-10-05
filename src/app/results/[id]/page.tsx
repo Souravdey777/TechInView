@@ -14,6 +14,7 @@ import { FeedbackCard } from "@/components/results/FeedbackCard";
 import { TranscriptReview } from "@/components/results/TranscriptReview";
 import { CodeReview } from "@/components/results/CodeReview";
 import { InterviewReviewGate } from "@/components/results/InterviewReviewGate";
+import ResultsLoading from "./loading";
 import { ROUND_SCORING_DIMENSIONS, SCORING_DIMENSIONS } from "@/lib/constants";
 import type { HireRecommendation, InterviewMode, RoundScoreDimension, RoundType, ScoringDimension } from "@/lib/constants";
 import { useInterviewStore } from "@/stores/interview-store";
@@ -247,12 +248,7 @@ export default function ResultsPage() {
   // Loading state while checking feedback or fetching from DB
   if (feedbackCompleted === null || (!storeMatchesPage && loading)) {
     return (
-      <main className={cn(SHELL, "flex items-center justify-center")}>
-        <p className={cn(LABEL, "flex items-center gap-3")}>
-          <Loader2 className="h-4 w-4 animate-spin text-brand-cyan" />
-          Loading results...
-        </p>
-      </main>
+      <ResultsLoading />
     );
   }
 

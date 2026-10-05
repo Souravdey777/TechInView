@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { DesktopOnlyInterviewNotice } from "@/components/shared/DesktopOnlyInterviewNotice";
-import { FullPageLoader } from "@/components/shared/LoadingSpinner";
+import { RoomSkeleton } from "@/components/shared/RoomSkeleton";
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 1024px)";
 
@@ -41,6 +41,8 @@ type DesktopInterviewGateProps = {
   backHref?: string;
   backLabel?: string;
   loadingMessage?: string;
+  /** Which room layout the loading skeleton mirrors. */
+  roomVariant?: "coding" | "conversation";
   children: React.ReactNode;
 };
 
@@ -49,7 +51,8 @@ export function DesktopInterviewGate({
   description,
   backHref,
   backLabel,
-  loadingMessage = "Loading interview room...",
+  loadingMessage = "Loading interview room",
+  roomVariant = "coding",
   children,
 }: DesktopInterviewGateProps) {
   const isDesktop = useSyncExternalStore(
@@ -59,7 +62,7 @@ export function DesktopInterviewGate({
   );
 
   if (isDesktop === null) {
-    return <FullPageLoader message={loadingMessage} />;
+    return <RoomSkeleton variant={roomVariant} label={loadingMessage} />;
   }
 
   if (!isDesktop) {

@@ -56,40 +56,7 @@ export function AuthSplitLayout({
 }: AuthSplitLayoutProps) {
   return (
     <div className={cn("flex min-h-screen w-full lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]", className)}>
-      {/* Brand panel (desktop only) */}
-      <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-white/[0.08] px-[clamp(32px,4vw,64px)] py-12 lg:flex">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-[20%] -top-[10%] h-[90%] w-[90%] rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.14)_0%,rgb(var(--brand-cyan)/0.04)_35%,transparent_65%)]"
-        />
-
-        <Link href="/" className="relative w-fit rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan">
-          <BrandLogo size="sm" />
-        </Link>
-
-        <div className="relative">
-          {/* VoiceVisualizer's orb is 76px; scale the wrapper, never the component. */}
-          <div aria-hidden className="mb-14 flex h-[200px] w-[200px] items-center justify-center">
-            <div className="scale-[2.2] brightness-125">
-              <VoiceVisualizer state="speaking" className="h-[76px] w-[76px]" />
-            </div>
-          </div>
-          <Kicker>{kicker}</Kicker>
-          <p className="max-w-[14ch] text-balance text-[clamp(36px,4vw,60px)] font-normal leading-[1.0] tracking-[-0.04em]">
-            {panelHeadline}
-          </p>
-          <p className={cn(LEAD, "mt-6 max-w-[440px]")}>{panelSupporting}</p>
-        </div>
-
-        <dl className={cn(GRID, "relative grid-cols-3")}>
-          {PANEL_STATS.map((stat) => (
-            <div key={stat.label} className={cn(CELL, "flex flex-col-reverse gap-2 px-5 py-4")}>
-              <dt className={LABEL}>{stat.label}</dt>
-              <dd className="font-mono text-2xl tracking-[-0.02em] text-brand-text">{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </aside>
+      <AuthBrandPanel kicker={kicker} headline={panelHeadline} supporting={panelSupporting} />
 
       {/* Form column */}
       <div className="flex w-full flex-col justify-center px-5 py-12 sm:px-10 lg:px-[clamp(40px,6vw,96px)]">
@@ -113,6 +80,53 @@ export function AuthSplitLayout({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Desktop-only brand column shared by login, signup and onboarding. */
+export function AuthBrandPanel({
+  kicker,
+  headline,
+  supporting,
+}: {
+  kicker: string;
+  headline: string;
+  supporting: string;
+}) {
+  return (
+    <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-white/[0.08] px-[clamp(32px,4vw,64px)] py-12 lg:flex">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-[20%] -top-[10%] h-[90%] w-[90%] rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.14)_0%,rgb(var(--brand-cyan)/0.04)_35%,transparent_65%)]"
+      />
+
+      <Link href="/" className="relative w-fit rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan">
+        <BrandLogo size="sm" />
+      </Link>
+
+      <div className="relative">
+        {/* VoiceVisualizer's orb is 76px; scale the wrapper, never the component. */}
+        <div aria-hidden className="mb-14 flex h-[200px] w-[200px] items-center justify-center">
+          <div className="scale-[2.2] brightness-125">
+            <VoiceVisualizer state="speaking" className="h-[76px] w-[76px]" />
+          </div>
+        </div>
+        <Kicker>{kicker}</Kicker>
+        <p className="max-w-[14ch] text-balance text-[clamp(36px,4vw,60px)] font-normal leading-[1.0] tracking-[-0.04em]">
+          {headline}
+        </p>
+        <p className={cn(LEAD, "mt-6 max-w-[440px]")}>{supporting}</p>
+      </div>
+
+      <dl className={cn(GRID, "relative grid-cols-3")}>
+        {PANEL_STATS.map((stat) => (
+          <div key={stat.label} className={cn(CELL, "flex flex-col-reverse gap-2 px-5 py-4")}>
+            <dt className={LABEL}>{stat.label}</dt>
+            <dd className="font-mono text-2xl tracking-[-0.02em] text-brand-text">{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </aside>
   );
 }
 
