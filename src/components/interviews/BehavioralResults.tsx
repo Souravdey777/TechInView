@@ -655,12 +655,6 @@ export function BehavioralResults({ interviewId }: BehavioralResultsProps) {
                 ))}
               </ul>
             </AsideBlock>
-
-            {round?.prompt ? (
-              <AsideBlock label="Interview Brief">
-                <p className="whitespace-pre-line text-sm leading-relaxed text-brand-muted">{round.prompt}</p>
-              </AsideBlock>
-            ) : null}
           </aside>
         </div>
       </div>

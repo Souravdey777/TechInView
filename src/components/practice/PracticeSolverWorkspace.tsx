@@ -46,6 +46,8 @@ type PracticeAttemptSnapshot = {
 type PracticeSolverWorkspaceProps = {
   problem: PracticeProblem;
   initialAttempt: PracticeAttemptSnapshot;
+  /** The profile's preferred language; used when there is no saved attempt. */
+  preferredLanguage?: string | null;
 };
 
 type RunCodeResponse = {
@@ -73,9 +75,14 @@ const FOCUS_RING =
 export function PracticeSolverWorkspace({
   problem,
   initialAttempt,
+  preferredLanguage,
 }: PracticeSolverWorkspaceProps) {
   const posthog = usePostHog();
-  const [language, setLanguage] = useState<SupportedLanguage>(initialAttempt?.language ?? "python");
+  const [language, setLanguage] = useState<SupportedLanguage>(
+    initialAttempt?.language ??
+      SUPPORTED_LANGUAGES.find((lang) => lang === preferredLanguage) ??
+      "python"
+  );
   const [codeByLanguage, setCodeByLanguage] = useState<Record<SupportedLanguage, string>>(() => {
     const defaults = SUPPORTED_LANGUAGES.reduce(
       (acc, currentLanguage) => ({

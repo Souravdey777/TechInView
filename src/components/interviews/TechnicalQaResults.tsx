@@ -593,12 +593,6 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
                 ))}
               </ul>
             </AsideBlock>
-
-            {round?.prompt ? (
-              <AsideBlock label="Interview Brief">
-                <p className="text-sm leading-relaxed text-brand-muted">{round.prompt}</p>
-              </AsideBlock>
-            ) : null}
           </aside>
         </div>
       </div>

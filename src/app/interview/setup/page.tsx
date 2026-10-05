@@ -424,7 +424,7 @@ function InterviewSetupInner() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("interview_credits, has_used_free_trial, target_company, experience_level")
+        .select("interview_credits, has_used_free_trial, target_company, experience_level, preferred_language")
         .eq("id", user.id)
         .single();
       if (data) {
@@ -432,8 +432,13 @@ function InterviewSetupInner() {
         const isFreeTrial = !(data.has_used_free_trial ?? false);
         const shouldForcePreviewDefaults = isFreeTrial && (data.interview_credits ?? 0) <= 0;
         setIsFreeTrialUser(isFreeTrial);
+        // Default to the language picked in onboarding/settings, if it's one we offer.
+        const preferredLanguage = LANGUAGES.find(
+          (lang) => lang.value === data.preferred_language
+        )?.value;
         setForm((f) => ({
           ...f,
+          language: preferredLanguage ?? f.language,
           difficulty: shouldForcePreviewDefaults ? "easy" : f.difficulty,
           duration: shouldForcePreviewDefaults
             ? (FREE_TRIAL_DURATION_MINUTES as Duration)

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { DesktopInterviewGate } from "@/components/shared/DesktopInterviewGate";
-import { FullPageLoader } from "@/components/shared/LoadingSpinner";
+import { RoomSkeleton } from "@/components/shared/RoomSkeleton";
 
 const TechnicalQaInterviewRoom = dynamic(
   () =>
@@ -12,7 +12,7 @@ const TechnicalQaInterviewRoom = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <FullPageLoader message="Loading interview room..." />,
+    loading: () => <RoomSkeleton variant="conversation" />,
   }
 );
 
@@ -33,6 +33,7 @@ export default function TechnicalQaInterviewPage({
 
   return (
     <DesktopInterviewGate
+      roomVariant="conversation"
       title="Technical Q&A rounds work best on desktop"
       description="This room is tuned for a live voice conversation plus transcript review in parallel. Open it on a laptop or desktop for the intended interview flow."
     >

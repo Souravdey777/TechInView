@@ -109,7 +109,12 @@ function buildTechnicalQaPrompt(languageLabel: string, frameworkLabels: string[]
   const stackText =
     frameworkLabels.length > 0
       ? `${languageLabel} with ${frameworkLabels.join(", ")}`
-      : `${languageLabel} fundamentals`;
+      : `${languageLabel} language fundamentals`;
+  // No frameworks picked means the candidate chose "language basics only".
+  const basicsScope =
+    frameworkLabels.length === 0
+      ? "Scope: language basics only. Stay on the core language itself: its runtime and memory model, types, core data structures, the standard library, error handling, and concurrency primitives. Do not ask about frameworks or third-party libraries unless the candidate brings one up first.\n\n"
+      : "";
 
   return `Run a ${TECHNICAL_QA_DURATION_MINUTES}-minute, voice-first technical Q&A interview focused on ${stackText}.
 
@@ -120,7 +125,7 @@ Conversation contract:
 - Challenge vague answers with one narrower follow-up asking for a concrete example, failure mode, metric, runtime behavior, or alternative design.
 - Stop speaking after each question so the candidate has room to answer.
 
-Question design:
+${basicsScope}Question design:
 - Start broad enough to calibrate level, then go deeper into internals, debugging, testing, performance, rollout risk, scaling implications, and practical production judgment.
 - Prefer scenarios like "this fails in production, how would you debug it?" over definition recall.
 - Reward precise mechanisms, clear tradeoffs, and honest uncertainty. Push back on hand-wavy answers.`;
@@ -151,7 +156,7 @@ export function buildTechnicalQaRoundContext(
     summary:
       frameworkLabels.length > 0
         ? `A ${TECHNICAL_QA_DURATION_MINUTES}-minute voice-first technical interview focused on ${frameworkLabels.join(", ")} in ${languageLabel}, with realistic follow-ups on internals, debugging, performance, and production tradeoffs.`
-        : `A ${TECHNICAL_QA_DURATION_MINUTES}-minute voice-first technical interview focused on ${languageLabel} fundamentals, framework depth, debugging, performance, and production tradeoffs.`,
+        : `A ${TECHNICAL_QA_DURATION_MINUTES}-minute voice-first technical interview on ${languageLabel} basics only: the runtime, types, standard library, concurrency, debugging, and performance, with no framework questions.`,
     rationale:
       "This mirrors stack-depth interviews where the bar is not whether you can code from scratch on the spot, but whether you can explain how your tools behave, reason through tradeoffs, and answer realistic engineering follow-ups with precision.",
     confidence: "high",

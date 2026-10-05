@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { DesktopInterviewGate } from "@/components/shared/DesktopInterviewGate";
-import { FullPageLoader } from "@/components/shared/LoadingSpinner";
+import { RoomSkeleton } from "@/components/shared/RoomSkeleton";
 
 const EngineeringManagerInterviewRoom = dynamic(
   () =>
@@ -12,7 +12,7 @@ const EngineeringManagerInterviewRoom = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <FullPageLoader message="Loading interview room..." />,
+    loading: () => <RoomSkeleton variant="conversation" />,
   }
 );
 
@@ -33,6 +33,7 @@ export default function EngineeringManagerInterviewPage({
 
   return (
     <DesktopInterviewGate
+      roomVariant="conversation"
       title="Leadership interview rooms need a larger screen"
       description="This live interview view keeps the voice stage, round brief, and transcript visible together. Open it on desktop to continue the full experience."
     >

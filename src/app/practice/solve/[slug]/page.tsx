@@ -37,7 +37,10 @@ export default async function PracticeSolvePage({ params }: PracticeSolvePagePro
     redirect(`/practice/${params.slug}?locked=solver`);
   }
 
-  const attempt = await getPracticeAttempt(user.id, problem.id);
+  const [attempt, { data: profile }] = await Promise.all([
+    getPracticeAttempt(user.id, problem.id),
+    supabase.from("profiles").select("preferred_language").eq("id", user.id).single(),
+  ]);
 
   return (
     <DesktopInterviewGate
@@ -45,7 +48,7 @@ export default async function PracticeSolvePage({ params }: PracticeSolvePagePro
       description="Practice Mode shows the problem, your code and the tests side by side. Open this problem on a laptop or desktop to solve it."
       backHref={`/practice/${params.slug}`}
       backLabel="Back to problem"
-      loadingMessage="Loading practice room..."
+      loadingMessage="Loading practice room"
     >
       <div className="fixed inset-0 overflow-hidden bg-brand-deep">
         <PracticeSolverWorkspace
@@ -80,6 +83,7 @@ export default async function PracticeSolvePage({ params }: PracticeSolvePagePro
                 }
               : null
           }
+          preferredLanguage={profile?.preferred_language ?? null}
         />
       </div>
     </DesktopInterviewGate>
