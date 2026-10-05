@@ -4,6 +4,9 @@ import { CheckCircle2, Play, Save, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SupportedLanguage } from "@/lib/constants";
 
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep";
+
 type PracticeControlsProps = {
   language: SupportedLanguage;
   saveLabel: string;
@@ -34,7 +37,7 @@ function getRunShortcutHint(): string {
 
 /**
  * Practice room bottom bar. Mirrors the interview room's control bar, minus the
- * phase transport and the end-round action — practice has neither.
+ * phase transport and the end-round action; practice has neither.
  */
 export function PracticeControls({
   language,
@@ -46,9 +49,9 @@ export function PracticeControls({
   onRunCode,
 }: PracticeControlsProps) {
   return (
-    <div className="flex h-12 items-center justify-between border-t border-brand-border bg-brand-card px-4">
+    <div className="relative flex h-12 items-center justify-between border-t border-white/[0.08] bg-brand-deep px-4">
       {/* Left: autosave + test progress */}
-      <div className="flex items-center gap-3 text-xs text-brand-muted">
+      <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">
         <span className="inline-flex items-center gap-1.5">
           <Save className="h-3.5 w-3.5" />
           {saveLabel}
@@ -56,7 +59,7 @@ export function PracticeControls({
         {testsTotal !== null && (
           <span className="inline-flex items-center gap-1.5">
             <CheckCircle2 className="h-3.5 w-3.5 text-brand-green" />
-            <span className="font-medium text-brand-text">
+            <span className="tabular-nums text-brand-text">
               {testsPassed}/{testsTotal}
             </span>{" "}
             tests
@@ -72,14 +75,14 @@ export function PracticeControls({
 
       {/* Center: language badge */}
       <div className="absolute left-1/2 -translate-x-1/2">
-        <span className="rounded-md border border-brand-border bg-brand-surface px-2.5 py-1 font-mono text-xs font-medium text-brand-muted">
+        <span className="rounded-full border border-white/[0.1] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted">
           {LANGUAGE_LABELS[language]}
         </span>
       </div>
 
       {/* Right: run action + shortcut hint */}
       <div className="flex items-center gap-2">
-        <span className="hidden text-[10px] text-brand-muted sm:block">
+        <span className="hidden font-mono text-[10px] uppercase tracking-[0.1em] text-brand-subtle sm:block">
           {getRunShortcutHint()} to run
         </span>
 
@@ -87,10 +90,11 @@ export function PracticeControls({
           onClick={onRunCode}
           disabled={isRunning}
           className={cn(
-            "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all",
+            "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
+            FOCUS_RING,
             isRunning
-              ? "cursor-not-allowed border-brand-border text-brand-muted"
-              : "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20 hover:border-brand-green/50"
+              ? "cursor-not-allowed border-white/[0.08] text-brand-subtle"
+              : "border-white/[0.18] text-brand-text hover:border-brand-cyan hover:text-brand-cyan"
           )}
         >
           <Play className="h-3.5 w-3.5" />

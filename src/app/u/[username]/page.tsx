@@ -192,9 +192,9 @@ export default async function PublicProfilePage({
         <div className={CONTAINER}>
           <Kicker>Public interview profile</Kicker>
           <div className="flex flex-col gap-8 sm:flex-row sm:items-end">
-            <Avatar size="xl" className="h-24 w-24 shrink-0 border border-white/[0.08] bg-brand-surface">
+            <Avatar size="xl" className="h-24 w-24 shrink-0 border border-white/[0.12] bg-transparent">
               <AvatarImage src={profile.avatar_url ?? undefined} alt={`Profile photo of ${displayName}`} />
-              <AvatarFallback className="bg-brand-surface font-mono text-xl text-brand-text">
+              <AvatarFallback className="border-0 bg-transparent font-mono text-xl text-brand-text">
                 {getInitials(displayName)}
               </AvatarFallback>
             </Avatar>

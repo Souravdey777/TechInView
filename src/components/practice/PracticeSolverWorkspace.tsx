@@ -11,6 +11,7 @@ import { PanelResizeHandle } from "@/components/interview/PanelResizeHandle";
 import { ProblemPanel } from "@/components/interview/ProblemPanel";
 import { TestRunner, type TestResult } from "@/components/interview/TestRunner";
 import { PracticeControls } from "./PracticeControls";
+import { DifficultyMark } from "./ProblemStatement";
 import { useResizablePanel } from "@/hooks/useResizablePanel";
 import type { SupportedLanguage } from "@/lib/constants";
 
@@ -66,11 +67,8 @@ const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
   "cpp",
 ];
 
-const DIFFICULTY_STYLES = {
-  easy: "border-brand-green/30 bg-brand-green/10 text-brand-green",
-  medium: "border-brand-amber/30 bg-brand-amber/10 text-brand-amber",
-  hard: "border-brand-rose/30 bg-brand-rose/10 text-brand-rose",
-} as const;
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep";
 
 export function PracticeSolverWorkspace({
   problem,
@@ -261,29 +259,22 @@ export function PracticeSolverWorkspace({
   return (
     <div className="flex h-screen w-screen flex-col bg-brand-deep overflow-hidden">
       {/* ── Top bar ── */}
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-brand-border bg-brand-card px-4">
+      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.08] bg-brand-deep px-4">
         <div className="flex min-w-0 shrink items-center gap-3">
           <BrandLogo size="sm" wordmarkClassName="text-sm" />
-          <span className="h-4 w-px shrink-0 bg-brand-border" aria-hidden />
-          <span className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-subtle">
+          <span className="h-4 w-px shrink-0 bg-white/[0.08]" aria-hidden />
+          <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
             Practice Mode
           </span>
-          <span className="truncate text-xs text-brand-muted">{problem.title}</span>
-          <span
-            className={cn(
-              "shrink-0 rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em]",
-              DIFFICULTY_STYLES[problem.difficulty]
-            )}
-          >
-            {problem.difficulty}
-          </span>
+          <span className="truncate text-sm text-brand-text">{problem.title}</span>
+          <DifficultyMark difficulty={problem.difficulty} className="shrink-0" />
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={handleResetCode}
-            className="flex items-center gap-1.5 rounded-lg border border-brand-border px-3 py-1.5 text-xs font-medium text-brand-muted transition-colors hover:border-brand-subtle hover:text-brand-text"
+            className={cn("flex items-center gap-1.5 rounded-full border border-white/[0.18] px-3.5 py-1.5 text-xs font-medium text-brand-text transition-colors hover:border-brand-cyan hover:text-brand-cyan", FOCUS_RING)}
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Reset code
@@ -291,7 +282,7 @@ export function PracticeSolverWorkspace({
           <Link
             href={interviewHref}
             onClick={handleUpgradeClick}
-            className="flex items-center gap-1.5 rounded-lg bg-brand-cyan px-3 py-1.5 text-xs font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
+            className={cn("flex items-center gap-1.5 rounded-full bg-brand-cyan px-3.5 py-1.5 text-xs font-medium text-brand-deep transition-colors hover:bg-brand-text", FOCUS_RING)}
           >
             Interview this one
             <ArrowRight className="h-3.5 w-3.5" />
@@ -303,7 +294,7 @@ export function PracticeSolverWorkspace({
       <div className="flex flex-1 overflow-hidden">
         {/* ── Left panel (resizable) ── */}
         <aside
-          className="flex shrink-0 flex-col border-r border-brand-border bg-brand-surface overflow-hidden"
+          className="flex shrink-0 flex-col overflow-hidden border-r border-white/[0.08] bg-brand-deep"
           style={{ width: `${panelWidth}px` }}
         >
           <div className="flex flex-1 flex-col overflow-hidden">
@@ -331,7 +322,7 @@ export function PracticeSolverWorkspace({
           </div>
 
           {error && (
-            <div className="shrink-0 border-t border-brand-rose/30 bg-brand-rose/10 px-4 py-2 text-xs text-brand-rose">
+            <div className="shrink-0 border-t border-brand-rose/30 bg-brand-rose/[0.08] px-4 py-2 text-xs text-brand-rose">
               {error}
             </div>
           )}
