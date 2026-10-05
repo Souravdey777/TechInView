@@ -1,7 +1,14 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/site-seo";
 
+/**
+ * Keep crawlers on the public marketing surface. Prefixes match without a
+ * trailing slash so the bare route is covered too ("/interview" also covers
+ * "/interviews/..."). Login/signup stay crawlable so a noindex on those pages
+ * can be seen.
+ */
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
+  const baseUrl = getSiteUrl();
 
   return {
     rules: [
@@ -9,15 +16,20 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         disallow: [
-          "/dashboard/",
-          "/settings/",
-          "/progress/",
-          "/problems/",
-          "/interview/",
-          "/results/",
-          "/onboarding/",
           "/api/",
-          "/callback/",
+          "/callback",
+          "/onboarding",
+          "/dashboard",
+          "/settings",
+          "/progress",
+          "/problems",
+          "/prep-plans",
+          "/prep-guru",
+          "/design-system",
+          "/orb-lab",
+          "/interview",
+          "/results",
+          "/practice/solve/",
         ],
       },
     ],

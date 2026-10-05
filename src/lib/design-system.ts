@@ -167,10 +167,43 @@ export const DESIGN_SYSTEM_SURFACES = [
 ] as const;
 
 export const DESIGN_SYSTEM_RULES = [
-  "Dark theme is the product default; do not introduce a light mode in V1 surfaces.",
+  "Dark theme is the product default. Do not introduce a light mode in V1 surfaces.",
   "Use cyan for primary action and focus. Reserve green, amber, and rose for semantic states.",
+  "Marketing pages use one accent only (cyan), hairline borders, and mono uppercase eyebrows such as \"01 · Interview room\".",
   "Keep operational screens dense, scan-friendly, and restrained. Avoid marketing hero composition inside app tools.",
   "Use 8px radius for compact controls and 12-24px radius for major product panels.",
   "Pair icon buttons with accessible labels or visible text when the command is not obvious.",
   "Prefer existing shared components before adding a new primitive.",
+] as const;
+
+/** Marketing surfaces (landing page) re-skin the brand tokens via `.theme-landing` in globals.css. */
+export const DESIGN_SYSTEM_LANDING_COLORS = [
+  { name: "Ink", token: "--brand-deep", value: "#0A0B0D", usage: "Page background" },
+  { name: "Panel", token: "--brand-surface", value: "#0E1013", usage: "Demo panels and cards" },
+  { name: "Text", token: "--brand-text", value: "#EDEEF0", usage: "Headlines and primary copy" },
+  { name: "Muted", token: "--brand-muted", value: "#8E939B", usage: "Body copy and nav links" },
+  { name: "Subtle", token: "--brand-subtle", value: "#5B6068", usage: "Eyebrows, secondary headline half" },
+  { name: "Cyan", token: "--brand-cyan", value: "#22D3EE", usage: "The only accent: CTAs, active links, timeline and score highlights" },
+] as const;
+
+export const DESIGN_SYSTEM_LOGO_RULES = [
+  "The mark is code brackets holding the voice dot. Brackets take the text colour; the dot is always brand cyan #22D3EE (#0891B2 on white, where the lighter cyan is too faint).",
+  "Use BrandLogo or BrandMark from src/components/shared/BrandLogo.tsx. Do not place the mark on a gradient tile or recolour the dot.",
+  "The wordmark is lowercase \"techinview\". Write the company name as TechInView in sentences.",
+  "Below 20px use the 16px cut (wider bracket arms on whole pixels); it ships in favicon.ico.",
+  "Keep clear space of at least half the mark's width on every side.",
+] as const;
+
+export const DESIGN_SYSTEM_VOICE_STATES = [
+  { state: "idle", label: "Ready", usage: "Smaller and slow. Nothing is happening yet." },
+  { state: "listening", label: "Listening", usage: "Cyan and violet. The candidate is talking." },
+  { state: "thinking", label: "Thinking", usage: "Amber. The interviewer is preparing a reply." },
+  { state: "speaking", label: "Speaking", usage: "Green. The interviewer is talking. Marketing uses this state only." },
+] as const;
+
+export const DESIGN_SYSTEM_WRITING_RULES = [
+  "No em dashes anywhere in user-facing copy. Use a comma, colon, period, or a middle dot (·) for compact labels.",
+  "Say what happens in the product in concrete terms. Avoid hype words such as unlock, elevate, seamless, supercharge, or journey.",
+  "Do not claim features that are not live. Java and C++ execution, System Design, and Machine Coding are not shipped yet.",
+  "Button labels are short and literal: \"Start interview\", \"Buy 3 interviews\", not \"Get started on your journey\".",
 ] as const;

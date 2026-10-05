@@ -1,12 +1,7 @@
-"use client";
-
-import { ScoreSummary } from "@/components/results/ScoreSummary";
-import { ScoreRadar } from "@/components/results/ScoreRadar";
-import { FeedbackCard } from "@/components/results/FeedbackCard";
-import {
-  SCORING_DIMENSIONS,
-  type ScoringDimension,
-} from "@/lib/constants";
+import { ScoreCard } from "@/components/landing/LandingLive";
+import { BODY, CELL, GRID, H3, LABEL } from "@/components/marketing/ds";
+import { HIRE_RECOMMENDATION_CONFIG, SCORING_DIMENSIONS, type ScoringDimension } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 const SAMPLE_DIMENSION_ORDER: ScoringDimension[] = [
   "problem_solving",
@@ -16,6 +11,14 @@ const SAMPLE_DIMENSION_ORDER: ScoringDimension[] = [
   "testing",
 ];
 
+const SHORT: Record<ScoringDimension, string> = {
+  problem_solving: "PROBLEM SOLVING",
+  code_quality: "CODE QUALITY",
+  communication: "COMMUNICATION",
+  technical_knowledge: "TECH KNOWLEDGE",
+  testing: "TESTING",
+};
+
 const SAMPLE_SCORES: Record<ScoringDimension, number> = {
   problem_solving: 78,
   code_quality: 82,
@@ -23,6 +26,8 @@ const SAMPLE_SCORES: Record<ScoringDimension, number> = {
   technical_knowledge: 74,
   testing: 68,
 };
+
+const SAMPLE_OVERALL = 76;
 
 const SAMPLE_FEEDBACK: Record<ScoringDimension, string> = {
   problem_solving:
@@ -38,47 +43,56 @@ const SAMPLE_FEEDBACK: Record<ScoringDimension, string> = {
 };
 
 export function SampleReportPreview() {
-  const radarScores = SAMPLE_DIMENSION_ORDER.map((key) => ({
-    dimension: SCORING_DIMENSIONS[key].label,
+  const dims = SAMPLE_DIMENSION_ORDER.map((key) => ({
+    name: SCORING_DIMENSIONS[key].label,
+    short: SHORT[key],
     score: SAMPLE_SCORES[key],
-    maxScore: 100,
   }));
 
   return (
-    <div className="space-y-8">
-      <div
-        className="rounded-xl border border-brand-amber/30 bg-brand-amber/[0.06] px-4 py-3 text-sm text-brand-text"
-        role="note"
-      >
-        <span className="font-semibold text-brand-amber">Sample only.</span>{" "}
-        This preview mirrors TechInView results after an AI interview; your real report
-        reflects your session and includes transcript and code review.
-      </div>
-
-      <ScoreSummary
-        overallScore={76}
-        hireRecommendation="hire"
-        summary="Solid performance: clear approach, working solution, and reasonable complexity discussion. Communication was good with room to be more vocal during debugging. Overall aligned with a hire-level bar for this problem."
+    <div>
+      <ScoreCard
+        dims={dims}
+        overall={SAMPLE_OVERALL}
+        personaName="Tia"
+        header={
+          <div className="mb-10">
+            <p className={cn(LABEL, "text-brand-cyan")} role="note">
+              Sample only · scores and notes are made up to show the format
+            </p>
+            <p className={cn(LABEL, "mt-8")}>Recommendation</p>
+            <h3 className="mt-2 text-[40px] font-normal leading-none tracking-[-0.035em]">
+              {HIRE_RECOMMENDATION_CONFIG.hire.label}
+            </h3>
+            <p className={cn(BODY, "mt-5 max-w-[460px]")}>
+              Solid performance: clear approach, working solution, and reasonable complexity discussion.
+              Communication was good with room to be more vocal during debugging. Overall aligned with a
+              hire-level bar for this problem.
+            </p>
+          </div>
+        }
+        footer={
+          <p className={cn(BODY, "mt-6 max-w-[460px] text-sm")}>
+            Your report is based on your own session and includes the transcript and your code.
+          </p>
+        }
       />
 
-      <ScoreRadar scores={radarScores} />
-
-      <div>
-        <h2 className="text-base font-semibold text-brand-text mb-4">
-          Dimension breakdown
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SAMPLE_DIMENSION_ORDER.map((key) => (
-            <FeedbackCard
-              key={key}
-              dimension={SCORING_DIMENSIONS[key].label}
-              score={SAMPLE_SCORES[key]}
-              weight={SCORING_DIMENSIONS[key].weight}
-              feedback={SAMPLE_FEEDBACK[key]}
-            />
-          ))}
-        </div>
-      </div>
+      <h3 className={cn(H3, "mb-6 mt-20")}>Dimension breakdown</h3>
+      <ul className={cn(GRID, "sm:grid-cols-2 lg:grid-cols-3")}>
+        {SAMPLE_DIMENSION_ORDER.map((key, i) => (
+          <li key={key} className={cn(CELL, "flex flex-col p-6")}>
+            <div className={cn(LABEL, "flex justify-between gap-4")}>
+              <span>
+                {String(i + 1).padStart(2, "0")} · {Math.round(SCORING_DIMENSIONS[key].weight * 100)}% weight
+              </span>
+              <span className="text-brand-text">{SAMPLE_SCORES[key]}/100</span>
+            </div>
+            <h4 className="mt-5 text-[17px] tracking-[-0.01em]">{SCORING_DIMENSIONS[key].label}</h4>
+            <p className={cn(BODY, "mt-2")}>{SAMPLE_FEEDBACK[key]}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

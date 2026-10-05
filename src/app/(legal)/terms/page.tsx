@@ -6,7 +6,7 @@ export const metadata: Metadata = createLegalMetadata({
   path: "/terms",
   title: "Terms of Service",
   description:
-    "Rules for using TechInView, including accounts, interview credits, acceptable use, AI output limits, and support or refund references.",
+    "The terms for using TechInView: accounts, one-time interview packs and credits, acceptable use, ownership of your content, and the limits of AI-generated feedback.",
 });
 
 const sections: LegalSection[] = [
@@ -159,7 +159,7 @@ const sections: LegalSection[] = [
           <a href={createSupportMailto({ subject: "Question about TechInView terms" })}>
             {SUPPORT_EMAIL}
           </a>{" "}
-          or visit <a href="/contact">/contact</a>.
+          or visit the <a href="/contact">Contact page</a>.
         </p>
       </>
     ),
@@ -171,7 +171,7 @@ export default function TermsPage() {
     <LegalPageShell
       currentPath="/terms"
       title="Terms of Service"
-      description="The ground rules for using TechInView, including accounts, credits, acceptable use, AI output limitations, and support."
+      description="The rules that apply when you use TechInView: your account, interview credits, acceptable use, your content, and what AI feedback can and cannot tell you."
       summary="Interview packs are one-time purchases, not subscriptions, and credits have no cash value. You keep ownership of the code and content you submit; we license it only to run and improve the product. AI scores are practice feedback, not a guaranteed job outcome."
       sections={sections}
     />

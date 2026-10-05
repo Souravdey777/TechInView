@@ -223,7 +223,7 @@ export function TechnicalQaSetup() {
             </h1>
           </div>
           <p className="text-sm leading-relaxed text-brand-muted lg:max-w-sm lg:text-right">
-            Technical Q&amp;A is voice-only — no editor, no coding. Pick the stack
+            Technical Q&amp;A is voice-only: no editor, no coding. Pick the stack
             you actually work in and the interviewer probes internals, debugging,
             and production tradeoffs for {TECHNICAL_QA_DURATION_MINUTES} minutes,
             then scores you on {scoringDimensionCount} dimensions.
@@ -354,7 +354,7 @@ export function TechnicalQaSetup() {
                 {isLocked ? (
                   <Button asChild size="lg" className="w-full gap-2 text-base font-semibold">
                     <Link href="/settings">
-                      Unlock Technical Q&amp;A
+                      Get Technical Q&amp;A
                       <ChevronRight className="h-5 w-5" />
                     </Link>
                   </Button>
@@ -400,7 +400,7 @@ export function TechnicalQaSetup() {
                 <p className="text-center text-xs text-brand-muted">
                   By starting, you agree to live microphone processing by our
                   voice provider. TechInView stores transcripts, timing, scores,
-                  and results—not raw microphone audio. See our{" "}
+                  and results, but not raw microphone audio. See our{" "}
                   <Link href="/privacy" className="text-brand-cyan hover:underline">
                     Privacy Policy
                   </Link>

@@ -6,7 +6,7 @@ export const metadata: Metadata = createLegalMetadata({
   path: "/refunds",
   title: "Refund Policy",
   description:
-    "How TechInView reviews duplicate charges, missing credits, unused interview packs, and exceptions caused by platform errors or legal requirements.",
+    "How TechInView handles duplicate charges, missing credits, refund requests for unused interview packs within 7 days of purchase, and cases where a refund may be declined.",
 });
 
 const sections: LegalSection[] = [
@@ -108,7 +108,7 @@ export default function RefundsPage() {
     <LegalPageShell
       currentPath="/refunds"
       title="Refund Policy"
-      description="A practical refund policy for duplicate charges, missing credits, and unused interview packs purchased on TechInView."
+      description="When and how we fix or refund a TechInView purchase: duplicate charges, credits that did not arrive, and interview packs you have not used."
       summary="Packs are one-time purchases and every request is reviewed case by case. Confirmed duplicate charges and fulfillment errors get corrected. Unused packs can be reviewed within 7 days of purchase, and credits you have already used are not refundable except where the law requires it or a verified platform error caused the problem."
       sections={sections}
     />

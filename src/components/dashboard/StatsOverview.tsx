@@ -99,7 +99,7 @@ export function StatsOverview({
               </p>
               <p className={cn("text-2xl font-bold font-heading", accentClass)}>
                 {value === 0 && label === "Average Score" ? (
-                  <span className="text-brand-muted text-xl">—</span>
+                  <span className="text-brand-muted text-xl">–</span>
                 ) : (
                   <>
                     {value}

@@ -94,7 +94,7 @@ export function InterviewFeedback({
             </div>
             <div>
               <h3 className="text-lg font-semibold text-brand-text">
-                {existingFeedback ? "Feedback Updated" : "Thanks for your feedback!"}
+                {existingFeedback ? "Feedback Updated" : "Thanks for your feedback"}
               </h3>
               <p className="text-sm text-brand-muted mt-1.5">
                 Your input helps us make TechInView better for everyone.

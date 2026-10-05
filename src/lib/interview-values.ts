@@ -309,7 +309,7 @@ const AMAZON_LP: ValueFramework = {
     {
       id: "earn_trust",
       label: "Earn Trust",
-      description: "Listening attentively, speaking candidly, and treating others respectfully — including about your own mistakes.",
+      description: "Listening attentively, speaking candidly, and treating others respectfully, including when the mistake is your own.",
       probes: [
         "How did you tell them you had got it wrong?",
         "What did you do when you inherited a team that did not trust you?",
@@ -351,7 +351,7 @@ const GOOGLE_GL: ValueFramework = {
   shortLabel: "Google G&L",
   origin: "Google's hiring attributes (GCA, Leadership, Googleyness)",
   description:
-    "Google's dedicated behavioural round grades comfort with ambiguity, emergent leadership, intellectual humility, and user focus — leadership without relying on formal authority.",
+    "Google's dedicated behavioural round grades comfort with ambiguity, emergent leadership, intellectual humility, and user focus: leadership without relying on formal authority.",
   interviewStyle:
     "One 45-minute round, roughly four to six behavioural questions in STAR form, probing how you handle ambiguity, take the lead without the title, act on feedback, and choose the user over internal convenience.",
   defaultCompetencyIds: ["comfort_with_ambiguity", "emergent_leadership", "intellectual_humility"],
@@ -385,7 +385,7 @@ const GOOGLE_GL: ValueFramework = {
       label: "Emergent Leadership",
       description: "Stepping into the lead when your skills are needed, and stepping back when they are not.",
       probes: [
-        "You had no authority there — how did you get people moving?",
+        "You had no authority there. How did you get people moving?",
         "When did you hand it back, and to whom?",
         "What would have happened without you?",
       ],
@@ -517,7 +517,7 @@ const META_VALUES: ValueFramework = {
     {
       id: "meta_metamates_me",
       label: "Meta, Metamates, Me",
-      description: "Company first, team second, self third — with concrete evidence of that ordering.",
+      description: "Company first, team second, self third, with concrete evidence of that ordering.",
       probes: [
         "What did you do that was bad for your visibility but good for the company?",
         "What did you hand over that you wanted to keep?",

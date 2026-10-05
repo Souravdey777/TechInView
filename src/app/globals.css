@@ -24,6 +24,66 @@
     --input: 215 30% 15%;
     --ring: 187 92% 53%;
     --radius: 0.625rem;
+
+  --brand-deep: 7 8 10;
+  --brand-surface: 13 16 23;
+  --brand-card: 17 24 32;
+  --brand-border: 26 35 50;
+  --brand-text: 226 232 240;
+  --brand-muted: 122 139 163;
+  --brand-subtle: 74 85 104;
+  --brand-cyan: 34 211 238;
+  --brand-green: 52 211 153;
+  --brand-amber: 251 191 36;
+  --brand-rose: 244 114 182;
+  }
+
+  /* Warm Claude Code palette. Wrap a subtree in .theme-claude to re-skin it;
+     every brand-* utility and shadcn token inside picks it up. */
+  .theme-claude {
+    --brand-deep: 26 25 21;
+    --brand-surface: 33 32 28;
+    --brand-card: 42 41 36;
+    --brand-border: 58 56 51;
+    --brand-text: 240 238 230;
+    --brand-muted: 168 162 154;
+    --brand-subtle: 117 112 106;
+    --brand-cyan: 217 119 87;
+    --brand-green: 143 181 115;
+    --brand-amber: 229 164 90;
+    --brand-rose: 229 128 107;
+
+    --background: 48 10% 9%;
+    --foreground: 48 33% 92%;
+    --card: 50 7% 15%;
+    --card-foreground: 48 33% 92%;
+    --popover: 50 7% 15%;
+    --popover-foreground: 48 33% 92%;
+    --primary: 15 63% 60%;
+    --primary-foreground: 48 10% 9%;
+    --secondary: 50 7% 15%;
+    --secondary-foreground: 48 33% 92%;
+    --muted: 50 7% 15%;
+    --muted-foreground: 36 7% 63%;
+    --accent: 50 7% 15%;
+    --accent-foreground: 48 33% 92%;
+    --border: 45 6% 21%;
+    --input: 45 6% 21%;
+    --ring: 15 63% 60%;
+  }
+
+  /* Landing page: near-black, cool greys, single cyan accent, Geist type.
+     Geist is loaded by a <link> on the landing page itself. */
+  .theme-landing {
+    --brand-deep: 10 11 13;
+    --brand-surface: 14 16 19;
+    --brand-card: 16 18 21;
+    --brand-border: 30 31 34;
+    --brand-text: 237 238 240;
+    --brand-muted: 142 147 155;
+    --brand-subtle: 91 96 104;
+    --font-sans: "Geist";
+    --font-mono: "Geist Mono";
   }
 
   * {
@@ -58,69 +118,13 @@
   background: hsl(var(--muted-foreground));
 }
 
-/* Utility classes */
-@layer utilities {
-  .glass-card {
-    @apply bg-brand-card/80 backdrop-blur-sm border border-brand-border rounded-xl;
-  }
-
-  .landing-panel {
-    @apply relative overflow-hidden rounded-3xl border border-brand-border bg-brand-card;
-    backdrop-filter: blur(18px);
-    box-shadow:
-      0 0 0 1px rgba(26, 35, 50, 0.5),
-      0 28px 90px -42px rgba(7, 8, 10, 0.72);
-  }
-
-  .landing-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      rgba(26, 35, 50, 0),
-      rgba(34, 211, 238, 0.28),
-      rgba(26, 35, 50, 0)
-    );
-    pointer-events: none;
-  }
-
-  .glow-cyan {
-    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.2);
-  }
-
-  .glow-green {
-    box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.2);
-  }
-
-  .text-gradient-cyan {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-cyan to-brand-green;
-  }
-}
-
-.landing-aurora {
-  background: linear-gradient(
-    180deg,
-    rgba(7, 8, 10, 0.96) 0%,
-    rgba(13, 16, 23, 0.88) 54%,
-    rgba(7, 8, 10, 1) 100%
-  );
-}
-
 /* Grid dot pattern */
 .bg-grid-pattern {
-  background-image: radial-gradient(circle, rgba(34, 211, 238, 0.07) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgb(var(--brand-cyan) / 0.07) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 /* Staggered animations */
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
-.stagger-5 { animation-delay: 0.5s; }
-.stagger-6 { animation-delay: 0.6s; }
 
 /* Animate on scroll — hidden by default, revealed via IntersectionObserver or group */
 .animate-on-scroll {
@@ -133,21 +137,6 @@
 }
 
 /* Landing mock — soft pulse on in-preview CTA */
-@keyframes mock-preview-cta-highlight {
-  0%,
-  100% {
-    border-color: rgba(34, 211, 238, 0.32);
-    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12), 0 0 18px rgba(34, 211, 238, 0.06);
-  }
-  50% {
-    border-color: rgba(34, 211, 238, 0.55);
-    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.28), 0 0 26px rgba(34, 211, 238, 0.14);
-  }
-}
-
-.mock-preview-cta {
-  animation: mock-preview-cta-highlight 2.2s ease-in-out infinite;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-on-scroll {
@@ -159,34 +148,9 @@
     animation: none;
   }
 
-  .text-shimmer {
-    animation: none;
-    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary)));
-    background-size: 100% 100%;
-  }
-
-  .typing-cursor {
-    animation: none;
-    border-right-color: hsl(var(--primary));
-  }
-
-  .mock-preview-cta {
-    animation: none;
-    border-color: rgba(34, 211, 238, 0.5);
-    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.22), 0 0 22px rgba(34, 211, 238, 0.1);
-  }
 }
 
 /* Typing cursor blink */
-@keyframes blink-caret {
-  0%, 100% { border-color: transparent; }
-  50% { border-color: hsl(var(--primary)); }
-}
-
-.typing-cursor {
-  border-right: 2px solid hsl(var(--primary));
-  animation: blink-caret 0.8s step-end infinite;
-}
 
 /* Floating animation */
 @keyframes float {
@@ -194,32 +158,11 @@
   50% { transform: translateY(-8px); }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
 /* Shimmer for stats */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.text-shimmer {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--primary)) 0%,
-    hsl(var(--foreground)) 40%,
-    hsl(var(--primary)) 80%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
-}
 
 /* Selection */
 ::selection {
-  background: rgba(34, 211, 238, 0.2);
+  background: rgb(var(--brand-cyan) / 0.2);
   color: hsl(var(--foreground));
 }
 
@@ -235,8 +178,8 @@
 }
 
 @keyframes start-btn-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(34,211,238,0.15), 0 0 60px rgba(34,211,238,0.05); }
-  50% { box-shadow: 0 0 30px rgba(34,211,238,0.3), 0 0 80px rgba(34,211,238,0.1); }
+  0%, 100% { box-shadow: 0 0 20px rgb(var(--brand-cyan) / 0.15), 0 0 60px rgb(var(--brand-cyan) / 0.05); }
+  50% { box-shadow: 0 0 30px rgb(var(--brand-cyan) / 0.3), 0 0 80px rgb(var(--brand-cyan) / 0.1); }
 }
 
 /* Interview room — scoring overlay animations */
@@ -252,4 +195,35 @@
 @keyframes scoring-fade-in {
   0% { opacity: 0; transform: translateY(12px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Landing — endless ticker; the track holds two copies so -50% loops seamlessly. */
+@keyframes landing-marquee {
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-marquee { animation: none !important; }
+}
+
+/* Landing — hero load-in and staggered grid reveals. --i sets the hero order. */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(28px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.hero-rise {
+  opacity: 0;
+  animation: rise-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 120ms + 80ms);
+}
+.reveal-stagger > * { opacity: 0; }
+.is-visible .reveal-stagger > * { animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
+.reveal-stagger > :nth-child(2) { animation-delay: 80ms; }
+.reveal-stagger > :nth-child(3) { animation-delay: 160ms; }
+.reveal-stagger > :nth-child(4) { animation-delay: 240ms; }
+.reveal-stagger > :nth-child(5) { animation-delay: 320ms; }
+.reveal-stagger > :nth-child(6) { animation-delay: 400ms; }
+.reveal-stagger > :nth-child(n + 7) { animation-delay: 480ms; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise,
+  .reveal-stagger > * { opacity: 1; animation: none !important; }
 }

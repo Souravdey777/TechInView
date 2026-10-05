@@ -1,25 +1,32 @@
-import Link from "next/link";
+import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ButtonLink, H1, Kicker, LABEL, LEAD, LINK_ARROW, PAD, READING } from "@/components/marketing/ds";
+import { SUPPORT_EMAIL, createSupportMailto } from "@/lib/legal";
+import { cn } from "@/lib/utils";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-brand-deep flex items-center justify-center px-6">
-      <div className="text-center">
-        <p className="text-brand-cyan text-sm font-semibold uppercase tracking-widest mb-4">
-          404
-        </p>
-        <h1 className="text-4xl font-bold text-brand-text mb-4">
-          Page not found
-        </h1>
-        <p className="text-brand-muted mb-8 max-w-sm mx-auto">
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
-        </p>
-        <Link
-          href="/"
-          className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-brand-cyan text-brand-deep font-semibold hover:bg-cyan-300 transition-colors"
-        >
-          Back to Home
-        </Link>
-      </div>
-    </div>
+    <MarketingShell>
+      <section className={cn("py-[clamp(96px,16vh,180px)]", PAD)}>
+        <div className={READING}>
+          <Kicker>404 · Page not found</Kicker>
+          <h1 className={H1}>This page does not exist.</h1>
+          <p className={cn(LEAD, "mt-8")}>
+            It may have moved, or the URL has a typo. Check the URL, or start from the home page.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <ButtonLink href="/">Back to the home page</ButtonLink>
+            <ButtonLink href="/practice" variant="ghost">
+              Browse practice problems
+            </ButtonLink>
+          </div>
+          <p className={cn(LABEL, "mt-14 flex flex-wrap items-center gap-x-3 gap-y-2")}>
+            Still stuck?
+            <a href={createSupportMailto({ subject: "Broken link on TechInView" })} className={LINK_ARROW}>
+              {SUPPORT_EMAIL} →
+            </a>
+          </p>
+        </div>
+      </section>
+    </MarketingShell>
   );
 }

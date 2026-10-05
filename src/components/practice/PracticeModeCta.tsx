@@ -1,84 +1,108 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { ArrowRight, Lock, Sparkles } from "lucide-react";
-import { DsaExperienceToggle } from "@/components/dsa/DsaExperienceToggle";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { BODY, ButtonLink, CELL, Eyebrow, GRID, LABEL } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 import { DEFAULT_DSA_EXPERIENCE, type DsaExperience } from "@/lib/dsa";
 
 type PracticeModeCtaProps = {
   problemSlug: string;
   isFreeSolverEnabled: boolean;
   initialExperience?: DsaExperience;
+  /** Section number for the eyebrow, e.g. "05". */
+  n?: string;
 };
 
 export function PracticeModeCta({
   problemSlug,
   isFreeSolverEnabled,
   initialExperience = DEFAULT_DSA_EXPERIENCE,
+  n,
 }: PracticeModeCtaProps) {
   const [experience, setExperience] = useState<DsaExperience>(initialExperience);
 
-  const primaryHref = useMemo(() => {
-    if (experience === "practice" && isFreeSolverEnabled) {
-      return `/practice/solve/${problemSlug}`;
-    }
+  const interviewHref = `/interview/setup?problem=${problemSlug}&dsaExperience=ai_interview`;
+  const canSolve = experience === "practice" && isFreeSolverEnabled;
+  const primaryHref = canSolve ? `/practice/solve/${problemSlug}` : interviewHref;
+  const primaryLabel =
+    experience === "practice"
+      ? isFreeSolverEnabled
+        ? "Solve this problem free"
+        : "Take it as an AI interview"
+      : "Start a voice interview on this problem";
 
-    return `/interview/setup?problem=${problemSlug}&dsaExperience=ai_interview`;
-  }, [experience, isFreeSolverEnabled, problemSlug]);
-
-  const primaryLabel = experience === "practice"
-    ? isFreeSolverEnabled
-      ? "Solve This Problem Free"
-      : "Open in AI Interview Mode"
-    : "Try 5-Minute Audio Interview";
+  const options: { id: DsaExperience; label: string; description: string }[] = [
+    {
+      id: "practice",
+      label: "Practice Mode",
+      description: isFreeSolverEnabled
+        ? "Code in the browser, run the tests, and pick up where you left off."
+        : "This problem is not in the free practice set yet.",
+    },
+    {
+      id: "ai_interview",
+      label: "AI Interview Mode",
+      description: "Work through the same problem out loud with a voice interviewer.",
+    },
+  ];
 
   return (
-    <section className="my-12 rounded-2xl border border-brand-cyan/20 bg-gradient-to-br from-brand-cyan/10 via-brand-surface to-brand-card px-6 py-8 sm:px-10">
-      <div className="flex items-center gap-2 text-sm font-semibold text-brand-cyan">
-        <Sparkles className="h-4 w-4" />
-        One problem, two ways to prep
-      </div>
-      <h2 className="mt-3 text-xl font-bold text-brand-text sm:text-2xl">
-        Choose between solo practice and interview simulation
+    <section className="my-16 border-t border-white/[0.08] pt-12" aria-labelledby="practice-mode-cta">
+      <Eyebrow n={n}>Two ways to work on it</Eyebrow>
+      <h2
+        id="practice-mode-cta"
+        className="max-w-[20ch] text-balance text-[clamp(28px,3.4vw,44px)] font-normal leading-[1.05] tracking-[-0.035em]"
+      >
+        Practice it alone or rehearse it as an interview.
       </h2>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-muted sm:text-base">
-        Practice Mode keeps things simple with code + tests. AI Interview Mode adds voice, pressure, and a post-round score summary.
+      <p className={cn(BODY, "mt-5 max-w-[560px]")}>
+        Practice Mode gives you an editor and test runs, nothing else. AI Interview Mode puts a voice interviewer on the
+        other side, adds a clock, and ends with a scored summary of the round.
       </p>
 
-      <div className="mt-6">
-        <DsaExperienceToggle
-          value={experience}
-          onChange={setExperience}
-          practiceDescription={
-            isFreeSolverEnabled
-              ? "Open the LeetCode-style workspace with saved progress."
-              : "This problem is not in the free solver subset yet."
-          }
-          aiDescription="Practice the same problem with a voice-based interviewer."
-        />
+      <div className={cn(GRID, "mt-10 sm:grid-cols-2")} role="group" aria-label="Choose a mode">
+        {options.map((option, i) => {
+          const active = experience === option.id;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => setExperience(option.id)}
+              className={cn(
+                CELL,
+                "px-6 py-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan",
+                active ? "bg-brand-cyan/[0.06]" : "hover:bg-white/[0.02]"
+              )}
+            >
+              <span className={cn(LABEL, active && "text-brand-cyan")}>
+                {String(i + 1).padStart(2, "0")} · {active ? "Selected" : "Select"}
+              </span>
+              <span className={cn("mt-3 block text-lg tracking-[-0.02em]", active ? "text-brand-cyan" : "text-brand-text")}>
+                {option.label}
+              </span>
+              <span className="mt-2 block text-sm leading-relaxed text-brand-muted">{option.description}</span>
+            </button>
+          );
+        })}
       </div>
 
       {!isFreeSolverEnabled && experience === "practice" ? (
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-amber/20 bg-brand-amber/10 px-3 py-1.5 text-xs text-brand-amber">
-          <Lock className="h-3.5 w-3.5" />
-          Practice Mode is available on the curated free subset only.
-        </div>
+        <p className={cn(LABEL, "mt-5 inline-flex items-center gap-2 text-brand-amber")}>
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-amber" />
+          Practice Mode is only available for problems in the free set
+        </p>
       ) : null}
 
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Button asChild size="lg">
-          <Link href={primaryHref}>
-            {primaryLabel}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-        <Button asChild variant="secondary" size="lg">
-          <Link href={`/interview/setup?problem=${problemSlug}&dsaExperience=ai_interview`}>
+      <div className="mt-8 flex flex-wrap gap-3">
+        <ButtonLink href={primaryHref}>
+          {primaryLabel} <span className="font-mono" aria-hidden>→</span>
+        </ButtonLink>
+        {canSolve ? (
+          <ButtonLink href={interviewHref} variant="ghost">
             AI Interview Mode
-          </Link>
-        </Button>
+          </ButtonLink>
+        ) : null}
       </div>
     </section>
   );

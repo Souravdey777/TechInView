@@ -127,9 +127,9 @@ function buildEmailShell(input: {
     </div>
     <div style="margin:0;background:#f8fafc;padding:32px 16px;font-family:Inter,Segoe UI,Arial,sans-serif;color:#0f172a;">
       <div style="margin:0 auto;max-width:640px;overflow:hidden;border:1px solid #e2e8f0;border-radius:24px;background:#ffffff;">
-        <div style="height:6px;background:linear-gradient(90deg,#22d3ee 0%,#34d399 100%);"></div>
+        <div style="height:6px;background:linear-gradient(90deg,#22D3EE 0%,#34d399 100%);"></div>
         <div style="padding:36px 32px 12px;">
-          <p style="margin:0 0 12px;color:#0891b2;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;">
+          <p style="margin:0 0 12px;color:#0891B2;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;">
             ${eyebrow}
           </p>
           <h1 style="margin:0 0 18px;color:#020617;font-size:30px;line-height:1.2;">
@@ -165,7 +165,7 @@ function buildEmailShell(input: {
         <div style="border-top:1px solid #e2e8f0;padding:20px 32px 28px;background:#f8fafc;">
           <p style="margin:0;color:#64748b;font-size:13px;line-height:1.7;">
             Reply to this email or send feedback anytime at
-            <a href="${escapeHtml(feedbackUrl)}" style="color:#0891b2;text-decoration:none;">${escapeHtml(
+            <a href="${escapeHtml(feedbackUrl)}" style="color:#0891B2;text-decoration:none;">${escapeHtml(
               SUPPORT_EMAIL
             )}</a>.
           </p>
@@ -202,7 +202,7 @@ function createWelcomeEmail(recipient: Recipient): LifecycleEmail {
     "You can start with free practice right away, plus your 5-minute voice interview preview with Tia once your setup is done.",
     `I’d love your feedback as you explore the product. If anything feels unclear, rough, or especially useful, just reply to this email or reach me at <a href="${escapeHtml(
       getFeedbackMailto()
-    )}" style="color:#0891b2;text-decoration:none;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
+    )}" style="color:#0891B2;text-decoration:none;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
   ];
 
   const { html, text } = buildEmailShell({
@@ -232,7 +232,7 @@ function createBetaWelcomeEmail(recipient: Recipient): LifecycleEmail {
     `Your ${betaCredits} are now waiting on your account, so you can jump straight into full mock interviews once you finish setup.`,
     `Because this is still early, your feedback matters a lot. Reply to this email with anything you notice, want improved, or want added next, or email <a href="${escapeHtml(
       getFeedbackMailto()
-    )}" style="color:#0891b2;text-decoration:none;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
+    )}" style="color:#0891B2;text-decoration:none;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
   ];
 
   const { html, text } = buildEmailShell({
@@ -271,7 +271,7 @@ function createPaidSupportEmail(recipient: Recipient, input: {
     )}</strong>, and ${escapeHtml(creditCopy)} have been added to your account.`,
     `If anything feels off with the experience or if there’s a feature you want next, just reply to this email or reach me at <a href="${escapeHtml(
       getFeedbackMailto()
-    )}" style="color:#0891b2;text-decoration:none;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
+    )}" style="color:#0891B2;text-decoration:none;">${escapeHtml(SUPPORT_EMAIL)}</a>.`,
   ];
 
   const { html, text } = buildEmailShell({

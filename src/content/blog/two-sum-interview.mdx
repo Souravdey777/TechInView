@@ -1,21 +1,23 @@
 ---
 title: "The Complete Guide to Two Sum (All 3 Approaches)"
 seoTitle: "Two Sum Interview: All 3 Approaches Explained"
-description: "Brute force, two-pointer, and hash map solutions for Two Sum—complexity, when each applies, and exactly what to say in an interview."
+description: "Two Sum three ways: brute force, sort plus two pointers, and a one-pass hash map, with complexity, the duplicate-value trap, and what to say out loud."
 date: "2026-04-24"
 keyword: "two sum interview"
 topic: "Coding craft"
 ---
 
-**Two Sum** is the "hello world" of technical interviews. That does not make it trivial—interviewers use it to see whether you communicate trade-offs, catch constraints, and avoid hidden pitfalls. If someone searches **two sum interview**, they want a single reference: all standard approaches, complexities, and narrative scripts.
+**Short answer:** in a **Two Sum interview**, state the O(n²) brute force first, then solve it in one pass with a hash map that stores each value's index and checks for `target - num` before inserting. That is O(n) time and O(n) space. Use two pointers instead if the array is already sorted.
 
-> **Problem (classic form):** Given an integer array `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] == target`. Assume exactly one solution exists and you may not use the same element twice.
+Two Sum is the "hello world" of coding interviews, which does not make it free points. Interviewers use it to see whether you clarify the variant, explain trade-offs, and handle duplicates. This page covers all three standard approaches and what to say for each.
 
-Variants exist (sorted array, return values instead of indices, all pairs). Always clarify which variant you have.
+> **Problem (classic form):** Given an integer array `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] == target`. Assume exactly one solution exists, and you may not use the same element twice.
+
+Variants exist: the array is sorted, you return values instead of indices, or you return all pairs. Ask which one you have before writing code.
 
 ## Approach 1: Brute force
 
-Try every pair `(i, j)` where `i < j`.
+Check every pair `(i, j)` with `i < j`.
 
 ```python
 def two_sum(nums, target):
@@ -24,29 +26,45 @@ def two_sum(nums, target):
         for j in range(i + 1, n):
             if nums[i] + nums[j] == target:
                 return [i, j]
+    return []
 ```
 
 - **Time:** O(n²)
 - **Space:** O(1) extra
 
-**When to mention it:** Open with "The naive approach checks all pairs—quadratic time, constant space—then we can improve."
+**What to say:** "The naive approach checks every pair. That is quadratic time and constant space. Let me see if we can do better."
 
-This establishes you are not jumping to the trick without showing baseline reasoning—a strong **two sum interview** signal.
+Saying this out loud shows you have a correct baseline before reaching for the trick, and it gives you something to fall back on if the optimisation goes wrong.
 
-## Approach 2: Sort + two pointers (values, not original indices)
+## Approach 2: Sort, then two pointers
 
-Sort a copy of the array with `(value, original_index)` pairs. Use left and right pointers, moving inward based on whether `sum < target` or `sum > target`.
+Build a list of `(value, original_index)` pairs and sort it by value. Put one pointer at each end. If the sum is too small, move the left pointer right; if it is too big, move the right pointer left.
 
-- **Time:** O(n log n) for sorting
-- **Space:** O(n) for pairs (or O(log n) to O(n) sort space depending on implementation)
+```python
+def two_sum(nums, target):
+    pairs = sorted((num, i) for i, num in enumerate(nums))
+    left, right = 0, len(pairs) - 1
+    while left < right:
+        total = pairs[left][0] + pairs[right][0]
+        if total == target:
+            return [pairs[left][1], pairs[right][1]]
+        if total < target:
+            left += 1
+        else:
+            right -= 1
+    return []
+```
 
-**Caveat:** If the question requires **original indices**, you must preserve them through the sort. If duplicates are allowed with distinct indices, your walk logic must still respect "not the same element."
+- **Time:** O(n log n), dominated by the sort
+- **Space:** O(n) for the pairs list
 
-**When it shines:** Sorted input variant, or when the interviewer bans hash maps.
+**Caveat:** sorting loses the original positions, which is why you carry the index along. Because the two pointers are always at different positions, you never use the same element twice, even when values repeat.
 
-## Approach 3: Hash map (the interview default)
+**When it wins:** the input is already sorted (then you skip the sort and get O(n) time and O(1) space), or the interviewer asks you not to use a hash map.
 
-One pass: for each `num`, check if `complement = target - num` was seen; if yes, return stored index and current index; else store `num -> index`.
+## Approach 3: One-pass hash map (the usual answer)
+
+For each number, check whether `target - num` has already been seen. If it has, return both indices. If not, store `num -> index` and move on.
 
 ```python
 def two_sum(nums, target):
@@ -56,40 +74,41 @@ def two_sum(nums, target):
         if complement in seen:
             return [seen[complement], i]
         seen[num] = i
+    return []
 ```
 
-- **Time:** O(n) average
+- **Time:** O(n) on average
 - **Space:** O(n) for the map
 
-**What to say:** "I'm trading space for time: each lookup is O(1) expected, single pass."
+**What to say:** "I am trading space for time. Each lookup is O(1) expected, so this is a single pass."
 
 ### Pitfall: duplicate values
 
-If `nums = [3, 3]` and `target = 6`, storing `value -> index` overwrites earlier indices. The usual pattern still works because you check **before** inserting the current index—so the complement lookup hits the previous occurrence.
+With `nums = [3, 3]` and `target = 6`, a map from value to index can only hold one index per value. This still works because you check for the complement **before** inserting the current element. At `i = 1`, the map already holds `3 -> 0`, so you return `[0, 1]`. If you inserted first and checked second, you could match an element with itself, for example `nums = [3, 2, 4]` with `target = 6` would wrongly return `[0, 0]`.
 
-## Comparison table
+## Comparison
 
-| Approach | Time | Extra space | Notes |
+| Approach | Time | Extra space | Use when |
 |---------|------|-------------|--------|
-| Brute force | O(n²) | O(1) | Baseline |
-| Sort + two pointers | O(n log n) | O(n) typical | Sorted variant / no extra DS |
-| Hash map | O(n) | O(n) | Default for unsorted + indices |
+| Brute force | O(n²) | O(1) | Stating a baseline |
+| Sort + two pointers | O(n log n) | O(n) | Sorted input, or no hash map allowed |
+| Hash map | O(n) | O(n) | Default for unsorted input that needs indices |
 
-## Follow-ups you should expect
+## Follow-ups to expect
 
-- **All pairs** that sum to target (avoid duplicates in output).
-- **Sorted array** and **O(n)** time with O(1) space (two pointers on the original array).
-- **3Sum / 4Sum** reduction (sort + fix one element + two pointers is a common pattern).
-- **Data too large for one machine** (external sort, map-reduce sketch—rare in phone screens).
+- **Return all pairs** that sum to the target, without duplicate pairs in the output.
+- **The array is sorted:** O(n) time and O(1) space with two pointers on the original array.
+- **3Sum and 4Sum:** sort, fix one element, then run two pointers on the rest. Try [3Sum](/practice/three-sum) next.
+- **The data does not fit on one machine:** an external sort or a partition-by-hash sketch. This is rare in phone screens.
 
-## Closing the **two sum interview** loop
+## Putting it together in the interview
 
-1. Clarify duplicates, sortedness, and return type.
-2. State brute force, then improve.
-3. Implement hash map (or the variant-appropriate solution).
-4. Trace a short example.
-5. State complexity and mention when two-pointer wins.
+1. Clarify duplicates, whether the input is sorted, and what to return.
+2. State the brute force, then improve on it.
+3. Implement the hash map (or the version that fits the variant).
+4. Trace a short example, including a duplicate case like `[3, 3]`.
+5. State the complexity and mention when two pointers would be better.
 
-Two Sum is not about the five lines of code. It is about showing structured thinking—the same structure you will reuse on harder graph and DP problems.
+The five lines of code are not really the point. The interviewer is watching the structure: clarify, baseline, improve, test, analyse. You will reuse that same structure on harder graph and DP problems. For more on narrating it, see [thinking out loud in coding interviews](/blog/coding-interview-communication) and the [time complexity cheat sheet](/blog/time-complexity-cheat-sheet). [How the AI evaluates](/how-ai-evaluates) shows how TechInView scores each of those steps.
 
 <ProblemCard slug="two-sum" />

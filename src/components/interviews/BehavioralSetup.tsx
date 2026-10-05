@@ -272,7 +272,7 @@ export function BehavioralSetup({
               <p className="mt-2 text-sm text-brand-muted">
                 {selectedScenarioLabels.length > 0
                   ? selectedScenarioLabels.join(", ")
-                  : "No scenario context selected — the interviewer will pick the situations."}
+                  : "No scenario context selected. The interviewer will pick the situations."}
               </p>
               <p className="mt-3 text-xs text-brand-muted">
                 Interviewer: {selectedPersona.name}

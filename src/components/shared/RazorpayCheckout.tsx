@@ -125,13 +125,13 @@ export function RazorpayCheckout({
         amount,
         currency,
         name: "TechInView",
-        description: `${pack_label} — Interview Pack`,
+        description: `${pack_label} · Interview pack`,
         order_id,
         prefill: {
           name: userName,
           email: userEmail,
         },
-        theme: { color: "#22d3ee" },
+        theme: { color: "#22D3EE" },
         handler: async (response: RazorpayResponse) => {
           try {
             const verifyRes = await fetch("/api/payment/verify", {
@@ -153,14 +153,14 @@ export function RazorpayCheckout({
                   angle: 60,
                   spread: 55,
                   origin: { x: 0, y: 0.7 },
-                  colors: ["#22d3ee", "#34d399", "#fbbf24"],
+                  colors: ["#22D3EE", "#34d399", "#fbbf24"],
                 });
                 confetti({
                   particleCount: 3,
                   angle: 120,
                   spread: 55,
                   origin: { x: 1, y: 0.7 },
-                  colors: ["#22d3ee", "#34d399", "#fbbf24"],
+                  colors: ["#22D3EE", "#34d399", "#fbbf24"],
                 });
                 if (Date.now() < end) requestAnimationFrame(frame);
               };

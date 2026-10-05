@@ -1,23 +1,25 @@
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE_PATH, buildOrganizationNode } from "@/lib/blog-seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import {
-  ArrowLeft,
-  Building2,
-  Clock,
-  BarChart3,
-  Tag,
-  ChevronRight,
-  Lock,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getProblems, getProblemBySlug } from "@/lib/db/queries";
-import { DIFFICULTY_CONFIG } from "@/lib/constants";
-import type { DifficultyLevel } from "@/lib/constants";
+import {
+  CELL,
+  CHIP,
+  CONTAINER,
+  GRID,
+  H1,
+  LABEL,
+  LINK_ARROW,
+  PAD,
+  PROSE,
+} from "@/components/marketing/ds";
 import { PracticeModeCta } from "@/components/practice/PracticeModeCta";
 import {
+  DifficultyMark,
   ProblemConstraints,
   ProblemExamples,
   SectionLabel,
@@ -56,79 +58,72 @@ function buildMetaDescription(problem: {
   category: string;
   description: string;
   company_tags: string[] | null;
-  optimal_complexity: unknown;
 }) {
-  const companies = (problem.company_tags ?? []).slice(0, 4).join(", ");
-  const complexity = problem.optimal_complexity as OptimalComplexity | null;
-  const complexityStr = complexity?.time
-    ? ` Optimal: ${complexity.time} time.`
-    : "";
   const catLabel = capitalizeCategory(problem.category);
+  const companies = (problem.company_tags ?? []).slice(0, 3).join(", ");
 
-  // Use first ~100 chars of the problem description as a natural snippet
-  const snippet = problem.description
-    .replace(/[#*`\n]/g, " ")
+  // First sentence-ish of the statement, cut on a word boundary.
+  const plain = problem.description
+    .replace(/[#*`>\n]/g, " ")
     .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 100);
+    .trim();
+  const snippet =
+    plain.length > 110
+      ? `${plain.slice(0, 110).replace(/\s+\S*$/, "")}...`
+      : plain;
 
-  return `${problem.title} (${problem.difficulty}) — ${catLabel}. ${snippet}...${complexityStr}${companies ? ` Asked at ${companies}.` : ""} Practice with a voice AI interviewer on TechInView.`;
+  return `${problem.title} is a ${problem.difficulty} ${catLabel.toLowerCase()} problem. ${snippet}${companies ? ` Company tags: ${companies}.` : ""} Read the examples and constraints, then practice it out loud with a voice AI interviewer.`;
 }
 
 export async function generateMetadata({
   params,
 }: PracticeSlugPageProps): Promise<Metadata> {
   const problem = await getProblemBySlug(params.slug);
-  if (!problem) return { title: "Problem not found" };
+  if (!problem) {
+    return { title: "Problem not found | TechInView", robots: { index: false } };
+  }
 
-  const titleFormatted = problem.title.replace(/-/g, " ");
   const catLabel = capitalizeCategory(problem.category);
-  const title = `${problem.title} — ${catLabel} Interview Problem | TechInView`;
+  const heading = `${problem.title}: ${catLabel} interview problem`;
   const description = buildMetaDescription(problem);
+  const url = `${baseUrl}/practice/${problem.slug}`;
 
   return {
-    title,
+    title: `${heading} | TechInView`,
     description,
     keywords: [
       problem.title,
-      `${titleFormatted} solution`,
-      `${titleFormatted} interview question`,
-      `${titleFormatted} ${problem.difficulty}`,
+      `${problem.title} interview question`,
       `${catLabel} interview problems`,
-      problem.category,
-      ...(problem.company_tags ?? []).map((t) => `${t} interview questions`),
+      ...(problem.company_tags ?? []).map((t) => `${t} coding interview`),
       "coding interview practice",
       "AI mock interview",
-      "DSA practice",
-      "leetcode alternative",
-      "FAANG interview prep",
-      "TechInView",
     ],
     authors: [{ name: "TechInView", url: baseUrl }],
     robots: { index: true, follow: true },
+    alternates: { canonical: `/practice/${problem.slug}` },
     openGraph: {
-      title: `${problem.title} — Practice with AI Interviewer`,
+      title: heading,
       description,
       type: "article",
-      url: `${baseUrl}/practice/${problem.slug}`,
+      url,
       siteName: "TechInView",
       locale: "en_US",
       images: [
         {
-          url: "/og-image.png",
+          url: DEFAULT_OG_IMAGE_PATH,
           width: 1200,
           height: 630,
-          alt: `Practice ${problem.title} — TechInView`,
+          alt: `${problem.title} practice problem on TechInView`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${problem.title} — ${catLabel} Problem | TechInView`,
+      title: heading,
       description,
-      images: ["/og-image.png"],
+      images: [DEFAULT_OG_IMAGE_PATH],
     },
-    alternates: { canonical: `/practice/${problem.slug}` },
   };
 }
 
@@ -143,21 +138,6 @@ type Example = {
   diagram?: string;
 };
 type OptimalComplexity = { time?: string; space?: string };
-
-function DifficultyBadge({ difficulty }: { difficulty: DifficultyLevel }) {
-  const cfg = DIFFICULTY_CONFIG[difficulty];
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold",
-        cfg.bgColor,
-        cfg.color
-      )}
-    >
-      {cfg.label}
-    </span>
-  );
-}
 
 function capitalizeCategory(cat: string) {
   return cat
@@ -212,7 +192,7 @@ export default async function PracticeSlugPage({
       "@type": "LearningResource",
       "@id": pageUrl,
       name: problem.title,
-      headline: `${problem.title} — ${catLabel} Interview Problem`,
+      headline: `${problem.title}: ${catLabel} interview problem`,
       description: buildMetaDescription(problem),
       url: pageUrl,
       educationalLevel: problem.difficulty,
@@ -227,12 +207,7 @@ export default async function PracticeSlugPage({
       ...(companyTags.length > 0 && {
         keywords: companyTags.join(", "),
       }),
-      provider: {
-        "@type": "Organization",
-        name: "TechInView",
-        url: baseUrl,
-        logo: `${baseUrl}/og-image.png`,
-      },
+      provider: buildOrganizationNode(baseUrl),
     },
     {
       "@type": "BreadcrumbList",
@@ -254,21 +229,6 @@ export default async function PracticeSlugPage({
     },
   ];
 
-  // FAQPage schema from examples — helps Google show rich results
-  if (examples.length > 0) {
-    graph.push({
-      "@type": "FAQPage",
-      mainEntity: examples.map((ex, i) => ({
-        "@type": "Question",
-        name: `Example ${i + 1}: What is the output for input ${ex.input}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `Output: ${ex.output}${ex.explanation ? `. ${ex.explanation}` : ""}`,
-        },
-      })),
-    });
-  }
-
   const jsonLd = { "@context": "https://schema.org", "@graph": graph };
   const showLockedNotice = searchParams?.locked === "solver";
   const initialExperience = normalizeDsaExperience(
@@ -277,158 +237,150 @@ export default async function PracticeSlugPage({
       : undefined
   );
 
+  // Number the sections that actually render so the eyebrows stay sequential.
+  const hasComplexity = Boolean(complexity.time || complexity.space);
+  let section = 1;
+  const nextN = () => String(++section).padStart(2, "0");
+  const examplesN = examples.length > 0 ? nextN() : undefined;
+  const constraintsN = constraints.length > 0 ? nextN() : undefined;
+  const complexityN = hasComplexity ? nextN() : undefined;
+  const ctaN = nextN();
+
   return (
-    <article className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <article className={cn(PAD, "pb-24 pt-14 sm:pb-32 sm:pt-20")}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Breadcrumb nav */}
-      <Link
-        href="/practice"
-        className="text-sm text-brand-muted hover:text-brand-cyan transition-colors mb-8 inline-flex items-center gap-1"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        All problems
-      </Link>
+      <div className={cn(CONTAINER, "max-w-[880px]")}>
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-12">
+          <ol className={cn(LABEL, "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1")}>
+            <li>
+              <Link href="/practice" className="transition-colors hover:text-brand-cyan">
+                Practice
+              </Link>
+            </li>
+            <li aria-hidden>/</li>
+            <li className="min-w-0 truncate text-brand-muted" aria-current="page">
+              {problem.title}
+            </li>
+          </ol>
+        </nav>
 
-      {/* Header */}
-      <header className="mb-10 pb-8 border-b border-brand-border">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <DifficultyBadge
-            difficulty={problem.difficulty as DifficultyLevel}
-          />
-          <span className="text-xs text-brand-muted flex items-center gap-1.5">
-            <Tag className="w-3.5 h-3.5" />
-            {capitalizeCategory(problem.category)}
-          </span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold font-heading text-brand-text leading-tight mb-4">
-          {problem.title}
-        </h1>
-
-        {/* Company tags */}
-        {companyTags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mt-4">
-            <Building2 className="w-4 h-4 text-brand-muted shrink-0" />
-            {companyTags.map((tag) => (
-              <span
-                key={tag}
-                className="text-xs px-2 py-0.5 rounded-md bg-brand-surface border border-brand-border text-brand-muted"
-              >
-                {tag}
-              </span>
-            ))}
+        {/* Header */}
+        <header className="mb-14 border-b border-white/[0.08] pb-10">
+          <div className="mb-7 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <DifficultyMark difficulty={problem.difficulty} />
+            <span className={LABEL}>{catLabel}</span>
+            <span className={LABEL}>
+              {problem.is_free_solver_enabled ? "Free practice" : "AI interview only"}
+            </span>
           </div>
-        )}
-      </header>
+          <h1 className={cn(H1, "text-[clamp(36px,5.2vw,72px)] leading-[1.02]")}>
+            {problem.title}
+          </h1>
 
-      {/* Problem statement */}
-      <section className="mb-12">
-        <div
-          className="
-            prose prose-invert max-w-none
-            prose-p:text-[17px] prose-p:leading-[1.72] prose-p:text-brand-muted
-            prose-headings:font-heading prose-headings:text-brand-text
-            prose-strong:text-brand-text prose-strong:font-semibold
-            prose-em:text-brand-text prose-em:italic
-            prose-a:text-brand-cyan prose-a:no-underline hover:prose-a:underline
-            prose-ul:my-5 prose-ol:my-5 prose-li:my-1
-            prose-li:text-[17px] prose-li:leading-[1.72] prose-li:text-brand-muted prose-li:marker:text-brand-cyan
-            prose-code:rounded prose-code:bg-brand-card prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-[0.85em] prose-code:font-normal prose-code:text-brand-cyan prose-code:before:content-none prose-code:after:content-none
-            prose-pre:overflow-x-auto prose-pre:rounded-xl prose-pre:border prose-pre:border-brand-border prose-pre:bg-brand-surface prose-pre:px-4 prose-pre:py-3.5 prose-pre:font-mono prose-pre:text-[13px] prose-pre:leading-[1.7] prose-pre:text-brand-muted
-            [&_pre_code]:rounded-none [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[1em] [&_pre_code]:font-normal [&_pre_code]:text-inherit
-            prose-hr:border-brand-border
-            prose-table:text-sm prose-th:text-brand-text prose-td:text-brand-muted
-          "
-        >
-          {descriptionContent}
-        </div>
-      </section>
+          {companyTags.length > 0 && (
+            <div className="mt-8 flex flex-wrap items-center gap-2">
+              <span className={cn(LABEL, "mr-2")}>Asked at</span>
+              {companyTags.map((tag) => (
+                <span key={tag} className={CHIP}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </header>
 
-      <ProblemExamples examples={examples} />
-
-      <ProblemConstraints constraints={constraints} />
-
-      {/* Complexity */}
-      {(complexity.time || complexity.space) && (
-        <section className="mb-12">
-          <SectionLabel>Optimal complexity</SectionLabel>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {complexity.time && (
-              <div className="flex items-center gap-3 rounded-xl border border-brand-border bg-brand-surface px-4 py-3">
-                <Clock className="h-4 w-4 shrink-0 text-brand-cyan" />
-                <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand-subtle">
-                    Time
-                  </p>
-                  <p className="mt-0.5 font-mono text-sm font-semibold text-brand-text">
-                    {complexity.time}
-                  </p>
-                </div>
-              </div>
+        {/* Problem statement */}
+        <section className="mb-16">
+          <SectionLabel n="01">Problem</SectionLabel>
+          <div
+            className={cn(
+              PROSE,
+              "prose-li:marker:text-brand-subtle prose-code:text-[0.88em] prose-pre:overflow-x-auto prose-pre:px-5 prose-pre:py-4 prose-pre:text-[13px] prose-pre:leading-[1.7] prose-pre:text-brand-muted",
+              "[&_pre_code]:rounded-none [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[1em] [&_pre_code]:text-inherit"
             )}
-            {complexity.space && (
-              <div className="flex items-center gap-3 rounded-xl border border-brand-border bg-brand-surface px-4 py-3">
-                <BarChart3 className="h-4 w-4 shrink-0 text-brand-green" />
-                <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand-subtle">
-                    Space
-                  </p>
-                  <p className="mt-0.5 font-mono text-sm font-semibold text-brand-text">
-                    {complexity.space}
-                  </p>
-                </div>
-              </div>
-            )}
+          >
+            {descriptionContent}
           </div>
         </section>
-      )}
 
-      {showLockedNotice ? (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-brand-amber/20 bg-brand-amber/10 px-4 py-3 text-sm text-brand-muted">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-brand-amber" />
-          <p>
-            This problem is not in the free Practice Mode subset yet. You can still open it in AI Interview Mode from below.
+        <ProblemExamples examples={examples} n={examplesN} />
+
+        <ProblemConstraints constraints={constraints} n={constraintsN} />
+
+        {/* Complexity */}
+        {hasComplexity && (
+          <section className="mb-16">
+            <SectionLabel n={complexityN}>Optimal complexity</SectionLabel>
+            <dl className={cn(GRID, "sm:grid-cols-2")}>
+              {complexity.time && (
+                <div className={cn(CELL, "px-5 py-5")}>
+                  <dt className={LABEL}>Time</dt>
+                  <dd className="mt-2 font-mono text-lg text-brand-text">{complexity.time}</dd>
+                </div>
+              )}
+              {complexity.space && (
+                <div className={cn(CELL, "px-5 py-5")}>
+                  <dt className={LABEL}>Space</dt>
+                  <dd className="mt-2 font-mono text-lg text-brand-text">{complexity.space}</dd>
+                </div>
+              )}
+            </dl>
+          </section>
+        )}
+
+        {showLockedNotice ? (
+          <p className="mb-6 border-l border-brand-amber pl-4 text-[15px] leading-relaxed text-brand-muted">
+            <span className="sr-only">Locked. </span>
+            This problem is not in the free Practice Mode set yet. You can still take it as an AI interview below.
           </p>
-        </div>
-      ) : null}
+        ) : null}
 
-      <PracticeModeCta
-        problemSlug={problem.slug}
-        isFreeSolverEnabled={problem.is_free_solver_enabled}
-        initialExperience={initialExperience}
-      />
+        <PracticeModeCta
+          problemSlug={problem.slug}
+          isFreeSolverEnabled={problem.is_free_solver_enabled}
+          initialExperience={initialExperience}
+          n={ctaN}
+        />
 
-      {/* Related problems */}
-      {related.length > 0 && (
-        <nav className="mt-14" aria-label="Related problems">
-          <h2 className="text-sm font-semibold text-brand-muted uppercase tracking-wide mb-4">
-            More {capitalizeCategory(problem.category)} problems
-          </h2>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {related.map((p) => (
-              <li key={p.slug}>
-                <Link
-                  href={`/practice/${p.slug}`}
-                  className="group glass-card p-4 flex items-center justify-between gap-3 transition-all hover:border-brand-cyan/30"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-brand-text group-hover:text-brand-cyan transition-colors truncate">
-                      {p.title}
-                    </p>
-                    <DifficultyBadge
-                      difficulty={p.difficulty as DifficultyLevel}
-                    />
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-brand-muted shrink-0 group-hover:text-brand-cyan transition-colors" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
+        {/* Related problems */}
+        {related.length > 0 && (
+          <nav className="mt-20" aria-labelledby="related-problems">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-white/[0.08] pb-4">
+              <h2 id="related-problems" className="font-mono text-xs font-normal uppercase tracking-[0.14em] text-brand-subtle">
+                More {catLabel} problems
+              </h2>
+              <Link href="/practice" className={LINK_ARROW}>
+                All problems <span aria-hidden>→</span>
+              </Link>
+            </div>
+            <ul className={cn(GRID, "sm:grid-cols-2")}>
+              {related.map((p) => (
+                <li key={p.slug} className={CELL}>
+                  <Link
+                    href={`/practice/${p.slug}`}
+                    className="group flex h-full items-center justify-between gap-4 px-5 py-5 transition-colors hover:bg-white/[0.02]"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-[15px] text-brand-text transition-colors group-hover:text-brand-cyan">
+                        {p.title}
+                      </span>
+                      <DifficultyMark difficulty={p.difficulty} className="mt-2" />
+                    </span>
+                    <span aria-hidden className="font-mono text-brand-subtle transition-colors group-hover:text-brand-cyan">
+                      →
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+      </div>
     </article>
   );
 }

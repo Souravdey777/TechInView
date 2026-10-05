@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-export const alt = "TechInView — AI Mock Interview Platform";
+export const alt = "TechInView: AI mock interviews for software engineers";
 
 export const size = {
   width: 1200,
@@ -75,50 +75,45 @@ export default function OgImage() {
               width: "8px",
               height: "8px",
               borderRadius: "50%",
-              background: "#22d3ee",
+              background: "#22D3EE",
             }}
           />
           <span
             style={{
-              color: "#22d3ee",
+              color: "#22D3EE",
               fontSize: "16px",
               fontWeight: "500",
               letterSpacing: "0.05em",
             }}
           >
-            Voice-powered AI interviewer
+            Voice AI interviewer
           </span>
         </div>
 
-        {/* Wordmark */}
+        {/* Logo: concept C mark + lowercase wordmark */}
         <div
           style={{
             display: "flex",
-            alignItems: "baseline",
-            gap: "2px",
+            alignItems: "center",
+            gap: "24px",
             marginBottom: "20px",
           }}
         >
+          <svg width="88" height="88" viewBox="0 0 32 32">
+            <path d="M11 4H4V28H11V25H7V7H11Z" fill="#EDEEF0" />
+            <path d="M21 4H28V28H21V25H25V7H21Z" fill="#EDEEF0" />
+            <circle cx="16" cy="16" r="4.5" fill="#22D3EE" />
+          </svg>
           <span
             style={{
               fontSize: "80px",
               fontWeight: "700",
-              color: "#e2e8f0",
+              color: "#EDEEF0",
               letterSpacing: "-2px",
               lineHeight: 1,
             }}
           >
-            TechInView
-          </span>
-          <span
-            style={{
-              fontSize: "88px",
-              fontWeight: "700",
-              color: "#22d3ee",
-              lineHeight: 1,
-            }}
-          >
-            .
+            techinview
           </span>
         </div>
 
@@ -132,7 +127,7 @@ export default function OgImage() {
             letterSpacing: "-0.3px",
           }}
         >
-          AI Mock Interview Platform
+          AI mock interviews for software engineers
         </p>
 
         {/* Tagline */}
@@ -147,7 +142,7 @@ export default function OgImage() {
             lineHeight: 1.5,
           }}
         >
-          Voice-powered DSA interviews with FAANG-calibrated scoring
+          Talk through DSA problems in a live editor, then get a scorecard
         </p>
 
         {/* Bottom divider + domain */}

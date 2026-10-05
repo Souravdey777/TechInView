@@ -3,9 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import {
+  SITE_NAME,
   buildBlogPostingAndBreadcrumbJsonLd,
   serializeJsonLd,
   wordCountFromMarkdownBody,
@@ -14,6 +14,23 @@ import { getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/blog";
 import { extractFaq, extractHeadings } from "@/lib/blog-taxonomy";
 import { PostToc } from "@/components/blog/PostToc";
 import { RelatedProblems } from "@/components/blog/RelatedProblems";
+import {
+  BODY,
+  ButtonLink,
+  CELL,
+  CHIP,
+  CONTAINER,
+  Eyebrow,
+  GRID,
+  H2,
+  HAIRLINE,
+  Kicker,
+  LABEL,
+  LEAD,
+  PAD,
+  PROSE,
+} from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 
 type BlogPostPageProps = {
   params: { slug: string };
@@ -44,8 +61,9 @@ function buildPostKeywords(post: {
 function formatDate(iso: string) {
   return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
+    timeZone: "UTC",
   }).format(new Date(iso));
 }
 
@@ -66,10 +84,10 @@ export function generateMetadata({ params }: BlogPostPageProps): Metadata {
   return {
     // Long, reader-facing titles get truncated in search; seoTitle is the
     // trimmed version when a post supplies one.
-    title: post.seoTitle ?? `${post.title} — TechInView Blog`,
+    title: post.seoTitle ?? `${post.title} | ${SITE_NAME}`,
     description: post.description,
     keywords,
-    authors: [{ name: "TechInView", url: baseUrl }],
+    authors: [{ name: SITE_NAME, url: baseUrl }],
     category: "Interview preparation",
     robots: { index: true, follow: true },
     openGraph: {
@@ -78,8 +96,11 @@ export function generateMetadata({ params }: BlogPostPageProps): Metadata {
       type: "article",
       publishedTime: post.date,
       modifiedTime: post.updated ?? post.date,
+      authors: [SITE_NAME],
+      section: post.topic,
+      tags: post.tags,
       url,
-      siteName: "TechInView",
+      siteName: SITE_NAME,
       locale: "en_US",
       // OG image auto-discovered from co-located opengraph-image.tsx
     },
@@ -89,7 +110,10 @@ export function generateMetadata({ params }: BlogPostPageProps): Metadata {
       description: post.description,
       // Twitter image auto-discovered from co-located opengraph-image.tsx
     },
-    alternates: { canonical: `/blog/${post.slug}` },
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+      types: { "application/rss+xml": "/blog/rss.xml" },
+    },
   };
 }
 
@@ -133,140 +157,149 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+    <div className="overflow-x-clip">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
-      <Link
-        href="/blog"
-        className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-cyan"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden />
-        All posts
-      </Link>
+      <article>
+        <header className={cn("pb-12 pt-16 sm:pt-24", PAD)}>
+          <div className={CONTAINER}>
+            <nav aria-label="Breadcrumb">
+              <ol className={cn(LABEL, "m-0 flex list-none flex-wrap items-center gap-x-2 gap-y-1 p-0")}>
+                <li>
+                  <Link href="/" className="transition-colors hover:text-brand-cyan">
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden>/</li>
+                <li>
+                  <Link href="/blog" className="transition-colors hover:text-brand-cyan">
+                    Blog
+                  </Link>
+                </li>
+                <li aria-hidden>/</li>
+                <li
+                  aria-current="page"
+                  className="min-w-0 max-w-full truncate text-brand-muted sm:max-w-md"
+                >
+                  {post.title}
+                </li>
+              </ol>
+            </nav>
 
-      <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-14">
-        <article className="min-w-0">
-          <header className="border-b border-brand-border pb-9">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11px] tracking-wide text-brand-muted">
-              <span className="inline-flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <time dateTime={post.date}>{formatDate(post.date)}</time>
-              </span>
-              <span className="h-3 w-px bg-brand-border" aria-hidden />
-              <span className="inline-flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                {post.readingTimeMinutes} min read
-              </span>
-              <span className="h-3 w-px bg-brand-border" aria-hidden />
-              <span className="text-brand-cyan">{post.topic}</span>
+            <Kicker className="mb-6 mt-14">{post.topic}</Kicker>
+            <h1 className={cn(H2, "max-w-[22ch]")}>{post.title}</h1>
+            <p className={cn(LEAD, "mt-8 max-w-[640px]")}>{post.description}</p>
+
+            <div
+              className={cn(
+                "mt-12 flex flex-wrap gap-x-8 gap-y-2 border-t pt-5 font-mono text-xs uppercase tracking-[0.06em] text-brand-muted",
+                HAIRLINE
+              )}
+            >
+              <time dateTime={post.date}>{formatDate(post.date)}</time>
+              {post.updated && post.updated !== post.date ? (
+                <span>
+                  Updated{" "}
+                  <time dateTime={post.updated}>{formatDate(post.updated)}</time>
+                </span>
+              ) : null}
+              <span>By {SITE_NAME}</span>
+              <span>{post.readingTimeMinutes} min read</span>
             </div>
 
-            <h1 className="mt-6 font-heading text-3xl font-bold leading-tight tracking-tight text-brand-text sm:text-[2.75rem]">
-              {post.title}
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-brand-muted">
-              {post.description}
-            </p>
-
             {post.tags?.length ? (
-              <ul className="m-0 mt-7 flex list-none flex-wrap gap-2 p-0">
+              <ul className="m-0 mt-6 flex list-none flex-wrap gap-2 p-0">
                 {post.tags.map((tag) => (
-                  <li
-                    key={tag}
-                    className="rounded-lg border border-brand-border px-2.5 py-1 font-mono text-[11px] text-brand-muted"
-                  >
+                  <li key={tag} className={CHIP}>
                     {tag}
                   </li>
                 ))}
               </ul>
             ) : null}
-          </header>
+          </div>
+        </header>
 
+        <div className={cn("pb-24", PAD)}>
           <div
-            className="
-              prose prose-invert prose-lg mt-10 max-w-none
-              prose-headings:font-heading prose-headings:text-brand-text prose-headings:scroll-mt-24
-              prose-p:text-brand-muted prose-p:leading-relaxed
-              prose-strong:text-brand-text prose-strong:font-semibold
-              prose-a:text-brand-cyan prose-a:no-underline hover:prose-a:underline
-              prose-li:text-brand-muted prose-li:marker:text-brand-cyan
-              prose-blockquote:border-brand-cyan/40 prose-blockquote:text-brand-muted
-              prose-code:text-brand-cyan prose-code:bg-brand-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-mono prose-code:text-[0.9em] prose-code:before:content-none prose-code:after:content-none
-              prose-pre:bg-brand-surface prose-pre:border prose-pre:border-brand-border prose-pre:rounded-xl
-              [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none
-              prose-hr:border-brand-border
-              prose-table:text-sm
-              prose-th:text-brand-text prose-td:text-brand-muted
-            "
+            className={cn(
+              CONTAINER,
+              "grid grid-cols-1 gap-14 lg:grid-cols-[minmax(0,720px)_260px] lg:justify-between lg:gap-20"
+            )}
           >
-            {content}
-          </div>
+            <div className="min-w-0">
+              <div
+                className={cn(
+                  PROSE,
+                  "prose-headings:scroll-mt-24 prose-li:marker:text-brand-subtle [&_pre_code]:rounded-none [&_pre_code]:bg-transparent [&_pre_code]:p-0"
+                )}
+              >
+                {content}
+              </div>
 
-          <RelatedProblems keyword={post.keyword} />
-        </article>
-
-        <aside className="flex flex-col gap-5 lg:sticky lg:top-8 lg:self-start">
-          <PostToc headings={headings} />
-
-          <div className="landing-panel p-6">
-            <div className="flex items-center gap-2.5">
-              <span
-                className="h-1.5 w-1.5 rounded-full bg-brand-cyan shadow-sm shadow-brand-cyan/50"
-                aria-hidden
-              />
-              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-cyan">
-                Practice out loud
-              </span>
+              <RelatedProblems keyword={post.keyword} />
             </div>
-            <p className="mt-4 text-lg font-semibold leading-snug text-brand-text">
-              Reading this is the easy half.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-brand-muted">
-              Start with free DSA practice, then switch into a voice mock
-              interview with live coding and a scored breakdown when you want
-              the full simulation.
-            </p>
-            <Link
-              href="/signup?next=/interview/setup"
-              className="mt-6 flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-cyan font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
-            >
-              Practice free
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-          </div>
 
-          {related.length > 0 ? (
-            <nav
-              aria-label="Related posts"
-              className="rounded-2xl border border-brand-border bg-brand-surface p-6"
-            >
-              <p className="m-0 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-muted">
-                Related
-              </p>
-              <ul className="m-0 mt-4 list-none p-0">
-                {related.map((p) => (
-                  <li key={p.slug}>
-                    <Link
-                      href={`/blog/${p.slug}`}
-                      className="group flex flex-col gap-1.5 border-t border-brand-border py-4"
-                    >
-                      <span className="text-sm font-medium leading-snug text-brand-text transition-colors group-hover:text-brand-cyan">
-                        {p.title}
-                      </span>
-                      <span className="font-mono text-[10px] tracking-wide text-brand-subtle">
-                        {p.topic} &middot; {p.readingTimeMinutes} min
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ) : null}
-        </aside>
-      </div>
+            {headings.length > 0 ? (
+              <aside className="hidden lg:sticky lg:block lg:top-24 lg:self-start">
+                <PostToc headings={headings} />
+              </aside>
+            ) : null}
+          </div>
+        </div>
+      </article>
+
+      {/* ── Practice CTA ── */}
+      <section className={cn("py-24", PAD)}>
+        <div className={cn(CONTAINER, "border-t pt-16", HAIRLINE)}>
+          <Kicker>Practice out loud</Kicker>
+          <h2 className={cn(H2, "max-w-[16ch]")}>
+            Reading this is{" "}
+            <span className="text-brand-subtle">the easy half.</span>
+          </h2>
+          <p className={cn(BODY, "mt-6 max-w-[460px]")}>
+            Start with free DSA practice, then switch into a voice mock
+            interview with live coding and a scored breakdown when you want the
+            full simulation.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <ButtonLink href="/signup?next=/interview/setup">
+              Practice free <span className="font-mono">→</span>
+            </ButtonLink>
+            <ButtonLink href="/practice" variant="ghost">
+              Browse problems
+            </ButtonLink>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Related guides ── */}
+      {related.length > 0 ? (
+        <nav aria-label="Related posts" className={cn("pb-[120px]", PAD)}>
+          <div className={CONTAINER}>
+            <Eyebrow>Related guides</Eyebrow>
+            <ul className={cn(GRID, "m-0 list-none grid-cols-1 p-0 md:grid-cols-3")}>
+              {related.map((p) => (
+                <li key={p.slug} className={cn(CELL, "min-w-0")}>
+                  <Link
+                    href={`/blog/${p.slug}`}
+                    className="group flex h-full flex-col gap-6 p-6 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan sm:p-7"
+                  >
+                    <span className={LABEL}>
+                      {p.topic} · {p.readingTimeMinutes} min
+                    </span>
+                    <span className="text-xl font-normal leading-snug tracking-[-0.02em] text-brand-text transition-colors group-hover:text-brand-cyan">
+                      {p.title}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+      ) : null}
     </div>
   );
 }

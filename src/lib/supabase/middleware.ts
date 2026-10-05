@@ -20,6 +20,24 @@ function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PATHS.some((path) => pathname.startsWith(path));
 }
 
+/**
+ * Resolve `?next=` to a same-origin URL, else /dashboard. Validates the parsed
+ * origin, not the raw string, so tricks like "/\\evil.com" or "//evil.com" fail.
+ */
+export function safeNextUrl(request: { nextUrl: URL }): URL {
+  const origin = request.nextUrl.origin;
+  const next = request.nextUrl.searchParams.get("next");
+  if (next && next.startsWith("/") && !next.startsWith("//") && !next.includes("\\")) {
+    try {
+      const candidate = new URL(next, origin);
+      if (candidate.origin === origin) return candidate;
+    } catch {
+      // fall through to the default
+    }
+  }
+  return new URL("/dashboard", origin);
+}
+
 function withReferralCookie(response: NextResponse, request: NextRequest) {
   const ref = request.nextUrl.searchParams.get("ref")?.trim();
 
@@ -89,12 +107,10 @@ export async function updateSession(request: NextRequest) {
     return withReferralCookie(NextResponse.redirect(loginUrl), request);
   }
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages, honouring a same-site
+  // `next` so public CTAs like /signup?next=/interview/setup work when signed in.
   if (user && (pathname === "/login" || pathname === "/signup")) {
-    const dashboardUrl = request.nextUrl.clone();
-    dashboardUrl.pathname = "/dashboard";
-    dashboardUrl.search = "";
-    return withReferralCookie(NextResponse.redirect(dashboardUrl), request);
+    return withReferralCookie(NextResponse.redirect(safeNextUrl(request)), request);
   }
 
   // Onboarding redirect: check if profile is incomplete

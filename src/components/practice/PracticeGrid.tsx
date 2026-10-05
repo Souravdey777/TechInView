@@ -3,12 +3,10 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  DIFFICULTY_CONFIG,
-  PROBLEM_CATEGORIES,
-} from "@/lib/constants";
+import { PROBLEM_CATEGORIES } from "@/lib/constants";
 import type { DifficultyLevel, ProblemCategory } from "@/lib/constants";
-import { Search, Building2, ChevronRight, ChevronDown } from "lucide-react";
+import { CHIP, CHIP_ACTIVE, FIELD, LABEL, LINK_ARROW } from "@/components/marketing/ds";
+import { DifficultyMark } from "@/components/practice/ProblemStatement";
 
 type Problem = {
   id: string;
@@ -39,18 +37,24 @@ const CATEGORY_LABELS: Record<ProblemCategory, string> = {
   trie: "Trie",
 };
 
-function DifficultyBadge({ difficulty }: { difficulty: DifficultyLevel }) {
-  const cfg = DIFFICULTY_CONFIG[difficulty];
+const DIFFICULTIES: (DifficultyLevel | "all")[] = ["all", "easy", "medium", "hard"];
+
+/** Shared column template: header and rows must agree. */
+const COLS = "md:grid md:grid-cols-[44px_minmax(0,1fr)_96px_140px_minmax(0,180px)_150px] md:items-center md:gap-6";
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold",
-        cfg.bgColor,
-        cfg.color
-      )}
-    >
-      {cfg.label}
-    </span>
+    <button type="button" aria-pressed={active} onClick={onClick} className={cn(CHIP, active && CHIP_ACTIVE)}>
+      {children}
+    </button>
   );
 }
 
@@ -62,17 +66,15 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
   const filtered = useMemo(() => {
     return problems
       .filter((p) => {
-      if (difficulty !== "all" && p.difficulty !== difficulty) return false;
-      if (category !== "all" && p.category !== category) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        const matchesTitle = p.title.toLowerCase().includes(q);
-        const matchesCompany = p.companyTags.some((t) =>
-          t.toLowerCase().includes(q)
-        );
-        if (!matchesTitle && !matchesCompany) return false;
-      }
-      return true;
+        if (difficulty !== "all" && p.difficulty !== difficulty) return false;
+        if (category !== "all" && p.category !== category) return false;
+        if (search) {
+          const q = search.toLowerCase();
+          const matchesTitle = p.title.toLowerCase().includes(q);
+          const matchesCompany = p.companyTags.some((t) => t.toLowerCase().includes(q));
+          if (!matchesTitle && !matchesCompany) return false;
+        }
+        return true;
       })
       .sort((left, right) => {
         if (left.isFreeSolverEnabled === right.isFreeSolverEnabled) return 0;
@@ -80,138 +82,151 @@ export function PracticeGrid({ problems }: PracticeGridProps) {
       });
   }, [problems, difficulty, category, search]);
 
+  const isFiltered = search !== "" || difficulty !== "all" || category !== "all";
+  const reset = () => {
+    setSearch("");
+    setDifficulty("all");
+    setCategory("all");
+  };
+
   return (
-    <section>
-      {/* Filter Bar */}
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-brand-border bg-brand-card p-4">
-        <div className="relative basis-full min-w-0 sm:flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
-          <input
-            type="text"
-            placeholder="Search problems or companies..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg bg-brand-surface border border-brand-border text-sm text-brand-text placeholder:text-brand-muted/60 focus:outline-none focus:border-brand-cyan/50 transition-colors"
-          />
+    <div>
+      {/* Filters */}
+      <div className="mb-10 space-y-5">
+        <input
+          type="search"
+          placeholder="Search by problem or company"
+          aria-label="Search problems by title or company"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className={cn(FIELD, "md:max-w-[520px]")}
+        />
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by difficulty">
+          <span className={cn(LABEL, "mr-2 w-full sm:w-20")}>Difficulty</span>
+          {DIFFICULTIES.map((d) => (
+            <FilterChip key={d} active={difficulty === d} onClick={() => setDifficulty(d)}>
+              {d === "all" ? "All" : d}
+            </FilterChip>
+          ))}
         </div>
-        <div className="relative">
-          <select
-            value={difficulty}
-            onChange={(e) =>
-              setDifficulty(e.target.value as DifficultyLevel | "all")
-            }
-            style={{ colorScheme: "dark" }}
-            className="w-full cursor-pointer appearance-none rounded-lg border border-brand-border bg-brand-surface pl-3 pr-8 py-2 text-sm text-brand-text transition-colors focus:outline-none focus:border-brand-cyan/50 sm:w-auto"
-          >
-            <option value="all">All Difficulties</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted" />
-        </div>
-        <div className="relative">
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            style={{ colorScheme: "dark" }}
-            className="w-full cursor-pointer appearance-none rounded-lg border border-brand-border bg-brand-surface pl-3 pr-8 py-2 text-sm text-brand-text transition-colors focus:outline-none focus:border-brand-cyan/50 sm:w-auto"
-          >
-            <option value="all">All Categories</option>
-            {PROBLEM_CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {CATEGORY_LABELS[cat]}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted" />
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by category">
+          <span className={cn(LABEL, "mr-2 w-full sm:w-20")}>Topic</span>
+          <FilterChip active={category === "all"} onClick={() => setCategory("all")}>
+            All
+          </FilterChip>
+          {PROBLEM_CATEGORIES.map((cat) => (
+            <FilterChip key={cat} active={category === cat} onClick={() => setCategory(cat)}>
+              {CATEGORY_LABELS[cat]}
+            </FilterChip>
+          ))}
         </div>
       </div>
 
-      {/* Results count */}
-      <p className="text-xs text-brand-muted mb-4">
-        Showing {filtered.length} of {problems.length} problems
-      </p>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <p className={LABEL} aria-live="polite">
+          Showing {filtered.length} of {problems.length}
+        </p>
+        {isFiltered && (
+          <button
+            type="button"
+            onClick={reset}
+            className={LINK_ARROW}
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
 
-      {/* Grid */}
-      <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 list-none p-0 m-0">
-        {filtered.map((p) => (
-          <li key={p.slug} className="min-w-0">
-            <div className="group flex h-full flex-col glass-card p-5 transition-all hover:border-brand-cyan/30 hover:-translate-y-0.5">
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <DifficultyBadge
-                  difficulty={p.difficulty as DifficultyLevel}
-                />
-                <span className="text-xs text-brand-muted">
+      {/* Table head (desktop only; rows stack on small screens) */}
+      <div className={cn(COLS, "hidden border-t border-white/[0.08] py-3", LABEL)} aria-hidden>
+        <span>#</span>
+        <span>Problem</span>
+        <span>Level</span>
+        <span>Topic</span>
+        <span>Companies</span>
+        <span className="text-right">Start</span>
+      </div>
+
+      <ul className="m-0 list-none border-t border-white/[0.08] p-0">
+        {filtered.map((p, i) => {
+          const interviewHref = `/interview/setup?problem=${p.slug}&dsaExperience=ai_interview`;
+          return (
+            <li
+              key={p.slug}
+              className={cn(COLS, "group border-b border-white/[0.08] py-5 transition-colors hover:bg-white/[0.02]")}
+            >
+              <span className={cn(LABEL, "hidden md:block")}>{String(i + 1).padStart(2, "0")}</span>
+
+              <div className="min-w-0">
+                <h3 className="text-[17px] font-normal tracking-[-0.01em] text-brand-text">
+                  <Link href={`/practice/${p.slug}`} className="transition-colors hover:text-brand-cyan">
+                    {p.title}
+                  </Link>
+                </h3>
+                <p
+                  className={cn(
+                    "mt-1 font-mono text-[11px] uppercase tracking-[0.08em]",
+                    p.isFreeSolverEnabled ? "text-brand-muted" : "text-brand-subtle"
+                  )}
+                >
+                  {p.isFreeSolverEnabled ? "Free practice" : "Locked · AI interview only"}
+                </p>
+              </div>
+
+              {/* Mobile: level + topic + companies on one wrapping meta line */}
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 md:contents">
+                <DifficultyMark difficulty={p.difficulty} />
+                <span className={cn(LABEL, "text-brand-muted")}>
                   {CATEGORY_LABELS[p.category as ProblemCategory] ?? p.category}
                 </span>
-              </div>
-              <h2 className="mb-2 line-clamp-2 text-base font-semibold text-brand-text transition-colors group-hover:text-brand-cyan">
-                <Link href={`/practice/${p.slug}`} className="hover:text-brand-cyan">
-                  {p.title}
-                </Link>
-              </h2>
-              <div className="mt-auto pt-3">
-                <span
-                  className={cn(
-                    "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-                    p.isFreeSolverEnabled
-                      ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
-                      : "border-brand-amber/20 bg-brand-amber/10 text-brand-amber"
-                  )}
-                >
-                  {p.isFreeSolverEnabled ? "Free Practice" : "AI Interview Only"}
+                <span className="min-w-0 truncate font-mono text-[11px] uppercase tracking-[0.08em] text-brand-subtle">
+                  {p.companyTags.length > 0
+                    ? `${p.companyTags.slice(0, 3).join(", ")}${p.companyTags.length > 3 ? ` +${p.companyTags.length - 3}` : ""}`
+                    : <span className="hidden md:inline">-</span>}
                 </span>
               </div>
-              {p.companyTags.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 pt-3">
-                  <Building2 className="w-3 h-3 text-brand-muted shrink-0" />
-                  {p.companyTags.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[11px] px-1.5 py-0.5 rounded bg-brand-surface border border-brand-border text-brand-muted"
+
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 md:mt-0 md:justify-end">
+                {p.isFreeSolverEnabled ? (
+                  <>
+                    <Link
+                      href={`/practice/solve/${p.slug}`}
+                      className={LINK_ARROW}
+                      aria-label={`Practice: ${p.title}`}
                     >
-                      {tag}
-                    </span>
-                  ))}
-                  {p.companyTags.length > 3 && (
-                    <span className="text-[11px] text-brand-muted">
-                      +{p.companyTags.length - 3}
-                    </span>
-                  )}
-                </div>
-              )}
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-brand-border pt-3">
-                <Link
-                  href={
-                    p.isFreeSolverEnabled
-                      ? `/practice/solve/${p.slug}`
-                      : `/interview/setup?problem=${p.slug}&dsaExperience=ai_interview`
-                  }
-                  className="inline-flex items-center gap-1 text-xs font-medium text-brand-cyan hover:underline"
-                >
-                  {p.isFreeSolverEnabled ? "Practice" : "AI Interview"}
-                  <ChevronRight className="w-3 h-3" />
-                </Link>
-                <Link
-                  href={`/interview/setup?problem=${p.slug}&dsaExperience=ai_interview`}
-                  className="text-[11px] font-medium text-brand-muted hover:text-brand-cyan"
-                >
-                  AI Interview
-                </Link>
+                      Practice <span aria-hidden>→</span>
+                    </Link>
+                    <Link
+                      href={interviewHref}
+                      className="font-mono text-xs uppercase tracking-[0.08em] text-brand-muted transition-colors hover:text-brand-text"
+                      aria-label={`AI interview: ${p.title}`}
+                    >
+                      Interview
+                    </Link>
+                  </>
+                ) : (
+                  <Link href={interviewHref} className={LINK_ARROW} aria-label={`AI interview: ${p.title}`}>
+                    Interview <span aria-hidden>→</span>
+                  </Link>
+                )}
               </div>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
 
       {filtered.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-brand-muted text-sm">
-            No problems match your filters. Try adjusting your search.
-          </p>
+        <div className="border-b border-white/[0.08] py-16 text-center">
+          <p className="text-[15px] text-brand-muted">No problems match these filters.</p>
+          <button
+            type="button"
+            onClick={reset}
+            className={cn(LINK_ARROW, "mt-4")}
+          >
+            Clear filters
+          </button>
         </div>
       )}
-    </section>
+    </div>
   );
 }

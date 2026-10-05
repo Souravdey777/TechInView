@@ -12,10 +12,7 @@ function MDXLink({ href, children, ...rest }: ComponentPropsWithoutRef<"a">) {
   const url = href ?? "";
   if (url.startsWith("/")) {
     return (
-      <Link
-        href={url}
-        className="text-brand-cyan underline-offset-2 hover:underline font-medium"
-      >
+      <Link href={url}>
         {children}
       </Link>
     );
@@ -25,7 +22,6 @@ function MDXLink({ href, children, ...rest }: ComponentPropsWithoutRef<"a">) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-brand-cyan underline-offset-2 hover:underline font-medium"
       {...rest}
     >
       {children}
@@ -64,7 +60,17 @@ function MDXHeading3({ children, ...rest }: ComponentPropsWithoutRef<"h3">) {
   );
 }
 
+/** Wide tables scroll inside the column instead of the page on mobile. */
+function MDXTable(props: ComponentPropsWithoutRef<"table">) {
+  return (
+    <div className="my-8 overflow-x-auto border-y border-white/[0.08]">
+      <table {...props} className="my-0" />
+    </div>
+  );
+}
+
 export const mdxComponents = {
+  table: MDXTable,
   a: MDXLink,
   h2: MDXHeading2,
   h3: MDXHeading3,

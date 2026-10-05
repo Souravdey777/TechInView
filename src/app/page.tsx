@@ -1,35 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
-import {
-  ArrowRight,
-  Bot,
-  Brain,
-  CheckCircle2,
-  ChevronRight,
-  Cpu,
-  MessageSquare,
-  Play,
-  Sparkles,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
-import { MarketingNav } from "@/components/landing/MarketingNav";
-import { HowItWorksTimeline } from "@/components/landing/HowItWorksTimeline";
+import { HeroCanvas, InterviewRoomDemo, LiveStatus, PhaseTimeline, ScoreCard } from "@/components/landing/LandingLive";
 import { LandingReveal } from "@/components/landing/LandingReveal";
-import { LandingTiaPreview } from "@/components/landing/LandingTiaPreview";
-import { TiltCard } from "@/components/landing/TiltCard";
-import { MarketingFooter } from "@/components/landing/MarketingFooter";
-import { Pricing } from "@/components/landing/Pricing";
-import { ScoreRadar } from "@/components/results/ScoreRadar";
-import { getRegionForCountry } from "@/lib/constants";
+import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { BTN_GHOST, BTN_PRIMARY, Eyebrow, H2, PAD } from "@/components/marketing/ds";
+import {
+  CREDIT_PACKS,
+  FREE_TRIAL_DURATION_MINUTES,
+  FULL_INTERVIEW_DURATION_MINUTES,
+  PACK_IDS,
+  getDisplayPricingKey,
+  getRegionForCountry,
+} from "@/lib/constants";
 import { buildHomeJsonLd } from "@/lib/site-seo";
 import { serializeJsonLd } from "@/lib/blog-seo";
-import {
-  INTERVIEWER_PERSONAS,
-  getInterviewerPersona,
-  type InterviewerPersonaId,
-} from "@/lib/interviewer-personas";
+import { INTERVIEWER_PERSONAS, getInterviewerPersona, type InterviewerPersonaId } from "@/lib/interviewer-personas";
 import { cn } from "@/lib/utils";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
@@ -44,594 +30,255 @@ type LandingPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-type Tone = "cyan" | "green" | "amber" | "rose";
-
-type SignalCard = {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  tone: Tone;
-};
-
-type FaqItem = {
-  question: string;
-  answer: string;
-};
-
-const TONE_STYLES: Record<
-  Tone,
+const GAPS = [
   {
-    badgeText: string;
-    border: string;
-    glow: string;
-    solid: string;
-    text: string;
-    surface: string;
-  }
-> = {
-  cyan: {
-    badgeText: "text-brand-cyan",
-    border: "border-brand-cyan/25",
-    glow: "shadow-xl shadow-brand-cyan/10",
-    solid: "bg-brand-cyan",
-    text: "text-brand-cyan",
-    surface: "bg-brand-cyan/10",
-  },
-  green: {
-    badgeText: "text-brand-green",
-    border: "border-brand-green/25",
-    glow: "shadow-xl shadow-brand-green/10",
-    solid: "bg-brand-green",
-    text: "text-brand-green",
-    surface: "bg-brand-green/10",
-  },
-  amber: {
-    badgeText: "text-brand-amber",
-    border: "border-brand-amber/25",
-    glow: "shadow-xl shadow-brand-amber/10",
-    solid: "bg-brand-amber",
-    text: "text-brand-amber",
-    surface: "bg-brand-amber/10",
-  },
-  rose: {
-    badgeText: "text-brand-rose",
-    border: "border-brand-rose/25",
-    glow: "shadow-xl shadow-brand-rose/10",
-    solid: "bg-brand-rose",
-    text: "text-brand-rose",
-    surface: "bg-brand-rose/10",
-  },
-};
-
-const INTERVIEW_GAPS: readonly SignalCard[] = [
-  {
-    icon: MessageSquare,
-    title: "Communication is part of the test",
-    description:
-      "Most prep only checks whether you can solve the problem. Real interviews also check how clearly you think out loud.",
-    tone: "cyan",
+    title: "You have to think out loud",
+    body: "Interviewers grade how you explain the plan as well as the code. Practicing in silence skips half the test.",
   },
   {
-    icon: Brain,
-    title: "Weak approaches should get challenged",
-    description:
-      "A real interviewer pushes back when your plan is too slow, too vague, or missing edge cases. Silent practice never does.",
-    tone: "rose",
+    title: "Weak approaches get challenged",
+    body: "Propose a nested loop and the interviewer asks if you can do better. Skip an edge case and it asks what happens on empty input.",
   },
   {
-    icon: Cpu,
-    title: "You need a realistic loop",
-    description:
-      "The pressure comes from juggling voice, code, time, and testing together. That combined signal is what changes real outcomes.",
-    tone: "green",
+    title: "The clock is real",
+    body: "A timer, a running editor and a voice waiting on your answer. That combination is what makes people freeze, so rehearse it.",
   },
   {
-    icon: Sparkles,
-    title: "Feedback should tell you what to fix next",
-    description:
-      "Every round ends with a scorecard that pinpoints whether you missed clarity, rigor, speed, testing, or clean execution.",
-    tone: "amber",
+    title: "Feedback you can act on",
+    body: "Every round ends with a scorecard: a score per dimension, written notes on what cost you points, and the transcript to check them against.",
   },
 ];
 
-const PERSONA_SPOTLIGHT: Record<
-  InterviewerPersonaId,
-  {
-    bestFor: string;
-    tone: Tone;
-    edge: string;
-  }
-> = {
-  tia: {
-    bestFor: "Best first round",
-    tone: "cyan",
-    edge: "Balanced signal with a FAANG-generalist bar",
-  },
-  google: {
-    bestFor: "Clarity and structure",
-    tone: "green",
-    edge: "Rewards legible reasoning and deliberate tradeoffs",
-  },
-  meta: {
-    bestFor: "Fast convergence",
-    tone: "rose",
-    edge: "Pushes hard on efficiency and iteration speed",
-  },
-  amazon: {
-    bestFor: "Ownership and edge cases",
-    tone: "amber",
-    edge: "Tests robustness, assumptions, and test discipline",
-  },
-  apple: {
-    bestFor: "Precision and polish",
-    tone: "cyan",
-    edge: "Looks for crisp communication and tidy execution",
-  },
-  netflix: {
-    bestFor: "Senior-bar autonomy",
-    tone: "green",
-    edge: "Low handholding, high judgment, high signal density",
-  },
+const PERSONA_SPOTLIGHT: Record<InterviewerPersonaId, { bestFor: string; edge: string }> = {
+  tia: { bestFor: "Good first round", edge: "Warm generalist. One probe at a time, Socratic hints, a general big-tech bar." },
+  google: { bestFor: "Structure and clarity", edge: "Wants assumptions named, invariants stated and tradeoffs argued before you optimize." },
+  meta: { bestFor: "Speed and optimization", edge: "Fast and direct. Challenges a slow approach right away and expects you to converge." },
+  amazon: { bestFor: "Edge cases and ownership", edge: "Asks what breaks, how you tested it, and whether you would ship it as written." },
+  apple: { bestFor: "Precision and polish", edge: "Tightens loose wording and rough code. Rewards tidy, deliberate choices." },
+  netflix: { bestFor: "Senior-bar autonomy", edge: "Few hints. Expects you to make the call, defend it and self-correct." },
 };
 
-const SAMPLE_RADAR_SCORES = [
-  { dimension: "Problem Solving", score: 86, maxScore: 100 },
-  { dimension: "Code Quality", score: 82, maxScore: 100 },
-  { dimension: "Communication", score: 79, maxScore: 100 },
-  { dimension: "Technical Knowledge", score: 84, maxScore: 100 },
-  { dimension: "Testing", score: 76, maxScore: 100 },
-] as const;
+const SAMPLE_DIMS = [
+  { name: "Problem solving", short: "PROBLEM SOLVING", score: 84 },
+  { name: "Code quality", short: "CODE QUALITY", score: 76 },
+  { name: "Communication", short: "COMMUNICATION", score: 90 },
+  { name: "Technical knowledge", short: "TECH KNOWLEDGE", score: 71 },
+  { name: "Testing", short: "TESTING", score: 62 },
+];
 
-const FAQS: readonly FaqItem[] = [
+const FAQS = [
   {
-    question: "How realistic is the AI interviewer?",
+    question: "How does the AI mock interview work?",
     answer:
-      "Each persona follows the structure of a real coding round: intro, clarification, approach discussion, coding, testing, complexity analysis, and wrap-up. The interviewer adapts to your responses and challenges weak choices instead of just cheering you on.",
+      "You talk to an AI interviewer by voice while you code in a shared editor. A 45-minute coding round follows the shape of a real technical screen: intro, problem, clarifying questions, approach, coding, testing, complexity analysis, a follow-up and wrap-up. The interviewer sees your code as you write it and pushes back on a weak approach instead of approving whatever you say.",
   },
   {
-    question: "Which languages are supported?",
+    question: "Which interview rounds can I practice?",
     answer:
-      "Python, JavaScript, Java, and C++. Code runs in a sandboxed execution environment with test feedback during the round.",
+      "DSA coding interviews with six interviewer personas (a generalist plus Google, Meta, Amazon, Apple and Netflix styles), Technical Q&A, Engineering Manager and Behavioral rounds. Behavioral and Engineering Manager rounds are graded against a value lens you pick, such as Amazon Leadership Principles or Googleyness. System Design and Machine Coding are not available yet.",
   },
   {
-    question: "How long does a session take?",
+    question: "Which programming languages can I use?",
     answer:
-      "Practice Mode is self-paced. AI Interview Mode runs for 45 minutes on paid rounds, and every account keeps one shorter 5-minute audio preview so you can feel the pressure before buying a pack.",
+      "Python and JavaScript run end to end, with test results shown in the editor. Java and C++ appear in the language picker, but running code in them is not supported yet. Use Python or JavaScript if you want to execute tests during the round.",
+  },
+  {
+    question: "How long is a session?",
+    answer:
+      "A full AI interview is 45 minutes. Practice Mode has no timer. Each new account gets one free 5-minute AI interview on an easy DSA problem, so you can try the voice format before buying a pack.",
   },
   {
     question: "Do I need a subscription?",
     answer:
-      "No. Free Practice Mode is always available for the curated DSA set. AI Interview Mode uses one-time interview packs, so you only buy the rounds you actually need.",
+      "No. DSA Practice Mode is free and needs no card. AI interviews are sold as one-time packs of 1, 3 or 6 interviews, priced in your local currency, with no recurring billing.",
   },
   {
-    question: "Can I use this on mobile?",
+    question: "Can I use it on my phone?",
     answer:
-      "The landing page is mobile-friendly, but the interview room is designed for desktop because voice, code, and feedback work best with a full screen and a microphone.",
+      "You can sign up and browse on a phone, but the interview room needs a laptop or desktop with a microphone. It shows the interviewer, the problem, your code and the tests side by side.",
   },
   {
     question: "What do I get after the round?",
     answer:
-      "You get an overall score, a hire recommendation, a five-dimension breakdown, detailed feedback, and the transcript so you can review where the signal was strong or weak.",
+      "An overall score out of 100, a hire recommendation from Strong Hire to No Hire, written feedback per dimension and the full transcript. Coding rounds are scored on problem solving, code quality, communication, technical knowledge and testing. Behavioral and Engineering Manager rounds add a competency report with evidence, gaps and STAR coverage for each competency.",
   },
 ];
 
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-  align = "center",
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-  align?: "left" | "center";
-}) {
-  return (
-    <div className={cn("max-w-3xl", align === "center" ? "mx-auto text-center" : "text-left")}>
-      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-cyan">
-        {eyebrow}
-      </p>
-      <h2 className="mt-4 text-3xl font-bold leading-tight text-brand-text sm:text-4xl md:text-5xl">
-        {title}
-      </h2>
-      <p className="mt-4 text-base leading-relaxed text-brand-muted sm:text-lg">
-        {description}
-      </p>
-    </div>
-  );
-}
+const MARQUEE = ["Intro", "Problem", "Clarify", "Approach", "Code", "Test", "Complexity", "Follow-up", "Wrap-up"];
 
 export default async function LandingPage({ searchParams }: LandingPageProps) {
-  const headersList = headers();
-  const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
-  const region = getRegionForCountry(country).region;
-  const pricingRegion =
-    region === "INR" ? ("inr" as const) : region === "PPP" ? ("ppp" as const) : ("usd" as const);
+  const country = (headers().get("x-vercel-ip-country") ?? "US").toUpperCase();
+  const { region, symbol } = getRegionForCountry(country);
+  const priceKey = getDisplayPricingKey(region);
+  const locale = priceKey === "inr" ? "en-IN" : "en-US";
+  const money = (n: number) => `${symbol}${n.toLocaleString(locale, { maximumFractionDigits: 2 })}`;
 
   const params = await searchParams;
   const ref = typeof params.ref === "string" ? params.ref : undefined;
   const buildAuthHref = (pathname: "/login" | "/signup", next?: string) => {
     const authParams = new URLSearchParams();
-    if (ref) {
-      authParams.set("ref", ref);
-    }
-    if (next) {
-      authParams.set("next", next);
-    }
-
+    if (ref) authParams.set("ref", ref);
+    if (next) authParams.set("next", next);
     const query = authParams.toString();
     return query ? `${pathname}?${query}` : pathname;
   };
   const loginHref = buildAuthHref("/login");
   const practiceSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=ai_interview");
-  const previewSignupHref = buildAuthHref("/signup", "/interview/setup?dsaExperience=ai_interview");
-  const defaultPersona = getInterviewerPersona("tia");
+  const previewSignupHref = practiceSignupHref;
+  const buyHref = buildAuthHref("/signup");
+  const tia = getInterviewerPersona("tia");
+
+  const singlePrice = CREDIT_PACKS.single.displayPrices[priceKey];
+  const packs = PACK_IDS.map((id) => {
+    const pack = CREDIT_PACKS[id];
+    const price = pack.displayPrices[priceKey];
+    const full = singlePrice * pack.credits;
+    return {
+      id,
+      label: pack.label,
+      credits: pack.credits,
+      price,
+      full,
+      off: Math.round((1 - price / full) * 100),
+      badge: pack.badge,
+    };
+  });
 
   const jsonLd = buildHomeJsonLd({ baseUrl, faq: FAQS });
 
   return (
-    <div className="min-h-screen [overflow-x:clip] bg-brand-deep text-brand-text">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
-      />
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-brand-cyan focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-deep focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:ring-offset-2 focus:ring-offset-brand-deep"
-      >
-        Skip to content
-      </a>
-      <MarketingNav loginHref={loginHref} signupHref={practiceSignupHref} />
-
-      <main id="main">
-        <section className="relative overflow-hidden px-4 pb-28 pt-16 sm:px-6 sm:pb-32 sm:pt-24">
-          <div className="landing-aurora absolute inset-0 opacity-90" aria-hidden />
-          <div className="absolute inset-0 bg-grid-pattern opacity-[0.28]" aria-hidden />
+    <MarketingShell loginHref={loginHref} signupHref={practiceSignupHref}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
+        {/* ── Hero ── */}
+        <header className={cn("relative flex min-h-[calc(100svh-4rem)] flex-col justify-end overflow-hidden pb-14 pt-24", PAD)}>
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-brand-deep via-brand-deep/80 to-transparent"
             aria-hidden
+            className="pointer-events-none absolute -right-[18vw] -top-[14vw] h-[80vw] w-[80vw] rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.16)_0%,rgb(var(--brand-cyan)/0.05)_35%,transparent_65%)]"
           />
           <div
-            className="pointer-events-none absolute left-1/2 top-14 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-brand-cyan/[0.08] blur-3xl"
             aria-hidden
+            className="pointer-events-none absolute -bottom-[30vw] -left-[20vw] h-[70vw] w-[70vw] rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.09)_0%,transparent_60%)]"
           />
+          <HeroCanvas />
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-brand-deep to-transparent" />
 
-          <LandingReveal className="relative mx-auto max-w-6xl">
-            <div className="grid items-center gap-16 xl:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] xl:gap-20">
-              <div className="max-w-3xl pt-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-brand-cyan/25 bg-brand-cyan/[0.08] px-4 py-1.5 text-xs font-medium text-brand-cyan">
-                  <span className="h-2 w-2 rounded-full bg-brand-cyan shadow-sm shadow-brand-cyan/30" />
-                  Voice-first AI mock interviews for software engineers
-                </div>
-
-                <h1 className="mt-8 max-w-[12.5ch] text-balance text-5xl font-bold leading-[0.92] tracking-tight text-brand-text sm:text-6xl md:text-[5.7rem] xl:text-[6rem]">
-                  Practice the interview, <span className="text-shimmer">not just the problem.</span>
-                </h1>
-
-                <p className="mt-8 max-w-2xl text-lg leading-relaxed text-brand-muted sm:text-xl">
-                  Start with free Practice Mode for DSA, then switch into AI Interview Mode when
-                  you want the interviewer to speak, challenge your thinking, watch your code, and
-                  score how you perform under pressure. {defaultPersona.name} is ready when you
-                  want the real interview feel.
-                </p>
-
-                <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                  <Link
-                    href={practiceSignupHref}
-                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-7 py-4 text-base font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
-                  >
-                    Practice Free
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                  <Link
-                    href={previewSignupHref}
-                    className="group inline-flex items-center justify-center gap-2 rounded-xl border border-brand-border bg-brand-surface px-7 py-4 text-base font-semibold text-brand-text transition-colors hover:border-brand-cyan/30 hover:bg-brand-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/40 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
-                  >
-                    <Play className="h-4 w-4 text-brand-cyan" />
-                    Try 5-Minute Audio Interview
-                  </Link>
-                </div>
-
-                <p className="mt-5 text-sm text-brand-muted">
-                  Free DSA practice with saved progress. One 5-minute audio preview included.
-                </p>
-
-                <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-brand-muted">
-                  {[
-                    "Voice interviewers that actually push back",
-                    "Live coding with execution in the round",
-                    "Actionable scorecards after every session",
-                  ].map((item) => (
-                    <div key={item} className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <TiltCard className="landing-panel p-6 lg:p-8">
-                <div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-cyan">
-                      Interview Room
-                    </p>
-                    <h2 className="mt-2 max-w-lg text-lg font-semibold text-brand-text sm:text-[1.6rem] sm:leading-tight">
-                      Voice, live code, and feedback in one calm workspace.
-                    </h2>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex flex-wrap items-center gap-2">
-                  {INTERVIEWER_PERSONAS.map((persona) => (
-                    <span
-                      key={persona.id}
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-[11px] font-medium",
-                        persona.id === "tia"
-                          ? "border-brand-cyan/[0.35] bg-brand-cyan/[0.12] text-brand-cyan"
-                          : "border-brand-border bg-brand-surface text-brand-muted"
-                      )}
-                    >
-                      {persona.name} ({persona.companyLabel})
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-7 rounded-3xl border border-brand-border bg-brand-surface/80 p-4 lg:p-5">
-                  <div className="grid gap-5 lg:grid-cols-[minmax(17rem,0.72fr)_minmax(0,1.28fr)]">
-                    <div className="rounded-2xl border border-brand-border bg-brand-card p-5">
-                      <LandingTiaPreview />
-                      <div className="mt-5 rounded-2xl border border-brand-cyan/[0.15] bg-brand-cyan/[0.05] p-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                          Live prompt
-                        </p>
-                        <p className="mt-3 text-sm leading-relaxed text-brand-muted">
-                          &quot;Talk me through the brute force first, then tell me how you would get
-                          it to O(n). I care about how you reason, not just the final answer.&quot;
-                        </p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="rounded-2xl border border-brand-border bg-brand-card p-5 lg:h-full">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="rounded-lg border border-brand-border bg-brand-surface px-3 py-1 font-mono text-[11px] text-brand-cyan">
-                            solution.py
-                          </div>
-                          <div className="rounded-full border border-brand-green/20 bg-brand-green/10 px-3 py-1 text-[11px] font-semibold text-brand-green">
-                            2/2 tests passing
-                          </div>
-                        </div>
-                        <div className="mt-5 space-y-1 overflow-x-auto whitespace-nowrap rounded-2xl border border-brand-border bg-brand-surface p-5 font-mono text-[11px] leading-relaxed text-brand-text [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:text-xs">
-                          <p>
-                            <span className="text-brand-muted">1</span>{" "}
-                            <span className="text-brand-rose">def</span>{" "}
-                            <span className="text-brand-cyan">two_sum</span>(nums, target):
-                          </p>
-                          <p>
-                            <span className="text-brand-muted">2</span> &nbsp;&nbsp;&nbsp;&nbsp;seen
-                            = {"{}"}
-                          </p>
-                          <p>
-                            <span className="text-brand-muted">3</span> &nbsp;&nbsp;&nbsp;&nbsp;
-                            <span className="text-brand-rose">for</span> i, num{" "}
-                            <span className="text-brand-rose">in</span>{" "}
-                            <span className="text-brand-amber">enumerate</span>(nums):
-                          </p>
-                          <p>
-                            <span className="text-brand-muted">4</span> &nbsp;&nbsp;&nbsp;&nbsp;
-                            complement = target - num
-                          </p>
-                          <p>
-                            <span className="text-brand-muted">5</span> &nbsp;&nbsp;&nbsp;&nbsp;
-                            <span className="text-brand-rose">if</span> complement{" "}
-                            <span className="text-brand-rose">in</span> seen:
-                          </p>
-                          <p>
-                            <span className="text-brand-muted">6</span> &nbsp;&nbsp;&nbsp;&nbsp;
-                            &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-brand-rose">return</span>{" "}
-                            [seen[complement], i]
-                          </p>
-                          <p>
-                            <span className="text-brand-muted">7</span> &nbsp;&nbsp;&nbsp;&nbsp;
-                            seen[num] = i<span className="typing-cursor">&nbsp;</span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </TiltCard>
-            </div>
-          </LandingReveal>
-        </section>
-
-        <section id="features" className="bg-brand-surface/[0.65] px-4 py-24 sm:px-6">
-          <LandingReveal className="mx-auto max-w-6xl">
-            <div className="grid gap-12 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-start">
-              <div>
-                <SectionHeading
-                  eyebrow="What Changes Here"
-                  title="LeetCode trains answers. Interviews test signal."
-                  description="The hard part of real interviews is not just the solution. It is explaining the plan, surviving pushback, coding clearly, and still sounding composed when the clock is moving."
-                  align="left"
-                />
-
-                <div className="mt-8 rounded-3xl border border-brand-border bg-brand-card p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-muted">
-                    Why silent practice falls short
-                  </p>
-                  <div className="mt-5 space-y-4">
-                    {[
-                      "You never have to explain tradeoffs while you think.",
-                      "No one challenges a slow or fuzzy approach in real time.",
-                      "Testing often becomes optional instead of part of the evaluation.",
-                      "You do not feel the pressure of voice + code + time all at once.",
-                    ].map((item) => (
-                      <div key={item} className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-brand-rose/20 bg-brand-rose/10 text-brand-rose">
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </div>
-                        <p className="text-sm leading-relaxed text-brand-muted">{item}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                {INTERVIEW_GAPS.map((card) => {
-                  const style = TONE_STYLES[card.tone];
-                  return (
-                    <div
-                      key={card.title}
-                      className={cn(
-                        "landing-panel p-6",
-                        style.border,
-                        style.glow,
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "inline-flex h-11 w-11 items-center justify-center rounded-2xl",
-                          style.surface,
-                          style.badgeText,
-                        )}
-                      >
-                        <card.icon className="h-5 w-5" />
-                      </div>
-                      <h3 className="mt-5 text-lg font-semibold text-brand-text">{card.title}</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-brand-muted">
-                        {card.description}
-                      </p>
-                    </div>
-                  );
-                })}
+          <div className="relative mx-auto w-full max-w-[1320px]">
+            <div className="hero-rise mb-7 font-mono text-xs uppercase tracking-[0.14em] text-brand-cyan">[ Voice-first AI mock interviews ]</div>
+            <h1 style={{ "--i": 1 } as React.CSSProperties} className="hero-rise max-w-[12ch] text-balance text-[clamp(44px,7.4vw,112px)] font-normal leading-[0.96] tracking-[-0.045em]">
+              Practice the interview<span className="text-brand-subtle">, not just the problem.</span>
+            </h1>
+            <div style={{ "--i": 2 } as React.CSSProperties} className="hero-rise mt-12 flex flex-wrap items-end justify-between gap-10">
+              <p className="max-w-[460px] text-pretty text-[17px] leading-relaxed text-brand-muted">
+                Solve DSA problems free. When you are ready, run a {FULL_INTERVIEW_DURATION_MINUTES}-minute round with an
+                AI interviewer that talks to you, reads your code as you type, and pushes back when your approach is weak.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href={practiceSignupHref} className={BTN_PRIMARY}>
+                  Practice free <span className="font-mono">→</span>
+                </Link>
+                <Link href={previewSignupHref} className={BTN_GHOST}>
+                  Try a free {FREE_TRIAL_DURATION_MINUTES}-minute interview
+                </Link>
               </div>
             </div>
-          </LandingReveal>
-        </section>
-
-        <section id="how-it-works" className="relative [overflow-x:clip] bg-brand-deep px-4 py-24 sm:px-6">
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-brand-cyan/[0.06] to-transparent"
-            aria-hidden
-          />
-
-          <div className="relative mx-auto max-w-6xl">
-            <div className="grid gap-12 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-start">
-              <div className="lg:sticky lg:top-24 lg:self-start">
-                <SectionHeading
-                  eyebrow="How It Works"
-                  title="A full interview arc, not a chatbot demo."
-                  description="Each round moves through the same moments that matter in a real technical screen: understanding the problem, choosing the approach, coding clearly, validating edge cases, and defending complexity."
-                  align="left"
-                />
-
-                <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                  {[
-                    {
-                      icon: Bot,
-                      title: "Adaptive interviewer behavior",
-                      description:
-                        "If you stall, the interviewer can nudge. If your plan is weak, it pushes back. If your answer is strong, it raises the bar.",
-                      tone: "cyan" as const,
-                    },
-                    {
-                      icon: Zap,
-                      title: "Built for repetition",
-                      description:
-                        "Start on demand, finish with a concrete report, then run another round without scheduling anyone or waiting for feedback.",
-                      tone: "green" as const,
-                    },
-                  ].map((card) => {
-                    const style = TONE_STYLES[card.tone];
-                    return (
-                      <div
-                        key={card.title}
-                        className="rounded-2xl border border-brand-border bg-brand-card p-5"
-                      >
-                        <div
-                          className={cn(
-                            "inline-flex h-10 w-10 items-center justify-center rounded-xl",
-                            style.surface,
-                            style.badgeText,
-                          )}
-                        >
-                          <card.icon className="h-5 w-5" />
-                        </div>
-                        <p className="mt-4 text-sm font-semibold text-brand-text">{card.title}</p>
-                        <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-                          {card.description}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <HowItWorksTimeline />
+            <div style={{ "--i": 3 } as React.CSSProperties} className="hero-rise mt-16 flex flex-wrap gap-x-10 gap-y-3 border-t border-white/[0.08] pt-5 font-mono text-xs uppercase tracking-[0.06em] text-brand-muted">
+              <LiveStatus name={tia.name} />
+              <span>Voice-first rounds</span>
+              <span>Python + JS run live</span>
+              <span>Scorecard after every round</span>
             </div>
           </div>
+        </header>
+
+        {/* ── 01 Interview room ── */}
+        <section id="room" className={cn("relative pb-[120px] pt-[140px]", PAD)}>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-[55%] h-[60vw] max-h-[900px] w-[90vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgb(var(--brand-cyan)/0.08)_0%,rgb(var(--brand-cyan)/0.04)_35%,transparent_65%)]"
+          />
+          <LandingReveal className="relative mx-auto max-w-[1320px]">
+            <div className="mb-12">
+              <Eyebrow n="01">Interview room</Eyebrow>
+              <h2 className={cn(H2, "max-w-[16ch]")}>The interviewer on one side. Your code on the other.</h2>
+            </div>
+            <InterviewRoomDemo
+              personas={INTERVIEWER_PERSONAS.map(({ id, name, companyLabel }) => ({ id, name, companyLabel }))}
+            />
+          </LandingReveal>
         </section>
 
-        <section className="bg-brand-surface px-4 py-24 sm:px-6">
-          <LandingReveal className="mx-auto max-w-6xl">
-            <SectionHeading
-              eyebrow="Meet The Interviewers"
-              title="From warm generalist to company-specific pressure."
-              description="Start with Tia when you want a balanced bar. Switch personas when you want practice that feels closer to a Google, Meta, Amazon, Apple, or Netflix-style round."
-            />
+        {/* ── 02 What changes ── */}
+        <section id="features" className={cn("scroll-mt-20 py-[120px]", PAD)}>
+          <LandingReveal className="mx-auto grid max-w-[1320px] grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] gap-16">
+            <div>
+              <Eyebrow n="02">Why practice out loud</Eyebrow>
+              <h2 className={H2}>
+                LeetCode trains answers. <span className="text-brand-cyan">Interviews test signal.</span>
+              </h2>
+              <p className="mt-7 max-w-[440px] text-pretty text-[17px] leading-relaxed text-brand-muted">
+                Plenty of people who fail a coding round could have solved the problem at home. They went quiet, skipped
+                the clarifying questions, coded into a dead end, or never tested. Those habits only show up when someone
+                is listening.
+              </p>
+            </div>
+            <div className="reveal-stagger grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] border-t border-white/[0.08]">
+              {GAPS.map((g, i) => (
+                <div key={g.title} className="border-b border-white/[0.08] pb-10 pr-7 pt-8">
+                  <div className="mb-10 font-mono text-xs text-brand-cyan">/0{i + 1}</div>
+                  <h3 className="mb-3 text-xl font-medium tracking-[-0.02em]">{g.title}</h3>
+                  <p className="text-[15px] leading-relaxed text-brand-muted">{g.body}</p>
+                </div>
+              ))}
+            </div>
+          </LandingReveal>
+        </section>
 
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {INTERVIEWER_PERSONAS.map((persona) => {
-                const spotlight = PERSONA_SPOTLIGHT[persona.id];
-                const style = TONE_STYLES[spotlight.tone];
+        {/* ── 03 How it works ── */}
+        <section id="how-it-works" className={cn("scroll-mt-20 py-[120px]", PAD)}>
+          <LandingReveal className="mx-auto max-w-[1320px]">
+            <div className="mb-16">
+              <Eyebrow n="03">How a round runs</Eyebrow>
+              <h2 className={cn(H2, "max-w-[18ch]")}>{FULL_INTERVIEW_DURATION_MINUTES} minutes, nine phases, from intro to wrap-up.</h2>
+            </div>
+            <PhaseTimeline />
+          </LandingReveal>
+        </section>
 
+        {/* ── 04 Interviewers ── */}
+        <section id="interviewers" className={cn("scroll-mt-20 py-[120px]", PAD)}>
+          <LandingReveal className="mx-auto max-w-[1320px]">
+            <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <Eyebrow n="04">Interviewers</Eyebrow>
+                <h2 className={cn(H2, "max-w-[16ch]")}>Six interviewers. Each one runs the round differently.</h2>
+              </div>
+              <p className="max-w-[360px] text-[15px] leading-relaxed text-brand-muted">
+                Start with {tia.name}, the generalist. Switch to a company-style persona when you are rehearsing for a
+                specific loop. Styles are based on publicly described interview formats; TechInView is not affiliated
+                with these companies.
+              </p>
+            </div>
+            <div className="reveal-stagger grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] border-l border-t border-white/[0.08]">
+              {INTERVIEWER_PERSONAS.map((p, i) => {
+                const spot = PERSONA_SPOTLIGHT[p.id];
                 return (
                   <div
-                    key={persona.id}
-                    className={cn(
-                      "landing-panel p-6",
-                      style.border,
-                      style.glow,
-                      persona.id === "tia" && "ring-1 ring-brand-cyan/20",
-                    )}
+                    key={p.id}
+                    tabIndex={0}
+                    className="group flex min-h-[280px] flex-col justify-between gap-8 border-b border-r border-white/[0.08] p-8 outline-none transition-colors hover:bg-brand-card focus-visible:bg-brand-card"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-muted">
-                          {persona.companyLabel}
-                        </p>
-                        <h3 className="mt-2 text-2xl font-semibold text-brand-text">
-                          {persona.name}
-                        </h3>
-                      </div>
-                      <span
-                        className={cn(
-                          "rounded-full border px-3 py-1 text-[11px] font-semibold",
-                          style.border,
-                          style.surface,
-                          style.badgeText,
-                        )}
-                      >
-                        {spotlight.bestFor}
-                      </span>
+                    <div className="flex justify-between font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">
+                      <span>0{i + 1}</span>
+                      <span>{p.companyLabel}</span>
                     </div>
-
-                    <p className="mt-5 text-sm font-medium text-brand-text">
-                      {persona.shortStyleSummary}
-                    </p>
-                    <p className="mt-3 text-sm leading-relaxed text-brand-muted">
-                      {spotlight.edge}
-                    </p>
-                    <div className="mt-6 rounded-2xl border border-brand-border bg-brand-surface p-4">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-muted">
-                        Sample opener
+                    <div>
+                      <h3 className="mb-1.5 text-4xl font-normal tracking-[-0.03em]">{p.name}</h3>
+                      <div className="mb-4 font-mono text-xs text-brand-cyan">{spot.bestFor}</div>
+                      <p className="min-h-[46px] text-[15px] leading-normal text-brand-muted group-hover:hidden group-focus-visible:hidden">
+                        {spot.edge}
                       </p>
-                      <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-                        {persona.greeting}
+                      <p className="hidden min-h-[46px] text-[15px] leading-normal text-brand-text group-hover:block group-focus-visible:block">
+                        “{p.greeting}”
                       </p>
                     </div>
                   </div>
@@ -641,148 +288,208 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </LandingReveal>
         </section>
 
-        <section id="scorecard" className="bg-brand-deep px-4 py-24 sm:px-6">
-          <LandingReveal className="mx-auto max-w-6xl">
-            <div className="grid gap-12 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-start">
+        {/* ── 05 Scorecard ── */}
+        <section id="score" className={cn("relative py-[120px]", PAD)}>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-[10vw] top-1/2 h-[60vw] w-[60vw] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.12)_0%,transparent_60%)]"
+          />
+          <LandingReveal className="relative mx-auto max-w-[1320px]">
+            <ScoreCard
+              dims={SAMPLE_DIMS}
+              overall={77}
+              personaName={tia.name}
+              header={
+                <>
+                  <Eyebrow n="05">After the round</Eyebrow>
+                  <h2 className={H2}>Scored on five dimensions, with notes on each.</h2>
+                  <p className="mb-10 mt-7 max-w-[440px] text-[17px] leading-relaxed text-brand-muted">
+                    An overall score out of 100, a hire recommendation, written feedback per dimension and the full
+                    transcript. Behavioral and Engineering Manager rounds add a competency report graded against the
+                    value lens you picked.
+                  </p>
+                </>
+              }
+              footer={
+                <Link
+                  href="/how-ai-evaluates"
+                  className="mt-7 inline-block font-mono text-xs uppercase tracking-[0.08em] text-brand-cyan hover:text-brand-text"
+                >
+                  How we score a round →
+                </Link>
+              }
+            />
+          </LandingReveal>
+        </section>
+
+        {/* ── 06 Pricing ── */}
+        <section id="pricing" className={cn("relative scroll-mt-20 py-[120px]", PAD)}>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-[62%] top-[60%] h-[50vw] w-[50vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.11)_0%,transparent_60%)]"
+          />
+          <LandingReveal className="relative mx-auto max-w-[1320px]">
+            <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
               <div>
-                <SectionHeading
-                  eyebrow="After The Round"
-                  title="See your 5-dimension interview profile at a glance."
-                  description="Instead of guessing how the round went, you get one clear performance view across the five signals that matter most in technical interviews."
-                  align="left"
+                <Eyebrow n="06">Pricing</Eyebrow>
+                <h2 className={H2}>Interview packs, not a subscription.</h2>
+              </div>
+              <p className="max-w-[360px] text-[15px] leading-relaxed text-brand-muted">
+                DSA practice is free. Pay once for full {FULL_INTERVIEW_DURATION_MINUTES}-minute AI interviews and use
+                each credit on a coding, Technical Q&amp;A, Engineering Manager or Behavioral round.
+              </p>
+            </div>
+            <div className="reveal-stagger grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-3">
+              <PriceCard
+                label="Free practice"
+                price={money(0)}
+                features={["Curated DSA problem set", "Run Python or JS, progress saved", `One free ${FREE_TRIAL_DURATION_MINUTES}-minute AI interview`]}
+                cta="Practice free"
+                href={practiceSignupHref}
+              />
+              {packs.map((p) => (
+                <PriceCard
+                  key={p.id}
+                  label={p.label}
+                  badge={p.badge && p.off > 0 ? `${p.badge} · −${p.off}%` : undefined}
+                  price={money(p.price)}
+                  was={p.off > 0 ? money(p.full) : undefined}
+                  featured={p.id === "3pack"}
+                  features={[
+                    ...(p.credits > 1 ? [`${money(Math.round((p.price / p.credits) * 100) / 100)} per interview`] : []),
+                    `${p.credits} × ${FULL_INTERVIEW_DURATION_MINUTES}-minute full interview${p.credits > 1 ? "s" : ""}`,
+                    "Transcript and scored report",
+                    p.credits > 1 ? "Progress tracking" : "Specific problem selection",
+                  ]}
+                  cta={`Buy ${p.label.toLowerCase()}`}
+                  href={buyHref}
                 />
-
-                <div className="mt-8 space-y-4">
-                  {[
-                    "Problem solving",
-                    "Code quality",
-                    "Communication",
-                    "Technical knowledge",
-                    "Testing",
-                  ].map((item) => (
-                    <div key={item} className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-cyan/10 text-brand-cyan">
-                        <CheckCircle2 className="h-4 w-4" />
-                      </div>
-                      <p className="text-sm leading-relaxed text-brand-muted">{item}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    href="/how-ai-evaluates"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-border bg-brand-surface px-6 py-3 text-sm font-semibold text-brand-text transition-colors hover:border-brand-cyan/30 hover:bg-brand-card"
-                  >
-                    Learn how scoring works
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link
-                    href={previewSignupHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-6 py-3 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
-                  >
-                    Try 5-Minute Audio Interview
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-
-              <div className="landing-panel p-4 sm:p-5">
-                <div className="rounded-3xl border border-brand-border bg-brand-surface p-5 sm:p-6">
-                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-cyan">
-                        5D Preview
-                      </p>
-                      <h3 className="mt-2 text-2xl font-bold tracking-tight text-brand-text">
-                        Performance Breakdown
-                      </h3>
-                    </div>
-                    <span className="inline-flex items-center rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                      {defaultPersona.name} &middot; Sample round
-                    </span>
-                  </div>
-
-                  <ScoreRadar scores={[...SAMPLE_RADAR_SCORES]} />
-                </div>
-              </div>
+              ))}
+            </div>
+            <div className="mt-5 text-center font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">
+              One-time packs · No recurring billing · No card for free practice
             </div>
           </LandingReveal>
         </section>
 
-        <LandingReveal>
-          <Pricing defaultRegion={pricingRegion} refParam={ref} />
-        </LandingReveal>
-
-        <section id="faq" className="bg-brand-surface px-4 py-24 sm:px-6">
-          <LandingReveal className="mx-auto max-w-6xl">
-            <SectionHeading
-              eyebrow="FAQ"
-              title="Common questions before your first round."
-              description="If you are wondering whether this is realistic enough, long enough, or useful enough, these are usually the questions people ask before they try the first session."
-            />
-
-            <div className="mx-auto mt-12 max-w-4xl space-y-4">
-              {FAQS.map((faq) => (
-                <details key={faq.question} className="group landing-panel overflow-hidden p-0">
-                  <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-5 text-left text-sm font-semibold text-brand-text transition-colors hover:text-brand-cyan list-none">
-                    {faq.question}
-                    <ChevronRight className="h-4 w-4 shrink-0 text-brand-muted transition-transform group-open:rotate-90" />
+        {/* ── 07 FAQ ── */}
+        <section id="faq" className={cn("scroll-mt-20 py-[120px]", PAD)}>
+          <LandingReveal className="mx-auto grid max-w-[1320px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] gap-16">
+            <div>
+              <Eyebrow n="07">FAQ</Eyebrow>
+              <h2 className={cn(H2, "max-w-[12ch]")}>Before your first round.</h2>
+            </div>
+            <div className="reveal-stagger border-t border-white/[0.08]">
+              {FAQS.map((f, i) => (
+                <details key={f.question} name="landing-faq" open={i === 0} className="group border-b border-white/[0.08]">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-left text-[19px] tracking-[-0.01em] transition-colors hover:text-brand-cyan [&::-webkit-details-marker]:hidden">
+                    <span>{f.question}</span>
+                    <span className="flex-none font-mono text-lg text-brand-cyan">
+                      <span className="group-open:hidden">+</span>
+                      <span className="hidden group-open:inline">−</span>
+                    </span>
                   </summary>
-                  <div className="px-5 pb-5 text-sm leading-relaxed text-brand-muted">
-                    {faq.answer}
-                  </div>
+                  <p className="pb-7 pr-12 text-pretty text-base leading-relaxed text-brand-muted">{f.answer}</p>
                 </details>
               ))}
             </div>
           </LandingReveal>
         </section>
 
-        <section className="relative overflow-hidden px-4 py-24 sm:px-6">
-          <div className="landing-aurora absolute inset-0 opacity-80" aria-hidden />
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-brand-cyan/[0.08] to-transparent"
-            aria-hidden
-          />
-
-          <LandingReveal className="relative mx-auto max-w-6xl">
-            <div className="landing-panel px-6 py-10 text-center sm:px-10 sm:py-14">
-              <div className="inline-flex items-center gap-2 rounded-full border border-brand-cyan/25 bg-brand-cyan/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                Ready when you are
-              </div>
-              <h2 className="mx-auto mt-6 max-w-4xl text-3xl font-bold leading-tight text-brand-text sm:text-4xl md:text-5xl">
-                Walk into the real interview already having heard yourself answer hard questions.
-              </h2>
-              <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-brand-muted">
-                No scheduling. No awkward peer pairing. Just a real-feeling coding round, a live
-                interviewer, and feedback that tells you what to sharpen next.
-              </p>
-
-              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link
-                  href={practiceSignupHref}
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-cyan px-7 py-4 text-base font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
-                >
-                  Practice Free
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-                <Link
-                  href={previewSignupHref}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-border bg-brand-surface px-7 py-4 text-base font-semibold text-brand-text transition-colors hover:border-brand-cyan/30 hover:bg-brand-card"
-                >
-                  Try 5-Minute Audio Interview
-                </Link>
-              </div>
-
-              <p className="mt-4 text-sm text-brand-muted">
-                Practice free now, then unlock full AI interview packs when you are ready.
-              </p>
+        {/* ── Closing CTA ── */}
+        <section className="overflow-hidden pt-[120px]">
+          <div className="overflow-hidden border-y border-white/[0.08] py-[22px]" aria-hidden>
+            <div className="landing-marquee flex w-max gap-12 whitespace-nowrap font-mono text-[13px] uppercase tracking-[0.14em] text-brand-subtle [animation:landing-marquee_40s_linear_infinite]">
+              {[...MARQUEE, ...MARQUEE].map((w, i) => (
+                <span key={i} className="flex gap-12">
+                  <span>{w}</span>
+                  <span className="text-brand-cyan">✦</span>
+                </span>
+              ))}
+            </div>
+          </div>
+          <LandingReveal className={cn("relative mx-auto max-w-[1320px] pb-[120px] pt-[140px]", PAD)}>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -bottom-[40%] -left-[15%] z-0 h-[80vw] max-h-[1200px] w-[80vw] max-w-[1200px] rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.13)_0%,rgb(var(--brand-cyan)/0.05)_30%,transparent_60%)]"
+            />
+            <div className="relative mb-7 font-mono text-xs uppercase tracking-[0.14em] text-brand-cyan">[ Ready when you are ]</div>
+            <h2 className="relative max-w-[16ch] text-balance text-[clamp(40px,6.4vw,96px)] font-normal leading-[0.98] tracking-[-0.045em]">
+              Walk in already having heard yourself <span className="text-brand-subtle">answer hard questions.</span>
+            </h2>
+            <div className="relative mt-14 flex flex-wrap gap-3">
+              <Link href={practiceSignupHref} className={BTN_PRIMARY}>
+                Practice free <span className="font-mono">→</span>
+              </Link>
+              <Link href={previewSignupHref} className={BTN_GHOST}>
+                Try a free {FREE_TRIAL_DURATION_MINUTES}-minute interview
+              </Link>
             </div>
           </LandingReveal>
         </section>
-      </main>
+    </MarketingShell>
+  );
+}
 
-      <MarketingFooter signupHref={practiceSignupHref} />
+function PriceCard({
+  label,
+  badge,
+  price,
+  was,
+  features,
+  cta,
+  href,
+  featured = false,
+}: {
+  label: string;
+  badge?: string;
+  price: string;
+  was?: string;
+  features: string[];
+  cta: string;
+  href: string;
+  featured?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-7 rounded-[18px] border p-7",
+        featured
+          ? "border-brand-cyan bg-brand-cyan/[0.04] shadow-[0_0_60px_rgb(var(--brand-cyan)/0.08)]"
+          : "border-white/[0.09]"
+      )}
+    >
+      <div
+        className={cn(
+          "flex justify-between font-mono text-[11px] uppercase tracking-[0.12em]",
+          featured ? "text-brand-cyan" : "text-brand-muted"
+        )}
+      >
+        <span>{label}</span>
+        {badge && <span>{badge}</span>}
+      </div>
+      <div className="flex items-baseline gap-3">
+        <span className="text-[56px] font-light leading-none tracking-[-0.05em]">{price}</span>
+        {was && <span className="text-base text-brand-subtle line-through">{was}</span>}
+      </div>
+      <ul className="flex flex-1 flex-col gap-2.5 text-sm text-brand-muted">
+        {features.map((f, i) => (
+          <li key={f} className={cn(featured && i === 0 && "text-brand-text")}>
+            {f}
+          </li>
+        ))}
+      </ul>
+      <Link
+        href={href}
+        className={cn(
+          "rounded-full p-[13px] text-center text-sm transition-colors",
+          featured
+            ? "bg-brand-cyan font-medium text-brand-deep hover:bg-brand-text"
+            : "border border-white/[0.18] hover:border-brand-cyan hover:text-brand-cyan"
+        )}
+      >
+        {cta}
+      </Link>
     </div>
   );
 }

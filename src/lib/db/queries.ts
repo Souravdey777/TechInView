@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { localProblemCatalog, shouldUseLocalProblemCatalog } from "./local-problems";
 import { eq, and, ilike, inArray, sql, desc, asc } from "drizzle-orm";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
@@ -407,6 +408,16 @@ export type ProblemFilters = {
 async function _getProblems(
   filters?: ProblemFilters
 ): Promise<Problem[]> {
+  if (shouldUseLocalProblemCatalog()) {
+    const q = filters?.search?.toLowerCase();
+    return localProblemCatalog().filter(
+      (p) =>
+        (!filters?.difficulty || p.difficulty === filters.difficulty) &&
+        (!filters?.category || p.category === filters.category) &&
+        (!q || p.title.toLowerCase().includes(q)) &&
+        (!filters?.freeOnly || p.is_free_solver_enabled)
+    );
+  }
   const db = getDb();
 
   const conditions = [];
@@ -452,6 +463,7 @@ export const getProblems = cache(
 async function _getProblemBySlug(
   slug: string
 ): Promise<Problem | undefined> {
+  if (shouldUseLocalProblemCatalog()) return localProblemCatalog().find((p) => p.slug === slug);
   const db = getDb();
   const results = await db
     .select()
@@ -553,6 +565,12 @@ export async function getRelatedProblems(
   limit = 4
 ): Promise<Problem[]> {
   if (categories.length === 0) return [];
+  if (shouldUseLocalProblemCatalog()) {
+    return localProblemCatalog()
+      .filter((p) => categories.includes(p.category))
+      .sort(() => Math.random() - 0.5)
+      .slice(0, limit);
+  }
   const db = getDb();
   return db
     .select()

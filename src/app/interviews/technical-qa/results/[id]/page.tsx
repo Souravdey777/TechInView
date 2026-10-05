@@ -11,7 +11,7 @@ export default function TechnicalQaResultsPage({
   params,
 }: TechnicalQaResultsPageProps) {
   useEffect(() => {
-    document.title = "Technical Q&A Results — TechInView";
+    document.title = "Technical Q&A Results · TechInView";
 
     return () => {
       document.title = "TechInView.ai";

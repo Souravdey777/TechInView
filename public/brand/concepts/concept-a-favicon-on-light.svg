@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" role="img" aria-label="TechInView concept A">
+  <path d="M11 4H0V28H11V24H4V8H11Z" fill="#0A0B0D"/>
+  <path d="M21 4H32V28H21V24H28V8H21Z" fill="#0A0B0D"/>
+  <rect x="7" y="12" width="4" height="8" fill="#0891B2"/>
+  <rect x="14" y="6" width="4" height="20" fill="#0891B2"/>
+  <rect x="21" y="12" width="4" height="8" fill="#0891B2"/>
+</svg>

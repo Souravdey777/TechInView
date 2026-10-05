@@ -490,7 +490,7 @@ export default function ResultsPage() {
                 </h3>
                 <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
                   Your 5-minute audio preview includes the overall score and hire recommendation above.
-                  Purchase an interview pack to unlock the 5-dimension radar chart, per-dimension feedback,
+                  Buy an interview pack to see the 5-dimension radar chart, per-dimension feedback,
                   key strengths, and areas to improve.
                 </p>
               </div>

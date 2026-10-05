@@ -1,7 +1,7 @@
 ---
 title: "How to Read a Coding Interview Problem (Without Burning 20 Minutes)"
 seoTitle: "How to Approach LeetCode Problems: 5-Step Framework"
-description: "Learn how to approach LeetCode and whiteboard problems: a 5-step read framework, red flags, and how it pairs with vocal mock interviews."
+description: "How to approach LeetCode and interview problems: a five-pass read that takes under four minutes, the questions to ask, and how to turn it into a spoken plan."
 date: "2026-07-03"
 keyword: "how to approach leetcode problems"
 topic: "Coding craft"
@@ -12,76 +12,78 @@ tags:
   - DSA interview strategy
 ---
 
-If you want to master **how to approach LeetCode problems** in a real interview, stop treating “read the prompt” as passive scanning. Strong candidates spend **two to four minutes** extracting **constraints, invariants, and test philosophy** before they commit to an algorithm. Weak candidates jump to code and rewrite half their solution when the interviewer says, “What about duplicates?”
+**Short answer:** before writing code, make five quick passes over the problem. Restate it, pin down the input/output contract, name the brute force, guess the pattern, and set a complexity target. The whole read takes two to four minutes, and it saves you from rewriting half your solution when the interviewer asks "what about duplicates?"
 
-This framework matches how **voice interviewers** probe—same phases we discuss in [coding interview communication](/blog/coding-interview-communication) and [FAANG scoring](/blog/faang-interview-scoring).
+Learning how to approach LeetCode problems in a real interview starts with treating "read the prompt" as active work, not skimming. Strong candidates use the first few minutes to pin down constraints and test cases before they commit to an algorithm. Weak candidates start typing and pay for it later.
+
+These are the same phases a good interviewer probes for. See [how to think out loud](/blog/coding-interview-communication) and [what FAANG interviewers score](/blog/faang-interview-scoring).
 
 ## The five-pass read (under four minutes)
 
-### Pass 1 — Restate in your own words (30–45 seconds)
+### Pass 1: restate it (30-45 seconds)
 
-One or two sentences. No code. Forces alignment with the interviewer.
+One or two sentences in your own words, no code. This catches misunderstandings while they are still cheap.
 
-### Pass 2 — I/O contract (45 seconds)
+### Pass 2: the input/output contract (about 45 seconds)
 
-- Types, ranges, **empty** inputs, **negative** numbers, **duplicates**
-- Return type: indices vs values, all solutions vs one
-- **Mutate input** allowed?
+- Types and ranges, empty input, negative numbers, duplicates.
+- What to return: indices or values, one answer or all of them?
+- Can you modify the input?
 
-Write **two tiny examples** you will trace later—including a **weird** one.
+Write two tiny examples you will trace later, including one awkward case (empty, all duplicates, a single element).
 
-### Pass 3 — Brute force sanity (30 seconds)
+### Pass 3: name the brute force (about 30 seconds)
 
-Name the obvious O(n²) or exponential baseline in one line. It anchors **correctness** before optimization—excellent **signal** in scoring rubrics.
+Say the obvious O(n²) or exponential solution in one line. It gives you a correct baseline before you optimize, and interviewers like seeing it.
 
-### Pass 4 — Pattern guess (60 seconds)
+### Pass 4: guess the pattern (about 60 seconds)
 
-Tag mentally: **two pointers**, **prefix sum**, **graph**, **binary search on answer**, etc. If unsure, say: “I see a subarray property → sliding window candidate; I’ll verify with an example.”
+Tag it: two pointers, prefix sums, sliding window, graph traversal, binary search on the answer, and so on. If you are unsure, say so and test the guess: "This asks about a contiguous subarray, so sliding window is a candidate. Let me check it against my example."
 
-### Pass 5 — Complexity target (30 seconds)
+### Pass 5: set a complexity target (about 30 seconds)
 
-State what “good enough” looks like: “We likely need O(n) or O(n log n) because …” Tie to [time complexity](/blog/time-complexity-cheat-sheet) when you articulate **why**.
+Say what good enough looks like and why: "n can be 10^5, so O(n²) is about 10^10 operations, too slow. I'm aiming for O(n log n) or better." The [time complexity guide](/blog/time-complexity-cheat-sheet) shows how to reason from input size to target.
 
 ## Red flags in problem statements
 
-| Phrase / situation | Ask |
-|--------------------|-----|
-| “Sorted array” | Duplicates? Multiple valid windows? |
-| “Find any” vs “find all” | Output size explosion? |
-| Graph | Directed? DAG? Disconnected? |
-| String matching | Case sensitivity? Unicode? |
-| “In-place” | Return value still needed? |
+| Phrase or situation | Ask |
+|---------------------|-----|
+| "Sorted array" | Can there be duplicates? Can more than one answer be valid? |
+| "Find any" vs "find all" | How large can the output get? |
+| A graph | Directed? Acyclic? Possibly disconnected? |
+| String matching | Case-sensitive? ASCII only or Unicode? |
+| "In place" | Do you still need to return something? |
 
-Silence here costs more than **polite questions**.
+A polite question costs you seconds. Silently guessing wrong can cost you the round.
 
-## After the read: verbal plan before keys
+## After the read: a spoken plan before you type
 
-Spend **60–90 seconds** on:
+Spend 60 to 90 seconds on:
 
-1. Algorithm name + **why it fits**
-2. **Failure modes** (overflow, off-by-one)
-3. **Test strategy** (edge cases first)
+1. The algorithm, and why it fits these constraints.
+2. Likely failure points (overflow, off-by-one, empty input).
+3. How you will test it, edge cases first.
 
-This is the bridge between **reading** and **coding under pressure**—see [live coding under pressure](/blog/coding-interview-pressure-live-coding).
+This plan is the bridge between reading and [coding under pressure](/blog/coding-interview-pressure-live-coding). If you can't find a pattern in pass 4, the [data structure decision guide](/blog/data-structure-decision-guide) gives you four questions that usually narrow it down.
 
-## Tie-in: classic example
+## A worked example: Two Sum
 
-For “two integers sum to target,” our [Two Sum guide](/blog/two-sum-interview) shows how **clarifying indices vs values** changes your entire approach. That is **pass 2** in the wild.
+"Return two numbers in the array that add up to the target." Pass 2 is where this one turns. If the interviewer wants **indices**, you can't sort the array without tracking original positions, so a hash map from value to index is the natural fit. If they want the **values** and the array is already sorted, two pointers solve it in O(1) extra space. The same prompt leads to two different solutions depending on one clarifying question. The [Two Sum guide](/blog/two-sum-interview) walks through all three approaches, and you can try it on the [Two Sum practice page](/practice/two-sum).
 
 ## FAQ
 
-### Is it OK to ask “optimal complexity”?
+### Is it OK to ask what complexity they want?
 
-Yes, if phrased collaboratively: “Is there a target complexity you want me to hit?” Some interviewers volunteer hints.
+Yes, if you ask it collaboratively: "Is there a target complexity you'd like me to hit?" Some interviewers will tell you, which is a free hint.
 
-### What if I mis-read?
+### What if I misread the problem?
 
-Pause, **acknowledge**, and **revise plan**—interviewers score **recovery** highly.
+Stop, say so plainly, and revise the plan. Interviewers give real credit for clean recovery. The [stuck-in-an-interview playbook](/blog/stuck-in-a-coding-interview-recovery) has wording that helps.
 
-### How do I practice reads?
+### How do I practice reading?
 
-Use **timed reads only** (no code) for 10 problems/week—then do **full mocks** with [TechInView](/login) to practice **speaking** the five passes aloud.
+Do ten timed reads a week with no code: just the five passes, out loud. Then run full mocks where you speak the passes before solving. TechInView's [free practice set](/practice) works for the reads, and the voice interview works for the full rehearsal.
 
 ---
 
-**Summary:** **How to approach LeetCode problems** in interviews is a **repeatable read**: restate, contract, brute baseline, pattern tag, complexity target—then **verbalize** before coding. Pair with **communication** drills and **mock interviews** for real loop fidelity.
+**Summary:** approaching LeetCode problems in an interview is a repeatable read: restate, contract, brute force, pattern, complexity target. Then say your plan before you code.

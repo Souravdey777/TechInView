@@ -3,61 +3,50 @@ import { cn } from "@/lib/utils";
 import { DIFFICULTY_CONFIG } from "@/lib/constants";
 import type { DifficultyLevel } from "@/lib/constants";
 import { getProblemBySlug } from "@/lib/db/queries";
-import { Building2, ChevronRight } from "lucide-react";
+import { CHIP, HAIRLINE, LABEL, LINK_ARROW } from "@/components/marketing/ds";
 
 export async function ProblemCard({ slug }: { slug: string }) {
-  const problem = await getProblemBySlug(slug);
+  // Optional widget: a DB failure should not take the whole post down.
+  const problem = await getProblemBySlug(slug).catch(() => null);
   if (!problem) return null;
 
   const cfg = DIFFICULTY_CONFIG[problem.difficulty as DifficultyLevel];
   const companyTags = problem.company_tags ?? [];
 
   return (
-    <div className="not-prose my-6">
+    <div className="not-prose my-10">
       <Link
-        href={`/login`}
-        className="group flex items-center justify-between gap-4 rounded-xl border border-brand-border bg-brand-card/60 p-5 transition-all hover:border-brand-cyan/30"
+        href={`/practice/${problem.slug}`}
+        className={cn(
+          "group block border-y py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan",
+          HAIRLINE
+        )}
       >
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <span
-              className={cn(
-                "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold",
-                cfg.bgColor,
-                cfg.color
-              )}
-            >
-              {cfg.label}
-            </span>
-            <span className="text-xs text-brand-muted">
-              {problem.category}
-            </span>
-          </div>
-          <p className="text-base font-semibold text-brand-text group-hover:text-brand-cyan transition-colors">
-            {problem.title}
-          </p>
-          {companyTags.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 mt-2">
-              <Building2 className="w-3 h-3 text-brand-muted shrink-0" />
-              {companyTags.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[11px] px-1.5 py-0.5 rounded bg-brand-surface border border-brand-border text-brand-muted"
-                >
-                  {tag}
-                </span>
-              ))}
-              {companyTags.length > 3 && (
-                <span className="text-[11px] text-brand-muted">
-                  +{companyTags.length - 3}
-                </span>
-              )}
-            </div>
-          )}
-          <span className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-brand-cyan group-hover:underline">
-            Start AI interview <ChevronRight className="w-3 h-3" />
-          </span>
+        <div className={cn(LABEL, "flex flex-wrap gap-x-3 gap-y-1")}>
+          <span>Practice problem</span>
+          <span aria-hidden>·</span>
+          <span>{cfg?.label ?? problem.difficulty}</span>
+          <span aria-hidden>·</span>
+          <span>{problem.category}</span>
         </div>
+        <p className="mt-3 text-xl font-normal tracking-[-0.02em] text-brand-text transition-colors group-hover:text-brand-cyan">
+          {problem.title}
+        </p>
+        {companyTags.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {companyTags.slice(0, 3).map((tag) => (
+              <span key={tag} className={CHIP}>
+                {tag}
+              </span>
+            ))}
+            {companyTags.length > 3 && (
+              <span className={LABEL}>+{companyTags.length - 3}</span>
+            )}
+          </div>
+        )}
+        <span className={cn(LINK_ARROW, "mt-5")}>
+          Open the problem <span aria-hidden>→</span>
+        </span>
       </Link>
     </div>
   );

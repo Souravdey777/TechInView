@@ -7,7 +7,9 @@ import { usePostHog } from "posthog-js/react";
 import { useSupabase } from "@/hooks/useSupabase";
 import {
   AuthDivider,
+  AUTH_LINK,
   AuthErrorBanner,
+  AuthNote,
   AuthSplitLayout,
 } from "@/components/auth/AuthSplitLayout";
 import { AuthProviderButton } from "@/components/auth/AuthProviderButton";
@@ -69,23 +71,17 @@ export default function SignupPage() {
 
   return (
     <AuthSplitLayout
+      kicker="Voice-first AI mock interviews"
       eyebrow={isBeta ? "Beta invite" : "Start free"}
       heading="Create account."
       panelHeadline="Practice against the interview you will actually sit."
-      panelSupporting={`Free DSA practice on the full catalog, plus one ${FREE_TRIAL_DURATION_MINUTES}-minute audio round on the house.`}
+      panelSupporting={`Free solo practice on a curated set of DSA problems, plus one ${FREE_TRIAL_DURATION_MINUTES}-minute voice interview on the house.`}
       intro={
         isBeta ? (
-          <div className="mt-5 flex flex-col items-start gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-cyan/30 bg-brand-cyan/10 px-3 py-1 text-xs font-semibold text-brand-cyan">
-              Beta Invite
-            </span>
-            <p className="text-sm text-brand-muted">
-              You&apos;ve been invited! Sign up to get{" "}
-              <span className="font-semibold text-brand-cyan">
-                {BETA_CREDITS} full interview credits
-              </span>
-            </p>
-          </div>
+          <AuthNote title="Your invite">
+            Sign up with this invite and your account starts with{" "}
+            <span className="text-brand-cyan">{BETA_CREDITS} full interview credits</span>.
+          </AuthNote>
         ) : null
       }
       footer={
@@ -93,13 +89,26 @@ export default function SignupPage() {
           Already have an account?{" "}
           <Link
             href={loginHref}
-            className="rounded-sm text-brand-cyan hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
+            className={AUTH_LINK}
           >
-            Sign in
+            Log in
           </Link>
         </>
       }
-      reassurance="By signing up, you agree to our Terms of Service and Privacy Policy. Rounds run best on desktop — voice, editor, and test output need the screen and a working microphone."
+      reassurance={
+        <>
+          By signing up, you agree to our{" "}
+          <Link href="/terms" className={AUTH_LINK}>
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className={AUTH_LINK}>
+            Privacy Policy
+          </Link>
+          . Interviews work best on a desktop or laptop with a working microphone, since the voice panel, editor and
+          test output share the screen.
+        </>
+      }
     >
       {error && <AuthErrorBanner message={error} />}
 

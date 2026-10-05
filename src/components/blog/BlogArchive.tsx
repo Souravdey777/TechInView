@@ -4,6 +4,14 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
+  BODY,
+  CHIP,
+  CHIP_ACTIVE,
+  HAIRLINE,
+  LABEL,
+  LINK_ARROW,
+} from "@/components/marketing/ds";
+import {
   groupPostsByMonth,
   type BlogListItem,
   type BlogTopic,
@@ -40,49 +48,21 @@ export function BlogArchive({ posts, topics }: BlogArchiveProps) {
         role="group"
         aria-label="Filter posts by topic"
       >
-        <button
-          type="button"
+        <TopicChip
+          label="All"
+          count={posts.length}
+          on={active === "all"}
           onClick={() => setActive("all")}
-          aria-pressed={active === "all"}
-          className={cn(
-            "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-[11px] tracking-wide transition-colors",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/50 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep",
-            active === "all"
-              ? "border-brand-cyan/35 bg-brand-cyan/10 text-brand-cyan"
-              : "border-brand-border text-brand-muted hover:border-brand-cyan/25 hover:text-brand-text"
-          )}
-        >
-          All
-          <span
-            className={active === "all" ? "text-brand-cyan" : "text-brand-subtle"}
-          >
-            {posts.length}
-          </span>
-        </button>
-
-        {topics.map(({ topic, count }) => {
-          const on = active === topic;
-          return (
-            <button
-              key={topic}
-              type="button"
-              onClick={() => setActive(on ? "all" : topic)}
-              aria-pressed={on}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-[11px] tracking-wide transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/50 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep",
-                on
-                  ? "border-brand-cyan/35 bg-brand-cyan/10 text-brand-cyan"
-                  : "border-brand-border text-brand-muted hover:border-brand-cyan/25 hover:text-brand-text"
-              )}
-            >
-              {topic}
-              <span className={on ? "text-brand-cyan" : "text-brand-subtle"}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
+        />
+        {topics.map(({ topic, count }) => (
+          <TopicChip
+            key={topic}
+            label={topic}
+            count={count}
+            on={active === topic}
+            onClick={() => setActive(active === topic ? "all" : topic)}
+          />
+        ))}
       </div>
 
       <p className="sr-only" aria-live="polite">
@@ -90,59 +70,102 @@ export function BlogArchive({ posts, topics }: BlogArchiveProps) {
         {active === "all" ? "" : ` in ${active}`}
       </p>
 
+      {groups.length === 0 ? (
+        <div className={cn("mt-10 border-t pt-6", HAIRLINE)}>
+          <p className={BODY}>No guides in this topic yet.</p>
+          <button
+            type="button"
+            onClick={() => setActive("all")}
+            className={cn(LINK_ARROW, "mt-4")}
+          >
+            Show all guides <span aria-hidden>→</span>
+          </button>
+        </div>
+      ) : null}
+
       <div className="mt-10">
         {groups.map((group) => (
           <section key={group.key} className="mt-14 first:mt-0">
             <div className="flex items-center justify-between pb-4">
-              <h2 className="m-0 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-muted">
-                {group.label}
-              </h2>
-              <span className="font-mono text-[10px] tracking-[0.1em] text-brand-subtle">
+              <h2 className={cn(LABEL, "m-0")}>{group.label}</h2>
+              <span className={LABEL}>
                 {group.posts.length}{" "}
                 {group.posts.length === 1 ? "guide" : "guides"}
               </span>
             </div>
 
-            <ul className="m-0 list-none p-0">
+            <ul className={cn("m-0 list-none border-b p-0", HAIRLINE)}>
               {group.posts.map((post) => (
                 <li key={post.slug} className="min-w-0">
                   <Link
                     href={`/blog/${post.slug}`}
                     className={cn(
-                      "group grid grid-cols-1 gap-x-7 gap-y-2 border-t border-brand-border py-6 transition-colors",
-                      "md:grid-cols-[92px_minmax(0,1fr)_170px_64px] md:items-baseline",
-                      "hover:border-brand-cyan/25",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/40"
+                      "group grid grid-cols-1 gap-x-8 gap-y-2 border-t py-7",
+                      HAIRLINE,
+                      "md:grid-cols-[80px_minmax(0,1fr)_150px_56px] md:items-baseline",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
                     )}
                   >
-                    <span className="font-mono text-xs tracking-wide text-brand-subtle">
+                    <time
+                      dateTime={post.date}
+                      className="font-mono text-xs uppercase tracking-[0.06em] text-brand-subtle"
+                    >
                       {formatDayMonth(post.date)}
-                    </span>
+                    </time>
 
                     <div className="min-w-0">
-                      <h3 className="m-0 text-lg font-semibold leading-snug text-brand-text transition-colors group-hover:text-brand-cyan">
+                      <h3 className="m-0 text-xl font-normal leading-snug tracking-[-0.02em] text-brand-text transition-colors group-hover:text-brand-cyan">
                         {post.title}
                       </h3>
-                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-muted">
+                      <p className={cn(BODY, "mt-2 max-w-[600px]")}>
                         {post.description}
                       </p>
                     </div>
 
-                    <span className="font-mono text-[11px] tracking-wide text-brand-muted">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted">
                       {post.topic}
                     </span>
 
-                    <span className="font-mono text-[11px] text-brand-subtle md:text-right">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-brand-subtle md:text-right">
                       {post.readingTimeMinutes} min
                     </span>
                   </Link>
                 </li>
               ))}
             </ul>
-            <div className="border-t border-brand-border" />
           </section>
         ))}
       </div>
     </div>
+  );
+}
+
+function TopicChip({
+  label,
+  count,
+  on,
+  onClick,
+}: {
+  label: string;
+  count: number;
+  on: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={on}
+      className={cn(
+        CHIP,
+        "gap-2 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan",
+        on && CHIP_ACTIVE
+      )}
+    >
+      {label}
+      <span className={on ? "text-brand-cyan" : "text-brand-subtle"}>
+        {count}
+      </span>
+    </button>
   );
 }

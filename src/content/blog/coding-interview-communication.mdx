@@ -1,97 +1,97 @@
 ---
 title: "How to Think Out Loud in a Coding Interview"
-seoTitle: "Coding Interview Communication: Think Out Loud"
-description: "A practical framework for coding interview communication—what to say, when to pause, and how interviewers interpret silence."
+seoTitle: "How to Think Out Loud in a Coding Interview"
+description: "A four-phase script for coding interview communication: what to say while clarifying, planning, coding, and testing, and how interviewers read your silence."
 date: "2026-05-01"
 keyword: "coding interview communication"
 topic: "Coding craft"
 ---
 
-Most candidates fail interviews for two reasons: they cannot explain their thinking, or they explain *everything* without structure. Interviewers are not mind readers. **Coding interview communication** is how you prove you can work on a real team—where ambiguity, trade-offs, and code reviews happen every day.
+**Short answer:** talk in four phases. Clarify the problem before solving it, state a plan in plain English before typing, narrate decisions (not keystrokes) while you code, then trace an example and state complexity out loud. Never go silent for more than about 30 seconds without saying what you are doing.
 
-This guide gives you a repeatable rhythm: clarify, plan, narrate while coding, and close with complexity and tests. Use it on LeetCode, in peer mocks, and in **AI mock interviews** where you can rehearse the same cadence without burning social capital.
+Candidates who get the algorithm right still lose rounds in two ways: they say nothing, or they say everything with no structure. The interviewer cannot see inside your head, and most of what they write down comes from what you say. Good coding interview communication is also the closest thing a 45-minute round has to watching you work on a real team, where ambiguity, trade-offs, and code review happen daily.
 
-## Why communication matters as much as the answer
+The script below works on LeetCode, in peer mocks, and in [AI mock interviews](/blog/ai-mock-interview-2026), where you can rehearse it as often as you like.
 
-Hiring committees rarely debate whether you memorized a trick. They ask:
+## Why communication counts as much as the answer
 
-- Can this person **decompose** a vague problem?
-- Will they **surface assumptions** before writing code?
-- Do they **respond to hints** without defensiveness?
-- Can they **reason about trade-offs** under time pressure?
+When interviewers write up a coding round, the questions they answer look like this:
 
-Your code editor shows syntax. Your voice (or typed explanation in some formats) shows judgment. Strong **coding interview communication** signals seniority even on mid-level problems.
+- Did the candidate break a vague problem into parts?
+- Did they surface assumptions before writing code?
+- Did they take hints without getting defensive?
+- Could they reason about trade-offs with the clock running?
+
+The editor shows your syntax. Your voice shows your judgment. Clear communication on a medium problem often reads as more senior than a silent, perfect solution. [What FAANG interviewers score](/blog/faang-interview-scoring) breaks the rubric down further.
 
 ## The four-phase script
 
 ### 1. Clarify before you solve
 
-Spend 60–120 seconds confirming the problem. You are not stalling—you are de-risking.
+Spend one to two minutes confirming the problem. This is not stalling; it is cheap insurance against solving the wrong thing.
 
-Say things like:
+Questions worth asking:
 
-- "Can the input be empty? What should I return?"
-- "Are elements unique? Can there be duplicates?"
-- "Do we care about index order, or only existence?"
-- "Should I optimize for time, space, or readability?"
+- "Can the input be empty? What should I return then?"
+- "Can there be duplicates?"
+- "Do you want indices or values?"
+- "Should I optimize for time, memory, or readability?"
 
-Write down two or three concrete examples on the whiteboard or in comments. Interviewers mentally check whether you **match their expectations** before you invest ten minutes in the wrong invariant.
+Write two or three small examples in comments, including one awkward case. The interviewer is checking that you match their expectations before you spend ten minutes on the wrong invariant. [How to read a coding interview problem](/blog/how-to-read-coding-interview-problems) has a fuller checklist.
 
 ### 2. State a plan in plain English
 
-Before typing, give a **high-level algorithm** in 3–5 sentences.
+Before typing, describe the algorithm in three to five sentences:
 
-Template:
+1. "First I'll ... because ..."
+2. "That gives me ..."
+3. "The expensive step is ..., so overall it's O(...)."
 
-1. "First I'll … because …"
-2. "That gives me …"
-3. "The bottleneck is … so overall …"
+If you see more than one approach, name them: "Brute force checks every pair in O(n²). A hash map gets it to O(n) at the cost of O(n) memory." This shows you chose an approach rather than grabbing the first one you thought of.
 
-If you know multiple approaches, name them briefly: "Brute force would be …, but we can do better with … because …" This is where **thinking out loud** earns credit—you show you see the landscape, not just one path.
+### 3. Narrate decisions while coding, not keystrokes
 
-### 3. Narrate while coding—lightly
+Alternate between:
 
-While coding, alternate between:
+- **Intent:** "I'm storing seen values in a hash map so each lookup is O(1) on average."
+- **Small decisions:** "I'll use a half-open range here so the bounds don't go off by one."
+- **Quiet typing** for the mechanical parts. Nobody needs to hear you spell out a for loop.
 
-- **Intent**: "I'm tracking seen values in a hash map so lookup is O(1)."
-- **Micro-decisions**: "I'll use inclusive bounds here so I don't off-by-one."
-- **Short silence** when doing mechanical typing—do not read every keystroke.
-
-If you go quiet for more than ~20–30 seconds, drop a one-liner: "Still wiring the loop; one sec." Silence makes interviewers wonder if you are stuck.
+If you have been quiet for 20 to 30 seconds, say one line: "Still wiring up the loop, one second." Unexplained silence makes the interviewer wonder whether you are stuck. If you actually are stuck, the [recovery playbook](/blog/stuck-in-a-coding-interview-recovery) covers what to say.
 
 ### 4. Test and analyze out loud
 
-Walk through your smallest example line by line. Then state **time and space complexity** and mention one realistic optimization or failure mode ("If the array were sorted, we could binary search …").
+Trace your smallest example line by line before you hit run. Then state time and space complexity, and mention one realistic extension or failure mode: "If the array were sorted, two pointers would get space down to O(1)."
 
-## Common mistakes (and fixes)
+## Common mistakes and fixes
 
 | Mistake | Fix |
-|--------|-----|
-| Jumping into code immediately | Force a 30-second plan out loud |
-| Apologizing constantly | Replace "sorry" with "Let me restate …" |
-| Mumbling or trailing off | End sentences; use numbered steps |
-| Ignoring hints | Echo the hint: "So you're suggesting I …" |
-| Over-explaining trivia | Explain *why*, not every keystroke |
+|---------|-----|
+| Starting to code immediately | Force yourself to state a plan for 30 seconds first |
+| Apologizing constantly | Replace "sorry" with "let me restate that" |
+| Trailing off mid-sentence | Finish sentences; number your steps |
+| Ignoring hints | Repeat the hint back: "So you're suggesting I ..." |
+| Explaining trivia | Explain why, not every keystroke |
 
 ## Thinking out loud without rambling
 
-Use **signposting**:
+Signpost the structure:
 
-- "There are two parts: building the structure, then querying it."
-- "I'll handle the edge case first so the main loop stays clean."
+- "There are two parts: building the index, then querying it."
+- "I'll handle the empty case first so the main loop stays clean."
 
-Pause deliberately after each signpost. Interviewers use those pauses to steer you.
+Then pause briefly after each signpost. Those pauses are where the interviewer steers you, and steering is a gift.
 
-## How AI mock interviews help
+## Practicing with a voice interviewer
 
-Platforms like TechInView simulate **time pressure**, **follow-up questions**, and **phase changes** (clarification → approach → coding). That trains **coding interview communication** in a loop: speak, get interrupted, recover, continue. It is closer to reality than silently solving in a tab.
+TechInView's DSA interview runs 45 minutes with a voice interviewer who moves through clarification, approach, coding, testing, and wrap-up, interrupts with follow-ups, and runs your code. Communication is one of the five scored dimensions; [how the AI evaluates](/how-ai-evaluates) shows what it listens for. That loop (speak, get interrupted, recover, continue) is much closer to the real thing than solving silently in a browser tab.
 
-## Checklist before you click "Run"
+## Checklist before you click Run
 
-- [ ] I repeated the problem in my own words.
-- [ ] I stated time/space target before coding.
-- [ ] I verbalized non-trivial data structure choices.
-- [ ] I traced at least one example.
-- [ ] I stated complexity and one extension idea.
+- [ ] I restated the problem in my own words.
+- [ ] I said my target complexity before coding.
+- [ ] I explained every non-obvious data structure choice.
+- [ ] I traced at least one example by hand.
+- [ ] I stated complexity and one possible extension.
 
-Master the script once; reuse it on every problem. Communication is a muscle—reps matter more than talent.
+Learn the script once and reuse it on every problem. It gets easier with reps, so start with something small like [Two Sum](/practice/two-sum) and talk through all four phases even when the answer is obvious.

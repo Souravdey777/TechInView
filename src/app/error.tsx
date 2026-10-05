@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { BTN_PRIMARY, ButtonLink, H1, Kicker, LABEL, LEAD, LINK_ARROW, PAD, READING } from "@/components/marketing/ds";
+import { SUPPORT_EMAIL, createSupportMailto } from "@/lib/legal";
+import { cn } from "@/lib/utils";
 
 type ErrorProps = {
   error: Error & { digest?: string };
@@ -13,26 +17,42 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-brand-deep flex items-center justify-center px-6">
-      <div className="text-center max-w-md">
-        <p className="text-brand-rose text-sm font-semibold uppercase tracking-widest mb-4">
-          Something went wrong
-        </p>
-        <h1 className="text-3xl font-bold text-brand-text mb-4">
-          An unexpected error occurred
-        </h1>
-        {error.message && (
-          <p className="text-brand-muted text-sm mb-8 font-mono bg-brand-card border border-brand-border rounded-lg px-4 py-3 text-left break-words">
-            {error.message}
+    <MarketingShell>
+      <section className={cn("py-[clamp(96px,16vh,180px)]", PAD)}>
+        <div className={READING}>
+          <Kicker>Error</Kicker>
+          <h1 className={H1}>This page failed to load.</h1>
+          <p className={cn(LEAD, "mt-8")}>
+            Try again. If it keeps happening, email {SUPPORT_EMAIL} with what you were doing.
           </p>
-        )}
-        <button
-          onClick={reset}
-          className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-brand-cyan text-brand-deep font-semibold hover:bg-cyan-300 transition-colors"
-        >
-          Try again
-        </button>
-      </div>
-    </div>
+          {error.message ? (
+            <p className="mt-8 break-words border-l border-white/[0.18] pl-4 font-mono text-[13px] leading-relaxed text-brand-muted">
+              {error.message}
+              {error.digest ? <span className="block text-brand-subtle">Ref {error.digest}</span> : null}
+            </p>
+          ) : null}
+          <div className="mt-10 flex flex-wrap gap-3">
+            <button type="button" onClick={reset} className={BTN_PRIMARY}>
+              Try again
+            </button>
+            <ButtonLink href="/" variant="ghost">
+              Back to the home page
+            </ButtonLink>
+          </div>
+          <p className={cn(LABEL, "mt-14 flex flex-wrap items-center gap-x-3 gap-y-2")}>
+            Need help?
+            <a
+              href={createSupportMailto({
+                subject: "TechInView error report",
+                body: error.digest ? `Error ref: ${error.digest}` : undefined,
+              })}
+              className={LINK_ARROW}
+            >
+              {SUPPORT_EMAIL} →
+            </a>
+          </p>
+        </div>
+      </section>
+    </MarketingShell>
   );
 }

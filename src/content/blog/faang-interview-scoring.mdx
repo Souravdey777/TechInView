@@ -1,95 +1,97 @@
 ---
 title: "What FAANG Interviewers Actually Score You On"
 seoTitle: "FAANG Interview Scoring: What Interviewers Grade"
-description: "How big-tech coding rounds are graded—problem solving, code quality, communication, depth, and signals that move a hire decision."
+description: "How big-tech coding rounds are graded: problem solving, code quality, communication, technical depth, and testing, and how the hire decision gets made."
 date: "2026-04-17"
 keyword: "FAANG interview scoring"
 topic: "What gets scored"
 ---
 
-Search **FAANG interview scoring** and you will find anecdotes. Here is a consolidated rubric aligned with how most top-tier companies structure **coding rounds**: multiple dimensions, independent notes, then a calibration meeting. Exact weights differ by level and company, but the *axes* are remarkably stable.
+**Short answer:** most big-tech coding rounds grade you on five things: problem solving, code quality, communication, technical depth (complexity and trade-offs), and testing. Each interviewer writes notes against those areas and gives a recommendation. A panel or committee then compares the notes. Finishing the problem helps, but it is one signal among many.
 
-This is not official policy for any single employer—it is a synthesis of common practice. Use it to self-review recordings, peer mocks, or **AI mock interview** scorecards.
+If you search for FAANG interview scoring you mostly find anecdotes. What follows is a synthesis of common practice across large tech companies, not the official policy of any one employer. Exact rubrics and weights vary by company and level, but the areas being judged are very consistent. Use them to review your own recordings, peer mocks, or [AI mock interview](/blog/ai-mock-interview-2026) scorecards.
 
-## The hidden unit: signal per minute
+## The real unit: evidence per minute
 
-Interviewers have ~45 minutes. They are not checking whether you finished—they are collecting **signals**:
+A coding round is roughly 45 minutes. The interviewer is not just checking whether you finished. They are collecting evidence they can write down:
 
 - Did you drive the problem forward?
 - Did you catch your own mistakes?
-- Could you explain *why* your code works?
+- Could you explain why your code works?
 
-**FAANG interview scoring** is less about "AC on all tests" and more about **judgment under uncertainty**.
+That is why a candidate who finishes silently can score below one who gets 80% of the way while reasoning clearly.
 
-## Dimension 1: Problem solving
+## 1. Problem solving
 
-**What they watch**
+**What they watch for**
 
-- Restating the problem and constraints in your own words.
-- Choosing a reasonable approach before coding; revising when stuck.
-- Handling edge cases (empty input, duplicates, overflow, invalid state).
+- Restating the problem and its constraints in your own words.
+- Choosing a reasonable approach before coding, and revising it when stuck.
+- Edge cases: empty input, duplicates, overflow, invalid state.
 
-**Strong signal:** You propose two approaches, pick one with a clear reason, and pivot quickly if the interviewer steers you.
+**Strong:** you propose two approaches, pick one for a stated reason, and adjust quickly when the interviewer steers.
 
-**Weak signal:** Random syntax tweaks hoping tests pass; ignoring hints.
+**Weak:** random edits hoping the tests pass; ignoring hints.
 
-## Dimension 2: Code quality
+## 2. Code quality
 
-**What they watch**
+**What they watch for**
 
-- Naming, structure, and whether another engineer could maintain the code.
-- Avoiding unnecessary cleverness; using idioms of your language.
-- Deleting dead paths instead of accumulating special cases.
+- Naming and structure another engineer could maintain.
+- Idiomatic use of your language, without needless cleverness.
+- Removing dead paths instead of piling up special cases.
 
-**Strong signal:** Small pure functions, obvious invariants, readable control flow.
+**Strong:** small functions, obvious invariants, readable control flow.
 
-**Weak signal:** Giant monolith functions, magic numbers, copy-paste branches.
+**Weak:** one giant function, magic numbers, copy-pasted branches.
 
-## Dimension 3: Communication
+## 3. Communication
 
-**What they watch**
+**What they watch for**
 
-- Thinking out loud at useful granularity.
-- Summarizing intent before details.
-- Receiving feedback without defensiveness.
+- Thinking out loud at a useful level of detail.
+- Stating intent before details.
+- Taking feedback without getting defensive.
 
-This dimension often breaks ties between two candidates with similar algorithms. **FAANG interview scoring** meetings explicitly discuss "would I want to debug with this person."
+This often separates two candidates with the same algorithm. Interviewers are effectively asking whether they would want to debug a production issue with you. [How to think out loud](/blog/coding-interview-communication) covers the habits that score well here.
 
-## Dimension 4: Technical depth
+## 4. Technical depth
 
-**What they watch**
+**What they watch for**
 
-- Correct time and space complexity with justification.
+- Correct time and space complexity, with a justification.
 - Awareness of alternative structures or algorithms.
-- Understanding *why* a hack works—not just that it passes.
+- Understanding why a trick works, not just that it passes.
 
-**Strong signal:** You explain the bottleneck and a realistic optimization path.
+**Strong:** you name the bottleneck and a realistic way to improve it.
 
-**Weak signal:** Memorized complexity without being able to derive it from the loop structure.
+**Weak:** reciting a complexity you cannot derive from the loops. The [time complexity guide](/blog/time-complexity-cheat-sheet) helps here.
 
-## Dimension 5: Verification and testing
+## 5. Testing and verification
 
-**What they watch**
+**What they watch for**
 
-- You trace an example before running code.
-- You propose tests that target boundaries, not only the happy path.
-- When a test fails, you form a hypothesis instead of thrashing.
+- Tracing an example before running the code.
+- Proposing tests that hit boundaries, not only the happy path.
+- Forming a hypothesis when a test fails, instead of thrashing.
 
-## How decisions actually get made
+## How the decision gets made
 
-Interviewers submit **structured notes** and an overall recommendation (strong hire / hire / leaning / no hire). Then:
+Each interviewer submits written feedback and an overall recommendation, usually on a scale from strong no hire to strong hire. Then the feedback is reviewed together, in a debrief or by a separate hiring committee depending on the company:
 
-- Outliers are challenged: "They bombed complexity but shipped perfect code—what level are we targeting?"
-- **Bar raisers** or equivalent roles push back on inconsistent standards.
+- Outliers get challenged: "Weak on complexity but very clean code. What level are we hiring for?"
+- Some companies have a designated reviewer, such as Amazon's Bar Raiser, whose job is to keep the standard consistent.
 
-Your goal is not perfection. It is **enough positive signal** across dimensions that the panel can defend hiring you.
+You do not need a perfect round. You need enough positive evidence across the five areas that the panel can defend the decision to hire you.
 
 ## Practice that matches the rubric
 
-- Record yourself and score each dimension 1–5.
-- Use **AI mock interviews** that expose a rubric (problem solving, code, communication, technical knowledge, testing) so you are not guessing.
-- After each problem, spend five minutes writing "what I would say differently"—that reflection is where **FAANG interview scoring** feedback becomes durable skill.
+- Record yourself and score each area from 1 to 5.
+- Use mock interviews that show a rubric instead of a single verdict. TechInView's DSA interview scores problem solving, code quality, communication, technical knowledge, and testing separately; [how the AI evaluates](/how-ai-evaluates) shows the weights and what each covers.
+- After every problem, spend five minutes writing what you would say differently. That habit is what turns feedback into skill.
+
+If you know which area is weakest, the [90-day prep plan](/blog/90-day-coding-interview-prep-plan) shows how to schedule practice around it, and [Google vs Amazon vs Meta](/blog/faang-coding-interview-differences) covers how emphasis shifts by company.
 
 ## Takeaway
 
-Companies hire for **how you think**, not whether you memorized one optimal solution. Align your prep with the dimensions above and you will know *why* an interview went well or poorly—instead of relying on vibes alone.
+Big-tech companies hire for how you think, not for whether you memorized one optimal solution. Practice against these five areas and you will know why an interview went well or badly instead of guessing.

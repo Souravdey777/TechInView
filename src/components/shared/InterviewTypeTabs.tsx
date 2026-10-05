@@ -109,7 +109,7 @@ export function InterviewTypeTabs({ children }: InterviewTypTabsProps) {
             <comingSoonTab.icon className="w-7 h-7 text-brand-amber" />
           </div>
           <h3 className="text-lg font-bold text-brand-text mb-2">
-            {comingSoonTab.label} — Coming Soon
+            {comingSoonTab.label} · Coming soon
           </h3>
           <p className="text-sm text-brand-muted max-w-sm mb-4">
             {comingSoonTab.description}

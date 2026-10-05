@@ -22,7 +22,7 @@ type BehavioralInterviewPageProps = {
 
 export default function BehavioralInterviewPage({ params }: BehavioralInterviewPageProps) {
   useEffect(() => {
-    document.title = "Behavioral Interview — TechInView";
+    document.title = "Behavioral Interview · TechInView";
 
     return () => {
       document.title = "TechInView.ai";

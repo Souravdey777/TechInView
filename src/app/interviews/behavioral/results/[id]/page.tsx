@@ -9,7 +9,7 @@ type BehavioralResultsPageProps = {
 
 export default function BehavioralResultsPage({ params }: BehavioralResultsPageProps) {
   useEffect(() => {
-    document.title = "Behavioral Results — TechInView";
+    document.title = "Behavioral Results · TechInView";
 
     return () => {
       document.title = "TechInView.ai";

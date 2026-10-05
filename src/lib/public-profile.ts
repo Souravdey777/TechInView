@@ -65,13 +65,13 @@ export const PUBLIC_PROFILE_LINK_CONFIG: Record<
   linkedin: {
     label: "LinkedIn",
     placeholder: "linkedin.com/in/yourname or yourname",
-    helpText: "Your professional profile or hiring-facing presence.",
+    helpText: "Your work history, for recruiters and hiring managers.",
     buildUrl: (handle) => `https://www.linkedin.com/in/${handle}`,
   },
   peerlist: {
     label: "Peerlist",
     placeholder: "peerlist.io/yourname or yourname",
-    helpText: "Showcase your projects, work, and profile credibility.",
+    helpText: "Projects and work you have shipped.",
     buildUrl: (handle) => `https://peerlist.io/${handle}`,
   },
   devto: {
@@ -93,9 +93,9 @@ export const PUBLIC_PROFILE_LINK_CONFIG: Record<
     buildUrl: (handle) => `https://medium.com/@${handle.replace(/^@/, "")}`,
   },
   twitter: {
-    label: "Twitter",
+    label: "X (Twitter)",
     placeholder: "x.com/yourname or yourname",
-    helpText: "Social proof, writing threads, or public updates.",
+    helpText: "Threads, posts, or public updates.",
     buildUrl: (handle) => `https://x.com/${handle.replace(/^@/, "")}`,
   },
 };

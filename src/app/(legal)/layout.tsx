@@ -1,16 +1,9 @@
-import { MarketingNav } from "@/components/landing/MarketingNav";
-import { MarketingFooter } from "@/components/landing/MarketingFooter";
+import { MarketingShell } from "@/components/marketing/MarketingShell";
 
 export default function LegalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-brand-deep text-brand-text">
-      <MarketingNav />
-      <main className="flex-1">{children}</main>
-      <MarketingFooter signupHref="/login" />
-    </div>
-  );
+  return <MarketingShell>{children}</MarketingShell>;
 }

@@ -1,7 +1,7 @@
 ---
 title: "Stuck in a Coding Interview: A Recovery Playbook"
-seoTitle: "Stuck in a Coding Interview? A Recovery Playbook"
-description: "What to do in the ninety seconds after you freeze: three recovery moves, how to take a hint without losing points, and what interviewers actually deduct for."
+seoTitle: "Stuck in a Coding Interview? How to Recover"
+description: "What to do in the 90 seconds after you freeze in a coding interview: name the kind of stuck, narrate, shrink the problem, and take hints without losing points."
 date: "2026-06-05"
 keyword: "stuck in coding interview"
 topic: "Coding craft"
@@ -12,77 +12,81 @@ tags:
   - interview recovery script
 ---
 
-Everyone gets **stuck in coding interview** rounds. Strong candidates are not the ones who never stall — they are the ones whose stall lasts forty seconds instead of eight minutes, and who narrate their way out of it. The deduction almost never comes from being stuck. It comes from **going silent while stuck**.
+**Short answer:** when you get **stuck in a coding interview**, keep talking. Restate what you know, solve a tiny example by hand, and tell the interviewer the specific thing you are missing. Being stuck rarely costs much on its own. Going silent while stuck does.
 
-## First, name which kind of stuck you are
+Everyone stalls at some point. The candidates who do well are the ones whose stall lasts forty seconds instead of eight minutes, and who talk their way out of it.
 
-The recovery move is different for each, so diagnose before you thrash:
+## First, work out which kind of stuck you are
+
+Each kind needs a different move, so diagnose before you start thrashing:
 
 | Kind | Symptom | The move |
 |---|---|---|
 | No approach | You have read the problem three times and have nothing | Solve a smaller version by hand |
-| Approach won’t scale | You have a brute force and no idea how to improve it | Attack the redundant work |
-| Bug you cannot find | Logic looks right, output is wrong | Trace one input, out loud, on paper |
-| Wrong turn | Ten minutes into an approach that is collapsing | Say so, and cost the retreat |
+| Approach will not scale | You have a brute force and no idea how to improve it | Look for repeated work |
+| Bug you cannot find | The logic looks right, the output is wrong | Trace one input, out loud, step by step |
+| Wrong turn | Ten minutes into an approach that is falling apart | Say so, and say what backing out costs |
 
 ## The ninety-second protocol
 
 When your mind goes blank, do this instead of freezing:
 
-1. **Say the words “let me think about this out loud for a second.”** You have now bought yourself silence that reads as deliberate rather than lost.
-2. **Restate what you know.** Inputs, constraints, the output shape, and what you have already ruled out. Half the time the missing idea falls out of this.
-3. **Shrink the problem.** Solve n = 2 or n = 3 by hand. Concrete examples break abstraction locks better than staring does.
-4. **Say what would unblock you.** “I think I need a way to look up the complement in constant time” invites a hint that costs you almost nothing, because you supplied the direction.
+1. **Say "let me think about this out loud for a second."** The silence that follows now reads as deliberate.
+2. **Restate what you know.** Inputs, constraints, the output shape, and what you have already ruled out. Surprisingly often the missing idea falls out of this step.
+3. **Shrink the problem.** Solve n = 2 or n = 3 by hand. A concrete example breaks a mental block faster than staring at the general case.
+4. **Say what would unblock you.** "I think I need a way to look up the complement in constant time" invites a hint that costs you very little, because you supplied the direction.
 
-That last step is the whole trick. An interviewer who hears a specific blocker gives a specific nudge. An interviewer watching silence has to decide whether you are thinking or drowning — and they will assume the worse of the two.
+That last step does most of the work. An interviewer who hears a specific blocker can give a specific nudge. An interviewer watching silence has to guess whether you are thinking or lost, and most will guess lost.
 
-## Attacking redundant work
+## Finding the repeated work
 
-When the brute force is obvious but the optimisation is not, ask: **what am I recomputing?**
+When the brute force is obvious but the optimisation is not, ask: **what am I computing more than once?**
 
-- Recomputing a lookup → hash map or set
-- Recomputing a sum over a range → prefix sums
-- Recomputing a min or max in a window → deque or heap
-- Recomputing an entire subproblem → memoisation
-- Rescanning after every insert → keep the collection sorted, or use a heap
+- Repeated lookups: use a hash map or set ([Two Sum](/practice/two-sum))
+- Repeated range sums: use prefix sums
+- Repeated min or max over a sliding window: use a monotonic deque or a heap ([Sliding Window Maximum](/practice/sliding-window-maximum))
+- Repeated subproblems: memoise ([Coin Change](/practice/coin-change))
+- Rescanning after every insert: keep the data sorted, or use a heap ([Kth Largest Element](/practice/kth-largest-element))
 
-Almost every “optimal” interview solution is one of those five. Walk the list aloud; it is a search you can perform under stress, and it pairs directly with the [structure decision guide](/blog/data-structure-decision-guide).
+A large share of standard interview optimisations come from that list. Walk through it out loud. It is a search you can still run under stress, and it pairs well with the [data structure decision guide](/blog/data-structure-decision-guide).
 
 ## Taking a hint without losing points
 
-Hints are priced by what you do with them, not by receiving them. Two responses to the same nudge:
+What matters is what you do with a hint, not that you needed one. Two responses to the same nudge:
 
-> “Oh, a hash map. Okay.” — then silently typing.
+> "Oh, a hash map. Okay." Then silent typing.
 
-> “A hash map — so I trade O(n) memory for constant lookup, which drops me from O(n²) to O(n). Let me redo the loop with that.” — then typing.
+> "A hash map, so I trade O(n) memory for constant-time lookup, which takes me from O(n²) to O(n). Let me redo the loop with that." Then typing.
 
-Same hint. The second one recovers most of the signal, because you extended the idea instead of just accepting it. This is the same [thinking-out-loud discipline](/blog/coding-interview-communication) that carries the rest of the round.
+Same hint. The second response wins back most of the credit because you extended the idea instead of just accepting it. It is the same [thinking-out-loud habit](/blog/coding-interview-communication) that carries the rest of the round.
 
 ## What actually costs you
 
-- **Silence longer than about thirty seconds.** The interviewer cannot score what they cannot hear.
-- **Defending a dead approach** after it is clearly failing. Retreating costs two minutes; stubbornness costs the round.
-- **Guess-and-check debugging.** Randomly flipping `<` to `<=` tells the panel you do not have a model of your own code.
-- **Abandoning a working brute force** with eight minutes left because it is not optimal. Shipping something correct beats an elegant half-solution.
+- **Silence longer than about thirty seconds.** The interviewer cannot give credit for reasoning they cannot hear.
+- **Defending a dead approach** after it is clearly failing. Backing out costs two minutes. Stubbornness can cost the round.
+- **Guess-and-check debugging.** Flipping `<` to `<=` at random tells the interviewer you do not have a model of your own code.
+- **Throwing away a working brute force** with eight minutes left because it is not optimal. Something correct beats half of something elegant.
 
-## Rehearse being stuck
+Most rubrics weight problem solving and communication heavily, and both are visible while you are stuck. See [what human interviewers score](/blog/faang-interview-scoring) and [how TechInView's AI evaluates a round](/how-ai-evaluates).
 
-You cannot practise recovery on problems you can already solve. Deliberately pick problems slightly above your level, set a timer, and **require yourself to keep talking** for the full session. Recording it is uncomfortable and unusually effective. This is precisely the failure mode that silent practice never touches — [pressure has to be trained](/blog/coding-interview-pressure-live-coding).
+## Practise being stuck
+
+You cannot practise recovery on problems you can already solve. Pick problems a bit above your level, set a timer, and make yourself keep talking the whole time. Recording yourself is uncomfortable and works well. Silent practice never touches this failure mode, which is why [pressure has to be trained](/blog/coding-interview-pressure-live-coding). A voice mock interview is one way to get that pressure without a friend on call.
 
 ## FAQ
 
 ### How long should I struggle before asking for help?
 
-Two to three minutes of visible, narrated effort. Past that you are burning clock that you need for implementation.
+Two to three minutes of visible, narrated effort. Beyond that you are spending time you need for implementation.
 
 ### Does asking for a hint mean I failed?
 
-No. Interviewers expect to collaborate. Unprompted silence and unrecoverable stubbornness are what sink candidates.
+No. Interviewers expect some back and forth. Long silence and refusing to change course are what sink candidates.
 
-### What if I finish nothing?
+### What if I do not finish?
 
-A clearly explained approach with partial code still scores on communication and problem solving. State your remaining plan before time runs out.
+A clearly explained approach with partial code still earns credit for communication and problem solving. Before time runs out, say what the remaining steps would be.
 
 ---
 
-**Summary:** Being **stuck in coding interview** rounds is normal; going quiet is what costs you. Diagnose the kind of stuck, narrate, shrink the problem, name your blocker, and extend any hint you are given.
+**Summary:** getting stuck in a coding interview is normal; going quiet is what costs you. Work out which kind of stuck you are, narrate, shrink the problem, name your blocker, and build on any hint you get.

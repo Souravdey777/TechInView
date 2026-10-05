@@ -1018,7 +1018,7 @@ function InterviewSetupInner() {
               <p className="text-sm font-semibold text-brand-text">5-Minute Audio Preview</p>
               <p className="text-xs text-brand-muted mt-1">
                 Your preview includes a {FREE_TRIAL_DURATION_MINUTES}-minute voice session with Tia, an easy random problem, and a basic score summary.
-                Buy an interview pack to unlock company-specific personas, full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, specific problem selection, and detailed AI feedback.
+                Buy an interview pack for company-specific personas, full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, specific problem selection, and detailed AI feedback.
               </p>
             </div>
           </div>
@@ -1334,7 +1334,7 @@ function InterviewSetupInner() {
 
             {isPreviewSession && (
               <p className="mt-3 text-xs text-brand-amber">
-                Preview sessions are limited to Tia. Upgrade to unlock company-specific interviewer personas.
+                Preview sessions are limited to Tia. Buy a pack to choose a company-specific interviewer.
               </p>
             )}
           </SetupRack>
@@ -1384,13 +1384,13 @@ function InterviewSetupInner() {
               {isSpecificSelected && (
                 <p className="mt-3 text-xs text-brand-amber">
                   Difficulty is locked to {selectedProblem?.difficulty} and category to{" "}
-                  {selectedProblem?.category} — determined by the selected problem.
+                  {selectedProblem?.category} to match the selected problem.
                 </p>
               )}
 
               {isPreviewSession && !isSpecificSelected && (
                 <p className="mt-3 text-xs text-brand-amber">
-                  Audio preview is limited to easy problems. Buy a pack to unlock medium and hard.
+                  Audio preview is limited to easy problems. Buy a pack for medium and hard problems.
                 </p>
               )}
 
@@ -1631,7 +1631,7 @@ function InterviewSetupInner() {
                 >
                   {isPreviewSession
                     ? `Audio preview sessions are capped at ${FREE_TRIAL_DURATION_MINUTES} minutes. Upgrade for full ${FULL_INTERVIEW_DURATION_MINUTES}-minute interviews.`
-                    : `Each interview credit unlocks one full ${FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.`}
+                    : `Each interview credit covers one full ${FULL_INTERVIEW_DURATION_MINUTES}-minute mock interview.`}
                 </p>
               )}
 
@@ -1669,7 +1669,7 @@ function InterviewSetupInner() {
                   ) : isAiModeLocked ? (
                     <Button asChild size="lg" className="w-full gap-2 text-base font-semibold">
                       <Link href="/settings">
-                        Unlock AI Interview
+                        Get AI Interviews
                         <ChevronRight className="h-5 w-5" />
                       </Link>
                     </Button>
@@ -1717,7 +1717,7 @@ function InterviewSetupInner() {
                   <p className="text-center text-xs text-brand-muted">
                     {isPracticeMode
                       ? "Practice Mode saves your progress as you code so you can resume later."
-                      : <>By starting, you agree to live microphone processing by our voice provider. TechInView stores transcripts, code, timing, scores, and results—not raw microphone audio. See our <Link href="/privacy" className="text-brand-cyan hover:underline">Privacy Policy</Link>.</>}
+                      : <>By starting, you agree to live microphone processing by our voice provider. TechInView stores transcripts, code, timing, scores, and results, but not raw microphone audio. See our <Link href="/privacy" className="text-brand-cyan hover:underline">Privacy Policy</Link>.</>}
                   </p>
                 </div>
               ) : (

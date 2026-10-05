@@ -318,7 +318,7 @@ function CategoryCard({
             )}
           >
             {score === 0 ? (
-              "—"
+              "–"
             ) : (
               <>
                 {score}

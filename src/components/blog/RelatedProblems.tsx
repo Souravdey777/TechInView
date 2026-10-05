@@ -4,53 +4,43 @@ import { DIFFICULTY_CONFIG } from "@/lib/constants";
 import type { DifficultyLevel } from "@/lib/constants";
 import { getRelatedProblems } from "@/lib/db/queries";
 import { getCategoriesForKeyword } from "@/lib/blog-problem-mapping";
-import { ChevronRight } from "lucide-react";
-
-function DifficultyBadge({ difficulty }: { difficulty: DifficultyLevel }) {
-  const cfg = DIFFICULTY_CONFIG[difficulty];
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold",
-        cfg.bgColor,
-        cfg.color
-      )}
-    >
-      {cfg.label}
-    </span>
-  );
-}
+import { CELL, GRID, LABEL } from "@/components/marketing/ds";
 
 export async function RelatedProblems({ keyword }: { keyword: string }) {
   const categories = getCategoriesForKeyword(keyword);
   if (categories.length === 0) return null;
 
-  const problems = await getRelatedProblems(categories, 4);
+  // Optional widget: a DB failure should not take the whole post down.
+  const problems = await getRelatedProblems(categories, 4).catch(() => []);
   if (problems.length === 0) return null;
 
   return (
-    <aside className="mt-14 pt-10 border-t border-brand-border">
-      <h2 className="text-sm font-semibold text-brand-muted uppercase tracking-wide mb-4">
+    <aside className="mt-16">
+      <h2 className="mb-5 font-mono text-xs uppercase tracking-[0.14em] text-brand-subtle">
         Practice related problems
       </h2>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none p-0 m-0">
+      <ul className={cn(GRID, "m-0 list-none grid-cols-1 p-0 sm:grid-cols-2")}>
         {problems.map((p) => (
-          <li key={p.slug}>
+          <li key={p.slug} className={cn(CELL, "min-w-0")}>
             <Link
               href={`/practice/${p.slug}`}
-              className="group flex items-center justify-between gap-3 rounded-xl border border-brand-border bg-brand-card/60 p-4 transition-all hover:border-brand-cyan/30"
+              className="group flex h-full items-start justify-between gap-4 p-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan"
             >
               <div className="min-w-0">
-                <p className="text-sm font-medium text-brand-text group-hover:text-brand-cyan transition-colors truncate">
+                <p className={LABEL}>
+                  {DIFFICULTY_CONFIG[p.difficulty as DifficultyLevel]?.label ??
+                    p.difficulty}
+                </p>
+                <p className="mt-2 truncate text-[15px] text-brand-text transition-colors group-hover:text-brand-cyan">
                   {p.title}
                 </p>
-                <div className="mt-1.5">
-                  <DifficultyBadge
-                    difficulty={p.difficulty as DifficultyLevel}
-                  />
-                </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-brand-muted shrink-0 group-hover:text-brand-cyan transition-colors" />
+              <span
+                aria-hidden
+                className="font-mono text-brand-subtle transition-colors group-hover:text-brand-cyan"
+              >
+                →
+              </span>
             </Link>
           </li>
         ))}

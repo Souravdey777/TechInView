@@ -1,7 +1,7 @@
 ---
 title: "Turn a Job Description Into an Interview Plan"
-seoTitle: "Job Description Interview Prep: Build Your Loop"
-description: "Read a JD like an interviewer: extract the likely loop, the bar, and the questions you will face—then build a two-week plan that studies only that."
+seoTitle: "Job Description Interview Prep: Map the Loop"
+description: "Read a job description the way the hiring manager wrote it: map verbs to rounds and nouns to questions, confirm the loop, then plan two weeks around it."
 date: "2026-08-28"
 keyword: "job description interview prep"
 topic: "Prep planning"
@@ -12,65 +12,69 @@ tags:
   - interview loop research
 ---
 
-Generic preparation is why strong engineers walk into loops they were never going to pass. **Job description interview prep** is the opposite habit: read the posting as a specification of what will be tested, then spend your two weeks on that and nothing else. A JD is written by the hiring manager who will sit on your panel — it leaks more than people notice.
+**Short answer:** for **job description interview prep**, treat the posting as a rough spec of the loop. The verbs ("design", "own", "mentor") tell you which rounds to expect. The technologies and domain words tell you what gets asked inside those rounds. Confirm the round list with the recruiter, then spend your prep time in proportion to those rounds.
+
+Generic prep is how strong engineers end up studying for an interview they are not going to get. The hiring manager who wrote the posting often sits on the panel, and the text gives away more than most candidates notice.
 
 ## What a JD actually tells you
 
 | Phrase in the JD | What it usually means for the loop |
 |---|---|
-| “Design and build systems at scale” | A design round with real depth, not a warm-up |
-| “Own services end to end” | Operational questions: on-call, rollout, failure modes |
-| “Strong CS fundamentals” | A genuine algorithms round, not a formality |
-| “Partner closely with product” | A stakeholder or prioritisation round |
-| Named stack, repeatedly | A [stack-depth Q&A round](/blog/technical-qa-interview-round-prep) on exactly those tools |
-| “Mentor and grow engineers” | Behavioural questions about feedback and scope |
-| Domain words: payments, latency, ML | Domain questions where hand-waving is visible |
+| "Design and build systems at scale" | A design round with real depth, not a warm-up |
+| "Own services end to end" | Operational questions: on-call, rollouts, failure modes |
+| "Strong CS fundamentals" | A genuine algorithms round, not a formality |
+| "Partner closely with product" | A stakeholder or prioritisation conversation |
+| A named stack, repeated | A [stack-depth Q&A round](/blog/technical-qa-interview-round-prep) on exactly those tools |
+| "Mentor and grow engineers" | Behavioural questions about feedback and scope |
+| Domain words: payments, latency, ML | Domain questions where hand-waving shows |
 
-Two passes are enough. First pass: highlight every **verb** — design, own, migrate, mentor, debug. Verbs map to rounds. Second pass: highlight every **noun that is a technology or a domain**. Those map to the questions inside those rounds.
+Two passes are enough. On the first, highlight every **verb**: design, own, migrate, mentor, debug. Verbs map to rounds. On the second, highlight every **noun that is a technology or a domain**. Those map to the questions inside the rounds.
 
 ## Read the seniority bar, not the title
 
-Titles are inconsistent across companies; the responsibilities are not. “Contributes to” means you will be asked to execute. “Sets direction for” means you will be asked to justify a direction you set and its consequences. If the JD lists ambiguity or cross-team influence, expect at least one question where the correct answer is a trade-off rather than a solution — the same reasoning the [FAANG rubrics](/blog/faang-interview-scoring) reward.
+Titles vary wildly between companies. Responsibilities are more honest. "Contributes to" means you will be asked to execute. "Sets direction for" means you will be asked to defend a direction you chose and live with what followed. If the posting mentions ambiguity or cross-team influence, expect at least one question where the right answer is a trade-off rather than a solution. That is the same reasoning the [FAANG scoring rubrics](/blog/faang-interview-scoring) reward.
 
 ## Verify before you commit two weeks
 
-The JD is a hypothesis. Cheap ways to confirm it:
+Your reading of the JD is a guess. Cheap ways to check it:
 
-- **Ask the recruiter for the loop structure.** Most will tell you the round types and lengths outright. This one email is the highest-leverage thing in your prep.
-- **Read the engineering blog.** It tells you the real stack and the problems they are proud of solving.
-- **Check the team’s recent hires on LinkedIn.** Their backgrounds reveal the bar better than the posting does.
-- **Search for recent candidate reports**, but discount anything older than a year — loops change, and [company differences are narrower than folklore suggests](/blog/faang-coding-interview-differences).
+- **Ask the recruiter for the loop structure.** Most will tell you the round types and lengths if you ask directly. This one email does more for your prep than anything else on this list.
+- **Read the engineering blog.** It shows the real stack and the problems the team is proud of solving.
+- **Look at the backgrounds of recent hires on the team.** It is a rough signal of who they bring in, not a rule.
+- **Read recent candidate reports**, and discount anything more than a year old. Loops change, and [company differences are smaller than the folklore](/blog/faang-coding-interview-differences).
+
+TechInView's setup flow can also generate a targeted loop from a company, role and pasted JD, which is a quick way to get a first draft of the round list. Treat it the same way: a draft you confirm with the recruiter.
 
 ## A two-week plan skeleton
 
-Once you know the loop, allocate by round weight rather than by comfort:
+Once you know the loop, allocate hours by round weight, not by what feels comfortable:
 
-- **Days 1–2.** Map the loop. Write the rounds down and score your own readiness for each out of five. The lowest two get the most hours.
-- **Days 3–7.** Depth on the weakest round. If it is coding, drill patterns from the JD’s domain — payments implies precision and idempotency, ML infra implies data volume and streaming.
-- **Days 8–11.** Rehearse verbally. One mock per round type, out loud, timed. Reading notes is not rehearsal.
-- **Days 12–13.** Stories and specifics. Two per behavioural family, with numbers you can quote.
-- **Day 14.** Light review, sleep, and prepare your own questions for them.
+- **Days 1 to 2.** Write the rounds down and rate your readiness for each out of five. The lowest two get the most hours.
+- **Days 3 to 7.** Depth on the weakest round. If it is coding, pick patterns that match the domain: payments work leans on precision and idempotency, ML infra leans on data volume and streaming. The [practice problem set](/practice) is enough to drill the core patterns.
+- **Days 8 to 11.** Rehearse out loud. One timed mock per round type. Re-reading notes is not rehearsal.
+- **Days 12 to 13.** Stories and specifics. Two per behavioural theme, with numbers you can quote. The [STAR guide](/blog/behavioral-interview-software-engineer-star) covers the structure.
+- **Day 14.** Light review, sleep, and a short list of your own questions for them.
 
-Notice what is absent: grinding a hundred extra problems in a category the JD never mentions. Coverage is comforting and expensive. If your loop has one algorithms round and three conversational ones, your hours should follow that ratio — a discipline the [90-day plan](/blog/90-day-coding-interview-prep-plan) applies over a longer horizon.
+What is missing on purpose: a hundred extra problems in a category the JD never mentions. Broad coverage feels safe and costs a lot of hours. If the loop has one algorithms round and three conversational ones, your time should roughly follow that ratio. The [90-day plan](/blog/90-day-coding-interview-prep-plan) applies the same rule over a longer window.
 
-## When the JD is useless
+## When the JD tells you nothing
 
-Some postings are boilerplate copied across twelve openings. When the text tells you nothing, fall back to the company’s shape: early-stage startups test breadth and shipping speed; large product companies test algorithms and design in separate rounds; infrastructure teams test failure modes. Then ask the recruiter, because you now have a specific question rather than “what should I expect?”
+Some postings are boilerplate copied across a dozen openings. When the text is empty, fall back on the company's shape. Early-stage startups tend to test breadth and how fast you ship. Large product companies usually split algorithms and design into separate rounds. Infrastructure teams push on failure modes. Then email the recruiter, because now you have a specific question instead of "what should I expect?"
 
 ## FAQ
 
-### Should I mirror the JD’s keywords in my answers?
+### Should I mirror the JD's keywords in my answers?
 
-Use its vocabulary where it is genuinely yours. Do not adopt terms you cannot defend — the [stack-depth round](/blog/technical-qa-interview-round-prep) will find them.
+Use its vocabulary where it is genuinely yours. Do not adopt terms you cannot defend, because the [stack-depth round](/blog/technical-qa-interview-round-prep) will find them.
 
 ### What if the JD asks for a technology I have never used?
 
-Apply anyway if the fundamentals overlap, and be direct in the round: what you have used that is analogous, and what you would need a week to learn.
+Apply anyway if the fundamentals overlap. In the round, be direct: say what you have used that is similar, and what you would need a week to learn.
 
 ### How early should I do this?
 
-Before the first call. The recruiter screen is also the cheapest moment to ask about the loop.
+Before the first call. The recruiter screen is the cheapest moment to ask about the loop.
 
 ---
 
-**Summary:** **Job description interview prep** means turning verbs into rounds and nouns into questions, verifying the loop with the recruiter, then allocating your two weeks by round weight instead of by habit.
+**Summary:** job description interview prep means turning verbs into rounds and nouns into questions, confirming the loop with the recruiter, and spending your two weeks by round weight instead of by habit.
