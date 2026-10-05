@@ -204,7 +204,7 @@ function buildDimensionsFootnote(dimensions: readonly DimensionAverage[]) {
   }
 
   if (below.length === 1) {
-    return `${weakest.label} is the only dimension below the hire line, at ${weakest.average}. One dimension is the cheapest score to buy — make it the thing you narrate out loud in your next round.`;
+    return `${weakest.label} is the only dimension below the hire line, at ${weakest.average}. One dimension is the cheapest score to buy. Make it the thing you narrate out loud in your next round.`;
   }
 
   return `${below.length} dimensions sit below the hire line of ${HIRE_LINE}. Start with ${weakest.label} at ${weakest.average}; the lowest one drags the weighted score hardest.`;
@@ -312,7 +312,7 @@ export function buildDashboardSummary({
     },
     {
       label: "Average score",
-      value: overallAverage === null ? "—" : String(overallAverage),
+      value: overallAverage === null ? "–" : String(overallAverage),
       delta:
         delta === null || delta === 0
           ? undefined

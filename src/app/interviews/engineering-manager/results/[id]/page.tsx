@@ -11,7 +11,7 @@ export default function EngineeringManagerResultsPage({
   params,
 }: EngineeringManagerResultsPageProps) {
   useEffect(() => {
-    document.title = "Engineering Manager Results — TechInView";
+    document.title = "Engineering Manager Results · TechInView";
 
     return () => {
       document.title = "TechInView.ai";

@@ -32,7 +32,7 @@ function testsText(problem: BankProblem) {
     return attempt.isSolved ? "Solved" : "Code saved";
   }
 
-  return problem.testsTotal ? `${problem.testsTotal} tests` : "—";
+  return problem.testsTotal ? `${problem.testsTotal} tests` : "–";
 }
 
 /**

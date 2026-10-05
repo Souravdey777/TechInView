@@ -213,7 +213,7 @@ export function VoicePanel({
           </div>
           {!micSupported ? (
             <span className="text-[10px] text-brand-muted">
-              Mic not supported — use text input below
+              Mic not supported. Use text input below.
             </span>
           ) : (
             <span className="mt-0.5 text-[10px] text-brand-muted">

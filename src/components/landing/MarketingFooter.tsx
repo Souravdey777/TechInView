@@ -1,248 +1,88 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  LifeBuoy,
-  Mail,
-  Mic,
-  Sparkles,
-  Ticket,
-  type LucideIcon,
-} from "lucide-react";
-import { BrandLogo } from "@/components/shared/BrandLogo";
+import { Wordmark } from "@/components/landing/MarketingNav";
+import { BODY, BTN_GHOST, BTN_PRIMARY, BTN_SM, CONTAINER, FOCUS, LABEL, PAD } from "@/components/marketing/ds";
 import { LEGAL_LINKS, SUPPORT_EMAIL, createSupportMailto } from "@/lib/legal";
+import { cn } from "@/lib/utils";
 
 type MarketingFooterProps = {
-  signupHref: string;
+  signupHref?: string;
 };
 
-const productLinks = [
-  { href: "/#features", label: "Features" },
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
-] as const;
+type FooterLink = { href: string; label: string };
 
-const resourceLinks = [
-  { href: "/practice", label: "Practice Problems" },
-  { href: "/how-ai-evaluates", label: "How TechInView Evaluates You" },
-  { href: "/blog", label: "Blog" },
-] as const;
+const COLUMNS: { heading: string; links: readonly FooterLink[] }[] = [
+  {
+    heading: "Product",
+    links: [
+      { href: "/#features", label: "Features" },
+      { href: "/#how-it-works", label: "How it works" },
+      { href: "/#interviewers", label: "Interviewers" },
+      { href: "/#pricing", label: "Pricing" },
+      { href: "/#faq", label: "FAQ" },
+    ],
+  },
+  {
+    heading: "Resources",
+    links: [
+      { href: "/practice", label: "DSA practice problems" },
+      { href: "/how-ai-evaluates", label: "How AI scoring works" },
+      { href: "/blog", label: "Blog" },
+    ],
+  },
+  { heading: "Legal & support", links: LEGAL_LINKS },
+];
 
-type FooterSignal = {
-  icon: LucideIcon;
-  label: string;
-};
+const LINK = cn("text-sm text-brand-muted transition-colors hover:text-brand-cyan", FOCUS);
 
-const platformSignals: readonly FooterSignal[] = [
-  { icon: Mic, label: "Real-time voice interviews" },
-  { icon: Sparkles, label: "Five-dimension feedback" },
-  { icon: Ticket, label: "One-time interview packs" },
-] as const;
-
-export function MarketingFooter({ signupHref }: MarketingFooterProps) {
+export function MarketingFooter({ signupHref = "/signup" }: MarketingFooterProps) {
   const year = new Date().getFullYear();
-  const supportHref = createSupportMailto({
-    subject: "TechInView support request",
-  });
+  const supportHref = createSupportMailto({ subject: "TechInView support request" });
 
   return (
-    <footer className="relative overflow-hidden border-t border-brand-border bg-brand-deep">
-      <div
-        className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-[0.12]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/35 to-transparent"
-        aria-hidden
-      />
-      <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:px-6 sm:pb-12 sm:pt-16 lg:pb-14 lg:pt-20">
-        <div className="rounded-3xl border border-brand-border bg-brand-card shadow-2xl shadow-brand-deep/40">
-          <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)] lg:p-10">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-cyan">
-                Practice With Pressure
-              </p>
-              <Link
-                href="/"
-                className="mt-4 inline-flex"
-              >
-                <BrandLogo size="md" wordmarkClassName="text-2xl font-bold" />
+    <footer aria-label="Site footer" className="border-t border-white/[0.08] bg-brand-deep">
+      <div className={cn(CONTAINER, PAD)}>
+        <div className="grid gap-14 py-16 sm:py-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          <div>
+            <Link href="/" className={cn("inline-flex", FOCUS)} aria-label="TechInView home">
+              <Wordmark />
+            </Link>
+            <p className={cn(BODY, "mt-6 max-w-[40ch]")}>
+              Voice mock interviews for coding, Technical Q&amp;A, Behavioral and Engineering Manager rounds, with a
+              scorecard after each one.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href={signupHref} className={cn(BTN_PRIMARY, BTN_SM)}>
+                Practice free <span className="font-mono">→</span>
               </Link>
-              <h2 className="mt-5 max-w-2xl text-2xl font-semibold leading-tight text-brand-text sm:text-3xl">
-                The closest thing to a live coding round before the real one.
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-brand-muted sm:text-base">
-                Start with free DSA practice, then switch into voice-based mock
-                interviews when you want the full loop: communication, coding,
-                testing, and a sharper post-round debrief.
-              </p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <Link
-                  href={signupHref}
-                  className="group inline-flex items-center gap-2 rounded-xl bg-brand-cyan px-4 py-2.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
-                >
-                  Practice free
-                  <ArrowRight
-                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-                    aria-hidden
-                  />
-                </Link>
-                <Link
-                  href="/practice"
-                  className="inline-flex items-center gap-2 rounded-xl border border-brand-border bg-brand-card/60 px-4 py-2.5 text-sm font-medium text-brand-text transition-colors hover:border-brand-cyan/30 hover:bg-brand-card"
-                >
-                  <BookOpen className="h-4 w-4 text-brand-cyan" aria-hidden />
-                  Browse practice problems
-                </Link>
-              </div>
-              <div className="mt-7 flex flex-wrap gap-3">
-                {platformSignals.map(({ icon: Icon, label }) => (
-                  <div
-                    key={label}
-                    className="inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-surface/70 px-3.5 py-2 text-xs text-brand-muted"
-                  >
-                    <Icon className="h-3.5 w-3.5 text-brand-cyan" aria-hidden />
-                    {label}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-              <div className="rounded-2xl border border-brand-border bg-brand-card/70 p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  Need Help?
-                </p>
-                <h3 className="mt-3 text-lg font-semibold text-brand-text">
-                  Support for billing, credits, and access issues
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-                  Questions before buying, missing credits after payment, or
-                  trouble logging in? Reach us directly by email.
-                </p>
-                <a
-                  href={supportHref}
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
-                >
-                  <Mail className="h-4 w-4" aria-hidden />
-                  {SUPPORT_EMAIL}
-                </a>
-                <Link
-                  href="/contact"
-                  className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-brand-cyan transition-colors hover:text-brand-cyan/80"
-                >
-                  <LifeBuoy className="h-4 w-4" aria-hidden />
-                  Open support page
-                </Link>
-              </div>
-
-              <div className="rounded-2xl border border-brand-border bg-brand-surface/60 p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-muted">
-                  Before You Start
-                </p>
-                <h3 className="mt-3 text-lg font-semibold text-brand-text">
-                  Understand the scoring bar first
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-                  See how TechInView evaluates problem solving, code quality,
-                  communication, technical depth, and testing before you jump
-                  into a full round.
-                </p>
-                <Link
-                  href="/how-ai-evaluates"
-                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-cyan transition-colors hover:text-brand-cyan/80"
-                >
-                  Review the rubric
-                  <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-                </Link>
-              </div>
+              <Link href="/practice" className={cn(BTN_GHOST, BTN_SM)}>
+                Browse practice problems
+              </Link>
             </div>
           </div>
+
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-3">
+            {COLUMNS.map((column) => (
+              <div key={column.heading}>
+                <h2 className={cn(LABEL, "mb-5 border-b border-white/[0.08] pb-3")}>{column.heading}</h2>
+                <ul className="flex flex-col gap-3">
+                  {column.links.map((item) => (
+                    <li key={item.href}>
+                      <Link href={item.href} className={LINK}>
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
 
-        <div className="mt-10 grid gap-8 border-t border-brand-border/80 pt-8 md:grid-cols-[minmax(0,1.15fr)_repeat(3,minmax(0,0.8fr))] md:gap-10">
-          <div className="max-w-sm">
-            <p className="text-sm font-semibold text-brand-text">
-              Built for engineers preparing for technical interviews.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-brand-muted">
-              Free practice stays open. Paid rounds are available as one-time
-              packs when you want live voice pressure and score-driven review.
-            </p>
-          </div>
-
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-brand-cyan">
-              Product
-            </p>
-            <ul className="mt-4 flex flex-col gap-3">
-              {productLinks.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-brand-cyan">
-              Resources
-            </p>
-            <ul className="mt-4 flex flex-col gap-3">
-              {resourceLinks.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-brand-cyan">
-              Legal & Support
-            </p>
-            <ul className="mt-4 flex flex-col gap-3">
-              {LEGAL_LINKS.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <a
-                  href={supportHref}
-                  className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                >
-                  {SUPPORT_EMAIL}
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-brand-border/80 pt-6 sm:flex-row sm:items-start">
-          <p className="text-center text-xs text-brand-muted sm:text-left">
-            &copy; {year} TechInView. All rights reserved.
-          </p>
-          <p className="text-center text-[11px] text-brand-muted/80 sm:text-right">
-            Voice-powered interview prep with public legal pages and direct
-            founder-stage support.
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/[0.08] py-8 font-mono text-xs uppercase tracking-[0.08em] text-brand-subtle">
+          <span>© {year} TechInView</span>
+          <a href={supportHref} className={cn("normal-case tracking-normal text-brand-muted transition-colors hover:text-brand-cyan", FOCUS)}>
+            {SUPPORT_EMAIL}
+          </a>
         </div>
       </div>
     </footer>

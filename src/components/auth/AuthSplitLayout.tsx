@@ -1,28 +1,31 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { VoiceVisualizer } from "@/components/interview/VoiceVisualizer";
+import { CELL, GRID, H3, Kicker, LABEL, LEAD } from "@/components/marketing/ds";
 import { INTERVIEWER_PERSONAS } from "@/lib/interviewer-personas";
-import { FULL_INTERVIEW_DURATION_MINUTES } from "@/lib/constants";
+import { FREE_TRIAL_DURATION_MINUTES, FULL_INTERVIEW_DURATION_MINUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-/**
- * Number of DSA problems shipped in the catalog.
- * Verified against the `.json` file count in `src/data/problems`.
- */
-const DSA_PROBLEM_COUNT = 70;
-
+// Only stats derived from code constants, so they cannot drift from the product.
 const PANEL_STATS: ReadonlyArray<{ value: string; label: string }> = [
-  { value: String(DSA_PROBLEM_COUNT), label: "DSA problems" },
   { value: String(INTERVIEWER_PERSONAS.length), label: "Interviewers" },
   { value: `${FULL_INTERVIEW_DURATION_MINUTES}m`, label: "Full round" },
+  { value: `${FREE_TRIAL_DURATION_MINUTES}m`, label: "Free preview" },
 ];
 
+/** Inline cyan text link for auth footers and legal lines. */
+export const AUTH_LINK =
+  "rounded-sm text-brand-cyan transition-colors hover:text-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep";
+
 type AuthSplitLayoutProps = {
-  /** Small mono eyebrow above the heading. */
+  /** Cyan bracketed kicker above the brand panel headline. */
+  kicker: string;
+  /** Small mono eyebrow above the form heading. */
   eyebrow: string;
-  /** Large tight-tracked heading for the form column. */
+  /** The page's one h1, in the form column. */
   heading: string;
   /** Headline for the brand panel. */
   panelHeadline: string;
@@ -35,11 +38,12 @@ type AuthSplitLayoutProps = {
   /** Link across to the opposite auth page. */
   footer: ReactNode;
   /** Small reassurance line pinned below a hairline. */
-  reassurance: string;
+  reassurance: ReactNode;
   className?: string;
 };
 
 export function AuthSplitLayout({
+  kicker,
   eyebrow,
   heading,
   panelHeadline,
@@ -51,85 +55,63 @@ export function AuthSplitLayout({
   className,
 }: AuthSplitLayoutProps) {
   return (
-    <div
-      className={cn(
-        "flex min-h-screen w-full bg-brand-deep lg:grid lg:grid-cols-2",
-        className
-      )}
-    >
-      {/* ── Brand panel (desktop only) ── */}
-      <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-brand-border bg-brand-surface px-14 py-12 lg:flex">
+    <div className={cn("flex min-h-screen w-full lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]", className)}>
+      {/* Brand panel (desktop only) */}
+      <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-white/[0.08] px-[clamp(32px,4vw,64px)] py-12 lg:flex">
         <div
-          className="pointer-events-none absolute left-1/2 top-[16%] h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-brand-cyan/[0.11] blur-3xl"
-          aria-hidden="true"
+          aria-hidden
+          className="pointer-events-none absolute -right-[20%] -top-[10%] h-[90%] w-[90%] rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.14)_0%,rgb(var(--brand-cyan)/0.04)_35%,transparent_65%)]"
         />
-        <div
-          className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-40"
-          aria-hidden="true"
-        />
+
+        <Link href="/" className="relative w-fit rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan">
+          <BrandLogo size="sm" />
+        </Link>
 
         <div className="relative">
-          <BrandLogo size="sm" />
-        </div>
-
-        <div className="relative flex flex-col items-center gap-8">
-          {/* VoiceVisualizer is a fixed 76px orb whose glow overflows its box.
-              Scale on this wrapper only — never inside the component. */}
-          <div className="flex h-[260px] w-[260px] shrink-0 items-center justify-center">
-            <div className="scale-[1.9]">
-              <VoiceVisualizer state="listening" />
+          {/* VoiceVisualizer's orb is 76px; scale the wrapper, never the component. */}
+          <div aria-hidden className="mb-14 flex h-[200px] w-[200px] items-center justify-center">
+            <div className="scale-[2.2] brightness-125">
+              <VoiceVisualizer state="speaking" className="h-[76px] w-[76px]" />
             </div>
           </div>
-
-          <div className="max-w-[26rem] text-center">
-            <p className="font-heading text-[1.875rem] font-bold leading-[1.18] tracking-[-0.03em] text-brand-text">
-              {panelHeadline}
-            </p>
-            <p className="mt-4 text-sm leading-relaxed text-brand-muted">
-              {panelSupporting}
-            </p>
-          </div>
+          <Kicker>{kicker}</Kicker>
+          <p className="max-w-[14ch] text-balance text-[clamp(36px,4vw,60px)] font-normal leading-[1.0] tracking-[-0.04em]">
+            {panelHeadline}
+          </p>
+          <p className={cn(LEAD, "mt-6 max-w-[440px]")}>{panelSupporting}</p>
         </div>
 
-        <dl className="relative flex gap-10">
+        <dl className={cn(GRID, "relative grid-cols-3")}>
           {PANEL_STATS.map((stat) => (
-            <div key={stat.label} className="flex flex-col-reverse gap-1.5">
-              <dt className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-brand-subtle">
-                {stat.label}
-              </dt>
-              <dd className="font-heading text-[1.375rem] font-bold tracking-[-0.03em] text-brand-text">
-                {stat.value}
-              </dd>
+            <div key={stat.label} className={cn(CELL, "flex flex-col-reverse gap-2 px-5 py-4")}>
+              <dt className={LABEL}>{stat.label}</dt>
+              <dd className="font-mono text-2xl tracking-[-0.02em] text-brand-text">{stat.value}</dd>
             </div>
           ))}
         </dl>
       </aside>
 
-      {/* ── Form column ── */}
-      <main className="flex w-full flex-col justify-center px-6 py-12 sm:px-10 lg:px-20 xl:px-24">
-        <div className="mx-auto w-full max-w-md">
-          <div className="mb-10 lg:hidden">
+      {/* Form column */}
+      <div className="flex w-full flex-col justify-center px-5 py-12 sm:px-10 lg:px-[clamp(40px,6vw,96px)]">
+        <div className="mx-auto w-full max-w-[420px]">
+          <Link href="/" className="mb-12 block w-fit rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan lg:hidden">
             <BrandLogo size="sm" />
-          </div>
+          </Link>
 
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-subtle">
-            {eyebrow}
-          </p>
-          <h1 className="mt-4 font-heading text-3xl font-bold leading-none tracking-[-0.04em] text-brand-text sm:text-[2.5rem]">
-            {heading}
-          </h1>
+          <p className={LABEL}>{eyebrow}</p>
+          <h1 className="mt-4 text-[clamp(40px,5vw,56px)] font-normal leading-none tracking-[-0.045em]">{heading}</h1>
 
           {intro}
 
-          <div className="mt-9">{children}</div>
+          <div className="mt-10">{children}</div>
 
-          <div className="mt-7 text-sm text-brand-muted">{footer}</div>
+          <p className="mt-8 text-[15px] text-brand-muted">{footer}</p>
 
-          <p className="mt-8 border-t border-brand-border pt-6 text-xs leading-relaxed text-brand-subtle">
+          <p className="mt-10 border-t border-white/[0.08] pt-6 text-[13px] leading-relaxed text-brand-subtle">
             {reassurance}
           </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
@@ -139,7 +121,7 @@ export function AuthErrorBanner({ message }: { message: string }) {
   return (
     <div
       role="alert"
-      className="mb-5 rounded-xl border border-brand-rose/30 bg-brand-rose/10 px-4 py-3 text-sm text-brand-rose"
+      className="mb-5 rounded-[16px] border border-brand-rose/30 bg-brand-rose/[0.08] px-5 py-3 text-sm text-brand-rose"
     >
       {message}
     </div>
@@ -150,11 +132,19 @@ export function AuthErrorBanner({ message }: { message: string }) {
 export function AuthDivider({ label = "or" }: { label?: string }) {
   return (
     <div className="flex items-center gap-4 py-1" aria-hidden="true">
-      <span className="h-px flex-1 bg-brand-border" />
-      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-brand-subtle">
-        {label}
-      </span>
-      <span className="h-px flex-1 bg-brand-border" />
+      <span className="h-px flex-1 bg-white/[0.08]" />
+      <span className={LABEL}>{label}</span>
+      <span className="h-px flex-1 bg-white/[0.08]" />
+    </div>
+  );
+}
+
+/** Small cyan-outlined callout for the form column (e.g. beta invite). */
+export function AuthNote({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="mt-8 border-l border-brand-cyan/60 pl-5">
+      <p className={cn(H3, "text-base")}>{title}</p>
+      <p className="mt-1 text-[15px] leading-relaxed text-brand-muted">{children}</p>
     </div>
   );
 }

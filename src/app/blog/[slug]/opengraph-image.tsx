@@ -83,12 +83,12 @@ export default function OgImage({ params }: { params: { slug: string } }) {
                 width: "8px",
                 height: "8px",
                 borderRadius: "50%",
-                background: "#22d3ee",
+                background: "#22D3EE",
               }}
             />
             <span
               style={{
-                color: "#22d3ee",
+                color: "#22D3EE",
                 fontSize: "16px",
                 fontWeight: "500",
                 letterSpacing: "0.05em",
@@ -154,7 +154,7 @@ export default function OgImage({ params }: { params: { slug: string } }) {
               style={{
                 fontSize: "32px",
                 fontWeight: "700",
-                color: "#22d3ee",
+                color: "#22D3EE",
               }}
             >
               .

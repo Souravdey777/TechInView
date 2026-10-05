@@ -86,7 +86,7 @@ function PlanRow({
     ROW_FOCUS
   );
 
-  const rowLabel = `${plan.company} — ${plan.role}, updated ${formatRelativeDay(
+  const rowLabel = `${plan.company}, ${plan.role}, updated ${formatRelativeDay(
     plan.updatedAt
   )}`;
 

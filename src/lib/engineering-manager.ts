@@ -345,7 +345,7 @@ export function buildEngineeringManagerRoundContext(
       company || roleTitle
         ? `${[company, roleTitle].filter(Boolean).join(" · ")} Engineering Manager Round`
         : "Engineering Manager Round",
-    summary: `A ${ENGINEERING_MANAGER_DURATION_MINUTES}-minute voice-first hiring-manager round for a ${contextLabel}, run as ${scope.summaryLabel}. Expect concrete questions on role fit, prioritization, stakeholder alignment, conflict, and the decisions you actually made — graded against ${framework.label}. No coding, and no hand-waving.`,
+    summary: `A ${ENGINEERING_MANAGER_DURATION_MINUTES}-minute voice-first hiring-manager round for a ${contextLabel}, run as ${scope.summaryLabel}. Expect concrete questions on role fit, prioritization, stakeholder alignment, conflict, and the decisions you actually made, graded against ${framework.label}. No coding, and no hand-waving.`,
     rationale: `This mirrors the hiring-manager conversation where the bar is not coding output but whether the manager would take you onto the team: how clearly you explain impact, how you prioritize competing asks, how you move people who do not report to you, and whether your examples hold up under follow-up. Leadership signal is graded against ${framework.label}, and the round closes with your questions for the manager.`,
     confidence: historicalQuestions.length > 0 ? "high" : "medium",
     estimatedMinutes: ENGINEERING_MANAGER_DURATION_MINUTES,

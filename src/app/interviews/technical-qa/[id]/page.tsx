@@ -24,7 +24,7 @@ export default function TechnicalQaInterviewPage({
   params,
 }: TechnicalQaInterviewPageProps) {
   useEffect(() => {
-    document.title = "Technical Q&A Interview — TechInView";
+    document.title = "Technical Q&A Interview · TechInView";
 
     return () => {
       document.title = "TechInView.ai";

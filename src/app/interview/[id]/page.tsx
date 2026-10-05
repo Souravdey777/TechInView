@@ -24,7 +24,7 @@ export default function InterviewRoomPage({ params }: PageProps) {
   const { id } = params;
 
   useEffect(() => {
-    document.title = "Interview — TechInView";
+    document.title = "Interview · TechInView";
     return () => {
       document.title = "TechInView.ai";
     };

@@ -1,110 +1,117 @@
 ---
 title: "How to Analyze Time Complexity (With Examples)"
-seoTitle: "Time Complexity Cheat Sheet for Interviews"
-description: "A practical time complexity cheat sheet for interviews—rules, loops, recursion, amortization, and patterns that trip people up."
+seoTitle: "Time Complexity Cheat Sheet for Coding Interviews"
+description: "A time complexity cheat sheet for coding interviews: common Big-O patterns, loops, recursion, amortized costs, graphs, space, and how to explain it out loud."
 date: "2026-04-10"
 keyword: "time complexity cheat sheet"
 topic: "Fundamentals"
 ---
 
-People searching for a **time complexity cheat sheet** rarely want heavy math—they want fast, correct answers in interviews. This guide is that: rules you can apply while talking, plus examples that mirror real questions.
+**Short answer:** to find time complexity in an interview, look at how many times each loop or recursive call runs as the input grows, multiply nested bounds, add sequential steps, and keep only the largest term. One pass is O(n), halving is O(log n), sorting is O(n log n), and full nested scans are O(n²).
+
+This **time complexity cheat sheet** skips the heavy math. It is the set of rules you can apply while talking, with examples that look like real interview questions.
 
 ## Big-O in one sentence
 
-**Big-O describes how runtime grows as input size *n* grows**—worst case unless the interviewer specifies average or amortized.
+Big-O describes how running time grows as the input size n grows. Interviews usually mean the worst case unless someone says average or amortized.
 
-You are comparing **dominant terms** and dropping constants and lower-order pieces: O(3n² + 100n) → O(n²).
+Keep the dominant term and drop constants and smaller terms: O(3n² + 100n) becomes O(n²).
 
-## Core building blocks
+## Core patterns
 
 | Pattern | Complexity | Notes |
 |--------|------------|--------|
 | Single loop over n | O(n) | |
-| Nested loops, each up to n | O(n²) | Triple nested → O(n³) |
-| Binary search / halving | O(log n) | |
-| Sorting comparison-based | O(n log n) | |
-| Scan all pairs | O(n²) | |
-| Subsets of n elements | O(2ⁿ) | |
-| Permutations | O(n!) | |
+| Two nested loops, each up to n | O(n²) | Three nested: O(n³) |
+| Binary search or repeated halving | O(log n) | |
+| Comparison-based sort | O(n log n) | |
+| Checking all pairs | O(n²) | |
+| Generating all subsets | O(2ⁿ) subsets | O(n · 2ⁿ) if you copy each one out |
+| Generating all permutations | O(n!) permutations | O(n · n!) if you copy each one out |
 
 ## Loops with changing bounds
 
-**Example:** `for i in range(n): for j in range(i, n):`  
-Inner iterations: (n-1) + (n-2) + … ≈ n(n-1)/2 → **O(n²)**.
+```python
+for i in range(n):
+    for j in range(i, n):
+        ...
+```
 
-**Example:** `i = 1; while i < n: i *= 2` → **O(log n)** iterations.
+The inner loop runs n, then n - 1, and so on down to 1 time. That sums to n(n + 1)/2, which is **O(n²)**. Starting the inner loop at `i` halves the work but does not change the class.
 
-Always ask: does the inner work depend on the outer index in a way that sums to n², n log n, or something else?
+```python
+i = 1
+while i < n:
+    i *= 2
+```
+
+`i` doubles each time, so the loop runs about log₂ n times: **O(log n)**.
+
+The question to ask each time: does the inner work, summed over every outer iteration, come to n², n log n, or something else?
 
 ## Recursion and trees
 
-For recursive DFS on a **binary tree** with n nodes:
+Recursive DFS on a binary tree with n nodes:
 
-- Each node visited once → **O(n)** time, **O(h)** stack space where h is height (O(log n) balanced, O(n) skewed).
+- Each node is visited once, so time is **O(n)**.
+- Stack space is **O(h)**, where h is the height: O(log n) for a balanced tree, O(n) for a skewed one.
 
-For **memoized** DP where each state computed once and work per state is O(1):
+Memoized dynamic programming where each state is computed once:
 
-- Time ≈ **O(number of states)**.
+- Time is **number of states × work per state**. With O(1) work per state, that is O(states). [Coin Change](/practice/coin-change) is O(amount × number of coins) for this reason.
 
-## Hash map and set operations
+## Hash maps and sets
 
-Average case:
+On average, insert, lookup and delete are **O(1)** expected.
 
-- Insert / lookup / delete: **O(1)** expected.
+In the worst case, heavy collisions can make them **O(n)**. Mention this only if the interviewer asks about implementation details.
 
-Worst case (rare in interviews unless discussed):
+## Sort, then scan
 
-- **O(n)** if many collisions—mention only if the interviewer probes implementation details.
-
-## Sorting + scanning
-
-Sort then one linear pass: **O(n log n)** dominates.
+Sorting followed by a single pass is **O(n log n)**: the sort dominates. [Merge Intervals](/practice/merge-intervals) and the two-pointer version of [3Sum](/practice/three-sum) follow this shape (3Sum's scan is O(n²), so that dominates there).
 
 ## Amortized analysis
 
-**Dynamic array push:** occasional resize is expensive, but spread over many pushes → **amortized O(1)** per append.
+**Dynamic array append:** an occasional resize copies everything, but spread across many appends the cost is **amortized O(1)** per append.
 
-**Union-Find with path compression:** nearly **O(α(n))** per op in practice—often treated as "inverse Ackermann, effectively constant" in interviews.
+**Union-Find:** with both path compression and union by rank (or size), each operation costs **O(α(n))** amortized, where α is the inverse Ackermann function. In practice you can call it effectively constant. With only one of the two optimisations, the bound is O(log n).
 
-Say the word **amortized** when you use a structure whose single operation worst case differs from the long-run average.
+Say "amortized" out loud whenever a single operation's worst case differs from its long-run average.
 
 ## Graphs
 
-- **BFS/DFS:** O(V + E) with adjacency list.
-- **Dijkstra with binary heap:** O((V + E) log V) typical statement level.
+- **BFS or DFS** with an adjacency list: O(V + E). [Number of Islands](/practice/number-of-islands) is O(rows × cols), since every cell is a vertex with at most four edges.
+- **Dijkstra with a binary heap:** O((V + E) log V).
 
-## What to say out loud (template)
+## What to say out loud
 
-1. "The dominant work is …"
-2. "We visit each … once, so …"
+1. "The dominant work is ..."
+2. "We visit each ... once, so ..."
 3. "Sorting dominates at O(n log n), then the scan is linear."
 
-That three-line habit satisfies most interviewers reviewing your **time complexity cheat sheet** mental model.
+Interviewers grade whether you can derive complexity from your own code, not whether you can recite a table. Complexity analysis is part of the technical knowledge score in TechInView's scorecard; [how the AI evaluates](/how-ai-evaluates) has the full breakdown.
 
-## Frequent mistakes
+## Common mistakes
 
-- Confusing **O(n log n)** sort with **O(n)** counting sort assumptions—counting sort is not comparison-based and needs bounded key ranges.
-- Reporting **O(1)** for building a frequency map from an unsized stream—you must read the input at least once → **O(n)**.
-- Ignoring **output size**: generating all subsets is O(2ⁿ) *output*, not O(n).
+- **Assuming counting sort everywhere.** Counting sort is O(n + k), but it is not comparison-based and only works when keys fall in a small known range k.
+- **Calling a frequency map O(1) to build.** You have to read every element, so building it is O(n).
+- **Ignoring output size.** If you return all subsets, you produce 2ⁿ of them, each up to n long. No algorithm can beat the size of its output.
+- **Forgetting string costs.** Slicing or concatenating strings in a loop often hides an extra factor of n.
 
 ## Space complexity
 
-Count **extra** structures: arrays, maps, recursion stack, implicit sort space.
+Count extra memory: arrays, maps, the recursion stack, and any copies a sort makes.
 
-- In-place sort: often **O(1)** or **O(log n)** auxiliary depending on algorithm.
-- Memo table sized by states: **O(states)**.
+- In-place sorts use O(1) to O(log n) extra space depending on the algorithm. Python's built-in sort (Timsort) can use O(n).
+- A memo table uses O(number of states).
 
-## Tie it to communication
+## Quick reference
 
-Interviewers grade **whether you can derive complexity from your actual code**, not whether you recite a table. After implementation, walk loop by loop and name the product of bounds—that is the living **time complexity cheat sheet**.
+- Single pass: O(n)
+- Halve each step: O(log n)
+- Nested full scans: O(n²)
+- Sort: O(n log n)
+- Graph traversal with adjacency list: O(V + E)
+- Bitmask DP over subsets: often O(n · 2ⁿ)
 
-## Quick reference card (print mentally)
-
-- Single pass → O(n)
-- Divide by two each step → O(log n)
-- Nested full scans → O(n²)
-- Sort → O(n log n)
-- Graph traversal (adj list) → O(V + E)
-- Bitmask DP over subsets → often O(n · 2ⁿ)
-
-Drill one new problem daily with "state complexity out loud" and this becomes automatic.
+To make this automatic, state the complexity out loud after every problem you solve, then check it. The [data structure decision guide](/blog/data-structure-decision-guide) covers which structure gives which costs, and [thinking out loud](/blog/coding-interview-communication) covers how to fit the explanation into a live round.

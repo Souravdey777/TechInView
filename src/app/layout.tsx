@@ -1,8 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Sora, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
+import { SITE_NAME } from "@/lib/blog-seo";
+import {
+  SITE_DEFAULT_DESCRIPTION,
+  SITE_DEFAULT_TITLE,
+  SITE_SOCIAL_DESCRIPTION,
+  SITE_THEME_COLOR,
+  getSiteUrl,
+} from "@/lib/site-seo";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -19,20 +27,25 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TechInView — AI Mock Interview Platform",
-  description:
-    "Voice-powered AI mock interviews for software engineers. Practice DSA problems with a real-time AI interviewer, live code editor, and FAANG-calibrated scoring.",
+  metadataBase: new URL(getSiteUrl()),
+  // No title template: child routes already append "| TechInView" themselves.
+  title: SITE_DEFAULT_TITLE,
+  description: SITE_DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
   keywords: [
     "mock interview",
-    "coding interview",
+    "AI mock interview",
+    "coding interview practice",
     "DSA practice",
-    "FAANG interview prep",
-    "AI interviewer",
     "technical interview",
-    "voice interview",
+    "behavioral interview practice",
+    "engineering manager interview",
   ],
-  authors: [{ name: "TechInView" }],
-  creator: "TechInView",
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "education",
+  formatDetection: { telephone: false, email: false, address: false },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -41,37 +54,41 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev"
-  ),
+  // Only feed discovery here. Canonicals are set per route; a root canonical
+  // would be inherited by every page that forgets its own.
+  alternates: {
+    types: { "application/rss+xml": "/blog/rss.xml" },
+  },
+  // og:image comes from src/app/opengraph-image.tsx (X falls back to it when
+  // twitter:image is absent). No og:url here for the same reason as above.
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://techinview.dev",
-    siteName: "TechInView",
-    title: "TechInView — AI Mock Interview Platform",
-    description:
-      "Voice-powered AI mock interviews for software engineers. Practice DSA with a real-time AI interviewer and get FAANG-calibrated feedback.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "TechInView — AI Mock Interview Platform",
-      },
-    ],
+    siteName: SITE_NAME,
+    title: SITE_DEFAULT_TITLE,
+    description: SITE_SOCIAL_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "TechInView — AI Mock Interview Platform",
-    description:
-      "Voice-powered AI mock interviews for software engineers. Practice DSA with a real-time AI interviewer and get FAANG-calibrated feedback.",
-    images: ["/og-image.png"],
+    title: SITE_DEFAULT_TITLE,
+    description: SITE_SOCIAL_DESCRIPTION,
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: SITE_THEME_COLOR,
+  colorScheme: "dark",
 };
 
 export default function RootLayout({

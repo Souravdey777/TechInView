@@ -117,7 +117,7 @@ export function ProblemFacetRow({
             isActive={facets.freeOnly}
             disabled={counts.free === 0 && !facets.freeOnly}
             toneClassName={facets.freeOnly ? "text-brand-green" : undefined}
-            title="Problems with the solo editor unlocked — solving them never spends a round"
+            title="Problems open in the solo editor. Solving them never spends a round."
             onClick={() => onFreeOnlyChange(!facets.freeOnly)}
           />
         </div>

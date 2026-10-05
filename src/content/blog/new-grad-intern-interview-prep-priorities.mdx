@@ -1,7 +1,7 @@
 ---
-title: "New Grad & Intern Interview Prep: What to Prioritize When Time Is Short"
-seoTitle: "Internship Interview Prep: What to Prioritize"
-description: "Internship interview prep for CS students: order of topics, project storytelling, and balancing LeetCode with communication before new grad interviews."
+title: "New Grad and Intern Interview Prep: What to Prioritize"
+seoTitle: "Internship Interview Prep: What to Prioritize First"
+description: "A six-week internship and new grad interview prep order: which DSA topics first, how to present one project, four behavioral stories, and daily spoken practice."
 date: "2026-05-15"
 keyword: "internship interview prep"
 topic: "Prep planning"
@@ -12,69 +12,77 @@ tags:
   - intern coding interview tips
 ---
 
-**Internship interview prep** and **new grad** loops reward **signal density**: you have **limited time** between classes, projects, and fatigue. The mistake is copying **staff-level** grinds. The win is **prioritizing** what actually moves an **entry-level** bar: **solid mediums**, **clean communication**, and **credible projects**—not 400 random problems.
+**Short answer:** for **internship interview prep** with limited time, spend most of it on arrays, strings, hash maps and basic trees, get comfortable solving medium problems while talking, have one project you can explain in detail, and prepare four short behavioural stories. Skip the hard-problem marathons until later.
 
-Use this alongside the [90-day coding interview plan](/blog/90-day-coding-interview-prep-plan) scaled down (e.g. **45-day** sprint), [problem reading](/blog/how-to-read-coding-interview-problems), and [thinking out loud](/blog/coding-interview-communication).
+You are fitting this around classes, projects and exams, so copying a senior engineer's six-month grind does not work. Entry-level loops mostly check whether you can solve a reasonable medium problem cleanly and explain what you are doing.
 
-## Priority stack (if you only have 6 weeks)
+If you have longer, scale up the [90-day coding interview plan](/blog/90-day-coding-interview-prep-plan). Either way, read [how to read a coding problem](/blog/how-to-read-coding-interview-problems) and [how to think out loud](/blog/coding-interview-communication) early.
 
-| Week block | Primary focus | Why |
-|------------|---------------|-----|
-| 1–2 | Arrays, strings, hash maps, basic trees | Highest **frequency** at intern/new-grad bar |
-| 3 | Binary search patterns, heaps intro | Unlocks many “medium” templates |
-| 4 | Graph BFS/DFS basics | Common **differentiator** without going olympiad |
-| 5 | Timed mediums + **verbal** recap | Converts knowledge to **performance** |
-| 6 | **Mocks** + weak-tag review only | **Fidelity** &gt; new intake |
+## A six-week priority order
 
-Defer **hard-only** marathons until **return offers** or **competitive** programs demand them.
+| Weeks | Focus | Why |
+|-------|-------|-----|
+| 1 to 2 | Arrays, strings, hash maps, basic trees | Most intern and new grad questions sit here |
+| 3 | Binary search patterns, intro to heaps | Covers a large share of medium problems |
+| 4 | Graph BFS and DFS basics | Separates candidates without needing contest-level tricks |
+| 5 | Timed mediums, explained out loud | Turns knowing into performing |
+| 6 | Mock interviews and review of weak topics only | Stop adding new material |
 
-## Projects: minimum viable credibility
+Some concrete problems for each block, all in the [practice set](/practice):
 
-Interviewers want **one** project you can **debug live**:
+- Weeks 1 to 2: [Two Sum](/practice/two-sum), [Group Anagrams](/practice/group-anagrams), [Valid Parentheses](/practice/valid-parentheses), [Maximum Depth of Binary Tree](/practice/maximum-depth-of-binary-tree)
+- Week 3: [Binary Search](/practice/binary-search), [Koko Eating Bananas](/practice/koko-eating-bananas), [Kth Largest Element](/practice/kth-largest-element)
+- Week 4: [Number of Islands](/practice/number-of-islands), [Binary Tree Level Order Traversal](/practice/binary-tree-level-order-traversal), [Course Schedule](/practice/course-schedule)
 
-- **README** with run steps, **what you built**, **what you’d improve**
-- **One** technical decision you can defend (why SQLite vs Postgres, etc.)
-- **Tests** or **deterministic demo**—flaky demos erode trust
+Leave hard-only sessions for later, unless a specific company or program is known to ask them.
 
-For **take-home** style submissions later, see [take-home tips](/blog/software-engineer-take-home-assignment-tips).
+## Projects: one you can defend
 
-## Behavioral: short and real
+Interviewers want one project you can walk through and debug with them:
 
-You still need **STAR** stories—even internships. Prepare **four**:
+- A README with run steps, what you built, and what you would improve
+- One technical decision you can defend, such as why you picked SQLite over Postgres
+- Tests or a demo that behaves the same every time. A flaky demo costs you trust quickly.
 
-- Conflict / teamwork
-- Failure / bug you caused
-- **Time pressure** (midterms + deadline)
-- **Learning something new** quickly
+If a company sends a take-home instead, see the [take-home assignment guide](/blog/software-engineer-take-home-assignment-tips).
 
-Details in [behavioral STAR guide](/blog/behavioral-interview-software-engineer-star).
+## Behavioural: short and real
 
-## Communication: cheap edge
+Internship loops still ask behavioural questions. Prepare four stories:
 
-Many new grads **lose** on **explanation**, not **algorithms**. Budget **15 minutes daily** **speaking** your approach **before** coding—no IDE. Pair with [live pressure drills](/blog/coding-interview-pressure-live-coding).
+- A conflict or teamwork problem
+- A bug or failure you caused
+- A deadline under pressure, for example a project due during midterms
+- Learning something new quickly
 
-## Company context without obsession
+The [STAR guide](/blog/behavioral-interview-software-engineer-star) covers how to structure them.
 
-Skim [FAANG coding differences](/blog/faang-coding-interview-differences) once; don’t rebuild your plan around **logo myths**. **Level-appropriate** mediums transfer.
+## Communication is the cheap win
+
+Plenty of new grads solve the problem and still get a weak score because the interviewer could not follow them. Spend about 15 minutes a day explaining an approach out loud before writing any code, with no editor open. [Live pressure drills](/blog/coding-interview-pressure-live-coding) help with the nerves side of this.
+
+## Company differences: read once, then move on
+
+Skim the [FAANG coding differences](/blog/faang-coding-interview-differences) post once. Do not rebuild your plan around rumours about a specific logo. Solid medium-level skills transfer across companies.
 
 ## FAQ
 
-### How many problems?
+### How many problems should I solve?
 
-Aim for **~80–120 thoughtful** solves + **review** rather than **300** shallow—quality &gt; trophy count.
+Around 80 to 120 problems you understood and reviewed is a better target than 300 you rushed. If you cannot re-solve one a week later, it did not count.
 
 ### Do I need system design?
 
-**Intern** loops: rare deep SD; **new grad** sometimes **high-level** discussions. Touch **foundations** only if recruiter signals—see [system design prep order](/blog/system-design-interview-prep-2026).
+Intern loops rarely include a real design round. New grad loops sometimes include a light, high-level discussion. Only study the foundations if the recruiter mentions it; the [system design prep order](/blog/system-design-interview-prep-2026) covers where to start.
 
-### Best mock format for students?
+### What mock format works for students?
 
-**Voice + code** sessions train **nervous speech** under time—[try TechInView](/login) between **peer** practices ([AI vs human](/blog/ai-mock-interview-2026)).
+Mocks where you speak and code at the same time, because that is what trains you to talk while nervous. TechInView runs [free DSA practice](/practice) and a voice AI interview you can use between peer mocks. The [AI vs human mock comparison](/blog/ai-mock-interview-2026) covers when each helps, and [how the AI evaluates](/how-ai-evaluates) explains the scorecard.
 
-### GPA / resume?
+### What about GPA and the resume?
 
-If **screening** is tight, use [ATS resume checklist](/blog/software-engineer-resume-ats-checklist)—then return focus to **interview performance**.
+If you are not getting past screening, work through the [ATS resume checklist](/blog/software-engineer-resume-ats-checklist), then put your time back into interview practice.
 
 ---
 
-**Summary:** **Internship interview prep** should **front-load** **high-frequency DSA**, **one credible project**, **four STAR stories**, and **daily spoken reasoning**—then **mocks** that mirror **real** **new grad coding interviews**, not influencer problem lists.
+**Summary:** internship interview prep should start with the most common DSA topics, one project you can defend, four behavioural stories and daily spoken practice, then finish with mocks that look like real new grad interviews.

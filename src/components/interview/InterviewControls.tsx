@@ -94,7 +94,7 @@ export function InterviewControls({
             <span className="font-medium text-brand-text">
               {phaseLabel}
             </span>{" "}
-            &mdash; Step {step}/{total}
+            &middot; Step {step}/{total}
           </span>
         </div>
 

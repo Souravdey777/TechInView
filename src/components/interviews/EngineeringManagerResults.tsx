@@ -73,7 +73,7 @@ const ENGINEERING_MANAGER_SCORE_DIMENSIONS = {
     ...ROUND_SCORING_DIMENSIONS.technical_depth,
     label: "Technical Judgment",
     description:
-      "Tradeoff reasoning behind your technical calls — why that option, what it cost — rather than implementation fluency.",
+      "Tradeoff reasoning behind your technical calls (why that option, what it cost) rather than implementation fluency.",
   },
   execution: {
     ...ROUND_SCORING_DIMENSIONS.execution,

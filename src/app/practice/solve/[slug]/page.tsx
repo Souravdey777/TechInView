@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getProblemBySlug, getPracticeAttempt } from "@/lib/db/queries";
@@ -9,6 +10,12 @@ type PracticeSolvePageProps = {
 };
 
 export const dynamic = "force-dynamic";
+
+// Signed-in workspace; the public problem page at /practice/[slug] is the one to index.
+export const metadata: Metadata = {
+  title: "Practice room | TechInView",
+  robots: { index: false, follow: false },
+};
 
 export default async function PracticeSolvePage({ params }: PracticeSolvePageProps) {
   const supabase = createClient();
@@ -35,7 +42,7 @@ export default async function PracticeSolvePage({ params }: PracticeSolvePagePro
   return (
     <DesktopInterviewGate
       title="The practice room needs a desktop screen"
-      description="Practice Mode uses side-by-side problem, code, and test panels. Open this problem on a laptop or desktop to start solving."
+      description="Practice Mode shows the problem, your code and the tests side by side. Open this problem on a laptop or desktop to solve it."
       backHref={`/practice/${params.slug}`}
       backLabel="Back to problem"
       loadingMessage="Loading practice room..."

@@ -6,16 +6,9 @@ import { usePostHog } from "posthog-js/react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/shared/BrandLogo";
-import {
-  ChevronRight,
-  ChevronLeft,
-  Loader2,
-  User,
-  Building2,
-  Briefcase,
-  Code2,
-  Sparkles,
-} from "lucide-react";
+import { AuthErrorBanner } from "@/components/auth/AuthSplitLayout";
+import { BTN_GHOST, BTN_PRIMARY, CHIP, CHIP_ACTIVE, FIELD, LABEL, LEAD } from "@/components/marketing/ds";
+import { Loader2 } from "lucide-react";
 
 type ExperienceLevel = "junior" | "mid" | "senior" | "staff";
 
@@ -47,12 +40,20 @@ const LANGUAGES: { value: string; label: string; ext: string }[] = [
   { value: "cpp", label: "C++", ext: ".cpp" },
 ];
 
-const STEPS = [
-  { icon: User, label: "Name" },
-  { icon: Building2, label: "Company" },
-  { icon: Briefcase, label: "Experience" },
-  { icon: Code2, label: "Language" },
-];
+const STEPS = ["Name", "Company", "Experience", "Language"] as const;
+
+const HEADING = "text-balance text-[clamp(32px,4.4vw,48px)] font-normal leading-[1.02] tracking-[-0.04em]";
+/** CHIP sized up for a primary choice: bigger hit area, same visual language. */
+const CHOICE = cn(CHIP, "gap-2 px-4 py-2.5 text-xs");
+
+function StepHeader({ title, description }: { title: string; description: string }) {
+  return (
+    <div>
+      <h1 className={HEADING}>{title}</h1>
+      <p className={cn(LEAD, "mt-4")}>{description}</p>
+    </div>
+  );
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -137,78 +138,55 @@ export default function OnboardingPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-brand-deep flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-cyan" />
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-brand-cyan" aria-label="Loading" />
       </div>
     );
   }
 
+  const ready = canContinue() && !isSaving;
+
   return (
-    <div className="min-h-screen bg-brand-deep flex items-center justify-center px-4 py-8 sm:px-6">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="mb-8 flex items-center justify-center">
-          <BrandLogo size="lg" wordmarkClassName="text-2xl font-bold" />
-        </div>
+    <div className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10">
+      <div className="w-full max-w-[560px]">
+        <BrandLogo size="sm" />
 
         {/* Progress */}
-        <div className="mb-6 flex items-center justify-center gap-1.5 sm:mb-8 sm:gap-2">
-          {STEPS.map((s, i) => {
-            const Icon = s.icon;
-            const isActive = i === step;
-            const isDone = i < step;
-            return (
-              <div key={s.label} className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    "flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all duration-300",
-                    "sm:w-9 sm:h-9 w-8 h-8",
-                    isActive
-                      ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan"
-                      : isDone
-                        ? "border-brand-green bg-brand-green/10 text-brand-green"
-                        : "border-brand-border bg-brand-surface text-brand-muted"
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                </div>
-                {i < STEPS.length - 1 && (
-                  <div
-                    className={cn(
-                      "h-0.5 w-5 rounded-full transition-colors duration-300 sm:w-8",
-                      isDone ? "bg-brand-green" : "bg-brand-border"
-                    )}
-                  />
+        <div className="mt-14">
+          <p className={LABEL} aria-live="polite">
+            Step {String(step + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")} · {STEPS[step]}
+          </p>
+          <ol className="mt-4 grid grid-cols-4 gap-2" aria-hidden="true">
+            {STEPS.map((label, i) => (
+              <li
+                key={label}
+                className={cn(
+                  "h-px transition-colors duration-300",
+                  i <= step ? "bg-brand-cyan" : "bg-white/[0.12]"
                 )}
-              </div>
-            );
-          })}
+              />
+            ))}
+          </ol>
         </div>
 
-        {/* Card */}
-        <div className="glass-card p-6 sm:p-8">
+        <div className="mt-12">
           {/* Step 0: Display Name */}
           {step === 0 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h1 className="text-xl font-bold text-brand-text mb-1">
-                  Welcome to TechInView
-                </h1>
-                <p className="text-brand-muted text-sm">
-                  What should we call you?
-                </p>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-brand-muted text-xs font-medium uppercase tracking-wide">
-                  Display Name
+            <div className="space-y-10">
+              <StepHeader title="Welcome to TechInView." description="What should we call you?" />
+              <div className="space-y-3">
+                <label htmlFor="onboarding-display-name" className={cn(LABEL, "block")}>
+                  Display name
                 </label>
                 <input
+                  id="onboarding-display-name"
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Your name"
                   autoFocus
-                  className="w-full px-4 py-3 bg-brand-surface border border-brand-border rounded-lg text-brand-text text-sm placeholder:text-brand-muted focus:outline-none focus:border-brand-cyan/50 transition-colors"
+                  autoComplete="name"
+                  className={FIELD}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && canContinue()) handleNext();
                   }}
@@ -219,16 +197,12 @@ export default function OnboardingPage() {
 
           {/* Step 1: Target Company */}
           {step === 1 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h1 className="text-xl font-bold text-brand-text mb-1">
-                  Dream Company
-                </h1>
-                <p className="text-brand-muted text-sm">
-                  Which company are you preparing for?
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 justify-center">
+            <div className="space-y-10">
+              <StepHeader
+                title="Target company."
+                description="Which company are you preparing for? Pick Other if it is not listed."
+              />
+              <div className="flex flex-wrap gap-2">
                 {TARGET_COMPANIES.map((company) => {
                   const val = company.toLowerCase();
                   const isSelected = targetCompany === val;
@@ -236,13 +210,9 @@ export default function OnboardingPage() {
                     <button
                       key={company}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => setTargetCompany(val)}
-                      className={cn(
-                        "px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-150",
-                        isSelected
-                          ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan"
-                          : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                      )}
+                      className={cn(CHOICE, isSelected && CHIP_ACTIVE)}
                     >
                       {company}
                     </button>
@@ -254,32 +224,24 @@ export default function OnboardingPage() {
 
           {/* Step 2: Experience Level */}
           {step === 2 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h1 className="text-xl font-bold text-brand-text mb-1">
-                  Experience Level
-                </h1>
-                <p className="text-brand-muted text-sm">
-                  This helps us calibrate interview difficulty and preselect the right persona.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-10">
+              <StepHeader
+                title="Experience level."
+                description="We use this as the default level for your interviews. You can change it before any round."
+              />
+              <div className="flex flex-wrap gap-2">
                 {EXPERIENCE_LEVELS.map((level) => {
                   const isSelected = experienceLevel === level.value;
                   return (
                     <button
                       key={level.value}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => setExperienceLevel(level.value)}
-                      className={cn(
-                        "flex flex-col items-center gap-1 rounded-xl border px-4 py-4 transition-all duration-150",
-                        isSelected
-                          ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan ring-1 ring-brand-cyan/30"
-                          : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                      )}
+                      className={cn(CHOICE, isSelected && CHIP_ACTIVE)}
                     >
-                      <span className="text-sm font-semibold">{level.label}</span>
-                      <span className="text-xs opacity-70">{level.desc}</span>
+                      {level.label}
+                      <span className="text-brand-subtle">{level.desc}</span>
                     </button>
                   );
                 })}
@@ -289,32 +251,24 @@ export default function OnboardingPage() {
 
           {/* Step 3: Preferred Language */}
           {step === 3 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h1 className="text-xl font-bold text-brand-text mb-1">
-                  Preferred Language
-                </h1>
-                <p className="text-brand-muted text-sm">
-                  Pick your go-to language for coding interviews.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-10">
+              <StepHeader
+                title="Preferred language."
+                description="The language you plan to code in. Running code currently works in Python and JavaScript."
+              />
+              <div className="flex flex-wrap gap-2">
                 {LANGUAGES.map((lang) => {
                   const isSelected = preferredLanguage === lang.value;
                   return (
                     <button
                       key={lang.value}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => setPreferredLanguage(lang.value)}
-                      className={cn(
-                        "flex flex-col items-center gap-1.5 rounded-xl border px-4 py-4 transition-all duration-150",
-                        isSelected
-                          ? "border-brand-cyan bg-brand-cyan/10 text-brand-cyan ring-1 ring-brand-cyan/30"
-                          : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                      )}
+                      className={cn(CHOICE, isSelected && CHIP_ACTIVE)}
                     >
-                      <span className="font-mono text-xs opacity-60">{lang.ext}</span>
-                      <span className="text-sm font-semibold">{lang.label}</span>
+                      {lang.label}
+                      <span className="text-brand-subtle">{lang.ext}</span>
                     </button>
                   );
                 })}
@@ -322,60 +276,44 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Error */}
           {error && (
-            <div className="mt-4 rounded-lg border border-brand-rose/30 bg-brand-rose/10 px-4 py-3 text-sm text-brand-rose">
-              {error}
+            <div className="mt-8">
+              <AuthErrorBanner message={error} />
             </div>
           )}
 
           {/* Navigation */}
-          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-            {step > 0 && (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-brand-border px-4 py-2.5 text-sm font-medium text-brand-muted transition-colors hover:border-brand-subtle hover:text-brand-text sm:w-auto"
-              >
-                <ChevronLeft className="w-4 h-4" />
+          <div className="mt-12 flex flex-col-reverse gap-3 border-t border-white/[0.08] pt-8 sm:flex-row sm:items-center sm:justify-between">
+            {step > 0 ? (
+              <button type="button" onClick={handleBack} className={cn(BTN_GHOST, "w-full sm:w-auto")}>
+                <span aria-hidden>←</span>
                 Back
               </button>
+            ) : (
+              <span className="hidden sm:block" />
             )}
             <button
               type="button"
               onClick={handleNext}
-              disabled={!canContinue() || isSaving}
-              className={cn(
-                "flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all sm:flex-1",
-                canContinue() && !isSaving
-                  ? "bg-brand-cyan text-brand-deep hover:opacity-90"
-                  : "bg-brand-border text-brand-muted cursor-not-allowed"
-              )}
+              disabled={!ready}
+              className={cn(BTN_PRIMARY, "w-full sm:w-auto")}
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   Setting up...
                 </>
               ) : step === 3 ? (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  Get Started
-                </>
+                "Finish setup"
               ) : (
                 <>
                   Continue
-                  <ChevronRight className="w-4 h-4" />
+                  <span aria-hidden>→</span>
                 </>
               )}
             </button>
           </div>
         </div>
-
-        {/* Step label */}
-        <p className="text-center text-brand-muted text-xs mt-6">
-          Step {step + 1} of {STEPS.length}
-        </p>
       </div>
     </div>
   );

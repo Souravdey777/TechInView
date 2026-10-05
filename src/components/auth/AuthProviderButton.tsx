@@ -1,5 +1,6 @@
 "use client";
 
+import { BTN_GHOST } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
 
 export type AuthProvider = "google" | "github";
@@ -63,19 +64,14 @@ export function AuthProviderButton({
       onClick={onClick}
       disabled={disabled}
       aria-busy={loading}
-      className={cn(
-        "flex h-[52px] w-full items-center justify-center gap-3 rounded-xl text-sm font-semibold transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        "border border-brand-border bg-brand-card font-medium text-brand-text hover:border-brand-cyan/30 hover:bg-brand-surface"
-      )}
+      className={cn(BTN_GHOST, "w-full")}
     >
       {loading ? (
-        <span className="h-5 w-5 animate-spin rounded-full border-2 border-brand-muted border-t-brand-cyan" />
+        <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/[0.18] border-t-brand-cyan" />
       ) : provider === "google" ? (
         <GoogleIcon />
       ) : (
-        <GithubIcon className="text-brand-text" />
+        <GithubIcon />
       )}
       {PROVIDER_LABELS[provider]}
     </button>

@@ -118,7 +118,7 @@ export function SessionLog({ rows }: { rows: readonly SessionLogRow[] }) {
                 <div className="flex items-start justify-between gap-4 lg:contents">
                   <span className="hidden font-mono text-xs text-brand-subtle lg:block">
                     {row.take === null
-                      ? "—"
+                      ? "–"
                       : String(row.take).padStart(2, "0")}
                   </span>
 
@@ -156,7 +156,7 @@ export function SessionLog({ rows }: { rows: readonly SessionLogRow[] }) {
                     {row.interviewerLabel}
                   </span>
                   <span className="hidden font-mono text-xs text-brand-muted lg:block">
-                    {row.durationLabel ?? "—"}
+                    {row.durationLabel ?? "–"}
                   </span>
                   <span className="hidden lg:block">
                     {row.score !== null ? (
@@ -170,7 +170,7 @@ export function SessionLog({ rows }: { rows: readonly SessionLogRow[] }) {
                       </span>
                     ) : (
                       <span className="whitespace-nowrap font-mono text-[11px] text-brand-subtle">
-                        {row.resultLabel ?? "—"}
+                        {row.resultLabel ?? "–"}
                       </span>
                     )}
                   </span>

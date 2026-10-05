@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" role="img" aria-label="TechInView concept C">
+  <path d="M12 4H4V28H12V24H8V8H12Z" fill="#EDEEF0"/>
+  <path d="M20 4H28V28H20V24H24V8H20Z" fill="#EDEEF0"/>
+  <circle cx="16" cy="16" r="4.5" fill="#22D3EE"/>
+</svg>

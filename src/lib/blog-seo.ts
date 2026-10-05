@@ -1,6 +1,15 @@
-/** Shared SEO helpers for blog routes (JSON-LD, OG image path). */
+/** Shared SEO helpers (JSON-LD builders, OG image path, site constants). */
 
-export const DEFAULT_OG_IMAGE_PATH = "/og-image.png";
+export const SITE_NAME = "TechInView";
+
+/**
+ * Served by `src/app/opengraph-image.tsx`. `/og-image.png` (referenced by older
+ * pages) is rewritten to the same route in next.config.mjs.
+ */
+export const DEFAULT_OG_IMAGE_PATH = "/opengraph-image";
+
+/** Square brand mark (1254x1254) for schema.org `logo`. */
+export const SITE_LOGO_PATH = "/images/techinview-logo.png";
 
 export function absoluteUrl(baseUrl: string, path: string): string {
   const base = baseUrl.replace(/\/$/, "");
@@ -14,6 +23,43 @@ export function absoluteUrl(baseUrl: string, path: string): string {
  */
 export function serializeJsonLd(jsonLd: unknown): string {
   return JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+}
+
+/**
+ * Organization node shared by every JSON-LD graph. The `@id` matches the full
+ * node emitted on the home page, so crawlers can join them.
+ */
+export function buildOrganizationNode(baseUrl: string) {
+  return {
+    "@type": "Organization",
+    "@id": absoluteUrl(baseUrl, "/#organization"),
+    name: SITE_NAME,
+    url: absoluteUrl(baseUrl, "/"),
+    logo: {
+      "@type": "ImageObject",
+      url: absoluteUrl(baseUrl, SITE_LOGO_PATH),
+      width: 1254,
+      height: 1254,
+    },
+  };
+}
+
+/** BreadcrumbList from ordered [name, path] pairs (first is usually Home). */
+export function buildBreadcrumbListNode(
+  id: string,
+  baseUrl: string,
+  items: readonly { name: string; path: string }[]
+) {
+  return {
+    "@type": "BreadcrumbList",
+    "@id": id,
+    itemListElement: items.map((entry, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: entry.name,
+      item: absoluteUrl(baseUrl, entry.path),
+    })),
+  };
 }
 
 /** FAQPage node from question/answer pairs already rendered on the page. */
@@ -54,6 +100,7 @@ export function buildBlogPostingAndBreadcrumbJsonLd(input: {
 }) {
   const pageUrl = absoluteUrl(input.baseUrl, `/blog/${input.slug}`);
   const imageUrl = absoluteUrl(input.baseUrl, DEFAULT_OG_IMAGE_PATH);
+  const organization = buildOrganizationNode(input.baseUrl);
 
   const blogPosting: Record<string, unknown> = {
     "@type": "BlogPosting",
@@ -68,20 +115,8 @@ export function buildBlogPostingAndBreadcrumbJsonLd(input: {
     },
     datePublished: input.datePublished,
     dateModified: input.dateModified ?? input.datePublished,
-    author: {
-      "@type": "Organization",
-      name: "TechInView",
-      url: input.baseUrl,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TechInView",
-      url: input.baseUrl,
-      logo: {
-        "@type": "ImageObject",
-        url: imageUrl,
-      },
-    },
+    author: organization,
+    publisher: organization,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": pageUrl,
@@ -98,38 +133,19 @@ export function buildBlogPostingAndBreadcrumbJsonLd(input: {
       "@type": "Blog",
       "@id": absoluteUrl(input.baseUrl, "/blog#blog"),
       name: "TechInView Interview Prep Blog",
-      publisher: {
-        "@type": "Organization",
-        name: "TechInView",
-        url: input.baseUrl,
-      },
+      publisher: organization,
     },
   };
 
-  const breadcrumb = {
-    "@type": "BreadcrumbList",
-    "@id": `${pageUrl}#breadcrumb`,
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: input.baseUrl,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: absoluteUrl(input.baseUrl, "/blog"),
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: input.title,
-        item: pageUrl,
-      },
-    ],
-  };
+  const breadcrumb = buildBreadcrumbListNode(
+    `${pageUrl}#breadcrumb`,
+    input.baseUrl,
+    [
+      { name: "Home", path: "/" },
+      { name: "Blog", path: "/blog" },
+      { name: input.title, path: `/blog/${input.slug}` },
+    ]
+  );
 
   const graph: Record<string, unknown>[] = [blogPosting, breadcrumb];
 
@@ -165,18 +181,10 @@ export function buildBlogIndexJsonLd(input: {
         "@id": `${blogUrl}#blog`,
         name: "TechInView Interview Prep Blog",
         description:
-          "Long-form guides on coding interviews, DSA, communication, FAANG-style prep, and AI mock interviews.",
+          "Practical guides on coding interview prep and DSA problem patterns.",
         url: blogUrl,
         inLanguage: "en-US",
-        publisher: {
-          "@type": "Organization",
-          name: "TechInView",
-          url: input.baseUrl,
-          logo: {
-            "@type": "ImageObject",
-            url: absoluteUrl(input.baseUrl, DEFAULT_OG_IMAGE_PATH),
-          },
-        },
+        publisher: buildOrganizationNode(input.baseUrl),
         blogPost: input.posts.map((p) => ({
           "@id": absoluteUrl(input.baseUrl, `/blog/${p.slug}#article`),
         })),
@@ -188,24 +196,10 @@ export function buildBlogIndexJsonLd(input: {
         numberOfItems: input.posts.length,
         itemListElement,
       },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${blogUrl}#breadcrumb`,
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: input.baseUrl,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Blog",
-            item: blogUrl,
-          },
-        ],
-      },
+      buildBreadcrumbListNode(`${blogUrl}#breadcrumb`, input.baseUrl, [
+        { name: "Home", path: "/" },
+        { name: "Blog", path: "/blog" },
+      ]),
     ],
   };
 }

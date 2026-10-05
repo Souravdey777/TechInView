@@ -171,8 +171,8 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
           <div className="px-5 py-12 text-center">
             <MonoLabel>Bank is empty</MonoLabel>
             <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-brand-muted">
-              No problems came back from the catalogue. Reload in a moment —
-              nothing you have already solved is lost.
+              No problems came back from the catalogue. Reload in a moment.
+              Nothing you have already solved is lost.
             </p>
           </div>
         ) : (

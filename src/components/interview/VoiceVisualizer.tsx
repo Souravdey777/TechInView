@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export type VoiceState = "idle" | "listening" | "thinking" | "speaking";
@@ -9,16 +10,54 @@ type VoiceVisualizerProps = {
   className?: string;
 };
 
+const FADE_MS = 700;
+
 /**
  * Siri-style fluid orb — smooth iridescent sphere with swirling
  * color gradients that blend and morph organically.
+ *
+ * Gradients can't be CSS-transitioned and swapping keyframes restarts them,
+ * so each state renders as its own layer and state changes crossfade: the
+ * outgoing layer keeps animating while it fades out.
  */
 export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
+  const [layers, setLayers] = useState<VoiceState[]>([state]);
+
+  useEffect(() => {
+    setLayers((prev) => (prev.includes(state) ? prev : [...prev, state]));
+    const id = window.setTimeout(() => setLayers([state]), FADE_MS);
+    return () => window.clearTimeout(id);
+  }, [state]);
+
+  return (
+    <div
+      className={cn("relative min-h-[76px] min-w-[76px] transition-transform ease-in-out motion-reduce:transition-none", className)}
+      style={{ transform: `scale(${state === "idle" ? 0.75 : 1})`, transitionDuration: `${FADE_MS}ms` }}
+    >
+      {layers.map((s) => (
+        <OrbLayer key={s} state={s} visible={s === state} />
+      ))}
+    </div>
+  );
+}
+
+function OrbLayer({ state, visible }: { state: VoiceState; visible: boolean }) {
   const isActive = state !== "idle";
 
   return (
-    <div className={cn("relative flex items-center justify-center", className)}>
+    <div
+      data-state={state}
+      className="absolute inset-0 flex items-center justify-center transition-opacity motion-reduce:transition-none"
+      style={{
+        // Incoming eases out fast, outgoing eases in late, so the sum never dips.
+        opacity: visible ? 1 : 0,
+        transitionDuration: `${FADE_MS}ms`,
+        transitionTimingFunction: "cubic-bezier(0.7, 0, 1, 1)",
+        animation: `siri-layer-in ${FADE_MS}ms cubic-bezier(0, 0, 0.3, 1)`,
+      }}
+    >
       <style>{`
+        @keyframes siri-layer-in { from { opacity: 0; } }
         /* ─── Siri orb keyframes ─── */
         @keyframes siri-rotate-1 {
           0%   { transform: rotate(0deg); }
@@ -52,10 +91,6 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
           30% { opacity: 0.8; transform: scale(1.2); }
           60% { opacity: 0.5; transform: scale(1.05); }
         }
-        @keyframes siri-ring-expand {
-          0% { transform: scale(0.7); opacity: 0.5; }
-          100% { transform: scale(2); opacity: 0; }
-        }
       `}</style>
 
       {/* ── Ambient glow ── */}
@@ -81,26 +116,6 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
         }}
       />
 
-      {/* ── Expanding rings (listening/speaking) ── */}
-      {(state === "listening" || state === "speaking") && (
-        <>
-          <div
-            className="absolute w-[72px] h-[72px] rounded-full"
-            style={{
-              border: state === "listening" ? "1.5px solid rgba(34,211,238,0.3)" : "1.5px solid rgba(52,211,153,0.3)",
-              animation: "siri-ring-expand 2.5s ease-out infinite",
-            }}
-          />
-          <div
-            className="absolute w-[72px] h-[72px] rounded-full"
-            style={{
-              border: state === "listening" ? "1px solid rgba(139,92,246,0.25)" : "1px solid rgba(34,211,238,0.25)",
-              animation: "siri-ring-expand 2.5s ease-out 0.8s infinite",
-            }}
-          />
-        </>
-      )}
-
       {/* ── The orb — layered rotating gradients inside a morphing container ── */}
       <div
         className="relative z-10 w-[76px] h-[76px] overflow-hidden"
@@ -109,6 +124,7 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
             ? `siri-morph-active ${state === "speaking" ? "3s" : state === "thinking" ? "4s" : "3.5s"} ease-in-out infinite`
             : "siri-morph 6s ease-in-out infinite",
           borderRadius: "42% 58% 50% 50% / 50% 42% 58% 50%",
+          boxShadow: "0 12px 28px -10px rgba(0,0,0,0.7)",
         }}
       >
         {/* Base fill — dark with tint */}
@@ -189,11 +205,24 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
           }}
         />
 
-        {/* Surface sheen — subtle highlight for 3D effect */}
+        {/* Sphere shading — light from top-left: shadowed far side, rim, specular */}
         <div
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-[inherit]"
           style={{
-            background: "radial-gradient(ellipse at 35% 30%, rgba(255,255,255,0.08) 0%, transparent 50%)",
+            background: "radial-gradient(circle at 36% 30%, transparent 35%, rgba(0,0,0,0.25) 65%, rgba(0,0,0,0.6) 100%)",
+            boxShadow: "inset -4px -6px 12px rgba(0,0,0,0.45), inset 2px 3px 6px rgba(255,255,255,0.12)",
+          }}
+        />
+        <div
+          className="absolute rounded-full"
+          style={{
+            left: "20%",
+            top: "14%",
+            width: "34%",
+            height: "24%",
+            background: "radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.08) 50%, transparent 75%)",
+            filter: "blur(3px)",
+            transform: "rotate(-25deg)",
           }}
         />
       </div>

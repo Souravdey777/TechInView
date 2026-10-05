@@ -297,7 +297,7 @@ export function EngineeringManagerSetup({
     >
       <InterviewSetupHero
         title="Engineering Manager Setup"
-        description="Build the voice-first hiring-manager round around the company, role, and value lens you want to be graded against. This full-length flow skips coding and focuses on role fit, prioritization, stakeholder judgment, and concrete examples from your own work — then closes with your questions for the manager."
+        description="Build the voice-first hiring-manager round around the company, role, and value lens you want to be graded against. This full-length flow skips coding and focuses on role fit, prioritization, stakeholder judgment, and concrete examples from your own work, then closes with your questions for the manager."
         metadata={[`${ENGINEERING_MANAGER_DURATION_MINUTES} min`, "Voice chat", "Leadership"]}
         contextLabel={
           [trimOrNull(company), trimOrNull(roleTitle)].filter(Boolean).join(" · ") || null

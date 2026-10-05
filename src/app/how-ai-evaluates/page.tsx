@@ -1,6 +1,20 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
+import {
+  BODY,
+  ButtonLink,
+  CELL,
+  CONTAINER,
+  Eyebrow,
+  GRID,
+  H1,
+  H3,
+  Kicker,
+  LABEL,
+  LEAD,
+  PAD,
+  SectionHeader,
+} from "@/components/marketing/ds";
 import {
   HIRE_RECOMMENDATION_CONFIG,
   SCORING_DIMENSIONS,
@@ -15,15 +29,15 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 /** Longer copy for the rubric cards; keys must match SCORING_DIMENSIONS. */
 const DIMENSION_EXPLANATIONS: Record<ScoringDimension, string> = {
   problem_solving:
-    "TechInView evaluates whether you clarify requirements and constraints, propose a reasonable approach, and reason about edge cases (empty input, duplicates, bounds) before leaning on code. Strong scores usually mean you can defend why your approach fits the problem and adjust when Tia pushes back like a real interviewer.",
+    "Did you ask about constraints and edge cases (empty input, duplicates, bounds) before writing code? Did you pick a sensible approach and explain why it fits? High scores go to candidates who change course when the interviewer points out a flaw instead of defending a dead end.",
   code_quality:
-    "TechInView scores how readable and maintainable your solution is in the session editor: naming, structure, control flow, and whether you avoid needless complexity. Idiomatic use of your language and small refactors when you notice smell help—panels care that someone else could review or extend your code.",
+    "The scorer reads your final code in the session editor: naming, structure, control flow and whether you added complexity you did not need. Ask yourself if a teammate could review it in two minutes. Small cleanups you make along the way count.",
   communication:
-    "In TechInView AI interviews, Tia hears how you explain your plan, narrate trade-offs, and respond to hints. You do not need a polished speech—structured, honest explanation (including when you are stuck) scores better than long silence.",
+    "The interviewer hears how you explain the plan, talk through tradeoffs and respond to hints. You do not need a polished speech. Saying \"I'm stuck on the duplicate case\" scores better than two minutes of silence.",
   technical_knowledge:
-    "TechInView weights depth in your answers: correct time and space complexity, why your data structures fit the constraints, and how you compare alternatives (e.g. extra space vs. in-place). Calibrated follow-ups and crisp answers when discussing bottlenecks or optimizations matter.",
+    "Correct time and space complexity, a reason for each data structure you chose, and a fair comparison with the alternatives (extra memory vs. in-place, sort vs. hash map). Vague answers to follow-up questions pull this score down.",
   testing:
-    "TechInView credits walking through examples, calling out edge cases, and checking your logic when something fails—whether you run tests in the built-in editor or trace by hand. Proactively testing corner cases and fixing bugs when output is wrong looks stronger than only happy-path code.",
+    "Walk an example through your code, name the edge cases and check them, either by running tests in the editor or by tracing by hand. Finding and fixing your own bug scores better than code that only handles the happy path.",
 };
 
 const HIRE_TIER_ORDER: HireRecommendation[] = [
@@ -43,27 +57,19 @@ function hireScoreRangeLabel(rec: HireRecommendation, index: number): string {
   return `${min}\u2013${max}`;
 }
 
+const PAGE_TITLE = "How AI Mock Interviews Are Scored";
+const PAGE_DESCRIPTION =
+  "How TechInView scores an AI mock coding interview: five weighted dimensions, the overall score formula, hire recommendation bands, and a sample report.";
+
 export const metadata: Metadata = {
-  title: "How TechInView Evaluates You — AI Interview Scoring | TechInView",
-  description:
-    "TechInView (TIV): how AI mock interviews are scored after you talk with Tia—five weighted dimensions, overall score, hire bands, and a sample report before you practice.",
-  keywords: [
-    "TechInView",
-    "TIV",
-    "Tia AI interviewer",
-    "AI interview scoring",
-    "mock interview feedback",
-    "FAANG interview rubric",
-    "coding interview evaluation",
-  ],
-  authors: [{ name: "TechInView", url: baseUrl }],
-  robots: { index: true, follow: true },
+  title: `${PAGE_TITLE} | TechInView`,
+  description: PAGE_DESCRIPTION,
   alternates: { canonical: "/how-ai-evaluates" },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: "How TechInView Evaluates You",
-    description:
-      "TechInView scoring: five weighted dimensions, hire recommendation bands, and a sample post-interview report from a Tia session.",
-    type: "website",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    type: "article",
     url: `${baseUrl}/how-ai-evaluates`,
     siteName: "TechInView",
     locale: "en_US",
@@ -72,160 +78,176 @@ export const metadata: Metadata = {
         url: DEFAULT_OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: "TechInView — How AI interview scoring works",
+        alt: "TechInView AI interview scorecard with five scored dimensions",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "How TechInView Evaluates You",
-    description:
-      "TechInView: five dimensions, weighted overall score, hire bands, and a sample Tia interview report.",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE_PATH],
   },
 };
 
+const DIMENSION_KEYS = Object.keys(SCORING_DIMENSIONS) as ScoringDimension[];
+const pct = (w: number) => Math.round(w * 100);
+
 export default function HowAiEvaluatesPage() {
   return (
-    <div className="relative overflow-hidden">
-      <div
-        className="pointer-events-none absolute top-0 left-1/2 h-[280px] w-[min(90vw,36rem)] -translate-x-1/2 rounded-full bg-brand-cyan/[0.07] blur-3xl"
-        aria-hidden
-      />
+    <>
+      <section className={cn("pb-24 pt-20 sm:pt-28", PAD)}>
+        <div className={CONTAINER}>
+          <Kicker>Scoring · DSA coding rounds</Kicker>
+          <h1 className={cn(H1, "max-w-[16ch]")}>How TechInView scores an AI mock interview</h1>
+          <p className={cn(LEAD, "mt-9 max-w-[620px]")}>
+            When a round ends, the scoring model reads the full transcript of what you said to the
+            interviewer and the code you wrote in the editor. It scores five dimensions from 0 to 100.
+            Your <strong className="font-medium text-brand-text">overall score</strong> is the weighted
+            sum of those five, and it maps to a hire recommendation from Strong Hire to No Hire.
+          </p>
+          <p className={cn(LABEL, "mt-8")}>
+            This page covers DSA coding rounds. Other round types use their own rubrics, noted below.
+          </p>
+        </div>
+      </section>
 
-      <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16 sm:px-6">
-        <header className="mb-12 max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-brand-cyan">
-            Resources
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
-            How TechInView Evaluates You
-          </h1>
-          <p className="mt-3 text-xs text-brand-muted sm:text-sm">
-            TechInView (TIV) — AI DSA mock interviews with Tia, your AI interviewer.
-          </p>
-          <p className="mt-4 text-sm leading-relaxed text-brand-muted sm:text-base">
-            When you finish a session on TechInView, our scoring model reviews what you
-            said to Tia and the code you wrote in the interview editor. Each dimension is
-            scored from 0–100. Your{" "}
-            <strong className="font-medium text-brand-text">overall score</strong> is the
-            weighted sum of those five scores. That overall maps to a hire-style
-            recommendation so you can benchmark yourself against a strong loop.
-          </p>
-        </header>
-
-        <section className="mb-14" aria-labelledby="rubric-heading">
-          <h2
-            id="rubric-heading"
-            className="text-lg font-semibold text-brand-text mb-2"
-          >
-            The five dimensions
-          </h2>
-          <p className="text-sm text-brand-muted mb-6 max-w-2xl">
-            TechInView&apos;s rubric weights mirror how many FAANG-style panels emphasize
-            problem solving and code, while still rewarding communication, depth, and
-            testing in an AI interview.
-          </p>
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {(Object.keys(SCORING_DIMENSIONS) as ScoringDimension[]).map((key) => {
+      <section aria-labelledby="rubric-heading" className={cn("border-t border-white/[0.08] py-24", PAD)}>
+        <div className={CONTAINER}>
+          <SectionHeader
+            n="01"
+            eyebrow="Rubric"
+            title={<span id="rubric-heading">The five dimensions</span>}
+            description="Problem solving and code carry the most weight, as they do in most big-tech coding loops. Communication, technical depth and testing make up the rest."
+          />
+          <ul className={cn(GRID, "sm:grid-cols-2 lg:grid-cols-3")}>
+            {DIMENSION_KEYS.map((key, i) => {
               const d = SCORING_DIMENSIONS[key];
-              const pct = Math.round(d.weight * 100);
               return (
-                <li
-                  key={key}
-                  className="rounded-xl border border-brand-border bg-brand-card/60 p-5"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-sm font-semibold text-brand-text">
-                      {d.label}
-                    </h3>
-                    <span className="shrink-0 rounded-full border border-brand-border bg-brand-surface px-2 py-0.5 text-xs text-brand-muted">
-                      {pct}% weight
-                    </span>
+                <li key={key} className={cn(CELL, "flex flex-col p-7")}>
+                  <div className={cn(LABEL, "flex justify-between gap-4")}>
+                    <span>{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-brand-cyan">{pct(d.weight)}% weight</span>
                   </div>
-                  <p className="mt-2 text-sm font-medium text-brand-text/90">
-                    {d.description}
-                  </p>
-                  <p className="mt-3 text-sm text-brand-muted leading-relaxed">
-                    {DIMENSION_EXPLANATIONS[key]}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-          <p className="mt-6 text-sm text-brand-muted max-w-2xl">
-            Overall = (Problem Solving × 30%) + (Code Quality × 25%) + (Communication ×
-            20%) + (Technical Knowledge × 15%) + (Testing × 10%), each using the
-            0–100 score for that dimension.
-          </p>
-        </section>
-
-        <section className="mb-14" aria-labelledby="hire-bands-heading">
-          <h2
-            id="hire-bands-heading"
-            className="text-lg font-semibold text-brand-text mb-2"
-          >
-            Hire recommendation bands
-          </h2>
-          <p className="text-sm text-brand-muted mb-6 max-w-2xl">
-            On TechInView, your hire recommendation comes from your weighted overall
-            score—not from any single dimension in isolation.
-          </p>
-          <ul className="space-y-3 max-w-xl">
-            {HIRE_TIER_ORDER.map((rec, i) => {
-              const cfg = HIRE_RECOMMENDATION_CONFIG[rec];
-              return (
-                <li
-                  key={rec}
-                  className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg border border-brand-border bg-brand-surface/50 px-4 py-3"
-                >
-                  <span className={cn("text-sm font-semibold", cfg.color)}>
-                    {cfg.label}
-                  </span>
-                  <span className="text-sm tabular-nums text-brand-muted">
-                    Overall {hireScoreRangeLabel(rec, i)}
+                  <h3 className={cn(H3, "mt-8")}>{d.label}</h3>
+                  <p className="mt-2 text-[15px] text-brand-text/90">{d.description}</p>
+                  <p className={cn(BODY, "mt-4")}>{DIMENSION_EXPLANATIONS[key]}</p>
+                  <span aria-hidden className="mt-auto block pt-8">
+                    <span className="relative block h-0.5 bg-white/[0.08]">
+                      <span className="absolute inset-y-0 left-0 bg-brand-cyan" style={{ width: `${pct(d.weight)}%` }} />
+                    </span>
                   </span>
                 </li>
               );
             })}
+            <li className={cn(CELL, "flex flex-col p-7")}>
+              <div className={LABEL}>Overall score</div>
+              <h3 className={cn(H3, "mt-8")}>The formula</h3>
+              <p className={cn(BODY, "mt-2")}>Each dimension is scored 0 to 100, then weighted.</p>
+              <pre className="mt-6 whitespace-pre-wrap font-mono text-[13px] leading-[1.9] text-brand-text">
+                {"overall =\n" +
+                  DIMENSION_KEYS.map(
+                    (key, i) => `  ${i ? "+ " : "  "}${SCORING_DIMENSIONS[key].label} × ${pct(SCORING_DIMENSIONS[key].weight)}%`
+                  ).join("\n")}
+              </pre>
+            </li>
           </ul>
-        </section>
+        </div>
+      </section>
 
-        <section className="mb-10" aria-labelledby="sample-heading">
-          <h2
-            id="sample-heading"
-            className="text-lg font-semibold text-brand-text mb-2"
-          >
-            Sample report
-          </h2>
-          <p className="text-sm text-brand-muted mb-8 max-w-2xl">
-            Below is a static preview of what TechInView shows after a Tia interview:
-            summary, radar chart, and per-dimension cards. A real run also includes your
-            transcript and code review on your TechInView results page.
-          </p>
+      <section aria-labelledby="hire-bands-heading" className={cn("border-t border-white/[0.08] py-24", PAD)}>
+        <div className={CONTAINER}>
+          <SectionHeader
+            n="02"
+            eyebrow="Recommendation"
+            title={<span id="hire-bands-heading">Hire recommendation bands</span>}
+            description="The recommendation comes from the weighted overall score, not from any single dimension. A 95 in communication will not carry a 40 in problem solving."
+          />
+          <table className="w-full border-collapse text-left">
+            <thead>
+              <tr className="border-y border-white/[0.08]">
+                <th scope="col" className={cn(LABEL, "py-3 pr-4 font-normal")}>Recommendation</th>
+                <th scope="col" className={cn(LABEL, "py-3 pr-4 font-normal")}>Overall</th>
+                <th scope="col" className={cn(LABEL, "hidden py-3 font-normal sm:table-cell")}>
+                  <span className="sr-only">Position on the 0 to 100 scale</span>
+                  <span aria-hidden>0 to 100</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {HIRE_TIER_ORDER.map((rec, i) => {
+                const cfg = HIRE_RECOMMENDATION_CONFIG[rec];
+                const max = i === 0 ? 100 : HIRE_RECOMMENDATION_CONFIG[HIRE_TIER_ORDER[i - 1]!].minScore - 1;
+                return (
+                  <tr key={rec} className="border-b border-white/[0.08]">
+                    <th scope="row" className="py-5 pr-4 text-[17px] font-normal tracking-[-0.01em]">
+                      {cfg.label}
+                    </th>
+                    <td className="py-5 pr-4 font-mono text-[13px] tabular-nums text-brand-muted">
+                      {hireScoreRangeLabel(rec, i)}
+                    </td>
+                    <td className="hidden w-1/2 py-5 sm:table-cell" aria-hidden>
+                      <span className="relative block h-0.5 bg-white/[0.08]">
+                        <span
+                          className="absolute inset-y-0 bg-brand-cyan"
+                          style={{ left: `${cfg.minScore}%`, width: `${max - cfg.minScore + 1}%` }}
+                        />
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="sample-heading" className={cn("border-t border-white/[0.08] py-24", PAD)}>
+        <div className={CONTAINER}>
+          <SectionHeader
+            n="03"
+            eyebrow="Sample report"
+            title={<span id="sample-heading">What you get after a round</span>}
+            description="A static example of the results page after a coding round with Tia: summary, radar chart and a note per dimension. Your real results page also has the transcript and your code."
+          />
           <SampleReportPreview />
-        </section>
+        </div>
+      </section>
 
-        <div className="flex flex-col items-start gap-4 border-t border-brand-border pt-10 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-brand-muted">
-            Ready for your own TechInView report?
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/practice"
-              className="inline-flex items-center justify-center rounded-lg border border-brand-border px-4 py-2 text-sm font-medium text-brand-text transition-colors hover:bg-brand-card"
-            >
-              Browse problems
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
-            >
-              Start practicing
-            </Link>
+      <section aria-labelledby="other-rounds-heading" className={cn("border-t border-white/[0.08] py-24", PAD)}>
+        <div className={cn(CONTAINER, "grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]")}>
+          <div>
+            <Eyebrow n="04">Other rounds</Eyebrow>
+            <h2 id="other-rounds-heading" className="text-[clamp(28px,3vw,40px)] font-normal leading-[1.05] tracking-[-0.03em]">
+              Technical Q&amp;A, Engineering Manager and Behavioral
+            </h2>
+          </div>
+          <div>
+            <p className={LEAD}>
+              Technical Q&amp;A, Engineering Manager and Behavioral rounds use a round rubric instead:
+              problem solving, communication, technical depth, execution and judgment. Behavioral and
+              Engineering Manager rounds also get a competency report graded against the value lens you
+              choose at setup, such as Amazon Leadership Principles.
+            </p>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <section className={cn("border-t border-white/[0.08] py-24", PAD)}>
+        <div className={cn(CONTAINER, "flex flex-col items-start gap-8 lg:flex-row lg:items-end lg:justify-between")}>
+          <p className="max-w-[560px] text-pretty text-[clamp(24px,2.6vw,34px)] font-normal leading-[1.15] tracking-[-0.025em]">
+            Want a scorecard of your own? Practice free, or start with a 5-minute AI interview.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <ButtonLink href="/signup">
+              Practice free <span className="font-mono">→</span>
+            </ButtonLink>
+            <ButtonLink href="/practice" variant="ghost">
+              Browse DSA problems
+            </ButtonLink>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

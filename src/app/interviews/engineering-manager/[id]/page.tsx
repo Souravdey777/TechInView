@@ -24,7 +24,7 @@ export default function EngineeringManagerInterviewPage({
   params,
 }: EngineeringManagerInterviewPageProps) {
   useEffect(() => {
-    document.title = "Engineering Manager Interview — TechInView";
+    document.title = "Engineering Manager Interview · TechInView";
 
     return () => {
       document.title = "TechInView.ai";

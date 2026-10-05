@@ -6,7 +6,7 @@ export const metadata: Metadata = createLegalMetadata({
   path: "/privacy",
   title: "Privacy Policy",
   description:
-    "How TechInView collects, uses, stores, and shares account data, interview data, analytics events, payment records, and support requests.",
+    "What TechInView collects (account details, interview and practice data, voice transcripts, analytics, payment records), why, who processes it, and how to request access or deletion.",
 });
 
 const sections: LegalSection[] = [
@@ -22,9 +22,8 @@ const sections: LegalSection[] = [
         </p>
         <p>
           TechInView is an interview preparation product for software
-          engineers. Because the core experience includes voice, code, scoring,
-          and payments, this policy covers each of those product surfaces in one
-          place.
+          engineers. A session can involve voice, code, scoring, and payments,
+          so this policy covers all of them in one place.
         </p>
       </>
     ),
@@ -194,7 +193,7 @@ export default function PrivacyPage() {
     <LegalPageShell
       currentPath="/privacy"
       title="Privacy Policy"
-      description="How TechInView handles account details, interview data, voice transcripts, payments, analytics, and support communications."
+      description="What we collect when you use TechInView, why we collect it, which providers process it, and how to ask us to correct or delete it."
       summary="We collect account details, interview and practice data, transcripts, usage analytics, and payment records. Raw candidate microphone audio is processed live by our voice provider and is not stored by TechInView. We do not sell your personal information and we do not use your content for advertising."
       sections={sections}
     />

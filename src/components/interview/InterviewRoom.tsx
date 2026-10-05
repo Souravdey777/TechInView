@@ -664,7 +664,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
           id: "error",
           input: "",
           expected: "",
-          actual: "Execution error — check your code and try again.",
+          actual: "Execution error. Check your code and try again.",
           passed: false,
           isHidden: false,
         },

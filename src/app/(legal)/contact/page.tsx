@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { Bug, CreditCard, LockKeyhole, Mail, UserRoundX } from "lucide-react";
 import { LegalPageShell, type LegalSection } from "@/components/legal/LegalPageShell";
+import { BODY, CELL, GRID, LINK_ARROW } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 import { SUPPORT_EMAIL, createLegalMetadata, createSupportMailto } from "@/lib/legal";
 
 export const metadata: Metadata = createLegalMetadata({
   path: "/contact",
   title: "Contact Support",
   description:
-    "Contact TechInView support by email for billing issues, missing credits, account access, bug reports, and privacy or legal requests.",
+    "Email TechInView support about billing, missing credits, account access, bugs, or privacy and legal requests, and see what details to include so we can help quickly.",
 });
 
 const shortcuts = [
@@ -15,25 +16,21 @@ const shortcuts = [
     title: "Billing and credits",
     description: "Orders, duplicate charges, missing credits, or refund questions.",
     href: createSupportMailto({ subject: "TechInView billing support" }),
-    icon: CreditCard,
   },
   {
     title: "Account access",
     description: "Login issues, auth problems, or account recovery requests.",
     href: createSupportMailto({ subject: "TechInView account access help" }),
-    icon: UserRoundX,
   },
   {
     title: "Bug report",
     description: "Broken flows, code runner issues, voice problems, or UI errors.",
     href: createSupportMailto({ subject: "TechInView bug report" }),
-    icon: Bug,
   },
   {
     title: "Privacy or legal",
     description: "Data requests, policy questions, or legal notices.",
     href: createSupportMailto({ subject: "TechInView privacy or legal request" }),
-    icon: LockKeyhole,
   },
 ] as const;
 
@@ -43,35 +40,23 @@ const sections: LegalSection[] = [
     content: (
       <>
         <p>
-          The fastest support channel is email. Send your request to{" "}
+          Email is the fastest way to reach us. Write to{" "}
           <a href={createSupportMailto({ subject: "TechInView support request" })}>
             {SUPPORT_EMAIL}
           </a>
-          , and use one of the quick links below if you want a pre-filled
-          subject line.
+          , or use one of the links below to start an email with the subject
+          line already filled in.
         </p>
-        <div className="not-prose mt-6 grid gap-3 sm:grid-cols-2">
-          {shortcuts.map(({ title, description, href, icon: Icon }) => (
+        <div className={cn("not-prose mt-8 sm:grid-cols-2", GRID)}>
+          {shortcuts.map(({ title, description, href }) => (
             <a
               key={title}
               href={href}
-              className="rounded-xl border border-brand-border bg-brand-surface/70 p-4 transition-colors hover:border-brand-cyan/30 hover:bg-brand-card"
+              className={cn(CELL, "group flex flex-col p-6 transition-colors hover:bg-white/[0.02]")}
             >
-              <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-brand-cyan/10 p-2 text-brand-cyan">
-                  <Icon className="h-4 w-4" aria-hidden />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-brand-text">{title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-brand-muted">
-                    {description}
-                  </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand-cyan">
-                    Email this request
-                    <Mail className="h-3.5 w-3.5" aria-hidden />
-                  </span>
-                </div>
-              </div>
+              <span className="text-[17px] tracking-[-0.01em] text-brand-text">{title}</span>
+              <span className={cn(BODY, "mt-2 flex-1")}>{description}</span>
+              <span className={cn(LINK_ARROW, "mt-5 group-hover:text-brand-text")}>Email this request →</span>
             </a>
           ))}
         </div>
@@ -83,13 +68,13 @@ const sections: LegalSection[] = [
     content: (
       <>
         <p>
-          To help us resolve your request faster, include the account email you
-          used on TechInView, a short description of the issue, and any useful
-          IDs or screenshots.
+          Tell us the email address on your TechInView account, what went
+          wrong, and any IDs or screenshots that show it. That usually saves a
+          round of back and forth.
         </p>
         <ul>
           <li>For billing: payment ID, order ID, pack name, and charge date.</li>
-          <li>For bugs: page URL, browser/device details, and repro steps.</li>
+          <li>For bugs: the page URL, your browser and device, and the steps that trigger the problem.</li>
           <li>For account access: the email address tied to the affected account.</li>
           <li>For privacy requests: the specific request and the relevant account email.</li>
         </ul>
@@ -101,14 +86,14 @@ const sections: LegalSection[] = [
     content: (
       <>
         <p>
-          We review support requests in the order they arrive and prioritize
-          billing issues, access problems, and privacy or security concerns
+          We work through requests in the order they arrive, with billing
+          issues, access problems, and privacy or security concerns handled
           first.
         </p>
         <p>
-          If your request is about refunds or missing credits, you can also read
-          the <a href="/refunds">Refund Policy</a>. For privacy-related
-          questions, see the <a href="/privacy">Privacy Policy</a>.
+          For refunds or missing credits, the <a href="/refunds">Refund
+          Policy</a> explains what we can do. For questions about your data,
+          see the <a href="/privacy">Privacy Policy</a>.
         </p>
       </>
     ),
@@ -120,7 +105,7 @@ export default function ContactPage() {
     <LegalPageShell
       currentPath="/contact"
       title="Contact Support"
-      description="Email TechInView for billing help, missing credits, account access, bug reports, and privacy or legal requests."
+      description="Email us about billing, missing credits, account access, bugs, or privacy and legal requests. Here is what to include so we can sort it out quickly."
       summary="Email is the fastest way to reach us. Include the account email you used on TechInView plus any order, payment, or page details so we can reproduce the issue. Requests are reviewed in the order they arrive, with billing, access, and privacy or security concerns handled first."
       sections={sections}
     />

@@ -9,7 +9,7 @@ import type { VoiceLatencyStats } from "@/hooks/useDeepgramVoiceAgent";
  */
 
 function fmt(v: number | null): string {
-  return v == null ? "—" : `${v}ms`;
+  return v == null ? "–" : `${v}ms`;
 }
 
 function band(v: number | null): string {

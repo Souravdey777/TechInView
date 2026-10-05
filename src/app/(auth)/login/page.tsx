@@ -7,6 +7,7 @@ import { usePostHog } from "posthog-js/react";
 import { useSupabase } from "@/hooks/useSupabase";
 import {
   AuthDivider,
+  AUTH_LINK,
   AuthErrorBanner,
   AuthSplitLayout,
 } from "@/components/auth/AuthSplitLayout";
@@ -64,22 +65,23 @@ export default function LoginPage() {
 
   return (
     <AuthSplitLayout
+      kicker="Voice-first AI mock interviews"
       eyebrow="Welcome back"
       heading="Log in."
       panelHeadline="Your interviewers are still awake."
-      panelSupporting={`Pick up practice where you left off, or spend your ${FREE_TRIAL_DURATION_MINUTES}-minute audio preview on a company persona.`}
+      panelSupporting={`Pick up practice where you left off, or use your ${FREE_TRIAL_DURATION_MINUTES}-minute voice preview with a company-style interviewer.`}
       footer={
         <>
           No account yet?{" "}
           <Link
             href={signupHref}
-            className="rounded-sm text-brand-cyan hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
+            className={AUTH_LINK}
           >
             Start free
           </Link>
         </>
       }
-      reassurance="Rounds run best on desktop. Voice, editor, and test output need the screen and a working microphone."
+      reassurance="Interviews work best on a desktop or laptop with a working microphone, since the voice panel, editor and test output share the screen."
     >
       {error && <AuthErrorBanner message={error} />}
 
