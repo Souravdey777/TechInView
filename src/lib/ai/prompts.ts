@@ -13,17 +13,14 @@ const SCORING_CALIBRATION_RULES = `- Use evidence from the transcript, final cod
 
 /**
  * Evidence tags wrap untrusted text; a candidate must not be able to close one early.
- * Matches tags with attributes too, and repeats until stable so nested input like
- * "</trans</transcript>cript>" cannot reassemble a tag after one pass.
+ * Rather than deleting tags (deletion can let fragments reassemble, e.g.
+ * "</trans</transcript>cript>"), defang them: the "<" of anything that could start an
+ * evidence tag becomes "‹", so no real tag can survive. One linear pass: the
+ * lookahead only scans the [\s/] run after each "<", so there is no ReDoS on long input.
  */
-const EVIDENCE_TAG = /<\s*\/?\s*(transcript|final_code|round_context)\b[^>]*>/gi;
+const EVIDENCE_TAG_OPEN = /<(?=[\s/]*(?:transcript|final_code|round_context)(?![a-z0-9_]))/gi;
 export function stripEvidenceTags(text: string): string {
-  let out = text;
-  for (let prev = ""; prev !== out; ) {
-    prev = out;
-    out = out.replace(EVIDENCE_TAG, "");
-  }
-  return out;
+  return text.replace(EVIDENCE_TAG_OPEN, "\u2039");
 }
 
 function formatTranscript(
