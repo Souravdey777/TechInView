@@ -26,8 +26,8 @@ export const metadata: Metadata = {
 
 /*
  * The page chrome uses the landing look (ink, cool greys, one cyan accent,
- * Geist). Fonts are set by family name here, not through --font-sans, so the
- * product specimens below still inherit Sora and JetBrains Mono.
+ * Geist), which the root layout now applies to every route via .theme-landing
+ * on <body>. Specimens restore the base :root tokens only where they document them.
  */
 const LANDING_VARS = {
   "--brand-deep": "10 11 13",
@@ -148,12 +148,6 @@ const COMPONENT_EXAMPLES = [
 export default function DesignSystemPage() {
   return (
     <div style={LANDING_VARS} className={cn(SANS, "mx-auto max-w-[1200px] bg-brand-deep text-brand-text antialiased")}>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
-      />
 
       <header className="pb-16 pt-6">
         <div className={`mb-8 ${MONO} text-xs uppercase tracking-[0.14em] text-brand-cyan`}>[ Design system ]</div>
@@ -163,8 +157,8 @@ export default function DesignSystemPage() {
         <div className="mt-10 flex flex-wrap items-end justify-between gap-8">
           <p className="max-w-[520px] text-[17px] leading-relaxed text-brand-muted">
             The reference for every surface: logo, voice orb, colour tokens, typography, components, and the
-            rules for writing copy. Marketing and product share the logo, the orb and the writing rules; they
-            differ in palette and type.
+            rules for writing copy. Marketing and product share all of it: one palette, one type family, one
+            accent.
           </p>
           <div className={`flex flex-wrap gap-x-8 gap-y-2 ${MONO} text-xs uppercase tracking-[0.08em] text-brand-muted`}>
             <span>Dark-first</span>
@@ -246,12 +240,12 @@ export default function DesignSystemPage() {
       <Section
         n="03"
         eyebrow="Colour"
-        title="Two palettes, one accent."
-        description="Product screens use the brand tokens below through Tailwind classes. Marketing pages wrap themselves in .theme-landing, which re-skins the same tokens."
+        title="One palette, one accent."
+        description="The root layout puts .theme-landing on <body>, so every page, dialog and toast uses the landing values. The :root brand-* values are the base it overrides."
       >
         <div className="space-y-12">
           <div>
-            <div className={`mb-4 ${LABEL}`}>Product · brand-* tokens</div>
+            <div className={`mb-4 ${LABEL}`}>Base · :root brand-* tokens</div>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,200px),1fr))] border-l border-t border-white/[0.08]">
               {DESIGN_SYSTEM_COLORS.map((color) => (
                 <div key={color.token} className="border-b border-r border-white/[0.08] p-5">
@@ -267,7 +261,7 @@ export default function DesignSystemPage() {
             </div>
           </div>
           <div>
-            <div className={`mb-4 ${LABEL}`}>Marketing · .theme-landing</div>
+            <div className={`mb-4 ${LABEL}`}>Applied · .theme-landing on body</div>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,200px),1fr))] border-l border-t border-white/[0.08]">
               {DESIGN_SYSTEM_LANDING_COLORS.map((c) => (
                 <div key={c.name} className="border-b border-r border-white/[0.08] p-5">
@@ -288,8 +282,8 @@ export default function DesignSystemPage() {
       <Section
         n="04"
         eyebrow="Type"
-        title="Sora in the product, Geist on marketing."
-        description="JetBrains Mono sets code, tokens and compact technical values in the product. Geist and Geist Mono are loaded on marketing pages only. The specimens below render in the product font."
+        title="Geist everywhere."
+        description="Geist sets every surface, product and marketing. Geist Mono sets code, tokens, labels and compact technical values. Both load once from the root layout."
       >
         <div className="border-t border-white/[0.08]">
           {DESIGN_SYSTEM_TYPOGRAPHY.map((item) => (

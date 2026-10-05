@@ -13,7 +13,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-10 items-center gap-1 rounded-lg bg-brand-surface border border-brand-border p-1",
+      "inline-flex h-10 items-center gap-1 rounded-full border border-white/[0.1] p-1",
       className
     )}
     {...props}
@@ -28,13 +28,12 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium",
+      "inline-flex items-center justify-center whitespace-nowrap rounded-full px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em]",
       "text-brand-muted transition-all",
-      "hover:text-brand-text hover:bg-brand-card",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-1 focus-visible:ring-offset-brand-surface",
+      "hover:text-brand-text",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-1 focus-visible:ring-offset-brand-deep",
       "disabled:pointer-events-none disabled:opacity-40",
-      "data-[state=active]:bg-brand-card data-[state=active]:text-brand-text data-[state=active]:shadow-sm",
-      "data-[state=active]:border-b-2 data-[state=active]:border-brand-cyan data-[state=active]:rounded-b-none",
+      "data-[state=active]:bg-brand-cyan/[0.08] data-[state=active]:text-brand-cyan",
       className
     )}
     {...props}

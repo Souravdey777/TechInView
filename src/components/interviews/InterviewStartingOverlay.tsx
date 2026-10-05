@@ -28,35 +28,38 @@ export function InterviewStartingOverlay({
       aria-live="polite"
       aria-label={isResuming ? "Reconnecting interview audio" : "Preparing interview audio"}
     >
-      <div className="w-full max-w-md rounded-3xl border border-brand-cyan/20 bg-brand-card p-8 text-center shadow-[0_0_80px_rgba(34,211,238,0.12)]">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan">
-          <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="w-full max-w-md rounded-[20px] border border-white/[0.08] bg-brand-deep p-8">
+        <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.14em] text-brand-subtle">
+          <Loader2 className="h-4 w-4 animate-spin text-brand-cyan" />
+          {isResuming ? "Reconnecting" : "Connecting"}
         </div>
 
-        <h2 className="mt-6 text-xl font-semibold text-brand-text">
+        <h2 className="mt-5 text-2xl font-normal tracking-[-0.03em] text-brand-text">
           {isResuming ? `Reconnecting to ${interviewerName}` : `Getting ${interviewerName} ready`}
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-brand-muted">
+        <p className="mt-3 text-[15px] leading-relaxed text-brand-muted">
           Please wait a moment. The interview will begin automatically when the audio connection is ready.
         </p>
 
-        <div className="mt-6 grid gap-2 text-left">
+        <ul className="mt-6 divide-y divide-white/[0.08] border-y border-white/[0.08]">
           {READINESS_STEPS.map(({ label, icon: Icon }, index) => (
-            <div
+            <li
               key={label}
-              className="flex items-center gap-3 rounded-xl border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-muted"
+              className="flex items-center gap-3 py-3 text-sm text-brand-muted"
             >
-              <Icon className="h-4 w-4 shrink-0 text-brand-cyan" />
+              <Icon className="h-4 w-4 shrink-0 text-brand-subtle" />
               <span>{label}</span>
               <span
                 className="ml-auto h-1.5 w-1.5 animate-pulse rounded-full bg-brand-cyan"
                 style={{ animationDelay: `${index * 180}ms` }}
               />
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
 
-        <p className="mt-5 text-xs text-brand-muted/70">This usually takes a few seconds.</p>
+        <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
+          This usually takes a few seconds.
+        </p>
       </div>
     </div>
   );

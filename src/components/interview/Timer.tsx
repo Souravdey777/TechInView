@@ -38,21 +38,21 @@ export function Timer({ timeLeft, isRunning }: TimerProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors duration-300",
+        "flex items-center gap-2 rounded-full border px-3 py-1 transition-colors duration-300",
         isCritical
-          ? "border-brand-rose/30 bg-brand-rose/5"
+          ? "border-brand-rose/30 bg-brand-rose/[0.06]"
           : isWarning
-            ? "border-brand-amber/30 bg-brand-amber/5"
-            : "border-brand-border bg-brand-card"
+            ? "border-brand-amber/30 bg-brand-amber/[0.06]"
+            : "border-white/[0.12]"
       )}
       aria-label={`Time remaining: ${formatDuration(timeLeft)}`}
     >
       <Clock
-        className={cn("h-4 w-4 transition-colors duration-300", iconClass)}
+        className={cn("h-3.5 w-3.5 transition-colors duration-300", iconClass)}
       />
       <span
         className={cn(
-          "font-mono text-sm font-semibold tabular-nums transition-colors duration-300",
+          "font-mono text-sm tabular-nums tracking-[0.02em] transition-colors duration-300",
           colorClass,
           pulseClass
         )}
@@ -60,7 +60,7 @@ export function Timer({ timeLeft, isRunning }: TimerProps) {
         {formatDuration(timeLeft)}
       </span>
       {!isRunning && (
-        <span className="text-[10px] font-medium uppercase tracking-wider text-brand-muted">
+        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle">
           Paused
         </span>
       )}

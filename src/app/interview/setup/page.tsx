@@ -43,10 +43,25 @@ import { ROUND_TYPE_LABELS } from "@/lib/loops/round-config";
 import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
 import { InterviewSetupSection } from "@/components/interviews/InterviewSetupLayout";
 import {
-  SETUP_FOCUS_RING,
+  SETUP_CELL_FOCUS,
+  SETUP_CELL_SELECTED,
   SetupMonoLabel,
   SetupRack,
 } from "@/components/interviews/setup/SetupRack";
+import {
+  BTN_GHOST,
+  BTN_SM,
+  CELL,
+  CHIP,
+  Eyebrow,
+  FIELD,
+  FOCUS,
+  GRID,
+  LABEL,
+  LEAD,
+  LINK_ARROW,
+  PAD,
+} from "@/components/marketing/ds";
 import {
   SetupSegmentedControl,
   SetupSelect,
@@ -125,27 +140,27 @@ const DIFFICULTIES: { value: Difficulty; label: string; color: string; activeCol
   {
     value: "easy",
     label: "Easy",
-    color: "text-brand-green border-brand-border hover:border-brand-green/50",
-    activeColor: "bg-brand-green/10 border-brand-green text-brand-green",
+    color: "text-brand-muted hover:bg-white/[0.04] hover:text-brand-green",
+    activeColor: "bg-brand-green/10 text-brand-green",
   },
   {
     value: "medium",
     label: "Medium",
-    color: "text-brand-amber border-brand-border hover:border-brand-amber/50",
-    activeColor: "bg-brand-amber/10 border-brand-amber text-brand-amber",
+    color: "text-brand-muted hover:bg-white/[0.04] hover:text-brand-amber",
+    activeColor: "bg-brand-amber/10 text-brand-amber",
   },
   {
     value: "hard",
     label: "Hard",
-    color: "text-brand-rose border-brand-border hover:border-brand-rose/50",
-    activeColor: "bg-brand-rose/10 border-brand-rose text-brand-rose",
+    color: "text-brand-muted hover:bg-white/[0.04] hover:text-brand-rose",
+    activeColor: "bg-brand-rose/10 text-brand-rose",
   },
 ];
 
 const DIFFICULTY_BADGE: Record<Difficulty, string> = {
-  easy: "bg-brand-green/10 text-brand-green border border-brand-green/30",
-  medium: "bg-brand-amber/10 text-brand-amber border border-brand-amber/30",
-  hard: "bg-brand-rose/10 text-brand-rose border border-brand-rose/30",
+  easy: "border-brand-green/30 text-brand-green",
+  medium: "border-brand-amber/30 text-brand-amber",
+  hard: "border-brand-rose/30 text-brand-rose",
 };
 
 const CATEGORIES: { value: Category; label: string }[] = [
@@ -208,7 +223,7 @@ function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
   return (
     <span
       className={cn(
-        "rounded-full px-2 py-0.5 text-xs font-semibold capitalize",
+        "rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em]",
         DIFFICULTY_BADGE[difficulty]
       )}
     >
@@ -226,7 +241,7 @@ function categoryLabel(category: string) {
 function CategoryTag({ category }: { category: string }) {
   const label = categoryLabel(category);
   return (
-    <span className="rounded-full border border-brand-border px-2 py-0.5 text-xs text-brand-muted">
+    <span className="rounded-full border border-white/[0.1] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-brand-muted">
       {label}
     </span>
   );
@@ -234,25 +249,23 @@ function CategoryTag({ category }: { category: string }) {
 
 function HistoricalQuestionPreview({ question }: { question: HistoricalQuestion }) {
   return (
-    <div className="rounded-lg border border-brand-border bg-brand-surface px-4 py-3">
+    <div className="rounded-[16px] border border-white/[0.08] px-4 py-4">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-          {ROUND_TYPE_LABELS[question.roundType]}
-        </span>
-        <span className="text-[11px] text-brand-muted">{Math.round(question.confidence * 100)}% confidence</span>
+        <span className={LABEL}>{ROUND_TYPE_LABELS[question.roundType]}</span>
+        <span className="font-mono text-[11px] tabular-nums text-brand-muted">{Math.round(question.confidence * 100)}% confidence</span>
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-brand-text">{question.prompt}</p>
+      <p className="mt-2 text-[15px] leading-relaxed text-brand-text">{question.prompt}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {question.topics.map((topic) => (
           <span
             key={`${question.id}-${topic}`}
-            className="rounded-full border border-brand-border px-2 py-0.5 text-[11px] text-brand-muted"
+            className="rounded-full border border-white/[0.1] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-brand-muted"
           >
             {topic}
           </span>
         ))}
       </div>
-      <p className="mt-3 text-[11px] leading-relaxed text-brand-muted">{question.sourceLabel}</p>
+      <p className="mt-3 text-xs leading-relaxed text-brand-subtle">{question.sourceLabel}</p>
     </div>
   );
 }
@@ -267,32 +280,28 @@ function GeneratedLoopRoundCard({
   onStart: (round: GeneratedLoopRound) => void;
 }) {
   return (
-    <div className="rounded-xl border border-brand-border bg-brand-card p-5">
+    <div className="rounded-[20px] border border-white/[0.08] p-5 sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-brand-cyan/20 bg-brand-cyan/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-              Round {round.order}
+            <span className="font-mono text-xs uppercase tracking-[0.14em] text-brand-subtle">
+              Round {String(round.order).padStart(2, "0")}
             </span>
-            <span className="rounded-full border border-brand-border px-3 py-1 text-[11px] font-medium text-brand-muted">
-              {ROUND_TYPE_LABELS[round.roundType]}
-            </span>
-            <span className="rounded-full border border-brand-border px-3 py-1 text-[11px] font-medium text-brand-muted">
-              {round.estimatedMinutes} min
-            </span>
+            <span className={CHIP}>{ROUND_TYPE_LABELS[round.roundType]}</span>
+            <span className={CHIP}>{round.estimatedMinutes} min</span>
             <span
               className={cn(
-                "rounded-full border px-3 py-1 text-[11px] font-medium",
+                "rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em]",
                 round.confidence === "high"
-                  ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
-                  : "border-brand-amber/20 bg-brand-amber/10 text-brand-amber"
+                  ? "border-brand-green/30 text-brand-green"
+                  : "border-brand-amber/30 text-brand-amber"
               )}
             >
               {round.confidence === "high" ? "Company-specific" : "Similar-company fallback"}
             </span>
           </div>
-          <h3 className="mt-3 text-lg font-semibold text-brand-text">{round.title}</h3>
-          <p className="mt-2 text-sm leading-relaxed text-brand-muted">{round.summary}</p>
+          <h3 className="mt-4 text-xl font-medium tracking-[-0.02em] text-brand-text">{round.title}</h3>
+          <p className="mt-2 text-[15px] leading-relaxed text-brand-muted">{round.summary}</p>
           <p className="mt-3 text-xs leading-relaxed text-brand-muted">{round.rationale}</p>
         </div>
 
@@ -319,7 +328,7 @@ function GeneratedLoopRoundCard({
         {round.focusAreas.map((focus) => (
           <span
             key={`${round.id}-${focus}`}
-            className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
+            className={CHIP}
           >
             {focus}
           </span>
@@ -352,17 +361,18 @@ function SetupSkeleton() {
         containerClassName="max-w-6xl"
         supportingText="DSA · Interview setup"
       />
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="h-10 w-64 animate-pulse rounded-lg bg-brand-surface" />
-        <div className="mt-6 grid gap-5 lg:grid-cols-12 lg:items-start">
-          <div className="space-y-5 lg:col-span-8">
-            <div className="h-40 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
-            <div className="h-48 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
-            <div className="h-56 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
+      <div className={cn("mx-auto w-full max-w-6xl py-10 sm:py-14", PAD)}>
+        <div className="h-3 w-28 animate-pulse rounded-full bg-white/[0.04]" />
+        <div className="mt-5 h-12 w-80 max-w-full animate-pulse rounded-full bg-white/[0.04]" />
+        <div className="mt-10 grid gap-6 lg:grid-cols-12 lg:items-start">
+          <div className="space-y-6 lg:col-span-8">
+            <div className="h-48 animate-pulse rounded-[20px] border border-white/[0.08] bg-white/[0.02]" />
+            <div className="h-56 animate-pulse rounded-[20px] border border-white/[0.08] bg-white/[0.02]" />
+            <div className="h-40 animate-pulse rounded-[20px] border border-white/[0.08] bg-white/[0.02]" />
           </div>
-          <div className="space-y-5 lg:col-span-4">
-            <div className="h-72 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
-            <div className="h-40 animate-pulse rounded-2xl border border-brand-border bg-brand-card" />
+          <div className="space-y-6 lg:col-span-4">
+            <div className="h-64 animate-pulse rounded-[20px] border border-white/[0.08] bg-white/[0.02]" />
+            <div className="h-12 animate-pulse rounded-full bg-white/[0.04]" />
           </div>
         </div>
       </div>
@@ -952,15 +962,15 @@ function InterviewSetupInner() {
       />
 
       {/* Body */}
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+      <main className={cn("mx-auto w-full max-w-6xl py-10 sm:py-14", PAD)}>
+        <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
           <div className="min-w-0">
-            <SetupMonoLabel>New session</SetupMonoLabel>
-            <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
+            <Eyebrow>New session</Eyebrow>
+            <h1 className="text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
               Set up the room.
             </h1>
           </div>
-          <p className="text-sm leading-relaxed text-brand-muted lg:max-w-sm lg:text-right">
+          <p className={cn(LEAD, "lg:max-w-sm lg:text-right")}>
             Practice Mode is free and self-paced. AI Interview Mode spends one
             interview credit and runs a full{" "}
             {FULL_INTERVIEW_DURATION_MINUTES}-minute voice round that is scored on{" "}
@@ -969,11 +979,11 @@ function InterviewSetupInner() {
         </header>
 
         {isPracticeMode && (
-          <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
-            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" />
+          <div className="mt-10 flex items-start gap-3 rounded-[20px] border border-white/[0.08] px-5 py-4">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-brand-subtle" />
             <div>
-              <p className="text-sm font-semibold text-brand-text">Free Practice Mode</p>
-              <p className="mt-1 text-xs text-brand-muted">
+              <p className="text-[15px] font-medium text-brand-text">Free Practice Mode</p>
+              <p className="mt-1 text-sm leading-relaxed text-brand-muted">
                 Practice Mode gives you a curated set of DSA problems, code execution, and saved progress.
                 Switch to AI Interview Mode when you want the 5-minute audio preview or a full interview round with voice and scoring.
               </p>
@@ -983,11 +993,11 @@ function InterviewSetupInner() {
 
         {/* AI preview banner */}
         {isAiInterviewMode && isFreeTrialUser && !hasCredits && (
-          <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-cyan/30 bg-brand-cyan/5 px-5 py-4">
-            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" />
+          <div className="mt-10 flex items-start gap-3 rounded-[20px] border border-white/[0.08] px-5 py-4">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-brand-subtle" />
             <div>
-              <p className="text-sm font-semibold text-brand-text">5-Minute Audio Preview</p>
-              <p className="text-xs text-brand-muted mt-1">
+              <p className="text-[15px] font-medium text-brand-text">5-Minute Audio Preview</p>
+              <p className="mt-1 text-sm leading-relaxed text-brand-muted">
                 Your preview includes a {FREE_TRIAL_DURATION_MINUTES}-minute voice session with Tia, an easy random problem, and a basic score summary.
                 Buy an interview pack for full {FULL_INTERVIEW_DURATION_MINUTES}-minute rounds, specific problem selection, and detailed AI feedback.
               </p>
@@ -997,21 +1007,21 @@ function InterviewSetupInner() {
 
         {/* No credits warning */}
         {isAiModeLocked && (
-          <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-rose/30 bg-brand-rose/5 px-5 py-4">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-rose" />
+          <div className="mt-10 flex items-start gap-3 rounded-[20px] border border-brand-rose/25 px-5 py-4">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
             <div>
-              <p className="text-sm font-semibold text-brand-text">AI Interview Mode Locked</p>
-              <p className="text-xs text-brand-muted mt-1">
+              <p className="text-[15px] font-medium text-brand-text">AI Interview Mode Locked</p>
+              <p className="mt-1 text-sm leading-relaxed text-brand-muted">
                 Your audio preview has already been used.{" "}
-                <a href="/settings" className="text-brand-cyan hover:underline">Buy an interview pack</a> to start another AI interview.
+                <a href="/settings" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>Buy an interview pack</a> to start another AI interview.
               </p>
             </div>
           </div>
         )}
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-12 lg:items-start">
+        <div className="mt-10 grid gap-6 lg:grid-cols-12 lg:items-start">
           {/* ─── Configuration racks ─── */}
-          <div className="flex min-w-0 flex-col gap-5 lg:col-span-8">
+          <div className="flex min-w-0 flex-col gap-6 lg:col-span-8">
 
         {interviewMode === "general_dsa" && (
           <SetupRack index={rackIndex.mode} label="Mode">
@@ -1033,7 +1043,7 @@ function InterviewSetupInner() {
             <SectionCard title="Target Role">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-brand-muted">
+                  <label className={cn(LABEL, "flex items-center gap-2")}>
                     <Building2 className="h-3.5 w-3.5" />
                     Company
                   </label>
@@ -1044,11 +1054,11 @@ function InterviewSetupInner() {
                       setTargetedForm((prev) => ({ ...prev, company: event.target.value }))
                     }
                     placeholder="Google"
-                    className="w-full rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                    className={FIELD}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-brand-muted">
+                  <label className={cn(LABEL, "flex items-center gap-2")}>
                     <Target className="h-3.5 w-3.5" />
                     Role Title
                   </label>
@@ -1059,17 +1069,17 @@ function InterviewSetupInner() {
                       setTargetedForm((prev) => ({ ...prev, roleTitle: event.target.value }))
                     }
                     placeholder="Senior Software Engineer"
-                    className="w-full rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                    className={FIELD}
                   />
                 </div>
               </div>
 
               <div className="mt-5">
-                <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-brand-muted">
+                <p className={cn(LABEL, "mb-3 flex items-center gap-2")}>
                   <ListFilter className="h-3.5 w-3.5" />
                   Experience Level
                 </p>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className={cn(GRID, "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4")}>
                   {EXPERIENCE_LEVEL_OPTIONS.map((level) => (
                     <button
                       key={level.value}
@@ -1078,13 +1088,15 @@ function InterviewSetupInner() {
                         setTargetedForm((prev) => ({ ...prev, experienceLevel: level.value }))
                       }
                       className={cn(
-                        "rounded-lg border px-4 py-3 text-left transition-all",
+                        CELL,
+                        "px-4 py-4 text-left transition-colors",
                         targetedForm.experienceLevel === level.value
-                          ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-                          : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
+                          ? SETUP_CELL_SELECTED
+                          : "hover:bg-white/[0.03]",
+                        SETUP_CELL_FOCUS
                       )}
                     >
-                      <p className="text-sm font-semibold text-brand-text">{level.label}</p>
+                      <p className="text-[15px] font-medium text-brand-text">{level.label}</p>
                       <p className="mt-1 text-xs leading-relaxed text-brand-muted">
                         {level.description}
                       </p>
@@ -1094,7 +1106,7 @@ function InterviewSetupInner() {
               </div>
 
               <div className="mt-5 space-y-2">
-                <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-brand-muted">
+                <label className={cn(LABEL, "flex items-center gap-2")}>
                   <FileText className="h-3.5 w-3.5" />
                   Job Description
                 </label>
@@ -1105,7 +1117,7 @@ function InterviewSetupInner() {
                   }
                   rows={12}
                   placeholder="Paste the job description here. We’ll use the company, role, and JD signals to assemble a likely interview loop."
-                  className="w-full rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm leading-relaxed text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                  className="w-full rounded-[20px] border border-white/[0.12] bg-transparent px-5 py-4 text-[15px] leading-relaxed text-brand-text placeholder:text-brand-subtle focus:border-brand-cyan focus:outline-none"
                 />
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-xs text-brand-muted">
@@ -1161,29 +1173,29 @@ function InterviewSetupInner() {
 
             {generatedLoop && (
               <SectionCard title="Likely Interview Loop">
-                <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 px-5 py-4">
+                <div className="rounded-[20px] border border-white/[0.08] px-5 py-5">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-brand-text">{generatedLoop.loopName}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-brand-muted">
+                      <p className="text-xl font-medium tracking-[-0.02em] text-brand-text">{generatedLoop.loopName}</p>
+                      <p className="mt-2 text-[15px] leading-relaxed text-brand-muted">
                         {generatedLoop.summary}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {generatedLoop.jdSignals.map((signal) => (
                           <span
                             key={signal}
-                            className="rounded-full border border-brand-border px-3 py-1 text-[11px] font-medium text-brand-muted"
+                            className={CHIP}
                           >
                             {signal.replace(/_/g, " ")}
                           </span>
                         ))}
                       </div>
                     </div>
-                    <div className="rounded-lg border border-brand-border bg-brand-surface px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-cyan">
+                    <div className="shrink-0 border-white/[0.08] lg:border-l lg:pl-5">
+                      <p className={LABEL}>
                         Confidence
                       </p>
-                      <p className="mt-2 text-sm font-semibold text-brand-text">
+                      <p className="mt-2 text-[15px] text-brand-text">
                         {generatedLoop.confidence === "high" ? "High confidence" : "Mixed with similar-company signals"}
                       </p>
                     </div>
@@ -1201,11 +1213,11 @@ function InterviewSetupInner() {
                   ))}
                 </div>
 
-                <div className="mt-5 border-t border-brand-border pt-5">
+                <div className="mt-6 border-t border-white/[0.08] pt-6">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-brand-text">See all reviewed historical questions</p>
-                      <p className="text-xs text-brand-muted mt-1">
+                      <p className="text-[15px] font-medium text-brand-text">See all reviewed historical questions</p>
+                      <p className="mt-1 text-sm text-brand-muted">
                         Browse the company-specific corpus behind this loop by topic or keyword.
                       </p>
                     </div>
@@ -1227,12 +1239,12 @@ function InterviewSetupInner() {
                           value={questionSearch}
                           onChange={(event) => setQuestionSearch(event.target.value)}
                           placeholder="Search by topic, keyword, or question phrasing"
-                          className="w-full rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                          className={FIELD}
                         />
                         <select
                           value={questionTopicFilter}
                           onChange={(event) => setQuestionTopicFilter(event.target.value)}
-                          className="rounded-lg border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-text focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                          className={cn(FIELD, "bg-brand-deep")}
                         >
                           <option value="all">All topics</option>
                           {availableQuestionTopics.map((topic) => (
@@ -1244,12 +1256,12 @@ function InterviewSetupInner() {
                       </div>
 
                       {historicalQuestionsLoading ? (
-                        <div className="flex items-center gap-2 rounded-lg border border-brand-border bg-brand-surface px-4 py-6 text-sm text-brand-muted">
+                        <div className="flex items-center gap-2 rounded-[16px] border border-white/[0.08] px-4 py-6 text-sm text-brand-muted">
                           <Loader2 className="h-4 w-4 animate-spin" />
                           Loading reviewed questions...
                         </div>
                       ) : historicalQuestionsError ? (
-                        <div className="rounded-lg border border-brand-rose/20 bg-brand-rose/5 px-4 py-3 text-sm text-brand-rose">
+                        <div className="rounded-[16px] border border-brand-rose/30 px-4 py-3 text-sm text-brand-rose">
                           {historicalQuestionsError}
                         </div>
                       ) : (
@@ -1258,7 +1270,7 @@ function InterviewSetupInner() {
                             <HistoricalQuestionPreview key={question.id} question={question} />
                           ))}
                           {historicalQuestions.length === 0 && (
-                            <div className="rounded-lg border border-brand-border bg-brand-surface px-4 py-6 text-sm text-brand-muted">
+                            <div className="rounded-[16px] border border-white/[0.08] px-4 py-6 text-sm text-brand-muted">
                               No reviewed questions matched this filter.
                             </div>
                           )}
@@ -1274,7 +1286,7 @@ function InterviewSetupInner() {
 
 
         <SetupRack index={rackIndex.problem} label="Problem">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {interviewMode === "general_dsa" && (
               <>
                 <SetupSegmentedControl<Difficulty>
@@ -1315,26 +1327,26 @@ function InterviewSetupInner() {
           {interviewMode === "general_dsa" && (
             <>
               {isSpecificSelected && (
-                <p className="mt-3 text-xs text-brand-amber">
+                <p className="mt-4 text-sm text-brand-amber">
                   Difficulty is locked to {selectedProblem?.difficulty} and category to{" "}
                   {selectedProblem?.category} to match the selected problem.
                 </p>
               )}
 
               {isPreviewSession && !isSpecificSelected && (
-                <p className="mt-3 text-xs text-brand-amber">
+                <p className="mt-4 text-sm text-brand-amber">
                   Audio preview is limited to easy problems. Buy a pack for medium and hard problems.
                 </p>
               )}
 
               {/* Chosen problem */}
               {problemMode === "random" ? (
-                <div className="mt-4">
-                  <div className="flex flex-col gap-3 rounded-xl border border-brand-cyan/40 bg-brand-cyan/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-5">
+                  <div className="flex flex-col gap-3 rounded-[16px] border border-brand-cyan/40 bg-brand-cyan/[0.06] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-start gap-3">
                       <Shuffle className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-brand-text">
+                        <p className="text-[15px] font-medium text-brand-text">
                           Random problem
                         </p>
                         <p className="mt-1">
@@ -1349,11 +1361,10 @@ function InterviewSetupInner() {
                       onClick={() => !isPreviewSession && setProblemMode("specific")}
                       disabled={isPreviewSession}
                       className={cn(
-                        "inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-lg border border-brand-border bg-brand-card px-3 text-xs font-medium text-brand-text transition-colors duration-150",
-                        isPreviewSession
-                          ? "cursor-not-allowed opacity-50"
-                          : "hover:border-brand-subtle",
-                        SETUP_FOCUS_RING
+                        BTN_GHOST,
+                        BTN_SM,
+                        "min-h-[44px] shrink-0 gap-2",
+                        isPreviewSession && "cursor-not-allowed opacity-50"
                       )}
                     >
                       <BookOpen className="h-3.5 w-3.5" />
@@ -1363,20 +1374,20 @@ function InterviewSetupInner() {
                       )}
                     </button>
                   </div>
-                  <p className="mt-2 text-xs text-brand-muted">
+                  <p className="mt-3 text-sm text-brand-muted">
                     {isPracticeMode
                       ? "A free-practice problem will be selected from the curated DSA set based on your filters above."
                       : "A problem will be selected based on your difficulty and category preferences above."}
                   </p>
                 </div>
               ) : (
-                <div className="mt-4 space-y-3">
+                <div className="mt-5 space-y-4">
                   {selectedProblem ? (
-                    <div className="flex flex-col gap-3 rounded-xl border border-brand-cyan/40 bg-brand-cyan/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-3 rounded-[16px] border border-brand-cyan/40 bg-brand-cyan/[0.06] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex min-w-0 items-start gap-3">
                         <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-brand-text">
+                          <p className="truncate text-[15px] font-medium text-brand-text">
                             {selectedProblem.title}
                           </p>
                           <p className="mt-1">
@@ -1391,10 +1402,7 @@ function InterviewSetupInner() {
                         <button
                           type="button"
                           onClick={() => setSelectedProblem(null)}
-                          className={cn(
-                            "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-brand-border bg-brand-card px-3 text-xs font-medium text-brand-text transition-colors duration-150 hover:border-brand-subtle",
-                            SETUP_FOCUS_RING
-                          )}
+                          className={cn(BTN_GHOST, BTN_SM, "min-h-[44px] gap-2")}
                         >
                           <Search className="h-3.5 w-3.5" />
                           Pick another
@@ -1402,10 +1410,7 @@ function InterviewSetupInner() {
                         <button
                           type="button"
                           onClick={() => setProblemMode("random")}
-                          className={cn(
-                            "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-3 text-xs font-medium text-brand-muted transition-colors duration-150 hover:text-brand-text",
-                            SETUP_FOCUS_RING
-                          )}
+                          className={cn(LINK_ARROW, "min-h-[44px] px-2")}
                         >
                           <Shuffle className="h-3.5 w-3.5" />
                           Use a random problem
@@ -1414,22 +1419,22 @@ function InterviewSetupInner() {
                     </div>
                   ) : null}
 
-                  <div hidden={selectedProblem !== null} className="space-y-3">
+                  <div hidden={selectedProblem !== null} className="space-y-4">
                     {/* Search input */}
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
+                      <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-subtle" />
                       <input
                         ref={searchInputRef}
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search problems by title…"
-                        className="w-full rounded-lg border border-brand-border bg-brand-surface py-2.5 pl-9 pr-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                        className={cn(FIELD, "pl-11 pr-11")}
                       />
                       {searchQuery && (
                         <button
                           onClick={() => setSearchQuery("")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-text"
+                          className={cn("absolute right-5 top-1/2 -translate-y-1/2 text-brand-muted transition-colors hover:text-brand-text", FOCUS)}
                           aria-label="Clear search"
                         >
                           <X className="h-3.5 w-3.5" />
@@ -1438,7 +1443,7 @@ function InterviewSetupInner() {
                     </div>
 
                     {/* Problems list */}
-                    <div className="max-h-64 overflow-y-auto rounded-lg border border-brand-border">
+                    <div className="max-h-64 overflow-y-auto rounded-[16px] border border-white/[0.08]">
                       {problemsLoading ? (
                         <div className="flex items-center justify-center gap-2 py-8 text-sm text-brand-muted">
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -1456,7 +1461,7 @@ function InterviewSetupInner() {
                             : "No problems found"}
                         </div>
                       ) : (
-                        <ul className="divide-y divide-brand-border">
+                        <ul className="divide-y divide-white/[0.08]">
                           {displayProblems.map((problem) => {
                             const isSelected = selectedProblem?.slug === problem.slug;
                             return (
@@ -1468,14 +1473,15 @@ function InterviewSetupInner() {
                                   className={cn(
                                     "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-100",
                                     isSelected
-                                      ? "border-l-2 border-brand-cyan bg-brand-cyan/5"
-                                      : "hover:bg-brand-surface"
+                                      ? "border-l-2 border-brand-cyan bg-brand-cyan/[0.06]"
+                                      : "hover:bg-white/[0.03]",
+                                    SETUP_CELL_FOCUS
                                   )}
                                 >
                                   <div className="min-w-0 flex-1">
                                     <p
                                       className={cn(
-                                        "truncate text-sm font-medium",
+                                        "truncate text-[15px]",
                                         isSelected
                                           ? "text-brand-cyan"
                                           : "text-brand-text"
@@ -1501,17 +1507,14 @@ function InterviewSetupInner() {
 
                     {/* Prompt if none selected */}
                     {!selectedProblem && !problemsLoading && (
-                      <p className="text-xs text-brand-muted">
+                      <p className="text-sm text-brand-muted">
                         Click a problem above to select it for your {isPracticeMode ? "practice session" : "interview"}.
                       </p>
                     )}
                     <button
                       type="button"
                       onClick={() => setProblemMode("random")}
-                      className={cn(
-                        "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-3 text-xs font-medium text-brand-muted transition-colors duration-150 hover:text-brand-text",
-                        SETUP_FOCUS_RING
-                      )}
+                      className={cn(LINK_ARROW, "min-h-[44px] px-2")}
                     >
                       <Shuffle className="h-3.5 w-3.5" />
                       Use a random problem instead
@@ -1521,18 +1524,18 @@ function InterviewSetupInner() {
               )}
 
               {isPracticeMode && problemMode === "random" && practiceRandomMatchesError ? (
-                <p className="mt-3 text-xs text-brand-rose">{practiceRandomMatchesError}</p>
+                <p className="mt-4 text-sm text-brand-rose">{practiceRandomMatchesError}</p>
               ) : null}
 
               {isPracticeMode && problemMode === "random" && !practiceRandomMatchesLoading && practiceRandomMatches.length === 0 ? (
-                <p className="mt-3 text-xs text-brand-amber">
+                <p className="mt-4 text-sm text-brand-amber">
                   No free-practice problems match these filters right now. Adjust difficulty or category to continue.
                 </p>
               ) : null}
             </>
           )}
 
-          <p className="mt-4 text-xs leading-relaxed text-brand-muted">
+          <p className="mt-6 border-t border-white/[0.08] pt-4 text-xs leading-relaxed text-brand-subtle">
             Python and JavaScript execute against real tests in the round. Java and
             C++ are selectable, but execution is still landing.
           </p>
@@ -1550,13 +1553,13 @@ function InterviewSetupInner() {
 
           {/* ─── Summary rail ─── */}
           <div className="lg:col-span-4">
-            <div className="flex flex-col gap-5 lg:sticky lg:top-8">
+            <div className="flex flex-col gap-6 lg:sticky lg:top-8">
               <SessionFactsCard title="This session" facts={sessionFacts} />
 
               {interviewMode === "general_dsa" && !isPracticeMode && (
                 <p
                   className={cn(
-                    "text-xs leading-relaxed",
+                    "text-sm leading-relaxed",
                     isPreviewSession ? "text-brand-amber" : "text-brand-muted"
                   )}
                 >
@@ -1568,13 +1571,13 @@ function InterviewSetupInner() {
 
               {/* Error */}
               {createError && (
-                <div className="flex items-start gap-3 rounded-lg border border-brand-rose/30 bg-brand-rose/5 px-4 py-3">
+                <div className="flex items-start gap-3 rounded-[16px] border border-brand-rose/30 px-4 py-3">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
                   <p className="text-sm text-brand-rose">{createError}</p>
                 </div>
               )}
               {loopError && (
-                <div className="flex items-start gap-3 rounded-lg border border-brand-rose/30 bg-brand-rose/5 px-4 py-3">
+                <div className="flex items-start gap-3 rounded-[16px] border border-brand-rose/30 px-4 py-3">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
                   <p className="text-sm text-brand-rose">{loopError}</p>
                 </div>
@@ -1592,16 +1595,16 @@ function InterviewSetupInner() {
                         (problemMode === "specific" && !selectedProblem) ||
                         (problemMode === "random" && practiceRandomMatches.length === 0)
                       }
-                      className="w-full gap-2 text-base font-semibold"
+                      className="w-full"
                     >
                       Start Practicing
-                      <ChevronRight className="h-5 w-5" />
+                      <ChevronRight />
                     </Button>
                   ) : isAiModeLocked ? (
-                    <Button asChild size="lg" className="w-full gap-2 text-base font-semibold">
+                    <Button asChild size="lg" className="w-full">
                       <Link href="/settings">
                         Get AI Interviews
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRight />
                       </Link>
                     </Button>
                   ) : (
@@ -1609,17 +1612,17 @@ function InterviewSetupInner() {
                       size="lg"
                       onClick={handleStartInterview}
                       disabled={isCreating || (problemMode === "specific" && !selectedProblem)}
-                      className="w-full gap-2 text-base font-semibold"
+                      className="w-full"
                     >
                       {isCreating ? (
                         <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <Loader2 className="animate-spin" />
                           Setting up your interview…
                         </>
                       ) : (
                         <>
                           {isPreviewSession ? "Start 5-Minute Audio Interview" : "Start AI Interview"}
-                          <ChevronRight className="h-5 w-5" />
+                          <ChevronRight />
                         </>
                       )}
                     </Button>
@@ -1629,7 +1632,7 @@ function InterviewSetupInner() {
                       variant="secondary"
                       size="lg"
                       onClick={() => handleDsaExperienceChange("practice")}
-                      className="w-full gap-2 text-sm font-medium"
+                      className="w-full"
                     >
                       <Code2 className="h-4 w-4" />
                       Practice this free instead
@@ -1648,11 +1651,11 @@ function InterviewSetupInner() {
                   <p className="text-center text-xs text-brand-muted">
                     {isPracticeMode
                       ? "Practice Mode saves your progress as you code so you can resume later."
-                      : <>By starting, you agree to live microphone processing by our voice provider. TechInView stores transcripts, code, timing, scores, and results, but not raw microphone audio. See our <Link href="/privacy" className="text-brand-cyan hover:underline">Privacy Policy</Link>.</>}
+                      : <>By starting, you agree to live microphone processing by our voice provider. TechInView stores transcripts, code, timing, scores, and results, but not raw microphone audio. See our <Link href="/privacy" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>Privacy Policy</Link>.</>}
                   </p>
                 </div>
               ) : (
-                <div className="rounded-xl border border-brand-border bg-brand-card px-5 py-4 text-sm text-brand-muted">
+                <div className="rounded-[20px] border border-white/[0.08] px-5 py-4 text-sm text-brand-muted">
                   Generate a targeted loop above, then launch any round directly from the loop cards.
                 </div>
               )}

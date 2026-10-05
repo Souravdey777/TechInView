@@ -23,8 +23,8 @@ export function VoiceLatencyHud({ stats }: { stats: VoiceLatencyStats }) {
   const last = stats.samples[stats.samples.length - 1];
 
   return (
-    <div className="pointer-events-none fixed bottom-3 right-3 z-50 w-52 rounded-lg border border-brand-border bg-brand-card/95 p-3 font-mono text-[11px] text-brand-text shadow-lg backdrop-blur-sm">
-      <div className="mb-2 flex items-center justify-between tracking-wider text-brand-muted">
+    <div className="pointer-events-none fixed bottom-3 right-3 z-50 w-52 rounded-[14px] border border-white/[0.08] bg-brand-deep p-3 font-mono text-[11px] text-brand-text">
+      <div className="mb-2 flex items-center justify-between tracking-[0.12em] text-brand-subtle">
         <span>VOICE LATENCY</span>
         <span>n={stats.count}</span>
       </div>
@@ -42,7 +42,7 @@ export function VoiceLatencyHud({ stats }: { stats: VoiceLatencyStats }) {
         <span className={band(stats.p90V2vMs)}>{fmt(stats.p90V2vMs)}</span>
       </div>
 
-      <div className="mt-1 flex items-center justify-between border-t border-brand-border pt-1 text-brand-muted">
+      <div className="mt-1 flex items-center justify-between border-t border-white/[0.08] pt-1 text-brand-muted">
         <span>think→audio</span>
         <span>{fmt(last?.thinkToAudioMs ?? null)}</span>
       </div>

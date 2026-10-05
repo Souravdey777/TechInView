@@ -27,7 +27,7 @@ type SetupSegmentedControlProps<T extends string> = {
   groupClassName?: string;
 };
 
-/** Labelled segmented control rendered as a radiogroup. */
+/** Labelled pill segmented control rendered as a radiogroup. */
 export function SetupSegmentedControl<T extends string>({
   label,
   value,
@@ -43,11 +43,11 @@ export function SetupSegmentedControl<T extends string>({
         role="radiogroup"
         aria-label={label}
         className={cn(
-          "flex overflow-hidden rounded-lg border border-brand-border bg-brand-surface",
+          "flex gap-1 rounded-full border border-white/[0.12] p-1",
           groupClassName
         )}
       >
-        {options.map((option, index) => {
+        {options.map((option) => {
           const isActive = option.value === value;
           return (
             <button
@@ -61,14 +61,12 @@ export function SetupSegmentedControl<T extends string>({
                 onChange(option.value);
               }}
               className={cn(
-                "relative flex min-h-[44px] flex-1 items-center justify-center gap-1.5 px-2 text-sm font-medium transition-colors duration-150",
-                index > 0 && "border-l",
+                "relative flex min-h-[36px] flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-sm transition-colors duration-150",
                 option.locked && "cursor-not-allowed opacity-40",
                 isActive
-                  ? option.activeClassName ??
-                      "border-brand-cyan bg-brand-cyan/10 text-brand-cyan"
+                  ? option.activeClassName ?? "bg-brand-cyan/[0.1] text-brand-cyan"
                   : option.inactiveClassName ??
-                      "border-brand-border text-brand-muted hover:text-brand-text",
+                      "text-brand-muted hover:bg-white/[0.04] hover:text-brand-text",
                 SETUP_FOCUS_RING
               )}
             >
@@ -95,7 +93,7 @@ type SetupSelectProps<T extends string> = {
   className?: string;
 };
 
-/** Labelled native select styled to match the setup racks. */
+/** Labelled native select styled as a FIELD pill. */
 export function SetupSelect<T extends string>({
   id,
   label,
@@ -111,16 +109,17 @@ export function SetupSelect<T extends string>({
         <SetupMonoLabel>{label}</SetupMonoLabel>
       </label>
       <div className="relative">
+        {/* Opaque brand-deep (not transparent) so native option lists stay dark. */}
         <select
           id={id}
           value={value}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value as T)}
           className={cn(
-            "min-h-[44px] w-full appearance-none rounded-lg border border-brand-border bg-brand-surface px-3 pr-9 text-sm text-brand-text",
+            "min-h-[46px] w-full appearance-none rounded-full border border-white/[0.12] bg-brand-deep px-5 pr-10 text-[15px] text-brand-text transition-colors focus:border-brand-cyan",
             disabled
               ? "cursor-not-allowed opacity-40"
-              : "hover:border-brand-subtle",
+              : "hover:border-white/[0.2]",
             SETUP_FOCUS_RING
           )}
         >
@@ -130,7 +129,7 @@ export function SetupSelect<T extends string>({
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-muted" />
+        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-muted" />
       </div>
     </div>
   );

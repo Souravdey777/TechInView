@@ -19,15 +19,15 @@ export function PanelResizeHandle({
   return (
     <div
       className={cn(
-        "flex w-2 shrink-0 cursor-col-resize items-center justify-center border-r border-brand-border bg-brand-surface transition-colors hover:bg-brand-cyan/10 group",
-        isDragging && "bg-brand-cyan/10"
+        "group flex w-2 shrink-0 cursor-col-resize items-center justify-center border-r border-white/[0.08] bg-brand-deep transition-colors hover:bg-brand-cyan/[0.06]",
+        isDragging && "bg-brand-cyan/[0.06]"
       )}
       onMouseDown={onMouseDown}
       onTouchStart={onTouchStart}
     >
       <GripVertical
         className={cn(
-          "h-5 w-5 text-brand-border transition-colors group-hover:text-brand-cyan/60",
+          "h-5 w-5 text-white/[0.12] transition-colors group-hover:text-brand-cyan/60",
           isDragging && "text-brand-cyan/60"
         )}
       />

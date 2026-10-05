@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LayoutDashboard } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { Button } from "@/components/ui/button";
+import { FOCUS, PAD } from "@/components/marketing/ds";
 import { useSupabase } from "@/hooks/useSupabase";
 import { cn } from "@/lib/utils";
 
@@ -31,17 +32,21 @@ export function SetupPageHeader({
   };
 
   return (
-    <div className="border-b border-brand-border bg-brand-surface">
+    <div className="border-b border-white/[0.08] bg-brand-deep">
       <div
         className={cn(
-          "mx-auto flex flex-col gap-3 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between",
+          "mx-auto flex w-full flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between",
+          PAD,
           containerClassName
         )}
       >
         <button
           type="button"
           onClick={() => void handleLogoClick()}
-          className="inline-flex w-fit items-center rounded-lg text-left transition-opacity hover:opacity-90"
+          className={cn(
+            "inline-flex w-fit items-center text-left transition-opacity hover:opacity-90",
+            FOCUS
+          )}
           aria-label={user ? "Go to dashboard" : "Go to homepage"}
         >
           <BrandLogo size="sm" wordmarkClassName="text-base" />
@@ -49,15 +54,15 @@ export function SetupPageHeader({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center md:justify-end">
           {supportingText ? (
-            <span className="text-left text-xs text-brand-muted sm:text-sm md:text-right">
+            <span className="text-left font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle md:text-right">
               {supportingText}
             </span>
           ) : null}
 
           {user ? (
-            <Button asChild variant="secondary" className="w-full sm:w-auto">
+            <Button asChild variant="secondary" size="sm" className="w-full sm:w-auto">
               <Link href="/dashboard">
-                <LayoutDashboard className="h-4 w-4" />
+                <LayoutDashboard />
                 Go to dashboard
               </Link>
             </Button>

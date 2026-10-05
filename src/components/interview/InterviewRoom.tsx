@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { cn } from "@/lib/utils";
+import { BTN_GHOST, BTN_PRIMARY, BTN_SM } from "@/components/marketing/ds";
 
 import { VoicePanel } from "./VoicePanel";
 import { TranscriptChat } from "./TranscriptChat";
@@ -988,37 +989,36 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // Scoring overlay — shown while AI evaluates the interview
   if (isScoring) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep overflow-hidden">
+      <div className="flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-brand-deep">
         <InterviewStartingOverlay
           visible={isConnectingVoice}
           interviewerName={interviewer.name}
           isResuming={isResuming}
         />
-        <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-        <div className="absolute w-[400px] h-[400px] rounded-full bg-brand-cyan/5 blur-[100px] animate-pulse" />
-        <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">
-          {/* Siri orb — thinking state for scoring */}
+        <div className="relative z-10 flex max-w-md flex-col items-center gap-8 px-6 text-center">
+          {/* Voice orb in the thinking state while scoring runs */}
           <VoiceVisualizer state="thinking" className="h-36 w-36" />
 
           <div style={{ animation: "scoring-fade-in 0.6s ease-out 0.2s both" }}>
-            <h1 className="text-2xl font-bold text-brand-text">
+            <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">Scoring</div>
+            <h1 className="text-balance text-3xl font-normal leading-[1.05] tracking-[-0.03em] text-brand-text">
               {interviewer.name} is reviewing your performance
             </h1>
-            <p className="text-brand-muted text-sm mt-2 leading-relaxed">
+            <p className="mt-3 text-[15px] leading-relaxed text-brand-muted">
               Evaluating {scoringDimensionLabels.join(", ").toLowerCase()}.
             </p>
           </div>
           <div className="w-full space-y-2.5" style={{ animation: "scoring-fade-in 0.6s ease-out 0.5s both" }}>
             {scoringDimensionLabels.map((dim, i) => (
               <div key={dim} className="flex items-center gap-3">
-                <span className="text-[11px] text-brand-muted w-32 text-right shrink-0">{dim}</span>
-                <div className="flex-1 h-1.5 rounded-full bg-brand-border overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-brand-amber to-amber-400" style={{ animation: `scoring-progress ${6 + i * 1.5}s ease-out ${i * 0.4}s both` }} />
+                <span className="w-32 shrink-0 text-right font-mono text-[11px] uppercase tracking-[0.08em] text-brand-subtle">{dim}</span>
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                  <div className="h-full rounded-full bg-brand-cyan" style={{ animation: `scoring-progress ${6 + i * 1.5}s ease-out ${i * 0.4}s both` }} />
                 </div>
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-brand-muted/60" style={{ animation: "scoring-fade-in 0.6s ease-out 0.8s both" }}>This usually takes 5-10 seconds</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle" style={{ animation: "scoring-fade-in 0.6s ease-out 0.8s both" }}>This usually takes 5-10 seconds</p>
         </div>
       </div>
     );
@@ -1027,20 +1027,21 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   // Start overlay — requires user click to unlock browser audio
   if (!hasStarted) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-brand-deep overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-        <div className="absolute w-[500px] h-[500px] rounded-full bg-brand-cyan/4 blur-[120px]" />
-        <div className="relative z-10 flex flex-col items-center gap-8 max-w-md text-center px-6">
-          {/* Siri orb — idle state for start screen */}
+      <div className="flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-brand-deep">
+        <div className="relative z-10 flex max-w-md flex-col items-center gap-8 px-6 text-center">
+          {/* Voice orb in the idle state on the start screen */}
           <div style={{ animation: "start-fade-up 0.8s ease-out both" }}>
             <VoiceVisualizer state="idle" className="h-40 w-40" />
           </div>
 
           <div style={{ animation: "start-fade-up 0.8s ease-out 0.15s both" }}>
-            <h1 className="text-3xl font-bold text-brand-text tracking-tight">
+            <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
+              {isResuming ? "Session active" : "Interview room"}
+            </div>
+            <h1 className="text-balance text-[clamp(32px,4.4vw,48px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
               {isResuming ? "Resume your interview" : "Ready to begin?"}
             </h1>
-            <p className="text-brand-muted text-sm mt-3 leading-relaxed">
+            <p className="mt-4 text-[15px] leading-relaxed text-brand-muted">
               {isResuming ? (
                 <>Your session is still active. You have approximately{" "}
                 <span className="text-brand-text font-medium">{Math.ceil(timeLeft / 60)} minute{Math.ceil(timeLeft / 60) !== 1 ? "s" : ""}</span> remaining.</>
@@ -1059,22 +1060,21 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
             </p>
           </div>
           {!isResuming && (
-            <div className="flex items-center justify-center gap-6 text-[11px] text-brand-muted" style={{ animation: "start-fade-up 0.8s ease-out 0.3s both" }}>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-cyan/60" />Voice conversation</span>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-green/60" />{isCodingRound ? "Live coding" : "Structured workspace"}</span>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-brand-amber/60" />AI scoring</span>
+            <div className="flex items-center justify-center gap-6 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-subtle" style={{ animation: "start-fade-up 0.8s ease-out 0.3s both" }}>
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-white/[0.24]" />Voice conversation</span>
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-white/[0.24]" />{isCodingRound ? "Live coding" : "Structured workspace"}</span>
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-white/[0.24]" />AI scoring</span>
             </div>
           )}
           <button
             onClick={isResuming ? resumeInterview : startInterview}
             disabled={isConnectingVoice}
             className={cn(
-              "flex items-center gap-2 rounded-xl px-10 py-3.5 text-base font-semibold text-brand-deep transition-all",
-              isConnectingVoice
-                ? "cursor-wait bg-brand-cyan/70"
-                : "bg-brand-cyan hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98]",
+              BTN_PRIMARY,
+              "px-10",
+              isConnectingVoice && "cursor-wait bg-brand-cyan/70 hover:bg-brand-cyan/70",
             )}
-            style={{ animation: "start-fade-up 0.8s ease-out 0.45s both, start-btn-glow 3s ease-in-out infinite" }}
+            style={{ animation: "start-fade-up 0.8s ease-out 0.45s both" }}
           >
             {isConnectingVoice
               ? "Connecting..."
@@ -1090,13 +1090,13 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
               <button
                 type="button"
                 onClick={() => void continueInTextMode()}
-                className="rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 px-4 py-2 text-sm font-semibold text-brand-cyan hover:bg-brand-cyan/15"
+                className={cn(BTN_GHOST, BTN_SM)}
               >
                 Continue with text
               </button>
             </div>
           )}
-          <p className="text-xs text-brand-muted/60" style={{ animation: "start-fade-up 0.8s ease-out 0.6s both" }}>
+          <p className="text-xs text-brand-subtle" style={{ animation: "start-fade-up 0.8s ease-out 0.6s both" }}>
             {isResuming
               ? "Click resume to continue where you left off"
               : "Make sure your speakers are on \u00b7 You can also type responses"}
@@ -1107,13 +1107,13 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-brand-deep overflow-hidden">
-      {/* ── Top bar ── */}
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-brand-border bg-brand-card px-4">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-brand-deep">
+      {/* ── Top bar: hairline bottom border and mono metadata, like the app nav ── */}
+      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.08] bg-brand-deep px-4">
         <div className="flex min-w-0 shrink items-center gap-3">
           <BrandLogo size="sm" wordmarkClassName="text-sm" />
-          <span className="h-4 w-px shrink-0 bg-brand-border" aria-hidden />
-          <span className="truncate text-xs text-brand-muted">
+          <span className="h-4 w-px shrink-0 bg-white/[0.08]" aria-hidden />
+          <span className="truncate font-mono text-[11px] uppercase tracking-[0.12em] text-brand-muted">
             {isCodingRound && activeProblem
               ? activeProblem.title
               : ROUND_TYPE_LABELS[roundType] ?? "Interview"}
@@ -1122,7 +1122,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
 
         <div className="flex shrink-0 items-center gap-3">
           <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
-          <span className="hidden font-mono text-[10px] text-brand-subtle 2xl:inline">
+          <span className="hidden font-mono text-[11px] tracking-[0.08em] text-brand-subtle 2xl:inline">
             #{interviewId.slice(-6).toUpperCase()}
           </span>
         </div>
@@ -1132,7 +1132,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
       <div className="flex flex-1 overflow-hidden">
         {/* ── Left panel (resizable) ── */}
         <aside
-          className="flex shrink-0 flex-col border-r border-brand-border bg-brand-surface overflow-hidden"
+          className="flex shrink-0 flex-col overflow-hidden border-r border-white/[0.08] bg-brand-deep"
           style={{ width: `${panelWidth}px` }}
         >
 
@@ -1191,7 +1191,7 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         </main>
 
         {/* ── Voice channel + transcript ── */}
-        <aside className="flex w-[300px] shrink-0 flex-col overflow-hidden border-l border-brand-border bg-brand-surface xl:w-[336px]">
+        <aside className="flex w-[300px] shrink-0 flex-col overflow-hidden border-l border-white/[0.08] bg-brand-deep xl:w-[336px]">
           <div className="shrink-0">
             <VoicePanel
               voiceState={voiceState}

@@ -10,7 +10,7 @@ const NOISE =
   ) +
   "\")";
 
-/** Geist / Geist Mono for marketing surfaces (not part of next/font in this Next version). */
+/** Geist / Geist Mono, loaded once by the root layout (not part of next/font in this Next version). */
 export function GeistFonts() {
   return (
     <>
@@ -35,7 +35,7 @@ type MarketingShellProps = {
 };
 
 /**
- * Frame for every public page: landing theme tokens, Geist, film grain,
+ * Frame for every public page: landing theme tokens (also on <body>), film grain,
  * skip link, header and footer. Pages render <section>s inside it.
  */
 export function MarketingShell({
@@ -52,7 +52,6 @@ export function MarketingShell({
         className
       )}
     >
-      <GeistFonts />
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-[60] opacity-[0.07]"

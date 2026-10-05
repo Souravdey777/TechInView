@@ -63,7 +63,7 @@ export function DeletePrepPlanButton({
       </DialogTrigger>
 
       {/* Portaled outside the themed layout, so it re-applies the theme itself. */}
-      <DialogContent className="theme-landing rounded-[20px] border-white/[0.08] bg-brand-deep font-sans shadow-none">
+      <DialogContent className="rounded-[20px] border-white/[0.08] bg-brand-deep shadow-none">
         <DialogHeader>
           <DialogTitle className="text-2xl font-normal tracking-[-0.03em]">
             Delete this prep plan?

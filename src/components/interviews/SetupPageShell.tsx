@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowRight, Clock3, Sparkles } from "lucide-react";
 import {
   InterviewSetupAsideCard,
@@ -7,7 +6,8 @@ import {
   InterviewSetupSection,
   type InterviewSetupStatus,
 } from "@/components/interviews/InterviewSetupLayout";
-import { Button } from "@/components/ui/button";
+import { BODY, ButtonLink, CHIP } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 
 type SetupPageShellProps = {
   title: string;
@@ -38,7 +38,7 @@ export function SetupPageShell({
       supportingText={contextLabel ?? `${title} · Interview setup`}
       aside={
         <InterviewSetupAsideCard title="Availability" icon={<Clock3 className="h-3.5 w-3.5" />}>
-          <p className="mt-3 text-sm leading-relaxed text-brand-muted">
+          <p className={cn(BODY, "mt-3")}>
             {status === "live"
               ? "This interview is available now and follows the same setup-to-results flow as every other live round."
               : "This interview format is visible in the shared setup experience while its dedicated runtime is being built."}
@@ -54,7 +54,7 @@ export function SetupPageShell({
         contextLabel={contextLabel}
       />
 
-      <div className="mt-8">
+      <div className="mt-10">
         <InterviewSetupSection
           title="Interview format"
           icon={<Sparkles className="h-3.5 w-3.5" />}
@@ -62,10 +62,7 @@ export function SetupPageShell({
         >
           <div className="mt-4 flex flex-wrap gap-2">
             {setupHighlights.map((item) => (
-              <span
-                key={`${title}-format-${item}`}
-                className="rounded-full border border-brand-border bg-brand-card px-3 py-1 text-xs text-brand-muted"
-              >
+              <span key={`${title}-format-${item}`} className={CHIP}>
                 {item}
               </span>
             ))}
@@ -73,17 +70,15 @@ export function SetupPageShell({
         </InterviewSetupSection>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-3 border-t border-brand-border pt-6">
-        <Button asChild>
-          <Link href={primaryHref}>
-            {primaryLabel}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+      <div className="mt-8 flex flex-wrap gap-3 border-t border-white/[0.08] pt-8">
+        <ButtonLink href={primaryHref}>
+          {primaryLabel}
+          <ArrowRight className="h-4 w-4" />
+        </ButtonLink>
         {secondaryHref && secondaryLabel ? (
-          <Button asChild variant="secondary">
-            <Link href={secondaryHref}>{secondaryLabel}</Link>
-          </Button>
+          <ButtonLink href={secondaryHref} variant="ghost">
+            {secondaryLabel}
+          </ButtonLink>
         ) : null}
       </div>
     </InterviewSetupLayout>

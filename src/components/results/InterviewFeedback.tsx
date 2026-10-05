@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Star, MessageSquare, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { Star, Send, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { BODY, LABEL } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
 
 type InterviewFeedbackProps = {
@@ -89,14 +92,12 @@ export function InterviewFeedback({
       <DialogContent className="max-w-md">
         {submitted ? (
           <div className="flex flex-col items-center gap-4 py-6 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-green/10 border border-brand-green/20">
-              <CheckCircle2 className="h-7 w-7 text-brand-green" />
-            </div>
             <div>
-              <h3 className="text-lg font-semibold text-brand-text">
+              <p className={cn(LABEL, "text-brand-green")}>Received</p>
+              <h3 className="mt-3 text-2xl font-normal tracking-[-0.03em] text-brand-text">
                 {existingFeedback ? "Feedback Updated" : "Thanks for your feedback"}
               </h3>
-              <p className="text-sm text-brand-muted mt-1.5">
+              <p className={cn(BODY, "mt-2")}>
                 Your input helps us make TechInView better for everyone.
               </p>
             </div>
@@ -107,8 +108,8 @@ export function InterviewFeedback({
                   className={cn(
                     "h-5 w-5 transition-colors",
                     star <= rating
-                      ? "fill-brand-amber text-brand-amber"
-                      : "text-brand-border"
+                      ? "fill-brand-cyan text-brand-cyan"
+                      : "text-white/[0.18]"
                   )}
                 />
               ))}
@@ -117,8 +118,7 @@ export function InterviewFeedback({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-brand-cyan" />
+              <DialogTitle>
                 How was your interview?
               </DialogTitle>
               <DialogDescription>
@@ -127,10 +127,10 @@ export function InterviewFeedback({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-5 mt-1">
+            <div className="mt-1 space-y-5">
               {/* Star rating */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-brand-text">
+                <label className={LABEL}>
                   Overall experience
                 </label>
                 <div className="flex items-center gap-3">
@@ -142,21 +142,21 @@ export function InterviewFeedback({
                         onClick={() => setRating(star)}
                         onMouseEnter={() => setHoveredStar(star)}
                         onMouseLeave={() => setHoveredStar(0)}
-                        className="p-0.5 rounded transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:ring-offset-1 focus:ring-offset-brand-card"
+                        className="rounded p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
                       >
                         <Star
                           className={cn(
                             "h-7 w-7 transition-colors duration-150",
                             star <= displayStar
-                              ? "fill-brand-amber text-brand-amber"
-                              : "text-brand-border hover:text-brand-muted"
+                              ? "fill-brand-cyan text-brand-cyan"
+                              : "text-white/[0.18] hover:text-brand-muted"
                           )}
                         />
                       </button>
                     ))}
                   </div>
                   {displayStar > 0 && (
-                    <span className="text-xs text-brand-muted animate-in fade-in-0 slide-in-from-left-1 duration-150">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted animate-in fade-in-0 slide-in-from-left-1 duration-150">
                       {STAR_LABELS[displayStar - 1]}
                     </span>
                   )}
@@ -167,26 +167,21 @@ export function InterviewFeedback({
               <div className="space-y-1.5">
                 <label
                   htmlFor="went-well"
-                  className="text-sm font-medium text-brand-text"
+                  className={LABEL}
                 >
                   What went well?
-                  <span className="text-brand-muted font-normal ml-1">
+                  <span className="ml-1 normal-case tracking-normal">
                     (optional)
                   </span>
                 </label>
-                <textarea
+                <Textarea
                   id="went-well"
                   value={wentWell}
                   onChange={(e) => setWentWell(e.target.value)}
                   placeholder="e.g. The AI interviewer felt realistic, hints were helpful..."
                   rows={2}
                   maxLength={500}
-                  className={cn(
-                    "w-full rounded-lg border border-brand-border bg-brand-surface px-3 py-2",
-                    "text-sm text-brand-text placeholder:text-brand-muted/50",
-                    "focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent",
-                    "resize-none transition-colors"
-                  )}
+                  className="min-h-0"
                 />
               </div>
 
@@ -194,48 +189,37 @@ export function InterviewFeedback({
               <div className="space-y-1.5">
                 <label
                   htmlFor="to-improve"
-                  className="text-sm font-medium text-brand-text"
+                  className={LABEL}
                 >
                   What could be better?
-                  <span className="text-brand-muted font-normal ml-1">
+                  <span className="ml-1 normal-case tracking-normal">
                     (optional)
                   </span>
                 </label>
-                <textarea
+                <Textarea
                   id="to-improve"
                   value={toImprove}
                   onChange={(e) => setToImprove(e.target.value)}
                   placeholder="e.g. Voice was laggy, problem was too easy, scoring felt off..."
                   rows={2}
                   maxLength={500}
-                  className={cn(
-                    "w-full rounded-lg border border-brand-border bg-brand-surface px-3 py-2",
-                    "text-sm text-brand-text placeholder:text-brand-muted/50",
-                    "focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent",
-                    "resize-none transition-colors"
-                  )}
+                  className="min-h-0"
                 />
               </div>
 
               {/* Submit */}
-              <div className="flex items-center justify-between pt-2 border-t border-brand-border">
-                <button
+              <div className="flex items-center justify-between border-t border-white/[0.08] pt-4">
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={() => onOpenChange(false)}
-                  className="text-sm text-brand-muted hover:text-brand-text transition-colors"
                 >
                   Skip
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={handleSubmit}
                   disabled={rating === 0 || submitting}
-                  className={cn(
-                    "inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all",
-                    rating > 0
-                      ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90 hover:scale-[1.02] active:scale-[0.98]"
-                      : "bg-brand-surface text-brand-muted cursor-not-allowed border border-brand-border"
-                  )}
                 >
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -243,7 +227,7 @@ export function InterviewFeedback({
                     <Send className="h-4 w-4" />
                   )}
                   Submit Feedback
-                </button>
+                </Button>
               </div>
             </div>
           </>

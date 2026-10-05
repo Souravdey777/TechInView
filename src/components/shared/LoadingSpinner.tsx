@@ -15,17 +15,17 @@ const SIZE_CONFIG: Record<
   sm: {
     spinner: "w-4 h-4 border-2",
     track: "w-4 h-4 border-2",
-    text: "text-xs",
+    text: "text-[10px]",
   },
   md: {
     spinner: "w-8 h-8 border-2",
     track: "w-8 h-8 border-2",
-    text: "text-sm",
+    text: "text-[11px]",
   },
   lg: {
     spinner: "w-12 h-12 border-[3px]",
     track: "w-12 h-12 border-[3px]",
-    text: "text-base",
+    text: "text-xs",
   },
 };
 
@@ -50,7 +50,7 @@ export function LoadingSpinner({
         {/* Track ring */}
         <div
           className={cn(
-            "absolute rounded-full border-brand-border",
+            "absolute rounded-full border-white/[0.08]",
             config.track
           )}
         />
@@ -65,7 +65,7 @@ export function LoadingSpinner({
       </div>
 
       {message && (
-        <p className={cn("text-brand-muted font-medium", config.text)}>
+        <p className={cn("font-mono uppercase tracking-[0.12em] text-brand-subtle", config.text)}>
           {message}
         </p>
       )}

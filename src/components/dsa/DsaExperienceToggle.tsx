@@ -2,6 +2,11 @@
 
 import { Brain, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CELL, GRID } from "@/components/marketing/ds";
+import {
+  SETUP_CELL_FOCUS,
+  SETUP_CELL_SELECTED,
+} from "@/components/interviews/setup/SetupRack";
 import type { DsaExperience } from "@/lib/dsa";
 
 type DsaExperienceToggleProps = {
@@ -31,7 +36,7 @@ export function DsaExperienceToggle({
   aiDescription = "Turn the same problem into a voice-based mock interview.",
 }: DsaExperienceToggleProps) {
   return (
-    <div className="grid gap-3 md:grid-cols-2">
+    <div className={cn(GRID, "grid-cols-1 md:grid-cols-2")}>
       {(
         [
           {
@@ -59,28 +64,29 @@ export function DsaExperienceToggle({
             type="button"
             onClick={() => onChange(option.id)}
             className={cn(
-              "rounded-xl border px-4 py-4 text-left transition-all duration-150",
-              isActive
-                ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-                : "border-brand-border hover:border-brand-subtle hover:bg-brand-surface"
+              CELL,
+              "p-5 text-left transition-colors duration-150",
+              isActive ? SETUP_CELL_SELECTED : "hover:bg-white/[0.03]",
+              SETUP_CELL_FOCUS
             )}
           >
             <div className="flex items-start gap-3">
-              <div
+              <Icon
                 className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border",
-                  isActive
-                    ? "border-brand-cyan/30 bg-brand-cyan/10"
-                    : "border-brand-border bg-brand-surface"
+                  "mt-1 h-4 w-4 shrink-0",
+                  isActive ? "text-brand-cyan" : "text-brand-subtle"
                 )}
-              >
-                <Icon className={cn("h-4 w-4", isActive ? "text-brand-cyan" : "text-brand-muted")} />
-              </div>
+              />
               <div>
-                <p className={cn("text-sm font-semibold", isActive ? "text-brand-cyan" : "text-brand-text")}>
+                <p
+                  className={cn(
+                    "text-xl font-medium tracking-[-0.02em]",
+                    isActive ? "text-brand-text" : "text-brand-muted"
+                  )}
+                >
                   {option.label}
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-brand-muted">
+                <p className="mt-2 text-sm leading-relaxed text-brand-muted">
                   {option.description}
                 </p>
               </div>

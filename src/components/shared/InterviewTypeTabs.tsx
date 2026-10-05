@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Braces, Network, MonitorSmartphone, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BODY, CELL, GRID } from "@/components/marketing/ds";
+import {
+  SETUP_CELL_FOCUS,
+  SETUP_CELL_SELECTED,
+} from "@/components/interviews/setup/SetupRack";
 
 type InterviewType = "dsa" | "system-design" | "machine-coding";
 
@@ -25,6 +30,12 @@ const COMING_SOON_TABS: { id: InterviewType; label: string; icon: React.ElementT
   },
 ];
 
+const TAB_BASE = cn(
+  CELL,
+  "group flex w-full items-center gap-3 px-5 py-4 text-left transition-colors duration-150",
+  SETUP_CELL_FOCUS
+);
+
 export function InterviewTypeTabs({ children }: InterviewTypTabsProps) {
   const [activeTab, setActiveTab] = useState<InterviewType>("dsa");
 
@@ -32,32 +43,25 @@ export function InterviewTypeTabs({ children }: InterviewTypTabsProps) {
 
   return (
     <>
-      {/* Tab bar */}
-      <div className="w-full rounded-2xl border border-brand-border bg-brand-card p-2">
-        <div className="grid gap-2 sm:grid-cols-3">
+      {/* Tab bar: hairline grid, cyan inset hairline on the active cell */}
+      <div className={cn(GRID, "w-full grid-cols-1 sm:grid-cols-3")}>
         <button
           onClick={() => setActiveTab("dsa")}
           className={cn(
-            "group flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-150",
-            activeTab === "dsa"
-              ? "border-brand-cyan/35 bg-brand-cyan/10 text-brand-text shadow-[inset_0_0_0_1px_rgba(34,211,238,0.12)]"
-              : "border-transparent text-brand-muted hover:border-brand-border hover:bg-brand-surface hover:text-brand-text"
+            TAB_BASE,
+            activeTab === "dsa" ? SETUP_CELL_SELECTED : "hover:bg-white/[0.03]"
           )}
         >
-          <div
+          <Braces
             className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border bg-brand-surface transition-colors",
-              activeTab === "dsa"
-                ? "border-brand-cyan/30 text-brand-cyan"
-                : "border-brand-border text-brand-muted group-hover:text-brand-text"
+              "h-4 w-4 shrink-0",
+              activeTab === "dsa" ? "text-brand-cyan" : "text-brand-subtle group-hover:text-brand-text"
             )}
-          >
-            <Braces className="h-4 w-4" />
-          </div>
+          />
           <span
             className={cn(
-              "min-w-0 flex-1 text-sm font-semibold",
-              activeTab === "dsa" ? "text-brand-cyan" : "text-brand-text"
+              "min-w-0 flex-1 text-[15px] font-medium tracking-[-0.01em]",
+              activeTab === "dsa" ? "text-brand-text" : "text-brand-muted"
             )}
           >
             DSA / Coding
@@ -68,36 +72,29 @@ export function InterviewTypeTabs({ children }: InterviewTypTabsProps) {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "group flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-150",
-              activeTab === tab.id
-                ? "border-brand-amber/35 bg-brand-amber/10 text-brand-text shadow-[inset_0_0_0_1px_rgba(251,191,36,0.12)]"
-                : "border-transparent text-brand-muted hover:border-brand-border hover:bg-brand-surface hover:text-brand-text"
+              TAB_BASE,
+              activeTab === tab.id ? SETUP_CELL_SELECTED : "hover:bg-white/[0.03]"
             )}
           >
-            <div
+            <tab.icon
               className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border bg-brand-surface transition-colors",
-                activeTab === tab.id
-                  ? "border-brand-amber/30 text-brand-amber"
-                  : "border-brand-border text-brand-muted group-hover:text-brand-text"
+                "h-4 w-4 shrink-0",
+                activeTab === tab.id ? "text-brand-cyan" : "text-brand-subtle group-hover:text-brand-text"
               )}
-            >
-              <tab.icon className="h-4 w-4" />
-            </div>
+            />
             <span
               className={cn(
-                "min-w-0 flex-1 text-sm font-semibold",
-                activeTab === tab.id ? "text-brand-text" : "text-brand-text/90"
+                "min-w-0 flex-1 text-[15px] font-medium tracking-[-0.01em]",
+                activeTab === tab.id ? "text-brand-text" : "text-brand-muted"
               )}
             >
               {tab.label}
             </span>
-            <span className="shrink-0 rounded-full border border-brand-amber/30 bg-brand-amber/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-amber">
+            <span className="shrink-0 rounded-full border border-brand-amber/30 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-brand-amber">
               Soon
             </span>
           </button>
         ))}
-        </div>
       </div>
 
       {/* Content */}
@@ -105,18 +102,16 @@ export function InterviewTypeTabs({ children }: InterviewTypTabsProps) {
         children
       ) : comingSoonTab ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-amber/10 border border-brand-amber/25 mb-5">
-            <comingSoonTab.icon className="w-7 h-7 text-brand-amber" />
-          </div>
-          <h3 className="text-lg font-bold text-brand-text mb-2">
+          <comingSoonTab.icon className="mb-5 h-6 w-6 text-brand-subtle" />
+          <h3 className="mb-3 text-2xl font-normal tracking-[-0.03em] text-brand-text">
             {comingSoonTab.label} · Coming soon
           </h3>
-          <p className="text-sm text-brand-muted max-w-sm mb-4">
+          <p className={cn(BODY, "mb-5 max-w-sm")}>
             {comingSoonTab.description}
           </p>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand-card border border-brand-border">
-            <Lock className="w-3.5 h-3.5 text-brand-amber" />
-            <span className="text-xs text-brand-muted">Expected in the next update</span>
+          <div className="flex items-center gap-2 rounded-full border border-white/[0.1] px-4 py-2">
+            <Lock className="h-3.5 w-3.5 text-brand-amber" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted">Expected in the next update</span>
           </div>
         </div>
       ) : null}

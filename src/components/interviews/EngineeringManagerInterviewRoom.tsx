@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, MessageSquareMore, Scale } from "lucide-react";
+import { ArrowLeft, Loader2, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InterviewStartingOverlay } from "@/components/interviews/InterviewStartingOverlay";
 import { Timer } from "@/components/interview/Timer";
@@ -19,6 +19,8 @@ import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
 import { useInterviewTextFallback } from "@/hooks/useInterviewTextFallback";
 import { useInterviewStore } from "@/stores/interview-store";
+import { cn } from "@/lib/utils";
+import { BODY, CELL, CHIP, FOCUS, GRID, LABEL, LEAD } from "@/components/marketing/ds";
 import {
   type InterviewPhase,
   clampPhaseToTimeFloor,
@@ -598,11 +600,12 @@ export function EngineeringManagerInterviewRoom({
   if (isScoring) {
     return (
       <div className="flex h-screen items-center justify-center bg-brand-deep px-6 text-center text-brand-text">
-        <div className="max-w-md space-y-5">
+        <div className="max-w-md space-y-6">
           <VoiceVisualizer state="thinking" className="mx-auto h-28 w-28" />
           <div>
-            <h1 className="text-2xl font-semibold">Scoring your Engineering Manager round</h1>
-            <p className="mt-2 text-sm leading-relaxed text-brand-muted">
+            <p className={LABEL}>Scoring</p>
+            <h1 className="mt-3 text-balance text-[clamp(28px,3.4vw,40px)] font-normal leading-[1.05] tracking-[-0.03em]">Scoring your Engineering Manager round</h1>
+            <p className={cn(BODY, "mt-3")}>
               We&apos;re reviewing the transcript for decision quality, stakeholder handling,
               prioritization, and the evidence behind each competency you chose.
             </p>
@@ -616,20 +619,20 @@ export function EngineeringManagerInterviewRoom({
     const minutesRemaining = Math.ceil(timeLeft / 60);
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-brand-deep px-6 text-brand-text">
+      <div className="flex min-h-screen items-center justify-center bg-brand-deep px-5 py-12 text-brand-text">
         <InterviewStartingOverlay
           visible={isConnectingVoice}
           interviewerName={interviewer.name}
           isResuming={isResuming}
         />
-        <div className="w-full max-w-3xl rounded-3xl border border-brand-border bg-brand-card p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
+        <div className="w-full max-w-3xl">
+          <p className={LABEL}>
             Engineering Manager
           </p>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight">
+          <h1 className="mt-4 text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em]">
             {isResuming ? "Resume your voice interview" : round.title}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted">
+          <p className={cn(LEAD, "mt-5 max-w-2xl")}>
             {isResuming
               ? `Your session is still active. You have about ${minutesRemaining} minute${
                   minutesRemaining === 1 ? "" : "s"
@@ -638,44 +641,40 @@ export function EngineeringManagerInterviewRoom({
           </p>
 
           {!isResuming ? (
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-7 flex flex-wrap gap-2">
               {round.focusAreas.map((focus) => (
-                <span
-                  key={focus}
-                  className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
-                >
+                <span key={focus} className={CHIP}>
                   {focus}
                 </span>
               ))}
             </div>
           ) : null}
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">Format</p>
-              <p className="mt-2 text-sm font-semibold text-brand-text">
+          <div className={cn(GRID, "mt-10 sm:grid-cols-3")}>
+            <div className={cn(CELL, "p-5")}>
+              <p className={LABEL}>Format</p>
+              <p className="mt-2 text-[15px] text-brand-text">
                 Voice conversation, no coding
               </p>
             </div>
-            <div className="rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">Duration</p>
-              <p className="mt-2 text-sm font-semibold text-brand-text">
+            <div className={cn(CELL, "p-5")}>
+              <p className={LABEL}>Duration</p>
+              <p className="mt-2 text-[15px] text-brand-text">
                 {ENGINEERING_MANAGER_DURATION_MINUTES} minutes
               </p>
             </div>
-            <div className="rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">Interviewer</p>
-              <p className="mt-2 text-sm font-semibold text-brand-text">{interviewer.name}</p>
+            <div className={cn(CELL, "p-5")}>
+              <p className={LABEL}>Interviewer</p>
+              <p className="mt-2 text-[15px] text-brand-text">{interviewer.name}</p>
             </div>
-          </div>
 
           {valueLens && valueCompetencies.length > 0 ? (
-            <div className="mt-4 rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-brand-muted">
-                <Scale className="h-3.5 w-3.5 text-brand-cyan" />
+            <div className={cn(CELL, "p-5 sm:col-span-3")}>
+              <div className={cn(LABEL, "flex items-center gap-2")}>
+                <Scale className="h-3.5 w-3.5" />
                 Graded against
               </div>
-              <p className="mt-2 text-sm font-semibold text-brand-text">
+              <p className="mt-2 text-[15px] text-brand-text">
                 {valueLens.frameworkLabel}
               </p>
               <p className="mt-1 text-sm leading-relaxed text-brand-muted">
@@ -683,9 +682,11 @@ export function EngineeringManagerInterviewRoom({
               </p>
             </div>
           ) : null}
+          </div>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-10 flex flex-wrap gap-3">
             <Button
+              size="lg"
               onClick={() => void (isResuming ? resumeInterview() : startInterview())}
               disabled={isConnectingVoice}
             >
@@ -700,20 +701,20 @@ export function EngineeringManagerInterviewRoom({
                 "Start Engineering Manager Round"
               )}
             </Button>
-            <Button asChild variant="secondary">
+            <Button asChild variant="secondary" size="lg">
               <Link href="/interviews/engineering-manager/setup">Back to setup</Link>
             </Button>
           </div>
 
           {voiceError ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <p className="text-sm text-brand-rose">{voiceError}</p>
               <Button variant="secondary" onClick={() => void continueInTextMode()}>
                 Continue with text
               </Button>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-brand-muted">
+            <p className="mt-5 text-sm leading-relaxed text-brand-muted">
               Make sure your mic and speakers are on. Typed fallback stays available inside the
               room if you need it.
             </p>
@@ -725,20 +726,23 @@ export function EngineeringManagerInterviewRoom({
 
   return (
     <div className="flex h-screen flex-col bg-brand-deep text-brand-text">
-      <header className="border-b border-brand-border bg-brand-card px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <header className="shrink-0 border-b border-white/[0.08] bg-brand-deep px-4">
+        <div className="flex h-14 items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text"
+              className={cn(
+                "inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text",
+                FOCUS
+              )}
             >
               <ArrowLeft className="h-4 w-4" />
               Dashboard
             </Link>
-            <div className="hidden h-5 w-px bg-brand-border sm:block" />
-            <div>
-              <p className="text-sm font-semibold tracking-tight">Engineering Manager</p>
-              <p className="text-xs text-brand-muted">
+            <div className="hidden h-5 w-px bg-white/[0.08] sm:block" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium tracking-[-0.01em]">Engineering Manager</p>
+              <p className={cn(LABEL, "truncate text-[10px]")}>
                 Session #{interviewId.slice(-6).toUpperCase()}
               </p>
             </div>
@@ -746,8 +750,8 @@ export function EngineeringManagerInterviewRoom({
 
           <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
 
-          <div className="flex items-center gap-3">
-            <span className="hidden rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted md:inline-flex">
+          <div className="flex items-center gap-4">
+            <span className={cn(LABEL, "hidden md:inline")}>
               {getPhaseLabelForRound("hiring_manager", currentPhase)}
             </span>
             <Button variant="destructive" size="sm" onClick={() => void handleEndInterview()}>
@@ -757,8 +761,10 @@ export function EngineeringManagerInterviewRoom({
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[18rem_22rem_minmax(0,1fr)] xl:grid-cols-[20rem_24rem_minmax(0,1fr)]">
-        <aside className="min-h-0 overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
+      {/* Brief | voice room | live transcript, flush on brand-deep and split
+          by hairlines instead of boxed cards. */}
+      <div className="grid min-h-0 flex-1 divide-y divide-white/[0.08] lg:divide-x lg:divide-y-0 lg:grid-cols-[18rem_22rem_minmax(0,1fr)] xl:grid-cols-[20rem_24rem_minmax(0,1fr)]">
+        <aside className="min-h-0 overflow-hidden">
           {/* The shared brief panel renders the value lens itself, so the room
               does not repeat it here. */}
           <RoundBriefPanel
@@ -769,11 +775,9 @@ export function EngineeringManagerInterviewRoom({
           />
         </aside>
 
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          <div className="border-b border-brand-border px-5 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-              Voice Room
-            </p>
+        <section className="flex min-h-0 flex-col overflow-hidden">
+          <div className="shrink-0 border-b border-white/[0.08] px-5 py-4">
+            <p className={cn(LABEL, "text-brand-text")}>Voice Room</p>
             <p className="mt-2 text-sm leading-relaxed text-brand-muted">
               Stay in the conversation. This round is built for clear, concrete leadership
               answers, not note-taking or coding.
@@ -806,19 +810,17 @@ export function EngineeringManagerInterviewRoom({
           </div>
         </section>
 
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          <div className="border-b border-brand-border px-5 py-4">
-            <div className="flex items-center justify-between gap-3">
+        <section className="flex min-h-0 flex-col overflow-hidden">
+          <div className="shrink-0 border-b border-white/[0.08] px-5 py-4">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  Live Transcript
-                </p>
+                <p className={cn(LABEL, "text-brand-text")}>Live Transcript</p>
                 <p className="mt-1 text-sm text-brand-muted">
                   Every spoken turn lands here so you can track the flow of the round in real
                   time.
                 </p>
               </div>
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
+              <span className={cn(LABEL, "shrink-0 whitespace-nowrap")}>
                 {voiceState === "thinking"
                   ? "Thinking"
                   : voiceState === "speaking"
@@ -858,10 +860,9 @@ function EngineeringManagerTranscript({
 
   if (messages.length === 0 && !isAgentBusy) {
     return (
-      <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-brand-border bg-brand-surface">
+      <div className="flex h-full items-center justify-center">
         <div className="max-w-sm px-6 text-center">
-          <MessageSquareMore className="mx-auto h-10 w-10 text-brand-cyan" />
-          <p className="mt-4 text-sm font-semibold text-brand-text">
+          <p className="text-[15px] text-brand-text">
             {interviewerName} will open the round here
           </p>
           <p className="mt-2 text-sm leading-relaxed text-brand-muted">
@@ -873,39 +874,35 @@ function EngineeringManagerTranscript({
     );
   }
 
+  // Transcript idiom: hairline-divided turns with a mono speaker label, the
+  // candidate's words set off by a quiet left rule.
   return (
-    <div className="space-y-4">
+    <div className="divide-y divide-white/[0.08]">
       {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`flex ${message.role === "candidate" ? "justify-end" : "justify-start"}`}
-        >
-          <div
-            className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-              message.role === "candidate"
-                ? "rounded-tr-sm border border-brand-cyan/25 bg-brand-cyan/10"
-                : "rounded-tl-sm border border-brand-border bg-brand-surface"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-brand-text">
-                {message.role === "candidate" ? "You" : interviewerName}
-              </span>
-              <span className="text-[11px] text-brand-muted">{message.time}</span>
-            </div>
-            <p className="mt-2 text-sm leading-relaxed text-brand-text">{message.content}</p>
+        <div key={message.id} className="py-4 first:pt-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className={cn(LABEL, message.role === "interviewer" && "text-brand-text")}>
+              {message.role === "candidate" ? "You" : interviewerName}
+            </span>
+            <span className="font-mono text-[11px] tabular-nums text-brand-subtle">{message.time}</span>
           </div>
+          <p
+            className={cn(
+              "mt-2 text-[15px] leading-relaxed text-brand-text",
+              message.role === "candidate" && "border-l border-white/[0.18] pl-4"
+            )}
+          >
+            {message.content}
+          </p>
         </div>
       ))}
 
       {isAgentBusy ? (
-        <div className="flex justify-start">
-          <div className="rounded-2xl rounded-tl-sm border border-brand-border bg-brand-surface px-4 py-3">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan [animation-delay:-0.2s]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan [animation-delay:-0.1s]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-brand-cyan" />
-            </div>
+        <div className="py-4 first:pt-0">
+          <div className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand-muted [animation-delay:-0.2s]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand-muted [animation-delay:-0.1s]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand-muted" />
           </div>
         </div>
       ) : null}

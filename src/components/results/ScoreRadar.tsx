@@ -9,8 +9,11 @@ import {
   Radar,
   Tooltip,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MonoLabel, Rack } from "@/components/shared/Rack";
 import { DESIGN_SYSTEM_CHART_COLORS } from "@/lib/design-system";
+
+/** Chart gridlines and axes are drawn as white/[0.08] hairlines. */
+const HAIRLINE = "rgba(255,255,255,0.08)";
 
 type RadarDataPoint = {
   dimension: string;
@@ -41,9 +44,9 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   const raw = entry?.payload;
 
   return (
-    <div className="rounded-lg border border-brand-border bg-brand-card px-3 py-2 shadow-lg">
-      <p className="text-xs font-semibold text-brand-text">{raw?.dimension}</p>
-      <p className="text-xs text-brand-cyan mt-0.5">
+    <div className="rounded-xl border border-white/[0.12] bg-brand-deep px-3 py-2">
+      <p className="text-xs text-brand-text">{raw?.dimension}</p>
+      <p className="mt-0.5 font-mono text-xs tabular-nums text-brand-cyan">
         {raw?.score} / {raw?.maxScore}
       </p>
     </div>
@@ -57,59 +60,55 @@ export function ScoreRadar({ scores }: ScoreRadarProps) {
   }));
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold">Performance Breakdown</CardTitle>
-      </CardHeader>
-      <CardContent className="p-4 pb-6">
-        <div className="h-[320px] w-full">
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-            minWidth={0}
-            initialDimension={{ width: 640, height: 320 }}
-          >
-            <RadarChart data={data} margin={{ top: 16, right: 32, bottom: 16, left: 32 }}>
-              <PolarGrid
-                stroke={DESIGN_SYSTEM_CHART_COLORS.grid}
-                strokeWidth={1}
-              />
-              <PolarAngleAxis
-                dataKey="dimension"
-                tick={{
-                  fill: DESIGN_SYSTEM_CHART_COLORS.label,
-                  fontSize: 12,
-                  fontFamily: "Sora, system-ui, sans-serif",
-                }}
-              />
-              <PolarRadiusAxis
-                angle={90}
-                domain={[0, 100]}
-                tick={{
-                  fill: DESIGN_SYSTEM_CHART_COLORS.tick,
-                  fontSize: 10,
-                }}
-                tickCount={5}
-                stroke={DESIGN_SYSTEM_CHART_COLORS.axis}
-              />
-              <Radar
-                name="Score"
-                dataKey="score"
-                stroke={DESIGN_SYSTEM_CHART_COLORS.score}
-                fill={DESIGN_SYSTEM_CHART_COLORS.score}
-                fillOpacity={0.2}
-                strokeWidth={2}
-                dot={{
-                  r: 4,
-                  fill: DESIGN_SYSTEM_CHART_COLORS.score,
-                  strokeWidth: 0,
-                }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    <Rack label={<MonoLabel>Performance breakdown</MonoLabel>} className="w-full" bodyClassName="p-4 sm:p-6">
+      <div className="h-[320px] w-full">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          minWidth={0}
+          initialDimension={{ width: 640, height: 320 }}
+        >
+          <RadarChart data={data} margin={{ top: 16, right: 32, bottom: 16, left: 32 }}>
+            <PolarGrid
+              stroke={HAIRLINE}
+              strokeWidth={1}
+            />
+            <PolarAngleAxis
+              dataKey="dimension"
+              tick={{
+                fill: DESIGN_SYSTEM_CHART_COLORS.label,
+                fontSize: 11,
+                fontFamily: "var(--font-mono), ui-monospace, monospace",
+              }}
+            />
+            <PolarRadiusAxis
+              angle={90}
+              domain={[0, 100]}
+              tick={{
+                fill: DESIGN_SYSTEM_CHART_COLORS.tick,
+                fontSize: 10,
+                fontFamily: "var(--font-mono), ui-monospace, monospace",
+              }}
+              tickCount={5}
+              stroke={HAIRLINE}
+            />
+            <Radar
+              name="Score"
+              dataKey="score"
+              stroke={DESIGN_SYSTEM_CHART_COLORS.score}
+              fill={DESIGN_SYSTEM_CHART_COLORS.score}
+              fillOpacity={0.12}
+              strokeWidth={1.5}
+              dot={{
+                r: 3,
+                fill: DESIGN_SYSTEM_CHART_COLORS.score,
+                strokeWidth: 0,
+              }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+    </Rack>
   );
 }

@@ -99,8 +99,8 @@ function ToastCard({
       role="alert"
       aria-live="assertive"
       className={cn(
-        "relative flex flex-col gap-1 px-4 py-3 pr-10 rounded-xl",
-        "bg-brand-card border shadow-xl",
+        "relative flex flex-col gap-1 px-4 py-3 pr-10 rounded-[20px]",
+        "bg-brand-deep border",
         "transition-all duration-300 ease-out",
         variantStyles[item.variant],
         visible
@@ -110,7 +110,7 @@ function ToastCard({
     >
       <p
         className={cn(
-          "text-sm font-semibold leading-tight",
+          "text-sm font-medium leading-tight",
           variantTitleStyles[item.variant]
         )}
       >

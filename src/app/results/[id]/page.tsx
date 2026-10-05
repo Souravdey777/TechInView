@@ -5,7 +5,9 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, Loader2, FileQuestion, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, RefreshCw, Loader2, Lock } from "lucide-react";
+import { BODY, ButtonLink, CELL, CHIP, CONTAINER, Eyebrow, FOCUS, GRID, LABEL, LEAD, PAD } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 import { ScoreSummary } from "@/components/results/ScoreSummary";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
 import { FeedbackCard } from "@/components/results/FeedbackCard";
@@ -48,46 +50,41 @@ function getDimensionKeys(mode: InterviewMode): DimensionKey[] {
     : (Object.keys(SCORING_DIMENSIONS) as ScoringDimension[]);
 }
 
+/** Page shell: deep ink, design-system padding, a report-width column. */
+const SHELL = cn("min-h-screen bg-brand-deep text-brand-text", PAD);
+const COLUMN = cn(CONTAINER, "max-w-[1100px] py-10 sm:py-14");
+const PAGE_TITLE = "text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text";
+const SECTION_TITLE = "text-2xl font-normal tracking-[-0.03em] text-brand-text sm:text-3xl";
+const BACK_LINK = cn(
+  "group inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.08em] text-brand-muted transition-colors hover:text-brand-text",
+  FOCUS
+);
+
 // ─── Empty state: no result found in store ────────────────────────────────────
 
 function NoResultState() {
   return (
-    <main className="min-h-screen bg-brand-deep text-brand-text">
-      <div className="max-w-5xl mx-auto py-8 px-4">
-        <div className="flex items-center mb-8">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-brand-muted hover:text-brand-text transition-colors group"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            Back to Dashboard
-          </Link>
-        </div>
+    <main className={SHELL}>
+      <div className={COLUMN}>
+        <Link href="/dashboard" className={BACK_LINK}>
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+          Back to Dashboard
+        </Link>
 
-        <div className="flex flex-col items-center justify-center py-24 gap-6 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-brand-border bg-brand-card">
-            <FileQuestion className="h-8 w-8 text-brand-muted" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-brand-text">No Results Found</h1>
-            <p className="text-sm text-brand-muted mt-2 max-w-sm">
-              We couldn&apos;t find interview results for this session. The results may have expired or you may have navigated here directly.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-brand-border text-sm text-brand-text hover:bg-brand-card transition-colors"
-            >
-              Go to Dashboard
-            </Link>
-            <Link
-              href="/interviews/dsa/setup"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 transition-colors"
-            >
+        <div className="mt-16 max-w-xl border-t border-white/[0.08] pt-10">
+          <Eyebrow>Interview report</Eyebrow>
+          <h1 className={PAGE_TITLE}>No Results Found</h1>
+          <p className={cn(LEAD, "mt-4")}>
+            We couldn&apos;t find interview results for this session. The results may have expired or you may have navigated here directly.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <ButtonLink href="/interviews/dsa/setup" size="sm">
               <RefreshCw className="h-4 w-4" />
               Start New Interview
-            </Link>
+            </ButtonLink>
+            <ButtonLink href="/dashboard" variant="ghost" size="sm">
+              Go to Dashboard
+            </ButtonLink>
           </div>
         </div>
       </div>
@@ -105,26 +102,23 @@ function ScoringUnavailableCard({
   interviewerName: string;
 }) {
   return (
-    <div className="rounded-xl border border-brand-border bg-brand-card p-8 flex flex-col items-center gap-4 text-center">
+    <div className="border-y border-white/[0.08] py-10">
       {reason === "in_progress" ? (
         <>
-          <Loader2 className="h-8 w-8 text-brand-cyan animate-spin" />
-          <div>
-            <h3 className="text-sm font-semibold text-brand-text">Scoring In Progress</h3>
-            <p className="text-xs text-brand-muted mt-1">
-              {interviewerName} is still evaluating your performance. Please check back shortly.
-            </p>
-          </div>
+          <p className={cn(LABEL, "flex items-center gap-2")}>
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-cyan" />
+            Scoring In Progress
+          </p>
+          <p className={cn(BODY, "mt-3 max-w-prose")}>
+            {interviewerName} is still evaluating your performance. Please check back shortly.
+          </p>
         </>
       ) : (
         <>
-          <AlertCircle className="h-8 w-8 text-brand-amber" />
-          <div>
-            <h3 className="text-sm font-semibold text-brand-text">Scoring Unavailable</h3>
-            <p className="text-xs text-brand-muted mt-1">
-              AI scoring could not be completed for this session. Your transcript and code are still available below.
-            </p>
-          </div>
+          <p className={cn(LABEL, "text-brand-amber")}>Scoring Unavailable</p>
+          <p className={cn(BODY, "mt-3 max-w-prose")}>
+            AI scoring could not be completed for this session. Your transcript and code are still available below.
+          </p>
         </>
       )}
     </div>
@@ -253,11 +247,11 @@ export default function ResultsPage() {
   // Loading state while checking feedback or fetching from DB
   if (feedbackCompleted === null || (!storeMatchesPage && loading)) {
     return (
-      <main className="min-h-screen bg-brand-deep text-brand-text flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-brand-cyan" />
-          <p className="text-sm text-brand-muted">Loading results...</p>
-        </div>
+      <main className={cn(SHELL, "flex items-center justify-center")}>
+        <p className={cn(LABEL, "flex items-center gap-3")}>
+          <Loader2 className="h-4 w-4 animate-spin text-brand-cyan" />
+          Loading results...
+        </p>
       </main>
     );
   }
@@ -346,198 +340,132 @@ export default function ResultsPage() {
     : [];
 
   return (
-    <main className="min-h-screen bg-brand-deep text-brand-text relative overflow-hidden">
-      {/* Background ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-brand-cyan/3 blur-[120px] pointer-events-none" />
+    <main className={SHELL}>
+      <div className={cn(COLUMN, "space-y-16 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-500")}>
 
-      <style>{`
-        @keyframes results-fade-up {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes results-scale-in {
-          0% { opacity: 0; transform: scale(0.92); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes results-slide-left {
-          0% { opacity: 0; transform: translateX(-16px); }
-          100% { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes results-slide-right {
-          0% { opacity: 0; transform: translateX(16px); }
-          100% { opacity: 1; transform: translateX(0); }
-        }
-        .r-anim-1 { animation: results-fade-up 0.5s ease-out 0.05s both; }
-        .r-anim-2 { animation: results-fade-up 0.5s ease-out 0.15s both; }
-        .r-anim-3 { animation: results-scale-in 0.5s ease-out 0.25s both; }
-        .r-anim-4 { animation: results-scale-in 0.5s ease-out 0.35s both; }
-        .r-anim-5 { animation: results-fade-up 0.5s ease-out 0.45s both; }
-        .r-anim-6 { animation: results-fade-up 0.5s ease-out 0.55s both; }
-        .r-anim-7 { animation: results-fade-up 0.5s ease-out 0.65s both; }
-        .r-anim-8 { animation: results-fade-up 0.5s ease-out 0.75s both; }
-        .r-anim-sl { animation: results-slide-left 0.5s ease-out 0.5s both; }
-        .r-anim-sr { animation: results-slide-right 0.5s ease-out 0.55s both; }
-      `}</style>
+        {/* Top nav + header */}
+        <header>
+          <div className="mb-12 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Link href="/dashboard" className={BACK_LINK}>
+              <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+              Back to Dashboard
+            </Link>
+            <span className={LABEL}>{sessionMeta}</span>
+          </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto py-8 px-4">
-
-        {/* Top nav */}
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between r-anim-1">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-brand-muted hover:text-brand-text transition-colors group"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            Back to Dashboard
-          </Link>
-          <span className="self-start rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted sm:self-auto">
-            {sessionMeta}
-          </span>
-        </div>
-
-        {/* Page title */}
-        <div className="mb-8 r-anim-2">
-          <h1 className="text-2xl font-bold text-brand-text tracking-tight">
-            Interview Results
-          </h1>
-          <p className="text-sm text-brand-muted mt-1">
+          <Eyebrow>Interview report</Eyebrow>
+          <h1 className={PAGE_TITLE}>Interview Results</h1>
+          <p className={cn(LEAD, "mt-4 max-w-[620px]")}>
             {hasScores
               ? mode === "targeted_loop"
                 ? "Here\u2019s how you showed up in this round across the shared five interview signals."
                 : "Here\u2019s a detailed breakdown of your performance across all 5 dimensions."
               : "Your interview session has ended. Score breakdown was not available for this session."}
           </p>
-        </div>
+        </header>
 
         {mode === "targeted_loop" && (loopSummary || roundContext) && (
-          <section className="mb-6 r-anim-3">
-            <div className="rounded-xl border border-brand-border bg-brand-card p-5">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                    Targeted Loop Context
-                  </p>
-                  <h2 className="mt-2 text-lg font-semibold text-brand-text">
-                    {roundTitle}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-                    {roundContext?.summary ??
-                      `This round was generated for ${company ?? "your target company"} and ${roleTitle ?? "your target role"}.`}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-brand-border bg-brand-surface px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-muted">
-                    Loop
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">
-                    {loopSummary?.loopName ?? "Targeted SWE loop"}
-                  </p>
-                  <p className="mt-1 text-xs text-brand-muted">
-                    {company ?? "Company"} · {roleTitle ?? "Role"}
-                  </p>
-                </div>
-              </div>
-
+          <section className={cn(GRID, "md:grid-cols-[minmax(0,1fr)_320px]")}>
+            <div className={cn(CELL, "p-6")}>
+              <p className={LABEL}>Targeted Loop Context</p>
+              <h2 className="mt-4 text-xl font-medium tracking-[-0.02em] text-brand-text">
+                {roundTitle}
+              </h2>
+              <p className={cn(BODY, "mt-2")}>
+                {roundContext?.summary ??
+                  `This round was generated for ${company ?? "your target company"} and ${roleTitle ?? "your target role"}.`}
+              </p>
               {roundContext?.focusAreas && roundContext.focusAreas.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap gap-2">
                   {roundContext.focusAreas.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
-                    >
+                    <span key={item} className={CHIP}>
                       {item}
                     </span>
                   ))}
                 </div>
               )}
             </div>
+            <div className={cn(CELL, "p-6")}>
+              <p className={LABEL}>Loop</p>
+              <p className="mt-4 text-[17px] tracking-[-0.01em] text-brand-text">
+                {loopSummary?.loopName ?? "Targeted SWE loop"}
+              </p>
+              <p className="mt-1 text-sm text-brand-muted">
+                {company ?? "Company"} · {roleTitle ?? "Role"}
+              </p>
+            </div>
           </section>
         )}
 
         {/* ── Section 1: Score Summary (only if scores exist) ── */}
-        {hasScores && overallScore !== null && hireRec && summary ? (
-          <section className="mb-6 r-anim-3">
+        <section>
+          {hasScores && overallScore !== null && hireRec && summary ? (
             <ScoreSummary
               overallScore={overallScore}
               hireRecommendation={hireRec}
               summary={summary}
             />
-          </section>
-        ) : (
-          <section className="mb-6 r-anim-3">
+          ) : (
             <ScoringUnavailableCard reason="failed" interviewerName={interviewer.name} />
-          </section>
-        )}
+          )}
+        </section>
 
         {/* ── Audio preview upgrade CTA (shown instead of detailed sections) ── */}
         {isFreeTrial && hasScores && (
-          <section className="mb-6 r-anim-4">
-            <div className="flex flex-col items-start gap-5 rounded-xl border border-brand-cyan/30 bg-gradient-to-br from-brand-cyan/5 to-brand-card p-6 sm:flex-row sm:items-center">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-cyan/10 border border-brand-cyan/20">
-                <Sparkles className="h-6 w-6 text-brand-cyan" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-brand-text flex items-center gap-2">
-                  <Lock className="h-3.5 w-3.5 text-brand-muted" />
-                  Detailed Feedback Locked
-                </h3>
-                <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
-                  Your 5-minute audio preview includes the overall score and hire recommendation above.
-                  Buy an interview pack to see the 5-dimension radar chart, per-dimension feedback,
-                  key strengths, and areas to improve.
-                </p>
-              </div>
-              <Link
-                href="/settings"
-                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
-              >
-                View Packs
-              </Link>
+          <section className="flex flex-col items-start gap-6 rounded-[20px] border border-white/[0.08] p-6 sm:flex-row sm:items-center sm:p-8">
+            <div className="flex-1">
+              <p className={cn(LABEL, "flex items-center gap-2")}>
+                <Lock className="h-3.5 w-3.5" />
+                Detailed Feedback Locked
+              </p>
+              <p className={cn(BODY, "mt-3 max-w-prose")}>
+                Your 5-minute audio preview includes the overall score and hire recommendation above.
+                Buy an interview pack to see the 5-dimension radar chart, per-dimension feedback,
+                key strengths, and areas to improve.
+              </p>
             </div>
+            <ButtonLink href="/settings" size="sm" className="shrink-0">
+              View Packs
+            </ButtonLink>
           </section>
         )}
 
-        {/* ── Section 2: Radar Chart (only if scores exist and not preview) ── */}
-        {!isFreeTrial && hasScores && radarData.length > 0 && (
-          <section className="mb-6 r-anim-4">
-            <ScoreRadar scores={radarData} />
-          </section>
-        )}
-
-        {/* ── Section 3: Feedback Cards (only if scores exist and not preview) ── */}
-        {!isFreeTrial && hasScores && feedbackCards.length > 0 && (
-          <section className="mb-6 r-anim-5">
-            <h2 className="text-base font-semibold text-brand-text mb-4">
-              Dimension Breakdown
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {feedbackCards.map((card, i) => (
-                <div key={card.dimension} style={{ animation: `results-scale-in 0.4s ease-out ${0.5 + i * 0.08}s both` }}>
-                  <FeedbackCard
-                    dimension={card.dimension}
-                    score={card.score}
-                    weight={card.weight}
-                    feedback={card.feedback}
-                  />
-                </div>
-              ))}
-            </div>
+        {/* ── Section 2 + 3: Radar and per-dimension feedback (only if scores exist and not preview) ── */}
+        {!isFreeTrial && hasScores && (radarData.length > 0 || feedbackCards.length > 0) && (
+          <section>
+            <h2 className={cn(SECTION_TITLE, "mb-6")}>Dimension Breakdown</h2>
+            {radarData.length > 0 && (
+              <div className="mb-8">
+                <ScoreRadar scores={radarData} />
+              </div>
+            )}
+            {feedbackCards.length > 0 && (
+              <ul className={cn(GRID, "sm:grid-cols-2 lg:grid-cols-3")}>
+                {feedbackCards.map((card) => (
+                  <li key={card.dimension} className={CELL}>
+                    <FeedbackCard
+                      dimension={card.dimension}
+                      score={card.score}
+                      weight={card.weight}
+                      feedback={card.feedback}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         )}
 
         {/* ── Section 3b: Key Strengths & Areas to Improve (only if provided and not preview) ── */}
         {!isFreeTrial && hasScores && (keyStrengths || areasToImprove) && (
-          <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <section className={cn(GRID, "sm:grid-cols-2")}>
             {keyStrengths && keyStrengths.length > 0 && (
-              <div className="rounded-xl border border-brand-border bg-brand-card p-5 r-anim-sl">
-                <h3 className="text-sm font-semibold text-brand-green flex items-center gap-2 mb-3">
-                  <CheckCircle className="h-4 w-4" />
-                  Key Strengths
-                </h3>
-                <ul className="space-y-2">
+              <div className={cn(CELL, "p-6")}>
+                <h3 className={cn(LABEL, "text-brand-green")}>Key Strengths</h3>
+                <ul className="mt-4 divide-y divide-white/[0.08] border-t border-white/[0.08]">
                   {keyStrengths.map((s, i) => (
-                    <li key={i} className="text-sm text-brand-text flex items-start gap-2" style={{ animation: `results-fade-up 0.3s ease-out ${0.6 + i * 0.06}s both` }}>
-                      <span className="text-brand-green mt-0.5 shrink-0">+</span>
+                    <li key={i} className="grid grid-cols-[16px_minmax(0,1fr)] gap-3 py-3 text-[15px] leading-relaxed text-brand-text">
+                      <span className="font-mono text-brand-green">+</span>
                       {s}
                     </li>
                   ))}
@@ -545,15 +473,12 @@ export default function ResultsPage() {
               </div>
             )}
             {areasToImprove && areasToImprove.length > 0 && (
-              <div className="rounded-xl border border-brand-border bg-brand-card p-5 r-anim-sr">
-                <h3 className="text-sm font-semibold text-brand-amber flex items-center gap-2 mb-3">
-                  <AlertCircle className="h-4 w-4" />
-                  Areas to Improve
-                </h3>
-                <ul className="space-y-2">
+              <div className={cn(CELL, "p-6")}>
+                <h3 className={cn(LABEL, "text-brand-amber")}>Areas to Improve</h3>
+                <ul className="mt-4 divide-y divide-white/[0.08] border-t border-white/[0.08]">
                   {areasToImprove.map((a, i) => (
-                    <li key={i} className="text-sm text-brand-text flex items-start gap-2" style={{ animation: `results-fade-up 0.3s ease-out ${0.65 + i * 0.06}s both` }}>
-                      <span className="text-brand-amber mt-0.5 shrink-0">-</span>
+                    <li key={i} className="grid grid-cols-[16px_minmax(0,1fr)] gap-3 py-3 text-[15px] leading-relaxed text-brand-text">
+                      <span className="font-mono text-brand-amber">-</span>
                       {a}
                     </li>
                   ))}
@@ -565,7 +490,7 @@ export default function ResultsPage() {
 
         {/* ── Section 4: Code Review (always shown when code exists) ── */}
         {shouldShowCodeReview && (
-          <section className="mb-6 r-anim-7">
+          <section>
             <CodeReview
               code={finalCode}
               language={codeLanguage}
@@ -576,20 +501,17 @@ export default function ResultsPage() {
         )}
 
         {/* ── Section 5: Transcript (always shown when messages exist) ── */}
-        <section className="mb-10 r-anim-7">
+        <section>
           <TranscriptReview messages={transcript} interviewerName={interviewer.name} />
         </section>
 
         {/* ── CTA: Practice Again ── */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-brand-border r-anim-8">
-          <p className="text-sm text-brand-muted">Ready to improve your score?</p>
-          <Link
-            href={mode === "targeted_loop" ? "/prep-guru" : "/interviews/dsa/setup"}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-brand-deep font-semibold text-sm hover:bg-brand-cyan/90 hover:scale-[1.03] active:scale-[0.98] transition-all"
-          >
+        <div className="flex flex-col items-start gap-4 border-t border-white/[0.08] pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className={BODY}>Ready to improve your score?</p>
+          <ButtonLink href={mode === "targeted_loop" ? "/prep-guru" : "/interviews/dsa/setup"} size="sm">
             <RefreshCw className="h-4 w-4" />
             {mode === "targeted_loop" ? "Practice Another Targeted Round" : "Practice Again"}
-          </Link>
+          </ButtonLink>
         </div>
 
       </div>
