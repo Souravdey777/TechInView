@@ -292,10 +292,18 @@ function phaseInstruction(
     : discussionPhaseInstruction(currentPhase, roundType);
 }
 
-function buildPersonaBlock(interviewerPersonaId?: string | null): string {
+const ROUND_ROLE: Record<RoundType, string> = {
+  coding: "senior technical interviewer running a live coding round",
+  technical_qa: "senior technical interviewer running a technical Q&A round",
+  system_design: "senior technical interviewer running a system design round",
+  behavioral: "behavioural interviewer running a past-experience round",
+  hiring_manager: "engineering hiring manager running a hiring-manager round",
+};
+
+function buildPersonaBlock(roundType: RoundType, interviewerPersonaId?: string | null): string {
   const persona = getInterviewerPersona(interviewerPersonaId);
 
-  return `You are ${persona.name}, a ${persona.companyLabel === "Generalist" ? "FAANG-calibrated generalist" : `${persona.companyLabel}-style`} senior technical interviewer conducting a live interview.
+  return `You are ${persona.name}, a ${persona.companyLabel === "Generalist" ? "FAANG-calibrated generalist" : `${persona.companyLabel}-style`} ${ROUND_ROLE[roundType] ?? ROUND_ROLE.coding}.
 
 Your persona:
 - ${persona.shortStyleSummary}
@@ -372,7 +380,7 @@ ${sections || emptySectionsText}
 }
 
 function basePrompt(options: PromptOptions): string {
-  return `${buildPersonaBlock(options.interviewerPersonaId)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
+  return `${buildPersonaBlock(options.roundType, options.interviewerPersonaId)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
 
 ## Active Round Type: ${options.roundType}
 ## Current Phase (conversation context): ${options.currentPhase}
@@ -418,7 +426,7 @@ export function buildVoiceSystemPrompt(options: PromptOptions): string {
         ? ""
         : "- `get_workspace_notes`: Retrieve the candidate's structured notes from the workspace before making claims about what they have already written down.";
 
-  return `${buildPersonaBlock(options.interviewerPersonaId)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
+  return `${buildPersonaBlock(options.roundType, options.interviewerPersonaId)}${buildProblemBlock(options.problem)}${buildRoundContextBlock(options.roundType, options.roundContext)}
 
 ## Active Round Type: ${options.roundType}
 ## Current Phase (conversation context): ${options.currentPhase}
@@ -450,7 +458,7 @@ ${extraFunctionLines}
 - \`get_interview_state\`: Get current interview state (phase, time left, test summary).
 
 ## Output rules
-Respond with natural speech only. Never output JSON, markdown, or code blocks. Keep responses concise (1-3 sentences). During the CODING phase, be extremely brief (1 sentence max).
+Respond with natural speech only. Never output JSON, markdown, or code blocks. Keep responses concise (1-3 sentences).${options.roundType === "coding" ? " During the CODING phase, be extremely brief (1 sentence max)." : ""}
 Ask one question at a time, then stop speaking and wait for the candidate's answer. Do not answer your own question or continue with another prompt until the candidate has responded.
 If your response already contains a question mark, end the turn there unless you are correcting a safety or factual issue.
 When you mention arrays, examples, or complexity, say them in spoken English rather than raw symbols.`;

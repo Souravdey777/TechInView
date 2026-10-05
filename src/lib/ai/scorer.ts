@@ -220,6 +220,8 @@ type ScoreInterviewParams = {
     optimal_complexity: { time: string; space: string };
   } | null;
   roundContext?: RoundContextSnapshot | null;
+  /** Injected by the prompt eval to record usage; production uses the default client. */
+  client?: Anthropic;
 };
 
 export async function scoreInterview(
@@ -238,7 +240,7 @@ export async function scoreInterview(
     roundContext,
   } = params;
 
-  const client = new Anthropic();
+  const client = params.client ?? new Anthropic();
 
   // Strip timestamp from messages for the prompt (transcript-only)
   const transcript = messages.map(({ role, content }) => ({ role, content }));
