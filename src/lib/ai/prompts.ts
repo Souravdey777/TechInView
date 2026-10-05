@@ -11,9 +11,19 @@ const SCORING_CALIBRATION_RULES = `- Use evidence from the transcript, final cod
 - Penalize confident but incorrect complexity, untested edge cases, vague storytelling, and answers that avoid tradeoffs.
 - Feedback must be specific, actionable, and tied to observed behavior. Avoid generic praise like "good communication" without evidence.`;
 
-/** Evidence tags wrap untrusted text; a candidate must not be able to close one early. */
+/**
+ * Evidence tags wrap untrusted text; a candidate must not be able to close one early.
+ * Matches tags with attributes too, and repeats until stable so nested input like
+ * "</trans</transcript>cript>" cannot reassemble a tag after one pass.
+ */
+const EVIDENCE_TAG = /<\s*\/?\s*(transcript|final_code|round_context)\b[^>]*>/gi;
 export function stripEvidenceTags(text: string): string {
-  return text.replace(/<\s*\/?\s*(transcript|final_code|round_context)\s*>/gi, "");
+  let out = text;
+  for (let prev = ""; prev !== out; ) {
+    prev = out;
+    out = out.replace(EVIDENCE_TAG, "");
+  }
+  return out;
 }
 
 function formatTranscript(
