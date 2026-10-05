@@ -1,14 +1,13 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ButtonLink, Eyebrow, LEAD } from "@/components/marketing/ds";
 import { ProblemGrid } from "@/components/dashboard/ProblemGrid";
 import {
   summarizeBank,
   type BankProblem,
 } from "@/components/dashboard/problems/catalogue";
-import { MonoLabel } from "@/components/shared/Rack";
 import type { DifficultyLevel } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import { getProblems, getRecentPracticeAttempts } from "@/lib/db/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -65,16 +64,16 @@ export default async function ProblemsPage() {
   const summary = summarizeBank(bankProblems);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+    <div className="space-y-12">
+      <header className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
         <div className="min-w-0">
-          <MonoLabel>Problem bank</MonoLabel>
-          <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
+          <Eyebrow>Problem bank</Eyebrow>
+          <h1 className="text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
             {summary.total > 0
               ? `${summary.total} problems, two ways in.`
               : "The problem bank."}
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
+          <p className={cn(LEAD, "mt-5 max-w-xl")}>
             Solve one solo in the editor with hints and test runs, or hand it to
             a voice interviewer and get scored on it. Practice never spends a
             round.
@@ -82,17 +81,13 @@ export default async function ProblemsPage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button asChild size="lg" className="gap-2 text-base font-semibold">
-            <Link href="/interview/setup?dsaExperience=ai_interview">
-              Start a round
-              <ChevronRight className="h-5 w-5" />
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="secondary" className="gap-2">
-            <Link href="/interview/setup?dsaExperience=practice">
-              Practice free
-            </Link>
-          </Button>
+          <ButtonLink href="/interview/setup?dsaExperience=ai_interview">
+            Start a round
+            <ChevronRight className="h-4 w-4" />
+          </ButtonLink>
+          <ButtonLink href="/interview/setup?dsaExperience=practice" variant="ghost">
+            Practice free
+          </ButtonLink>
         </div>
       </header>
 

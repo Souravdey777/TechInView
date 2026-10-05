@@ -1,29 +1,29 @@
 import { cn } from "@/lib/utils";
-import { MonoLabel } from "@/components/shared/Rack";
+import { CELL, GRID, LABEL } from "@/components/marketing/ds";
 import type { DashboardMeter } from "@/lib/dashboard/home-metrics";
 
 /**
- * Hairline strip of headline numbers. Cells share one border so the strip
+ * Hairline grid of headline numbers. Cells share one border so the strip
  * reads as a single instrument panel rather than four floating cards.
  */
 export function MeterStrip({ meters }: { meters: readonly DashboardMeter[] }) {
   return (
-    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-brand-border bg-brand-border sm:grid-cols-2 lg:grid-cols-4">
+    <div className={cn(GRID, "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4")}>
       {meters.map((meter) => (
-        <div key={meter.label} className="bg-brand-card px-5 py-5">
-          <MonoLabel>{meter.label}</MonoLabel>
+        <div key={meter.label} className={cn(CELL, "px-5 py-6 sm:px-7 sm:py-7")}>
+          <span className={LABEL}>{meter.label}</span>
 
-          <div className="mt-3.5 flex items-baseline gap-2.5">
-            <p className="font-heading text-4xl font-bold leading-none tracking-tight text-brand-text">
+          <div className="mt-4 flex items-baseline gap-2.5">
+            <p className="text-[clamp(36px,3.6vw,48px)] font-normal leading-none tracking-[-0.04em] tabular-nums text-brand-text">
               {meter.value}
               {meter.suffix ? (
-                <span className="text-xl text-brand-subtle">{meter.suffix}</span>
+                <span className="text-xl tracking-[-0.02em] text-brand-subtle">{meter.suffix}</span>
               ) : null}
             </p>
             {meter.delta ? (
               <span
                 className={cn(
-                  "font-mono text-xs font-bold",
+                  "font-mono text-xs tabular-nums",
                   meter.delta.tone === "green" ? "text-brand-green" : "text-brand-rose"
                 )}
               >
@@ -33,15 +33,15 @@ export function MeterStrip({ meters }: { meters: readonly DashboardMeter[] }) {
           </div>
 
           {meter.segments ? (
-            <div className="mt-3.5 flex gap-0.5" aria-hidden="true">
+            <div className="mt-4 flex gap-0.5" aria-hidden="true">
               {Array.from({ length: meter.segments.total }).map((_, index) => (
                 <span
                   key={index}
                   className={cn(
-                    "h-1 flex-1 rounded-sm",
+                    "h-1 flex-1 rounded-full",
                     index < meter.segments!.filled
                       ? "bg-brand-green"
-                      : "bg-brand-border"
+                      : "bg-white/[0.08]"
                   )}
                 />
               ))}
@@ -49,7 +49,7 @@ export function MeterStrip({ meters }: { meters: readonly DashboardMeter[] }) {
           ) : null}
 
           {meter.caption ? (
-            <p className="mt-2.5 text-xs text-brand-subtle">{meter.caption}</p>
+            <p className="mt-3 text-[13px] text-brand-subtle">{meter.caption}</p>
           ) : null}
         </div>
       ))}

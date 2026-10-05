@@ -4,10 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { cn } from "@/lib/utils";
 import { SettingsForm } from "@/components/dashboard/SettingsForm";
-import {
-  SettingsMonoLabel,
-  SettingsRack,
-} from "@/components/dashboard/settings/SettingsRack";
+import { SettingsRack } from "@/components/dashboard/settings/SettingsRack";
 import {
   SettingsSectionNav,
   type SettingsSection,
@@ -21,14 +18,22 @@ import {
   getRegionForCountry,
 } from "@/lib/constants";
 import { Mail } from "lucide-react";
+import {
+  BTN_GHOST,
+  BTN_PRIMARY,
+  BTN_SM,
+  BODY,
+  CELL,
+  CHIP,
+  Eyebrow,
+  GRID,
+  LABEL,
+} from "@/components/marketing/ds";
 import { DeleteAccountButton } from "@/components/dashboard/DeleteAccountButton";
 import { LEGAL_LINKS, SUPPORT_EMAIL, createSupportMailto } from "@/lib/legal";
 
-const PACK_COLORS: Record<string, string> = {
-  single: "brand-cyan",
-  "3pack": "brand-green",
-  "6pack": "brand-amber",
-};
+/** The pack that gets the primary pill, matching the landing pricing section. */
+const FEATURED_PACK = "3pack";
 
 const SETTINGS_SECTIONS: readonly SettingsSection[] = [
   { id: "profile", label: "Profile" },
@@ -85,15 +90,13 @@ export default async function SettingsPage() {
   return (
     <div className="animate-fade-in">
       <header>
-        <SettingsMonoLabel className="tracking-[0.18em]">
-          Settings
-        </SettingsMonoLabel>
-        <h1 className="mt-3 font-heading text-3xl font-bold leading-none tracking-[-0.04em] text-brand-text sm:text-[2.5rem]">
+        <Eyebrow className="mb-4">Settings</Eyebrow>
+        <h1 className="text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
           Account.
         </h1>
       </header>
 
-      <div className="mt-8 grid items-start gap-6 sm:mt-10 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
+      <div className="mt-8 grid items-start gap-6 sm:mt-12 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
         <SettingsSectionNav sections={SETTINGS_SECTIONS} />
 
         <div className="flex min-w-0 flex-col gap-5">
@@ -117,23 +120,23 @@ export default async function SettingsPage() {
             label="Rounds and billing"
             note="One-time packs, nothing renews"
           >
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <div className="flex items-baseline gap-3">
                     <span
                       className={cn(
-                        "font-heading text-[2.5rem] font-bold leading-none tracking-[-0.04em]",
+                        "text-[clamp(40px,5vw,56px)] font-normal tabular-nums leading-none tracking-[-0.045em]",
                         credits > 0 ? "text-brand-text" : "text-brand-subtle"
                       )}
                     >
                       {credits}
                     </span>
-                    <span className="text-sm text-brand-muted">
+                    <span className={LABEL}>
                       round{credits === 1 ? "" : "s"} remaining
                     </span>
                   </div>
-                  <p className="mt-2 text-xs leading-relaxed text-brand-subtle">
+                  <p className="mt-3 text-sm leading-relaxed text-brand-muted">
                     {interviewsCompleted} round
                     {interviewsCompleted === 1 ? "" : "s"} completed. Rounds never
                     expire.
@@ -142,39 +145,38 @@ export default async function SettingsPage() {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className={cn(GRID, "sm:grid-cols-3")}>
                 {PACK_IDS.map((packId) => {
                   const pack = CREDIT_PACKS[packId];
-                  const color = PACK_COLORS[packId] ?? "brand-cyan";
+                  const featured = packId === FEATURED_PACK;
                   const price = pack.displayPrices[displayKey];
 
                   return (
                     <div
                       key={packId}
-                      className="flex flex-col gap-3 rounded-xl border border-brand-border bg-brand-surface p-4"
+                      className={cn(
+                        CELL,
+                        "flex flex-col gap-5 p-5",
+                        featured && "bg-brand-cyan/[0.03]"
+                      )}
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <SettingsMonoLabel>{pack.label}</SettingsMonoLabel>
-                        {pack.badge && (
-                          <span
-                            className={cn(
-                              "rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                              color === "brand-green"
-                                ? "bg-brand-green/15 text-brand-green"
-                                : "bg-brand-amber/15 text-brand-amber"
-                            )}
-                          >
-                            {pack.badge}
-                          </span>
+                      <div
+                        className={cn(
+                          LABEL,
+                          "flex items-center justify-between gap-2",
+                          featured && "text-brand-cyan"
                         )}
+                      >
+                        <span>{pack.label}</span>
+                        {pack.badge && <span>{pack.badge}</span>}
                       </div>
 
-                      <span className="font-heading text-xl font-bold tracking-[-0.03em] text-brand-text">
+                      <span className="text-[40px] font-light tabular-nums leading-none tracking-[-0.05em] text-brand-text">
                         {symbol}
                         {price.toLocaleString(region === "INR" ? "en-IN" : "en-US")}
                       </span>
 
-                      <p className="text-xs leading-relaxed text-brand-subtle">
+                      <p className="text-sm leading-relaxed text-brand-muted">
                         {pack.credits} x {FULL_INTERVIEW_DURATION_MINUTES}-minute
                         full round{pack.credits > 1 ? "s" : ""}
                       </p>
@@ -185,10 +187,9 @@ export default async function SettingsPage() {
                         userName={profile?.display_name ?? undefined}
                         userEmail={user.email ?? undefined}
                         className={cn(
-                          "mt-auto h-9 rounded-md border text-xs font-semibold transition-colors",
-                          color === "brand-cyan" && "border-brand-cyan/30 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20",
-                          color === "brand-green" && "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20",
-                          color === "brand-amber" && "border-brand-amber/30 bg-brand-amber/10 text-brand-amber hover:bg-brand-amber/20",
+                          featured ? BTN_PRIMARY : BTN_GHOST,
+                          BTN_SM,
+                          "mt-auto w-full"
                         )}
                       >
                         Buy pack
@@ -198,15 +199,15 @@ export default async function SettingsPage() {
                 })}
               </div>
 
-              <p className="border-t border-brand-border pt-4 text-xs leading-relaxed text-brand-subtle">
+              <p className="text-sm leading-relaxed text-brand-subtle">
                 Practice Mode stays free. Rounds are only spent in AI Interview
                 Mode. One-time packs, no subscription, secure payments via
                 Razorpay.
                 {region === "INR" && (
-                  <span className="ml-1 text-brand-cyan">India pricing applied.</span>
+                  <span className="ml-1 text-brand-text">India pricing applied.</span>
                 )}
                 {region === "PPP" && (
-                  <span className="ml-1 text-brand-cyan">Regional pricing applied.</span>
+                  <span className="ml-1 text-brand-text">Regional pricing applied.</span>
                 )}
               </p>
             </div>
@@ -215,10 +216,10 @@ export default async function SettingsPage() {
           <SettingsRack id="support" label="Support" note="Replies from a human">
             <div className="flex flex-col gap-5">
               <div>
-                <p className="text-sm font-medium text-brand-text">
+                <p className="text-xl font-medium tracking-[-0.02em] text-brand-text">
                   Need help with billing, rounds, account access, or privacy?
                 </p>
-                <p className="mt-1.5 text-xs leading-relaxed text-brand-subtle">
+                <p className={cn(BODY, "mt-2 max-w-xl")}>
                   Email the TechInView team directly. Include your account email
                   and any order ID, payment ID, or page URL that helps us verify
                   the request quickly.
@@ -228,14 +229,14 @@ export default async function SettingsPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <a
                   href={supportHref}
-                  className="inline-flex h-10 items-center gap-2 rounded-md bg-brand-cyan px-4 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
+                  className={cn(BTN_PRIMARY, BTN_SM, "gap-2")}
                 >
                   <Mail className="h-4 w-4" />
                   Email support
                 </a>
                 <Link
                   href="/contact"
-                  className="inline-flex h-10 items-center rounded-md border border-brand-border px-4 text-sm font-medium text-brand-text transition-colors hover:border-brand-cyan/40 hover:bg-brand-surface"
+                  className={cn(BTN_GHOST, BTN_SM)}
                 >
                   Support page
                 </Link>
@@ -244,12 +245,12 @@ export default async function SettingsPage() {
                 </span>
               </div>
 
-              <div className="flex flex-wrap gap-2 border-t border-brand-border pt-4">
+              <div className="flex flex-wrap gap-2 border-t border-white/[0.08] pt-5">
                 {LEGAL_LINKS.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="rounded-full border border-brand-border bg-brand-surface px-3 py-1.5 text-xs text-brand-muted transition-colors hover:border-brand-cyan/30 hover:text-brand-text"
+                    className={CHIP}
                   >
                     {item.label}
                   </Link>
@@ -261,10 +262,10 @@ export default async function SettingsPage() {
           <SettingsRack id="danger" label="Danger zone" tone="danger">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
               <div>
-                <p className="text-sm font-medium text-brand-text">
+                <p className="text-xl font-medium tracking-[-0.02em] text-brand-text">
                   Delete account
                 </p>
-                <p className="mt-1.5 max-w-md text-xs leading-relaxed text-brand-subtle">
+                <p className={cn(BODY, "mt-2 max-w-md")}>
                   Removes your transcripts, scorecards, and practice progress.
                   Unused rounds are not refunded, and this cannot be undone.
                 </p>

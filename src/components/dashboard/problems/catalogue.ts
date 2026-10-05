@@ -103,14 +103,6 @@ export const PROGRESS_CONFIG: Record<
   },
 };
 
-/** Difficulty carries its own colour in this list, selected or not. */
-export const DIFFICULTY_TONE: Record<DifficultyLevel | "all", string> = {
-  all: "text-brand-text",
-  easy: "text-brand-green",
-  medium: "text-brand-amber",
-  hard: "text-brand-rose",
-};
-
 /* ─── Derivation ──────────────────────────────────────────────────────────── */
 
 export function problemProgress(problem: BankProblem): ProblemProgress {

@@ -1,4 +1,5 @@
 import { MonoLabel, Rack } from "@/components/shared/Rack";
+import { BODY } from "@/components/marketing/ds";
 import { HIRE_LINE, type DimensionAverage } from "@/lib/dashboard/home-metrics";
 import { cn, getScoreBgColor, getScoreColor } from "@/lib/utils";
 
@@ -19,8 +20,8 @@ export function DimensionAverages({
 
   return (
     <Rack
-      label={<MonoLabel className="tracking-[0.18em]">Dimension average</MonoLabel>}
-      accessory={<MonoLabel className="tracking-[0.12em]">{note}</MonoLabel>}
+      label={<MonoLabel>Dimension average</MonoLabel>}
+      accessory={<MonoLabel>{note}</MonoLabel>}
     >
       {dimensions.length > 0 ? (
         <div className="flex flex-col gap-4">
@@ -34,22 +35,22 @@ export function DimensionAverages({
                     className={cn(
                       "text-sm",
                       isWeakest
-                        ? "font-semibold text-brand-text"
-                        : "font-medium text-brand-text"
+                        ? "font-medium text-brand-text"
+                        : "text-brand-muted"
                     )}
                   >
                     {dimension.label}
                   </span>
                   <span
                     className={cn(
-                      "font-mono text-xs font-bold",
+                      "font-mono text-xs tabular-nums",
                       getScoreColor(dimension.average)
                     )}
                   >
                     {dimension.average}
                   </span>
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-sm bg-brand-border">
+                <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.08]">
                   <div
                     className={cn("h-full", getScoreBgColor(dimension.average))}
                     style={{ width: `${Math.max(2, dimension.average)}%` }}
@@ -60,14 +61,14 @@ export function DimensionAverages({
           })}
         </div>
       ) : (
-        <p className="text-xs leading-relaxed text-brand-muted">
+        <p className={BODY}>
           Dimension averages need one scored round. They break your weighted
           score into the parts an interviewer actually watches.
         </p>
       )}
 
       {footnote ? (
-        <p className="mt-5 border-t border-brand-border pt-4 text-xs leading-relaxed text-brand-muted">
+        <p className="mt-5 border-t border-white/[0.08] pt-4 text-[13px] leading-relaxed text-brand-muted">
           {footnote}
         </p>
       ) : null}

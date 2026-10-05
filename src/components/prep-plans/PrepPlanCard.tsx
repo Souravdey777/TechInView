@@ -19,7 +19,7 @@ type PrepPlanCardProps = {
 };
 
 /**
- * A saved loop at a glance: the target in the chrome header, the next round to
+ * A saved loop at a glance: the target in the hairline header, the next round to
  * take, and the per-round breakdown underneath. `compact` trims the rounds for
  * the dashboard rack; the full form is used wherever the loop is the subject.
  */
@@ -30,11 +30,11 @@ export function PrepPlanCard({
 }: PrepPlanCardProps) {
   return (
     <Rack
-      bodyClassName="flex flex-col gap-4 p-4 sm:p-4"
+      bodyClassName="flex flex-col gap-5"
       label={
         <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-          <MonoLabel className="tracking-[0.18em]">Loop</MonoLabel>
-          <span className="truncate font-mono text-[11px] text-brand-muted">
+          <MonoLabel>Loop</MonoLabel>
+          <span className="truncate text-sm text-brand-text">
             {plan.company} · {plan.role}
           </span>
         </span>
@@ -42,7 +42,7 @@ export function PrepPlanCard({
       accessory={
         <span className="flex items-center gap-2.5">
           <PlanStatusTag status={plan.status} />
-          <MonoLabel className="text-[9px] tracking-[0.12em]">
+          <MonoLabel>
             Updated {formatShortDate(plan.updatedAt)}
           </MonoLabel>
         </span>
@@ -50,11 +50,11 @@ export function PrepPlanCard({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <MonoLabel className="text-[9px]">Next round</MonoLabel>
-          <p className="mt-1.5 font-heading text-sm font-semibold tracking-tight text-brand-text">
+          <MonoLabel>Next round</MonoLabel>
+          <p className="mt-2 text-xl font-medium tracking-[-0.02em] text-brand-text">
             {getPracticeKindLabel(plan.nextRecommendedKind)}
           </p>
-          <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-brand-muted">
+          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-brand-muted">
             {plan.nextActionLabel}
           </p>
         </div>

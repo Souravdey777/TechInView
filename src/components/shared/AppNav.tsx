@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSupabase } from "@/hooks/useSupabase";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { BTN_GHOST, BTN_SM, CONTAINER, FOCUS, PAD } from "@/components/marketing/ds";
 import { createSupportMailto } from "@/lib/legal";
 import { getPublicProfilePath } from "@/lib/public-profile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -134,13 +135,13 @@ function AccountMenu({
       <DropdownMenuTrigger
         className={cn(
           "group shrink-0 rounded-full",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-surface"
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep"
         )}
         aria-label="Account menu"
       >
         <Avatar
           className={cn(
-            "h-[30px] w-[30px] border border-brand-border bg-brand-card text-xs text-brand-muted",
+            "h-8 w-8 border border-white/[0.12] bg-transparent text-xs text-brand-muted",
             "transition-colors group-hover:border-brand-cyan/40 group-hover:text-brand-text",
             "group-data-[state=open]:border-brand-cyan/40 group-data-[state=open]:text-brand-text"
           )}
@@ -151,16 +152,17 @@ function AccountMenu({
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      {/* Portaled to <body>, outside the layout theme, so it re-applies it. */}
+      <DropdownMenuContent align="end" className="theme-landing w-64 font-sans">
         <div className="flex items-center gap-2.5 px-2.5 pb-2 pt-1.5">
-          <Avatar className="h-9 w-9 border border-brand-border bg-brand-card text-brand-muted">
+          <Avatar className="h-9 w-9 border border-white/[0.12] bg-transparent text-brand-muted">
             <AvatarImage src={avatarUrl ?? undefined} alt="" />
             <AvatarFallback className="border-0 bg-transparent text-xs font-semibold text-inherit">
               {initial}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-brand-subtle">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle">
               Signed in as
             </p>
             <p
@@ -281,18 +283,18 @@ export function AppNav({
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-brand-border bg-brand-surface/95 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-7">
+      <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-brand-deep/80 backdrop-blur-[14px]">
+        <div className={cn(CONTAINER, PAD, "flex h-16 items-center justify-between gap-6")}>
+          <div className="flex min-w-0 items-center gap-10">
             <Link
               href="/dashboard"
-              className="inline-flex shrink-0 items-center rounded-lg transition-opacity hover:opacity-90"
+              className={cn("inline-flex shrink-0 items-center transition-opacity hover:opacity-90", FOCUS)}
               aria-label="Go to dashboard"
             >
-              <BrandLogo size="sm" wordmarkClassName="text-sm" />
+              <BrandLogo size="sm" boxClassName="h-7 w-7 rounded-md" wordmarkClassName="text-lg font-semibold" />
             </Link>
 
-            <nav className="hidden items-center gap-6 lg:flex">
+            <nav aria-label="App" className="hidden items-center gap-7 font-mono text-xs uppercase tracking-[0.08em] lg:flex">
               {NAV_ITEMS.map(({ href, label }) => {
                 const isActive = isItemActive(pathname, href);
                 return (
@@ -301,21 +303,12 @@ export function AppNav({
                     href={href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "rounded-sm text-[13px] transition-colors",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-4 focus-visible:ring-offset-brand-surface",
-                      isActive
-                        ? "font-semibold text-brand-text"
-                        : "text-brand-subtle hover:text-brand-text"
+                      "transition-colors",
+                      FOCUS,
+                      isActive ? "text-brand-cyan" : "text-brand-muted hover:text-brand-text"
                     )}
                   >
-                    <span
-                      className={cn(
-                        "inline-block border-b pb-[3px]",
-                        isActive ? "border-brand-cyan" : "border-transparent"
-                      )}
-                    >
-                      {label}
-                    </span>
+                    {label}
                   </Link>
                 );
               })}
@@ -327,12 +320,7 @@ export function AppNav({
 
             <Link
               href={ROUNDS_HREF}
-              className={cn(
-                "hidden h-9 items-center rounded-md border border-brand-border px-3.5",
-                "text-[13px] font-medium text-brand-muted transition-colors",
-                "hover:border-brand-cyan/40 hover:text-brand-text lg:inline-flex",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-surface"
-              )}
+              className={cn(BTN_GHOST, BTN_SM, "hidden lg:inline-flex")}
             >
               Buy rounds
             </Link>
@@ -351,9 +339,9 @@ export function AppNav({
               type="button"
               onClick={() => setOpen((prev) => !prev)}
               className={cn(
-                "inline-flex h-9 w-9 items-center justify-center rounded-md",
-                "border border-brand-border text-brand-muted transition-colors",
-                "hover:border-brand-cyan/40 hover:text-brand-text lg:hidden"
+                "inline-flex h-10 w-10 items-center justify-center rounded-full",
+                "border border-white/[0.12] text-brand-text transition-colors",
+                "hover:border-brand-cyan hover:text-brand-cyan lg:hidden"
               )}
               aria-expanded={open}
               aria-controls="app-nav-drawer"
@@ -386,23 +374,23 @@ export function AppNav({
 
         <aside
           className={cn(
-            "absolute inset-x-0 top-0 flex flex-col border-b border-brand-border bg-brand-surface shadow-2xl transition-transform duration-200",
+            "absolute inset-x-0 top-0 flex flex-col border-b border-white/[0.08] bg-brand-deep transition-transform duration-200",
             open ? "translate-y-0" : "-translate-y-full"
           )}
         >
-          <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-brand-border px-4 sm:px-6">
-            <BrandLogo size="sm" wordmarkClassName="text-sm" />
+          <div className={cn(PAD, "flex h-16 shrink-0 items-center justify-between gap-3 border-b border-white/[0.08]")}>
+            <BrandLogo size="sm" boxClassName="h-7 w-7 rounded-md" wordmarkClassName="text-lg font-semibold" />
             <button
               type="button"
               onClick={close}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-brand-border text-brand-muted transition-colors hover:border-brand-cyan/40 hover:text-brand-text"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.12] text-brand-text transition-colors hover:border-brand-cyan hover:text-brand-cyan"
               aria-label="Close navigation"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          <nav className="flex flex-col px-4 py-2 sm:px-6">
+          <nav aria-label="App" className={cn(PAD, "flex flex-col py-2")}>
             {NAV_ITEMS.map(({ href, label }) => {
               const isActive = isItemActive(pathname, href);
               return (
@@ -413,10 +401,8 @@ export function AppNav({
                   tabIndex={open ? 0 : -1}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "flex h-11 items-center border-l px-4 text-sm transition-colors",
-                    isActive
-                      ? "border-brand-cyan bg-brand-card font-semibold text-brand-text"
-                      : "border-transparent text-brand-muted hover:bg-brand-card hover:text-brand-text"
+                    "flex h-14 items-center border-b border-white/[0.08] text-2xl font-normal tracking-[-0.03em] transition-colors",
+                    isActive ? "text-brand-cyan" : "text-brand-text hover:text-brand-cyan"
                   )}
                 >
                   {label}
@@ -425,30 +411,30 @@ export function AppNav({
             })}
           </nav>
 
-          <div className="border-t border-brand-border px-4 py-4 sm:px-6">
+          <div className={cn(PAD, "py-4")}>
             <div className="flex items-center justify-between gap-3">
               <RoundsCounter credits={credits} />
               <Link
                 href={ROUNDS_HREF}
                 onClick={close}
                 tabIndex={open ? 0 : -1}
-                className="inline-flex h-9 items-center rounded-md border border-brand-border px-3.5 text-[13px] font-medium text-brand-muted transition-colors hover:border-brand-cyan/40 hover:text-brand-text"
+                className={cn(BTN_GHOST, BTN_SM)}
               >
                 Buy rounds
               </Link>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1 border-t border-brand-border px-4 py-4 sm:px-6">
+          <div className={cn(PAD, "flex flex-col gap-1 border-t border-white/[0.08] py-4")}>
             <div className="flex items-center gap-2.5 pb-2">
-              <Avatar className="h-[30px] w-[30px] border border-brand-border bg-brand-card text-brand-muted">
+              <Avatar className="h-8 w-8 border border-white/[0.12] bg-transparent text-brand-muted">
                 <AvatarImage src={avatarUrl ?? undefined} alt="" />
                 <AvatarFallback className="border-0 bg-transparent text-xs font-semibold text-inherit">
                   {getAvatarInitial(displayName, userEmail)}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-brand-subtle">
+                <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle">
                   Signed in as
                 </p>
                 <p
@@ -467,7 +453,7 @@ export function AppNav({
                 rel="noreferrer"
                 onClick={close}
                 tabIndex={open ? 0 : -1}
-                className="flex items-center gap-2.5 rounded-md px-2 py-2.5 text-sm text-brand-muted transition-colors hover:bg-brand-card hover:text-brand-text"
+                className="flex items-center gap-2.5 rounded-full px-3 py-2.5 text-sm text-brand-muted transition-colors hover:bg-white/[0.04] hover:text-brand-text"
               >
                 <UserRound className="h-4 w-4" />
                 Public profile
@@ -478,7 +464,7 @@ export function AppNav({
                 href={publicProfile.href}
                 onClick={close}
                 tabIndex={open ? 0 : -1}
-                className="flex items-center gap-2.5 rounded-md px-2 py-2.5 text-sm text-brand-muted transition-colors hover:bg-brand-card hover:text-brand-text"
+                className="flex items-center gap-2.5 rounded-full px-3 py-2.5 text-sm text-brand-muted transition-colors hover:bg-white/[0.04] hover:text-brand-text"
               >
                 <UserRound className="h-4 w-4" />
                 Set up public profile
@@ -489,7 +475,7 @@ export function AppNav({
               href="/settings"
               onClick={close}
               tabIndex={open ? 0 : -1}
-              className="flex items-center gap-2.5 rounded-md px-2 py-2.5 text-sm text-brand-muted transition-colors hover:bg-brand-card hover:text-brand-text"
+              className="flex items-center gap-2.5 rounded-full px-3 py-2.5 text-sm text-brand-muted transition-colors hover:bg-white/[0.04] hover:text-brand-text"
             >
               <Settings2 className="h-4 w-4" />
               Settings
@@ -498,7 +484,7 @@ export function AppNav({
               href={SUPPORT_HREF}
               onClick={close}
               tabIndex={open ? 0 : -1}
-              className="flex items-center gap-2.5 rounded-md px-2 py-2.5 text-sm text-brand-muted transition-colors hover:bg-brand-card hover:text-brand-text"
+              className="flex items-center gap-2.5 rounded-full px-3 py-2.5 text-sm text-brand-muted transition-colors hover:bg-white/[0.04] hover:text-brand-text"
             >
               <Mail className="h-4 w-4" />
               Contact support
@@ -507,7 +493,7 @@ export function AppNav({
               type="button"
               onClick={() => void handleSignOut()}
               tabIndex={open ? 0 : -1}
-              className="flex items-center gap-2.5 rounded-md px-2 py-2.5 text-left text-sm text-brand-muted transition-colors hover:bg-brand-rose/5 hover:text-brand-rose"
+              className="flex items-center gap-2.5 rounded-full px-3 py-2.5 text-left text-sm text-brand-muted transition-colors hover:bg-brand-rose/5 hover:text-brand-rose"
             >
               <LogOut className="h-4 w-4" />
               Sign out

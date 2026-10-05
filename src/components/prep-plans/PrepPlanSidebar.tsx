@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { History, Plus, X } from "lucide-react";
 import { MonoLabel } from "@/components/shared/Rack";
+import { BTN_GHOST, BTN_SM } from "@/components/marketing/ds";
 import { DeletePrepPlanButton } from "@/components/prep-plans/DeletePrepPlanButton";
 import {
   LOCAL_ONLY_NOTE,
@@ -24,7 +25,7 @@ type PrepPlanSidebarProps = {
 };
 
 const ROW_FOCUS =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-card";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep";
 
 function NewPlanAction({
   onNewPlan,
@@ -33,11 +34,7 @@ function NewPlanAction({
   onNewPlan?: () => void;
   onNavigate?: () => void;
 }) {
-  const className = cn(
-    "flex h-10 w-full items-center gap-2 rounded-lg border border-brand-border bg-brand-surface px-3",
-    "text-sm font-medium text-brand-text transition-colors hover:border-brand-cyan/40 hover:bg-brand-card",
-    ROW_FOCUS
-  );
+  const className = cn(BTN_GHOST, BTN_SM, "w-full justify-start gap-2");
 
   if (onNewPlan) {
     return (
@@ -49,7 +46,7 @@ function NewPlanAction({
           onNavigate?.();
         }}
       >
-        <Plus className="h-4 w-4 text-brand-cyan" />
+        <Plus className="h-4 w-4" />
         New plan
       </button>
     );
@@ -57,7 +54,7 @@ function NewPlanAction({
 
   return (
     <Link href="/prep-guru" className={className} onClick={onNavigate}>
-      <Plus className="h-4 w-4 text-brand-cyan" />
+      <Plus className="h-4 w-4" />
       New plan
     </Link>
   );
@@ -79,10 +76,10 @@ function PlanRow({
   onNavigate,
 }: PlanRowProps) {
   const rowClassName = cn(
-    "min-w-0 flex-1 rounded-lg border-l-2 px-3 py-2 text-left transition-colors",
+    "min-w-0 flex-1 rounded-r-lg border-l-2 px-3 py-2.5 text-left transition-colors",
     isActive
-      ? "border-brand-cyan bg-brand-card"
-      : "border-transparent hover:border-brand-subtle hover:bg-brand-card",
+      ? "border-brand-cyan bg-white/[0.03]"
+      : "border-transparent hover:border-white/[0.18] hover:bg-white/[0.02]",
     ROW_FOCUS
   );
 
@@ -94,7 +91,7 @@ function PlanRow({
     <>
       <span
         className={cn(
-          "block truncate text-[13px] font-medium",
+          "block truncate text-sm",
           isActive ? "text-brand-text" : "text-brand-muted"
         )}
       >
@@ -103,7 +100,7 @@ function PlanRow({
       <span className="mt-0.5 block truncate text-xs text-brand-subtle">
         {plan.role}
       </span>
-      <MonoLabel className="mt-1.5 block text-[9px]">
+      <MonoLabel className="mt-1.5 block text-[10px]">
         {formatRelativeDay(plan.updatedAt)}
       </MonoLabel>
     </>
@@ -161,9 +158,9 @@ function SidebarBody({
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <NewPlanAction onNewPlan={onNewPlan} onNavigate={onNavigate} />
 
-      <div className="flex items-baseline justify-between gap-3 border-b border-brand-border pb-2">
-        <MonoLabel className="tracking-[0.18em]">Your plans</MonoLabel>
-        <MonoLabel className="text-[9px] tracking-[0.12em]">
+      <div className="flex items-baseline justify-between gap-3 border-b border-white/[0.08] pb-2.5">
+        <MonoLabel>Your plans</MonoLabel>
+        <MonoLabel className="text-[10px]">
           {isLoaded ? `${plans.length} saved` : "Reading"}
         </MonoLabel>
       </div>
@@ -173,8 +170,8 @@ function SidebarBody({
           <div className="flex flex-col gap-2 py-1" aria-hidden="true">
             {[0, 1, 2].map((row) => (
               <div key={row} className="px-3 py-2">
-                <span className="block h-2 w-24 rounded-sm bg-brand-border" />
-                <span className="mt-2 block h-2 w-16 rounded-sm bg-brand-border/60" />
+                <span className="block h-2 w-24 animate-pulse rounded-full bg-white/[0.06]" />
+                <span className="mt-2 block h-2 w-16 animate-pulse rounded-full bg-white/[0.04]" />
               </div>
             ))}
           </div>
@@ -199,7 +196,7 @@ function SidebarBody({
         )}
       </div>
 
-      <p className="border-t border-brand-border pt-3 text-[11px] leading-relaxed text-brand-subtle">
+      <p className="border-t border-white/[0.08] pt-3 text-[11px] leading-relaxed text-brand-subtle">
         {LOCAL_ONLY_NOTE}
       </p>
     </div>
@@ -285,8 +282,8 @@ export function PrepPlanSidebar(props: PrepPlanSidebarProps) {
           aria-expanded={isDrawerOpen}
           aria-controls="prep-guru-plan-drawer"
           className={cn(
-            "inline-flex h-9 items-center gap-2 rounded-lg border border-brand-border bg-brand-surface px-3",
-            "text-xs font-medium text-brand-muted transition-colors hover:border-brand-cyan/40 hover:text-brand-text",
+            "inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.12] px-4",
+            "text-xs text-brand-muted transition-colors hover:border-brand-cyan hover:text-brand-cyan",
             ROW_FOCUS
           )}
         >
@@ -297,14 +294,14 @@ export function PrepPlanSidebar(props: PrepPlanSidebarProps) {
           </span>
         </button>
         {activePlan ? (
-          <MonoLabel className="min-w-0 truncate text-[9px]">
+          <MonoLabel className="min-w-0 truncate text-[10px]">
             {activePlan.company}
           </MonoLabel>
         ) : null}
       </div>
 
       {/* ─── Desktop rail ─── */}
-      <aside className="hidden lg:sticky lg:top-[4.5rem] lg:flex lg:max-h-[calc(100vh-6.5rem)] lg:flex-col lg:self-start lg:rounded-2xl lg:border lg:border-brand-border lg:bg-brand-card lg:p-3">
+      <aside className="hidden lg:sticky lg:top-[4.5rem] lg:flex lg:max-h-[calc(100vh-6.5rem)] lg:flex-col lg:self-start lg:rounded-[20px] lg:border lg:border-white/[0.08] lg:p-3">
         <SidebarBody {...props} />
       </aside>
 
@@ -337,19 +334,22 @@ export function PrepPlanSidebar(props: PrepPlanSidebarProps) {
           aria-modal="true"
           aria-label="Prep plan history"
           className={cn(
-            "absolute inset-y-0 left-0 flex w-[19rem] max-w-[88vw] flex-col border-r border-brand-border bg-brand-surface shadow-2xl transition-transform duration-200",
+            "absolute inset-y-0 left-0 flex w-[19rem] max-w-[88vw] flex-col border-r border-white/[0.08] bg-brand-deep transition-transform duration-200",
             isDrawerOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
-          <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-brand-border px-4">
-            <MonoLabel className="tracking-[0.18em]">Prep Guru</MonoLabel>
+          <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-white/[0.08] px-4">
+            <MonoLabel>Prep Guru</MonoLabel>
             <button
               type="button"
               ref={closeButtonRef}
               onClick={closeDrawer}
               tabIndex={isDrawerOpen ? 0 : -1}
               aria-label="Close plan history"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-brand-border text-brand-muted transition-colors hover:border-brand-cyan/40 hover:text-brand-text"
+              className={cn(
+                "inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.12] text-brand-muted transition-colors hover:border-brand-cyan hover:text-brand-cyan",
+                ROW_FOCUS
+              )}
             >
               <X className="h-4 w-4" />
             </button>

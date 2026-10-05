@@ -15,7 +15,7 @@ type SettingsRackProps = {
   bodyClassName?: string;
 };
 
-/** Bordered settings panel with a recessed chrome header. */
+/** Hairline settings rack with a mono label header. */
 export function SettingsRack({
   id,
   label,
@@ -34,15 +34,14 @@ export function SettingsRack({
       label={
         <MonoLabel
           className={cn(
-            "tracking-[0.18em]",
-            tone === "danger" ? "text-brand-rose" : "text-brand-cyan"
+            tone === "danger" ? "text-brand-rose" : "text-brand-text"
           )}
         >
           {label}
         </MonoLabel>
       }
       accessory={
-        note ? <MonoLabel className="tracking-[0.12em]">{note}</MonoLabel> : null
+        note ? <MonoLabel>{note}</MonoLabel> : null
       }
     >
       {children}
@@ -73,7 +72,7 @@ export function SettingsField({
       </label>
       <div className="mt-2">{children}</div>
       {hint ? (
-        <p className="mt-2 text-xs leading-relaxed text-brand-subtle">{hint}</p>
+        <p className="mt-2 text-[13px] leading-relaxed text-brand-subtle">{hint}</p>
       ) : null}
     </div>
   );
@@ -96,11 +95,11 @@ export function SettingsToggleRow({
   label,
 }: SettingsToggleRowProps) {
   return (
-    <div className="flex items-start justify-between gap-6 border-t border-brand-border/60 py-5 first:border-t-0 first:pt-0">
+    <div className="flex items-start justify-between gap-6 border-t border-white/[0.08] py-5 first:border-t-0 first:pt-0">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-brand-text">{title}</p>
+        <p className="text-[15px] font-medium text-brand-text">{title}</p>
         {description ? (
-          <p className="mt-1.5 text-xs leading-relaxed text-brand-subtle">
+          <p className="mt-1.5 text-sm leading-relaxed text-brand-muted">
             {description}
           </p>
         ) : null}
@@ -113,10 +112,10 @@ export function SettingsToggleRow({
         onClick={() => onCheckedChange(!checked)}
         className={cn(
           "relative mt-0.5 h-6 w-11 shrink-0 rounded-full border transition-colors",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-card",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep",
           checked
             ? "border-brand-cyan bg-brand-cyan"
-            : "border-brand-border bg-brand-surface"
+            : "border-white/[0.18] bg-transparent"
         )}
       >
         <span

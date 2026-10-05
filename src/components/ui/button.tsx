@@ -6,26 +6,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90 shadow-sm shadow-brand-cyan/20",
+          "bg-brand-cyan text-brand-deep hover:bg-brand-text",
         secondary:
-          "bg-brand-surface text-brand-text border border-brand-border hover:bg-brand-card hover:border-brand-subtle",
+          "bg-transparent text-brand-text border border-white/[0.18] hover:border-brand-cyan hover:text-brand-cyan",
         outline:
-          "border border-brand-border bg-transparent text-brand-text hover:bg-brand-card hover:border-brand-cyan/50",
+          "border border-white/[0.12] bg-transparent text-brand-text hover:border-brand-cyan hover:text-brand-cyan",
         ghost:
-          "bg-transparent text-brand-text hover:bg-brand-card hover:text-brand-text",
+          "bg-transparent text-brand-muted hover:bg-white/[0.04] hover:text-brand-text",
         destructive:
           "bg-brand-rose/10 text-brand-rose border border-brand-rose/30 hover:bg-brand-rose/20 hover:border-brand-rose/60",
         link: "text-brand-cyan underline-offset-4 hover:underline bg-transparent",
       },
       size: {
-        sm: "h-8 px-3 text-xs rounded-md [&_svg]:size-3.5",
-        default: "h-10 px-4 text-sm [&_svg]:size-4",
-        lg: "h-12 px-6 text-base rounded-lg [&_svg]:size-5",
+        sm: "h-8 px-3.5 text-xs [&_svg]:size-3.5",
+        default: "h-10 px-5 text-sm [&_svg]:size-4",
+        lg: "h-12 px-[26px] text-[15px] [&_svg]:size-5",
         icon: "h-10 w-10 [&_svg]:size-4",
       },
     },

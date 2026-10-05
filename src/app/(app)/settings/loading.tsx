@@ -1,77 +1,84 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { CELL, GRID } from "@/components/marketing/ds";
+
+function Pulse({ className }: { className?: string }) {
+  return <div className={cn("animate-pulse rounded-md bg-white/[0.04]", className)} />;
+}
+
+function RackSkeleton({
+  danger = false,
+  children,
+}: {
+  danger?: boolean;
+  children: ReactNode;
+}) {
+  const border = danger ? "border-brand-rose/25" : "border-white/[0.08]";
+  return (
+    <div className={cn("overflow-hidden rounded-[20px] border", border)}>
+      <div className={cn("flex items-center justify-between gap-4 border-b px-5 py-4 sm:px-6", border)}>
+        <Pulse className="h-3 w-24" />
+        <Pulse className="hidden h-3 w-36 sm:block" />
+      </div>
+      <div className="p-5 sm:p-6">{children}</div>
+    </div>
+  );
+}
 
 export default function SettingsLoading() {
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      {/* Heading */}
-      <div className="space-y-2">
-        <Skeleton className="h-7 w-28" />
-        <Skeleton className="h-4 w-72" />
-      </div>
+    <div>
+      {/* Eyebrow + title */}
+      <Pulse className="h-3 w-20" />
+      <Pulse className="mt-4 h-12 w-56" />
 
-      {/* Profile Section */}
-      <div className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-border">
-          <Skeleton className="h-4 w-4 rounded" />
-          <Skeleton className="h-4 w-16" />
-        </div>
-        <div className="p-6 space-y-5">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="space-y-1.5">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-10 w-full rounded-lg" />
-            </div>
+      <div className="mt-8 grid items-start gap-6 sm:mt-12 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
+        {/* Section nav */}
+        <div className="flex gap-4 overflow-hidden lg:flex-col lg:gap-5 lg:border-l lg:border-white/[0.08] lg:pl-4 lg:pt-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Pulse key={i} className="h-3 w-20 shrink-0 lg:w-28" />
           ))}
-          <Skeleton className="h-10 w-28 rounded-lg" />
         </div>
-      </div>
 
-      {/* Subscription Section */}
-      <div className="bg-brand-card rounded-xl border border-brand-border overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-border">
-          <Skeleton className="h-4 w-4 rounded" />
-          <Skeleton className="h-4 w-28" />
-        </div>
-        <div className="p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-6 w-20 rounded-full" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Array.from({ length: 2 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-brand-surface rounded-xl border border-brand-border p-5 space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <Skeleton className="h-5 w-20" />
-                  <Skeleton className="h-5 w-16" />
+        <div className="flex min-w-0 flex-col gap-5">
+          {/* Profile */}
+          <RackSkeleton>
+            <div className="grid gap-5 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Pulse className="h-3 w-24" />
+                  <Pulse className="h-12 w-full rounded-full" />
                 </div>
-                <div className="space-y-2">
-                  {Array.from({ length: 3 }).map((_, j) => (
-                    <Skeleton key={j} className="h-4 w-40" />
-                  ))}
+              ))}
+            </div>
+          </RackSkeleton>
+
+          {/* Rounds and billing */}
+          <RackSkeleton>
+            <Pulse className="h-12 w-24" />
+            <Pulse className="mt-3 h-4 w-72 max-w-full" />
+            <div className={cn(GRID, "mt-6 sm:grid-cols-3")}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className={cn(CELL, "space-y-5 p-5")}>
+                  <Pulse className="h-3 w-20" />
+                  <Pulse className="h-10 w-24" />
+                  <Pulse className="h-4 w-36" />
+                  <Pulse className="h-10 w-full rounded-full" />
                 </div>
-                <Skeleton className="h-9 w-full rounded-lg" />
+              ))}
+            </div>
+          </RackSkeleton>
+
+          {/* Danger zone */}
+          <RackSkeleton danger>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-2">
+                <Pulse className="h-5 w-32" />
+                <Pulse className="h-4 w-72 max-w-full" />
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Danger Zone */}
-      <div className="bg-brand-card rounded-xl border border-brand-rose/20 overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-brand-rose/20">
-          <Skeleton className="h-4 w-4 rounded" />
-          <Skeleton className="h-4 w-24" />
-        </div>
-        <div className="p-6 flex items-start justify-between gap-4">
-          <div className="space-y-1.5">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-3 w-72 max-w-full" />
-            <Skeleton className="h-3 w-56 max-w-full" />
-          </div>
-          <Skeleton className="h-9 w-32 rounded-lg shrink-0" />
+              <Pulse className="h-10 w-36 shrink-0 rounded-full" />
+            </div>
+          </RackSkeleton>
         </div>
       </div>
     </div>
