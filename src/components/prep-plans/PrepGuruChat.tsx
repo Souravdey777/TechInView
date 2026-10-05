@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { ArrowRight, TriangleAlert } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { MonoLabel } from "@/components/shared/Rack";
+import { BODY, ButtonLink, Eyebrow, LEAD } from "@/components/marketing/ds";
 import {
   PrepPlanBuilder,
   type PrepPlanRequest,
@@ -64,13 +63,13 @@ function PlanTurn({ plan }: { plan: PrepPlanSummary }) {
       accessory={
         <span className="flex items-center gap-2.5">
           <PlanStatusTag status={plan.status} />
-          <MonoLabel className="text-[9px] tracking-[0.12em]">
+          <MonoLabel>
             Generated {formatRelativeDay(plan.createdAt)}
           </MonoLabel>
         </span>
       }
     >
-      <h2 className="font-heading text-lg font-semibold tracking-tight text-brand-text sm:text-xl">
+      <h2 className="text-balance text-2xl font-normal leading-[1.1] tracking-[-0.03em] text-brand-text sm:text-3xl">
         {roundCount === 1
           ? "A single-round loop"
           : `A ${roundCount}-round loop`}{" "}
@@ -78,23 +77,23 @@ function PlanTurn({ plan }: { plan: PrepPlanSummary }) {
       </h2>
 
       {plan.planSummary ? (
-        <p className="mt-3 text-sm leading-relaxed text-brand-muted">
+        <p className={cn(BODY, "mt-4")}>
           {plan.planSummary}
         </p>
       ) : null}
 
       {plan.jdSignals.length > 0 ? (
-        <div className="mt-4">
-          <MonoLabel className="text-[9px]">Signals read from this JD</MonoLabel>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+        <div className="mt-6">
+          <MonoLabel>Signals read from this JD</MonoLabel>
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {plan.jdSignals.map((signal, index) => (
               <span
                 key={`${plan.id}-${signal}`}
                 className={cn(
-                  "rounded-full border px-2.5 py-0.5 font-mono text-[10px] tracking-[0.08em]",
+                  "rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em]",
                   index === 0
-                    ? "border-brand-cyan/30 bg-brand-cyan/5 text-brand-cyan"
-                    : "border-brand-border text-brand-muted"
+                    ? "border-white/[0.18] text-brand-text"
+                    : "border-white/[0.1] text-brand-muted"
                 )}
               >
                 {signal}
@@ -104,10 +103,10 @@ function PlanTurn({ plan }: { plan: PrepPlanSummary }) {
         </div>
       ) : null}
 
-      <div className="mt-4">
-        <MonoLabel className="text-[9px]">The rounds</MonoLabel>
+      <div className="mt-6">
+        <MonoLabel>The rounds</MonoLabel>
         <PrepPlanRoundGrid
-          className="mt-2"
+          className="mt-3"
           planId={plan.id}
           tracks={plan.tracks}
           showStatus
@@ -115,18 +114,16 @@ function PlanTurn({ plan }: { plan: PrepPlanSummary }) {
       </div>
 
       {plan.researchNote ? (
-        <p className="mt-4 border-t border-brand-border pt-3 text-xs leading-relaxed text-brand-subtle">
+        <p className="mt-6 text-xs leading-relaxed text-brand-subtle">
           {plan.researchNote}
         </p>
       ) : null}
 
-      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-brand-border pt-4">
-        <Button asChild size="sm">
-          <Link href={`/prep-guru/${plan.id}`}>
-            Open the full loop
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </Button>
+      <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-white/[0.08] pt-5">
+        <ButtonLink href={`/prep-guru/${plan.id}`} size="sm" className="gap-2">
+          Open the full loop
+          <ArrowRight className="h-3.5 w-3.5" />
+        </ButtonLink>
         <p className="text-xs leading-relaxed text-brand-subtle">
           Questions, reported patterns, and per-round setup live there.
         </p>
@@ -139,42 +136,42 @@ function ResearchingTurn({ target, step }: { target: string; step: number }) {
   return (
     <AssistantTurn
       accessory={
-        <MonoLabel className="text-[9px] tracking-[0.12em]">
+        <MonoLabel>
           Step {step + 1} of {RESEARCH_STEPS.length}
         </MonoLabel>
       }
     >
       <div aria-live="polite" aria-atomic="true">
-        <h2 className="font-heading text-base font-semibold tracking-tight text-brand-text">
+        <h2 className="text-xl font-medium tracking-[-0.02em] text-brand-text">
           Mapping the loop for {target}
         </h2>
 
-        <ol className="mt-3 flex flex-col divide-y divide-brand-border/60">
+        <ol className="mt-4 flex flex-col divide-y divide-white/[0.08]">
           {RESEARCH_STEPS.map((activity, index) => {
             const isActive = index === step;
 
             return (
               <li
                 key={activity.label}
-                className="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0"
+                className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"
               >
                 <span
                   className={cn(
                     "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                    isActive ? "bg-brand-cyan" : "bg-brand-border"
+                    isActive ? "bg-brand-cyan" : "bg-white/[0.18]"
                   )}
                 />
                 <span className="min-w-0">
                   <span
                     className={cn(
-                      "block text-sm font-medium",
+                      "block text-[15px]",
                       isActive ? "text-brand-text" : "text-brand-subtle"
                     )}
                   >
                     {activity.label}
                   </span>
                   {isActive ? (
-                    <span className="mt-1 block text-xs leading-relaxed text-brand-muted">
+                    <span className="mt-1 block text-sm leading-relaxed text-brand-muted">
                       {activity.detail}
                     </span>
                   ) : null}
@@ -184,13 +181,13 @@ function ResearchingTurn({ target, step }: { target: string; step: number }) {
           })}
         </ol>
 
-        <div className="mt-4 flex gap-1" aria-hidden="true">
+        <div className="mt-5 flex gap-1" aria-hidden="true">
           {RESEARCH_STEPS.map((activity, index) => (
             <span
               key={activity.label}
               className={cn(
-                "h-1 flex-1 rounded-sm transition-colors duration-500",
-                index === step ? "bg-brand-cyan" : "bg-brand-border"
+                "h-px flex-1 transition-colors duration-500",
+                index === step ? "bg-brand-cyan" : "bg-white/[0.12]"
               )}
             />
           ))}
@@ -206,10 +203,10 @@ function ErrorTurn({ message }: { message: string }) {
       <div className="flex gap-3">
         <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-brand-amber" />
         <div className="min-w-0">
-          <p role="alert" className="text-sm leading-relaxed text-brand-text">
+          <p role="alert" className="text-[15px] leading-relaxed text-brand-text">
             {message}
           </p>
-          <p className="mt-2 text-xs leading-relaxed text-brand-muted">
+          <p className="mt-2 text-sm leading-relaxed text-brand-muted">
             Nothing was saved. Add a bit more of the posting, or name the company
             and role explicitly, and send it again.
           </p>
@@ -305,13 +302,13 @@ export function PrepGuruChat({ activePlan, onPlanGenerated }: PrepGuruChatProps)
 
   if (!hasThread) {
     return (
-      <div className="flex min-h-[58vh] flex-col justify-center gap-6 py-6">
+      <div className="flex min-h-[58vh] flex-col justify-center gap-8 py-6">
         <div className="text-center">
-          <MonoLabel className="tracking-[0.18em]">Prep Guru</MonoLabel>
-          <h1 className="mt-3 font-heading text-2xl font-bold tracking-tight text-brand-text sm:text-3xl">
+          <Eyebrow className="mb-4">Prep Guru</Eyebrow>
+          <h1 className="mx-auto max-w-[18ch] text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
             What interview are you preparing for?
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
+          <p className={cn(LEAD, "mx-auto mt-5 max-w-xl")}>
             Paste the posting, or just name the role and company. Prep Guru maps
             the rounds you are likely to face, drafts the questions each one
             tends to ask, and flags which of them reviewed candidate reports
@@ -327,7 +324,7 @@ export function PrepGuruChat({ activePlan, onPlanGenerated }: PrepGuruChatProps)
           resetToken={resetToken}
         />
 
-        <p className="mx-auto flex max-w-xl gap-2.5 rounded-xl border border-brand-border px-4 py-3">
+        <p className="mx-auto flex max-w-xl gap-2.5 border-t border-white/[0.08] pt-4">
           <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-amber" />
           <span className="text-xs leading-relaxed text-brand-subtle">
             {INFERENCE_NOTE}
@@ -339,14 +336,14 @@ export function PrepGuruChat({ activePlan, onPlanGenerated }: PrepGuruChatProps)
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {pendingRequest ? (
           <>
             <UserTurn>
-              <MonoLabel className="text-[9px]">
+              <MonoLabel>
                 {pendingRequest.prompt.length >= 40 ? "Posting pasted" : "Target"}
               </MonoLabel>
-              <p className="mt-2 max-h-44 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-brand-text">
+              <p className="mt-2 max-h-44 overflow-y-auto whitespace-pre-wrap text-[15px] leading-relaxed text-brand-text">
                 {pendingRequest.prompt ||
                   `${pendingRequest.role} at ${pendingRequest.company}`}
               </p>

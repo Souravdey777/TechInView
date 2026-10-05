@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { FIELD, LABEL } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 
 const CONFIRM_TEXT = "delete my account";
 
@@ -71,9 +73,10 @@ export function DeleteAccountButton() {
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-md">
+        {/* Portaled outside the themed layout, so it carries the theme itself. */}
+        <DialogContent className="theme-landing max-w-md rounded-[20px] border-white/[0.08] bg-brand-deep font-sans shadow-none">
           <DialogHeader>
-            <DialogTitle className="text-brand-rose">
+            <DialogTitle className="text-2xl font-normal tracking-[-0.03em] text-brand-rose">
               Delete Account
             </DialogTitle>
             <DialogDescription>
@@ -83,12 +86,12 @@ export function DeleteAccountButton() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label
               htmlFor="confirm-delete"
-              className="text-sm text-brand-muted"
+              className={cn(LABEL, "block")}
             >
-              Type <span className="text-brand-text font-medium">{CONFIRM_TEXT}</span> to confirm:
+              Type <span className="normal-case tracking-normal text-brand-text">{CONFIRM_TEXT}</span> to confirm:
             </label>
             <Input
               id="confirm-delete"
@@ -97,6 +100,7 @@ export function DeleteAccountButton() {
               placeholder={CONFIRM_TEXT}
               disabled={loading}
               autoComplete="off"
+              className={cn(FIELD, "h-auto")}
             />
           </div>
 
@@ -104,7 +108,7 @@ export function DeleteAccountButton() {
             <p className="text-sm text-brand-rose">{error}</p>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="border-white/[0.08]">
             <Button
               type="button"
               onClick={() => handleOpenChange(false)}

@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { cn, getScoreBgColor, getScoreColor } from "@/lib/utils";
+import { cn, getScoreColor } from "@/lib/utils";
 import { PROBLEM_CATEGORIES } from "@/lib/constants";
 import type { ProblemCategory } from "@/lib/constants";
-import { MonoLabel, Rack } from "@/components/shared/Rack";
+import { CELL, Eyebrow, GRID, LABEL, LEAD } from "@/components/marketing/ds";
 import { ScoreTrendPanel } from "@/components/dashboard/home/ScoreTrendPanel";
 import {
   buildTrendPoints,
@@ -28,21 +28,6 @@ const CATEGORY_LABELS: Record<ProblemCategory, string> = {
   backtracking: "Backtracking",
   "sliding-window": "Sliding Window",
   trie: "Trie",
-};
-
-const CATEGORY_ICONS: Record<ProblemCategory, string> = {
-  arrays: "▦",
-  strings: "Ab",
-  trees: "⬡",
-  graphs: "◎",
-  dp: "⬒",
-  "linked-lists": "⬟",
-  "stacks-queues": "⊞",
-  "binary-search": "⌕",
-  heap: "△",
-  backtracking: "↺",
-  "sliding-window": "⇥",
-  trie: "⊤",
 };
 
 type ProgressData = {
@@ -139,14 +124,14 @@ export default async function ProgressPage() {
   ).length;
 
   return (
-    <div className="mx-auto max-w-6xl animate-fade-in space-y-5">
+    <div className="animate-fade-in space-y-14">
       {/* ─── Hero ─── */}
       <header>
-        <MonoLabel>Progress</MonoLabel>
-        <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
+        <Eyebrow>Progress</Eyebrow>
+        <h1 className="text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
           Your Progress
         </h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
+        <p className={cn(LEAD, "mt-4 max-w-xl")}>
           Track your improvement across all problem categories.
         </p>
       </header>
@@ -157,19 +142,13 @@ export default async function ProgressPage() {
       <ScoreTrendPanel trend={trend} />
 
       {/* ─── Category breakdown ─── */}
-      <Rack
-        label={
-          <h2>
-            <MonoLabel className="tracking-[0.18em]">Category Breakdown</MonoLabel>
-          </h2>
-        }
-        accessory={
-          <MonoLabel className="tracking-[0.12em]">
-            {attemptedCategories} of {PROBLEM_CATEGORIES.length} attempted
-          </MonoLabel>
-        }
-      >
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <section aria-labelledby="category-breakdown">
+        <SectionHead
+          id="category-breakdown"
+          title="Category breakdown"
+          accessory={`${attemptedCategories} of ${PROBLEM_CATEGORIES.length} attempted`}
+        />
+        <div className={cn(GRID, "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3")}>
           {PROBLEM_CATEGORIES.map((category) => {
             const data = progressMap.get(category);
             return (
@@ -183,27 +162,48 @@ export default async function ProgressPage() {
             );
           })}
         </div>
-      </Rack>
+      </section>
 
       {/* ─── Strengths & weaknesses ─── */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <InsightRack
+      <div className={cn(GRID, "grid-cols-1 md:grid-cols-2")}>
+        <InsightCell
           label="Strengths"
           accessory={`Top ${strengths.length} by average`}
-          tone="text-brand-green"
           rows={strengths}
           hasInsights={hasInsights}
           emptyCopy="Complete interviews across different categories to see your strengths."
         />
-        <InsightRack
+        <InsightCell
           label="Areas to Improve"
           accessory={`Weakest ${weaknesses.length} by average`}
-          tone="text-brand-rose"
           rows={weaknesses}
           hasInsights={hasInsights}
           emptyCopy="Your weak spots will be identified after completing several interviews."
         />
       </div>
+    </div>
+  );
+}
+
+/** Section title on the left, mono metadata on the right, over a hairline grid. */
+function SectionHead({
+  id,
+  title,
+  accessory,
+}: {
+  id: string;
+  title: string;
+  accessory: string;
+}) {
+  return (
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+      <h2
+        id={id}
+        className="text-2xl font-normal tracking-[-0.03em] text-brand-text sm:text-3xl"
+      >
+        {title}
+      </h2>
+      <span className={LABEL}>{accessory}</span>
     </div>
   );
 }
@@ -214,58 +214,51 @@ type InsightRow = {
   avgScore: number | null;
 };
 
-function InsightRack({
+function InsightCell({
   label,
   accessory,
-  tone,
   rows,
   hasInsights,
   emptyCopy,
 }: {
   label: string;
   accessory: string;
-  tone: string;
   rows: InsightRow[];
   hasInsights: boolean;
   emptyCopy: string;
 }) {
   return (
-    <Rack
-      label={
-        <h2>
-          <MonoLabel className={cn("tracking-[0.18em]", tone)}>{label}</MonoLabel>
+    <section className={cn(CELL, "px-5 py-6 sm:px-7")}>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 className="text-xl font-medium tracking-[-0.02em] text-brand-text">
+          {label}
         </h2>
-      }
-      accessory={
-        hasInsights ? (
-          <MonoLabel className="tracking-[0.12em]">{accessory}</MonoLabel>
-        ) : null
-      }
-    >
+        {hasInsights ? <span className={LABEL}>{accessory}</span> : null}
+      </div>
       {hasInsights ? (
-        <div className="flex flex-col gap-2">
+        <ul className="mt-4 divide-y divide-white/[0.08] border-t border-white/[0.08]">
           {rows.map((row) => (
-            <div
+            <li
               key={row.category}
-              className="flex items-center justify-between gap-3 rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5"
+              className="flex items-center justify-between gap-3 py-3"
             >
-              <span className="truncate text-sm text-brand-text">{row.label}</span>
+              <span className="truncate text-[15px] text-brand-text">{row.label}</span>
               <span
                 className={cn(
-                  "shrink-0 font-mono text-xs font-bold",
+                  "shrink-0 font-mono text-sm tabular-nums",
                   getScoreColor(row.avgScore ?? 0)
                 )}
               >
                 {Math.round(row.avgScore ?? 0)}
-                <span className="font-normal text-brand-subtle">/100</span>
+                <span className="text-brand-subtle">/100</span>
               </span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
-        <p className="text-xs leading-relaxed text-brand-muted">{emptyCopy}</p>
+        <p className="mt-4 text-sm leading-relaxed text-brand-muted">{emptyCopy}</p>
       )}
-    </Rack>
+    </section>
   );
 }
 
@@ -284,36 +277,19 @@ function CategoryCard({
   const isUntouched = attempted === 0;
 
   return (
-    <div
-      className={cn(
-        "rounded-xl border border-brand-border bg-brand-surface px-4 py-3.5",
-        isUntouched && "opacity-70"
-      )}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-brand-text">
-            {CATEGORY_LABELS[category]}
-          </p>
-          <MonoLabel className="mt-1 block">
-            {attempted} attempted · {solved} solved
-          </MonoLabel>
-        </div>
-        <span
-          aria-hidden="true"
-          className="flex h-7 w-7 shrink-0 select-none items-center justify-center rounded-md border border-brand-border bg-brand-card font-mono text-[11px] text-brand-subtle"
-        >
-          {CATEGORY_ICONS[category]}
+    <div className={cn(CELL, "px-5 py-6 sm:px-7", isUntouched && "opacity-60")}>
+      <p className="truncate text-xl font-medium tracking-[-0.02em] text-brand-text">
+        {CATEGORY_LABELS[category]}
+      </p>
+      <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <span className={LABEL}>
+          {attempted} attempted · {solved} solved
         </span>
-      </div>
-
-      {/* Flat meter over a recessed well, matching the dashboard racks. */}
-      <div className="mt-3.5">
-        <div className="flex items-baseline justify-between gap-2">
-          <MonoLabel className="text-[9px]">Avg score</MonoLabel>
+        <span className="flex items-baseline gap-2">
+          <span className={LABEL}>Avg score</span>
           <span
             className={cn(
-              "font-mono text-xs font-bold",
+              "font-mono text-sm tabular-nums",
               score === 0 ? "text-brand-subtle" : getScoreColor(score)
             )}
           >
@@ -322,22 +298,24 @@ function CategoryCard({
             ) : (
               <>
                 {score}
-                <span className="font-normal text-brand-subtle">/100</span>
+                <span className="text-brand-subtle">/100</span>
               </>
             )}
           </span>
-        </div>
-        <div
-          aria-hidden="true"
-          className="mt-2 h-1.5 overflow-hidden rounded-sm bg-brand-border"
-        >
-          {score > 0 ? (
-            <div
-              className={cn("h-full rounded-sm", getScoreBgColor(score))}
-              style={{ width: `${Math.max(2, Math.min(100, score))}%` }}
-            />
-          ) : null}
-        </div>
+        </span>
+      </div>
+
+      {/* Thin avg-score meter: cyan fill on a hairline track. */}
+      <div
+        aria-hidden="true"
+        className="mt-5 h-[3px] overflow-hidden rounded-full bg-white/[0.06]"
+      >
+        {score > 0 ? (
+          <div
+            className="h-full rounded-full bg-brand-cyan"
+            style={{ width: `${Math.max(2, Math.min(100, score))}%` }}
+          />
+        ) : null}
       </div>
     </div>
   );

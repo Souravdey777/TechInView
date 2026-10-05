@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MonoLabel } from "@/components/shared/Rack";
+import { CHIP, FIELD, LABEL } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
 
 const EXAMPLE_PROMPTS = [
@@ -89,7 +90,7 @@ export function PrepPlanBuilder({
     <div className="flex flex-col gap-3">
       {variant === "hero" ? (
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <MonoLabel className="text-[9px]">Try one</MonoLabel>
+          <MonoLabel>Try one</MonoLabel>
           {EXAMPLE_PROMPTS.map((example) => (
             <button
               key={example}
@@ -97,10 +98,8 @@ export function PrepPlanBuilder({
               disabled={isGenerating}
               onClick={() => setPrompt(example)}
               className={cn(
-                "rounded-full border border-brand-border bg-brand-surface px-3 py-1.5 text-xs text-brand-muted",
-                "transition-colors hover:border-brand-cyan/40 hover:text-brand-text",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep",
-                "disabled:pointer-events-none disabled:opacity-40"
+                CHIP,
+                "hover:border-white/[0.18] disabled:pointer-events-none disabled:opacity-40"
               )}
             >
               {example}
@@ -112,14 +111,14 @@ export function PrepPlanBuilder({
       <form
         onSubmit={handleSubmit}
         className={cn(
-          "rounded-2xl border bg-brand-card p-2.5 transition-colors",
-          isGenerating ? "border-brand-cyan/40" : "border-brand-border"
+          "rounded-[20px] border bg-transparent p-2.5 transition-colors focus-within:border-brand-cyan/60",
+          isGenerating ? "border-brand-cyan/40" : "border-white/[0.12]"
         )}
       >
         {showTargetFields ? (
-          <div className="grid gap-3 border-b border-brand-border px-1 pb-3 sm:grid-cols-2">
+          <div className="grid gap-3 border-b border-white/[0.08] px-1 pb-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1.5">
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-muted">
+              <span className={cn(LABEL, "inline-flex items-center gap-1.5")}>
                 <Building2 className="h-3.5 w-3.5" /> Company
               </span>
               <Input
@@ -127,10 +126,11 @@ export function PrepPlanBuilder({
                 onChange={(event) => setCompany(event.target.value)}
                 placeholder="e.g. Uber"
                 disabled={isGenerating}
+                className={cn(FIELD, "h-11 py-0 disabled:bg-transparent")}
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-muted">
+              <span className={cn(LABEL, "inline-flex items-center gap-1.5")}>
                 <UserRound className="h-3.5 w-3.5" /> Role
               </span>
               <Input
@@ -138,6 +138,7 @@ export function PrepPlanBuilder({
                 onChange={(event) => setRole(event.target.value)}
                 placeholder="e.g. Senior Backend Engineer"
                 disabled={isGenerating}
+                className={cn(FIELD, "h-11 py-0 disabled:bg-transparent")}
               />
             </label>
           </div>
@@ -149,7 +150,7 @@ export function PrepPlanBuilder({
           onKeyDown={handleKeyDown}
           placeholder="Paste the job description, or type something like “Senior backend engineer at Uber”…"
           aria-label="Job description, or target role and company"
-          className="min-h-24 resize-y border-0 bg-transparent px-2.5 py-2.5 focus:ring-0 focus:ring-offset-0"
+          className="min-h-24 resize-y border-0 bg-transparent px-3 py-2.5 text-[15px] placeholder:text-brand-subtle hover:border-0 focus:ring-0 focus:ring-offset-0 disabled:bg-transparent"
           maxLength={MAX_PROMPT_LENGTH}
           disabled={isGenerating}
         />
@@ -168,14 +169,14 @@ export function PrepPlanBuilder({
               {showTargetFields ? "Hide company & role" : "Company & role"}
             </Button>
             {prompt.length > 0 ? (
-              <MonoLabel className="text-[9px]">
+              <MonoLabel>
                 {prompt.length.toLocaleString()} chars
               </MonoLabel>
             ) : null}
           </div>
 
           <div className="flex items-center gap-2.5">
-            <MonoLabel className="hidden text-[9px] sm:inline">
+            <MonoLabel className="hidden sm:inline">
               ⌘ + ↵ to send
             </MonoLabel>
             <Button type="submit" size="sm" disabled={!canSubmit || isGenerating}>

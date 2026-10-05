@@ -107,7 +107,7 @@ function TrendCard({ point, x, y }: { point: TrendPoint; x: number; y: number })
         height={CARD_HEIGHT}
         rx={10}
         strokeWidth="1"
-        className="fill-brand-deep stroke-brand-border"
+        className="fill-brand-deep stroke-white/[0.12]"
       />
       <text
         x={origin.x + CARD_PAD}
@@ -119,7 +119,7 @@ function TrendCard({ point, x, y }: { point: TrendPoint; x: number; y: number })
       <text
         x={origin.x + CARD_PAD}
         y={origin.y + 40}
-        className="fill-brand-text text-[12px] font-semibold"
+        className="fill-brand-text text-[12px] font-medium tracking-[-0.01em]"
       >
         {clipTitle(point.title)}
       </text>
@@ -133,7 +133,7 @@ function TrendCard({ point, x, y }: { point: TrendPoint; x: number; y: number })
       <text
         x={origin.x + CARD_PAD}
         y={origin.y + 75}
-        className={cn("font-mono text-[13px] font-bold", fill)}
+        className={cn("font-mono text-[13px] tabular-nums", fill)}
       >
         {point.score}
         <tspan className="fill-brand-subtle text-[9px] font-normal">
@@ -185,7 +185,7 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
 
   return (
     <Rack
-      label={<MonoLabel className="tracking-[0.18em]">Score trend</MonoLabel>}
+      label={<MonoLabel>Score trend</MonoLabel>}
       accessory={
         hasTrend ? (
           <span className="flex items-center gap-3.5">
@@ -214,7 +214,7 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
                   y2={scoreToY(score)}
                   stroke="currentColor"
                   strokeWidth="1"
-                  className="text-brand-border"
+                  className="text-white/[0.08]"
                 />
                 <text
                   x={0}
@@ -246,7 +246,7 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
                 stroke="currentColor"
                 strokeWidth="1"
                 strokeDasharray="2 4"
-                className="text-brand-cyan/40"
+                className="text-white/[0.18]"
               />
             ) : null}
 
@@ -329,7 +329,7 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
                       className={
                         isActive || isLatest
                           ? "fill-brand-cyan stroke-brand-cyan"
-                          : "fill-brand-card stroke-brand-cyan"
+                          : "fill-brand-deep stroke-brand-cyan"
                       }
                     />
                   </a>
@@ -358,14 +358,14 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
             ) : null}
           </svg>
 
-          <p className="mt-1 text-center text-[11px] text-brand-subtle">
+          <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-[0.08em] text-brand-subtle">
             Hover a take for its verdict, or open the round to read the scorecard.
           </p>
         </>
       ) : (
         <div className="flex h-48 flex-col items-center justify-center gap-2 text-center">
           <MonoLabel>Not enough takes</MonoLabel>
-          <p className="max-w-xs text-xs leading-relaxed text-brand-muted">
+          <p className="max-w-xs text-sm leading-relaxed text-brand-muted">
             Two scored rounds draw the first line. Until then the trend stays
             empty on purpose rather than guessing at a shape.
           </p>

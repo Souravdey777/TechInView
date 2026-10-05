@@ -1,95 +1,85 @@
 import { PROBLEM_ROW_GRID } from "@/components/dashboard/problems/ProblemRow";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CELL, GRID } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
+
+/** Pulse block for the hairline layout. */
+const PULSE = "animate-pulse rounded-md bg-white/[0.04]";
 
 export default function ProblemsLoading() {
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
+    <div className="space-y-12">
       {/* Hero */}
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
-        <div className="space-y-3">
-          <Skeleton className="h-2.5 w-24" />
-          <Skeleton className="h-9 w-72 sm:w-96" />
-          <Skeleton className="h-4 w-full max-w-xl" />
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+        <div className="space-y-5">
+          <div className={cn(PULSE, "h-3 w-28")} />
+          <div className={cn(PULSE, "h-12 w-72 max-w-full sm:w-[28rem]")} />
+          <div className={cn(PULSE, "h-5 w-full max-w-xl")} />
         </div>
         <div className="flex gap-3">
-          <Skeleton className="h-12 w-36 rounded-md" />
-          <Skeleton className="h-12 w-32 rounded-md" />
+          <div className={cn(PULSE, "h-[52px] w-40 rounded-full")} />
+          <div className={cn(PULSE, "h-[52px] w-36 rounded-full")} />
         </div>
       </div>
 
       {/* Meters */}
-      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-brand-border bg-brand-border sm:grid-cols-2 lg:grid-cols-4">
+      <div className={cn(GRID, "grid-cols-2 lg:grid-cols-4")}>
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="space-y-3.5 bg-brand-card px-5 py-5">
-            <Skeleton className="h-2.5 w-20" />
-            <Skeleton className="h-9 w-14" />
-            <Skeleton className="h-3 w-32" />
+          <div key={index} className={cn(CELL, "p-5 sm:p-6")}>
+            <div className={cn(PULSE, "h-3 w-20")} />
+            <div className={cn(PULSE, "mt-6 h-12 w-16")} />
+            <div className={cn(PULSE, "mt-3 h-3 w-32 max-w-full")} />
           </div>
         ))}
       </div>
 
-      {/* Facet chips */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap gap-1.5">
-          {Array.from({ length: 9 }).map((_, index) => (
-            <Skeleton key={index} className="h-[26px] w-24 rounded-md" />
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-1.5 border-t border-brand-border/60 pt-3">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="h-[26px] w-24 rounded-md" />
-          ))}
-        </div>
+      {/* Search + facet rows */}
+      <div className="space-y-5">
+        <div className={cn(PULSE, "h-[50px] w-full rounded-full md:max-w-[520px]")} />
+        {[4, 9, 1].map((chips, row) => (
+          <div key={row} className="flex flex-wrap items-center gap-2">
+            <div className={cn(PULSE, "mr-2 h-3 w-20 sm:w-28")} />
+            {Array.from({ length: chips }).map((_, index) => (
+              <div key={index} className={cn(PULSE, "h-[26px] w-20 rounded-full")} />
+            ))}
+          </div>
+        ))}
       </div>
 
       {/* Bank */}
-      <div className="overflow-hidden rounded-2xl border border-brand-border bg-brand-card">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-brand-border bg-brand-surface px-4 py-3 sm:px-5">
-          <div className="flex gap-1">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={index} className="h-[26px] w-16 rounded-md" />
-            ))}
-          </div>
-          <Skeleton className="h-8 w-full rounded-md sm:w-64" />
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <div className={cn(PULSE, "h-3 w-28")} />
+          <div className={cn(PULSE, "h-3 w-48")} />
         </div>
 
         <div
           className={cn(
-            "hidden border-b border-brand-border bg-brand-surface/60 px-4 py-2.5 sm:px-5",
+            "hidden border-t border-white/[0.08] py-3",
             PROBLEM_ROW_GRID,
             "lg:grid"
           )}
         >
           <span />
-          <Skeleton className="h-2.5 w-16" />
-          <Skeleton className="h-2.5 w-16" />
-          <Skeleton className="h-2.5 w-14" />
-          <Skeleton className="h-2.5 w-16 lg:ml-auto" />
-          <Skeleton className="h-2.5 w-12 lg:ml-auto" />
+          <div className={cn(PULSE, "h-3 w-16")} />
+          <div className={cn(PULSE, "h-3 w-16")} />
+          <div className={cn(PULSE, "h-3 w-14")} />
+          <div className={cn(PULSE, "h-3 w-16 lg:ml-auto")} />
+          <div className={cn(PULSE, "h-3 w-12 lg:ml-auto")} />
         </div>
 
-        <div className="divide-y divide-brand-border/60">
+        <div className="divide-y divide-white/[0.08] border-y border-white/[0.08]">
           {Array.from({ length: 10 }).map((_, index) => (
-            <div
-              key={index}
-              className={cn("px-4 py-3 sm:px-5", PROBLEM_ROW_GRID)}
-            >
-              <div className="flex flex-col gap-2 lg:contents">
-                <Skeleton className="hidden h-[7px] w-[7px] rounded-full lg:block" />
-                <Skeleton className="h-4 w-56 max-w-full" />
-                <Skeleton className="hidden h-3 w-20 lg:block" />
-                <Skeleton className="hidden h-3 w-14 lg:block" />
-                <Skeleton className="hidden h-3 w-12 lg:block lg:ml-auto" />
-                <Skeleton className="h-3 w-24 lg:ml-auto" />
+            <div key={index} className={cn("py-5", PROBLEM_ROW_GRID)}>
+              <div className="flex flex-col gap-3 lg:contents">
+                <div className={cn(PULSE, "hidden h-1.5 w-1.5 rounded-full lg:block")} />
+                <div className={cn(PULSE, "h-5 w-56 max-w-full")} />
+                <div className={cn(PULSE, "hidden h-3 w-20 lg:block")} />
+                <div className={cn(PULSE, "hidden h-3 w-16 lg:block")} />
+                <div className={cn(PULSE, "hidden h-3 w-12 lg:ml-auto lg:block")} />
+                <div className={cn(PULSE, "h-3 w-28 lg:ml-auto")} />
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="flex items-center justify-between border-t border-brand-border bg-brand-surface/40 px-4 py-3 sm:px-5">
-          <Skeleton className="h-2.5 w-28" />
-          <Skeleton className="h-2.5 w-40" />
         </div>
       </div>
     </div>

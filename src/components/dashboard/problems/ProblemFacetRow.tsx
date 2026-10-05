@@ -1,7 +1,8 @@
 "use client";
 
 import { FacetChip } from "@/components/dashboard/problems/FacetChip";
-import { MonoLabel } from "@/components/shared/Rack";
+import { LABEL } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 import {
   PROGRESS_CONFIG,
   categoryLabel,
@@ -16,6 +17,9 @@ const PROGRESS_ORDER: readonly ProblemProgress[] = [
   "untouched",
 ];
 
+/** Mono row header, sized to line up with the difficulty row in ProblemGrid. */
+export const FACET_ROW_LABEL = cn(LABEL, "mr-2 w-full sm:w-28");
+
 type ProblemFacetRowProps = {
   facets: ProblemFacets;
   counts: FacetCounts;
@@ -29,9 +33,8 @@ type ProblemFacetRowProps = {
 };
 
 /**
- * The scope row above the rack: which slice of the bank you are looking at.
- * Categories on the first line, your own progress and the free-solver gate on
- * the second.
+ * The scope rows under the search: topic, your own progress, and the
+ * free-solver gate, each behind a mono label like the public /practice list.
  */
 export function ProblemFacetRow({
   facets,
@@ -43,12 +46,13 @@ export function ProblemFacetRow({
   onFreeOnlyChange,
 }: ProblemFacetRowProps) {
   return (
-    <div className="space-y-3">
+    <>
       <div
         role="group"
         aria-label="Filter by category"
-        className="flex gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0"
+        className="flex flex-wrap items-center gap-2"
       >
+        <span className={FACET_ROW_LABEL}>Topic</span>
         <FacetChip
           label="All"
           count={counts.category.all}
@@ -72,56 +76,47 @@ export function ProblemFacetRow({
         })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-brand-border/60 pt-3">
-        {showProgress ? (
-          <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-2">
-            <MonoLabel className="text-[9px]">Your progress</MonoLabel>
-            <div
-              role="group"
-              aria-label="Filter by your progress"
-              className="flex flex-wrap gap-1.5"
-            >
-              <FacetChip
-                label="Any"
-                isActive={facets.progress === "all"}
-                onClick={() => onProgressChange("all")}
-              />
-              {PROGRESS_ORDER.map((progress) => {
-                const count = counts.progress[progress];
-                const isActive = facets.progress === progress;
-
-                return (
-                  <FacetChip
-                    key={progress}
-                    label={PROGRESS_CONFIG[progress].label}
-                    count={count}
-                    isActive={isActive}
-                    disabled={count === 0 && !isActive}
-                    toneClassName={
-                      isActive
-                        ? PROGRESS_CONFIG[progress].textClassName
-                        : undefined
-                    }
-                    onClick={() => onProgressChange(progress)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="flex items-center gap-2.5 sm:ml-auto">
+      {showProgress ? (
+        <div
+          role="group"
+          aria-label="Filter by your progress"
+          className="flex flex-wrap items-center gap-2"
+        >
+          <span className={FACET_ROW_LABEL}>Your progress</span>
           <FacetChip
-            label="Free to solve"
-            count={counts.free}
-            isActive={facets.freeOnly}
-            disabled={counts.free === 0 && !facets.freeOnly}
-            toneClassName={facets.freeOnly ? "text-brand-green" : undefined}
-            title="Problems open in the solo editor. Solving them never spends a round."
-            onClick={() => onFreeOnlyChange(!facets.freeOnly)}
+            label="Any"
+            isActive={facets.progress === "all"}
+            onClick={() => onProgressChange("all")}
           />
+          {PROGRESS_ORDER.map((progress) => {
+            const count = counts.progress[progress];
+            const isActive = facets.progress === progress;
+
+            return (
+              <FacetChip
+                key={progress}
+                label={PROGRESS_CONFIG[progress].label}
+                count={count}
+                isActive={isActive}
+                disabled={count === 0 && !isActive}
+                onClick={() => onProgressChange(progress)}
+              />
+            );
+          })}
         </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={FACET_ROW_LABEL}>Access</span>
+        <FacetChip
+          label="Free to solve"
+          count={counts.free}
+          isActive={facets.freeOnly}
+          disabled={counts.free === 0 && !facets.freeOnly}
+          title="Problems open in the solo editor. Solving them never spends a round."
+          onClick={() => onFreeOnlyChange(!facets.freeOnly)}
+        />
       </div>
-    </div>
+    </>
   );
 }

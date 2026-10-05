@@ -13,13 +13,18 @@ import {
  */
 
 const TAG_BASE =
-  "shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.16em]";
+  "inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em]";
 
+/**
+ * Cyan is reserved for the active state (an active loop, a started round).
+ * Green / amber are semantic status. Everything else is a neutral hairline.
+ */
 const TAG_TONES = {
-  cyan: "border-brand-cyan/30 text-brand-cyan",
+  cyan: "border-brand-cyan/40 text-brand-cyan",
   green: "border-brand-green/30 text-brand-green",
   amber: "border-brand-amber/30 text-brand-amber",
-  muted: "border-brand-border text-brand-subtle",
+  strong: "border-white/[0.18] text-brand-text",
+  muted: "border-white/[0.1] text-brand-subtle",
 } as const;
 
 export type TagTone = keyof typeof TAG_TONES;
@@ -51,7 +56,7 @@ const AVAILABILITY_TAGS: Record<
   { label: string; tone: TagTone }
 > = {
   live: { label: "Live", tone: "green" },
-  beta: { label: "Beta", tone: "cyan" },
+  beta: { label: "Beta", tone: "strong" },
   planned: { label: "Planned", tone: "amber" },
   coming_soon: { label: "Soon", tone: "muted" },
 };
@@ -67,7 +72,7 @@ export function AvailabilityTag({ kind }: { kind: PracticeInterviewKind }) {
 /** Core focus vs supporting round, as weighted by the generator. */
 export function PriorityTag({ priority }: { priority: PrepPlanTrack["priority"] }) {
   return (
-    <Tag tone={priority === "core" ? "cyan" : "muted"}>
+    <Tag tone={priority === "core" ? "strong" : "muted"}>
       {priority === "core" ? "Core" : "Supporting"}
     </Tag>
   );
@@ -98,12 +103,12 @@ const TRACK_STATUS_DOTS: Record<
   },
   not_started: {
     label: "Not started",
-    dotClassName: "bg-brand-border",
+    dotClassName: "bg-white/[0.18]",
     textClassName: "text-brand-subtle",
   },
 };
 
-/** Dot + word, the System artboard's three-state indicator. */
+/** Dot + word, the three-state round progress indicator. */
 export function TrackStatusDot({ status }: { status: PrepPlanTrackStatus }) {
   const tone = TRACK_STATUS_DOTS[status];
 
@@ -112,7 +117,7 @@ export function TrackStatusDot({ status }: { status: PrepPlanTrackStatus }) {
       <span className={cn("h-1.5 w-1.5 rounded-full", tone.dotClassName)} />
       <span
         className={cn(
-          "font-mono text-[9px] font-medium uppercase tracking-[0.16em]",
+          "font-mono text-[10px] uppercase tracking-[0.08em]",
           tone.textClassName
         )}
       >

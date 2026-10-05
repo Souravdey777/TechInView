@@ -62,17 +62,20 @@ export function DeletePrepPlanButton({
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      {/* Portaled outside the themed layout, so it re-applies the theme itself. */}
+      <DialogContent className="theme-landing rounded-[20px] border-white/[0.08] bg-brand-deep font-sans shadow-none">
         <DialogHeader>
-          <DialogTitle>Delete this prep plan?</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-normal tracking-[-0.03em]">
+            Delete this prep plan?
+          </DialogTitle>
+          <DialogDescription className="text-[15px]">
             This removes <span className="text-brand-text">{planLabel}</span> from this browser
             along with its saved round progress. Plans are not synced to your account yet, so
             there is no copy to restore it from.
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter>
+        <DialogFooter className="border-white/[0.08]">
           <Button
             type="button"
             variant="secondary"

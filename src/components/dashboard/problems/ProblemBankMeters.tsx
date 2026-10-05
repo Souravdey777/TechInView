@@ -1,4 +1,4 @@
-import { MonoLabel } from "@/components/shared/Rack";
+import { CELL, GRID, LABEL } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
 import type { ProblemBankSummary } from "@/components/dashboard/problems/catalogue";
 
@@ -36,14 +36,13 @@ function buildMeters(summary: ProblemBankSummary): Meter[] {
       label: "Free to solve",
       value: summary.free,
       caption: "No round spent",
-      valueClassName: summary.free > 0 ? "text-brand-cyan" : undefined,
     },
   ];
 }
 
 /**
- * Hairline strip of bank totals. Cells share one border so the strip reads as
- * a single instrument panel, matching the dashboard's meters.
+ * Hairline grid of bank totals: one big number per cell. Only solved and
+ * in-progress carry a status colour.
  */
 export function ProblemBankMeters({
   summary,
@@ -51,23 +50,21 @@ export function ProblemBankMeters({
   summary: ProblemBankSummary;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-brand-border bg-brand-border lg:grid-cols-4">
+    <div className={cn(GRID, "grid-cols-2 lg:grid-cols-4")}>
       {buildMeters(summary).map((meter) => (
-        <div key={meter.label} className="bg-brand-card px-4 py-4 sm:px-5 sm:py-5">
-          <MonoLabel className="text-[9px] sm:text-[10px]">
-            {meter.label}
-          </MonoLabel>
+        <div key={meter.label} className={cn(CELL, "min-w-0 p-5 sm:p-6")}>
+          <p className={LABEL}>{meter.label}</p>
 
           <p
             className={cn(
-              "mt-3 font-heading text-3xl font-bold leading-none tracking-tight sm:mt-3.5 sm:text-4xl",
+              "mt-6 text-[clamp(36px,4vw,56px)] font-normal leading-none tracking-[-0.04em] tabular-nums",
               meter.valueClassName ?? "text-brand-text"
             )}
           >
             {meter.value}
           </p>
 
-          <p className="mt-2 text-[11px] text-brand-subtle sm:mt-2.5 sm:text-xs">
+          <p className="mt-3 text-[13px] leading-snug text-brand-subtle">
             {meter.caption}
           </p>
         </div>

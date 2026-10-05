@@ -36,6 +36,7 @@ import {
   type PublicProfileLinks,
 } from "@/lib/public-profile";
 import { cn } from "@/lib/utils";
+import { CHIP, CHIP_ACTIVE, FIELD, LINK_ARROW } from "@/components/marketing/ds";
 import { CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
 
 const EXPERIENCE_LEVELS = [
@@ -65,6 +66,12 @@ const LANGUAGE_LABELS: Record<string, string> = {
   java: "Java",
   cpp: "C++",
 };
+
+/** Shared field skins: the ui primitives restyled onto the design system's FIELD. */
+const INPUT = cn(FIELD, "h-auto");
+const SELECT = cn(FIELD, "h-auto pr-10 [&>option]:bg-brand-deep");
+const TEXTAREA = cn(FIELD, "rounded-[20px]");
+const CHOICE = cn(CHIP, "px-4 py-2");
 
 type SaveStatus = "idle" | "saving" | "success" | "error";
 
@@ -261,6 +268,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your name"
+              className={INPUT}
             />
           </SettingsField>
 
@@ -275,7 +283,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
               value={initialProfile.email}
               readOnly
               disabled
-              className="text-brand-muted"
+              className={cn(INPUT, "text-brand-muted disabled:bg-transparent")}
             />
           </SettingsField>
 
@@ -288,6 +296,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
               id="settings-target-company"
               value={targetCompany}
               onChange={(e) => setTargetCompany(e.target.value)}
+              className={SELECT}
             >
               <SelectOption value="">Select a company</SelectOption>
               {TARGET_COMPANIES.map((company) => (
@@ -307,6 +316,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
               id="settings-experience"
               value={experienceLevel}
               onChange={(e) => setExperienceLevel(e.target.value)}
+              className={SELECT}
             >
               <SelectOption value="">Select a level</SelectOption>
               {EXPERIENCE_LEVELS.map((level) => (
@@ -331,13 +341,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                     type="button"
                     onClick={() => setPreferredLanguage(lang)}
                     aria-pressed={isSelected}
-                    className={cn(
-                      "h-9 rounded-md border px-3 text-xs font-medium transition-colors",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-card",
-                      isSelected
-                        ? "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan"
-                        : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/20 hover:text-brand-text"
-                    )}
+                    className={cn(CHOICE, isSelected && CHIP_ACTIVE)}
                   >
                     {LANGUAGE_LABELS[lang]}
                   </button>
@@ -360,13 +364,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                     type="button"
                     onClick={() => selectVoice(voice.id)}
                     aria-pressed={isSelected}
-                    className={cn(
-                      "h-9 rounded-md border px-3 text-xs font-medium transition-colors",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-card",
-                      isSelected
-                        ? "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan"
-                        : "border-brand-border bg-brand-surface text-brand-muted hover:border-brand-cyan/20 hover:text-brand-text"
-                    )}
+                    className={cn(CHOICE, isSelected && CHIP_ACTIVE)}
                   >
                     {voice.label}
                   </button>
@@ -383,7 +381,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
         note="Private until you turn it on"
         bodyClassName="p-0 sm:p-0"
       >
-        <div className="px-4 pt-4 sm:px-5 sm:pt-5">
+        <div className="px-5 pt-5 sm:px-6 sm:pt-6">
           <SettingsToggleRow
             title="Publish my profile"
             description="Creates a shareable page with your handle, headline, and high-level interview progress."
@@ -393,13 +391,13 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
           />
         </div>
 
-        <div className="grid gap-5 border-t border-brand-border px-4 py-5 sm:px-5">
+        <div className="grid gap-6 border-t border-white/[0.08] px-5 py-6 sm:px-6">
           <SettingsField
             label="Username"
             htmlFor="settings-username"
             hint="Lowercase letters, numbers, and hyphens only. Changing it breaks old links."
           >
-            <div className="flex h-10 items-center rounded-md border border-brand-border bg-brand-surface px-3 transition-colors focus-within:border-brand-cyan/50 focus-within:ring-2 focus-within:ring-brand-cyan focus-within:ring-offset-2 focus-within:ring-offset-brand-card">
+            <div className="flex items-center rounded-full border border-white/[0.12] px-5 py-3 transition-colors focus-within:border-brand-cyan">
               <span className="shrink-0 font-mono text-sm text-brand-subtle">
                 {shareHost}/u/
               </span>
@@ -410,7 +408,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="your-handle"
                 maxLength={PUBLIC_PROFILE_USERNAME_MAX_LENGTH + 10}
-                className="min-w-0 flex-1 border-0 bg-transparent font-mono text-sm text-brand-text placeholder:text-brand-subtle focus:outline-none"
+                className="min-w-0 flex-1 border-0 bg-transparent font-mono text-[15px] text-brand-text placeholder:text-brand-subtle focus:outline-none"
               />
             </div>
           </SettingsField>
@@ -423,7 +421,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
               placeholder="What are you preparing for right now?"
               maxLength={PUBLIC_PROFILE_BIO_MAX_LENGTH}
               rows={3}
-              className="min-h-[5.75rem]"
+              className={cn(TEXTAREA, "min-h-[5.75rem]")}
             />
             <div className="mt-2 flex items-center justify-between gap-3 text-xs">
               <span className="text-brand-subtle">
@@ -444,7 +442,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
 
           <div>
             <SettingsMonoLabel>Links</SettingsMonoLabel>
-            <p className="mt-2 text-xs leading-relaxed text-brand-subtle">
+            <p className="mt-2 text-[13px] leading-relaxed text-brand-subtle">
               Add the profiles you want people to discover from your public page.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -469,6 +467,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                         }))
                       }
                       placeholder={config.placeholder}
+                      className={INPUT}
                     />
                   </SettingsField>
                 );
@@ -477,7 +476,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-brand-border bg-brand-surface px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex flex-col gap-3 border-t border-white/[0.08] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="min-w-0">
             <SettingsMonoLabel>Share link</SettingsMonoLabel>
             {publicProfileUrl ? (
@@ -497,13 +496,13 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
                 href={publicProfilePath ?? "#"}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-brand-cyan transition-colors hover:text-brand-cyan/80"
+                className={cn(LINK_ARROW, "shrink-0")}
               >
                 Open profile
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             ) : (
-              <span className="shrink-0 text-sm text-brand-subtle">
+              <span className="shrink-0 font-mono text-xs uppercase tracking-[0.08em] text-brand-subtle">
                 Save as public to open
               </span>
             )
@@ -512,7 +511,7 @@ export function SettingsForm({ initialProfile, shareBaseUrl }: Props) {
       </SettingsRack>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs leading-relaxed text-brand-subtle">
+        <p className="text-[13px] leading-relaxed text-brand-subtle">
           Saves your profile and public page together.
         </p>
 

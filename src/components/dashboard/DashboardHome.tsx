@@ -4,6 +4,15 @@ import Link from "next/link";
 import { ArrowRight, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MonoLabel, Rack } from "@/components/shared/Rack";
+import {
+  BODY,
+  ButtonLink,
+  FOCUS,
+  Kicker,
+  LEAD,
+  LINK_ARROW,
+} from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 import { PrepPlanCard } from "@/components/prep-plans/PrepPlanCard";
 import { usePrepPlans } from "@/hooks/usePrepPlans";
 import { MeterStrip } from "@/components/dashboard/home/MeterStrip";
@@ -46,34 +55,28 @@ export function DashboardHome({
     : { href: "/settings#rounds", label: "Buy rounds" };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
+    <div className="space-y-6">
       {/* ─── Hero ─── */}
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+      <header className="flex flex-col gap-8 pb-4 pt-2 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
         <div className="min-w-0">
-          <MonoLabel>Studio</MonoLabel>
-          <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
+          <Kicker>Studio</Kicker>
+          <h1 className="text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
             {summary.greeting}
           </h1>
-          <p className="mt-2 font-heading text-lg font-semibold tracking-tight text-brand-text/90">
+          <p className="mt-4 text-xl font-normal tracking-[-0.02em] text-brand-text/90">
             {summary.headline}
           </p>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
-            {summary.insight}
-          </p>
+          <p className={cn(LEAD, "mt-3 max-w-[620px]")}>{summary.insight}</p>
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button asChild size="lg" className="gap-2 text-base font-semibold">
-            <Link href={primaryAction.href}>
-              {primaryAction.label}
-              <ChevronRight className="h-5 w-5" />
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="secondary" className="gap-2">
-            <Link href="/interview/setup?dsaExperience=practice">
-              Practice free
-            </Link>
-          </Button>
+          <ButtonLink href={primaryAction.href}>
+            {primaryAction.label}
+            <ChevronRight className="h-4 w-4" />
+          </ButtonLink>
+          <ButtonLink href="/interview/setup?dsaExperience=practice" variant="ghost">
+            Practice free
+          </ButtonLink>
         </div>
       </header>
 
@@ -81,7 +84,7 @@ export function DashboardHome({
       <MeterStrip meters={summary.meters} />
 
       {/* ─── Trend and dimensions ─── */}
-      <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
         <div className="lg:col-span-7">
           <ScoreTrendPanel trend={summary.trend} />
         </div>
@@ -104,21 +107,19 @@ export function DashboardHome({
 
       {/* ─── Prep Guru ─── */}
       <Rack
-        label={<MonoLabel className="tracking-[0.18em]">Prep Guru</MonoLabel>}
+        label={<MonoLabel>Prep Guru</MonoLabel>}
         accessory={
-          <Link
-            href="/prep-guru"
-            className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-cyan hover:underline"
-          >
+          <Link href="/prep-guru" className={LINK_ARROW}>
             {plans.length > 0 ? "View all plans" : "Open Prep Guru"}
+            <span aria-hidden>→</span>
           </Link>
         }
       >
         {!isLoaded ? (
-          <p className="text-xs text-brand-muted">Loading saved prep plans…</p>
+          <p className={BODY}>Loading saved prep plans…</p>
         ) : plans.length === 0 ? (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="max-w-xl text-xs leading-relaxed text-brand-muted">
+            <p className={cn(BODY, "max-w-xl")}>
               Paste a job description, or name the company and role. Prep Guru
               maps the rounds you are likely to face and the questions that have
               actually been reported for them.
@@ -142,16 +143,19 @@ export function DashboardHome({
       {/* ─── Session log ─── */}
       <SessionLog rows={sessionRows} />
 
-      <p className="pb-6 text-center text-xs text-brand-subtle">
+      <p className="border-t border-white/[0.08] pb-6 pt-6 text-center text-sm text-brand-subtle">
         {hasCredits
           ? `${credits} round${credits === 1 ? "" : "s"} left on your account.`
           : isFreeTrialUser
             ? "Your audio preview is still unused. Practice Mode stays free either way."
             : "Practice Mode stays free."}{" "}
-        <Link href="/settings#rounds" className="text-brand-cyan hover:underline">
+        <Link
+          href="/settings#rounds"
+          className={cn("text-brand-cyan hover:text-brand-text", FOCUS)}
+        >
           Manage rounds
+          <ArrowRight className="ml-1 inline h-3 w-3" />
         </Link>
-        <ArrowRight className="ml-1 inline h-3 w-3 text-brand-cyan" />
       </p>
     </div>
   );

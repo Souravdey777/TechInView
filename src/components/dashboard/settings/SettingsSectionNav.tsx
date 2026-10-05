@@ -50,7 +50,7 @@ export function SettingsSectionNav({ sections }: SettingsSectionNavProps) {
   return (
     <nav
       aria-label="Settings sections"
-      className="flex gap-1 overflow-x-auto pb-1 lg:sticky lg:top-20 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0"
+      className="flex overflow-x-auto lg:sticky lg:top-20 lg:flex-col lg:overflow-visible lg:border-l lg:border-white/[0.08]"
     >
       {sections.map(({ id, label, tone = "default" }) => {
         const isActive = activeId === id;
@@ -62,13 +62,14 @@ export function SettingsSectionNav({ sections }: SettingsSectionNavProps) {
             href={`#${id}`}
             aria-current={isActive ? "true" : undefined}
             className={cn(
-              "flex h-11 shrink-0 items-center whitespace-nowrap rounded-md px-4 text-sm transition-colors",
-              "lg:rounded-none lg:border-l",
+              "flex h-11 shrink-0 items-center whitespace-nowrap border-b px-4 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan",
+              "lg:-ml-px lg:border-b-0 lg:border-l",
               isActive
-                ? "bg-brand-card font-semibold text-brand-text lg:border-brand-cyan"
-                : "text-brand-subtle hover:bg-brand-card/60 hover:text-brand-text lg:border-transparent",
+                ? "border-brand-cyan text-brand-cyan"
+                : "border-transparent text-brand-subtle hover:text-brand-text",
               isDanger && !isActive && "text-brand-rose/70 hover:text-brand-rose",
-              isDanger && isActive && "text-brand-rose lg:border-brand-rose"
+              isDanger && isActive && "border-brand-rose text-brand-rose"
             )}
           >
             {label}

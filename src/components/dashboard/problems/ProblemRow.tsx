@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { DIFFICULTY_CONFIG } from "@/lib/constants";
+import { FOCUS, LABEL, LINK_ARROW } from "@/components/marketing/ds";
+import { DifficultyMark } from "@/components/practice/ProblemStatement";
 import { cn } from "@/lib/utils";
 import {
   PROGRESS_CONFIG,
@@ -13,7 +14,12 @@ import {
 
 /** Shared by the row, the column header, and the loading skeleton. */
 export const PROBLEM_ROW_GRID =
-  "lg:grid lg:grid-cols-[0.5rem_minmax(0,1fr)_8.5rem_5rem_6rem_10.5rem] lg:items-center lg:gap-4";
+  "lg:grid lg:grid-cols-[0.5rem_minmax(0,1fr)_9rem_6.5rem_6rem_11rem] lg:items-center lg:gap-6";
+
+const SECONDARY_LINK = cn(
+  "font-mono text-xs uppercase tracking-[0.08em] text-brand-muted transition-colors hover:text-brand-text",
+  FOCUS
+);
 
 function companiesText(companyTags: readonly string[], max: number) {
   if (companyTags.length === 0) return null;
@@ -36,13 +42,12 @@ function testsText(problem: BankProblem) {
 }
 
 /**
- * One hairline row in the bank: progress rail, problem, where it sits in the
+ * One hairline row in the bank: progress dot, problem, where it sits in the
  * catalogue, and the two ways to open it.
  */
 export function ProblemRow({ problem }: { problem: BankProblem }) {
   const progress = problemProgress(problem);
   const progressConfig = PROGRESS_CONFIG[progress];
-  const difficulty = DIFFICULTY_CONFIG[problem.difficulty];
   const hrefs = problemLaunchHrefs(problem);
   const isFree = problem.isFreeSolverEnabled;
   const primaryHref = isFree ? hrefs.practice : hrefs.round;
@@ -52,61 +57,65 @@ export function ProblemRow({ problem }: { problem: BankProblem }) {
   return (
     <div
       className={cn(
-        "px-4 py-3 transition-colors hover:bg-brand-surface/50 sm:px-5",
+        "py-5 transition-colors hover:bg-white/[0.02]",
         PROBLEM_ROW_GRID
       )}
     >
-      <div className="flex flex-col gap-2 lg:contents">
+      <div className="flex flex-col gap-3 lg:contents">
         <span
           aria-hidden="true"
           className={cn(
-            "hidden h-[7px] w-[7px] rounded-full lg:block",
+            "hidden h-1.5 w-1.5 rounded-full lg:block",
             progressConfig.dotClassName
           )}
         />
 
         <div className="min-w-0">
-          <div className="flex min-w-0 items-baseline gap-x-2.5">
+          <div className="flex min-w-0 items-center gap-x-3">
             <span
               aria-hidden="true"
               className={cn(
-                "h-[7px] w-[7px] shrink-0 rounded-full lg:hidden",
+                "h-1.5 w-1.5 shrink-0 rounded-full lg:hidden",
                 progressConfig.dotClassName
               )}
             />
             <Link
               href={primaryHref}
-              className="truncate text-sm font-medium text-brand-text hover:text-brand-cyan"
+              className={cn(
+                "truncate text-[17px] font-normal tracking-[-0.01em] text-brand-text transition-colors hover:text-brand-cyan",
+                FOCUS
+              )}
             >
               {problem.title}
             </Link>
             <span className="sr-only">{progressConfig.label}</span>
             {isFree ? (
-              <span className="hidden shrink-0 font-mono text-[9px] uppercase tracking-[0.16em] text-brand-green/80 sm:inline">
+              <span className={cn(LABEL, "hidden shrink-0 text-brand-muted sm:inline")}>
                 Free
-              </span>
-            ) : null}
-            {problem.companyTags.length > 0 ? (
-              <span
-                title={allCompanies}
-                className="hidden shrink truncate font-mono text-[10px] tracking-[0.06em] text-brand-subtle lg:inline lg:max-w-[13rem]"
-              >
-                {companiesText(problem.companyTags, 3)}
               </span>
             ) : null}
           </div>
 
+          {problem.companyTags.length > 0 ? (
+            <p
+              title={allCompanies}
+              className="mt-1 hidden truncate font-mono text-[11px] uppercase tracking-[0.08em] text-brand-subtle lg:block"
+            >
+              {companiesText(problem.companyTags, 3)}
+            </p>
+          ) : null}
+
           {/* Everything the desktop columns carry, folded into one line. */}
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] lg:hidden">
+          <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-[0.08em] lg:hidden">
+            <DifficultyMark difficulty={problem.difficulty} />
             <span className="text-brand-muted">
               {categoryLabel(problem.category)}
             </span>
-            <span className={cn("font-bold", difficulty.color)}>
-              {difficulty.label}
+            <span className={cn("tabular-nums", progressConfig.textClassName)}>
+              {tests}
             </span>
-            <span className={progressConfig.textClassName}>{tests}</span>
             {isFree ? (
-              <span className="text-brand-green/80 sm:hidden">Free</span>
+              <span className="text-brand-muted sm:hidden">Free</span>
             ) : null}
             {problem.companyTags.length > 0 ? (
               <span className="min-w-0 truncate text-brand-subtle">
@@ -116,35 +125,31 @@ export function ProblemRow({ problem }: { problem: BankProblem }) {
           </p>
         </div>
 
-        <span className="hidden truncate font-mono text-[11px] tracking-[0.06em] text-brand-muted lg:block">
+        <span className={cn(LABEL, "hidden truncate text-brand-muted lg:block")}>
           {categoryLabel(problem.category)}
         </span>
 
-        <span
-          className={cn(
-            "hidden font-mono text-[11px] font-bold tracking-[0.08em] lg:block",
-            difficulty.color
-          )}
-        >
-          {difficulty.label}
-        </span>
+        <DifficultyMark
+          difficulty={problem.difficulty}
+          className="hidden lg:inline-flex"
+        />
 
         <span
           className={cn(
-            "hidden font-mono text-[11px] lg:block lg:text-right",
+            "hidden font-mono text-[11px] tabular-nums lg:block lg:text-right",
             progressConfig.textClassName
           )}
         >
           {tests}
         </span>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 lg:justify-end">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 lg:justify-end">
           {isFree ? (
             <>
               <Link
                 href={hrefs.practice}
                 aria-label={`Practice ${problem.title}`}
-                className="inline-flex items-center gap-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-brand-cyan hover:underline"
+                className={LINK_ARROW}
               >
                 Practice
                 <ChevronRight className="h-3 w-3" />
@@ -152,7 +157,7 @@ export function ProblemRow({ problem }: { problem: BankProblem }) {
               <Link
                 href={hrefs.round}
                 aria-label={`Take ${problem.title} as an AI interview round`}
-                className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle hover:text-brand-muted"
+                className={SECONDARY_LINK}
               >
                 As a round
               </Link>
@@ -161,7 +166,7 @@ export function ProblemRow({ problem }: { problem: BankProblem }) {
             <Link
               href={hrefs.round}
               aria-label={`Start an AI interview round on ${problem.title}`}
-              className="inline-flex items-center gap-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-brand-cyan hover:underline"
+              className={LINK_ARROW}
             >
               Start round
               <ChevronRight className="h-3 w-3" />

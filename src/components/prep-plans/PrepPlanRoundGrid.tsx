@@ -1,4 +1,5 @@
 import { MonoLabel } from "@/components/shared/Rack";
+import { CELL, GRID } from "@/components/marketing/ds";
 import {
   AvailabilityTag,
   PriorityTag,
@@ -21,8 +22,8 @@ type PrepPlanRoundGridProps = {
 };
 
 /**
- * The per-round breakdown of a loop as a hairline instrument grid: one cell per
- * round, sharing a single rule so the rounds read as one panel. Used by the
+ * The per-round breakdown of a loop as a hairline grid: one cell per round,
+ * borders drawn once so the rounds read as one panel. Used by the
  * generated-plan turn in the Prep Guru thread and by the dashboard loop card.
  */
 export function PrepPlanRoundGrid({
@@ -48,7 +49,8 @@ export function PrepPlanRoundGrid({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-brand-border bg-brand-border",
+        GRID,
+        "grid-cols-1",
         columnsClassName,
         className
       )}
@@ -59,14 +61,10 @@ export function PrepPlanRoundGrid({
         return (
           <div
             key={`${planId}-${track.kind}`}
-            className="flex flex-col gap-2 bg-brand-surface px-4 py-3.5"
+            className={cn(CELL, "flex flex-col gap-2.5 px-5 py-4")}
           >
             <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
-              <MonoLabel
-                className={cn("text-[9px]", isLive ? "text-brand-cyan" : "text-brand-subtle")}
-              >
-                Round {index + 1}
-              </MonoLabel>
+              <MonoLabel>Round {index + 1}</MonoLabel>
               <div className="flex flex-wrap items-center gap-1.5">
                 <PriorityTag priority={track.priority} />
                 <AvailabilityTag kind={track.kind} />
@@ -76,13 +74,13 @@ export function PrepPlanRoundGrid({
             <div>
               <p
                 className={cn(
-                  "font-heading text-sm font-semibold tracking-tight",
+                  "text-[15px] font-medium tracking-[-0.01em]",
                   isLive ? "text-brand-text" : "text-brand-muted"
                 )}
               >
                 {track.title ?? getPracticeKindLabel(track.kind)}
               </p>
-              <MonoLabel className="mt-1 block text-[9px]">
+              <MonoLabel className="mt-1 block">
                 {getPracticeKindLabel(track.kind)}
               </MonoLabel>
             </div>
@@ -103,7 +101,7 @@ export function PrepPlanRoundGrid({
       })}
 
       {hiddenCount > 0 ? (
-        <div className="flex items-center bg-brand-surface px-4 py-3.5">
+        <div className={cn(CELL, "flex items-center px-5 py-4")}>
           <MonoLabel>
             +{hiddenCount} more round{hiddenCount === 1 ? "" : "s"}
           </MonoLabel>

@@ -35,7 +35,7 @@ export function PrepGuruShell({
   ...sidebarProps
 }: PrepGuruShellProps) {
   return (
-    <div className="lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-6">
+    <div className="lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-10">
       <h1 className="sr-only">{heading}</h1>
 
       <PrepPlanSidebar {...sidebarProps} />

@@ -31,33 +31,33 @@ export function ContinueRack({
 }) {
   return (
     <Rack
-      label={<MonoLabel className="tracking-[0.18em]">Pick up where you left off</MonoLabel>}
+      label={<MonoLabel>Pick up where you left off</MonoLabel>}
       accessory={
-        <MonoLabel className="tracking-[0.12em]">
+        <MonoLabel>
           {attempts.length} saved attempt{attempts.length === 1 ? "" : "s"}
         </MonoLabel>
       }
       bodyClassName="p-0"
     >
-      <div className="divide-y divide-brand-border/60">
+      <div className="divide-y divide-white/[0.08]">
         {attempts.map((attempt) => (
           <div
             key={attempt.id}
-            className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+            className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-between sm:px-6"
           >
             <div className="min-w-0">
               <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                <p className="truncate text-sm font-medium text-brand-text">
+                <p className="truncate text-[15px] font-medium tracking-[-0.01em] text-brand-text">
                   {attempt.title}
                 </p>
-                <MonoLabel className="text-[9px]">
+                <MonoLabel className="text-[10px]">
                   {attempt.category} · {attempt.language}
                 </MonoLabel>
               </div>
               <p className="mt-1.5 flex flex-wrap items-center gap-x-3 text-xs text-brand-muted">
                 <span
                   className={cn(
-                    "font-mono",
+                    "font-mono tabular-nums",
                     attempt.isSolved ? "text-brand-green" : "text-brand-amber"
                   )}
                 >
