@@ -107,7 +107,7 @@ test("presented-problem phase forbids unsolicited repetition", () => {
 
   assert.match(voicePrompt, /problem has already been presented/i);
   assert.match(voicePrompt, /Never repeat its title, statement, examples, or constraints/i);
-  assert.match(voicePrompt, /finish saying the problem exactly once before calling `set_interview_phase`/i);
+  assert.match(voicePrompt, /Call `set_interview_phase` BEFORE you speak in a turn, never after/);
 });
 
 // ─── Repeated problem narration ───────────────────────────────────────────────

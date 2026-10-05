@@ -626,7 +626,13 @@ export function useDeepgramVoiceAgent(
           type: "FunctionCallResponse",
           id: fn.id,
           name: fn.name,
-          content: JSON.stringify({ success: true, phase: args.phase }),
+          content: JSON.stringify({
+            success: true,
+            phase: args.phase,
+            // The function result triggers a fresh LLM turn; without this the agent re-says its last line.
+            instruction:
+              "Phase updated. The candidate already heard everything you said before this call. Do not repeat or paraphrase it. If you already asked a question, say nothing and wait.",
+          }),
         });
         return;
       }

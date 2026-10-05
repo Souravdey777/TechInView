@@ -140,7 +140,7 @@ function codingPhaseInstruction(
 
   switch (currentPhase) {
     case "INTRO":
-      return "You are in the INTRO phase. A generic instruction to start the interview is not evidence that calibration is complete. If the conversation does not yet contain the candidate's answer to an introduction or calibration question, introduce yourself warmly and ask exactly one short question about their software engineering and coding interview experience. Do not ask about their preferred language. Then stop and wait without presenting the problem. Once the candidate has answered that question, briefly acknowledge the answer and present the problem exactly once in one concise spoken turn. After completing that narration, transition to PROBLEM_PRESENTED and ask exactly one opening clarification question. Before presenting, inspect the conversation: if any assistant turn has already named or described the problem, do not narrate it again.";
+      return "You are in the INTRO phase. A generic instruction to start the interview is not evidence that calibration is complete. If the conversation does not yet contain the candidate's answer to an introduction or calibration question, introduce yourself warmly and ask exactly one short question about their software engineering and coding interview experience. Do not ask about their preferred language. Then stop and wait without presenting the problem. Once the candidate has answered that question, first call `set_interview_phase` with PROBLEM_PRESENTED without saying anything, then in your next spoken turn briefly acknowledge the answer, present the problem exactly once, and end with exactly one opening clarification question. Before presenting, inspect the conversation: if any assistant turn has already named or described the problem, do not narrate it again.";
     case "PROBLEM_PRESENTED":
       return "The problem has already been presented. Never repeat its title, statement, examples, or constraints unless the candidate explicitly asks you to repeat or clarify something. Let the candidate read it, then ask exactly one brief clarification-oriented prompt and wait.";
     case "CLARIFICATION":
@@ -450,7 +450,9 @@ When the conversation naturally moves to a new phase, call the \`set_interview_p
 - Advance when the conversation naturally moves on.
 - Do not skip far ahead unless the candidate has clearly already done that work.
 - If uncertain, keep the same phase or advance by one step only.
-- For INTRO to PROBLEM_PRESENTED, finish saying the problem exactly once before calling \`set_interview_phase\`. After that call, never narrate the problem again unless the candidate explicitly requests repetition.
+- Call \`set_interview_phase\` BEFORE you speak in a turn, never after. Every function result starts a new spoken turn, so anything said before the call gets heard twice.
+- After any function result, never repeat or paraphrase what you already said. If your question has already been asked, say nothing and wait.
+- For INTRO to PROBLEM_PRESENTED, call \`set_interview_phase\` first, then say the problem exactly once. After that, never narrate the problem again unless the candidate explicitly requests repetition.
 
 ## Available functions
 - \`set_interview_phase\`: Update the UI phase when the conversation transitions.
