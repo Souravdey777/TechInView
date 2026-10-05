@@ -1,14 +1,18 @@
 import type { ReactNode } from "react";
 import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
+import { LEAD, PAD } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
 
 export type InterviewSetupStatus = "live" | "beta" | "planned";
 
 const STATUS_STYLES: Record<InterviewSetupStatus, string> = {
-  live: "border-brand-green/25 bg-brand-green/10 text-brand-green",
-  beta: "border-brand-cyan/25 bg-brand-cyan/10 text-brand-cyan",
-  planned: "border-brand-amber/25 bg-brand-amber/10 text-brand-amber",
+  live: "border-brand-green/30 text-brand-green",
+  beta: "border-brand-amber/30 text-brand-amber",
+  planned: "border-white/[0.12] text-brand-subtle",
 };
+
+const META_CHIP =
+  "rounded-full border border-white/[0.1] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted";
 
 type InterviewSetupLayoutProps = {
   supportingText: string;
@@ -17,6 +21,10 @@ type InterviewSetupLayoutProps = {
   containerClassName?: string;
 };
 
+/**
+ * Setup page frame: hairline top bar, then the main column of racks on the
+ * page itself (no boxed card) with an optional summary rail on the right.
+ */
 export function InterviewSetupLayout({
   supportingText,
   children,
@@ -29,17 +37,15 @@ export function InterviewSetupLayout({
         containerClassName={containerClassName}
         supportingText={supportingText}
       />
-      <main className={cn("mx-auto px-4 py-8 sm:px-6 sm:py-10", containerClassName)}>
+      <main className={cn("mx-auto w-full py-10 sm:py-14", PAD, containerClassName)}>
         <div
           className={cn(
-            "grid gap-6",
-            aside && "xl:grid-cols-[minmax(0,1fr)_24rem]"
+            "grid gap-8",
+            aside && "xl:grid-cols-[minmax(0,1fr)_24rem] xl:gap-10"
           )}
         >
-          <div className="min-w-0 rounded-3xl border border-brand-border bg-brand-card p-6 sm:p-8">
-            {children}
-          </div>
-          {aside ? <aside className="space-y-4">{aside}</aside> : null}
+          <div className="min-w-0">{children}</div>
+          {aside ? <aside className="space-y-5">{aside}</aside> : null}
         </div>
       </main>
     </div>
@@ -54,6 +60,7 @@ type InterviewSetupHeroProps = {
   contextLabel?: string | null;
 };
 
+/** Landing-style page head: status + metadata chips, big font-normal title, lead. */
 export function InterviewSetupHero({
   title,
   description,
@@ -63,35 +70,26 @@ export function InterviewSetupHero({
 }: InterviewSetupHeroProps) {
   return (
     <header>
-      <div className="flex flex-wrap items-center gap-2.5">
+      <div className="flex flex-wrap items-center gap-2">
         <span
           className={cn(
-            "rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
+            "rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.12em]",
             STATUS_STYLES[status]
           )}
         >
           {status}
         </span>
         {metadata.map((item) => (
-          <span
-            key={`${title}-${item}`}
-            className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted"
-          >
+          <span key={`${title}-${item}`} className={META_CHIP}>
             {item}
           </span>
         ))}
-        {contextLabel ? (
-          <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-[11px] text-brand-muted">
-            {contextLabel}
-          </span>
-        ) : null}
+        {contextLabel ? <span className={META_CHIP}>{contextLabel}</span> : null}
       </div>
-      <h1 className="mt-5 text-3xl font-bold tracking-tight text-brand-text">
+      <h1 className="mt-6 text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
         {title}
       </h1>
-      <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-muted">
-        {description}
-      </p>
+      <p className={cn(LEAD, "mt-4 max-w-3xl")}>{description}</p>
     </header>
   );
 }
@@ -104,6 +102,7 @@ type InterviewSetupSectionProps = {
   className?: string;
 };
 
+/** Hairline rack with a mono label header, the unit every setup form is built from. */
 export function InterviewSetupSection({
   title,
   description,
@@ -114,16 +113,16 @@ export function InterviewSetupSection({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-brand-border bg-brand-surface p-5",
+        "rounded-[20px] border border-white/[0.08] p-5 sm:p-6",
         className
       )}
     >
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
+      <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-brand-subtle">
         {icon}
-        {title}
+        <span className="text-brand-text">{title}</span>
       </div>
       {description ? (
-        <p className="mt-3 text-sm leading-relaxed text-brand-muted">{description}</p>
+        <p className="mt-3 text-[15px] leading-relaxed text-brand-muted">{description}</p>
       ) : null}
       {children}
     </section>
@@ -136,14 +135,15 @@ type InterviewSetupAsideCardProps = {
   icon?: ReactNode;
 };
 
+/** Summary-rail rack: same hairline shell as a section, with a mono label. */
 export function InterviewSetupAsideCard({
   title,
   children,
   icon,
 }: InterviewSetupAsideCardProps) {
   return (
-    <section className="rounded-3xl border border-brand-border bg-brand-card p-6">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
+    <section className="rounded-[20px] border border-white/[0.08] p-5 sm:p-6">
+      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
         {icon}
         {title}
       </div>

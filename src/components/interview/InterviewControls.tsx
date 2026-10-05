@@ -41,6 +41,9 @@ const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   cpp: "C++",
 };
 
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep";
+
 // ─── OS detection for keyboard shortcut hint ─────────────────────────────────
 
 function getRunShortcutHint(): string {
@@ -71,7 +74,7 @@ export function InterviewControls({
 
   return (
     <>
-      <div className="flex h-12 items-center justify-between border-t border-brand-border bg-brand-card px-4">
+      <div className="relative flex h-12 items-center justify-between border-t border-white/[0.08] bg-brand-deep px-4">
         {/* Left: phase progress */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
@@ -83,15 +86,15 @@ export function InterviewControls({
                   p === phase
                     ? "w-4 bg-brand-cyan"
                     : PHASE_STEP[p] < step
-                      ? "w-1.5 bg-brand-green/60"
-                      : "w-1.5 bg-brand-border"
+                      ? "w-1.5 bg-white/[0.4]"
+                      : "w-1.5 bg-white/[0.1]"
                 )}
                 title={PHASE_LABELS[p]}
               />
             ))}
           </div>
-          <span className="text-xs text-brand-muted">
-            <span className="font-medium text-brand-text">
+          <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">
+            <span className="text-brand-text">
               {phaseLabel}
             </span>{" "}
             &middot; Step {step}/{total}
@@ -100,7 +103,7 @@ export function InterviewControls({
 
         {/* Center: language badge */}
         <div className="absolute left-1/2 -translate-x-1/2">
-          <span className="rounded-md border border-brand-border bg-brand-surface px-2.5 py-1 font-mono text-xs font-medium text-brand-muted">
+          <span className="rounded-full border border-white/[0.1] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted">
             {isCodingRound ? LANGUAGE_LABELS[language] : ROUND_TYPE_LABELS[roundType]}
           </span>
         </div>
@@ -109,7 +112,7 @@ export function InterviewControls({
         <div className="flex items-center gap-2">
           {isCodingRound && (
             <>
-              <span className="hidden text-[10px] text-brand-muted sm:block">
+              <span className="hidden font-mono text-[10px] uppercase tracking-[0.1em] text-brand-subtle sm:block">
                 {getRunShortcutHint()} to run
               </span>
 
@@ -117,10 +120,11 @@ export function InterviewControls({
                 onClick={onRunCode}
                 disabled={isRunning}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all",
+                  "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
+                  FOCUS_RING,
                   isRunning
-                    ? "cursor-not-allowed border-brand-border text-brand-muted"
-                    : "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20 hover:border-brand-green/50"
+                    ? "cursor-not-allowed border-white/[0.08] text-brand-subtle"
+                    : "border-white/[0.18] text-brand-text hover:border-brand-cyan hover:text-brand-cyan"
                 )}
               >
                 <Play className="h-3.5 w-3.5" />
@@ -132,7 +136,10 @@ export function InterviewControls({
           {/* End Interview */}
           <button
             onClick={() => setConfirmOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-brand-rose/30 bg-brand-rose/10 px-3 py-1.5 text-xs font-semibold text-brand-rose transition-all hover:bg-brand-rose/20 hover:border-brand-rose/50"
+            className={cn(
+              "flex items-center gap-1.5 rounded-full border border-brand-rose/30 bg-brand-rose/[0.08] px-3.5 py-1.5 text-xs font-medium text-brand-rose transition-colors hover:border-brand-rose/50 hover:bg-brand-rose/[0.14]",
+              FOCUS_RING
+            )}
           >
             <StopCircle className="h-3.5 w-3.5" />
             End
@@ -144,10 +151,8 @@ export function InterviewControls({
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-rose/10 border border-brand-rose/30">
-              <AlertTriangle className="h-6 w-6 text-brand-rose" />
-            </div>
-            <DialogTitle className="text-center">End Interview?</DialogTitle>
+            <AlertTriangle className="mx-auto mb-2 h-5 w-5 text-brand-rose" />
+            <DialogTitle className="text-center text-xl font-normal tracking-[-0.02em]">End Interview?</DialogTitle>
             <DialogDescription className="text-center">
               Your session will be submitted for scoring. This action cannot be
               undone.

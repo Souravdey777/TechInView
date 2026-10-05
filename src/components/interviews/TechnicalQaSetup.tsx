@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, ChevronRight, Loader2, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CHIP, Eyebrow, FOCUS, LEAD } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 import { SetupPageHeader } from "@/components/interviews/SetupPageHeader";
 import {
   SetupMonoLabel,
@@ -195,14 +197,14 @@ export function TechnicalQaSetup() {
       />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+        <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
           <div className="min-w-0">
-            <SetupMonoLabel>New session</SetupMonoLabel>
-            <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight text-brand-text sm:text-4xl">
+            <Eyebrow className="mb-4">New session</Eyebrow>
+            <h1 className="text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
               Set up the room.
             </h1>
           </div>
-          <p className="text-sm leading-relaxed text-brand-muted lg:max-w-sm lg:text-right">
+          <p className={cn(LEAD, "lg:max-w-md")}>
             Technical Q&amp;A is voice-only: no editor, no coding. Pick the stack
             you actually work in and the interviewer probes internals, debugging,
             and production tradeoffs for {TECHNICAL_QA_DURATION_MINUTES} minutes,
@@ -211,16 +213,16 @@ export function TechnicalQaSetup() {
         </header>
 
         {isLocked && (
-          <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-rose/30 bg-brand-rose/5 px-5 py-4">
+          <div className="mt-8 flex items-start gap-3 rounded-[20px] border border-brand-rose/30 bg-brand-rose/[0.04] px-5 py-4">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-rose" />
             <div>
-              <p className="text-sm font-semibold text-brand-text">
+              <p className="text-sm font-medium text-brand-text">
                 Technical Q&amp;A needs an interview credit
               </p>
-              <p className="mt-1 text-xs text-brand-muted">
+              <p className="mt-1 text-[13px] leading-relaxed text-brand-muted">
                 This round runs the full {TECHNICAL_QA_DURATION_MINUTES} minutes
                 with voice and scoring.{" "}
-                <Link href="/settings" className="text-brand-cyan hover:underline">
+                <Link href="/settings" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>
                   Buy an interview pack
                 </Link>{" "}
                 to start one.
@@ -229,7 +231,7 @@ export function TechnicalQaSetup() {
           </div>
         )}
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-12 lg:items-start">
+        <div className="mt-10 grid gap-5 lg:grid-cols-12 lg:items-start">
           {/* ─── Configuration racks ─── */}
           <div className="flex min-w-0 flex-col gap-5 lg:col-span-8">
             <SetupRack index="01" label="Stack" note="Voice only · no coding">
@@ -246,7 +248,7 @@ export function TechnicalQaSetup() {
               />
 
               <SetupCheckboxGrid
-                className="mt-5 border-t border-brand-border pt-5"
+                className="mt-5 border-t border-white/[0.08] pt-5"
                 label="Frameworks of expertise"
                 note={
                   hasFrameworks
@@ -262,21 +264,21 @@ export function TechnicalQaSetup() {
                 }))}
               />
 
-              <div className="mt-5 rounded-xl border border-brand-border bg-brand-surface px-4 py-3">
+              <div className="mt-5 rounded-[16px] border border-white/[0.08] px-4 py-3">
                 <SetupMonoLabel>
                   Round brief ·{" "}
                   {selectedFrameworkLabels.length > 0
                     ? selectedFrameworkLabels.join(" · ")
                     : getTechnicalQaLanguageLabel(language)}
                 </SetupMonoLabel>
-                <p className="mt-2 text-xs leading-relaxed text-brand-muted">
+                <p className="mt-2 text-[13px] leading-relaxed text-brand-muted">
                   {roundContext.summary}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {roundContext.focusAreas.map((focus) => (
                     <span
                       key={focus}
-                      className="rounded-full border border-brand-border bg-brand-card px-2.5 py-1 text-[11px] text-brand-muted"
+                      className={CHIP}
                     >
                       {focus}
                     </span>
@@ -296,7 +298,7 @@ export function TechnicalQaSetup() {
               <SessionStepsCard title="How it runs" steps={SESSION_STEPS} />
 
               {error ? (
-                <div className="flex items-start gap-3 rounded-lg border border-brand-rose/30 bg-brand-rose/5 px-4 py-3">
+                <div className="flex items-start gap-3 rounded-[16px] border border-brand-rose/30 bg-brand-rose/[0.04] px-4 py-3">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
                   <p className="text-sm text-brand-rose">{error}</p>
                 </div>
@@ -304,7 +306,7 @@ export function TechnicalQaSetup() {
 
               <div className="flex flex-col gap-3">
                 {isLocked ? (
-                  <Button asChild size="lg" className="w-full gap-2 text-base font-semibold">
+                  <Button asChild size="lg" className="w-full gap-2 text-base">
                     <Link href="/settings">
                       Get Technical Q&amp;A
                       <ChevronRight className="h-5 w-5" />
@@ -315,7 +317,7 @@ export function TechnicalQaSetup() {
                     size="lg"
                     onClick={() => void handleStartInterview()}
                     disabled={isDisabled}
-                    className="w-full gap-2 text-base font-semibold"
+                    className="w-full gap-2 text-base"
                   >
                     {isCreating ? (
                       <>
@@ -335,7 +337,7 @@ export function TechnicalQaSetup() {
                   asChild
                   variant="secondary"
                   size="lg"
-                  className="w-full gap-2 text-sm font-medium"
+                  className="w-full gap-2 text-sm"
                 >
                   <Link href="/prep-guru">
                     <MessageSquare className="h-4 w-4" />
@@ -349,11 +351,11 @@ export function TechnicalQaSetup() {
                   </p>
                 ) : null}
 
-                <p className="text-center text-xs text-brand-muted">
+                <p className="text-center text-xs leading-relaxed text-brand-subtle">
                   By starting, you agree to live microphone processing by our
                   voice provider. TechInView stores transcripts, timing, scores,
                   and results, but not raw microphone audio. See our{" "}
-                  <Link href="/privacy" className="text-brand-cyan hover:underline">
+                  <Link href="/privacy" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>
                     Privacy Policy
                   </Link>
                   .

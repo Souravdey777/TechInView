@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CELL, Eyebrow, GRID, LABEL, LEAD } from "@/components/marketing/ds";
 import {
   InterviewSetupAsideCard,
-  InterviewSetupHero,
   InterviewSetupLayout,
   InterviewSetupSection,
 } from "@/components/interviews/InterviewSetupLayout";
@@ -53,6 +53,12 @@ type EngineeringManagerSetupProps = {
   initialCompany?: string | null;
   initialRoleTitle?: string | null;
 };
+
+/** Option cell inside a hairline grid; selected cells get the cyan ring and tint. */
+const OPTION_CELL =
+  "flex h-full w-full items-start justify-between gap-3 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan";
+const OPTION_SELECTED = "bg-brand-cyan/[0.06] text-brand-text ring-1 ring-inset ring-brand-cyan/40";
+const OPTION_IDLE = "text-brand-muted hover:bg-white/[0.03] hover:text-brand-text";
 
 function trimOrNull(value: string) {
   const trimmed = value.trim();
@@ -207,13 +213,16 @@ export function EngineeringManagerSetup({
     }
   }
 
+  const contextLabel =
+    [trimOrNull(company), trimOrNull(roleTitle)].filter(Boolean).join(" · ") || null;
+
   return (
     <InterviewSetupLayout
       supportingText="Engineering Manager · Interview setup"
       aside={
         <>
           <InterviewSetupAsideCard title="Interview preview">
-            <h2 className="mt-3 text-xl font-semibold text-brand-text">
+            <h2 className="mt-3 text-xl font-medium tracking-[-0.02em] text-brand-text">
               {roundContext.title}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-brand-muted">
@@ -223,7 +232,7 @@ export function EngineeringManagerSetup({
               {roundContext.focusAreas.map((focus) => (
                 <span
                   key={focus}
-                  className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
+                  className="rounded-full border border-white/[0.1] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted"
                 >
                   {focus}
                 </span>
@@ -232,17 +241,24 @@ export function EngineeringManagerSetup({
           </InterviewSetupAsideCard>
 
           <InterviewSetupAsideCard title="Session shape">
-            <div className="mt-4 space-y-3 text-sm text-brand-muted">
-              <p>1. Role-context calibration on what you own today</p>
-              <p>2. Decision-making and leadership deep dive</p>
-              <p>3. Outcome, prioritization, and stakeholder follow-ups</p>
-              <p>4. Role fit, then your questions for the manager</p>
-            </div>
-            <div className="mt-5 rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">
-                Selected setup
-              </p>
-              <p className="mt-2 text-sm font-semibold text-brand-text">
+            <ol className="mt-4 space-y-3 text-sm text-brand-muted">
+              {[
+                "Role-context calibration on what you own today",
+                "Decision-making and leadership deep dive",
+                "Outcome, prioritization, and stakeholder follow-ups",
+                "Role fit, then your questions for the manager",
+              ].map((step, index) => (
+                <li key={step} className="flex gap-3">
+                  <span className="font-mono text-[11px] leading-5 text-brand-subtle">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="leading-5">{step}</span>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-5 border-t border-white/[0.08] pt-4">
+              <p className={LABEL}>Selected setup</p>
+              <p className="mt-2 text-sm font-medium text-brand-text">
                 {[trimOrNull(roleTitle), trimOrNull(company)].filter(Boolean).join(" · ") ||
                   "General engineering leadership round"}
               </p>
@@ -251,10 +267,8 @@ export function EngineeringManagerSetup({
                   ? selectedFocusLabels.join(", ")
                   : "Choose at least one focus area to continue."}
               </p>
-              <p className="mt-3 text-xs uppercase tracking-[0.16em] text-brand-muted">
-                Value lens
-              </p>
-              <p className="mt-1 text-sm font-semibold text-brand-text">
+              <p className={cn(LABEL, "mt-4")}>Value lens</p>
+              <p className="mt-1 text-sm font-medium text-brand-text">
                 {selectedFramework.label}
               </p>
               <p className="mt-1 text-sm text-brand-muted">
@@ -279,166 +293,177 @@ export function EngineeringManagerSetup({
         </>
       }
     >
-      <InterviewSetupHero
-        title="Engineering Manager Setup"
-        description="Build the voice-first hiring-manager round around the company, role, and value lens you want to be graded against. This full-length flow skips coding and focuses on role fit, prioritization, stakeholder judgment, and concrete examples from your own work, then closes with your questions for the manager."
-        metadata={[`${ENGINEERING_MANAGER_DURATION_MINUTES} min`, "Voice chat", "Leadership"]}
-        contextLabel={
-          [trimOrNull(company), trimOrNull(roleTitle)].filter(Boolean).join(" · ") || null
-        }
-      />
+      <header>
+        <Eyebrow className="mb-4">
+          {[
+            "Live",
+            `${ENGINEERING_MANAGER_DURATION_MINUTES} min`,
+            "Voice chat",
+            "Leadership",
+            contextLabel,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </Eyebrow>
+        <h1 className="text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
+          Engineering Manager Setup
+        </h1>
+        <p className={cn(LEAD, "mt-4 max-w-3xl")}>
+          Build the voice-first hiring-manager round around the company, role, and value lens
+          you want to be graded against. This full-length flow skips coding and focuses on role
+          fit, prioritization, stakeholder judgment, and concrete examples from your own work,
+          then closes with your questions for the manager.
+        </p>
+      </header>
 
-      <div className="mt-8 grid gap-6">
-              <InterviewSetupSection title="Role context" icon={<Building2 className="h-3.5 w-3.5" />}>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
-                      Company
-                    </label>
-                    <Input
-                      value={company}
-                      onChange={(event) => setCompany(event.target.value)}
-                      placeholder="Meta, Google, Stripe..."
-                      className="mt-2 h-11 rounded-2xl bg-brand-card px-4"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
-                      Role Title
-                    </label>
-                    <Input
-                      value={roleTitle}
-                      onChange={(event) => setRoleTitle(event.target.value)}
-                      placeholder="Senior Backend Engineer"
-                      className="mt-2 h-11 rounded-2xl bg-brand-card px-4"
-                    />
-                  </div>
-                </div>
-                <p className="mt-3 text-sm text-brand-muted">
-                  These are optional, but they help the round feel more like a real role-fit or
-                  hiring-manager conversation.
-                </p>
-
-                <div className="mt-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
-                    What you lead today
-                  </p>
-                  <p className="mt-2 text-sm text-brand-muted">
-                    A hiring manager calibrates on this in the first two minutes. It decides
-                    whether team health and performance questions are on the table at all.
-                  </p>
-                  <div
-                    role="radiogroup"
-                    aria-label="Reporting scope"
-                    className="mt-4 grid gap-3 sm:grid-cols-3"
-                  >
-                    {ENGINEERING_MANAGER_REPORTING_SCOPES.map((scope) => {
-                      const selected = reportingScope === scope.value;
-
-                      return (
-                        <Button
-                          key={scope.value}
-                          type="button"
-                          role="radio"
-                          aria-checked={selected}
-                          onClick={() => setReportingScope(scope.value)}
-                          variant="outline"
-                          className={cn(
-                            "h-auto w-full flex-col items-start whitespace-normal rounded-2xl px-4 py-4 text-left",
-                            selected
-                              ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
-                              : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                          )}
-                        >
-                          <p className="text-sm font-semibold">{scope.label}</p>
-                          <p className="mt-2 text-xs leading-relaxed">{scope.description}</p>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </InterviewSetupSection>
-
-              <InterviewSetupSection
-                title="Interview focus"
-                icon={<Sparkles className="h-3.5 w-3.5" />}
-                description="Pick the leadership signals you want the interviewer to probe. You can choose multiple."
-              >
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {ENGINEERING_MANAGER_FOCUS_OPTIONS.map((option) => {
-                    const selected = focusAreas.includes(option.value);
-
-                    return (
-                      <Button
-                        key={option.value}
-                        type="button"
-                        onClick={() => toggleFocusArea(option.value)}
-                        variant="outline"
-                        className={cn(
-                          "h-auto w-full items-start justify-between whitespace-normal rounded-2xl px-4 py-4 text-left",
-                          selected
-                            ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
-                            : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text"
-                        )}
-                      >
-                        <div>
-                          <p className="text-sm font-semibold">{option.label}</p>
-                          <p className="mt-2 text-xs leading-relaxed">
-                            {option.description}
-                          </p>
-                        </div>
-                        <span
-                          className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border ${
-                            selected
-                              ? "border-brand-cyan bg-brand-cyan text-brand-deep"
-                              : "border-brand-border bg-brand-surface"
-                          }`}
-                        >
-                          {selected ? <Check className="h-3 w-3" /> : null}
-                        </span>
-                      </Button>
-                    );
-                  })}
-                </div>
-              </InterviewSetupSection>
-
-              <ValueLensPicker
-                frameworkId={valueFrameworkId}
-                competencyIds={valueCompetencyIds}
-                onFrameworkChange={handleFrameworkChange}
-                onCompetencyToggle={toggleValueCompetency}
-                description="Choose the value system the hiring manager grades you against. It shapes the leadership questions asked live and the competency report you get afterwards."
+      <div className="mt-10 grid gap-6">
+        <InterviewSetupSection title="Role context" icon={<Building2 className="h-3.5 w-3.5" />}>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={LABEL}>Company</label>
+              <Input
+                value={company}
+                onChange={(event) => setCompany(event.target.value)}
+                placeholder="Meta, Google, Stripe..."
+                className="mt-2"
               />
+            </div>
+            <div>
+              <label className={LABEL}>Role Title</label>
+              <Input
+                value={roleTitle}
+                onChange={(event) => setRoleTitle(event.target.value)}
+                placeholder="Senior Backend Engineer"
+                className="mt-2"
+              />
+            </div>
+          </div>
+          <p className="mt-3 text-sm leading-relaxed text-brand-muted">
+            These are optional, but they help the round feel more like a real role-fit or
+            hiring-manager conversation.
+          </p>
 
-              <MicrophoneSetupCheck />
+          <div className="mt-8 border-t border-white/[0.08] pt-6">
+            <p className={LABEL}>What you lead today</p>
+            <p className="mt-2 text-sm leading-relaxed text-brand-muted">
+              A hiring manager calibrates on this in the first two minutes. It decides
+              whether team health and performance questions are on the table at all.
+            </p>
+            <div
+              role="radiogroup"
+              aria-label="Reporting scope"
+              className={cn(GRID, "mt-4 sm:grid-cols-3")}
+            >
+              {ENGINEERING_MANAGER_REPORTING_SCOPES.map((scope) => {
+                const selected = reportingScope === scope.value;
+
+                return (
+                  <div key={scope.value} className={CELL}>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => setReportingScope(scope.value)}
+                      className={cn(OPTION_CELL, selected ? OPTION_SELECTED : OPTION_IDLE)}
+                    >
+                      <span className="min-w-0">
+                        <span className="block text-[15px] font-medium tracking-[-0.01em]">
+                          {scope.label}
+                        </span>
+                        <span className="mt-1.5 block text-[13px] leading-relaxed text-brand-muted">
+                          {scope.description}
+                        </span>
+                      </span>
+                      {selected ? (
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-cyan" />
+                      ) : null}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </InterviewSetupSection>
+
+        <InterviewSetupSection
+          title="Interview focus"
+          icon={<Sparkles className="h-3.5 w-3.5" />}
+          description="Pick the leadership signals you want the interviewer to probe. You can choose multiple."
+        >
+          <div className={cn(GRID, "mt-4 sm:grid-cols-2")}>
+            {ENGINEERING_MANAGER_FOCUS_OPTIONS.map((option) => {
+              const selected = focusAreas.includes(option.value);
+
+              return (
+                <div key={option.value} className={CELL}>
+                  <button
+                    type="button"
+                    onClick={() => toggleFocusArea(option.value)}
+                    aria-pressed={selected}
+                    className={cn(OPTION_CELL, selected ? OPTION_SELECTED : OPTION_IDLE)}
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-[15px] font-medium tracking-[-0.01em]">
+                        {option.label}
+                      </span>
+                      <span className="mt-1.5 block text-[13px] leading-relaxed text-brand-muted">
+                        {option.description}
+                      </span>
+                    </span>
+                    <span
+                      className={cn(
+                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border",
+                        selected
+                          ? "border-brand-cyan bg-brand-cyan text-brand-deep"
+                          : "border-white/[0.18]"
+                      )}
+                    >
+                      {selected ? <Check className="h-3 w-3" /> : null}
+                    </span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </InterviewSetupSection>
+
+        <ValueLensPicker
+          frameworkId={valueFrameworkId}
+          competencyIds={valueCompetencyIds}
+          onFrameworkChange={handleFrameworkChange}
+          onCompetencyToggle={toggleValueCompetency}
+          description="Choose the value system the hiring manager grades you against. It shapes the leadership questions asked live and the competency report you get afterwards."
+        />
+
+        <MicrophoneSetupCheck />
       </div>
 
-            <div className="mt-8 flex flex-wrap gap-3 border-t border-brand-border pt-6">
-              <Button onClick={() => void handleStartInterview()} disabled={isDisabled}>
-                {isCreating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Starting interview...
-                  </>
-                ) : (
-                  <>
-                    Start Engineering Manager Round
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
-              <Button asChild variant="secondary">
-                <Link href="/prep-guru">Ask Prep Guru</Link>
-              </Button>
-            </div>
+      <div className="mt-10 flex flex-wrap gap-3 border-t border-white/[0.08] pt-6">
+        <Button size="lg" onClick={() => void handleStartInterview()} disabled={isDisabled}>
+          {isCreating ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Starting interview...
+            </>
+          ) : (
+            <>
+              Start Engineering Manager Round
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+        <Button asChild size="lg" variant="secondary">
+          <Link href="/prep-guru">Ask Prep Guru</Link>
+        </Button>
+      </div>
 
-            {!hasRequiredSelections && !isCreating ? (
-              <p className="mt-4 text-sm text-brand-muted">
-                Pick at least one focus area and one value competency to start the round.
-              </p>
-            ) : null}
+      {!hasRequiredSelections && !isCreating ? (
+        <p className="mt-4 text-sm text-brand-muted">
+          Pick at least one focus area and one value competency to start the round.
+        </p>
+      ) : null}
 
-            {error ? <p className="mt-4 text-sm text-brand-rose">{error}</p> : null}
+      {error ? <p className="mt-4 text-sm text-brand-rose">{error}</p> : null}
     </InterviewSetupLayout>
   );
 }

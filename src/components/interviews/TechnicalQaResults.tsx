@@ -1,32 +1,32 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import {
-  ArrowLeft,
-  BrainCircuit,
-  Bug,
-  CheckCircle2,
-  FileQuestion,
-  Gauge,
-  ListChecks,
-  Loader2,
-  MessageSquareText,
-  Sparkles,
-  Target,
-  Wrench,
-} from "lucide-react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useInterviewStore } from "@/stores/interview-store";
-import { ScoreSummary } from "@/components/results/ScoreSummary";
 import { ScoreRadar } from "@/components/results/ScoreRadar";
 import { FeedbackCard } from "@/components/results/FeedbackCard";
 import { TranscriptReview } from "@/components/results/TranscriptReview";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
+  BODY,
+  ButtonLink,
+  CELL,
+  CONTAINER,
+  Eyebrow,
+  GRID,
+  LABEL,
+  LEAD,
+  PAD,
+} from "@/components/marketing/ds";
+import {
+  HIRE_RECOMMENDATION_CONFIG,
   ROUND_SCORING_DIMENSIONS,
   type HireRecommendation,
   type RoundScoreDimension,
 } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import { INTERVIEWER } from "@/lib/interviewer";
 import { getTechnicalQaLanguageLabel } from "@/lib/technical-qa";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
@@ -85,25 +85,21 @@ const TECHNICAL_QA_SIGNAL_CARDS = [
     key: "technical_depth",
     title: "Stack Depth",
     description: "Precise mechanisms, runtime behavior, framework internals, and non-trivia depth.",
-    icon: BrainCircuit,
   },
   {
     key: "execution",
     title: "Debugging Flow",
     description: "Concrete hypotheses, inspection steps, failure modes, and recovery paths.",
-    icon: Bug,
   },
   {
     key: "judgment",
     title: "Production Judgment",
     description: "Sensible tradeoffs around reliability, scale, rollout risk, and observability.",
-    icon: Gauge,
   },
   {
     key: "communication",
     title: "Answer Quality",
     description: "Structured responses that stayed direct while still showing enough technical detail.",
-    icon: MessageSquareText,
   },
 ] as const;
 
@@ -114,13 +110,97 @@ const TECHNICAL_QA_EVALUATED_SIGNALS = [
   "Concrete examples instead of definition recall",
 ];
 
+/** Page title, sized like the dashboard header. */
+const PAGE_TITLE =
+  "text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em]";
+
+/** Recommendation chip uses the semantic verdict colors, never the cyan accent. */
+function getVerdictClass(recommendation: HireRecommendation) {
+  if (recommendation === "strong_hire" || recommendation === "hire") {
+    return "border-brand-green/40 text-brand-green";
+  }
+  if (recommendation === "lean_hire") return "border-brand-amber/40 text-brand-amber";
+  return "border-brand-rose/40 text-brand-rose";
+}
+
+function SectionTitle({ title, description }: { title: string; description?: string }) {
+  return (
+    <div className="mb-6">
+      <h2 className="text-2xl font-normal tracking-[-0.03em] text-brand-text">{title}</h2>
+      {description ? <p className={cn(BODY, "mt-2 max-w-[640px]")}>{description}</p> : null}
+    </div>
+  );
+}
+
+/** Thin hairline score bar pinned to the bottom of its cell; `fill` is the semantic color. */
+function ScoreBar({ score, fill }: { score: number; fill: string }) {
+  return (
+    <div className="mt-auto pt-6">
+      <div className="h-0.5 bg-white/[0.08]">
+        <div
+          className={cn("h-full", fill)}
+          style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Transcript counts as a 2x2 hairline grid. */
+function CoverageGrid({ stats }: { stats: { label: string; value: string | number }[] }) {
+  return (
+    <div className={cn(GRID, "grid-cols-2")}>
+      {stats.map((stat) => (
+        <div key={stat.label} className={cn(CELL, "p-4")}>
+          <p className={LABEL}>{stat.label}</p>
+          <p className="mt-2 text-2xl font-normal tracking-[-0.02em] tabular-nums text-brand-text">
+            {stat.value}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Mono label header over a hairline-divided list (strengths, priorities). */
+function NoteList({
+  title,
+  toneClass,
+  items,
+}: {
+  title: string;
+  toneClass: string;
+  items: string[];
+}) {
+  return (
+    <div>
+      <p className={cn(LABEL, "mb-3", toneClass)}>{title}</p>
+      <ul className="divide-y divide-white/[0.08] border-y border-white/[0.08]">
+        {items.map((item) => (
+          <li key={item} className={cn(BODY, "py-4")}>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Aside block: hairline rule on top, mono label, then content. */
+function AsideBlock({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="border-t border-white/[0.08] pt-5">
+      <p className={cn(LABEL, "mb-3")}>{label}</p>
+      {children}
+    </div>
+  );
+}
+
 function getScoreTone(score: number) {
   if (score >= 85) {
     return {
       label: "Strong",
       text: "text-brand-green",
-      bg: "bg-brand-green/10",
-      border: "border-brand-green/25",
       bar: "bg-brand-green",
     };
   }
@@ -128,8 +208,6 @@ function getScoreTone(score: number) {
     return {
       label: "Solid",
       text: "text-brand-cyan",
-      bg: "bg-brand-cyan/10",
-      border: "border-brand-cyan/25",
       bar: "bg-brand-cyan",
     };
   }
@@ -137,16 +215,12 @@ function getScoreTone(score: number) {
     return {
       label: "Developing",
       text: "text-brand-amber",
-      bg: "bg-brand-amber/10",
-      border: "border-brand-amber/25",
       bar: "bg-brand-amber",
     };
   }
   return {
     label: "Needs Work",
     text: "text-brand-rose",
-    bg: "bg-brand-rose/10",
-    border: "border-brand-rose/25",
     bar: "bg-brand-rose",
   };
 }
@@ -183,54 +257,27 @@ function TechnicalQaSignalSnapshot({ scores }: { scores: TechnicalQaScores }) {
 
   return (
     <section>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">Technical Q&amp;A Signals</h2>
-          <p className="mt-1 text-sm text-brand-muted">
-            Stack depth, debugging flow, production judgment, and answer quality in one scan.
-          </p>
-        </div>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <SectionTitle
+        title="Technical Q&A Signals"
+        description="Stack depth, debugging flow, production judgment, and answer quality in one scan."
+      />
+      <ul className={cn(GRID, "sm:grid-cols-2")}>
         {signalCards.map((signal) => {
-          const Icon = signal.icon;
           const tone = getScoreTone(signal.score);
 
           return (
-            <div
-              key={signal.key}
-              className="rounded-3xl border border-brand-border bg-brand-card p-5"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span className={`flex h-10 w-10 items-center justify-center rounded-xl border ${tone.border} ${tone.bg}`}>
-                    <Icon className={`h-5 w-5 ${tone.text}`} />
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-semibold text-brand-text">{signal.title}</h3>
-                    <p className={`mt-1 text-xs font-semibold uppercase tracking-[0.14em] ${tone.text}`}>
-                      {tone.label}
-                    </p>
-                  </div>
-                </div>
-                <span className={`text-2xl font-bold tabular-nums ${tone.text}`}>
-                  {signal.score}
-                  <span className="text-xs font-normal text-brand-muted">/100</span>
-                </span>
+            <li key={signal.key} className={cn(CELL, "flex flex-col p-6")}>
+              <div className={cn(LABEL, "flex justify-between gap-4")}>
+                <span className={tone.text}>{tone.label}</span>
+                <span className="tabular-nums text-brand-text">{signal.score}/100</span>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-brand-muted">
-                {signal.description}
-              </p>
-              <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-brand-surface">
-                <div
-                  className={`h-full rounded-full ${tone.bar}`}
-                  style={{ width: `${Math.min(100, Math.max(0, signal.score))}%` }}
-                />
-              </div>
-            </div>
+              <h3 className="mt-5 text-[17px] tracking-[-0.01em] text-brand-text">{signal.title}</h3>
+              <p className={cn(BODY, "mt-2")}>{signal.description}</p>
+              <ScoreBar score={signal.score} fill={tone.bar} />
+            </li>
           );
         })}
-      </div>
+      </ul>
     </section>
   );
 }
@@ -247,39 +294,13 @@ function TechnicalQaCoachingNotes({
   }
 
   return (
-    <section className="grid gap-4 md:grid-cols-2">
+    <section className="grid gap-12 md:grid-cols-2">
       {strengths && strengths.length > 0 ? (
-        <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-          <div className="flex items-center gap-2 text-sm font-semibold text-brand-green">
-            <CheckCircle2 className="h-4 w-4" />
-            Technical Strengths
-          </div>
-          <ul className="mt-4 space-y-3">
-            {strengths.map((strength) => (
-              <li key={strength} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-green" />
-                <span>{strength}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <NoteList title="Technical Strengths" toneClass="text-brand-green" items={strengths} />
       ) : null}
 
       {areasToImprove && areasToImprove.length > 0 ? (
-        <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-          <div className="flex items-center gap-2 text-sm font-semibold text-brand-amber">
-            <Target className="h-4 w-4" />
-            Next Practice Priorities
-          </div>
-          <ul className="mt-4 space-y-3">
-            {areasToImprove.map((area) => (
-              <li key={area} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-amber" />
-                <span>{area}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <NoteList title="Next Practice Priorities" toneClass="text-brand-amber" items={areasToImprove} />
       ) : null}
     </section>
   );
@@ -287,26 +308,18 @@ function TechnicalQaCoachingNotes({
 
 function NoResultState() {
   return (
-    <main className="min-h-screen bg-brand-deep px-4 py-12 text-brand-text">
-      <div className="mx-auto flex max-w-3xl flex-col items-center justify-center rounded-3xl border border-brand-border bg-brand-card px-8 py-16 text-center">
-        <FileQuestion className="h-12 w-12 text-brand-cyan" />
-        <h1 className="mt-5 text-2xl font-semibold">No Technical Q&A report found</h1>
-        <p className="mt-3 max-w-md text-sm leading-relaxed text-brand-muted">
+    <main className={cn("min-h-screen bg-brand-deep text-brand-text", PAD)}>
+      <div className={cn(CONTAINER, "py-20 sm:py-28")}>
+        <Eyebrow>Technical Q&amp;A report</Eyebrow>
+        <h1 className={PAGE_TITLE}>No Technical Q&A report found</h1>
+        <p className={cn(LEAD, "mt-5 max-w-[560px]")}>
           We couldn&apos;t find a Technical Q&amp;A result for this session. The store may have been cleared or the interview might not have been completed yet.
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link
-            href="/interviews/technical-qa/setup"
-            className="inline-flex items-center rounded-lg bg-brand-cyan px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-brand-cyan/90"
-          >
-            Start a new Technical Q&amp;A round
-          </Link>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center rounded-lg border border-brand-border bg-brand-surface px-4 py-2 text-sm text-brand-text transition-colors hover:border-brand-cyan/30"
-          >
+        <div className="mt-10 flex flex-wrap gap-3">
+          <ButtonLink href="/interviews/technical-qa/setup">Start a new Technical Q&amp;A round</ButtonLink>
+          <ButtonLink href="/dashboard" variant="ghost">
             Back to dashboard
-          </Link>
+          </ButtonLink>
         </div>
       </div>
     </main>
@@ -415,10 +428,25 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-brand-deep text-brand-text">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-brand-cyan" />
-          <p className="text-sm text-brand-muted">Loading Technical Q&amp;A report...</p>
+      <main className={cn("min-h-screen bg-brand-deep text-brand-text", PAD)}>
+        <div className={cn(CONTAINER, "py-10 sm:py-14")}>
+          <p className={LABEL}>Loading Technical Q&amp;A report...</p>
+          <Skeleton className="mt-14 h-12 w-full max-w-[560px]" />
+          <Skeleton className="mt-5 h-5 w-full max-w-[720px]" />
+          <div className="mt-14 grid gap-10 border-t border-white/[0.08] pt-10 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-20">
+            <Skeleton className="h-32 w-48" />
+            <div className="space-y-3 lg:pt-10">
+              <Skeleton className="h-4 w-full max-w-[640px]" />
+              <Skeleton className="h-4 w-4/5 max-w-[520px]" />
+            </div>
+          </div>
+          <div className={cn(GRID, "mt-16 sm:grid-cols-2")}>
+            {[0, 1, 2, 3].map((cell) => (
+              <div key={cell} className={cn(CELL, "h-44 p-6")}>
+                <Skeleton className="h-full w-full" />
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     );
@@ -432,113 +460,97 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
   const round = result.roundContext;
   const languageLabel = getTechnicalQaLanguageLabel(result.language);
   const hasScores = Boolean(result.overallScore !== null && result.scores);
+  const recommendation = result.hireRecommendation as HireRecommendation | null;
 
   return (
-    <main className="min-h-screen bg-brand-deep px-4 py-8 text-brand-text">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text"
-          >
+    <main className={cn("min-h-screen bg-brand-deep text-brand-text", PAD)}>
+      <div className={cn(CONTAINER, "py-10 sm:py-14")}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <ButtonLink href="/dashboard" variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4" />
             Back to dashboard
-          </Link>
-          <Link
-            href="/interviews/technical-qa/setup"
-            className="inline-flex items-center gap-2 rounded-lg border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-text transition-colors hover:border-brand-cyan/30"
-          >
+          </ButtonLink>
+          <ButtonLink href="/interviews/technical-qa/setup" size="sm">
             Start another round
-          </Link>
+          </ButtonLink>
         </div>
 
-        <section className="rounded-3xl border border-brand-border bg-brand-card p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-            Technical Q&amp;A Report
+        <header className="mt-14">
+          <Eyebrow>Technical Q&amp;A Report</Eyebrow>
+          <h1 className={cn(PAGE_TITLE, "max-w-[22ch]")}>
+            {round?.title ?? "Technical Q&A"}
+          </h1>
+          <p className={cn(LEAD, "mt-5 max-w-[720px]")}>
+            {round?.summary ??
+              "A voice-first technical depth interview focused on whether your answers showed real stack fluency, debugging judgment, production tradeoffs, and clear follow-up handling."}
           </p>
-          <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                {round?.title ?? "Technical Q&A"}
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-brand-muted">
-                {round?.summary ??
-                  "A voice-first technical depth interview focused on whether your answers showed real stack fluency, debugging judgment, production tradeoffs, and clear follow-up handling."}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                {interviewer.name}
-              </span>
-              {result.company ? (
-                <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                  {result.company}
-                </span>
-              ) : null}
-              {result.roleTitle ? (
-                <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                  {result.roleTitle}
-                </span>
-              ) : null}
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                {languageLabel}
-              </span>
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                No coding
-              </span>
-              <span className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-                Voice Q&amp;A
-              </span>
-            </div>
+          <div className="mt-8 flex flex-wrap gap-2">
+              <Badge variant="secondary">{interviewer.name}</Badge>
+              {result.company ? <Badge variant="secondary">{result.company}</Badge> : null}
+              {result.roleTitle ? <Badge variant="secondary">{result.roleTitle}</Badge> : null}
+              <Badge variant="secondary">{languageLabel}</Badge>
+              <Badge variant="secondary">No coding</Badge>
+              <Badge variant="secondary">Voice Q&amp;A</Badge>
           </div>
           {round?.focusAreas?.length ? (
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               {round.focusAreas.map((focus) => (
-                <span
-                  key={focus}
-                  className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
-                >
+                <Badge key={focus} variant="secondary">
                   {focus}
-                </span>
+                </Badge>
               ))}
             </div>
           ) : null}
-        </section>
+        </header>
 
-        {hasScores && result.overallScore !== null && result.hireRecommendation && result.summary ? (
-          <ScoreSummary
-            overallScore={result.overallScore}
-            hireRecommendation={result.hireRecommendation as HireRecommendation}
-            summary={result.summary}
-          />
+        {hasScores && result.overallScore !== null && recommendation && result.summary ? (
+          <section className="mt-14 grid gap-10 border-t border-white/[0.08] pt-10 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-20">
+            <div>
+              <p className={LABEL}>Overall score</p>
+              <p className="mt-5 flex items-baseline gap-3">
+                <span className="text-[clamp(96px,13vw,168px)] font-normal leading-[0.8] tracking-[-0.06em] tabular-nums text-brand-text">
+                  {result.overallScore}
+                </span>
+                <span className="font-mono text-sm text-brand-subtle">/100</span>
+              </p>
+              <Badge variant="secondary" className={cn("mt-8", getVerdictClass(recommendation))}>
+                {HIRE_RECOMMENDATION_CONFIG[recommendation]?.label ?? recommendation}
+              </Badge>
+            </div>
+            <div className="lg:pt-10">
+              <p className={LABEL}>Summary</p>
+              <p className={cn(LEAD, "mt-3 max-w-[640px]")}>{result.summary}</p>
+            </div>
+          </section>
         ) : (
-          <section className="rounded-3xl border border-brand-border bg-brand-card p-7">
-            <p className="text-sm text-brand-muted">
+          <section className="mt-14 border-t border-white/[0.08] pt-10">
+            <p className={BODY}>
               Scoring was not available for this Technical Q&amp;A session, but the transcript is still available below.
             </p>
           </section>
         )}
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="space-y-6">
+        <div className="mt-16 grid gap-16 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-20">
+          <div className="min-w-0 space-y-16">
             <TechnicalQaSignalSnapshot scores={result.scores} />
 
             {radarData.length > 0 ? <ScoreRadar scores={radarData} /> : null}
 
             {feedbackCards.length > 0 ? (
               <section>
-                <h2 className="mb-4 text-lg font-semibold">Technical Rubric Breakdown</h2>
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <SectionTitle title="Technical Rubric Breakdown" />
+                <ul className={cn(GRID, "grid-cols-1 md:grid-cols-2")}>
                   {feedbackCards.map((card) => (
-                    <FeedbackCard
-                      key={card.dimension}
-                      dimension={card.dimension}
-                      score={card.score}
-                      weight={card.weight}
-                      feedback={card.feedback}
-                    />
+                    <li key={card.dimension} className={CELL}>
+                      <FeedbackCard
+                        dimension={card.dimension}
+                        score={card.score}
+                        weight={card.weight}
+                        feedback={card.feedback}
+                      />
+                    </li>
                   ))}
-                </div>
+                </ul>
               </section>
             ) : null}
 
@@ -553,63 +565,39 @@ export function TechnicalQaResults({ interviewId }: TechnicalQaResultsProps) {
             />
           </div>
 
-          <aside className="space-y-4">
-            <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                <Sparkles className="h-3.5 w-3.5" />
-                Round Setup
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-brand-muted">
+          <aside className="space-y-10">
+            <AsideBlock label="Round Setup">
+              <p className="text-sm leading-relaxed text-brand-muted">
                 {round?.rationale ??
                   "This round is designed to test whether you can explain the stack you claim as expertise with practical, production-aware judgment."}
               </p>
-            </div>
+            </AsideBlock>
 
-            <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                <ListChecks className="h-3.5 w-3.5" />
-                Q&amp;A Coverage
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Duration</p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.durationLabel}</p>
-                </div>
-                <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Turns</p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.totalTurns}</p>
-                </div>
-                <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Answers</p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.candidateTurns}</p>
-                </div>
-                <div className="rounded-2xl border border-brand-border bg-brand-surface p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-brand-muted">Questions</p>
-                  <p className="mt-1 text-sm font-semibold text-brand-text">{transcriptStats.interviewerQuestions}</p>
-                </div>
-              </div>
-            </div>
+            <AsideBlock label="Q&A Coverage">
+              <CoverageGrid
+                stats={[
+                  { label: "Duration", value: transcriptStats.durationLabel },
+                  { label: "Turns", value: transcriptStats.totalTurns },
+                  { label: "Answers", value: transcriptStats.candidateTurns },
+                  { label: "Questions", value: transcriptStats.interviewerQuestions },
+                ]}
+              />
+            </AsideBlock>
 
-            <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                <Wrench className="h-3.5 w-3.5" />
-                What Was Evaluated
-              </div>
-              <div className="mt-4 space-y-3 text-sm text-brand-muted">
+            <AsideBlock label="What Was Evaluated">
+              <ul className="divide-y divide-white/[0.08] border-y border-white/[0.08]">
                 {TECHNICAL_QA_EVALUATED_SIGNALS.map((signal) => (
-                  <p key={signal}>{signal}</p>
+                  <li key={signal} className="py-3 text-sm leading-relaxed text-brand-muted">
+                    {signal}
+                  </li>
                 ))}
-              </div>
-            </div>
+              </ul>
+            </AsideBlock>
 
             {round?.prompt ? (
-              <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
-                  <MessageSquareText className="h-3.5 w-3.5" />
-                  Interview Brief
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-brand-muted">{round.prompt}</p>
-              </div>
+              <AsideBlock label="Interview Brief">
+                <p className="text-sm leading-relaxed text-brand-muted">{round.prompt}</p>
+              </AsideBlock>
             ) : null}
           </aside>
         </div>

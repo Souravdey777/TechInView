@@ -37,7 +37,7 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2",
-        "bg-brand-card border border-brand-border rounded-xl shadow-2xl shadow-brand-deep/60",
+        "bg-brand-deep border border-white/[0.1] rounded-[20px]",
         "p-6 focus:outline-none",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -52,9 +52,9 @@ const DialogContent = React.forwardRef<
       {children}
       <DialogPrimitive.Close
         className={cn(
-          "absolute right-4 top-4 rounded-md p-1",
-          "text-brand-muted hover:text-brand-text hover:bg-brand-surface",
-          "transition-colors focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:ring-offset-2 focus:ring-offset-brand-card",
+          "absolute right-4 top-4 rounded-full p-1.5",
+          "text-brand-muted hover:text-brand-text hover:bg-white/[0.06]",
+          "transition-colors focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:ring-offset-2 focus:ring-offset-brand-deep",
           "disabled:pointer-events-none"
         )}
       >
@@ -83,7 +83,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3 mt-6 pt-5 border-t border-brand-border",
+      "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3 mt-6 pt-5 border-t border-white/[0.08]",
       className
     )}
     {...props}
@@ -98,7 +98,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-tight tracking-tight text-brand-text",
+      "text-2xl font-normal leading-tight tracking-[-0.03em] text-brand-text",
       className
     )}
     {...props}

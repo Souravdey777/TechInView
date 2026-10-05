@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppNav } from "@/components/shared/AppNav";
-import { GeistFonts } from "@/components/marketing/MarketingShell";
 import { CONTAINER, PAD } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
 
@@ -33,10 +32,7 @@ export default async function AppLayout({
     .single();
 
   return (
-    // Same tokens and type as the marketing site (.theme-landing + Geist), so
-    // the signed-in app reads as one product with the public pages.
-    <div className="theme-landing min-h-screen bg-brand-deep font-sans text-brand-text antialiased selection:bg-brand-cyan selection:text-brand-deep">
-      <GeistFonts />
+    <div className="min-h-screen bg-brand-deep selection:bg-brand-cyan selection:text-brand-deep">
       <AppNav
         userEmail={userEmail}
         displayName={profile?.display_name ?? null}

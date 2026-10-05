@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { stripEmbeddedExamples } from "@/lib/problems/statement";
 
 /**
- * Problem statements are authored as light markdown — inline `code`, **bold**,
+ * Problem statements are authored as light markdown: inline `code`, **bold**,
  * and fenced blocks. Rendering them raw showed candidates literal backticks and
  * asterisks, so this renders the small subset actually used across the catalog.
  *
@@ -28,14 +28,14 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
       out.push(
         <code
           key={`${keyPrefix}-c${i++}`}
-          className="rounded bg-brand-card px-1.5 py-0.5 font-mono text-[0.9em] text-brand-cyan"
+          className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.9em] text-brand-text"
         >
           {token.slice(1, -1)}
         </code>
       );
     } else {
       out.push(
-        <strong key={`${keyPrefix}-b${i++}`} className="font-semibold text-brand-text">
+        <strong key={`${keyPrefix}-b${i++}`} className="font-medium text-brand-text">
           {token.slice(2, -2)}
         </strong>
       );
@@ -93,7 +93,7 @@ export function ProblemProse({ description }: { description: string }) {
           return (
             <pre
               key={blockIndex}
-              className="overflow-x-auto rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5 font-mono text-xs leading-relaxed text-brand-text"
+              className="overflow-x-auto rounded-[12px] border border-white/[0.08] px-3 py-2.5 font-mono text-xs leading-relaxed text-brand-text"
             >
               {code}
             </pre>

@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CELL, Eyebrow, GRID, LABEL, LEAD } from "@/components/marketing/ds";
 import {
   InterviewSetupAsideCard,
-  InterviewSetupHero,
   InterviewSetupLayout,
   InterviewSetupSection,
 } from "@/components/interviews/InterviewSetupLayout";
@@ -59,6 +59,10 @@ const STRONG_ANSWER_INGREDIENTS = [
   "A measured result, and how it was measured",
   "What you would do differently with hindsight",
 ];
+
+/** Option cell inside a hairline grid; selected cells get the cyan ring and tint. */
+const OPTION_CELL =
+  "flex h-full w-full items-start justify-between gap-3 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan disabled:cursor-not-allowed disabled:opacity-40";
 
 function trimOrNull(value: string) {
   const trimmed = value.trim();
@@ -212,13 +216,16 @@ export function BehavioralSetup({
     }
   }
 
+  const contextLabel =
+    [trimOrNull(company), trimOrNull(roleTitle)].filter(Boolean).join(" · ") || null;
+
   return (
     <InterviewSetupLayout
       supportingText="Behavioral · Interview setup"
       aside={
         <>
           <InterviewSetupAsideCard title="Interview preview">
-            <h2 className="mt-3 text-xl font-semibold text-brand-text">
+            <h2 className="mt-3 text-xl font-medium tracking-[-0.02em] text-brand-text">
               {roundContext.title}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-brand-muted">
@@ -228,7 +235,7 @@ export function BehavioralSetup({
               {roundContext.focusAreas.map((focus) => (
                 <span
                   key={focus}
-                  className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
+                  className="rounded-full border border-white/[0.1] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted"
                 >
                   {focus}
                 </span>
@@ -237,17 +244,24 @@ export function BehavioralSetup({
           </InterviewSetupAsideCard>
 
           <InterviewSetupAsideCard title="Session shape">
-            <div className="mt-4 space-y-3 text-sm text-brand-muted">
-              <p>1. Short calibration on your current scope</p>
-              <p>2. Four to six &ldquo;tell me about a time&rdquo; questions</p>
-              <p>3. Follow-ups on your role, the metric, and the hindsight</p>
-              <p>4. Wrap-up with one strength and one realistic gap</p>
-            </div>
-            <div className="mt-5 rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">
-                Selected setup
-              </p>
-              <p className="mt-2 text-sm font-semibold text-brand-text">
+            <ol className="mt-4 space-y-3 text-sm text-brand-muted">
+              {[
+                "Short calibration on your current scope",
+                "Four to six \u201ctell me about a time\u201d questions",
+                "Follow-ups on your role, the metric, and the hindsight",
+                "Wrap-up with one strength and one realistic gap",
+              ].map((step, index) => (
+                <li key={step} className="flex gap-3">
+                  <span className="font-mono text-[11px] leading-5 text-brand-subtle">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="leading-5">{step}</span>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-5 border-t border-white/[0.08] pt-4">
+              <p className={LABEL}>Selected setup</p>
+              <p className="mt-2 text-sm font-medium text-brand-text">
                 {[trimOrNull(roleTitle), trimOrNull(company)].filter(Boolean).join(" · ") ||
                   "General behavioural round"}
               </p>
@@ -268,14 +282,13 @@ export function BehavioralSetup({
             title="What strong answers contain"
             icon={<NotebookPen className="h-3.5 w-3.5" />}
           >
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-4 divide-y divide-white/[0.08]">
               {STRONG_ANSWER_INGREDIENTS.map((ingredient) => (
                 <li
                   key={ingredient}
-                  className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted"
+                  className="py-2.5 text-sm leading-relaxed text-brand-muted first:pt-0 last:pb-0"
                 >
-                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-cyan" />
-                  <span>{ingredient}</span>
+                  {ingredient}
                 </li>
               ))}
             </ul>
@@ -283,42 +296,46 @@ export function BehavioralSetup({
         </>
       }
     >
-      <InterviewSetupHero
-        title="Behavioral Setup"
-        description="Build a voice-first behavioural round around the value system you will actually be graded against. The interviewer asks one competency at a time, expects STAR-shaped stories from your real work, and keeps following up until your own contribution, the hard part, the result, and your hindsight are clear."
-        metadata={[`${BEHAVIORAL_DURATION_MINUTES} min`, "Voice chat", "No coding"]}
-        contextLabel={
-          [trimOrNull(company), trimOrNull(roleTitle)].filter(Boolean).join(" · ") || null
-        }
-      />
+      <header>
+        <Eyebrow className="mb-4">
+          {["Live", `${BEHAVIORAL_DURATION_MINUTES} min`, "Voice chat", "No coding", contextLabel]
+            .filter(Boolean)
+            .join(" · ")}
+        </Eyebrow>
+        <h1 className="text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
+          Behavioral Setup
+        </h1>
+        <p className={cn(LEAD, "mt-4 max-w-3xl")}>
+          Build a voice-first behavioural round around the value system you will actually be
+          graded against. The interviewer asks one competency at a time, expects STAR-shaped
+          stories from your real work, and keeps following up until your own contribution, the
+          hard part, the result, and your hindsight are clear.
+        </p>
+      </header>
 
-      <div className="mt-8 grid gap-6">
+      <div className="mt-10 grid gap-6">
         <InterviewSetupSection title="Role context" icon={<Building2 className="h-3.5 w-3.5" />}>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
-                Company
-              </label>
+              <label className={LABEL}>Company</label>
               <Input
                 value={company}
                 onChange={(event) => setCompany(event.target.value)}
                 placeholder="Amazon, Google, Stripe..."
-                className="mt-2 h-11 rounded-2xl bg-brand-card px-4"
+                className="mt-2"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">
-                Role Title
-              </label>
+              <label className={LABEL}>Role Title</label>
               <Input
                 value={roleTitle}
                 onChange={(event) => setRoleTitle(event.target.value)}
                 placeholder="Senior Backend Engineer"
-                className="mt-2 h-11 rounded-2xl bg-brand-card px-4"
+                className="mt-2"
               />
             </div>
           </div>
-          <p className="mt-3 text-sm text-brand-muted">
+          <p className="mt-3 text-sm leading-relaxed text-brand-muted">
             Both are optional. They let the interviewer pitch questions at the right level and
             pull company-specific behavioural prompts when we have reviewed ones.
           </p>
@@ -337,45 +354,46 @@ export function BehavioralSetup({
           icon={<Sparkles className="h-3.5 w-3.5" />}
           description={`Which part of your history do you want to rehearse? The interviewer pulls stories from these when they fit the competency being probed. Up to ${MAX_BEHAVIORAL_SCENARIOS}.`}
         >
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className={cn(GRID, "mt-4 sm:grid-cols-2")}>
             {BEHAVIORAL_SCENARIO_OPTIONS.map((option) => {
               const selected = scenarioFocus.includes(option.value);
               const disabled = !selected && scenarioFocus.length >= MAX_BEHAVIORAL_SCENARIOS;
 
               return (
-                <Button
-                  key={option.value}
-                  type="button"
-                  role="checkbox"
-                  aria-checked={selected}
-                  disabled={disabled}
-                  onClick={() => toggleScenario(option.value)}
-                  variant="outline"
-                  className={cn(
-                    "h-auto w-full items-start justify-between gap-3 whitespace-normal rounded-2xl px-4 py-4 text-left",
-                    selected
-                      ? "border-brand-cyan bg-brand-cyan/10 text-brand-text hover:bg-brand-cyan/10"
-                      : "border-brand-border bg-brand-card text-brand-muted hover:border-brand-cyan/30 hover:text-brand-text",
-                    disabled && "cursor-not-allowed opacity-40"
-                  )}
-                >
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold">{option.label}</span>
-                    <span className="mt-2 block text-xs leading-relaxed">
-                      {option.description}
-                    </span>
-                  </span>
-                  <span
+                <div key={option.value} className={CELL}>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={selected}
+                    disabled={disabled}
+                    onClick={() => toggleScenario(option.value)}
                     className={cn(
-                      "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                      OPTION_CELL,
                       selected
-                        ? "border-brand-cyan bg-brand-cyan text-brand-deep"
-                        : "border-brand-border bg-brand-surface"
+                        ? "bg-brand-cyan/[0.06] text-brand-text ring-1 ring-inset ring-brand-cyan/40"
+                        : "text-brand-muted hover:bg-white/[0.03] hover:text-brand-text"
                     )}
                   >
-                    {selected ? <Check className="h-3 w-3" /> : null}
-                  </span>
-                </Button>
+                    <span className="min-w-0">
+                      <span className="block text-[15px] font-medium tracking-[-0.01em]">
+                        {option.label}
+                      </span>
+                      <span className="mt-1.5 block text-[13px] leading-relaxed text-brand-muted">
+                        {option.description}
+                      </span>
+                    </span>
+                    <span
+                      className={cn(
+                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border",
+                        selected
+                          ? "border-brand-cyan bg-brand-cyan text-brand-deep"
+                          : "border-white/[0.18]"
+                      )}
+                    >
+                      {selected ? <Check className="h-3 w-3" /> : null}
+                    </span>
+                  </button>
+                </div>
               );
             })}
           </div>
@@ -384,8 +402,8 @@ export function BehavioralSetup({
         <MicrophoneSetupCheck />
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-3 border-t border-brand-border pt-6">
-        <Button onClick={() => void handleStartInterview()} disabled={isDisabled}>
+      <div className="mt-10 flex flex-wrap gap-3 border-t border-white/[0.08] pt-6">
+        <Button size="lg" onClick={() => void handleStartInterview()} disabled={isDisabled}>
           {isCreating ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -398,7 +416,7 @@ export function BehavioralSetup({
             </>
           )}
         </Button>
-        <Button asChild variant="secondary">
+        <Button asChild size="lg" variant="secondary">
           <Link href="/prep-guru">Ask Prep Guru</Link>
         </Button>
       </div>

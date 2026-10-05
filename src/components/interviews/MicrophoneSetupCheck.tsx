@@ -5,6 +5,8 @@ import Link from "next/link";
 import { CheckCircle, Loader2, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InterviewSetupSection } from "@/components/interviews/InterviewSetupLayout";
+import { FIELD, FOCUS } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
 
 type MicStatus = "idle" | "checking" | "granted" | "denied";
@@ -35,7 +37,7 @@ export function MicrophoneSetupCheck() {
       icon={<Mic className="h-3.5 w-3.5" />}
       description="Choose the microphone used for the live interview. Typed responses remain available if voice fails."
     >
-      <div className="mt-4 space-y-3">
+      <div className="mt-5 space-y-4">
         <Button type="button" variant="outline" onClick={() => void checkMicrophone()} disabled={status === "checking"}>
           {status === "checking" ? (
             <><Loader2 className="h-4 w-4 animate-spin" />Checking microphone...</>
@@ -49,12 +51,12 @@ export function MicrophoneSetupCheck() {
         </Button>
 
         {status === "granted" && devices.length > 0 ? (
-          <label className="block text-xs text-brand-muted">
-            <span className="mb-1 block">Microphone</span>
+          <label className="block">
+            <span className="mb-2 block font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">Microphone</span>
             <select
               value={selectedDeviceId}
               onChange={(event) => setSelectedDeviceId(event.target.value)}
-              className="w-full rounded-xl border border-brand-border bg-brand-card px-3 py-2.5 text-sm text-brand-text focus:border-brand-cyan/60 focus:outline-none"
+              className={cn(FIELD, "bg-brand-deep")}
             >
               <option value="">System default</option>
               {devices.map((device) => (
@@ -65,13 +67,13 @@ export function MicrophoneSetupCheck() {
         ) : null}
 
         {status === "denied" ? (
-          <p className="text-xs text-brand-rose">
+          <p className="text-sm text-brand-rose">
             Microphone access is blocked. You can grant access in browser settings or continue with typed responses.
           </p>
         ) : null}
-        {deviceWarning ? <p className="text-xs text-brand-amber">{deviceWarning}</p> : null}
+        {deviceWarning ? <p className="text-sm text-brand-amber">{deviceWarning}</p> : null}
         <p className="text-xs leading-relaxed text-brand-muted">
-          Audio is processed live by our voice provider. TechInView does not store raw microphone audio; transcripts and interview results are stored. See our <Link href="/privacy" className="text-brand-cyan hover:underline">Privacy Policy</Link>.
+          Audio is processed live by our voice provider. TechInView does not store raw microphone audio; transcripts and interview results are stored. See our <Link href="/privacy" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>Privacy Policy</Link>.
         </p>
       </div>
     </InterviewSetupSection>

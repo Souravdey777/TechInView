@@ -3,8 +3,10 @@
 import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GRID, CELL } from "@/components/marketing/ds";
 import {
-  SETUP_FOCUS_RING,
+  SETUP_CELL_FOCUS,
+  SETUP_CELL_SELECTED,
   SetupMonoLabel,
 } from "@/components/interviews/setup/SetupRack";
 
@@ -42,18 +44,17 @@ function ChoiceCell({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex min-h-[44px] items-start justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-150",
+        CELL,
+        "flex min-h-[44px] items-start justify-between gap-3 px-4 py-4 text-left transition-colors duration-150",
         disabled && "cursor-not-allowed opacity-50",
-        isChecked
-          ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-          : "border-brand-border bg-brand-surface hover:border-brand-subtle",
-        SETUP_FOCUS_RING
+        isChecked ? SETUP_CELL_SELECTED : !disabled && "hover:bg-white/[0.03]",
+        SETUP_CELL_FOCUS
       )}
     >
       <span className="min-w-0">
         <span
           className={cn(
-            "block font-heading text-sm font-semibold tracking-tight",
+            "block text-[15px] font-medium tracking-[-0.01em]",
             isChecked ? "text-brand-text" : "text-brand-muted"
           )}
         >
@@ -79,7 +80,7 @@ type ChoiceGridShellProps = {
 
 function ChoiceGridShell({ label, note, children, className }: ChoiceGridShellProps) {
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div className={cn("flex flex-col gap-3", className)}>
       {label || note ? (
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           {label ? <SetupMonoLabel>{label}</SetupMonoLabel> : null}
@@ -104,7 +105,7 @@ type SetupRadioGridProps<T extends string> = {
   ariaLabel: string;
 };
 
-/** Single-select grid of setup cells — one choice, check mark on the active cell. */
+/** Single-select hairline grid — one choice, check mark on the active cell. */
 export function SetupRadioGrid<T extends string>({
   label,
   note,
@@ -120,7 +121,7 @@ export function SetupRadioGrid<T extends string>({
       <div
         role="radiogroup"
         aria-label={ariaLabel}
-        className={cn("grid grid-cols-1 gap-3", columnsClassName)}
+        className={cn(GRID, "grid-cols-1", columnsClassName)}
       >
         {options.map((option) => {
           const isChecked = option.value === value;
@@ -158,7 +159,7 @@ type SetupCheckboxGridProps<T extends string> = {
   ariaLabel: string;
 };
 
-/** Multi-select grid of setup cells — every cell carries its own check box. */
+/** Multi-select hairline grid — every cell carries its own check box. */
 export function SetupCheckboxGrid<T extends string>({
   label,
   note,
@@ -174,7 +175,7 @@ export function SetupCheckboxGrid<T extends string>({
       <div
         role="group"
         aria-label={ariaLabel}
-        className={cn("grid grid-cols-1 gap-3", columnsClassName)}
+        className={cn(GRID, "grid-cols-1", columnsClassName)}
       >
         {options.map((option) => {
           const isChecked = values.includes(option.value);
@@ -194,7 +195,7 @@ export function SetupCheckboxGrid<T extends string>({
                     "flex h-4 w-4 items-center justify-center rounded-[5px] border",
                     isChecked
                       ? "border-brand-cyan bg-brand-cyan text-brand-deep"
-                      : "border-brand-border bg-brand-card"
+                      : "border-white/[0.18]"
                   )}
                 >
                   {isChecked ? <Check className="h-3 w-3" /> : null}

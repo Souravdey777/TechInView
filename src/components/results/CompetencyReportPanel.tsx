@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  AlertTriangle,
-  ArrowUpRight,
-  CheckCircle2,
-  ClipboardList,
-  Dumbbell,
-  MinusCircle,
-  Quote,
-  Scale,
-} from "lucide-react";
+import { BODY, CELL, CHIP, GRID, LABEL } from "@/components/marketing/ds";
+import { cn } from "@/lib/utils";
 import type {
   CompetencyRating,
   CompetencyReport,
@@ -19,47 +11,32 @@ import type {
 
 const RATING_TONES: Record<
   CompetencyRating,
-  { label: string; text: string; bg: string; border: string; bar: string; blurb: string }
+  { label: string; text: string; bar: string; blurb: string }
 > = {
   strong: {
     label: "Strong",
     text: "text-brand-green",
-    bg: "bg-brand-green/10",
-    border: "border-brand-green/25",
     bar: "bg-brand-green",
     blurb: "Specific example, your own action, concrete outcome.",
   },
   solid: {
     label: "Solid",
     text: "text-brand-cyan",
-    bg: "bg-brand-cyan/10",
-    border: "border-brand-cyan/25",
     bar: "bg-brand-cyan",
     blurb: "Real example, but one dimension was missing.",
   },
   mixed: {
     label: "Mixed",
     text: "text-brand-amber",
-    bg: "bg-brand-amber/10",
-    border: "border-brand-amber/25",
     bar: "bg-brand-amber",
     blurb: "Part evidence, part assertion, or needed heavy prompting.",
   },
   insufficient: {
     label: "Not Evidenced",
     text: "text-brand-rose",
-    bg: "bg-brand-rose/10",
-    border: "border-brand-rose/25",
     bar: "bg-brand-rose",
     blurb: "No specific example surfaced in this round.",
   },
-};
-
-const RATING_ICONS: Record<CompetencyRating, typeof CheckCircle2> = {
-  strong: CheckCircle2,
-  solid: CheckCircle2,
-  mixed: AlertTriangle,
-  insufficient: MinusCircle,
 };
 
 const STAR_PARTS: { key: keyof StarCoverage; label: string; hint: string }[] = [
@@ -79,95 +56,62 @@ function starTone(value: number) {
 
 function CompetencyCard({ signal }: { signal: CompetencySignal }) {
   const tone = RATING_TONES[signal.rating] ?? RATING_TONES.mixed;
-  const Icon = RATING_ICONS[signal.rating] ?? AlertTriangle;
   const score = Math.min(100, Math.max(0, signal.score));
 
   return (
-    <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <span
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${tone.border} ${tone.bg}`}
-          >
-            <Icon className={`h-5 w-5 ${tone.text}`} />
-          </span>
-          <div className="min-w-0">
-            <h3 className="truncate text-sm font-semibold text-brand-text">
-              {signal.label}
-            </h3>
-            <p
-              className={`mt-1 text-xs font-semibold uppercase tracking-[0.14em] ${tone.text}`}
-            >
-              {tone.label}
-            </p>
-          </div>
-        </div>
-        <span className={`shrink-0 text-2xl font-bold tabular-nums ${tone.text}`}>
-          {score}
-          <span className="text-xs font-normal text-brand-muted">/100</span>
+    <li className={cn(CELL, "flex flex-col p-6")}>
+      <div className={cn(LABEL, "flex justify-between gap-4")}>
+        <span className={tone.text}>{tone.label}</span>
+        <span className="tabular-nums">
+          <span className={tone.text}>{score}</span>/100
         </span>
       </div>
-
-      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-brand-surface">
-        <div className={`h-full rounded-full ${tone.bar}`} style={{ width: `${score}%` }} />
+      <h3 className="mt-5 text-[17px] tracking-[-0.01em] text-brand-text">{signal.label}</h3>
+      <div className="mt-3 h-0.5 bg-white/[0.08]">
+        <div className={cn("h-full", tone.bar)} style={{ width: `${Math.max(2, score)}%` }} />
       </div>
 
-      <div className="mt-5 space-y-4 text-sm leading-relaxed">
-        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3">
-          <Quote className="mt-0.5 h-4 w-4 shrink-0 text-brand-muted" />
-          <p className="text-brand-muted">
-            <span className="font-semibold text-brand-text">What the interviewer heard: </span>
-            {signal.evidence}
-          </p>
+      <dl className="mt-5 divide-y divide-white/[0.08] border-t border-white/[0.08]">
+        <div className="py-4">
+          <dt className={LABEL}>What the interviewer heard</dt>
+          <dd className={cn(BODY, "mt-2")}>{signal.evidence}</dd>
         </div>
-        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-brand-amber" />
-          <p className="text-brand-muted">
-            <span className="font-semibold text-brand-text">Still missing: </span>
-            {signal.gap}
-          </p>
+        <div className="py-4">
+          <dt className={LABEL}>Still missing</dt>
+          <dd className={cn(BODY, "mt-2")}>{signal.gap}</dd>
         </div>
-        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3">
-          <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
-          <p className="text-brand-muted">
-            <span className="font-semibold text-brand-text">Do this next time: </span>
-            {signal.upgrade}
-          </p>
+        <div className="pt-4">
+          <dt className={LABEL}>Do this next time</dt>
+          <dd className="mt-2 text-[15px] leading-relaxed text-brand-text">{signal.upgrade}</dd>
         </div>
-      </div>
-    </div>
+      </dl>
+    </li>
   );
 }
 
 function StarCoveragePanel({ coverage }: { coverage: StarCoverage }) {
   return (
-    <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-      <div className="flex items-center gap-2 text-sm font-semibold text-brand-text">
-        <ClipboardList className="h-4 w-4 text-brand-cyan" />
-        Story Structure Coverage
-      </div>
-      <p className="mt-2 text-sm leading-relaxed text-brand-muted">
+    <div className={cn(CELL, "p-6")}>
+      <h3 className="text-xl font-medium tracking-[-0.02em] text-brand-text">Story structure coverage</h3>
+      <p className={cn(BODY, "mt-2")}>
         How completely your answers supplied each part of the structure interviewers grade.
         A low bar means that part was thin or absent, not that the story was bad.
       </p>
-      <div className="mt-5 space-y-4">
+      <div className="mt-5 divide-y divide-white/[0.08] border-t border-white/[0.08]">
         {STAR_PARTS.map((part) => {
           const value = Math.min(100, Math.max(0, coverage[part.key]));
           const tone = starTone(value);
 
           return (
-            <div key={part.key}>
+            <div key={part.key} className="py-4">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="text-sm font-semibold text-brand-text">{part.label}</p>
-                <span className={`text-sm font-bold tabular-nums ${tone.text}`}>{value}</span>
+                <p className="text-[15px] text-brand-text">{part.label}</p>
+                <span className={cn("font-mono text-xs tabular-nums", tone.text)}>{value}</span>
               </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-brand-surface">
-                <div
-                  className={`h-full rounded-full ${tone.bar}`}
-                  style={{ width: `${value}%` }}
-                />
+              <div className="mt-2 h-0.5 bg-white/[0.08]">
+                <div className={cn("h-full", tone.bar)} style={{ width: `${Math.max(2, value)}%` }} />
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-brand-muted">{part.hint}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-brand-muted">{part.hint}</p>
             </div>
           );
         })}
@@ -195,70 +139,68 @@ export function CompetencyReportPanel({
 }: CompetencyReportPanelProps) {
   if (!report || report.competencies.length === 0) return null;
 
+  const hasStar = Boolean(report.star_coverage);
+  const hasDrills = Boolean(report.follow_up_drills && report.follow_up_drills.length > 0);
+
   return (
-    <section className="space-y-4">
+    <section className="space-y-8">
       <div>
         <div className="flex flex-wrap items-center gap-3">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted">
-            <Scale className="h-3 w-3" />
-            {report.framework_label}
-          </span>
+          <h2 className="text-2xl font-normal tracking-[-0.03em] text-brand-text">{title}</h2>
+          <span className={CHIP}>{report.framework_label}</span>
         </div>
-        <p className="mt-1 text-sm text-brand-muted">
+        <p className={cn(BODY, "mt-2 max-w-prose")}>
           {description ??
             `Each competency you selected, graded on the evidence you actually gave. Ratings are based on specific examples, not delivery.`}
         </p>
       </div>
 
       {report.debrief_note ? (
-        <div className="rounded-3xl border border-brand-cyan/25 bg-brand-cyan/5 p-5">
-          <div className="flex items-center gap-2 text-sm font-semibold text-brand-cyan">
-            <ClipboardList className="h-4 w-4" />
-            Interviewer debrief note
-          </div>
-          <p className="mt-3 text-sm leading-relaxed text-brand-text">
+        <figure className="border-l border-white/[0.18] pl-5">
+          <figcaption className={LABEL}>Interviewer debrief note</figcaption>
+          <blockquote className="mt-3 text-[17px] leading-relaxed text-brand-text">
             {report.debrief_note}
-          </p>
-        </div>
+          </blockquote>
+        </figure>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <ul className={cn(GRID, "md:grid-cols-2")}>
         {report.competencies.map((signal) => (
           <CompetencyCard key={signal.competency_id} signal={signal} />
         ))}
-      </div>
+      </ul>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {report.star_coverage ? (
-          <StarCoveragePanel coverage={report.star_coverage} />
-        ) : null}
+      {hasStar || hasDrills ? (
+        <div className={cn(GRID, hasStar && hasDrills && "md:grid-cols-2")}>
+          {report.star_coverage ? (
+            <StarCoveragePanel coverage={report.star_coverage} />
+          ) : null}
 
-        {report.follow_up_drills && report.follow_up_drills.length > 0 ? (
-          <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-brand-text">
-              <Dumbbell className="h-4 w-4 text-brand-amber" />
-              Rehearse before your next attempt
+          {report.follow_up_drills && report.follow_up_drills.length > 0 ? (
+            <div className={cn(CELL, "p-6")}>
+              <h3 className="text-xl font-medium tracking-[-0.02em] text-brand-text">
+                Rehearse before your next attempt
+              </h3>
+              <p className={cn(BODY, "mt-2")}>
+                Specific fixes for the gaps above, in priority order.
+              </p>
+              <ol className="mt-5 divide-y divide-white/[0.08] border-t border-white/[0.08]">
+                {report.follow_up_drills.map((drill, index) => (
+                  <li
+                    key={drill}
+                    className="grid grid-cols-[28px_minmax(0,1fr)] gap-3 py-4 text-[15px] leading-relaxed text-brand-muted"
+                  >
+                    <span className="pt-0.5 font-mono text-xs tabular-nums text-brand-subtle">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span>{drill}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
-            <p className="mt-2 text-sm leading-relaxed text-brand-muted">
-              Specific fixes for the gaps above, in priority order.
-            </p>
-            <ol className="mt-4 space-y-3">
-              {report.follow_up_drills.map((drill, index) => (
-                <li
-                  key={drill}
-                  className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-brand-muted"
-                >
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-brand-border bg-brand-surface text-xs font-semibold text-brand-text">
-                    {index + 1}
-                  </span>
-                  <span>{drill}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }

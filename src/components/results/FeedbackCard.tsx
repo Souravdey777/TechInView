@@ -1,7 +1,5 @@
-import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { MessageSquare } from "lucide-react";
+import { cn, getScoreBgColor, getScoreColor } from "@/lib/utils";
+import { BODY, LABEL } from "@/components/marketing/ds";
 
 type FeedbackCardProps = {
   dimension: string;
@@ -17,70 +15,35 @@ function getScoreLabel(score: number): string {
   return "Needs Work";
 }
 
-function getScoreTextColor(score: number): string {
-  if (score >= 70) return "text-brand-green";
-  if (score >= 50) return "text-brand-amber";
-  return "text-brand-rose";
-}
-
-function getProgressIndicatorClass(score: number): string {
-  if (score >= 70) return "bg-brand-green";
-  if (score >= 50) return "bg-brand-amber";
-  return "bg-brand-rose";
-}
-
+/**
+ * One dimension of the breakdown: mono weight / score row, title, a thin score
+ * bar and the interviewer's note. Draws no border of its own; the parent lays
+ * these out as a hairline GRID with CELL on each wrapper.
+ */
 export function FeedbackCard({ dimension, score, weight, feedback }: FeedbackCardProps) {
-  const scoreColor = getScoreTextColor(score);
-  const label = getScoreLabel(score);
   const weightPercent = Math.round(weight * 100);
 
   return (
-    <Card className="w-full flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-sm font-semibold leading-tight">{dimension}</CardTitle>
-          <span className="flex-shrink-0 text-xs text-brand-muted bg-brand-surface border border-brand-border px-2 py-0.5 rounded-full">
-            {weightPercent}% weight
-          </span>
-        </div>
-      </CardHeader>
+    <div className="flex h-full w-full flex-col p-6">
+      <div className={cn(LABEL, "flex justify-between gap-4")}>
+        <span>{weightPercent}% weight</span>
+        <span className="tabular-nums">
+          <span className={getScoreColor(score)}>{score}</span>/100
+        </span>
+      </div>
 
-      <CardContent className="pt-0 flex flex-col gap-4 flex-1">
-        {/* Score row */}
-        <div className="flex items-center justify-between">
-          <span className={cn("text-2xl font-bold tabular-nums", scoreColor)}>
-            {score}
-            <span className="text-sm font-normal text-brand-muted">/100</span>
-          </span>
-          <span
-            className={cn(
-              "text-xs font-medium px-2 py-0.5 rounded-full",
-              score >= 70
-                ? "bg-brand-green/15 text-brand-green"
-                : score >= 50
-                ? "bg-brand-amber/15 text-brand-amber"
-                : "bg-brand-rose/15 text-brand-rose"
-            )}
-          >
-            {label}
-          </span>
-        </div>
+      <h3 className="mt-5 text-[17px] tracking-[-0.01em] text-brand-text">{dimension}</h3>
 
-        {/* Progress bar */}
-        <Progress
-          value={score}
-          indicatorClassName={getProgressIndicatorClass(score)}
-        />
-
-        {/* Grid keeps wrapped lines aligned in the text column (not under the icon). */}
-        <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 pt-3">
-          <MessageSquare
-            className="h-4 w-4 shrink-0 text-brand-muted translate-y-[3px]"
-            aria-hidden
-          />
-          <p className="text-sm text-brand-muted leading-relaxed min-w-0">{feedback}</p>
+      <div className="mt-3 flex items-center gap-3">
+        <div className="h-0.5 flex-1 bg-white/[0.08]">
+          <div className={cn("h-full", getScoreBgColor(score))} style={{ width: `${Math.max(2, score)}%` }} />
         </div>
-      </CardContent>
-    </Card>
+        <span className={cn("font-mono text-[11px] uppercase tracking-[0.08em]", getScoreColor(score))}>
+          {getScoreLabel(score)}
+        </span>
+      </div>
+
+      <p className={cn(BODY, "mt-4")}>{feedback}</p>
+    </div>
   );
 }

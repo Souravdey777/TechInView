@@ -152,8 +152,7 @@ function AccountMenu({
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      {/* Portaled to <body>, outside the layout theme, so it re-applies it. */}
-      <DropdownMenuContent align="end" className="theme-landing w-64 font-sans">
+      <DropdownMenuContent align="end" className="w-64">
         <div className="flex items-center gap-2.5 px-2.5 pb-2 pt-1.5">
           <Avatar className="h-9 w-9 border border-white/[0.12] bg-transparent text-brand-muted">
             <AvatarImage src={avatarUrl ?? undefined} alt="" />

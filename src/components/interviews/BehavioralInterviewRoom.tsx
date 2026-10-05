@@ -21,6 +21,8 @@ import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
 import { useInterviewTextFallback } from "@/hooks/useInterviewTextFallback";
 import { useInterviewStore } from "@/stores/interview-store";
+import { cn } from "@/lib/utils";
+import { BODY, CELL, CHIP, FOCUS, GRID, LABEL, LEAD } from "@/components/marketing/ds";
 import {
   type InterviewPhase,
   clampPhaseToTimeFloor,
@@ -604,11 +606,12 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
   if (isScoring) {
     return (
       <div className="flex h-screen items-center justify-center bg-brand-deep px-6 text-center text-brand-text">
-        <div className="max-w-md space-y-5">
+        <div className="max-w-md space-y-6">
           <VoiceVisualizer state="thinking" className="mx-auto h-28 w-28" />
           <div>
-            <h1 className="text-2xl font-semibold">Scoring your behavioral round</h1>
-            <p className="mt-2 text-sm leading-relaxed text-brand-muted">
+            <p className={LABEL}>Scoring</p>
+            <h1 className="mt-3 text-balance text-[clamp(28px,3.4vw,40px)] font-normal leading-[1.05] tracking-[-0.03em]">Scoring your behavioral round</h1>
+            <p className={cn(BODY, "mt-3")}>
               We&apos;re reviewing each story for the evidence a real interviewer grades:
               your own contribution, the hard part, the result, and your reflection.
             </p>
@@ -622,20 +625,20 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
     const minutesRemaining = Math.ceil(timeLeft / 60);
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-brand-deep px-6 text-brand-text">
+      <div className="flex min-h-screen items-center justify-center bg-brand-deep px-5 py-12 text-brand-text">
         <InterviewStartingOverlay
           visible={isConnectingVoice}
           interviewerName={interviewer.name}
           isResuming={isResuming}
         />
-        <div className="w-full max-w-3xl rounded-3xl border border-brand-border bg-brand-card p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-cyan">
+        <div className="w-full max-w-3xl">
+          <p className={LABEL}>
             Behavioral
           </p>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight">
+          <h1 className="mt-4 text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em]">
             {isResuming ? "Resume your voice interview" : round.title}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted">
+          <p className={cn(LEAD, "mt-5 max-w-2xl")}>
             {isResuming
               ? `Your session is still active. You have about ${minutesRemaining} minute${
                   minutesRemaining === 1 ? "" : "s"
@@ -644,39 +647,37 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
           </p>
 
           {!isResuming ? (
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-7 flex flex-wrap gap-2">
               {round.focusAreas.map((focus) => (
-                <span
-                  key={focus}
-                  className="rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted"
-                >
+                <span key={focus} className={CHIP}>
                   {focus}
                 </span>
               ))}
             </div>
           ) : null}
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">Format</p>
-              <p className="mt-2 text-sm font-semibold text-brand-text">
+          <div className={cn(GRID, "mt-10 sm:grid-cols-3")}>
+            <div className={cn(CELL, "p-5")}>
+              <p className={LABEL}>Format</p>
+              <p className="mt-2 text-[15px] text-brand-text">
                 Voice conversation, no coding
               </p>
             </div>
-            <div className="rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">Duration</p>
-              <p className="mt-2 text-sm font-semibold text-brand-text">
+            <div className={cn(CELL, "p-5")}>
+              <p className={LABEL}>Duration</p>
+              <p className="mt-2 text-[15px] text-brand-text">
                 {BEHAVIORAL_DURATION_MINUTES} minutes
               </p>
             </div>
-            <div className="rounded-2xl border border-brand-border bg-brand-surface p-4">
-              <p className="text-xs uppercase tracking-[0.16em] text-brand-muted">Interviewer</p>
-              <p className="mt-2 text-sm font-semibold text-brand-text">{interviewer.name}</p>
+            <div className={cn(CELL, "p-5")}>
+              <p className={LABEL}>Interviewer</p>
+              <p className="mt-2 text-[15px] text-brand-text">{interviewer.name}</p>
             </div>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-10 flex flex-wrap gap-3">
             <Button
+              size="lg"
               onClick={() => void (isResuming ? resumeInterview() : startInterview())}
               disabled={isConnectingVoice}
             >
@@ -691,20 +692,20 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
                 "Start Behavioral Round"
               )}
             </Button>
-            <Button asChild variant="secondary">
+            <Button asChild variant="secondary" size="lg">
               <Link href="/interviews/behavioral/setup">Back to setup</Link>
             </Button>
           </div>
 
           {voiceError ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <p className="text-sm text-brand-rose">{voiceError}</p>
               <Button variant="secondary" onClick={() => void continueInTextMode()}>
                 Continue with text
               </Button>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-brand-muted">
+            <p className="mt-5 text-sm leading-relaxed text-brand-muted">
               Make sure your mic and speakers are on. Typed fallback stays available inside the
               room if you need it.
             </p>
@@ -716,20 +717,23 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
 
   return (
     <div className="flex h-screen flex-col bg-brand-deep text-brand-text">
-      <header className="border-b border-brand-border bg-brand-card px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <header className="shrink-0 border-b border-white/[0.08] bg-brand-deep px-4">
+        <div className="flex h-14 items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text"
+              className={cn(
+                "inline-flex items-center gap-2 text-sm text-brand-muted transition-colors hover:text-brand-text",
+                FOCUS
+              )}
             >
               <ArrowLeft className="h-4 w-4" />
               Dashboard
             </Link>
-            <div className="hidden h-5 w-px bg-brand-border sm:block" />
-            <div>
-              <p className="text-sm font-semibold tracking-tight">Behavioral</p>
-              <p className="text-xs text-brand-muted">
+            <div className="hidden h-5 w-px bg-white/[0.08] sm:block" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium tracking-[-0.01em]">Behavioral</p>
+              <p className={cn(LABEL, "truncate text-[10px]")}>
                 Session #{interviewId.slice(-6).toUpperCase()}
               </p>
             </div>
@@ -737,8 +741,8 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
 
           <Timer timeLeft={timeLeft} isRunning={isTimerRunning} />
 
-          <div className="flex items-center gap-3">
-            <span className="hidden rounded-full border border-brand-border bg-brand-surface px-3 py-1 text-xs text-brand-muted md:inline-flex">
+          <div className="flex items-center gap-4">
+            <span className={cn(LABEL, "hidden md:inline")}>
               {getPhaseLabelForRound("behavioral", currentPhase)}
             </span>
             <Button variant="destructive" size="sm" onClick={() => void handleEndInterview()}>
@@ -749,9 +753,10 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
       </header>
 
       {/* Brief | STAR notes workspace | voice + transcript, mirroring the
-          non-coding layout the shared interview room uses. */}
-      <div className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[17rem_minmax(0,1fr)_20rem] xl:grid-cols-[19rem_minmax(0,1fr)_22rem]">
-        <aside className="min-h-0 overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
+          non-coding layout the shared interview room uses. Panes sit flush on
+          brand-deep, split by hairlines instead of boxed cards. */}
+      <div className="grid min-h-0 flex-1 divide-y divide-white/[0.08] lg:divide-x lg:divide-y-0 lg:grid-cols-[17rem_minmax(0,1fr)_20rem] xl:grid-cols-[19rem_minmax(0,1fr)_22rem]">
+        <aside className="min-h-0 overflow-hidden">
           <RoundBriefPanel
             round={round}
             company={storeConfig?.company ?? null}
@@ -760,7 +765,7 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
           />
         </aside>
 
-        <section className="min-h-0 overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
+        <section className="min-h-0 overflow-hidden">
           <DiscussionWorkspace
             round={round}
             company={storeConfig?.company}
@@ -770,8 +775,8 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
           />
         </section>
 
-        <aside className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-brand-border bg-brand-card">
-          <div className="shrink-0">
+        <aside className="flex min-h-0 flex-col overflow-hidden">
+          <div className="shrink-0 border-b border-white/[0.08]">
             <VoicePanel
               voiceState={voiceState}
               currentPhase={currentPhase}

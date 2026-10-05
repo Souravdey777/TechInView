@@ -2,7 +2,11 @@
 
 import { Brain, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SETUP_FOCUS_RING } from "@/components/interviews/setup/SetupRack";
+import { GRID, CELL } from "@/components/marketing/ds";
+import {
+  SETUP_CELL_FOCUS,
+  SETUP_CELL_SELECTED,
+} from "@/components/interviews/setup/SetupRack";
 import type { DsaExperience } from "@/lib/dsa";
 
 export type ModeChipTone = "green" | "cyan" | "amber" | "rose";
@@ -25,7 +29,7 @@ type DsaModePickerProps = {
   aiDetail: string;
 };
 
-/** Two-cell mode picker: free practice vs. the scored AI interview round. */
+/** Two-cell hairline grid: free practice vs. the scored AI interview round. */
 export function DsaModePicker({
   value,
   onChange,
@@ -66,7 +70,7 @@ export function DsaModePicker({
     <div
       role="radiogroup"
       aria-label="DSA mode"
-      className="grid gap-3 sm:grid-cols-2"
+      className={cn(GRID, "grid-cols-1 sm:grid-cols-2")}
     >
       {cells.map((cell) => {
         const Icon = cell.icon;
@@ -80,11 +84,10 @@ export function DsaModePicker({
             aria-checked={isActive}
             onClick={() => onChange(cell.id)}
             className={cn(
-              "flex min-h-[44px] flex-col rounded-xl border px-4 py-4 text-left transition-all duration-150",
-              isActive
-                ? "border-brand-cyan bg-brand-cyan/5 ring-1 ring-brand-cyan/30"
-                : "border-brand-border bg-brand-surface hover:border-brand-subtle",
-              SETUP_FOCUS_RING
+              CELL,
+              "flex min-h-[44px] flex-col p-5 text-left transition-colors duration-150",
+              isActive ? SETUP_CELL_SELECTED : "hover:bg-white/[0.03]",
+              SETUP_CELL_FOCUS
             )}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -92,12 +95,12 @@ export function DsaModePicker({
                 <Icon
                   className={cn(
                     "h-4 w-4 shrink-0",
-                    isActive ? "text-brand-cyan" : "text-brand-muted"
+                    isActive ? "text-brand-cyan" : "text-brand-subtle"
                   )}
                 />
                 <p
                   className={cn(
-                    "font-heading text-base font-semibold",
+                    "text-xl font-medium tracking-[-0.02em]",
                     isActive ? "text-brand-text" : "text-brand-muted"
                   )}
                 >
@@ -107,7 +110,7 @@ export function DsaModePicker({
               <div className="flex items-center gap-2">
                 <span
                   className={cn(
-                    "rounded-full border px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.16em]",
+                    "rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em]",
                     CHIP_TONES[cell.statusTone]
                   )}
                 >
@@ -115,8 +118,8 @@ export function DsaModePicker({
                 </span>
                 {isActive ? (
                   <span className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-cyan ring-2 ring-brand-cyan/30" />
-                    <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-brand-cyan">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan" />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-cyan">
                       Selected
                     </span>
                   </span>
@@ -125,8 +128,8 @@ export function DsaModePicker({
             </div>
             <p
               className={cn(
-                "mt-3 text-xs leading-relaxed",
-                isActive ? "text-brand-text" : "text-brand-muted"
+                "mt-3 text-sm leading-relaxed",
+                isActive ? "text-brand-text/85" : "text-brand-muted"
               )}
             >
               {cell.detail}

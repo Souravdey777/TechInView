@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { SetupMonoLabel } from "@/components/interviews/setup/SetupRack";
+import { MonoLabel, Rack } from "@/components/shared/Rack";
 
 export type SessionFact = {
   label: string;
@@ -9,7 +9,7 @@ export type SessionFact = {
   emphasis?: boolean;
 };
 
-/** Key/value rail panel describing the session that is about to start. */
+/** Hairline key/value rail rack describing the session that is about to start. */
 export function SessionFactsCard({
   title,
   facts,
@@ -18,22 +18,20 @@ export function SessionFactsCard({
   facts: readonly SessionFact[];
 }) {
   return (
-    <section className="rounded-2xl border border-brand-border bg-brand-card p-5">
-      <SetupMonoLabel>{title}</SetupMonoLabel>
-      <dl className="mt-4 space-y-3">
+    <Rack label={<MonoLabel>{title}</MonoLabel>} bodyClassName="py-2 sm:py-2">
+      <dl className="divide-y divide-white/[0.08]">
         {facts.map((fact) => (
           <div
             key={fact.label}
-            className={cn(
-              "flex items-baseline justify-between gap-3",
-              fact.emphasis && "border-t border-brand-border pt-3"
-            )}
+            className="flex items-baseline justify-between gap-3 py-3"
           >
-            <dt className="text-xs text-brand-muted">{fact.label}</dt>
+            <dt className="text-sm text-brand-muted">{fact.label}</dt>
             <dd
               className={cn(
-                "font-mono text-xs",
-                fact.emphasis ? "font-semibold text-brand-cyan" : "text-brand-text"
+                "text-right tabular-nums",
+                fact.emphasis
+                  ? "text-lg font-normal tracking-[-0.02em] text-brand-text"
+                  : "font-mono text-xs text-brand-text"
               )}
             >
               {fact.value}
@@ -41,11 +39,11 @@ export function SessionFactsCard({
           </div>
         ))}
       </dl>
-    </section>
+    </Rack>
   );
 }
 
-/** Rail panel walking through the shape of the round, step by step. */
+/** Hairline rail rack walking through the shape of the round, step by step. */
 export function SessionStepsCard({
   title,
   steps,
@@ -54,18 +52,17 @@ export function SessionStepsCard({
   steps: readonly string[];
 }) {
   return (
-    <section className="rounded-2xl border border-brand-border bg-brand-card p-5">
-      <SetupMonoLabel>{title}</SetupMonoLabel>
-      <ol className="mt-4 space-y-3">
+    <Rack label={<MonoLabel>{title}</MonoLabel>} bodyClassName="py-2 sm:py-2">
+      <ol className="divide-y divide-white/[0.08]">
         {steps.map((step, index) => (
-          <li key={step} className="flex gap-3">
-            <span className="font-mono text-[10px] font-semibold leading-5 text-brand-cyan">
+          <li key={step} className="flex gap-4 py-3">
+            <span className="font-mono text-[11px] leading-5 text-brand-subtle">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <span className="text-xs leading-5 text-brand-muted">{step}</span>
+            <span className="text-sm leading-5 text-brand-muted">{step}</span>
           </li>
         ))}
       </ol>
-    </section>
+    </Rack>
   );
 }

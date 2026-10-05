@@ -21,9 +21,9 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-xl",
-        "bg-brand-card border border-brand-border",
-        "p-1.5 shadow-xl shadow-brand-deep/50",
+        "z-50 min-w-[8rem] overflow-hidden rounded-[16px]",
+        "bg-brand-deep border border-white/[0.1]",
+        "p-1.5",
         "animate-in fade-in-0 zoom-in-95",
         "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
         "data-[side=bottom]:slide-in-from-top-2",
@@ -50,8 +50,8 @@ const DropdownMenuItem = React.forwardRef<
       "relative flex cursor-pointer select-none items-center gap-2 rounded-md",
       "px-2.5 py-2 text-sm text-brand-text outline-none",
       "transition-colors",
-      "hover:bg-brand-surface hover:text-brand-text",
-      "focus:bg-brand-surface focus:text-brand-text",
+      "hover:bg-white/[0.05] hover:text-brand-text",
+      "focus:bg-white/[0.05] focus:text-brand-text",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
       "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-brand-muted",
       inset && "pl-8",
@@ -72,7 +72,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
       "relative flex cursor-pointer select-none items-center rounded-md",
       "py-2 pl-8 pr-2.5 text-sm text-brand-text outline-none",
       "transition-colors",
-      "hover:bg-brand-surface focus:bg-brand-surface",
+      "hover:bg-white/[0.05] focus:bg-white/[0.05]",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
       className
     )}
@@ -100,7 +100,7 @@ const DropdownMenuRadioItem = React.forwardRef<
       "relative flex cursor-pointer select-none items-center rounded-md",
       "py-2 pl-8 pr-2.5 text-sm text-brand-text outline-none",
       "transition-colors",
-      "hover:bg-brand-surface focus:bg-brand-surface",
+      "hover:bg-white/[0.05] focus:bg-white/[0.05]",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
       className
     )}
@@ -125,7 +125,7 @@ const DropdownMenuLabel = React.forwardRef<
   <DropdownMenuPrimitive.Label
     ref={ref}
     className={cn(
-      "px-2.5 py-1.5 text-xs font-semibold text-brand-muted uppercase tracking-wider",
+      "px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle",
       inset && "pl-8",
       className
     )}
@@ -140,7 +140,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn("-mx-1.5 my-1.5 h-px bg-brand-border", className)}
+    className={cn("-mx-1.5 my-1.5 h-px bg-white/[0.08]", className)}
     {...props}
   />
 ));
@@ -158,8 +158,8 @@ const DropdownMenuSubTrigger = React.forwardRef<
       "flex cursor-pointer select-none items-center gap-2 rounded-md",
       "px-2.5 py-2 text-sm text-brand-text outline-none",
       "transition-colors",
-      "hover:bg-brand-surface focus:bg-brand-surface",
-      "data-[state=open]:bg-brand-surface",
+      "hover:bg-white/[0.05] focus:bg-white/[0.05]",
+      "data-[state=open]:bg-white/[0.05]",
       inset && "pl-8",
       className
     )}
@@ -179,9 +179,9 @@ const DropdownMenuSubContent = React.forwardRef<
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-xl",
-      "bg-brand-card border border-brand-border",
-      "p-1.5 shadow-xl shadow-brand-deep/50",
+      "z-50 min-w-[8rem] overflow-hidden rounded-[16px]",
+      "bg-brand-deep border border-white/[0.1]",
+      "p-1.5",
       "animate-in data-[state=closed]:animate-out",
       "fade-in-0 data-[state=closed]:fade-out-0",
       "zoom-in-95 data-[state=closed]:zoom-out-95",

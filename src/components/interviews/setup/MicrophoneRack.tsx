@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle, Loader2, Mic, MicOff, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BTN_GHOST, BTN_SM, FIELD } from "@/components/marketing/ds";
 import { SetupRack } from "@/components/interviews/setup/SetupRack";
 import { useMicrophoneDevices } from "@/hooks/useMicrophoneDevices";
 
@@ -36,12 +37,12 @@ export function MicrophoneRack({ index, interviewerName }: MicrophoneRackProps) 
 
   return (
     <SetupRack index={index} label="Microphone">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <p className="text-sm text-brand-text">
+          <p className="text-[15px] text-brand-text">
             Verify your microphone before starting
           </p>
-          <p className="text-xs text-brand-muted">
+          <p className="text-sm text-brand-muted">
             TechInView uses your mic for real-time voice interaction with{" "}
             {interviewerName}.
           </p>
@@ -50,12 +51,13 @@ export function MicrophoneRack({ index, interviewerName }: MicrophoneRackProps) 
           onClick={() => void handleMicCheck()}
           disabled={micStatus === "checking"}
           className={cn(
-            "flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-150",
-            micStatus === "granted"
-              ? "border-brand-green/40 bg-brand-green/10 text-brand-green"
-              : micStatus === "denied"
-                ? "border-brand-rose/40 bg-brand-rose/10 text-brand-rose"
-                : "border-brand-border text-brand-text hover:border-brand-subtle hover:bg-brand-card"
+            BTN_GHOST,
+            BTN_SM,
+            "min-h-[44px] shrink-0 gap-2",
+            micStatus === "granted" &&
+              "border-brand-green/40 text-brand-green hover:border-brand-green hover:text-brand-green",
+            micStatus === "denied" &&
+              "border-brand-rose/40 text-brand-rose hover:border-brand-rose hover:text-brand-rose"
           )}
         >
           {micStatus === "checking" ? (
@@ -82,9 +84,9 @@ export function MicrophoneRack({ index, interviewerName }: MicrophoneRackProps) 
         </button>
       </div>
       {micStatus === "denied" && (
-        <div className="mt-3 flex items-start gap-2 rounded-lg border border-brand-rose/20 bg-brand-rose/5 px-3 py-2.5">
+        <div className="mt-5 flex items-start gap-2 border-t border-white/[0.08] pt-4">
           <MicOff className="mt-0.5 h-4 w-4 shrink-0 text-brand-rose" />
-          <p className="text-xs text-brand-rose">
+          <p className="text-sm text-brand-rose">
             Microphone access was blocked. You can still type your responses
             during the interview, or grant access in your browser settings and
             try again.
@@ -92,20 +94,22 @@ export function MicrophoneRack({ index, interviewerName }: MicrophoneRackProps) 
         </div>
       )}
       {micStatus === "granted" && (
-        <div className="mt-3 space-y-3 rounded-lg border border-brand-green/20 bg-brand-green/5 px-3 py-2.5">
+        <div className="mt-5 space-y-4 border-t border-white/[0.08] pt-4">
           <div className="flex items-start gap-2">
             <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
-            <p className="text-xs text-brand-green">
+            <p className="text-sm text-brand-green">
               Microphone detected and working. Voice interaction is enabled.
             </p>
           </div>
           {microphoneDevices.length > 0 ? (
-            <label className="block text-xs text-brand-muted">
-              <span className="mb-1 block">Microphone</span>
+            <label className="block">
+              <span className="mb-2 block font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
+                Microphone
+              </span>
               <select
                 value={selectedDeviceId}
                 onChange={(event) => setSelectedDeviceId(event.target.value)}
-                className="w-full rounded-lg border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-text focus:border-brand-cyan/60 focus:outline-none"
+                className={cn(FIELD, "bg-brand-deep")}
               >
                 <option value="">System default</option>
                 {microphoneDevices.map((device) => (
@@ -117,7 +121,7 @@ export function MicrophoneRack({ index, interviewerName }: MicrophoneRackProps) 
             </label>
           ) : null}
           {deviceWarning ? (
-            <p className="text-xs text-brand-amber">{deviceWarning}</p>
+            <p className="text-sm text-brand-amber">{deviceWarning}</p>
           ) : null}
         </div>
       )}

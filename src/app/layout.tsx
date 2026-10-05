@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
+import { GeistFonts } from "@/components/marketing/MarketingShell";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
 import { SITE_NAME } from "@/lib/blog-seo";
 import {
@@ -11,20 +11,6 @@ import {
   SITE_THEME_COLOR,
   getSiteUrl,
 } from "@/lib/site-seo";
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -102,9 +88,12 @@ export default function RootLayout({
       className="dark"
       suppressHydrationWarning
     >
-      <body
-        className={`${sora.variable} ${jetbrainsMono.variable} font-sans antialiased`}
-      >
+      <head>
+        <GeistFonts />
+      </head>
+      {/* .theme-landing on <body> so every route, and Radix portals and toasts
+          rendered straight into <body>, share the design system tokens and Geist. */}
+      <body className="theme-landing bg-brand-deep font-sans text-brand-text antialiased">
         <PostHogProvider>
           <div>{children}</div>
           <Toaster />

@@ -29,9 +29,9 @@ type ProblemPanelProps = {
 // ─── Difficulty badge ─────────────────────────────────────────────────────────
 
 const DIFFICULTY_STYLES = {
-  easy: "bg-brand-green/10 text-brand-green border-brand-green/30",
-  medium: "bg-brand-amber/10 text-brand-amber border-brand-amber/30",
-  hard: "bg-brand-rose/10 text-brand-rose border-brand-rose/30",
+  easy: "text-brand-green border-brand-green/30",
+  medium: "text-brand-amber border-brand-amber/30",
+  hard: "text-brand-rose border-brand-rose/30",
 } as const;
 
 const DIFFICULTY_LABELS = {
@@ -50,15 +50,15 @@ function ExampleBlock({
   index: number;
 }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-brand-border bg-brand-surface">
-      <div className="border-b border-brand-border bg-brand-card px-3 py-1.5">
-        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-brand-muted">
+    <div className="overflow-hidden rounded-[12px] border border-white/[0.08]">
+      <div className="border-b border-white/[0.08] px-3 py-1.5">
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand-subtle">
           Example {index + 1}
         </span>
       </div>
       <div className="space-y-2.5 px-3 py-3">
         <div className="grid grid-cols-[52px_minmax(0,1fr)] items-baseline gap-3">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-brand-subtle">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle">
             Input
           </span>
           <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-brand-text">
@@ -66,7 +66,7 @@ function ExampleBlock({
           </pre>
         </div>
         <div className="grid grid-cols-[52px_minmax(0,1fr)] items-baseline gap-3">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-brand-subtle">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle">
             Output
           </span>
           <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-brand-green">
@@ -74,7 +74,7 @@ function ExampleBlock({
           </pre>
         </div>
         {example.explanation && (
-          <div className="border-t border-brand-border pt-2.5">
+          <div className="border-t border-white/[0.08] pt-2.5">
             <p className="text-xs leading-relaxed text-brand-muted [text-wrap:pretty]">
               {example.explanation}
             </p>
@@ -92,13 +92,13 @@ function HintAccordion({ hints }: { hints: string[] }) {
   if (!hints.length) return null;
 
   return (
-    <div className="border-t border-brand-border pt-4">
+    <div className="border-t border-white/[0.08] pt-4">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between text-xs font-medium text-brand-muted hover:text-brand-text transition-colors"
+        className="flex w-full items-center justify-between rounded-sm font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle transition-colors hover:text-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
       >
         <span className="flex items-center gap-1.5">
-          <Lightbulb className="h-3.5 w-3.5 text-brand-amber" />
+          <Lightbulb className="h-3.5 w-3.5" />
           Hints ({hints.length} available)
         </span>
         {open ? (
@@ -113,12 +113,12 @@ function HintAccordion({ hints }: { hints: string[] }) {
           {hints.slice(0, revealedCount).map((hint, i) => (
             <div
               key={i}
-              className="rounded-lg border border-brand-amber/20 bg-brand-amber/5 px-3 py-2.5"
+              className="border-l border-white/[0.18] py-1 pl-3"
             >
-              <span className="text-xs font-semibold text-brand-amber">
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle">
                 Hint {i + 1}
               </span>
-              <p className="mt-0.5 text-xs text-brand-text leading-relaxed">
+              <p className="mt-1 text-xs leading-relaxed text-brand-text">
                 {hint}
               </p>
             </div>
@@ -127,7 +127,7 @@ function HintAccordion({ hints }: { hints: string[] }) {
           {revealedCount < hints.length && (
             <button
               onClick={() => setRevealedCount((c) => c + 1)}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-brand-amber/30 px-3 py-2 text-xs font-medium text-brand-amber hover:bg-brand-amber/5 transition-colors"
+              className="flex w-full items-center justify-center gap-1.5 rounded-full border border-white/[0.18] px-3 py-2 text-xs text-brand-text transition-colors hover:border-brand-cyan hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
             >
               <Lightbulb className="h-3.5 w-3.5" />
               {revealedCount === 0
@@ -137,7 +137,7 @@ function HintAccordion({ hints }: { hints: string[] }) {
           )}
 
           {revealedCount === hints.length && hints.length > 0 && (
-            <p className="text-center text-xs text-brand-muted">
+            <p className="text-center font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle">
               All hints revealed.
             </p>
           )}
@@ -151,23 +151,23 @@ function HintAccordion({ hints }: { hints: string[] }) {
 
 export function ProblemPanel({ problem, showHints = true }: ProblemPanelProps) {
   return (
-    <div className="h-full overflow-y-auto px-4 py-4 space-y-5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-brand-border">
+    <div className="h-full space-y-6 overflow-y-auto px-5 py-5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-brand-border">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span
             className={cn(
-              "rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+              "rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.08em]",
               DIFFICULTY_STYLES[problem.difficulty]
             )}
           >
             {DIFFICULTY_LABELS[problem.difficulty]}
           </span>
-          <span className="rounded-full border border-brand-border bg-brand-card px-2.5 py-0.5 text-xs text-brand-muted capitalize">
+          <span className="rounded-full border border-white/[0.1] px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted">
             {problem.category}
           </span>
         </div>
-        <h2 className="text-base font-bold text-brand-text leading-snug">
+        <h2 className="text-xl font-medium leading-snug tracking-[-0.02em] text-brand-text">
           {problem.title}
         </h2>
       </div>
@@ -178,7 +178,7 @@ export function ProblemPanel({ problem, showHints = true }: ProblemPanelProps) {
       {/* Examples */}
       {problem.examples.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-brand-muted">
+          <h3 className="font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
             Examples
           </h3>
           {problem.examples.map((ex, i) => (
@@ -190,13 +190,13 @@ export function ProblemPanel({ problem, showHints = true }: ProblemPanelProps) {
       {/* Constraints */}
       {problem.constraints.length > 0 && (
         <div className="space-y-2">
-          <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-brand-muted">
+          <h3 className="font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
             Constraints
           </h3>
-          <ul className="space-y-1.5 rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5">
+          <ul className="divide-y divide-white/[0.08] border-y border-white/[0.08]">
             {problem.constraints.map((c, i) => (
-              <li key={i} className="flex items-start gap-2.5">
-                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-cyan" />
+              <li key={i} className="flex items-start gap-2.5 py-2">
+                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-white/[0.24]" />
                 <span className="font-mono text-xs leading-relaxed text-brand-muted">
                   {renderConstraint(c, `con-${i}`)}
                 </span>

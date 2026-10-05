@@ -32,20 +32,6 @@ type VoicePanelProps = {
   onSendText: (text: string) => boolean | Promise<boolean>;
 };
 
-const PHASE_COLORS: Record<InterviewPhase, string> = {
-  INTRO: "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30",
-  PROBLEM_PRESENTED: "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30",
-  CLARIFICATION: "bg-brand-amber/10 text-brand-amber border-brand-amber/30",
-  APPROACH_DISCUSSION:
-    "bg-brand-amber/10 text-brand-amber border-brand-amber/30",
-  CODING: "bg-brand-green/10 text-brand-green border-brand-green/30",
-  TESTING: "bg-brand-green/10 text-brand-green border-brand-green/30",
-  COMPLEXITY_ANALYSIS:
-    "bg-brand-rose/10 text-brand-rose border-brand-rose/30",
-  FOLLOW_UP: "bg-brand-rose/10 text-brand-rose border-brand-rose/30",
-  WRAP_UP: "bg-brand-muted/10 text-brand-muted border-brand-border",
-};
-
 function getStateLabel(voiceState: VoiceState, interviewerName: string): string {
   const labels: Record<VoiceState, string> = {
     idle: "Ready",
@@ -57,6 +43,7 @@ function getStateLabel(voiceState: VoiceState, interviewerName: string): string 
   return labels[voiceState];
 }
 
+// Matches the orb's colour per state, so the label and the orb agree.
 const STATE_COLORS: Record<VoiceState, string> = {
   idle: "text-brand-muted",
   listening: "text-brand-cyan",
@@ -120,17 +107,12 @@ export function VoicePanel({
       )}
     >
       <div className="flex items-center justify-between gap-3">
-        <span
-          className={cn(
-            "rounded-full border px-3 py-0.5 text-xs font-medium",
-            PHASE_COLORS[currentPhase]
-          )}
-        >
+        <span className="rounded-full border border-white/[0.1] px-3 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-brand-text">
           {roundType === "coding"
             ? PHASE_LABELS[currentPhase]
             : getPhaseLabelForRound(roundType, currentPhase)}
         </span>
-        <span className={cn("text-xs font-medium", isVoiceConnected ? STATE_COLORS[voiceState] : "text-brand-amber")}>
+        <span className={cn("font-mono text-[10px] uppercase tracking-[0.1em]", isVoiceConnected ? STATE_COLORS[voiceState] : "text-brand-amber")}>
           {isReconnecting
             ? "Connecting"
             : !isVoiceConnected
@@ -140,7 +122,7 @@ export function VoicePanel({
       </div>
 
       {errorMessage ? (
-        <div className="rounded-lg border border-brand-rose/30 bg-brand-rose/10 px-3 py-2 text-[11px] leading-relaxed text-brand-rose">
+        <div className="rounded-[12px] border border-brand-rose/30 bg-brand-rose/[0.06] px-3 py-2 text-[11px] leading-relaxed text-brand-rose">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span>{errorMessage}</span>
             {onReconnect ? (
@@ -149,10 +131,11 @@ export function VoicePanel({
                 onClick={onReconnect}
                 disabled={isVoiceConnected || isReconnecting}
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold transition-colors",
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan",
                   isVoiceConnected || isReconnecting
-                    ? "cursor-not-allowed border-brand-border bg-brand-surface text-brand-muted"
-                    : "border-brand-rose/35 bg-brand-deep text-brand-rose hover:border-brand-rose/60 hover:text-brand-text",
+                    ? "cursor-not-allowed border-white/[0.08] text-brand-subtle"
+                    : "border-brand-rose/35 text-brand-rose hover:border-brand-rose/60 hover:text-brand-text",
                 )}
               >
                 <RefreshCw className={cn("h-3 w-3", isReconnecting && "animate-spin")} />
@@ -177,13 +160,13 @@ export function VoicePanel({
           <div className="mt-1 text-center">
             <p
               className={cn(
-                "font-semibold text-brand-text",
-                isCenterStage ? "text-base" : "text-sm"
+                "tracking-[-0.01em] text-brand-text",
+                isCenterStage ? "text-lg" : "text-base"
               )}
             >
               {interviewerName}
             </p>
-            <p className="text-[11px] text-brand-muted">AI Interviewer</p>
+            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-brand-subtle">AI Interviewer</p>
           </div>
         </div>
 
@@ -194,13 +177,14 @@ export function VoicePanel({
               onClick={onToggleMic}
               disabled={!micSupported || !isVoiceConnected}
               className={cn(
-                "relative z-10 flex items-center justify-center rounded-full transition-all duration-300",
+                "relative z-10 flex items-center justify-center rounded-full transition-colors duration-300",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep",
                 isCenterStage ? "h-14 w-14" : "h-12 w-12",
                 !micSupported || !isVoiceConnected
-                  ? "cursor-not-allowed border border-brand-border bg-brand-card text-brand-muted opacity-50"
+                  ? "cursor-not-allowed border border-white/[0.08] bg-brand-deep text-brand-subtle opacity-50"
                   : isMicEnabled
-                    ? "border-2 border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_20px_rgba(34,211,238,0.3)]"
-                    : "border border-brand-border bg-brand-card text-brand-muted hover:border-brand-subtle hover:text-brand-text"
+                    ? "border border-brand-cyan bg-brand-cyan/[0.12] text-brand-cyan"
+                    : "border border-white/[0.18] bg-brand-deep text-brand-muted hover:border-white/[0.3] hover:text-brand-text"
               )}
               aria-label={!isVoiceConnected ? "Voice disconnected" : isMicEnabled ? "Mute microphone" : "Enable microphone"}
             >
@@ -212,11 +196,11 @@ export function VoicePanel({
             </button>
           </div>
           {!micSupported ? (
-            <span className="text-[10px] text-brand-muted">
+            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-brand-subtle">
               Mic not supported. Use text input below.
             </span>
           ) : (
-            <span className="mt-0.5 text-[10px] text-brand-muted">
+            <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-brand-subtle">
               {!isVoiceConnected
                 ? "Voice disconnected"
                 : isMicEnabled
@@ -227,12 +211,12 @@ export function VoicePanel({
             </span>
           )}
           {onDeviceChange && microphoneDevices.length > 0 ? (
-            <label className="mt-2 flex flex-col gap-1 text-[10px] text-brand-muted">
+            <label className="mt-2 flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.1em] text-brand-subtle">
               <span>Microphone</span>
               <select
                 value={selectedDeviceId}
                 onChange={(event) => onDeviceChange(event.target.value)}
-                className="max-w-52 rounded-md border border-brand-border bg-brand-surface px-2 py-1.5 text-xs text-brand-text focus:border-brand-cyan/60 focus:outline-none"
+                className="max-w-52 rounded-full border border-white/[0.12] bg-brand-deep px-3 py-1.5 font-sans text-xs normal-case tracking-normal text-brand-text focus:border-brand-cyan focus:outline-none"
                 aria-label="Select microphone"
               >
                 <option value="">System default</option>
@@ -253,7 +237,7 @@ export function VoicePanel({
       </div>
 
       {showTextFallback ? (
-        <div className={cn("border-t border-brand-border", isCenterStage ? "pt-4" : "mt-1 pt-2")}>
+        <div className={cn("border-t border-white/[0.08]", isCenterStage ? "pt-4" : "mt-1 pt-2")}>
           <button
             onClick={() => {
               setTextOpen((current) => !current);
@@ -261,7 +245,7 @@ export function VoicePanel({
                 setTimeout(() => textareaRef.current?.focus(), 50);
               }
             }}
-            className="flex w-full items-center justify-between px-1 text-xs text-brand-muted transition-colors hover:text-brand-text"
+            className="flex w-full items-center justify-between rounded-sm px-1 font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle transition-colors hover:text-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
           >
             <span>Type instead of speaking</span>
             {textOpen ? (
@@ -280,16 +264,17 @@ export function VoicePanel({
                 onKeyDown={handleKeyDown}
                 placeholder="Type your response... (Enter to send)"
                 rows={isCenterStage ? 4 : 3}
-                className="w-full resize-none rounded-lg border border-brand-border bg-brand-surface px-3 py-2.5 text-sm text-brand-text placeholder:text-brand-muted/60 focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30"
+                className="w-full resize-none rounded-[16px] border border-white/[0.12] bg-transparent px-3.5 py-2.5 text-sm text-brand-text placeholder:text-brand-subtle focus:border-brand-cyan focus:outline-none"
               />
               <button
                 onClick={() => void handleSend()}
                 disabled={!draft.trim() || isSendingText}
                 className={cn(
-                  "flex items-center justify-center gap-2 self-end rounded-lg px-4 py-2 text-xs font-medium transition-colors",
+                  "flex items-center justify-center gap-2 self-end rounded-full px-4 py-2 text-xs font-medium transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep",
                   draft.trim() && !isSendingText
-                    ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90"
-                    : "cursor-not-allowed bg-brand-border/30 text-brand-muted"
+                    ? "bg-brand-cyan text-brand-deep hover:bg-brand-text"
+                    : "cursor-not-allowed bg-white/[0.04] text-brand-subtle"
                 )}
               >
                 <Send className="h-3.5 w-3.5" />

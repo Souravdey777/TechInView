@@ -56,7 +56,7 @@ const ALL_LANGUAGES: SupportedLanguage[] = [
 
 const EDITOR_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
   fontSize: 14,
-  fontFamily: '"JetBrains Mono", "Fira Code", monospace',
+  fontFamily: '"Geist Mono", ui-monospace, monospace',
   fontLigatures: true,
   minimap: { enabled: false },
   wordWrap: "on",
@@ -69,7 +69,7 @@ const EDITOR_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
   detectIndentation: true,
   padding: { top: 16, bottom: 16 },
   lineHeight: 1.7,
-  letterSpacing: 0.5,
+  letterSpacing: 0,
   bracketPairColorization: { enabled: true },
   renderWhitespace: "none",
   overviewRulerLanes: 0,
@@ -98,30 +98,30 @@ export function CodeEditor({
         }
       );
 
-      // Dark theme customisation
+      // Dark theme on the design-system ink (brand-deep #0A0B0D), cool greys
       monaco.editor.defineTheme("techinview-dark", {
         base: "vs-dark",
         inherit: true,
         rules: [
-          { token: "comment", foreground: "4a5568", fontStyle: "italic" },
+          { token: "comment", foreground: "5B6068", fontStyle: "italic" },
           { token: "keyword", foreground: "22d3ee" },
           { token: "string", foreground: "34d399" },
           { token: "number", foreground: "fbbf24" },
           { token: "type", foreground: "f472b6" },
         ],
         colors: {
-          "editor.background": "#0d1017",
-          "editor.foreground": "#e2e8f0",
-          "editor.lineHighlightBackground": "#111820",
+          "editor.background": "#0A0B0D",
+          "editor.foreground": "#D5D8DC",
+          "editor.lineHighlightBackground": "#0E1013",
           "editor.selectionBackground": "#22D3EE22",
           "editor.inactiveSelectionBackground": "#22D3EE11",
           "editorCursor.foreground": "#22D3EE",
-          "editorLineNumber.foreground": "#2d3748",
-          "editorLineNumber.activeForeground": "#7a8ba3",
-          "editorIndentGuide.background": "#1a2332",
-          "editorIndentGuide.activeBackground": "#2d3748",
-          "scrollbarSlider.background": "#1a2332",
-          "scrollbarSlider.hoverBackground": "#2d3748",
+          "editorLineNumber.foreground": "#3E434A",
+          "editorLineNumber.activeForeground": "#8E939B",
+          "editorIndentGuide.background": "#1E1F22",
+          "editorIndentGuide.activeBackground": "#2A2C30",
+          "scrollbarSlider.background": "#1E1F22",
+          "scrollbarSlider.hoverBackground": "#2A2C30",
         },
       });
       monaco.editor.setTheme("techinview-dark");
@@ -130,10 +130,10 @@ export function CodeEditor({
   );
 
   return (
-    <div className="flex h-full flex-col bg-brand-surface">
-      {/* Toolbar */}
-      <div className="flex h-10 items-center justify-between border-b border-brand-border bg-brand-card px-4">
-        <span className="text-xs font-medium text-brand-muted">
+    <div className="flex h-full flex-col bg-brand-deep">
+      {/* Toolbar: mono pane label + language pill */}
+      <div className="flex h-10 items-center justify-between border-b border-white/[0.08] px-4">
+        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
           Solution Editor
         </span>
 
@@ -145,10 +145,10 @@ export function CodeEditor({
               onLanguageChange(e.target.value as SupportedLanguage)
             }
             className={cn(
-              "appearance-none rounded-md border border-brand-border bg-brand-surface",
-              "py-1 pl-3 pr-7 text-xs font-medium text-brand-text",
-              "focus:border-brand-cyan/60 focus:outline-none focus:ring-1 focus:ring-brand-cyan/30",
-              "cursor-pointer hover:border-brand-subtle transition-colors"
+              "appearance-none rounded-full border border-white/[0.12] bg-brand-deep",
+              "py-1 pl-3 pr-7 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-text",
+              "focus:border-brand-cyan focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan/40",
+              "cursor-pointer transition-colors hover:border-white/[0.24]"
             )}
           >
             {ALL_LANGUAGES.map((lang) => (
@@ -172,10 +172,10 @@ export function CodeEditor({
           theme="techinview-dark"
           options={EDITOR_OPTIONS}
           loading={
-            <div className="flex h-full items-center justify-center bg-brand-surface">
+            <div className="flex h-full items-center justify-center bg-brand-deep">
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-6 w-6 animate-spin text-brand-cyan" />
-                <span className="text-xs text-brand-muted">
+                <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">
                   Loading editor…
                 </span>
               </div>

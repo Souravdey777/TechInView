@@ -1,8 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollText, Bot, User, Info } from "lucide-react";
+import { MonoLabel, Rack } from "@/components/shared/Rack";
 
 type TranscriptMessage = {
   role: string;
@@ -22,154 +21,64 @@ function formatTimestamp(ms: number): string {
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
-type RoleConfig = {
-  label: string;
-  badgeClass: string;
-  bubbleClass: string;
-  Icon: React.ElementType;
-};
-
-function getRoleConfig(role: string, interviewerName: string): RoleConfig {
-  if (role === "interviewer") {
-    return {
-      label: interviewerName,
-      badgeClass: "bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30",
-      bubbleClass: "bg-brand-surface border border-brand-border",
-      Icon: Bot,
-    };
-  }
-  if (role === "candidate") {
-    return {
-      label: "You",
-      badgeClass: "bg-brand-green/15 text-brand-green border border-brand-green/30",
-      bubbleClass: "bg-brand-card border border-brand-border/60",
-      Icon: User,
-    };
-  }
-  return {
-    label: "System",
-    badgeClass: "bg-brand-muted/15 text-brand-muted border border-brand-border",
-    bubbleClass: "bg-brand-deep border border-brand-border/40",
-    Icon: Info,
-  };
+function getRoleLabel(role: string, interviewerName: string): string {
+  if (role === "interviewer") return interviewerName;
+  if (role === "candidate") return "You";
+  return "System";
 }
 
+/**
+ * Interview transcript read like the Prep Guru thread: a hairline rule between
+ * turns, a mono speaker label and timestamp, no bubbles. Candidate turns are
+ * set off by a quiet left rule; system notes are muted.
+ */
 export function TranscriptReview({
   messages,
   interviewerName = "Interviewer",
 }: TranscriptReviewProps) {
   if (messages.length === 0) {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <ScrollText className="h-4 w-4 text-brand-cyan" />
-            Interview Transcript
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-brand-muted text-center py-8">
-            No transcript available for this interview.
-          </p>
-        </CardContent>
-      </Card>
+      <Rack label={<MonoLabel>Interview transcript</MonoLabel>} className="w-full">
+        <p className="py-6 text-center text-sm text-brand-muted">
+          No transcript available for this interview.
+        </p>
+      </Rack>
     );
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <ScrollText className="h-4 w-4 text-brand-cyan" />
-            Interview Transcript
-          </CardTitle>
-          <span className="text-xs text-brand-muted">
-            {messages.length} messages
-          </span>
-        </div>
-      </CardHeader>
+    <Rack
+      label={<MonoLabel>Interview transcript</MonoLabel>}
+      accessory={<MonoLabel className="tabular-nums">{messages.length} messages</MonoLabel>}
+      className="w-full"
+      bodyClassName="p-0"
+    >
+      <div className="scrollbar-thin max-h-[500px] divide-y divide-white/[0.08] overflow-y-auto px-5 sm:px-6">
+        {messages.map((msg, index) => {
+          const isCandidate = msg.role === "candidate";
+          const isSystem = msg.role !== "candidate" && msg.role !== "interviewer";
 
-      <CardContent className="p-0">
-        <div className="max-h-[500px] space-y-3 overflow-y-auto px-4 pb-4 scrollbar-thin sm:px-6 sm:pb-6">
-          {messages.map((msg, index) => {
-            const config = getRoleConfig(msg.role, interviewerName);
-            const { Icon } = config;
-            const isCandidate = msg.role === "candidate";
-
-            return (
-              <div
-                key={index}
+          return (
+            <div key={index} className="py-5">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <MonoLabel className={cn(msg.role === "interviewer" && "text-brand-text")}>
+                  {getRoleLabel(msg.role, interviewerName)}
+                </MonoLabel>
+                <MonoLabel className="tabular-nums">{formatTimestamp(msg.timestamp_ms)}</MonoLabel>
+              </div>
+              <p
                 className={cn(
-                  "flex gap-3",
-                  isCandidate && "flex-row-reverse"
+                  "text-[15px] leading-relaxed",
+                  isCandidate && "border-l border-white/[0.18] pl-4 text-brand-text",
+                  isSystem ? "text-sm text-brand-muted" : !isCandidate && "text-brand-text/90"
                 )}
               >
-                {/* Avatar icon */}
-                <div
-                  className={cn(
-                    "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border",
-                    isCandidate
-                      ? "bg-brand-green/10 border-brand-green/30"
-                      : msg.role === "interviewer"
-                      ? "bg-brand-cyan/10 border-brand-cyan/30"
-                      : "bg-brand-surface border-brand-border"
-                  )}
-                >
-                  <Icon
-                    className={cn(
-                      "h-4 w-4",
-                      isCandidate
-                        ? "text-brand-green"
-                        : msg.role === "interviewer"
-                        ? "text-brand-cyan"
-                        : "text-brand-muted"
-                    )}
-                  />
-                </div>
-
-                {/* Message bubble */}
-                <div
-                  className={cn(
-                    "flex max-w-[88%] flex-col gap-1 sm:max-w-[75%]",
-                    isCandidate && "items-end"
-                  )}
-                >
-                  {/* Role + timestamp header */}
-                  <div
-                    className={cn(
-                      "flex items-center gap-2",
-                      isCandidate && "flex-row-reverse"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "text-xs font-medium px-2 py-0.5 rounded-full",
-                        config.badgeClass
-                      )}
-                    >
-                      {config.label}
-                    </span>
-                    <span className="text-xs text-brand-muted tabular-nums">
-                      {formatTimestamp(msg.timestamp_ms)}
-                    </span>
-                  </div>
-
-                  {/* Bubble */}
-                  <div
-                    className={cn(
-                      "rounded-xl px-3 py-3 text-sm leading-relaxed text-brand-text sm:px-4",
-                      config.bubbleClass
-                    )}
-                  >
-                    {msg.content}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+                {msg.content}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </Rack>
   );
 }
