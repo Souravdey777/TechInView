@@ -36,8 +36,26 @@ import {
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
-// ponytail: upload + checkout flow is not built yet; every CTA goes through this one href.
+// Upload and checkout are not built yet. Until they are, every buy CTA renders
+// as a disabled "Coming soon" pill. Flip this once /resume-review/new exists.
+const LAUNCHED = false;
 const UPLOAD_PATH = "/resume-review/new";
+const BUY_HREF = `/signup?${new URLSearchParams({ next: UPLOAD_PATH })}`;
+
+/** A buy CTA: a link once launched, a disabled "Coming soon" pill before. */
+function BuyLink({ className, children }: { className: string; children: React.ReactNode }) {
+  if (LAUNCHED)
+    return (
+      <Link href={BUY_HREF} className={className}>
+        {children}
+      </Link>
+    );
+  return (
+    <span aria-disabled="true" className={cn(className, "pointer-events-none cursor-default opacity-50")}>
+      Coming soon
+    </span>
+  );
+}
 
 const PAGE_TITLE = "AI Resume Review for Software Engineers";
 const PAGE_DESCRIPTION =
@@ -141,7 +159,6 @@ export default function ResumeReviewPage() {
   const locale = priceKey === "inr" ? "en-IN" : "en-US";
   const money = (n: number) => `${symbol}${n.toLocaleString(locale, { maximumFractionDigits: 2 })}`;
 
-  const buyHref = `/signup?${new URLSearchParams({ next: UPLOAD_PATH })}`;
   const single = RESUME_PACKS.resume_single.displayPrices[priceKey];
   const packs = RESUME_PACK_IDS.map((id) => {
     const pack = RESUME_PACKS[id];
@@ -161,7 +178,7 @@ export default function ResumeReviewPage() {
   };
 
   return (
-    <MarketingShell signupHref={buyHref} ctaLabel="Review my resume">
+    <MarketingShell signupHref={LAUNCHED ? BUY_HREF : "#sample"} ctaLabel={LAUNCHED ? "Review my resume" : "See a sample"}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
 
       {/* ── Hero ── */}
@@ -172,7 +189,7 @@ export default function ResumeReviewPage() {
         />
         <div className="relative mx-auto grid w-full max-w-[1320px] items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <Kicker className="hero-rise">AI resume review</Kicker>
+            <Kicker className="hero-rise">{LAUNCHED ? "AI resume review" : "AI resume review · Coming soon"}</Kicker>
             <h1
               style={{ "--i": 1 } as React.CSSProperties}
               className="hero-rise max-w-[13ch] text-balance text-[clamp(44px,6.4vw,96px)] font-normal leading-[0.96] tracking-[-0.045em]"
@@ -184,9 +201,9 @@ export default function ResumeReviewPage() {
               hiring manager reads them, and rewrites you can paste straight in.
             </p>
             <div style={{ "--i": 3 } as React.CSSProperties} className="hero-rise mt-10 flex flex-wrap gap-3">
-              <Link href={buyHref} className={BTN_PRIMARY}>
+              <BuyLink className={BTN_PRIMARY}>
                 Review my resume · {money(single)} <span className="font-mono">→</span>
-              </Link>
+              </BuyLink>
               <Link href="#sample" className={BTN_GHOST}>
                 See a sample report
               </Link>
@@ -315,8 +332,7 @@ export default function ResumeReviewPage() {
                     <li>Line-by-line markup and rewrites</li>
                     <li>{p.credits > 1 ? "Review again after each fix" : "Optional job fit page"}</li>
                   </ul>
-                  <Link
-                    href={buyHref}
+                  <BuyLink
                     className={cn(
                       "rounded-full p-[13px] text-center text-sm transition-colors",
                       featured
@@ -325,13 +341,13 @@ export default function ResumeReviewPage() {
                     )}
                   >
                     Buy {p.label.toLowerCase()}
-                  </Link>
+                  </BuyLink>
                 </div>
               );
             })}
           </div>
           <div className="mt-5 text-center font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">
-            One-time packs · No recurring billing · Failed reviews are refunded
+            {LAUNCHED ? "" : "Launching soon · "}One-time packs · No recurring billing · Failed reviews are refunded
           </div>
         </LandingReveal>
       </section>
@@ -368,9 +384,9 @@ export default function ResumeReviewPage() {
             The resume gets you the call. <span className="text-brand-subtle">Practice the interview.</span>
           </h2>
           <div className="mt-14 flex flex-wrap gap-3">
-            <Link href={buyHref} className={BTN_PRIMARY}>
+            <BuyLink className={BTN_PRIMARY}>
               Review my resume <span className="font-mono">→</span>
-            </Link>
+            </BuyLink>
             <Link href="/" className={BTN_GHOST}>
               AI mock interviews
             </Link>
