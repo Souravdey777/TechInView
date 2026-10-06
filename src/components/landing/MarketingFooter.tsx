@@ -17,6 +17,7 @@ const COLUMNS: { heading: string; links: readonly FooterLink[] }[] = [
       { href: "/#features", label: "Features" },
       { href: "/#how-it-works", label: "How it works" },
       { href: "/#pricing", label: "Pricing" },
+      { href: "/resume-review", label: "AI resume review" },
       { href: "/#faq", label: "FAQ" },
     ],
   },

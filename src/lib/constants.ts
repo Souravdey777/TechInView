@@ -170,6 +170,28 @@ export const CREDIT_PACKS: Record<CreditPackId, CreditPack> = {
 
 export const PACK_IDS: CreditPackId[] = ["single", "3pack", "6pack"];
 
+export type ResumePackId = "resume_single" | "resume_3pack";
+
+export const RESUME_PACKS: Record<ResumePackId, Omit<CreditPack, "id"> & { id: ResumePackId }> = {
+  resume_single: {
+    id: "resume_single",
+    label: "1 Review",
+    credits: 1,
+    prices: { USD: 600, INR: 19900, PPP: 300 },
+    displayPrices: { usd: 6, inr: 199, ppp: 3 },
+  },
+  resume_3pack: {
+    id: "resume_3pack",
+    label: "3 Reviews",
+    credits: 3,
+    badge: "Best Value",
+    prices: { USD: 1600, INR: 49900, PPP: 800 },
+    displayPrices: { usd: 16, inr: 499, ppp: 8 },
+  },
+};
+
+export const RESUME_PACK_IDS: ResumePackId[] = ["resume_single", "resume_3pack"];
+
 const PPP_COUNTRIES = new Set([
   "BR", "MX", "CO", "AR", "CL", "PE",
   "SG", "MY", "ID", "PH", "TH", "VN",
