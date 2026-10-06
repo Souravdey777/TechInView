@@ -268,3 +268,35 @@
   .draw-line { stroke-dasharray: none; }
 }
 
+/* Resume review sample: pen marks wipe in when their page is in view. Hidden
+   states only apply under .rr-anim, which JS adds, so no-JS readers see marks. */
+@keyframes rr-wipe {
+  from { clip-path: inset(-20% 100% -20% 0); }
+  to { clip-path: inset(-20% -2% -20% 0); }
+}
+@keyframes rr-note {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes rr-scan {
+  0% { top: 0%; opacity: 0; }
+  12%, 88% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+@keyframes rr-travel {
+  0% { top: 0%; opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.rr-anim .rr-page:not(.rr-inview) .rr-wipe { clip-path: inset(-20% 100% -20% 0); }
+.rr-anim .rr-page:not(.rr-inview) .rr-note { opacity: 0; }
+.rr-anim .rr-inview .rr-wipe { animation: rr-wipe 0.6s cubic-bezier(0.65, 0, 0.35, 1) both; animation-delay: var(--d, 0ms); }
+.rr-anim .rr-inview .rr-note { animation: rr-note 0.5s ease-out both; animation-delay: calc(var(--d, 0ms) + 250ms); }
+.rr-scan { animation: rr-scan 3.6s ease-in-out infinite; }
+.rr-float { animation: float 7s ease-in-out infinite; }
+.rr-travel { animation: rr-travel 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .rr-anim .rr-page .rr-wipe, .rr-anim .rr-page .rr-note { clip-path: none; opacity: 1; animation: none !important; }
+  .rr-scan, .rr-travel { display: none; }
+  .rr-float { animation: none; }
+}

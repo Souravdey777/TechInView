@@ -29,6 +29,8 @@ type MarketingShellProps = {
   children: ReactNode;
   loginHref?: string;
   signupHref?: string;
+  /** Nav CTA label, for pages selling something other than interviews. */
+  ctaLabel?: string;
   /** Hide the header and footer, e.g. for focused auth screens. */
   chrome?: boolean;
   className?: string;
@@ -42,6 +44,7 @@ export function MarketingShell({
   children,
   loginHref = "/login",
   signupHref = "/signup",
+  ctaLabel,
   chrome = true,
   className,
 }: MarketingShellProps) {
@@ -63,7 +66,7 @@ export function MarketingShell({
       >
         Skip to content
       </a>
-      {chrome ? <MarketingNav loginHref={loginHref} signupHref={signupHref} /> : null}
+      {chrome ? <MarketingNav loginHref={loginHref} signupHref={signupHref} ctaLabel={ctaLabel} /> : null}
       <main id="main" className="flex-1">
         {children}
       </main>

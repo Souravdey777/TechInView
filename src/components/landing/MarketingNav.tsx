@@ -11,6 +11,8 @@ import { BTN_PRIMARY, BTN_SM, CONTAINER, FOCUS, PAD } from "@/components/marketi
 type MarketingNavProps = {
   loginHref?: string;
   signupHref?: string;
+  /** Primary nav CTA label. Defaults to the interview product's "Practice free". */
+  ctaLabel?: string;
 };
 
 type NavLink = {
@@ -56,7 +58,7 @@ function matchesRoute(pathname: string, route: string) {
   return pathname === route || pathname.startsWith(`${route}/`);
 }
 
-export function MarketingNav({ loginHref = "/login", signupHref = "/signup" }: MarketingNavProps) {
+export function MarketingNav({ loginHref = "/login", signupHref = "/signup", ctaLabel = "Practice free" }: MarketingNavProps) {
   const pathname = usePathname() ?? "/";
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -204,7 +206,7 @@ export function MarketingNav({ loginHref = "/login", signupHref = "/signup" }: M
               Log in
             </Link>
             <Link href={signupHref} className={cn(BTN_PRIMARY, BTN_SM, "hidden min-[400px]:inline-flex")}>
-              Practice free
+              {ctaLabel}
             </Link>
             <button
               ref={menuButtonRef}
@@ -293,7 +295,7 @@ export function MarketingNav({ loginHref = "/login", signupHref = "/signup" }: M
         <div className="shrink-0 border-t border-white/[0.08]">
           <div className={cn(CONTAINER, PAD, "py-5")}>
             <Link href={signupHref} onClick={() => setOpen(false)} className={cn(BTN_PRIMARY, "w-full")}>
-              Practice free <span className="font-mono">→</span>
+              {ctaLabel} <span className="font-mono">→</span>
             </Link>
           </div>
         </div>
