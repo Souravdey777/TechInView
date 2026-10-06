@@ -12,6 +12,7 @@ import {
   CREDIT_PACKS,
   EARLY_ACCESS_DISCOUNT_PERCENT,
   FREE_TRIAL_DURATION_MINUTES,
+  FULL_INTERVIEW_DURATION_MINUTES,
   earlyAccessPrice,
   getDisplayPricingKey,
   getRegionForCountry,
@@ -22,7 +23,6 @@ const BANNER_TEXT = `Early access: ${EARLY_ACCESS_DISCOUNT_PERCENT}% off every i
 const BANNER_HREF = "/#pricing";
 const BANNER_CTA = "See pricing";
 const CTA_HREF = "/signup";
-const CTA_LABEL = "Try it free";
 
 const BANNER_KEY = "tiv-early-access-banner-dismissed";
 const EXIT_KEY = "tiv-early-access-exit-shown";
@@ -114,8 +114,10 @@ export function EarlyAccessBanner() {
 export function ExitIntentOffer() {
   const ph = usePostHog();
   const [open, setOpen] = useState(false);
+  const [price, setPrice] = useState<{ was: string; now: string } | null>(null);
 
   useEffect(() => {
+    setPrice(localSinglePrice());
     if (readFlag(EXIT_KEY) || !window.matchMedia("(pointer: fine)").matches) return;
 
     const armedAt = Date.now() + 5000; // ignore stray movements right after load
@@ -135,18 +137,35 @@ export function ExitIntentOffer() {
       <DialogContent className="max-w-md text-center">
         <p className="font-mono text-[11px] uppercase tracking-wider text-brand-cyan">Early access</p>
         <DialogTitle className="mt-2 text-2xl font-medium tracking-tight text-brand-text">
-          Before you go, try one round
+          Before you go, {EARLY_ACCESS_DISCOUNT_PERCENT}% off
         </DialogTitle>
         <DialogDescription className="mt-3 text-sm leading-relaxed text-brand-muted">
-          Talk through a real coding problem with Tia, our AI interviewer, in a free{" "}
-          {FREE_TRIAL_DURATION_MINUTES}-minute trial. You get a scorecard at the end. No card needed.
+          Early access pricing on every interview pack. A full {FULL_INTERVIEW_DURATION_MINUTES}-minute AI interview with
+          Tia and a scorecard
+          {price ? (
+            <>
+              {" "}for <s className="text-brand-subtle">{price.was}</s>{" "}
+              <span className="font-medium text-brand-text">{price.now}</span>
+            </>
+          ) : null}
+          .
         </DialogDescription>
         <Link
-          href={CTA_HREF}
-          onClick={() => ph?.capture("early_access_exit_popup_clicked")}
+          href={BANNER_HREF}
+          onClick={() => {
+            setOpen(false);
+            ph?.capture("early_access_exit_popup_clicked", { cta: "pricing", price: price?.now });
+          }}
           className={`${BTN_PRIMARY} mt-6 w-full justify-center`}
         >
-          {CTA_LABEL} →
+          Claim {EARLY_ACCESS_DISCOUNT_PERCENT}% off →
+        </Link>
+        <Link
+          href={CTA_HREF}
+          onClick={() => ph?.capture("early_access_exit_popup_clicked", { cta: "free_trial" })}
+          className="mt-3 inline-block text-sm text-brand-muted underline-offset-4 hover:text-brand-text hover:underline"
+        >
+          Or try a free {FREE_TRIAL_DURATION_MINUTES}-minute trial, no card needed
         </Link>
       </DialogContent>
     </Dialog>
