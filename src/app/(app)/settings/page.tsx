@@ -196,7 +196,6 @@ export default async function SettingsPage() {
 
                       <RazorpayCheckout
                         packId={packId}
-                        countryCode={country}
                         userName={profile?.display_name ?? undefined}
                         userEmail={user.email ?? undefined}
                         className={cn(

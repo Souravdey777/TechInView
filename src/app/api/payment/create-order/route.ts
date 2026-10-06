@@ -30,10 +30,7 @@ export async function POST(req: NextRequest) {
     });
     if (rateLimited) return rateLimited;
 
-    const { pack, country_code } = (await req.json()) as {
-      pack: string;
-      country_code?: string;
-    };
+    const { pack } = (await req.json()) as { pack: string };
 
     const creditPack = CREDIT_PACKS[pack as keyof typeof CREDIT_PACKS];
     if (!creditPack) {
@@ -43,7 +40,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const country = country_code?.toUpperCase() ?? "US";
+    // Price from Vercel's geo header, never the request body: a client-sent country could claim a cheaper region.
+    // Same source and fallback as the pages that display prices, so charge and display agree.
+    const country = (req.headers.get("x-vercel-ip-country") ?? "US").toUpperCase();
     const { region, currency } = getRegionForCountry(country);
     const listAmount = creditPack.prices[region];
     // prices are in minor units; discount whole currency units so the charge matches the displayed price.

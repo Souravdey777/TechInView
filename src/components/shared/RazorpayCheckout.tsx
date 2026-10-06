@@ -40,7 +40,6 @@ type RazorpayResponse = {
 
 type RazorpayCheckoutProps = {
   packId: string;
-  countryCode: string;
   userName?: string;
   userEmail?: string;
   children: React.ReactNode;
@@ -84,7 +83,6 @@ function loadRazorpayScript(): Promise<void> {
 
 export function RazorpayCheckout({
   packId,
-  countryCode,
   userName,
   userEmail,
   children,
@@ -108,7 +106,7 @@ export function RazorpayCheckout({
       const orderRes = await fetch("/api/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pack: packId, country_code: countryCode }),
+        body: JSON.stringify({ pack: packId }),
       });
 
       const orderData = await orderRes.json();
@@ -216,7 +214,7 @@ export function RazorpayCheckout({
       });
       setLoading(false);
     }
-  }, [loading, disabled, packId, countryCode, userName, userEmail, router]);
+  }, [loading, disabled, packId, userName, userEmail, router]);
 
   return (
     <button
