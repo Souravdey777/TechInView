@@ -331,6 +331,22 @@ export const payments = pgTable("payments", {
     .notNull(),
 });
 
+/** One row per discounted early-access order; see migrations/0007_add_early_access_holds.sql. */
+export const earlyAccessHolds = pgTable("early_access_holds", {
+  razorpay_order_id: text("razorpay_order_id").primaryKey(),
+  user_id: uuid("user_id")
+    .references(() => profiles.id, { onDelete: "cascade" })
+    .notNull(),
+  pack: text("pack").notNull(),
+  amount: integer("amount").notNull(),
+  currency: text("currency").notNull(),
+  expires_at: timestamp("expires_at", { withTimezone: true }).notNull(),
+  paid_at: timestamp("paid_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .default(sql`now()`)
+    .notNull(),
+});
+
 export const apiRateLimits = pgTable(
   "api_rate_limits",
   {

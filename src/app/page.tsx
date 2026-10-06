@@ -6,6 +6,9 @@ import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { BTN_GHOST, BTN_PRIMARY, Eyebrow, H2, LINK_ARROW, PAD } from "@/components/marketing/ds";
 import {
   CREDIT_PACKS,
+  EARLY_ACCESS_DISCOUNT_PERCENT,
+  EARLY_ACCESS_PURCHASE_LIMIT,
+  earlyAccessPrice,
   FREE_TRIAL_DURATION_MINUTES,
   FULL_INTERVIEW_DURATION_MINUTES,
   PACK_IDS,
@@ -13,6 +16,7 @@ import {
   getRegionForCountry,
 } from "@/lib/constants";
 import { INTERVIEWER } from "@/lib/interviewer";
+import { getCachedEarlyAccessSpotsLeft } from "@/lib/db/queries";
 import { cn } from "@/lib/utils";
 
 
@@ -108,11 +112,12 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
   const previewSignupHref = practiceSignupHref;
   const buyHref = buildAuthHref("/signup");
 
-  const singlePrice = CREDIT_PACKS.single.displayPrices[priceKey];
+  const spotsLeft = await getCachedEarlyAccessSpotsLeft();
   const packs = PACK_IDS.map((id) => {
     const pack = CREDIT_PACKS[id];
-    const price = pack.displayPrices[priceKey];
-    const full = singlePrice * pack.credits;
+    // Slashed price is the pack's own list price; the early-access price sits next to it.
+    const full = pack.displayPrices[priceKey];
+    const price = spotsLeft > 0 ? earlyAccessPrice(full) : full;
     return {
       id,
       label: pack.label,
@@ -268,6 +273,12 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               <p className="max-w-[360px] text-[15px] leading-relaxed text-brand-muted">
                 DSA practice is free. Pay once for full {FULL_INTERVIEW_DURATION_MINUTES}-minute AI interviews and use
                 each credit on a coding, Technical Q&amp;A, Engineering Manager or Behavioral round.
+                {spotsLeft > 0 && (
+                  <span className="mt-3 block text-brand-cyan">
+                    Early access: {EARLY_ACCESS_DISCOUNT_PERCENT}% off the first {EARLY_ACCESS_PURCHASE_LIMIT} purchases.{" "}
+                    {spotsLeft} left.
+                  </span>
+                )}
               </p>
             </div>
             <div className="reveal-stagger grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-3">
@@ -282,7 +293,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                 <PriceCard
                   key={p.id}
                   label={p.label}
-                  badge={p.badge && p.off > 0 ? `${p.badge} · −${p.off}%` : undefined}
+                  badge={p.off > 0 ? `${p.badge ? `${p.badge} · ` : ""}−${EARLY_ACCESS_DISCOUNT_PERCENT}%` : p.badge}
                   price={money(p.price)}
                   was={p.off > 0 ? money(p.full) : undefined}
                   featured={p.id === "3pack"}

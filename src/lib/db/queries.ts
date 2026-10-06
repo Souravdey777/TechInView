@@ -13,6 +13,12 @@ import type {
 } from "@/lib/loops/types";
 import type { InterviewMode, RoundType } from "@/lib/constants";
 import {
+  EARLY_ACCESS_DISCOUNT_PERCENT,
+  EARLY_ACCESS_HOLD_MINUTES,
+  EARLY_ACCESS_MAX_HOLDS_PER_USER,
+  EARLY_ACCESS_PURCHASE_LIMIT,
+} from "@/lib/constants";
+import {
   buildPublicProfilePracticeActivity,
   normalizePublicProfileLinks,
   normalizePublicUsername,
@@ -1122,6 +1128,79 @@ export async function insertPayment(data: {
   return results[0];
 }
 
+/** Spots in use: paid holds, plus unpaid holds that have not expired. */
+const earlyAccessSpotsUsed = sql<number>`cast(count(*) filter (where ${schema.earlyAccessHolds.paid_at} is not null or ${schema.earlyAccessHolds.expires_at} > now()) as int)`;
+
+/** Early-access discounted purchases still available, shared across all users. */
+export async function getEarlyAccessSpotsLeft(): Promise<number> {
+  if (EARLY_ACCESS_DISCOUNT_PERCENT <= 0) return 0;
+  try {
+    const [row] = await getDb().select({ used: earlyAccessSpotsUsed }).from(schema.earlyAccessHolds);
+    return Math.max(0, EARLY_ACCESS_PURCHASE_LIMIT - (row?.used ?? 0));
+  } catch (error) {
+    // No table / no DB, no discount: never undercharge because the count is unknown.
+    console.error("[early-access] Failed to count spots:", error);
+    return 0;
+  }
+}
+
+/** Same count for page renders and the banner; at most a minute stale. Checkout reserves under a lock. */
+export const getCachedEarlyAccessSpotsLeft = unstable_cache(getEarlyAccessSpotsLeft, ["early-access-spots-left"], {
+  revalidate: 60,
+});
+
+type OrderRef = { id: string; amount: number; currency: string };
+
+/**
+ * Reserve an early-access spot and create the discounted order, or return null
+ * (charge full price). Serialized with an advisory lock so concurrent checkouts
+ * cannot both take the last spot; the Razorpay call runs inside the lock.
+ * ponytail: holds are never cancelled on Razorpay's side, so an expired hold
+ * paid late still counts and can push past the limit; bounded per account by
+ * EARLY_ACCESS_MAX_HOLDS_PER_USER.
+ */
+export async function reserveEarlyAccessOrder(params: {
+  userId: string;
+  pack: string;
+  amount: number;
+  currency: string;
+  createOrder: (amount: number) => Promise<OrderRef>;
+}): Promise<OrderRef | null> {
+  if (EARLY_ACCESS_DISCOUNT_PERCENT <= 0) return null;
+  const t = schema.earlyAccessHolds;
+  try {
+    return await getDb().transaction(async (tx) => {
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext('early_access_holds'))`);
+
+      const mine = await tx.select().from(t).where(eq(t.user_id, params.userId));
+      if (mine.some((h) => h.paid_at) || mine.length >= EARLY_ACCESS_MAX_HOLDS_PER_USER) return null;
+
+      // Retried checkout for the same pack and price: reuse the open order instead of holding a second spot.
+      const open = mine.find(
+        (h) => !h.paid_at && h.expires_at > new Date() && h.pack === params.pack && h.amount === params.amount && h.currency === params.currency
+      );
+      if (open) return { id: open.razorpay_order_id, amount: open.amount, currency: open.currency };
+
+      const [row] = await tx.select({ used: earlyAccessSpotsUsed }).from(t);
+      if ((row?.used ?? 0) >= EARLY_ACCESS_PURCHASE_LIMIT) return null;
+
+      const order = await params.createOrder(params.amount);
+      await tx.insert(t).values({
+        razorpay_order_id: order.id,
+        user_id: params.userId,
+        pack: params.pack,
+        amount: order.amount,
+        currency: order.currency,
+        expires_at: new Date(Date.now() + EARLY_ACCESS_HOLD_MINUTES * 60_000),
+      });
+      return order;
+    });
+  } catch (error) {
+    console.error("[early-access] Reservation failed, charging full price:", error);
+    return null;
+  }
+}
+
 export async function provisionPaymentCredits(data: {
   user_id: string;
   razorpay_order_id: string;
@@ -1151,6 +1230,19 @@ export async function provisionPaymentCredits(data: {
 
     if (inserted.length === 0) {
       return { processed: false };
+    }
+
+    // Mark the early-access hold (if this was a discounted order) as a used spot.
+    // Savepoint, so a missing table can never block crediting a real payment.
+    try {
+      await tx.transaction((sp) =>
+        sp
+          .update(schema.earlyAccessHolds)
+          .set({ paid_at: sql`now()` })
+          .where(eq(schema.earlyAccessHolds.razorpay_order_id, data.razorpay_order_id))
+      );
+    } catch (error) {
+      console.error("[early-access] Failed to mark hold paid:", error);
     }
 
     const profiles = await tx

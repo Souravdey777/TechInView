@@ -61,7 +61,8 @@ export function OrbLab() {
 
         <div className="mt-8 grid gap-6">
           {[
-            { label: "Current (VoiceVisualizer)", orb: <VoiceVisualizer state={state} className="h-48 w-48" /> },
+            { label: "Default", orb: <VoiceVisualizer state={state} className="h-48 w-48" /> },
+            { label: "Follow cursor (landing)", orb: <VoiceVisualizer state={state} followCursor className="h-48 w-48" /> },
           ].map(({ label, orb }) => (
             <section key={label} className="flex flex-col items-center gap-4 rounded-2xl border border-brand-border bg-brand-card p-8">
               <div className="flex h-56 items-center justify-center">{orb}</div>

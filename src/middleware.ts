@@ -1,8 +1,14 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { COUNTRY_COOKIE } from "@/lib/constants";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  const response = await updateSession(request);
+  const country = request.headers.get("x-vercel-ip-country");
+  if (country && request.cookies.get(COUNTRY_COOKIE)?.value !== country) {
+    response.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 30 });
+  }
+  return response;
 }
 
 export const config = {

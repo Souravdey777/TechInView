@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export type VoiceState = "idle" | "listening" | "thinking" | "speaking";
@@ -8,6 +8,8 @@ export type VoiceState = "idle" | "listening" | "thinking" | "speaking";
 type VoiceVisualizerProps = {
   state: VoiceState;
   className?: string;
+  /** Eyes track the pointer on top of the state pose (landing page). */
+  followCursor?: boolean;
 };
 
 const FADE_MS = 700;
@@ -20,7 +22,7 @@ const FADE_MS = 700;
  * so each state renders as its own layer and state changes crossfade: the
  * outgoing layer keeps animating while it fades out.
  */
-export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
+export function VoiceVisualizer({ state, className, followCursor = false }: VoiceVisualizerProps) {
   const [layers, setLayers] = useState<VoiceState[]>([state]);
 
   useEffect(() => {
@@ -37,6 +39,8 @@ export function VoiceVisualizer({ state, className }: VoiceVisualizerProps) {
       {layers.map((s) => (
         <OrbLayer key={s} state={s} visible={s === state} />
       ))}
+      {/* One pair above the layers, so a state change moves the eyes instead of crossfading two pairs. */}
+      <OrbEyes state={state} followCursor={followCursor} />
     </div>
   );
 }
@@ -225,6 +229,129 @@ function OrbLayer({ state, visible }: { state: VoiceState; visible: boolean }) {
             transform: "rotate(-25deg)",
           }}
         />
+      </div>
+    </div>
+  );
+}
+
+// One eye's shape: size in px, corner radius, tilt, and vertical nudge.
+type EyeShape = { w: number; h: number; r: string; rot: number; dy: number };
+
+const PILL = "50%";
+// Rounded top, flat bottom: cheeks pushing up into a smile.
+const HAPPY = "50% 50% 30% 30% / 80% 80% 20% 20%";
+
+// Per-state pose. x/y shift both eyes; look/bob are 0..1 amplitudes for the idle glance and speaking bob.
+const EYE_POSE: Record<VoiceState, { x: number; y: number; look: number; bob: number; eyes: [EyeShape, EyeShape] }> = {
+  // Calm, glancing around.
+  idle: {
+    x: 0, y: 0, look: 1, bob: 0,
+    eyes: [{ w: 8, h: 13, r: PILL, rot: 0, dy: 0 }, { w: 8, h: 13, r: PILL, rot: 0, dy: 0 }],
+  },
+  // Wide open, leaning in.
+  listening: {
+    x: 0, y: -2, look: 0, bob: 0,
+    eyes: [{ w: 9, h: 16, r: PILL, rot: 0, dy: 0 }, { w: 9, h: 16, r: PILL, rot: 0, dy: 0 }],
+  },
+  // Looking up and away, one eye squinted: pondering.
+  thinking: {
+    x: 5, y: -6, look: 0, bob: 0,
+    eyes: [{ w: 9, h: 6, r: PILL, rot: -12, dy: 2 }, { w: 8, h: 14, r: PILL, rot: 0, dy: -1 }],
+  },
+  // Smiling eyes, tilted outward, bobbing with the voice.
+  speaking: {
+    x: 0, y: 0, look: 0, bob: 1,
+    eyes: [{ w: 10, h: 7, r: HAPPY, rot: -10, dy: 0 }, { w: 10, h: 7, r: HAPPY, rot: 10, dy: 0 }],
+  },
+};
+
+const EYE_EASE = `${FADE_MS}ms cubic-bezier(0.45, 0, 0.25, 1)`;
+// How far (orb px) the eyes can travel toward the cursor, and the distance at which they hit it.
+const FOLLOW_MAX = { x: 7, y: 5 };
+const FOLLOW_REACH = 320;
+
+const EYE_CSS = `
+        @property --eye-look { syntax: "<number>"; inherits: false; initial-value: 0; }
+        @property --eye-bob { syntax: "<number>"; inherits: false; initial-value: 0; }
+        @keyframes siri-eyes-look {
+          0%, 100% { transform: translateX(0); }
+          30% { transform: translateX(calc(var(--eye-look) * -3px)); }
+          65% { transform: translateX(calc(var(--eye-look) * 3px)); }
+        }
+        @keyframes siri-eyes-bob {
+          0%, 100% { translate: 0 0; }
+          50% { translate: 0 calc(var(--eye-bob) * -1.5px); }
+        }
+        @keyframes siri-blink {
+          0%, 92%, 100% { transform: scaleY(1); }
+          95% { transform: scaleY(0.1); }
+        }
+`;
+
+function OrbEyes({ state, followCursor }: { state: VoiceState; followCursor: boolean }) {
+  const pose = EYE_POSE[state];
+  const followRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = followRef.current;
+    if (!followCursor || !el) return;
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        // Rect is post-transform, so this works however the orb is scaled or moved.
+        const r = el.getBoundingClientRect();
+        const dx = e.clientX - (r.left + r.width / 2);
+        const dy = e.clientY - (r.top + r.height / 2);
+        const dist = Math.hypot(dx, dy) || 1;
+        const pull = Math.min(1, dist / FOLLOW_REACH);
+        el.style.translate = `${(dx / dist) * pull * FOLLOW_MAX.x}px ${(dy / dist) * pull * FOLLOW_MAX.y}px`;
+      });
+    };
+    const reset = () => {
+      cancelAnimationFrame(raf);
+      el.style.translate = "0px 0px";
+    };
+    window.addEventListener("pointermove", onMove);
+    document.documentElement.addEventListener("pointerleave", reset);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onMove);
+      document.documentElement.removeEventListener("pointerleave", reset);
+    };
+  }, [followCursor]);
+
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center motion-reduce:![animation:none]"
+      style={{
+        // Glance and bob always run; their amplitudes transition, so motion fades in and out instead of snapping.
+        ["--eye-look" as string]: followCursor ? 0 : pose.look,
+        ["--eye-bob" as string]: pose.bob,
+        transition: `--eye-look ${EYE_EASE}, --eye-bob ${EYE_EASE}`,
+        animation: "siri-eyes-look 9s ease-in-out infinite, siri-eyes-bob 0.6s ease-in-out infinite",
+      }}
+    >
+      {/* Raw HTML: React escapes the quotes/brackets in @property text on the server, breaking hydration. */}
+      <style dangerouslySetInnerHTML={{ __html: EYE_CSS }} />
+      <div ref={followRef} className="flex items-center gap-[13px]" style={{ transition: "translate 180ms ease-out" }}>
+        {pose.eyes.map((eye, i) => (
+          <span
+            key={i}
+            className="block bg-white/90 motion-reduce:![animation:none]"
+            style={{
+              width: eye.w,
+              height: eye.h,
+              borderRadius: eye.r,
+              rotate: `${eye.rot}deg`,
+              translate: `${pose.x}px ${pose.y + eye.dy - 3}px`,
+              transition: ["width", "height", "border-radius", "rotate", "translate"].map((p) => `${p} ${EYE_EASE}`).join(", "),
+              boxShadow: "0 0 8px rgba(255,255,255,0.45)",
+              animation: "siri-blink 4.5s ease-in-out infinite",
+            }}
+          />
+        ))}
       </div>
     </div>
   );

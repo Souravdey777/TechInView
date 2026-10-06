@@ -170,6 +170,26 @@ export const CREDIT_PACKS: Record<CreditPackId, CreditPack> = {
 
 export const PACK_IDS: CreditPackId[] = ["single", "3pack", "6pack"];
 
+/** Set by middleware from x-vercel-ip-country, so client components can price locally without making pages dynamic. */
+export const COUNTRY_COOKIE = "tiv-country";
+
+/** Early-access launch discount on interview packs (not resume reviews). Set to 0 to end it. */
+export const EARLY_ACCESS_DISCOUNT_PERCENT = 50;
+/** The discount covers only this many interview-pack purchases in total, across all users. */
+export const EARLY_ACCESS_PURCHASE_LIMIT = 20;
+/** How long an unpaid discounted order holds its spot. */
+export const EARLY_ACCESS_HOLD_MINUTES = 30;
+/** Discounted orders one account may ever create; caps late payments on expired holds. */
+export const EARLY_ACCESS_MAX_HOLDS_PER_USER = 3;
+
+/**
+ * Early-access price in whole currency units. Rounds down, so the discount is
+ * never smaller than advertised. Charge and display both go through this.
+ */
+export function earlyAccessPrice(fullPrice: number): number {
+  return Math.floor((fullPrice * (100 - EARLY_ACCESS_DISCOUNT_PERCENT)) / 100);
+}
+
 export type ResumePackId = "resume_single" | "resume_3pack";
 
 export const RESUME_PACKS: Record<ResumePackId, Omit<CreditPack, "id"> & { id: ResumePackId }> = {

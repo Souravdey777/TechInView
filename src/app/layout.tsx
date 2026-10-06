@@ -3,6 +3,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
 import { GeistFonts } from "@/components/marketing/MarketingShell";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
+import { EarlyAccessBanner } from "@/components/shared/EarlyAccess";
 import { SITE_NAME } from "@/lib/blog-seo";
 import {
   SITE_DEFAULT_DESCRIPTION,
@@ -95,6 +96,7 @@ export default function RootLayout({
           rendered straight into <body>, share the design system tokens and Geist. */}
       <body className="theme-landing bg-brand-deep font-sans text-brand-text antialiased">
         <PostHogProvider>
+          <EarlyAccessBanner />
           <div>{children}</div>
           <Toaster />
         </PostHogProvider>

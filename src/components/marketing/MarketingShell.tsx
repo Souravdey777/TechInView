@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { MarketingNav } from "@/components/landing/MarketingNav";
 import { MarketingFooter } from "@/components/landing/MarketingFooter";
+import { ExitIntentOffer } from "@/components/shared/EarlyAccess";
 import { cn } from "@/lib/utils";
 
 const NOISE =
@@ -71,6 +72,7 @@ export function MarketingShell({
         {children}
       </main>
       {chrome ? <MarketingFooter signupHref={signupHref} /> : null}
+      {chrome ? <ExitIntentOffer /> : null}
     </div>
   );
 }
