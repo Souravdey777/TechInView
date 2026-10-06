@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CREDIT_PACKS, earlyAccessPrice, getRegionForCountry } from "@/lib/constants";
 import { captureServerEvent } from "@/lib/posthog/server";
 import { enforceApiRateLimit } from "@/lib/api-security";
-import { getEarlyAccessSpotsLeft } from "@/lib/db/queries";
+import { reserveEarlyAccessOrder } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -45,20 +45,24 @@ export async function POST(req: NextRequest) {
     const country = (req.headers.get("x-vercel-ip-country") ?? "US").toUpperCase();
     const { region, currency } = getRegionForCountry(country);
     const listAmount = creditPack.prices[region];
-    // prices are in minor units; discount whole currency units so the charge matches the displayed price.
-    const earlyAccess = (await getEarlyAccessSpotsLeft()) > 0;
-    const amount = earlyAccess ? earlyAccessPrice(listAmount / 100) * 100 : listAmount;
-
-    const order = await createOrder(
-      amount,
-      currency,
-      `rcpt_${user.id.slice(0, 8)}_${Date.now()}`,
-      {
+    const newOrder = (amount: number) =>
+      createOrder(amount, currency, `rcpt_${user.id.slice(0, 8)}_${Date.now()}`, {
         userId: user.id,
         pack,
         credits: String(creditPack.credits),
-      }
-    );
+      });
+
+    // prices are in minor units; discount whole currency units so the charge matches the displayed price.
+    const discounted = await reserveEarlyAccessOrder({
+      userId: user.id,
+      pack,
+      amount: earlyAccessPrice(listAmount / 100) * 100,
+      currency,
+      createOrder: newOrder,
+    });
+    const earlyAccess = discounted !== null;
+    const order = discounted ?? (await newOrder(listAmount));
+    const amount = order.amount;
 
     captureServerEvent(user.id, "payment_initiated", {
       pack,

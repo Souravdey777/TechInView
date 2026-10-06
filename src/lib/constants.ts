@@ -177,8 +177,10 @@ export const COUNTRY_COOKIE = "tiv-country";
 export const EARLY_ACCESS_DISCOUNT_PERCENT = 50;
 /** The discount covers only this many interview-pack purchases in total, across all users. */
 export const EARLY_ACCESS_PURCHASE_LIMIT = 20;
-/** Purchases are counted from here, so packs bought before the offer don't use up spots. */
-export const EARLY_ACCESS_STARTS_AT = new Date("2026-10-06T00:00:00Z");
+/** How long an unpaid discounted order holds its spot. */
+export const EARLY_ACCESS_HOLD_MINUTES = 30;
+/** Discounted orders one account may ever create; caps late payments on expired holds. */
+export const EARLY_ACCESS_MAX_HOLDS_PER_USER = 3;
 
 /**
  * Early-access price in whole currency units. Rounds down, so the discount is
