@@ -71,7 +71,7 @@ export function PracticeModeCta({
               onClick={() => setExperience(option.id)}
               className={cn(
                 CELL,
-                "px-6 py-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan",
+                "px-6 py-6 text-left transition-[background-color,transform] duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan",
                 active ? "bg-brand-cyan/[0.06]" : "hover:bg-white/[0.02]"
               )}
             >
@@ -96,7 +96,11 @@ export function PracticeModeCta({
 
       <div className="mt-8 flex flex-wrap gap-3">
         <ButtonLink href={primaryHref}>
-          {primaryLabel} <span className="font-mono" aria-hidden>→</span>
+          {/* Re-keyed so the label eases in when the mode changes. */}
+          <span key={primaryLabel} className="animate-[soft-rise_0.3s_ease-out] motion-reduce:animate-none">
+            {primaryLabel}
+          </span>
+          <span className="font-mono" aria-hidden>→</span>
         </ButtonLink>
         {canSolve ? (
           <ButtonLink href={interviewHref} variant="ghost">

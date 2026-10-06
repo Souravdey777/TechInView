@@ -18,6 +18,7 @@ import {
   PROSE,
 } from "@/components/marketing/ds";
 import { PracticeModeCta } from "@/components/practice/PracticeModeCta";
+import { LandingReveal } from "@/components/landing/LandingReveal";
 import {
   DifficultyMark,
   ProblemConstraints,
@@ -255,7 +256,7 @@ export default async function PracticeSlugPage({
 
       <div className={cn(CONTAINER, "max-w-[880px]")}>
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-12">
+        <nav aria-label="Breadcrumb" className="hero-rise mb-12">
           <ol className={cn(LABEL, "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1")}>
             <li>
               <Link href="/practice" className="transition-colors hover:text-brand-cyan">
@@ -271,19 +272,19 @@ export default async function PracticeSlugPage({
 
         {/* Header */}
         <header className="mb-14 border-b border-white/[0.08] pb-10">
-          <div className="mb-7 flex flex-wrap items-center gap-x-5 gap-y-2">
+          <div style={{ "--i": 1 } as React.CSSProperties} className="hero-rise mb-7 flex flex-wrap items-center gap-x-5 gap-y-2">
             <DifficultyMark difficulty={problem.difficulty} />
             <span className={LABEL}>{catLabel}</span>
             <span className={LABEL}>
               {problem.is_free_solver_enabled ? "Free practice" : "AI interview only"}
             </span>
           </div>
-          <h1 className={cn(H1, "text-[clamp(36px,5.2vw,72px)] leading-[1.02]")}>
+          <h1 style={{ "--i": 2 } as React.CSSProperties} className={cn(H1, "hero-rise text-[clamp(36px,5.2vw,72px)] leading-[1.02]")}>
             {problem.title}
           </h1>
 
           {companyTags.length > 0 && (
-            <div className="mt-8 flex flex-wrap items-center gap-2">
+            <div style={{ "--i": 3 } as React.CSSProperties} className="hero-rise mt-8 flex flex-wrap items-center gap-2">
               <span className={cn(LABEL, "mr-2")}>Asked at</span>
               {companyTags.map((tag) => (
                 <span key={tag} className={CHIP}>
@@ -295,7 +296,7 @@ export default async function PracticeSlugPage({
         </header>
 
         {/* Problem statement */}
-        <section className="mb-16">
+        <section style={{ "--i": 4 } as React.CSSProperties} className="hero-rise mb-16">
           <SectionLabel n="01">Problem</SectionLabel>
           <div
             className={cn(
@@ -308,29 +309,35 @@ export default async function PracticeSlugPage({
           </div>
         </section>
 
-        <ProblemExamples examples={examples} n={examplesN} />
+        <LandingReveal>
+          <ProblemExamples examples={examples} n={examplesN} />
+        </LandingReveal>
 
-        <ProblemConstraints constraints={constraints} n={constraintsN} />
+        <LandingReveal>
+          <ProblemConstraints constraints={constraints} n={constraintsN} />
+        </LandingReveal>
 
         {/* Complexity */}
         {hasComplexity && (
+          <LandingReveal>
           <section className="mb-16">
             <SectionLabel n={complexityN}>Optimal complexity</SectionLabel>
             <dl className={cn(GRID, "sm:grid-cols-2")}>
               {complexity.time && (
-                <div className={cn(CELL, "px-5 py-5")}>
+                <div className={cn(CELL, "px-5 py-5 transition-colors hover:bg-white/[0.02]")}>
                   <dt className={LABEL}>Time</dt>
                   <dd className="mt-2 font-mono text-lg text-brand-text">{complexity.time}</dd>
                 </div>
               )}
               {complexity.space && (
-                <div className={cn(CELL, "px-5 py-5")}>
+                <div className={cn(CELL, "px-5 py-5 transition-colors hover:bg-white/[0.02]")}>
                   <dt className={LABEL}>Space</dt>
                   <dd className="mt-2 font-mono text-lg text-brand-text">{complexity.space}</dd>
                 </div>
               )}
             </dl>
           </section>
+          </LandingReveal>
         )}
 
         {showLockedNotice ? (
@@ -340,15 +347,18 @@ export default async function PracticeSlugPage({
           </p>
         ) : null}
 
-        <PracticeModeCta
-          problemSlug={problem.slug}
-          isFreeSolverEnabled={problem.is_free_solver_enabled}
-          initialExperience={initialExperience}
-          n={ctaN}
-        />
+        <LandingReveal>
+          <PracticeModeCta
+            problemSlug={problem.slug}
+            isFreeSolverEnabled={problem.is_free_solver_enabled}
+            initialExperience={initialExperience}
+            n={ctaN}
+          />
+        </LandingReveal>
 
         {/* Related problems */}
         {related.length > 0 && (
+          <LandingReveal>
           <nav className="mt-20" aria-labelledby="related-problems">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-white/[0.08] pb-4">
               <h2 id="related-problems" className="font-mono text-xs font-normal uppercase tracking-[0.14em] text-brand-subtle">
@@ -358,7 +368,7 @@ export default async function PracticeSlugPage({
                 All problems <span aria-hidden>→</span>
               </Link>
             </div>
-            <ul className={cn(GRID, "sm:grid-cols-2")}>
+            <ul className={cn(GRID, "reveal-stagger sm:grid-cols-2")}>
               {related.map((p) => (
                 <li key={p.slug} className={CELL}>
                   <Link
@@ -371,7 +381,7 @@ export default async function PracticeSlugPage({
                       </span>
                       <DifficultyMark difficulty={p.difficulty} className="mt-2" />
                     </span>
-                    <span aria-hidden className="font-mono text-brand-subtle transition-colors group-hover:text-brand-cyan">
+                    <span aria-hidden className="font-mono text-brand-subtle transition-[color,transform] duration-300 group-hover:translate-x-1 group-hover:text-brand-cyan">
                       →
                     </span>
                   </Link>
@@ -379,6 +389,7 @@ export default async function PracticeSlugPage({
               ))}
             </ul>
           </nav>
+          </LandingReveal>
         )}
       </div>
     </article>
