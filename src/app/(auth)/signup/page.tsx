@@ -71,6 +71,7 @@ export default function SignupPage() {
 
   return (
     <AuthSplitLayout
+      busy={loadingProvider !== null}
       kicker="Voice-first AI mock interviews"
       eyebrow={isBeta ? "Beta invite" : "Start free"}
       heading="Create account."

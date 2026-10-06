@@ -65,6 +65,7 @@ export default function LoginPage() {
 
   return (
     <AuthSplitLayout
+      busy={loadingProvider !== null}
       kicker="Voice-first AI mock interviews"
       eyebrow="Welcome back"
       heading="Log in."

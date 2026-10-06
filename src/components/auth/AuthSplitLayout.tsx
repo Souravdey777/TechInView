@@ -1,9 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/components/shared/BrandLogo";
-import { VoiceVisualizer } from "@/components/interview/VoiceVisualizer";
+import { VoiceVisualizer, type VoiceState } from "@/components/interview/VoiceVisualizer";
 import { CELL, GRID, H3, Kicker, LABEL, LEAD } from "@/components/marketing/ds";
 import { PHASE_ORDER } from "@/lib/interview-phases";
 import { FREE_TRIAL_DURATION_MINUTES, FULL_INTERVIEW_DURATION_MINUTES } from "@/lib/constants";
@@ -39,8 +39,49 @@ type AuthSplitLayoutProps = {
   footer: ReactNode;
   /** Small reassurance line pinned below a hairline. */
   reassurance: ReactNode;
+  /** An auth redirect is in flight; Tia shows "thinking". */
+  busy?: boolean;
   className?: string;
 };
+
+const TYPE_DELAY_MS = 500;
+const TYPE_CHAR_MS = 38;
+
+/** Types `text` out like Tia saying it. Reduced motion shows it all at once. */
+function useTypedLine(text: string) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setCount(text.length);
+      return;
+    }
+    setCount(0);
+    let id = window.setTimeout(function tick() {
+      setCount((c) => {
+        if (c + 1 < text.length) id = window.setTimeout(tick, TYPE_CHAR_MS);
+        return c + 1;
+      });
+    }, TYPE_DELAY_MS);
+    return () => window.clearTimeout(id);
+  }, [text]);
+
+  return { typed: text.slice(0, count), done: count >= text.length };
+}
+
+/** Full text holds the space (no layout shift) and is what screen readers get; the typed copy sits on top. */
+function TypedText({ text, typed, done }: { text: string; typed: string; done: boolean }) {
+  return (
+    <span className="grid">
+      <span className="invisible col-start-1 row-start-1">{text}</span>
+      <span aria-hidden className="col-start-1 row-start-1">
+        {typed}
+        {!done && <span className="ml-0.5 inline-block h-[0.8em] w-[0.08em] translate-y-[0.08em] animate-pulse bg-brand-cyan" />}
+      </span>
+      <span className="sr-only">{text}</span>
+    </span>
+  );
+}
 
 export function AuthSplitLayout({
   kicker,
@@ -52,11 +93,23 @@ export function AuthSplitLayout({
   children,
   footer,
   reassurance,
+  busy = false,
   className,
 }: AuthSplitLayoutProps) {
+  const line = useTypedLine(panelHeadline);
+  const [attentive, setAttentive] = useState(false);
+  // Tia talks first, then listens while you're on the sign-in options, and thinks while you're redirected.
+  const orbState: VoiceState = busy ? "thinking" : !line.done ? "speaking" : attentive ? "listening" : "idle";
+  const listen = {
+    onPointerEnter: () => setAttentive(true),
+    onPointerLeave: () => setAttentive(false),
+    onFocus: () => setAttentive(true),
+    onBlur: () => setAttentive(false),
+  };
+
   return (
     <div className={cn("flex min-h-screen w-full lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]", className)}>
-      <AuthBrandPanel kicker={kicker} headline={panelHeadline} supporting={panelSupporting} />
+      <AuthBrandPanel kicker={kicker} headline={panelHeadline} supporting={panelSupporting} line={line} orbState={orbState} />
 
       {/* Form column */}
       <div className="flex w-full flex-col justify-center px-5 py-12 sm:px-10 lg:px-[clamp(40px,6vw,96px)]">
@@ -65,12 +118,27 @@ export function AuthSplitLayout({
             <BrandLogo size="sm" />
           </Link>
 
+          {/* Mobile has no brand panel, so Tia greets you here instead. */}
+          <div aria-hidden className="mb-10 flex items-center gap-4 lg:hidden">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center">
+              <div className="scale-[0.62]">
+                <VoiceVisualizer state={orbState} className="h-[76px] w-[76px]" />
+              </div>
+            </div>
+            <p className="text-[15px] leading-snug text-brand-muted">
+              <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.1em] text-brand-cyan">Tia</span>
+              <TypedText text={panelHeadline} {...line} />
+            </p>
+          </div>
+
           <p className={LABEL}>{eyebrow}</p>
           <h1 className="mt-4 text-[clamp(40px,5vw,56px)] font-normal leading-none tracking-[-0.045em]">{heading}</h1>
 
           {intro}
 
-          <div className="mt-10">{children}</div>
+          <div className="mt-10" {...listen}>
+            {children}
+          </div>
 
           <p className="mt-8 text-[15px] text-brand-muted">{footer}</p>
 
@@ -88,11 +156,19 @@ export function AuthBrandPanel({
   kicker,
   headline,
   supporting,
+  line,
+  orbState,
 }: {
   kicker: string;
   headline: string;
   supporting: string;
+  /** Shared with the form column on login/signup; standalone (onboarding) the panel types its own. */
+  line?: { typed: string; done: boolean };
+  orbState?: VoiceState;
 }) {
+  const ownLine = useTypedLine(headline);
+  const shown = line ?? ownLine;
+  const state = orbState ?? (shown.done ? "idle" : "speaking");
   return (
     <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-white/[0.08] px-[clamp(32px,4vw,64px)] py-12 lg:flex">
       <div
@@ -108,12 +184,12 @@ export function AuthBrandPanel({
         {/* VoiceVisualizer's orb is 76px; scale the wrapper, never the component. */}
         <div aria-hidden className="mb-14 flex h-[200px] w-[200px] items-center justify-center">
           <div className="scale-[2.2] brightness-125">
-            <VoiceVisualizer state="speaking" className="h-[76px] w-[76px]" />
+            <VoiceVisualizer state={state} followCursor className="h-[76px] w-[76px]" />
           </div>
         </div>
         <Kicker>{kicker}</Kicker>
         <p className="max-w-[14ch] text-balance text-[clamp(36px,4vw,60px)] font-normal leading-[1.0] tracking-[-0.04em]">
-          {headline}
+          <TypedText text={headline} {...shown} />
         </p>
         <p className={cn(LEAD, "mt-6 max-w-[440px]")}>{supporting}</p>
       </div>
