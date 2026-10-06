@@ -128,7 +128,7 @@ export function HeroCanvas() {
     <div aria-hidden className="pointer-events-none absolute inset-0">
       <canvas ref={ref} className="absolute inset-0 block h-full w-full" />
       <div ref={orbRef} className="absolute left-0 top-0 h-[76px] w-[76px] opacity-0 brightness-125 transition-opacity duration-700">
-        <VoiceVisualizer state="speaking" className="h-[76px] w-[76px]" />
+        <VoiceVisualizer state="speaking" followCursor className="h-[76px] w-[76px]" />
       </div>
     </div>
   );
@@ -218,7 +218,7 @@ export function InterviewRoomDemo({ name }: { name: string }) {
           </div>
           <div aria-hidden className="flex h-60 w-full items-center justify-center">
             <div className="scale-[1.7]">
-              <VoiceVisualizer state={orbState} className="h-[76px] w-[76px]" />
+              <VoiceVisualizer state={orbState} followCursor className="h-[76px] w-[76px]" />
             </div>
           </div>
           <div>
