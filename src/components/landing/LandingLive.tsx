@@ -380,6 +380,8 @@ export function ScoreCard({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [k, setK] = useState(0);
+  // Hovering a row or a radar axis highlights that dimension in both.
+  const [hover, setHover] = useState<number | null>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -420,15 +422,28 @@ export function ScoreCard({
       <div>
         {header}
         <div className="flex flex-col border-t border-white/[0.08]">
-        {dims.map((d) => (
-          <div key={d.name} className="grid grid-cols-[minmax(0,1fr)_120px_36px] items-center gap-4 border-b border-white/[0.08] py-3.5">
-            <span className="text-[15px]">{d.name}</span>
-            <span className="relative h-0.5 bg-white/[0.08]">
-              <span className="absolute inset-y-0 left-0 bg-brand-cyan" style={{ width: `${d.score * k}%` }} />
-            </span>
-            <span className="text-right font-mono text-[13px] text-brand-muted">{Math.round(d.score * k)}</span>
-          </div>
-        ))}
+        {dims.map((d, i) => {
+          const on = hover === i;
+          return (
+            <div
+              key={d.name}
+              onMouseEnter={() => setHover(i)}
+              onMouseLeave={() => setHover(null)}
+              className={cn(
+                "grid grid-cols-[minmax(0,1fr)_120px_36px] items-center gap-4 border-b border-white/[0.08] py-3.5 transition-[padding,background-color] duration-300",
+                on && "bg-white/[0.02] pl-2"
+              )}
+            >
+              <span className={cn("text-[15px] transition-colors", on && "text-brand-cyan")}>{d.name}</span>
+              <span className={cn("relative bg-white/[0.08] transition-[height] duration-300", on ? "h-1" : "h-0.5")}>
+                <span className="absolute inset-y-0 left-0 bg-brand-cyan" style={{ width: `${d.score * k}%` }} />
+              </span>
+              <span className={cn("text-right font-mono text-[13px] transition-colors", on ? "text-brand-text" : "text-brand-muted")}>
+                {Math.round(d.score * k)}
+              </span>
+            </div>
+          );
+        })}
         </div>
         {footer}
       </div>
@@ -447,9 +462,20 @@ export function ScoreCard({
             return <line key={i} x1={c} y1={c} x2={x} y2={y} stroke="rgba(255,255,255,0.07)" />;
           })}
           <polygon points={poly((i) => (R * dims[i].score * k) / 100)} style={{ fill: ACCENT(0.14), stroke: ACCENT() }} strokeWidth={1.5} />
+          {hover !== null ? (
+            <line x1={c} y1={c} x2={pt(hover, R)[0]} y2={pt(hover, R)[1]} strokeDasharray="2 4" style={{ stroke: ACCENT(0.5) }} />
+          ) : null}
           {dims.map((d, i) => {
             const [x, y] = pt(i, (R * d.score * k) / 100);
-            return <circle key={d.name} cx={x} cy={y} r={3.5} style={{ fill: ACCENT() }} />;
+            const on = hover === i;
+            return (
+              <g key={d.name} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} className="cursor-default">
+                {on ? <circle cx={x} cy={y} r={10} style={{ fill: ACCENT(0.18) }} /> : null}
+                <circle cx={x} cy={y} r={on ? 5 : 3.5} style={{ fill: ACCENT(), transition: "r 200ms" }} />
+                {/* Generous invisible hit target around each vertex. */}
+                <circle cx={x} cy={y} r={18} fill="transparent" />
+              </g>
+            );
           })}
           {dims.map((d, i) => {
             const [x, y] = pt(i, R + 22);
@@ -458,12 +484,15 @@ export function ScoreCard({
                 key={d.name}
                 x={x}
                 y={y}
-                fill="#8E939B"
+                onMouseEnter={() => setHover(i)}
+                onMouseLeave={() => setHover(null)}
+                style={{ fill: hover === i ? ACCENT() : "#8E939B", transition: "fill 200ms" }}
                 dominantBaseline="middle"
                 textAnchor={x < c - 5 ? "end" : x > c + 5 ? "start" : "middle"}
                 className="font-mono text-[10px] tracking-[0.06em]"
               >
                 {d.short}
+                {hover === i ? <tspan fill="#E6E8EB"> {d.score}</tspan> : null}
               </text>
             );
           })}

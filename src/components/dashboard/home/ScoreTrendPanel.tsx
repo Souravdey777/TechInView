@@ -257,7 +257,8 @@ export function ScoreTrendPanel({ trend }: { trend: readonly TrendPoint[] }) {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-brand-cyan"
+              pathLength={1}
+              className="draw-line text-brand-cyan"
             />
 
             <g onMouseLeave={() => setActiveIndex(null)}>

@@ -36,16 +36,16 @@ export const BODY = "text-[15px] leading-relaxed text-brand-muted";
 export const LABEL = "font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle";
 
 export const BTN_PRIMARY =
-  "inline-flex items-center justify-center gap-3 rounded-full bg-brand-cyan px-[26px] py-4 text-[15px] font-medium text-brand-deep transition-colors hover:bg-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center gap-3 rounded-full bg-brand-cyan px-[26px] py-4 text-[15px] font-medium text-brand-deep transition-[color,background-color,border-color,transform] duration-200 active:scale-[0.97] [&_svg]:transition-transform hover:[&_svg:last-child]:translate-x-0.5 [&>[aria-hidden]]:transition-transform hover:[&>[aria-hidden]]:translate-x-0.5 hover:bg-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep disabled:pointer-events-none disabled:opacity-50";
 export const BTN_GHOST =
-  "inline-flex items-center justify-center gap-3 rounded-full border border-white/[0.18] px-[26px] py-4 text-[15px] text-brand-text transition-colors hover:border-brand-cyan hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center gap-3 rounded-full border border-white/[0.18] px-[26px] py-4 text-[15px] text-brand-text transition-[color,background-color,border-color,transform] duration-200 active:scale-[0.97] [&_svg]:transition-transform hover:[&_svg:last-child]:translate-x-0.5 [&>[aria-hidden]]:transition-transform hover:[&>[aria-hidden]]:translate-x-0.5 hover:border-brand-cyan hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan disabled:pointer-events-none disabled:opacity-50";
 /** Compact sizes for nav, cards and inline actions. */
 export const BTN_SM = "px-4 py-[9px] text-sm";
 /** Visible focus ring for text links and icon buttons (pills already include one). */
 export const FOCUS =
   "rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep";
 /** Mono uppercase text link with an arrow, e.g. "How we score a round →". */
-export const LINK_ARROW = `inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.08em] text-brand-cyan transition-colors hover:text-brand-text ${FOCUS}`;
+export const LINK_ARROW = `inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.08em] text-brand-cyan transition-colors hover:text-brand-text [&>[aria-hidden]]:transition-transform hover:[&>[aria-hidden]]:translate-x-1 ${FOCUS}`;
 /** Pill tag / filter chip. Add CHIP_ACTIVE when selected. */
 export const CHIP =
   "inline-flex items-center rounded-full border border-white/[0.1] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-muted transition-colors hover:text-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep";

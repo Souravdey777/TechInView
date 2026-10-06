@@ -57,12 +57,18 @@ export function PracticeGrid({ initial }: PracticeGridProps) {
           return (
             <li
               key={p.slug}
-              className={cn(COLS, "group border-b border-white/[0.08] py-5 transition-colors hover:bg-white/[0.02]")}
+              className={cn(
+                COLS,
+                "group border-b border-white/[0.08] py-5 transition-colors hover:bg-white/[0.02]",
+                // Rows ease in as they mount: first paint, a filter change, or a loaded page.
+                "animate-[soft-rise_0.4s_ease-out_backwards] motion-reduce:animate-none"
+              )}
+              style={{ animationDelay: `${Math.min(i % 20, 10) * 25}ms` }}
             >
-              <span className={cn(LABEL, "hidden md:block")}>{String(i + 1).padStart(2, "0")}</span>
+              <span className={cn(LABEL, "hidden transition-colors group-hover:text-brand-cyan md:block")}>{String(i + 1).padStart(2, "0")}</span>
 
               <div className="min-w-0">
-                <h3 className="text-[17px] font-normal tracking-[-0.01em] text-brand-text">
+                <h3 className="text-[17px] font-normal tracking-[-0.01em] text-brand-text transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transform-none">
                   <Link href={`/practice/${p.slug}`} className="transition-colors hover:text-brand-cyan">
                     {p.title}
                   </Link>

@@ -55,8 +55,8 @@ export function Rack({
     <section
       id={id}
       className={cn(
-        "overflow-hidden rounded-[20px] border",
-        isDanger ? "border-brand-rose/25" : "border-white/[0.08]",
+        "overflow-hidden rounded-[20px] border transition-colors duration-300",
+        isDanger ? "border-brand-rose/25" : "border-white/[0.08] hover:border-white/[0.14]",
         id && "scroll-mt-24",
         className
       )}

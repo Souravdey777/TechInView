@@ -216,7 +216,7 @@
   animation-delay: calc(var(--i, 0) * 120ms + 80ms);
 }
 .reveal-stagger > * { opacity: 0; }
-.is-visible .reveal-stagger > * { animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
+.is-visible .reveal-stagger > * { opacity: 1; animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
 .reveal-stagger > :nth-child(2) { animation-delay: 80ms; }
 .reveal-stagger > :nth-child(3) { animation-delay: 160ms; }
 .reveal-stagger > :nth-child(4) { animation-delay: 240ms; }
@@ -227,3 +227,44 @@
   .hero-rise,
   .reveal-stagger > * { opacity: 1; animation: none !important; }
 }
+
+/* Micro-motion — CSS-only utilities for app surfaces. */
+@keyframes soft-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+}
+@keyframes draw-line {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+/* Children rise in on mount, one beat apart. */
+.stagger-in > * {
+  animation: soft-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+.stagger-in > :nth-child(2) { animation-delay: 60ms; }
+.stagger-in > :nth-child(3) { animation-delay: 120ms; }
+.stagger-in > :nth-child(4) { animation-delay: 180ms; }
+.stagger-in > :nth-child(5) { animation-delay: 240ms; }
+.stagger-in > :nth-child(6) { animation-delay: 300ms; }
+.stagger-in > :nth-child(n + 7) { animation-delay: 360ms; }
+/* Bars fill from the left; set --d for a per-bar delay. */
+.grow-x {
+  transform-origin: left;
+  animation: grow-x 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+/* SVG strokes draw themselves; needs pathLength="1" on the element. */
+.draw-line {
+  stroke-dasharray: 1;
+  animation: draw-line 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stagger-in > *,
+  .grow-x,
+  .draw-line { animation: none !important; }
+  .draw-line { stroke-dasharray: none; }
+}
+

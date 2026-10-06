@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { HeroCanvas, InterviewRoomDemo, LiveStatus, PhaseTimeline, ScoreCard } from "@/components/landing/LandingLive";
 import { LandingReveal } from "@/components/landing/LandingReveal";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
-import { BTN_GHOST, BTN_PRIMARY, Eyebrow, H2, PAD } from "@/components/marketing/ds";
+import { BTN_GHOST, BTN_PRIMARY, Eyebrow, H2, LINK_ARROW, PAD } from "@/components/marketing/ds";
 import {
   CREDIT_PACKS,
   FREE_TRIAL_DURATION_MINUTES,
@@ -164,7 +164,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href={practiceSignupHref} className={BTN_PRIMARY}>
-                  Practice free <span className="font-mono">→</span>
+                  Practice free <span aria-hidden className="font-mono">→</span>
                 </Link>
                 <Link href={previewSignupHref} className={BTN_GHOST}>
                   Try a free {FREE_TRIAL_DURATION_MINUTES}-minute interview
@@ -211,8 +211,8 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             </div>
             <div className="reveal-stagger grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] border-t border-white/[0.08]">
               {GAPS.map((g, i) => (
-                <div key={g.title} className="border-b border-white/[0.08] pb-10 pr-7 pt-8">
-                  <div className="mb-10 font-mono text-xs text-brand-cyan">/0{i + 1}</div>
+                <div key={g.title} className="group border-b border-white/[0.08] pb-10 pr-7 pt-8">
+                  <div className="mb-10 font-mono text-xs text-brand-cyan transition-transform duration-300 group-hover:translate-x-1.5">/0{i + 1}</div>
                   <h3 className="mb-3 text-xl font-medium tracking-[-0.02em]">{g.title}</h3>
                   <p className="text-[15px] leading-relaxed text-brand-muted">{g.body}</p>
                 </div>
@@ -257,9 +257,9 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
               footer={
                 <Link
                   href="/how-ai-evaluates"
-                  className="mt-7 inline-block font-mono text-xs uppercase tracking-[0.08em] text-brand-cyan hover:text-brand-text"
+                  className={cn(LINK_ARROW, "mt-7")}
                 >
-                  How we score a round →
+                  How we score a round <span aria-hidden>→</span>
                 </Link>
               }
             />
@@ -333,7 +333,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                       <span className="hidden group-open:inline">−</span>
                     </span>
                   </summary>
-                  <p className="pb-7 pr-12 text-pretty text-base leading-relaxed text-brand-muted">{f.answer}</p>
+                  <p className="pb-7 pr-12 text-pretty text-base leading-relaxed text-brand-muted group-open:animate-[soft-rise_0.35s_ease-out] motion-reduce:animate-none">{f.answer}</p>
                 </details>
               ))}
             </div>
@@ -363,7 +363,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             </h2>
             <div className="relative mt-14 flex flex-wrap gap-3">
               <Link href={practiceSignupHref} className={BTN_PRIMARY}>
-                Practice free <span className="font-mono">→</span>
+                Practice free <span aria-hidden className="font-mono">→</span>
               </Link>
               <Link href={previewSignupHref} className={BTN_GHOST}>
                 Try a free {FREE_TRIAL_DURATION_MINUTES}-minute interview
@@ -397,10 +397,10 @@ function PriceCard({
   return (
     <div
       className={cn(
-        "flex flex-col gap-7 rounded-[18px] border p-7",
+        "flex flex-col gap-7 rounded-[18px] border p-7 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 motion-reduce:hover:translate-y-0",
         featured
-          ? "border-brand-cyan bg-brand-cyan/[0.04] shadow-[0_0_60px_rgb(var(--brand-cyan)/0.08)]"
-          : "border-white/[0.09]"
+          ? "border-brand-cyan bg-brand-cyan/[0.04] shadow-[0_0_60px_rgb(var(--brand-cyan)/0.08)] hover:shadow-[0_0_80px_rgb(var(--brand-cyan)/0.16)]"
+          : "border-white/[0.09] hover:border-white/[0.18]"
       )}
     >
       <div
@@ -426,7 +426,7 @@ function PriceCard({
       <Link
         href={href}
         className={cn(
-          "rounded-full p-[13px] text-center text-sm transition-colors",
+          "rounded-full p-[13px] text-center text-sm transition-[color,background-color,border-color,transform] duration-200 active:scale-[0.97]",
           featured
             ? "bg-brand-cyan font-medium text-brand-deep hover:bg-brand-text"
             : "border border-white/[0.18] hover:border-brand-cyan hover:text-brand-cyan"

@@ -17,6 +17,7 @@ import { DifficultyMark } from "@/components/practice/ProblemStatement";
 import { getProblems } from "@/lib/db/queries";
 import { getBankProblems, pageProblems } from "@/lib/problem-list";
 import { PracticeGrid } from "@/components/practice/PracticeGrid";
+import { LandingReveal } from "@/components/landing/LandingReveal";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
@@ -152,9 +153,9 @@ export default async function PracticePage() {
       {/* Hero */}
       <header className={cn(PAD, "pb-16 pt-20 sm:pb-20 sm:pt-28")}>
         <div className={CONTAINER}>
-          <Kicker>Coding interview prep</Kicker>
-          <h1 className={cn(H1, "max-w-[14ch]")}>DSA interview practice problems</h1>
-          <div className="mt-12 flex flex-wrap items-end justify-between gap-10">
+          <Kicker className="hero-rise">Coding interview prep</Kicker>
+          <h1 style={{ "--i": 1 } as React.CSSProperties} className={cn(H1, "hero-rise max-w-[14ch]")}>DSA interview practice problems</h1>
+          <div style={{ "--i": 2 } as React.CSSProperties} className="hero-rise mt-12 flex flex-wrap items-end justify-between gap-10">
             <p className={cn(LEAD, "max-w-[520px]")}>
               {counts.total} problems across arrays, trees, graphs, dynamic programming and more. Solve the free set on
               your own in Practice Mode. When you want to rehearse the real thing, open any problem in AI Interview Mode
@@ -169,7 +170,7 @@ export default async function PracticePage() {
               </ButtonLink>
             </div>
           </div>
-          <div className="mt-16 flex flex-wrap gap-x-10 gap-y-3 border-t border-white/[0.08] pt-5">
+          <div style={{ "--i": 3 } as React.CSSProperties} className="hero-rise mt-16 flex flex-wrap gap-x-10 gap-y-3 border-t border-white/[0.08] pt-5">
             <span className={cn(LABEL, "text-brand-muted")}>{counts.total} problems</span>
             <span className="inline-flex items-center gap-2">
               <DifficultyMark difficulty="easy" />
@@ -204,7 +205,8 @@ export default async function PracticePage() {
       <section className={cn(PAD, "border-t border-white/[0.08] pb-24 pt-24 sm:pb-32 sm:pt-32")} aria-labelledby="faq">
         <div className={CONTAINER}>
           <SectionHeader n="02" eyebrow="Questions" title={<span id="faq">How practice works.</span>} />
-          <dl className="border-t border-white/[0.08]">
+          <LandingReveal>
+          <dl className="reveal-stagger border-t border-white/[0.08]">
             {faqs.map((faq) => (
               <div
                 key={faq.q}
@@ -215,6 +217,7 @@ export default async function PracticePage() {
               </div>
             ))}
           </dl>
+          </LandingReveal>
         </div>
       </section>
     </>

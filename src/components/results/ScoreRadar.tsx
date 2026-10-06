@@ -104,8 +104,14 @@ export function ScoreRadar({ scores }: ScoreRadarProps) {
                 fill: DESIGN_SYSTEM_CHART_COLORS.score,
                 strokeWidth: 0,
               }}
+              activeDot={{
+                r: 5,
+                fill: DESIGN_SYSTEM_CHART_COLORS.score,
+                stroke: "rgba(255,255,255,0.2)",
+                strokeWidth: 6,
+              }}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: HAIRLINE, strokeDasharray: "2 4" }} />
           </RadarChart>
         </ResponsiveContainer>
       </div>

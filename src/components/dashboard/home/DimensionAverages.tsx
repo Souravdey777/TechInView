@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { MonoLabel, Rack } from "@/components/shared/Rack";
 import { BODY } from "@/components/marketing/ds";
 import { HIRE_LINE, type DimensionAverage } from "@/lib/dashboard/home-metrics";
@@ -25,7 +26,7 @@ export function DimensionAverages({
     >
       {dimensions.length > 0 ? (
         <div className="flex flex-col gap-4">
-          {dimensions.map((dimension) => {
+          {dimensions.map((dimension, index) => {
             const isWeakest = dimension.key === weakestKey;
 
             return (
@@ -52,8 +53,11 @@ export function DimensionAverages({
                 </div>
                 <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.08]">
                   <div
-                    className={cn("h-full", getScoreBgColor(dimension.average))}
-                    style={{ width: `${Math.max(2, dimension.average)}%` }}
+                    className={cn("grow-x h-full", getScoreBgColor(dimension.average))}
+                    style={{
+                      width: `${Math.max(2, dimension.average)}%`,
+                      "--d": `${300 + index * 70}ms`,
+                    } as CSSProperties}
                   />
                 </div>
               </div>

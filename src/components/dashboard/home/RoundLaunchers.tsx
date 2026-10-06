@@ -126,7 +126,7 @@ export function RoundLaunchers({ hasCredits, canPreview }: RoundLaunchersProps) 
               href={hasCredits ? config.href : "/settings#rounds"}
               className={cn(
                 CELL_BASE,
-                "transition-colors hover:bg-white/[0.03]",
+                "group transition-colors hover:bg-white/[0.03]",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-cyan"
               )}
             >
@@ -136,7 +136,7 @@ export function RoundLaunchers({ hasCredits, canPreview }: RoundLaunchersProps) 
               </p>
               <span className="mt-auto flex items-center gap-2 pt-4 font-mono text-xs uppercase tracking-[0.08em] text-brand-cyan">
                 {hasCredits ? config.ctaLabel : "Buy rounds to start"}
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
           );

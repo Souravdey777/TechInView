@@ -55,7 +55,7 @@ export function DashboardHome({
     : { href: "/settings#rounds", label: "Buy rounds" };
 
   return (
-    <div className="space-y-6">
+    <div className="stagger-in space-y-6">
       {/* ─── Hero ─── */}
       <header className="flex flex-col gap-8 pb-4 pt-2 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
         <div className="min-w-0">

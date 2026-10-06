@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { CELL, GRID, LABEL } from "@/components/marketing/ds";
 import type { DashboardMeter } from "@/lib/dashboard/home-metrics";
@@ -38,11 +39,12 @@ export function MeterStrip({ meters }: { meters: readonly DashboardMeter[] }) {
                 <span
                   key={index}
                   className={cn(
-                    "h-1 flex-1 rounded-full",
+                    "grow-x h-1 flex-1 rounded-full",
                     index < meter.segments!.filled
                       ? "bg-brand-green"
                       : "bg-white/[0.08]"
                   )}
+                  style={{ "--d": `${300 + index * 40}ms` } as CSSProperties}
                 />
               ))}
             </div>
