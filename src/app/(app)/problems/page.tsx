@@ -2,19 +2,12 @@ import { redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { ButtonLink, Eyebrow, LEAD } from "@/components/marketing/ds";
 import { ProblemGrid } from "@/components/dashboard/ProblemGrid";
-import {
-  summarizeBank,
-  type BankProblem,
-} from "@/components/dashboard/problems/catalogue";
-import type { DifficultyLevel } from "@/lib/constants";
+import { summarizeBank } from "@/components/dashboard/problems/catalogue";
 import { cn } from "@/lib/utils";
-import { getProblems, getRecentPracticeAttempts } from "@/lib/db/queries";
+import { getBankProblems, pageProblems } from "@/lib/problem-list";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
-
-/** One saved attempt per problem, so this covers the whole bank comfortably. */
-const ATTEMPT_LIMIT = 250;
 
 export default async function ProblemsPage() {
   const supabase = createClient();
@@ -26,42 +19,9 @@ export default async function ProblemsPage() {
     redirect("/login");
   }
 
-  const [problems, attempts] = await Promise.all([
-    getProblems(),
-    // Progress is a nice-to-have on this page: a failure here should not take
-    // the catalogue down with it.
-    getRecentPracticeAttempts(user.id, ATTEMPT_LIMIT).catch(() => []),
-  ]);
-
-  const attemptByProblem = new Map(
-    attempts.map((attempt) => [attempt.problem_id, attempt])
-  );
-
-  const bankProblems: BankProblem[] = problems.map((problem) => {
-    const attempt = attemptByProblem.get(problem.id);
-
-    return {
-      id: problem.id,
-      title: problem.title,
-      slug: problem.slug,
-      difficulty: problem.difficulty as DifficultyLevel,
-      category: problem.category,
-      companyTags: (problem.company_tags as string[] | null) ?? [],
-      isFreeSolverEnabled: problem.is_free_solver_enabled,
-      testsTotal: Array.isArray(problem.test_cases)
-        ? problem.test_cases.length
-        : 0,
-      attempt: attempt
-        ? {
-            isSolved: attempt.is_solved,
-            testsPassed: attempt.tests_passed,
-            testsTotal: attempt.tests_total,
-          }
-        : null,
-    };
-  });
-
-  const summary = summarizeBank(bankProblems);
+  const bank = await getBankProblems(user.id);
+  const summary = summarizeBank(bank);
+  const initial = pageProblems(bank);
 
   return (
     <div className="space-y-12">
@@ -91,7 +51,7 @@ export default async function ProblemsPage() {
         </div>
       </header>
 
-      <ProblemGrid problems={bankProblems} summary={summary} />
+      <ProblemGrid initial={initial} summary={summary} />
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
 } from "@/components/marketing/ds";
 import { DifficultyMark } from "@/components/practice/ProblemStatement";
 import { getProblems } from "@/lib/db/queries";
+import { getBankProblems, pageProblems } from "@/lib/problem-list";
 import { PracticeGrid } from "@/components/practice/PracticeGrid";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
@@ -72,16 +73,8 @@ export default async function PracticePage() {
     hard: problems.filter((p) => p.difficulty === "hard").length,
   };
 
-  // Serialize for client component
-  const serialized = problems.map((p) => ({
-    id: p.id,
-    title: p.title,
-    slug: p.slug,
-    difficulty: p.difficulty,
-    category: p.category,
-    companyTags: p.company_tags ?? [],
-    isFreeSolverEnabled: p.is_free_solver_enabled,
-  }));
+  // Only the first page ships to the browser; PracticeGrid fetches the rest as it scrolls.
+  const initial = pageProblems(await getBankProblems());
 
   // Shown on the page and mirrored in the FAQPage JSON-LD, so they stay in sync.
   const faqs = [
@@ -203,7 +196,7 @@ export default async function PracticePage() {
             title={<span id="library">Pick a problem.</span>}
             description="Free problems open straight into the solver. The rest run as AI interviews."
           />
-          <PracticeGrid problems={serialized} />
+          <PracticeGrid initial={initial} />
         </div>
       </section>
 

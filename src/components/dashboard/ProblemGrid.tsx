@@ -1,220 +1,43 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FIELD, FOCUS, LABEL, LINK_ARROW } from "@/components/marketing/ds";
-import { DIFFICULTY_CONFIG, PROBLEM_CATEGORIES } from "@/lib/constants";
-import type { DifficultyLevel } from "@/lib/constants";
+import { LABEL, LINK_ARROW } from "@/components/marketing/ds";
 import { cn } from "@/lib/utils";
-import { FacetChip } from "@/components/dashboard/problems/FacetChip";
 import { ProblemBankMeters } from "@/components/dashboard/problems/ProblemBankMeters";
-import {
-  FACET_ROW_LABEL,
-  ProblemFacetRow,
-} from "@/components/dashboard/problems/ProblemFacetRow";
+import { LoadMore, ProblemFilterBar } from "@/components/dashboard/problems/ProblemFilterBar";
 import {
   PROBLEM_ROW_GRID,
   ProblemRow,
 } from "@/components/dashboard/problems/ProblemRow";
-import {
-  EMPTY_FACETS,
-  SORT_LABELS,
-  computeFacetCounts,
-  sortProblems,
-  filterProblems,
-  hasActiveFacets,
-  summarizeBank,
-  type BankProblem,
-  type ProblemBankSummary,
-  type ProblemFacets,
-  type ProblemSort,
-} from "@/components/dashboard/problems/catalogue";
-
-const DIFFICULTY_ORDER: readonly (DifficultyLevel | "all")[] = [
-  "all",
-  "easy",
-  "medium",
-  "hard",
-];
-
-/** Rows rendered per scroll step; the full bank is filtered client-side, only rendering is paged. */
-const PAGE_SIZE = 40;
+import type { ProblemBankSummary } from "@/components/dashboard/problems/catalogue";
+import type { ProblemPage } from "@/lib/problem-list";
+import { useProblemFilters } from "@/components/dashboard/problems/useProblemFilters";
 
 type ProblemGridProps = {
-  problems: BankProblem[];
-  /** Computed on the server where possible; derived here when a caller omits it. */
-  summary?: ProblemBankSummary;
+  /** First page, rendered on the server; later pages are fetched as the list scrolls. */
+  initial: ProblemPage;
+  /** Totals for the whole bank, computed on the server. */
+  summary: ProblemBankSummary;
 };
 
 /**
  * The problem bank: a hairline grid of totals, search and chip facets, then a
  * hairline table with one row per problem (mirrors the public /practice list).
- * Kept as a list rather than a card grid because seventy cards stop being
- * scannable.
  */
-export function ProblemGrid({ problems, summary }: ProblemGridProps) {
-  const [facets, setFacets] = useState<ProblemFacets>(EMPTY_FACETS);
-  const [sort, setSort] = useState<ProblemSort>("default");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  // Typing stays responsive while 2,000 rows re-filter behind it.
-  const deferredFacets = useDeferredValue(facets);
-
-  const derivedSummary = useMemo(() => summarizeBank(problems), [problems]);
-  const bank = summary ?? derivedSummary;
-
-  const categories = useMemo(() => {
-    const present = new Set(problems.map((problem) => problem.category));
-    const known = (PROBLEM_CATEGORIES as readonly string[]).filter((category) =>
-      present.has(category)
-    );
-    const extra = [...present]
-      .filter(
-        (category) =>
-          !(PROBLEM_CATEGORIES as readonly string[]).includes(category)
-      )
-      .sort();
-    return [...known, ...extra];
-  }, [problems]);
-
-  const counts = useMemo(
-    () => computeFacetCounts(problems, deferredFacets),
-    [problems, deferredFacets]
-  );
-  const filtered = useMemo(
-    () => sortProblems(filterProblems(problems, deferredFacets), sort),
-    [problems, deferredFacets, sort]
-  );
-  const visible = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
-
-  // New filters or sort start back at the first page.
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [deferredFacets, sort]);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setVisibleCount((count) => count + PAGE_SIZE);
-        }
-      },
-      { rootMargin: "600px 0px" }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, visibleCount]);
-
-  const isFiltered = hasActiveFacets(facets);
-  const query = facets.search.trim();
-
-  function update<K extends keyof ProblemFacets>(
-    key: K,
-    value: ProblemFacets[K]
-  ) {
-    setFacets((previous) => ({ ...previous, [key]: value }));
-  }
-
-  function clearFacets() {
-    setFacets(EMPTY_FACETS);
-    setSort("default");
-  }
+export function ProblemGrid({ initial, summary: bank }: ProblemGridProps) {
+  const filters = useProblemFilters(initial);
+  const { total, bankTotal, visible, isFiltered, clear: clearFacets } = filters;
+  const query = filters.facets.search.trim();
 
   return (
     <div className="space-y-12">
-      {problems.length > 0 ? <ProblemBankMeters summary={bank} /> : null}
+      {bankTotal > 0 ? <ProblemBankMeters summary={bank} /> : null}
 
-      {problems.length > 0 ? (
-        <div className="space-y-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1 md:max-w-[520px]">
-            <Search
-              aria-hidden="true"
-              className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-subtle"
-            />
-            <input
-              type="text"
-              value={facets.search}
-              onChange={(event) => update("search", event.target.value)}
-              aria-label="Search problems, categories, or companies"
-              placeholder="Search problems or companies"
-              className={cn(FIELD, "pl-12 pr-12")}
-            />
-            {query ? (
-              <button
-                type="button"
-                aria-label="Clear search"
-                onClick={() => update("search", "")}
-                className={cn(
-                  "absolute right-4 top-1/2 -translate-y-1/2 p-1 text-brand-subtle transition-colors hover:text-brand-text",
-                  FOCUS
-                )}
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            ) : null}
-          </div>
-          <label className="flex items-center gap-3">
-            <span className={LABEL}>Sort</span>
-            <select
-              value={sort}
-              onChange={(event) => setSort(event.target.value as ProblemSort)}
-              aria-label="Sort problems"
-              className={cn(FIELD, "w-auto cursor-pointer bg-brand-deep py-2.5 pr-10")}
-            >
-              {(Object.keys(SORT_LABELS) as ProblemSort[]).map((value) => (
-                <option key={value} value={value}>
-                  {SORT_LABELS[value]}
-                </option>
-              ))}
-            </select>
-          </label>
-          </div>
-
-          <div
-            role="group"
-            aria-label="Filter by difficulty"
-            className="flex flex-wrap items-center gap-2"
-          >
-            <span className={FACET_ROW_LABEL}>Difficulty</span>
-            {DIFFICULTY_ORDER.map((level) => {
-              const count =
-                level === "all"
-                  ? counts.difficulty.all
-                  : counts.difficulty[level];
-              const isActive = facets.difficulty === level;
-
-              return (
-                <FacetChip
-                  key={level}
-                  label={level === "all" ? "All" : DIFFICULTY_CONFIG[level].label}
-                  count={count}
-                  isActive={isActive}
-                  disabled={count === 0 && !isActive}
-                  onClick={() => update("difficulty", level)}
-                />
-              );
-            })}
-          </div>
-
-          <ProblemFacetRow
-            facets={facets}
-            counts={counts}
-            categories={categories}
-            showProgress={bank.hasProgress}
-            onCategoryChange={(category) => update("category", category)}
-            onProgressChange={(progress) => update("progress", progress)}
-            onFreeOnlyChange={(freeOnly) => update("freeOnly", freeOnly)}
-            onCompanyChange={(company) => update("company", company)}
-          />
-        </div>
+      {bankTotal > 0 ? (
+        <ProblemFilterBar filters={filters} showProgress={bank.hasProgress} />
       ) : null}
 
-      {problems.length === 0 ? (
+      {bankTotal === 0 ? (
         <div className="border-y border-white/[0.08] py-16 text-center">
           <p className={LABEL}>Bank is empty</p>
           <p className="mx-auto mt-3 max-w-sm text-[15px] leading-relaxed text-brand-muted">
@@ -226,9 +49,9 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
         <div>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <p className={LABEL}>
-              {filtered.length === problems.length
-                ? `All ${problems.length} problems`
-                : `${filtered.length} of ${problems.length} problems`}
+              {total === bankTotal
+                ? `All ${bankTotal} problems`
+                : `${total} of ${bankTotal} problems`}
             </p>
             {isFiltered ? (
               <button type="button" onClick={clearFacets} className={LINK_ARROW}>
@@ -241,7 +64,7 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
             )}
           </div>
 
-          {filtered.length > 0 ? (
+          {total > 0 ? (
             <>
               <div
                 className={cn(
@@ -265,23 +88,7 @@ export function ProblemGrid({ problems, summary }: ProblemGridProps) {
                 ))}
               </div>
 
-              {hasMore ? (
-                <div
-                  ref={sentinelRef}
-                  className="flex flex-col items-center gap-3 py-8"
-                >
-                  <p className={LABEL} aria-live="polite">
-                    Showing {visible.length} of {filtered.length}
-                  </p>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-                  >
-                    Load more
-                  </Button>
-                </div>
-              ) : null}
+              <LoadMore filters={filters} />
             </>
           ) : (
             <div className="border-y border-white/[0.08] py-16 text-center">
