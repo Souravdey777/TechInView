@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOrder } from "@/lib/razorpay";
 import { createClient } from "@/lib/supabase/server";
-import { CREDIT_PACKS, getRegionForCountry } from "@/lib/constants";
+import { CREDIT_PACKS, earlyAccessPrice, getRegionForCountry } from "@/lib/constants";
 import { captureServerEvent } from "@/lib/posthog/server";
 import { enforceApiRateLimit } from "@/lib/api-security";
 
@@ -44,7 +44,9 @@ export async function POST(req: NextRequest) {
 
     const country = country_code?.toUpperCase() ?? "US";
     const { region, currency } = getRegionForCountry(country);
-    const amount = creditPack.prices[region];
+    const listAmount = creditPack.prices[region];
+    // prices are in minor units; discount whole currency units so the charge matches the displayed price.
+    const amount = earlyAccessPrice(listAmount / 100) * 100;
 
     const order = await createOrder(
       amount,
@@ -60,6 +62,7 @@ export async function POST(req: NextRequest) {
     captureServerEvent(user.id, "payment_initiated", {
       pack,
       amount,
+      list_amount: listAmount,
       currency,
       region,
       credits: creditPack.credits,

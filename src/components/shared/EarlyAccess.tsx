@@ -7,10 +7,20 @@ import { usePostHog } from "posthog-js/react";
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { BTN_PRIMARY } from "@/components/marketing/ds";
-import { FREE_TRIAL_DURATION_MINUTES } from "@/lib/constants";
+import {
+  COUNTRY_COOKIE,
+  CREDIT_PACKS,
+  EARLY_ACCESS_DISCOUNT_PERCENT,
+  FREE_TRIAL_DURATION_MINUTES,
+  earlyAccessPrice,
+  getDisplayPricingKey,
+  getRegionForCountry,
+} from "@/lib/constants";
 
 // Copy lives here so the offer can change without touching layout code.
-const BANNER_TEXT = "Early access is open. Try a free AI mock interview, no card needed.";
+const BANNER_TEXT = `Early access: ${EARLY_ACCESS_DISCOUNT_PERCENT}% off every interview pack.`;
+const BANNER_HREF = "/#pricing";
+const BANNER_CTA = "See pricing";
 const CTA_HREF = "/signup";
 const CTA_LABEL = "Try it free";
 
@@ -20,6 +30,15 @@ const EXIT_KEY = "tiv-early-access-exit-shown";
 // Live interview rooms are full-height and must stay distraction-free.
 // Setup and results pages still get the banner.
 const HIDE_ON = [/^\/interview\/(?!setup)[^/]+/, /^\/interviews\/[^/]+\/(?!setup|results)[^/]+$/];
+
+/** Single-interview list and early-access price in the visitor's currency, from the middleware's country cookie. */
+function localSinglePrice() {
+  const country = document.cookie.match(new RegExp(`(?:^|; )${COUNTRY_COOKIE}=([A-Z]{2})`))?.[1] ?? "US";
+  const { region, symbol } = getRegionForCountry(country);
+  const full = CREDIT_PACKS.single.displayPrices[getDisplayPricingKey(region)];
+  const fmt = (n: number) => `${symbol}${n.toLocaleString(region === "INR" ? "en-IN" : "en-US")}`;
+  return { was: fmt(full), now: fmt(earlyAccessPrice(full)) };
+}
 
 function readFlag(key: string) {
   try {
@@ -40,8 +59,13 @@ export function EarlyAccessBanner() {
   const ph = usePostHog();
   // Start hidden-safe: render on the server, hide after mount if dismissed.
   const [dismissed, setDismissed] = useState(false);
+  // Cookie is client-only; the price appears after mount so server and client markup match.
+  const [price, setPrice] = useState<{ was: string; now: string } | null>(null);
 
-  useEffect(() => setDismissed(readFlag(BANNER_KEY)), []);
+  useEffect(() => {
+    setDismissed(readFlag(BANNER_KEY));
+    setPrice(localSinglePrice());
+  }, []);
 
   if (dismissed || HIDE_ON.some((re) => re.test(pathname))) return null;
 
@@ -51,12 +75,21 @@ export function EarlyAccessBanner() {
         Early access
       </span>
       {BANNER_TEXT}{" "}
+      {price && (
+        <span className="mr-1 whitespace-nowrap tabular-nums">
+          <span className="sr-only">One interview, was {price.was}, now {price.now}.</span>
+          <span aria-hidden>
+            1 interview <s className="text-brand-subtle">{price.was}</s>{" "}
+            <span className="font-medium text-brand-text">{price.now}</span>
+          </span>
+        </span>
+      )}{" "}
       <Link
-        href={CTA_HREF}
-        onClick={() => ph?.capture("early_access_banner_clicked", { pathname })}
-        className="font-medium text-brand-cyan underline-offset-4 hover:underline"
+        href={BANNER_HREF}
+        onClick={() => ph?.capture("early_access_banner_clicked", { pathname, price: price?.now })}
+        className="whitespace-nowrap font-medium text-brand-cyan underline-offset-4 hover:underline"
       >
-        {CTA_LABEL} →
+        {BANNER_CTA} →
       </Link>
       <button
         type="button"

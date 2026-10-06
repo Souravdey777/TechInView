@@ -12,6 +12,7 @@ import {
 import { RazorpayCheckout } from "@/components/shared/RazorpayCheckout";
 import {
   CREDIT_PACKS,
+  earlyAccessPrice,
   FULL_INTERVIEW_DURATION_MINUTES,
   PACK_IDS,
   getDisplayPricingKey,
@@ -149,7 +150,9 @@ export default async function SettingsPage() {
                 {PACK_IDS.map((packId) => {
                   const pack = CREDIT_PACKS[packId];
                   const featured = packId === FEATURED_PACK;
-                  const price = pack.displayPrices[displayKey];
+                  const full = pack.displayPrices[displayKey];
+                  const price = earlyAccessPrice(full);
+                  const fmt = (n: number) => n.toLocaleString(region === "INR" ? "en-IN" : "en-US");
 
                   return (
                     <div
@@ -171,9 +174,17 @@ export default async function SettingsPage() {
                         {pack.badge && <span>{pack.badge}</span>}
                       </div>
 
-                      <span className="text-[40px] font-light tabular-nums leading-none tracking-[-0.05em] text-brand-text">
-                        {symbol}
-                        {price.toLocaleString(region === "INR" ? "en-IN" : "en-US")}
+                      <span className="flex items-baseline gap-2">
+                        <span className="text-[40px] font-light tabular-nums leading-none tracking-[-0.05em] text-brand-text">
+                          {symbol}
+                          {fmt(price)}
+                        </span>
+                        {price < full && (
+                          <span className="text-sm tabular-nums text-brand-subtle line-through">
+                            {symbol}
+                            {fmt(full)}
+                          </span>
+                        )}
                       </span>
 
                       <p className="text-sm leading-relaxed text-brand-muted">
