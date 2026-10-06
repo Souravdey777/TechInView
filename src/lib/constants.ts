@@ -175,6 +175,10 @@ export const COUNTRY_COOKIE = "tiv-country";
 
 /** Early-access launch discount on interview packs (not resume reviews). Set to 0 to end it. */
 export const EARLY_ACCESS_DISCOUNT_PERCENT = 50;
+/** The discount covers only this many interview-pack purchases in total, across all users. */
+export const EARLY_ACCESS_PURCHASE_LIMIT = 20;
+/** Purchases are counted from here, so packs bought before the offer don't use up spots. */
+export const EARLY_ACCESS_STARTS_AT = new Date("2026-10-06T00:00:00Z");
 
 /**
  * Early-access price in whole currency units. Rounds down, so the discount is

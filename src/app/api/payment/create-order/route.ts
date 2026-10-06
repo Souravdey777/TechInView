@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CREDIT_PACKS, earlyAccessPrice, getRegionForCountry } from "@/lib/constants";
 import { captureServerEvent } from "@/lib/posthog/server";
 import { enforceApiRateLimit } from "@/lib/api-security";
+import { getEarlyAccessSpotsLeft } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,8 @@ export async function POST(req: NextRequest) {
     const { region, currency } = getRegionForCountry(country);
     const listAmount = creditPack.prices[region];
     // prices are in minor units; discount whole currency units so the charge matches the displayed price.
-    const amount = earlyAccessPrice(listAmount / 100) * 100;
+    const earlyAccess = (await getEarlyAccessSpotsLeft()) > 0;
+    const amount = earlyAccess ? earlyAccessPrice(listAmount / 100) * 100 : listAmount;
 
     const order = await createOrder(
       amount,
@@ -63,6 +65,7 @@ export async function POST(req: NextRequest) {
       pack,
       amount,
       list_amount: listAmount,
+      early_access: earlyAccess,
       currency,
       region,
       credits: creditPack.credits,

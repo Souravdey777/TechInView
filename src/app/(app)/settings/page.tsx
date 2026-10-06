@@ -19,6 +19,7 @@ import {
   getRegionForCountry,
 } from "@/lib/constants";
 import { Mail } from "lucide-react";
+import { getCachedEarlyAccessSpotsLeft } from "@/lib/db/queries";
 import {
   BTN_GHOST,
   BTN_PRIMARY,
@@ -81,6 +82,7 @@ export default async function SettingsPage() {
 
   const headersList = headers();
   const country = (headersList.get("x-vercel-ip-country") ?? "US").toUpperCase();
+  const spotsLeft = await getCachedEarlyAccessSpotsLeft();
   const { region, symbol } = getRegionForCountry(country);
   const displayKey = getDisplayPricingKey(region);
   const appUrl = resolveAppUrl(headersList);
@@ -151,7 +153,7 @@ export default async function SettingsPage() {
                   const pack = CREDIT_PACKS[packId];
                   const featured = packId === FEATURED_PACK;
                   const full = pack.displayPrices[displayKey];
-                  const price = earlyAccessPrice(full);
+                  const price = spotsLeft > 0 ? earlyAccessPrice(full) : full;
                   const fmt = (n: number) => n.toLocaleString(region === "INR" ? "en-IN" : "en-US");
 
                   return (

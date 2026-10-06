@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 import { localProblemCatalog, shouldUseLocalProblemCatalog } from "./local-problems";
-import { eq, and, ilike, inArray, sql, desc, asc } from "drizzle-orm";
+import { eq, and, ilike, inArray, sql, desc, asc, gte } from "drizzle-orm";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import type {
@@ -12,6 +12,12 @@ import type {
   RoundContextSnapshot,
 } from "@/lib/loops/types";
 import type { InterviewMode, RoundType } from "@/lib/constants";
+import {
+  EARLY_ACCESS_DISCOUNT_PERCENT,
+  EARLY_ACCESS_PURCHASE_LIMIT,
+  EARLY_ACCESS_STARTS_AT,
+  PACK_IDS,
+} from "@/lib/constants";
 import {
   buildPublicProfilePracticeActivity,
   normalizePublicProfileLinks,
@@ -1121,6 +1127,38 @@ export async function insertPayment(data: {
     .returning();
   return results[0];
 }
+
+/**
+ * Early-access discounted purchases still available, shared across all users.
+ * ponytail: counted at order time, so checkouts opened in the same moment near
+ * the cap can all get the discount (a few over the limit); reserve spots on
+ * order creation if that ever matters.
+ */
+export async function getEarlyAccessSpotsLeft(): Promise<number> {
+  if (EARLY_ACCESS_DISCOUNT_PERCENT <= 0) return 0;
+  try {
+    const db = getDb();
+    const [row] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(schema.payments)
+      .where(
+        and(
+          inArray(schema.payments.pack, PACK_IDS),
+          gte(schema.payments.created_at, EARLY_ACCESS_STARTS_AT)
+        )
+      );
+    return Math.max(0, EARLY_ACCESS_PURCHASE_LIMIT - (row?.count ?? 0));
+  } catch (error) {
+    // No DB, no discount: never undercharge because the count is unknown.
+    console.error("[early-access] Failed to count purchases:", error);
+    return 0;
+  }
+}
+
+/** Same count for page renders and the banner; at most a minute stale. Checkout uses the live count. */
+export const getCachedEarlyAccessSpotsLeft = unstable_cache(getEarlyAccessSpotsLeft, ["early-access-spots-left"], {
+  revalidate: 60,
+});
 
 export async function provisionPaymentCredits(data: {
   user_id: string;
