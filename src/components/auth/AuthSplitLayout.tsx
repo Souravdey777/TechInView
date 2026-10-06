@@ -4,17 +4,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { VoiceVisualizer, type VoiceState } from "@/components/interview/VoiceVisualizer";
-import { CELL, GRID, H3, Kicker, LABEL, LEAD } from "@/components/marketing/ds";
-import { PHASE_ORDER } from "@/lib/interview-phases";
+import { BODY, H3, LABEL } from "@/components/marketing/ds";
+import { PHASE_LABELS, PHASE_ORDER } from "@/lib/interview-phases";
 import { FREE_TRIAL_DURATION_MINUTES, FULL_INTERVIEW_DURATION_MINUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-
-// Only stats derived from code constants, so they cannot drift from the product.
-const PANEL_STATS: ReadonlyArray<{ value: string; label: string }> = [
-  { value: String(PHASE_ORDER.length), label: "Interview phases" },
-  { value: `${FULL_INTERVIEW_DURATION_MINUTES}m`, label: "Full round" },
-  { value: `${FREE_TRIAL_DURATION_MINUTES}m`, label: "Free preview" },
-];
 
 /** Inline cyan text link for auth footers and legal lines. */
 export const AUTH_LINK =
@@ -151,7 +144,32 @@ export function AuthSplitLayout({
   );
 }
 
-/** Desktop-only brand column shared by login, signup and onboarding. */
+const STATE_LABEL: Record<VoiceState, string> = {
+  idle: "Waiting on you",
+  listening: "Listening",
+  thinking: "Thinking",
+  speaking: "Speaking",
+};
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const clock = (secs: number) => `${pad(Math.floor(secs / 60) % 60)}:${pad(secs % 60)}`;
+
+/** Seconds since mount; starts at 0 on server and client so hydration matches. */
+function useElapsed() {
+  const [secs, setSecs] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    const id = window.setInterval(() => setSecs(Math.floor((performance.now() - start) / 1000)), 250);
+    return () => window.clearInterval(id);
+  }, []);
+  return secs;
+}
+
+/**
+ * Desktop-only brand column shared by login, signup and onboarding.
+ * Framed as an interview that has already started: Tia's opening line is the
+ * headline, the candidate's turn is the form, and the footer is the real phase rail.
+ */
 export function AuthBrandPanel({
   kicker,
   headline,
@@ -169,6 +187,8 @@ export function AuthBrandPanel({
   const ownLine = useTypedLine(headline);
   const shown = line ?? ownLine;
   const state = orbState ?? (shown.done ? "idle" : "speaking");
+  const secs = useElapsed();
+
   return (
     <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-white/[0.08] px-[clamp(32px,4vw,64px)] py-12 lg:flex">
       <div
@@ -176,32 +196,95 @@ export function AuthBrandPanel({
         className="pointer-events-none absolute -right-[20%] -top-[10%] h-[90%] w-[90%] rounded-full bg-[radial-gradient(circle,rgb(var(--brand-cyan)/0.14)_0%,rgb(var(--brand-cyan)/0.04)_35%,transparent_65%)]"
       />
 
-      <Link href="/" className="relative w-fit rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan">
-        <BrandLogo size="sm" />
-      </Link>
-
-      <div className="relative">
-        {/* VoiceVisualizer's orb is 76px; scale the wrapper, never the component. */}
-        <div aria-hidden className="mb-14 flex h-[200px] w-[200px] items-center justify-center">
-          <div className="scale-[2.2] brightness-125">
-            <VoiceVisualizer state={state} followCursor className="h-[76px] w-[76px]" />
-          </div>
-        </div>
-        <Kicker>{kicker}</Kicker>
-        <p className="max-w-[14ch] text-balance text-[clamp(36px,4vw,60px)] font-normal leading-[1.0] tracking-[-0.04em]">
-          <TypedText text={headline} {...shown} />
-        </p>
-        <p className={cn(LEAD, "mt-6 max-w-[440px]")}>{supporting}</p>
+      <div className="relative flex items-center justify-between">
+        <Link href="/" className="w-fit rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan">
+          <BrandLogo size="sm" />
+        </Link>
+        <span aria-hidden className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-muted">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-rose" />
+          Live · {clock(secs)}
+        </span>
       </div>
 
-      <dl className={cn(GRID, "relative grid-cols-3")}>
-        {PANEL_STATS.map((stat) => (
-          <div key={stat.label} className={cn(CELL, "flex flex-col-reverse gap-2 px-5 py-4")}>
-            <dt className={LABEL}>{stat.label}</dt>
-            <dd className="font-mono text-2xl tracking-[-0.02em] text-brand-text">{stat.value}</dd>
+      <div className="relative">
+        {/* Name plate: orb + who is on the call and what she is doing. */}
+        <div className="mb-12 flex items-center gap-8">
+          {/* VoiceVisualizer's orb is 76px; scale the wrapper, never the component. */}
+          <div aria-hidden className="flex h-[150px] w-[150px] shrink-0 items-center justify-center">
+            <div className="scale-[1.7] brightness-125">
+              <VoiceVisualizer state={state} followCursor className="h-[76px] w-[76px]" />
+            </div>
           </div>
-        ))}
-      </dl>
+          <div>
+            <p className="text-2xl tracking-[-0.02em]">Tia</p>
+            <p className={cn(LABEL, "mt-1.5")}>AI interviewer</p>
+            <p aria-hidden className="mt-4 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-cyan">
+              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              {STATE_LABEL[state]}
+            </p>
+          </div>
+        </div>
+
+        {/* Transcript */}
+        <p className={cn(LABEL, "mb-6")}>{kicker}</p>
+        <ol className="space-y-7 border-l border-white/[0.1] pl-6">
+          <li>
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-cyan">
+              <span className="text-brand-subtle">00:00</span> · Tia
+            </p>
+            <p className="max-w-[20ch] text-balance text-[clamp(30px,3.2vw,46px)] font-normal leading-[1.05] tracking-[-0.035em]">
+              <TypedText text={headline} {...shown} />
+            </p>
+            <p className={cn(BODY, "mt-4 max-w-[440px]")}>{supporting}</p>
+          </li>
+          <li
+            aria-hidden
+            className="transition-opacity duration-500 motion-reduce:transition-none"
+            style={{ opacity: shown.done ? 1 : 0 }}
+          >
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-text">
+              <span className="text-brand-subtle">{clock(secs)}</span> · You
+            </p>
+            <p className="flex items-center gap-3 text-lg text-brand-muted">
+              {state === "listening" ? (
+                <span className="flex gap-1">
+                  {[0, 150, 300].map((d) => (
+                    <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand-muted" style={{ animationDelay: `${d}ms` }} />
+                  ))}
+                </span>
+              ) : state === "thinking" ? (
+                "Connecting…"
+              ) : (
+                <>
+                  Your turn <span className="text-brand-cyan">→</span>
+                </>
+              )}
+            </p>
+          </li>
+        </ol>
+      </div>
+
+      {/* The real interview track, from code constants so it cannot drift. */}
+      <div className="relative">
+        <div className="mb-3 flex items-baseline justify-between gap-4">
+          <p className={LABEL}>
+            Phase 1 / {PHASE_ORDER.length} · <span className="text-brand-text">{PHASE_LABELS[PHASE_ORDER[0]]}</span>
+          </p>
+          <p className={LABEL}>
+            {FULL_INTERVIEW_DURATION_MINUTES}m round · {FREE_TRIAL_DURATION_MINUTES}m free
+          </p>
+        </div>
+        <ol className="flex gap-1.5">
+          {PHASE_ORDER.map((phase, i) => (
+            <li key={phase} title={PHASE_LABELS[phase]} className="flex-1">
+              <span
+                className={cn("block h-[3px] rounded-full", i === 0 ? "animate-pulse bg-brand-cyan" : "bg-white/[0.1]")}
+              />
+              <span className="sr-only">{PHASE_LABELS[phase]}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
     </aside>
   );
 }
