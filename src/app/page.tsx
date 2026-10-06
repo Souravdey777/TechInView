@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { HeroCanvas, InterviewRoomDemo, LiveStatus, PhaseTimeline, ScoreCard } from "@/components/landing/LandingLive";
@@ -13,18 +12,9 @@ import {
   getDisplayPricingKey,
   getRegionForCountry,
 } from "@/lib/constants";
-import { buildHomeJsonLd } from "@/lib/site-seo";
-import { serializeJsonLd } from "@/lib/blog-seo";
 import { INTERVIEWER } from "@/lib/interviewer";
 import { cn } from "@/lib/utils";
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
-
-// Title, description, and OG come from the root layout; the home page only
-// needs to claim its own canonical.
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-};
 
 type LandingPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -134,11 +124,8 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
     };
   });
 
-  const jsonLd = buildHomeJsonLd({ baseUrl, faq: FAQS });
-
   return (
     <MarketingShell loginHref={loginHref} signupHref={practiceSignupHref}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
         {/* ── Hero ── */}
         <header className={cn("relative flex min-h-[calc(100svh-4rem)] flex-col justify-end overflow-hidden pb-14 pt-24", PAD)}>
           <div

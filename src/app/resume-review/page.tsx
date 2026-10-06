@@ -23,7 +23,6 @@ import {
   getDisplayPricingKey,
   getRegionForCountry,
 } from "@/lib/constants";
-import { DEFAULT_OG_IMAGE_PATH, serializeJsonLd } from "@/lib/blog-seo";
 import { cn } from "@/lib/utils";
 import { HeroStack, ReportCarousel } from "@/components/resume-review/ReportViewer";
 import {
@@ -34,7 +33,6 @@ import {
   sampleReportPages,
 } from "@/components/resume-review/SampleReport";
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://techinview.dev";
 
 // Upload and checkout are not built yet. Until they are, every buy CTA renders
 // as a disabled "Coming soon" pill. Flip this once /resume-review/new exists.
@@ -64,15 +62,6 @@ const PAGE_DESCRIPTION =
 export const metadata: Metadata = {
   title: `${PAGE_TITLE} | TechInView`,
   description: PAGE_DESCRIPTION,
-  alternates: { canonical: "/resume-review" },
-  openGraph: {
-    title: PAGE_TITLE,
-    description: PAGE_DESCRIPTION,
-    type: "website",
-    url: `${baseUrl}/resume-review`,
-    siteName: "TechInView",
-    images: [{ url: DEFAULT_OG_IMAGE_PATH, width: 1200, height: 630 }],
-  },
 };
 
 const PARTS = [
@@ -167,19 +156,8 @@ export default function ResumeReviewPage() {
     return { ...pack, price, full, off: Math.round((1 - price / full) * 100) };
   });
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.question,
-      acceptedAnswer: { "@type": "Answer", text: f.answer },
-    })),
-  };
-
   return (
     <MarketingShell signupHref={LAUNCHED ? BUY_HREF : "#sample"} ctaLabel={LAUNCHED ? "Review my resume" : "See a sample"}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
 
       {/* ── Hero ── */}
       <header className={cn("relative overflow-hidden pb-24 pt-24", PAD)}>
