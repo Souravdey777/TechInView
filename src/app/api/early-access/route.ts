@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
 import { EARLY_ACCESS_DISCOUNT_PERCENT, EARLY_ACCESS_PURCHASE_LIMIT } from "@/lib/constants";
-import { getCachedEarlyAccessSpotsLeft } from "@/lib/db/queries";
+import { getCachedEarlyAccessSpotsLeft, getProfile, hasCapturedPayment } from "@/lib/db/queries";
+import { createClient } from "@/lib/supabase/server";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
-/** Public offer status for the early access banner and exit popup. */
+/** Paid user with rounds still in the bank: no need to pitch them the offer. */
+async function isPaidWithRounds(): Promise<boolean> {
+  try {
+    const {
+      data: { user },
+    } = await createClient().auth.getUser();
+    if (!user) return false;
+    const [profile, paid] = await Promise.all([getProfile(user.id), hasCapturedPayment(user.id)]);
+    return paid && (profile?.interview_credits ?? 0) > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Offer status for the early access banner and exit popup. */
 export async function GET() {
-  const left = await getCachedEarlyAccessSpotsLeft();
-  return NextResponse.json({ left, limit: EARLY_ACCESS_PURCHASE_LIMIT, percent: EARLY_ACCESS_DISCOUNT_PERCENT });
+  const [left, paid] = await Promise.all([getCachedEarlyAccessSpotsLeft(), isPaidWithRounds()]);
+  return NextResponse.json({ left, paid, limit: EARLY_ACCESS_PURCHASE_LIMIT, percent: EARLY_ACCESS_DISCOUNT_PERCENT });
 }
