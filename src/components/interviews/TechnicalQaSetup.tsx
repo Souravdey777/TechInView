@@ -182,6 +182,7 @@ export function TechnicalQaSetup({ planId = null }: TechnicalQaSetupProps) {
           language,
           maxDurationSeconds: TECHNICAL_QA_DURATION_MINUTES * 60,
           generatedLoopRoundSnapshot: roundContext,
+          fromPlanId: planId,
         }),
       });
 
