@@ -2,7 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 import { MonoLabel } from "@/components/shared/Rack";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { BODY, ButtonLink, Eyebrow, LEAD } from "@/components/marketing/ds";
 import {
   PrepPlanBuilder,
@@ -226,6 +236,7 @@ export function PrepGuruChat({ activePlan, onPlanGenerated }: PrepGuruChatProps)
   const [pendingRequest, setPendingRequest] = useState<PrepPlanRequest | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paywallOpen, setPaywallOpen] = useState(false);
   const [researchStep, setResearchStep] = useState(0);
   const [resetToken, setResetToken] = useState(0);
   const threadEndRef = useRef<HTMLDivElement | null>(null);
@@ -272,6 +283,13 @@ export function PrepGuruChat({ activePlan, onPlanGenerated }: PrepGuruChatProps)
           jdText: request.prompt.length >= 40 ? request.prompt : "",
         }),
       });
+      // 403 = signed in but no purchase yet (see /api/prep-plans/generate).
+      if (response.status === 403) {
+        setPendingRequest(null);
+        setPaywallOpen(true);
+        return;
+      }
+
       const result = (await response.json()) as GenerateResponse;
 
       if (!response.ok || !result.success || !result.data) {
@@ -300,9 +318,38 @@ export function PrepGuruChat({ activePlan, onPlanGenerated }: PrepGuruChatProps)
 
   const hasThread = Boolean(pendingRequest || activePlan);
 
+  const paywall = (
+    <Dialog open={paywallOpen} onOpenChange={setPaywallOpen}>
+      {/* Portaled outside the themed layout, so it re-applies the theme itself. */}
+      <DialogContent className="rounded-[20px] border-white/[0.08] bg-brand-deep shadow-none">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-normal tracking-[-0.03em]">
+            Prep Guru is for paid accounts
+          </DialogTitle>
+          <DialogDescription className="text-[15px]">
+            Buy any interview pack to unlock Prep Guru. It maps the loop for your target
+            role and drafts the questions each round tends to ask.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="border-white/[0.08]">
+          <Button type="button" variant="secondary" onClick={() => setPaywallOpen(false)}>
+            Not now
+          </Button>
+          <Button asChild>
+            <Link href="/settings#rounds">
+              Buy rounds
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
   if (!hasThread) {
     return (
       <div className="flex min-h-[58vh] flex-col justify-center gap-8 py-6">
+        {paywall}
         <div className="text-center">
           <Eyebrow className="mb-4">Prep Guru</Eyebrow>
           <h1 className="mx-auto max-w-[18ch] text-balance text-[clamp(32px,4.4vw,56px)] font-normal leading-[1.02] tracking-[-0.035em] text-brand-text">
@@ -336,6 +383,7 @@ export function PrepGuruChat({ activePlan, onPlanGenerated }: PrepGuruChatProps)
 
   return (
     <div className="flex flex-col gap-5">
+      {paywall}
       <div className="flex flex-col gap-8">
         {pendingRequest ? (
           <>
