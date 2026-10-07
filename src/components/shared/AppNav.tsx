@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   ExternalLink,
   LogOut,
@@ -120,14 +120,14 @@ function AccountMenu({
   username?: string | null;
   isPublicProfile: boolean;
 }) {
-  const router = useRouter();
   const { signOut } = useSupabase();
   const initial = getAvatarInitial(displayName, userEmail);
   const publicProfile = getPublicProfileLink(username, isPublicProfile);
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/login");
+    // Hard navigation: a soft push can replay a prefetched /login -> /dashboard redirect.
+    window.location.replace("/login");
   };
 
   return (
@@ -234,7 +234,6 @@ export function AppNav({
   credits = 0,
 }: AppNavProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { signOut } = useSupabase();
   const [open, setOpen] = useState(false);
   const publicProfile = getPublicProfileLink(username, isPublicProfile);
@@ -277,7 +276,8 @@ export function AppNav({
   const handleSignOut = async () => {
     close();
     await signOut();
-    router.push("/login");
+    // Hard navigation: a soft push can replay a prefetched /login -> /dashboard redirect.
+    window.location.replace("/login");
   };
 
   return (
