@@ -1110,6 +1110,22 @@ export async function getPaymentByRazorpayId(
   return results[0];
 }
 
+/** "Paid user" = has at least one captured Razorpay payment (profiles.plan is never set). */
+export async function hasCapturedPayment(userId: string): Promise<boolean> {
+  const db = getDb();
+  const results = await db
+    .select({ id: schema.payments.id })
+    .from(schema.payments)
+    .where(
+      and(
+        eq(schema.payments.user_id, userId),
+        eq(schema.payments.status, "captured")
+      )
+    )
+    .limit(1);
+  return results.length > 0;
+}
+
 export async function insertPayment(data: {
   user_id: string;
   razorpay_order_id: string;

@@ -33,38 +33,50 @@ const PrepPlanGenerationInputSchema = z
     }
   });
 
+// Over-long model text is clipped, not rejected: a 125-char label shouldn't sink an otherwise good plan.
+const clipped = (min: number, max: number) =>
+  z.string().trim().min(min).transform((value) => value.slice(0, max).trim());
+
 const AiTrackSchema = z.object({
   kind: z.enum(PRACTICE_INTERVIEW_KINDS),
-  title: z.string().trim().min(4).max(80),
-  rationale: z.string().trim().min(20).max(220),
+  title: clipped(4, 80),
+  rationale: clipped(20, 220),
   priority: z.enum(["core", "supporting"]),
-  nextActionLabel: z.string().trim().min(8).max(120),
-  likelyQuestions: z.array(z.string().trim().min(12).max(240)).min(3).max(8),
+  nextActionLabel: clipped(8, 120),
+  likelyQuestions: z
+    .array(clipped(12, 240))
+    .min(3)
+    .transform((questions) => questions.slice(0, 8)),
 });
 
-const AiPrepPlanSchema = z.object({
-  company: z.string().trim().min(2).max(80),
-  role: z.string().trim().min(2).max(120),
-  planSummary: z.string().trim().min(30).max(500),
-  researchNote: z.string().trim().min(20).max(300),
-  jdSignals: z.array(z.string().trim().min(2).max(40)).max(8).default([]),
-  tracks: z.array(AiTrackSchema).min(2).max(PRACTICE_INTERVIEW_KINDS.length),
-}).superRefine((value, ctx) => {
-  const seen = new Set<PracticeInterviewKind>();
-
-  value.tracks.forEach((track, index) => {
-    if (seen.has(track.kind)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["tracks", index, "kind"],
-        message: "Each interview kind can appear at most once in the prep plan",
-      });
-      return;
-    }
-
-    seen.add(track.kind);
+const AiPrepPlanSchema = z
+  .object({
+    company: clipped(2, 80),
+    role: clipped(2, 120),
+    planSummary: clipped(30, 500),
+    researchNote: clipped(20, 300),
+    jdSignals: z
+      .array(clipped(2, 40))
+      .default([])
+      .transform((signals) => signals.slice(0, 8)),
+    tracks: z.array(AiTrackSchema).min(2),
+  })
+  // Keep the first track of each kind instead of rejecting the whole plan.
+  .transform((value) => {
+    const seen = new Set<PracticeInterviewKind>();
+    return {
+      ...value,
+      tracks: value.tracks.filter((track) => {
+        if (seen.has(track.kind)) return false;
+        seen.add(track.kind);
+        return true;
+      }),
+    };
+  })
+  .refine((value) => value.tracks.length >= 2, {
+    path: ["tracks"],
+    message: "Prep plan needs at least two distinct interview kinds",
   });
-});
 
 export type PrepPlanGenerationInput = z.infer<typeof PrepPlanGenerationInputSchema>;
 
