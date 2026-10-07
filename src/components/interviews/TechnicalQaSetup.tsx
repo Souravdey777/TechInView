@@ -235,7 +235,7 @@ export function TechnicalQaSetup() {
               <p className="mt-1 text-[13px] leading-relaxed text-brand-muted">
                 This round runs the full {TECHNICAL_QA_DURATION_MINUTES} minutes
                 with voice and scoring.{" "}
-                <Link href="/settings" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>
+                <Link href="/settings#rounds" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>
                   Buy an interview pack
                 </Link>{" "}
                 to start one.
@@ -329,7 +329,7 @@ export function TechnicalQaSetup() {
               <div className="flex flex-col gap-3">
                 {isLocked ? (
                   <Button asChild size="lg" className="w-full gap-2 text-base">
-                    <Link href="/settings">
+                    <Link href="/settings#rounds">
                       Get Technical Q&amp;A
                       <ChevronRight className="h-5 w-5" />
                     </Link>

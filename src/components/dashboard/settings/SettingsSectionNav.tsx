@@ -20,6 +20,13 @@ type SettingsSectionNavProps = {
 export function SettingsSectionNav({ sections }: SettingsSectionNavProps) {
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
 
+  // Deep links like /settings#rounds arrive while loading.tsx is still showing,
+  // so Next's own hash scroll misses. Scroll once the sections exist.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (id) document.getElementById(id)?.scrollIntoView({ block: "start" });
+  }, []);
+
   useEffect(() => {
     const targets = sections
       .map(({ id }) => document.getElementById(id))
