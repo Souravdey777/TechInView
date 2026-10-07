@@ -8,10 +8,20 @@ import {
   type PrepPlanTrack,
 } from "@/lib/dashboard/models";
 import { createPrepPlan } from "@/lib/dashboard/prep-plan-generator";
+import { BEHAVIORAL_SCENARIO_OPTIONS } from "@/lib/behavioral";
+import {
+  ENGINEERING_MANAGER_FOCUS_OPTIONS,
+  ENGINEERING_MANAGER_REPORTING_SCOPES,
+} from "@/lib/engineering-manager";
+import { INTERVIEW_VALUE_FRAMEWORKS, VALUE_FRAMEWORK_IDS } from "@/lib/interview-values";
+import {
+  TECHNICAL_QA_FRAMEWORK_OPTIONS,
+  TECHNICAL_QA_LANGUAGE_OPTIONS,
+} from "@/lib/technical-qa";
 import { PREP_PLAN_FALLBACK_MODEL, PREP_PLAN_PRIMARY_MODEL } from "./models";
 
-// 6 tracks x 6 questions plus summary fits; 3000 risked truncated, unparseable JSON.
-const MAX_TOKENS = 4096;
+// 6 tracks x 6 questions plus summary and round setups fits; 3000 risked truncated, unparseable JSON.
+const MAX_TOKENS = 5000;
 const PREP_PLAN_MODELS = [PREP_PLAN_PRIMARY_MODEL, PREP_PLAN_FALLBACK_MODEL] as const;
 
 const PrepPlanGenerationInputSchema = z
@@ -38,6 +48,46 @@ const PrepPlanGenerationInputSchema = z
 const clipped = (min: number, max: number) =>
   z.string().trim().min(min).transform((value) => value.slice(0, max).trim());
 
+const ids = <T extends { value: string }>(options: readonly T[]) =>
+  options.map((option) => option.value) as [T["value"], ...T["value"][]];
+const ALL_COMPETENCY_IDS = Array.from(
+  new Set(INTERVIEW_VALUE_FRAMEWORKS.flatMap((framework) => framework.competencies.map((c) => c.id)))
+) as [string, ...string[]];
+
+const ALL_TECHNICAL_QA_FRAMEWORK_IDS = Object.values(TECHNICAL_QA_FRAMEWORK_OPTIONS).flatMap(
+  (options) => options.map((option) => option.value)
+) as [string, ...string[]];
+
+// Setup-page choices for behavioural, engineering_manager, and technical_qa
+// tracks; null elsewhere. Competency and framework ids are unions across lenses
+// and languages here, so the setup pages re-resolve them against the chosen one.
+const AiRoundSetupSchema = z
+  .object({
+    valueFrameworkId: z.enum(VALUE_FRAMEWORK_IDS),
+    valueCompetencyIds: z.array(z.enum(ALL_COMPETENCY_IDS)),
+    scenarioFocus: z.array(z.enum(ids(BEHAVIORAL_SCENARIO_OPTIONS))),
+    managerFocusAreas: z.array(z.enum(ids(ENGINEERING_MANAGER_FOCUS_OPTIONS))),
+    reportingScope: z.enum(ids(ENGINEERING_MANAGER_REPORTING_SCOPES)).nullable(),
+    technicalQaLanguage: z.enum(ids(TECHNICAL_QA_LANGUAGE_OPTIONS)).nullable(),
+    technicalQaFrameworks: z.array(z.enum(ALL_TECHNICAL_QA_FRAMEWORK_IDS)),
+  })
+  .nullable();
+
+const SETUP_CATALOG = [
+  "Value lenses (valueFrameworkId: valueCompetencyIds allowed for it):",
+  ...INTERVIEW_VALUE_FRAMEWORKS.map(
+    (framework) =>
+      `- ${framework.id} (${framework.label}): ${framework.competencies.map((c) => c.id).join(", ")}`
+  ),
+  `Story contexts (scenarioFocus): ${ids(BEHAVIORAL_SCENARIO_OPTIONS).join(", ")}`,
+  `Manager focus areas (managerFocusAreas): ${ids(ENGINEERING_MANAGER_FOCUS_OPTIONS).join(", ")}`,
+  `Reporting scopes (reportingScope): ${ids(ENGINEERING_MANAGER_REPORTING_SCOPES).join(", ")}`,
+  "Technical Q&A stacks (technicalQaLanguage: technicalQaFrameworks allowed for it):",
+  ...Object.entries(TECHNICAL_QA_FRAMEWORK_OPTIONS).map(
+    ([language, options]) => `- ${language}: ${options.map((option) => option.value).join(", ")}`
+  ),
+].join("\n");
+
 const AiTrackSchema = z.object({
   kind: z.enum(PRACTICE_INTERVIEW_KINDS),
   title: clipped(4, 80),
@@ -48,6 +98,7 @@ const AiTrackSchema = z.object({
     .array(clipped(12, 240))
     .min(3)
     .transform((questions) => questions.slice(0, 8)),
+  setup: AiRoundSetupSchema,
 });
 
 const AiPrepPlanSchema = z
@@ -185,7 +236,8 @@ Example output (the response format enforces this shape):
         "Solve a graph traversal problem and explain the tradeoffs in your chosen representation.",
         "Find the lowest-cost path under changing edge constraints and test the main edge cases.",
         "Optimize a working solution and explain the time and space complexity precisely."
-      ]
+      ],
+      "setup": null
     }
   ]
 }
@@ -211,6 +263,13 @@ Rules:
 - Rationale should name the exact JD/company signal that made the track relevant.
 - researchNote is 1-2 short sentences (under 250 characters) and must say honestly what the plan is based on (the supplied input and your general knowledge). Do not claim live research, recruiter contact, or access to any question bank.
 - If the company or role is unclear, make the most reasonable inference and say so in researchNote instead of inventing specifics.
+- setup: for behavioral, engineering_manager, and technical_qa tracks, pick the options the candidate's setup page should start with, using only ids from the catalog below. Fields that do not apply to the track's kind are [] or null (valueFrameworkId is then generic).
+  - behavioral and engineering_manager: valueFrameworkId is the lens this company actually grades against (generic when it has no published value system); valueCompetencyIds are 2-4 ids from that lens only, the ones this loop most likely probes.
+  - behavioral: scenarioFocus is 2-4 story contexts.
+  - engineering_manager: managerFocusAreas is 2-4 areas and reportingScope matches the role's seniority (people manager roles: manages_engineers; lead/staff: tech_lead; otherwise individual_contributor).
+  - technical_qa: technicalQaLanguage is the primary language the JD names, and technicalQaFrameworks are the 1-4 frameworks from that language's list the JD or role actually implies ([] means core-language basics only).
+  - Every other track kind: setup is null.
+${SETUP_CATALOG}
 - Hard length limits (characters): title <= 80, rationale 20-220, nextActionLabel 8-120, each likelyQuestion 12-240, each jdSignal <= 40 (2-5 words, at most 8 signals), planSummary 30-500, researchNote 20-300, company <= 80, role <= 120. Stay well inside them.
   `.trim();
 }
@@ -254,6 +313,7 @@ function normalizeTracks(
       nextActionLabel:
         aiTrack?.nextActionLabel ?? fallbackTrack?.nextActionLabel ?? "Start this prep track",
       likelyQuestions: aiTrack?.likelyQuestions ?? fallbackTrack?.likelyQuestions ?? [],
+      setup: aiTrack?.setup ?? null,
     } satisfies PrepPlanTrack;
   });
 

@@ -23,6 +23,7 @@ import {
   type SessionFact,
 } from "@/components/interviews/setup/SessionSummaryCards";
 import { useInterviewStore } from "@/stores/interview-store";
+import { useApplyPrepPlanRound } from "@/hooks/usePrepPlans";
 import { useSupabase } from "@/hooks/useSupabase";
 import { ROUND_SCORING_DIMENSIONS } from "@/lib/constants";
 import { INTERVIEWER } from "@/lib/interviewer";
@@ -55,7 +56,12 @@ type StartResponse = {
 /** Grid value for "no frameworks, core language only"; never sent as a framework. */
 const BASICS_ONLY = "__basics";
 
-export function TechnicalQaSetup() {
+type TechnicalQaSetupProps = {
+  /** Prep Guru loop this round was opened from; its stack prefills the page. */
+  planId?: string | null;
+};
+
+export function TechnicalQaSetup({ planId = null }: TechnicalQaSetupProps) {
   const router = useRouter();
   const initFromSetup = useInterviewStore((state) => state.initFromSetup);
   const { supabase, user } = useSupabase();
@@ -65,6 +71,21 @@ export function TechnicalQaSetup() {
   const [credits, setCredits] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loopPlan = useApplyPrepPlanRound(planId, "technical_qa", (_plan, track) => {
+    const loopLanguage = TECHNICAL_QA_LANGUAGE_OPTIONS.find(
+      (option) => option.value === track?.setup?.technicalQaLanguage
+    )?.value;
+    if (!loopLanguage) return;
+
+    // Framework ids are a union across languages; keep the ones this language offers.
+    const loopFrameworks = getTechnicalQaFrameworkOptions(loopLanguage)
+      .map((option) => option.value as string)
+      .filter((value) => track?.setup?.technicalQaFrameworks?.includes(value));
+
+    setLanguage(loopLanguage);
+    setFrameworks(loopFrameworks);
+    setBasicsOnly(loopFrameworks.length === 0);
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -224,6 +245,15 @@ export function TechnicalQaSetup() {
             then scores you on {scoringDimensionCount} dimensions.
           </p>
         </header>
+        {loopPlan ? (
+          <p className="mt-4 text-sm text-brand-muted">
+            Prefilled from your{" "}
+            <Link href={`/prep-guru/${loopPlan.id}`} className="text-brand-cyan hover:underline">
+              {loopPlan.label}
+            </Link>{" "}
+            loop. Change anything before you start.
+          </p>
+        ) : null}
 
         {isLocked && (
           <div className="mt-8 flex items-start gap-3 rounded-[20px] border border-brand-rose/30 bg-brand-rose/[0.04] px-5 py-4">

@@ -19,6 +19,7 @@ import {
   InterviewSetupLayout,
   InterviewSetupSection,
 } from "@/components/interviews/InterviewSetupLayout";
+import { useApplyPrepPlanRound } from "@/hooks/usePrepPlans";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   DEFAULT_ENGINEERING_MANAGER_FOCUS_AREAS,
@@ -28,6 +29,7 @@ import {
   ENGINEERING_MANAGER_REPORTING_SCOPES,
   buildEngineeringManagerRoundContext,
   getEngineeringManagerFocusLabels,
+  getEngineeringManagerReportingScope,
   type EngineeringManagerReportingScopeId,
 } from "@/lib/engineering-manager";
 import {
@@ -35,6 +37,7 @@ import {
   MAX_VALUE_COMPETENCIES,
   MIN_VALUE_COMPETENCIES,
   getValueFramework,
+  resolveLoopValueLens,
   type ValueFrameworkId,
 } from "@/lib/interview-values";
 import { ValueLensPicker } from "@/components/interviews/setup/ValueLensPicker";
@@ -52,6 +55,8 @@ type StartResponse = {
 type EngineeringManagerSetupProps = {
   initialCompany?: string | null;
   initialRoleTitle?: string | null;
+  /** Prep Guru loop this round was opened from; its choices prefill the page. */
+  planId?: string | null;
 };
 
 /** Option cell inside a hairline grid; selected cells get the cyan ring and tint. */
@@ -68,6 +73,7 @@ function trimOrNull(value: string) {
 export function EngineeringManagerSetup({
   initialCompany = null,
   initialRoleTitle = null,
+  planId = null,
 }: EngineeringManagerSetupProps) {
   const router = useRouter();
   const initFromSetup = useInterviewStore((state) => state.initFromSetup);
@@ -86,6 +92,25 @@ export function EngineeringManagerSetup({
     ...getValueFramework(DEFAULT_VALUE_FRAMEWORK_ID).defaultCompetencyIds,
   ]);
   const [isCreating, setIsCreating] = useState(false);
+  const loopPlan = useApplyPrepPlanRound(planId, "engineering_manager", (plan, track) => {
+    const lens = resolveLoopValueLens(
+      track?.setup?.valueFrameworkId,
+      track?.setup?.valueCompetencyIds,
+      plan.company
+    );
+    const loopFocusAreas = ENGINEERING_MANAGER_FOCUS_OPTIONS.map((option) => option.value).filter(
+      (value) => track?.setup?.managerFocusAreas.includes(value)
+    );
+
+    setCompany(plan.company);
+    setRoleTitle(plan.role);
+    setValueFrameworkId(lens.frameworkId);
+    setValueCompetencyIds(lens.competencyIds);
+    if (loopFocusAreas.length > 0) setFocusAreas(loopFocusAreas);
+    if (track?.setup?.reportingScope) {
+      setReportingScope(getEngineeringManagerReportingScope(track.setup.reportingScope).value);
+    }
+  });
   const [error, setError] = useState<string | null>(null);
 
   const roundContext = useMemo(
@@ -314,6 +339,15 @@ export function EngineeringManagerSetup({
           fit, prioritization, stakeholder judgment, and concrete examples from your own work,
           then closes with your questions for the manager.
         </p>
+        {loopPlan ? (
+          <p className="mt-4 text-sm text-brand-muted">
+            Prefilled from your{" "}
+            <Link href={`/prep-guru/${loopPlan.id}`} className="text-brand-cyan hover:underline">
+              {loopPlan.label}
+            </Link>{" "}
+            loop. Change anything before you start.
+          </p>
+        ) : null}
       </header>
 
       <div className="mt-10 grid gap-6">

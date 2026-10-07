@@ -117,6 +117,22 @@ export type PrepPlanTrack = {
   nextActionLabel: string;
   likelyQuestions?: string[];
   historicalQuestions?: PrepPlanHistoricalQuestion[];
+  /** Setup choices Prep Guru picked for this round; prefilled on its setup page. */
+  setup?: PrepPlanRoundSetup | null;
+};
+
+/**
+ * Ids are unvalidated here (they come from the model and localStorage); the
+ * setup pages resolve them against the live catalogs before use.
+ */
+export type PrepPlanRoundSetup = {
+  valueFrameworkId: string;
+  valueCompetencyIds: string[];
+  scenarioFocus: string[];
+  managerFocusAreas: string[];
+  reportingScope: string | null;
+  technicalQaLanguage?: string | null;
+  technicalQaFrameworks?: string[];
 };
 
 export type PrepPlanStatus = "active" | "completed";

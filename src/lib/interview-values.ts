@@ -742,6 +742,37 @@ export function getValueFramework(id?: string | null): ValueFramework {
   );
 }
 
+/** Best-guess lens for a target company; anything unrecognised gets the universal set. */
+export function inferValueFrameworkId(company?: string | null): ValueFrameworkId {
+  const name = company?.toLowerCase() ?? "";
+  if (/\b(amazon|aws)\b/.test(name)) return "amazon_lp";
+  if (/\b(google|alphabet|deepmind)\b/.test(name)) return "google_gl";
+  if (/\b(meta|facebook|instagram|whatsapp)\b/.test(name)) return "meta_values";
+  if (/\bnetflix\b/.test(name)) return "netflix_culture";
+  return DEFAULT_VALUE_FRAMEWORK_ID;
+}
+
+/**
+ * Lens + competencies for a round launched from a Prep Guru loop. Untrusted ids
+ * are resolved against the catalog; a missing or unknown framework falls back
+ * to the company's lens, and empty competencies to that framework's defaults.
+ */
+export function resolveLoopValueLens(
+  frameworkId: string | null | undefined,
+  competencyIds: readonly string[] | null | undefined,
+  company?: string | null
+): { frameworkId: ValueFrameworkId; competencyIds: string[] } {
+  const framework = getValueFramework(
+    isValueFrameworkId(frameworkId) ? frameworkId : inferValueFrameworkId(company)
+  );
+  return {
+    frameworkId: framework.id,
+    competencyIds: resolveValueCompetencies(framework.id, competencyIds ?? []).map(
+      (competency) => competency.id
+    ),
+  };
+}
+
 /**
  * Resolves selected competency ids against a framework, preserving the
  * framework's own ordering and dropping anything unrecognised. Falls back to
