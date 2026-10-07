@@ -11,7 +11,7 @@ import type { PrepPlanSummary } from "@/lib/dashboard/models";
  * page opens on a fresh composer; picking a plan from the rail replays that
  * plan's thread without leaving the page.
  */
-export function PrepPlansIndex() {
+export function PrepPlansIndex({ isPaid }: { isPaid: boolean }) {
   const { plans, isLoaded, savePlan, deletePlan } = usePrepPlans();
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
   // Remounting the thread is how "New plan" clears a draft or a failed send,
@@ -47,6 +47,7 @@ export function PrepPlansIndex() {
       <PrepGuruChat
         key={threadKey}
         activePlan={activePlan}
+        isPaid={isPaid}
         onPlanGenerated={handlePlanGenerated}
       />
     </PrepGuruShell>

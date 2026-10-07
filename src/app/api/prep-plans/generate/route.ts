@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generatePrepPlanSummary } from "@/lib/ai/prep-plan-planner";
+import { hasCapturedPayment } from "@/lib/db/queries";
 import {
   enforceApiRateLimit,
   getAuthenticatedApiUser,
@@ -12,6 +13,15 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getAuthenticatedApiUser();
     if (!user) return unauthorizedResponse();
+    if (!(await hasCapturedPayment(user.id))) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Prep Guru is available on paid plans. Buy an interview pack to unlock it.",
+        },
+        { status: 403 }
+      );
+    }
     const rateLimited = await enforceApiRateLimit({
       userId: user.id,
       action: "prep_plan_generate",

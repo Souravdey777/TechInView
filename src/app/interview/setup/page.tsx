@@ -1018,7 +1018,7 @@ function InterviewSetupInner() {
               <p className="text-[15px] font-medium text-brand-text">AI Interview Mode Locked</p>
               <p className="mt-1 text-sm leading-relaxed text-brand-muted">
                 Your audio preview has already been used.{" "}
-                <a href="/settings" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>Buy an interview pack</a> to start another AI interview.
+                <a href="/settings#rounds" className={cn("text-brand-cyan transition-colors hover:text-brand-text", FOCUS)}>Buy an interview pack</a> to start another AI interview.
               </p>
             </div>
           </div>
@@ -1607,7 +1607,7 @@ function InterviewSetupInner() {
                     </Button>
                   ) : isAiModeLocked ? (
                     <Button asChild size="lg" className="w-full">
-                      <Link href="/settings">
+                      <Link href="/settings#rounds">
                         Get AI Interviews
                         <ChevronRight />
                       </Link>

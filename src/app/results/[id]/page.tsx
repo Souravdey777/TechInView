@@ -420,7 +420,7 @@ export default function ResultsPage() {
                 key strengths, and areas to improve.
               </p>
             </div>
-            <ButtonLink href="/settings" size="sm" className="shrink-0">
+            <ButtonLink href="/settings#rounds" size="sm" className="shrink-0">
               View Packs
             </ButtonLink>
           </section>
