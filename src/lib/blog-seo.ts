@@ -11,6 +11,8 @@ export const DEFAULT_OG_IMAGE_PATH = "/opengraph-image";
 /** Square brand mark (1254x1254) for schema.org `logo`. */
 export const SITE_LOGO_PATH = "/images/techinview-logo.png";
 
+export const LINKEDIN_URL = "https://www.linkedin.com/company/techinview";
+
 export function absoluteUrl(baseUrl: string, path: string): string {
   const base = baseUrl.replace(/\/$/, "");
   const p = path.startsWith("/") ? path : `/${path}`;
@@ -41,6 +43,7 @@ export function buildOrganizationNode(baseUrl: string) {
       width: 1254,
       height: 1254,
     },
+    sameAs: [LINKEDIN_URL],
   };
 }
 

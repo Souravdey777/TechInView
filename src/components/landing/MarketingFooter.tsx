@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/landing/MarketingNav";
 import { BODY, BTN_GHOST, BTN_PRIMARY, BTN_SM, CONTAINER, FOCUS, LABEL, PAD } from "@/components/marketing/ds";
+import { LINKEDIN_URL } from "@/lib/blog-seo";
 import { LEGAL_LINKS, SUPPORT_EMAIL, createSupportMailto } from "@/lib/legal";
 import { cn } from "@/lib/utils";
 
@@ -80,9 +81,19 @@ export function MarketingFooter({ signupHref = "/signup" }: MarketingFooterProps
 
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/[0.08] py-8 font-mono text-xs uppercase tracking-[0.08em] text-brand-subtle">
           <span>© {year} TechInView</span>
-          <a href={supportHref} className={cn("normal-case tracking-normal text-brand-muted transition-colors hover:text-brand-cyan", FOCUS)}>
-            {SUPPORT_EMAIL}
-          </a>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <a
+              href={LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn("normal-case tracking-normal text-brand-muted transition-colors hover:text-brand-cyan", FOCUS)}
+            >
+              LinkedIn<span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            <a href={supportHref} className={cn("normal-case tracking-normal text-brand-muted transition-colors hover:text-brand-cyan", FOCUS)}>
+              {SUPPORT_EMAIL}
+            </a>
+          </div>
         </div>
       </div>
     </footer>
