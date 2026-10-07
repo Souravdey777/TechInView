@@ -60,6 +60,8 @@ type GenerateResponse = {
 
 type PrepGuruChatProps = {
   activePlan: PrepPlanSummary | null;
+  /** No captured payment: open the upgrade prompt on arrival. */
+  isPaid: boolean;
   onPlanGenerated: (plan: PrepPlanSummary) => void;
 };
 
@@ -232,11 +234,11 @@ function ErrorTurn({ message }: { message: string }) {
  * One conversation per plan: the target you sent, then Prep Guru's loop. A new
  * send replaces the thread and lands in the sidebar's history.
  */
-export function PrepGuruChat({ activePlan, onPlanGenerated }: PrepGuruChatProps) {
+export function PrepGuruChat({ activePlan, isPaid, onPlanGenerated }: PrepGuruChatProps) {
   const [pendingRequest, setPendingRequest] = useState<PrepPlanRequest | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(!isPaid);
   const [researchStep, setResearchStep] = useState(0);
   const [resetToken, setResetToken] = useState(0);
   const threadEndRef = useRef<HTMLDivElement | null>(null);
