@@ -127,8 +127,8 @@ export async function GET(request: NextRequest) {
             !profile?.experience_level ||
             !profile?.preferred_language;
 
+          // A new account gets the welcome email whether it came through /signup or /login.
           const isFreshSignup =
-            intent === "signup" &&
             needsOnboarding &&
             (profile?.interviews_completed ?? 0) === 0 &&
             isRecentlyCreatedUser(user.created_at);
