@@ -194,6 +194,7 @@ export function BehavioralSetup({
           company: trimmedCompany,
           roleTitle: trimmedRoleTitle,
           generatedLoopRoundSnapshot: roundContext,
+          fromPlanId: planId,
         }),
       });
 

@@ -195,6 +195,7 @@ export function EngineeringManagerSetup({
           company: trimmedCompany,
           roleTitle: trimmedRoleTitle,
           generatedLoopRoundSnapshot: roundContext,
+          fromPlanId: planId,
         }),
       });
 
