@@ -21,6 +21,7 @@ import {
 } from "@/components/interviews/InterviewSetupLayout";
 import { MicrophoneSetupCheck } from "@/components/interviews/MicrophoneSetupCheck";
 import { ValueLensPicker } from "@/components/interviews/setup/ValueLensPicker";
+import { useApplyPrepPlanRound } from "@/hooks/usePrepPlans";
 import { useInterviewStore } from "@/stores/interview-store";
 import {
   BEHAVIORAL_DURATION_MINUTES,
@@ -35,6 +36,7 @@ import {
   MAX_VALUE_COMPETENCIES,
   getValueCompetencyLabels,
   getValueFramework,
+  resolveLoopValueLens,
   type ValueFrameworkId,
 } from "@/lib/interview-values";
 import { cn } from "@/lib/utils";
@@ -50,6 +52,8 @@ type StartResponse = {
 type BehavioralSetupProps = {
   initialCompany?: string | null;
   initialRoleTitle?: string | null;
+  /** Prep Guru loop this round was opened from; its choices prefill the page. */
+  planId?: string | null;
 };
 
 const STRONG_ANSWER_INGREDIENTS = [
@@ -72,6 +76,7 @@ function trimOrNull(value: string) {
 export function BehavioralSetup({
   initialCompany = null,
   initialRoleTitle = null,
+  planId = null,
 }: BehavioralSetupProps) {
   const router = useRouter();
   const initFromSetup = useInterviewStore((state) => state.initFromSetup);
@@ -87,6 +92,22 @@ export function BehavioralSetup({
     DEFAULT_BEHAVIORAL_SCENARIO_FOCUS
   );
   const [isCreating, setIsCreating] = useState(false);
+  const loopPlan = useApplyPrepPlanRound(planId, "behavioral", (plan, track) => {
+    const lens = resolveLoopValueLens(
+      track?.setup?.valueFrameworkId,
+      track?.setup?.valueCompetencyIds,
+      plan.company
+    );
+    const scenarios = BEHAVIORAL_SCENARIO_OPTIONS.map((option) => option.value).filter(
+      (value) => track?.setup?.scenarioFocus.includes(value)
+    );
+
+    setCompany(plan.company);
+    setRoleTitle(plan.role);
+    setValueFrameworkId(lens.frameworkId);
+    setValueCompetencyIds(lens.competencyIds);
+    if (scenarios.length > 0) setScenarioFocus(scenarios.slice(0, MAX_BEHAVIORAL_SCENARIOS));
+  });
   const [error, setError] = useState<string | null>(null);
 
   const roundContext = useMemo(
@@ -311,6 +332,15 @@ export function BehavioralSetup({
           stories from your real work, and keeps following up until your own contribution, the
           hard part, the result, and your hindsight are clear.
         </p>
+        {loopPlan ? (
+          <p className="mt-4 text-sm text-brand-muted">
+            Prefilled from your{" "}
+            <Link href={`/prep-guru/${loopPlan.id}`} className="text-brand-cyan hover:underline">
+              {loopPlan.label}
+            </Link>{" "}
+            loop. Change anything before you start.
+          </p>
+        ) : null}
       </header>
 
       <div className="mt-10 grid gap-6">

@@ -7,6 +7,7 @@ type PageProps = {
 export default function BehavioralSetupPage({ searchParams }: PageProps) {
   const company = typeof searchParams?.company === "string" ? searchParams.company : null;
   const roleTitle = typeof searchParams?.role === "string" ? searchParams.role : null;
+  const planId = typeof searchParams?.planId === "string" ? searchParams.planId : null;
 
-  return <BehavioralSetup initialCompany={company} initialRoleTitle={roleTitle} />;
+  return <BehavioralSetup initialCompany={company} initialRoleTitle={roleTitle} planId={planId} />;
 }

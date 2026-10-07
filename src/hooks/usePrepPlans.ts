@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { markPrepPlanTrackStarted } from "@/lib/dashboard/prep-plan-generator";
-import type { PracticeInterviewKind, PrepPlanSummary } from "@/lib/dashboard/models";
+import type {
+  PracticeInterviewKind,
+  PrepPlanSummary,
+  PrepPlanTrack,
+} from "@/lib/dashboard/models";
 
 const STORAGE_KEY = "techinview-prep-plans-v1";
 
@@ -133,4 +137,29 @@ export function usePrepPlans() {
     deletePlan,
     getPlanById,
   };
+}
+
+/**
+ * For a setup page opened from a Prep Guru loop (`?planId=`): once the plan has
+ * loaded from storage, calls `apply` a single time with the plan and its round
+ * of `kind`, so later edits on the page are never overwritten.
+ */
+export function useApplyPrepPlanRound(
+  planId: string | null | undefined,
+  kind: PracticeInterviewKind,
+  apply: (plan: PrepPlanSummary, track: PrepPlanTrack | null) => void
+) {
+  const { isLoaded, getPlanById } = usePrepPlans();
+  const plan = planId && isLoaded ? getPlanById(planId) : null;
+  const appliedPlanId = useRef<string | null>(null);
+  const applyRef = useRef(apply);
+  applyRef.current = apply;
+
+  useEffect(() => {
+    if (!plan || appliedPlanId.current === plan.id) return;
+    appliedPlanId.current = plan.id;
+    applyRef.current(plan, plan.tracks.find((track) => track.kind === kind) ?? null);
+  }, [plan, kind]);
+
+  return plan;
 }
