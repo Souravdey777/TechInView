@@ -79,16 +79,39 @@ const AiPrepPlanSchema = z
     message: "Prep plan needs at least two distinct interview kinds",
   });
 
+// Structured outputs enforce the shape (keys, types, enums). The SDK's own
+// helper demotes enums to descriptions, so strip only what the API rejects
+// (length bounds, minItems > 1, $schema) and lock objects. Length limits live
+// in the prompt; the Zod parse below still clips and dedupes.
+function toStrictOutputSchema(node: unknown): unknown {
+  if (Array.isArray(node)) return node.map(toStrictOutputSchema);
+  if (!node || typeof node !== "object") return node;
+
+  const { $schema, minLength, maxLength, minItems, maxItems, default: _default, ...rest } =
+    node as Record<string, unknown>;
+  void [$schema, minLength, maxLength, minItems, maxItems, _default];
+  const out = Object.fromEntries(
+    Object.entries(rest).map(([key, value]) => [key, toStrictOutputSchema(value)])
+  );
+
+  if (out.type === "object") {
+    out.additionalProperties = false;
+    out.required = Object.keys((out.properties as object) ?? {});
+  }
+  return out;
+}
+
+const PREP_PLAN_OUTPUT_FORMAT = {
+  type: "json_schema" as const,
+  schema: toStrictOutputSchema(z.toJSONSchema(AiPrepPlanSchema, { io: "input" })) as Record<
+    string,
+    unknown
+  >,
+};
+
 export type PrepPlanGenerationInput = z.infer<typeof PrepPlanGenerationInputSchema>;
 
 type AiPrepPlan = z.infer<typeof AiPrepPlanSchema>;
-
-function sanitizeJsonResponse(rawText: string) {
-  return rawText
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```\s*$/, "")
-    .trim();
-}
 
 function dedupeKinds(kinds: PracticeInterviewKind[]) {
   const seen = new Set<PracticeInterviewKind>();
@@ -144,7 +167,7 @@ Your job:
 - Order tracks in the sequence the candidate should practice them, starting with the highest-leverage next step.
 - Make the plan feel specific to this role, not a generic checklist.
 
-Return JSON only in this exact shape:
+Example output (the response format enforces this shape):
 {
   "company": "Uber",
   "role": "Senior Backend Engineer",
@@ -170,6 +193,7 @@ Return JSON only in this exact shape:
 Rules:
 - Do not force all six interview kinds. Include only the rounds that actually look relevant for this company, role, and JD.
 - Infer company and role from the pasted JD or candidate message when they were not entered separately.
+- The company and role are the job the candidate is interviewing for, not their current job.
 - Return 4-6 realistic likelyQuestions for every track. These are AI-inferred possibilities, not claims that the company asked them before.
 - Use between 2 and 6 tracks total.
 - Each interview kind can appear at most once.
@@ -188,7 +212,6 @@ Rules:
 - researchNote must say honestly what the plan is based on (the supplied input and your general knowledge). Do not claim live research, recruiter contact, or access to any question bank.
 - If the company or role is unclear, make the most reasonable inference and say so in researchNote instead of inventing specifics.
 - Hard length limits (characters): title <= 80, rationale 20-220, nextActionLabel 8-120, each likelyQuestion 12-240, each jdSignal <= 40 (2-5 words, at most 8 signals), planSummary 30-500, researchNote 20-300, company <= 80, role <= 120. Stay well inside them.
-- Do not include markdown, prose, or explanations outside the JSON object.
   `.trim();
 }
 
@@ -333,7 +356,8 @@ export async function generatePrepPlanSummary(
         model,
         max_tokens: MAX_TOKENS,
         system:
-          "You are a senior technical recruiter and interview coach. Generate realistic, company-shaped interview prep plans from job descriptions. Return valid JSON only, with no markdown fences or commentary.",
+          "You are a senior technical recruiter and interview coach. Generate realistic, company-shaped interview prep plans from job descriptions.",
+        output_config: { format: PREP_PLAN_OUTPUT_FORMAT },
         messages: [
           {
             role: "user",
@@ -342,8 +366,11 @@ export async function generatePrepPlanSummary(
         ],
       });
 
-      const jsonText = sanitizeJsonResponse(getTextFromResponse(response));
-      const parsed = JSON.parse(jsonText) as unknown;
+      if (response.stop_reason !== "end_turn") {
+        throw new Error(`Prep plan response ended with stop_reason=${response.stop_reason}`);
+      }
+
+      const parsed = JSON.parse(getTextFromResponse(response)) as unknown;
       const validated = AiPrepPlanSchema.parse(parsed);
 
       return mergeAiPlanIntoSummary(input, validated);
