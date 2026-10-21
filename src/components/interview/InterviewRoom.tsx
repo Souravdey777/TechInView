@@ -644,12 +644,15 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
         actual: r.actual ?? "", passed: r.passed, isHidden: r.isHidden,
       })));
 
-      // Inject test results into the agent for context
+      // Tell Tia the candidate ran tests. InjectUserMessage (not InjectAgentMessage,
+      // which would make her speak this text verbatim) so she reacts naturally;
+      // suppressTranscript keeps it out of the visible chat.
       if (agent.isConnected) {
         const passed = results.filter((r) => r.passed).length;
-        agent.injectAgentMessage(
+        agent.injectUserMessage(
           `[System: Candidate ran their code. ${passed}/${results.length} tests passed. ` +
           `Language: ${language}. Code:\n${code}]`,
+          { suppressTranscript: true },
         );
       }
     } catch {
@@ -949,23 +952,6 @@ export function InterviewRoom({ interviewId }: InterviewRoomProps) {
     const timePhase = phaseFromElapsedFraction(pct);
     setCurrentPhase((prev) => clampPhaseToTimeFloor(prev, timePhase));
   }, [timeLeft, hasStarted, maxDuration]);
-
-  // ── Periodic code snapshot injection (every 60s during coding phases) ──────
-  useEffect(() => {
-    if (!hasStarted || !agent.isConnected || !isCodingRound) return;
-    const CODING_PHASES = new Set(["CODING", "TESTING", "COMPLEXITY_ANALYSIS"]);
-
-    const interval = setInterval(() => {
-      if (!CODING_PHASES.has(currentPhaseRef.current)) return;
-      const currentCode = codeRef.current?.trim();
-      if (!currentCode) return;
-      agent.injectAgentMessage(
-        `[System: Code snapshot — ${languageRef.current}]\n${currentCode}`,
-      );
-    }, 60_000);
-
-    return () => clearInterval(interval);
-  }, [hasStarted, agent, isCodingRound]);
 
   const scoringDimensionLabels = useMemo(
     () =>
