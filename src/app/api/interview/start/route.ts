@@ -42,6 +42,7 @@ function inferCategoriesFromRound(round: RoundContextSnapshot | null): string[] 
 }
 
 type StartInterviewBody = {
+  fromPlanId?: string | null;
   difficulty?: string;
   category?: string;
   language: string;
@@ -223,6 +224,7 @@ export async function POST(req: NextRequest) {
       round_type: roundType,
       problem_title: problem?.title ?? generatedLoopRoundSnapshot?.title ?? null,
       interview_id: interviewId,
+      from_plan_id: typeof body.fromPlanId === "string" ? trimOrNull(body.fromPlanId) : null,
     });
 
     return NextResponse.json({

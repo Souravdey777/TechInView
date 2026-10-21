@@ -6,6 +6,7 @@ import {
   getAuthenticatedApiUser,
   unauthorizedResponse,
 } from "@/lib/api-security";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,12 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const plan = await generatePrepPlanSummary(body);
+    captureServerEvent(user.id, "prep_guru_plan_generated", {
+      company: plan.company,
+      role: plan.role,
+      round_count: plan.tracks.length,
+      has_jd: typeof body?.jdText === "string" && body.jdText.length > 0,
+    });
 
     return NextResponse.json({
       success: true,

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, TriangleAlert } from "lucide-react";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 import { MonoLabel } from "@/components/shared/Rack";
 import { Button } from "@/components/ui/button";
 import {
@@ -244,6 +245,11 @@ export function PrepGuruChat({ activePlan, isPaid, onPlanGenerated }: PrepGuruCh
   const threadEndRef = useRef<HTMLDivElement | null>(null);
 
   const activePlanId = activePlan?.id ?? null;
+  const ph = usePostHog();
+
+  useEffect(() => {
+    if (paywallOpen) ph?.capture("prep_guru_upgrade_shown");
+  }, [paywallOpen, ph]);
 
   // Switching plans from the sidebar (or starting a new one) drops any leftover
   // draft turn so the thread always matches the selected plan.
@@ -338,7 +344,10 @@ export function PrepGuruChat({ activePlan, isPaid, onPlanGenerated }: PrepGuruCh
             Not now
           </Button>
           <Button asChild>
-            <Link href="/settings#rounds">
+            <Link
+              href="/settings#rounds"
+              onClick={() => ph?.capture("prep_guru_upgrade_clicked")}
+            >
               Buy rounds
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
