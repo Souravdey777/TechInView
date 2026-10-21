@@ -281,7 +281,7 @@ export async function scoreInterview(
       system: getScorerSystemPrompt(),
       messages: [{ role: "user", content: prompt }],
       output_config: {
-        effort: "high",
+        effort: "low",
         format: zodOutputFormat(schema),
       },
     });
