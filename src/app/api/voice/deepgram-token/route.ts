@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { DeepgramClient, DeepgramError } from "@deepgram/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { enforceApiRateLimit } from "@/lib/api-security";
+import {
+  getVoiceLlmProxyUrl,
+  signVoiceLlmToken,
+  VOICE_LLM_TOKEN_TTL_SECONDS,
+} from "@/lib/voice-llm-token";
 
 const VOICE_TOKEN_SERVER_TIMEOUT_MS = 10000;
 
@@ -19,8 +24,13 @@ function withTimeout<T>(promise: Promise<T>, message: string): Promise<T> {
  *
  * Mints a short-lived Deepgram JWT for browser Voice Agent WebSocket auth
  * via @deepgram/sdk (POST /v1/auth/grant).
+ *
+ * With `{ interviewId }` in the body it also returns `llm`: our BYO think
+ * endpoint plus a bearer token pinned to that interview's tier (free trial vs
+ * paid), or null when the proxy can't be used (no public URL, unknown
+ * interview) and the client should fall back to Deepgram-managed models.
  */
-export async function POST(): Promise<Response> {
+export async function POST(request: Request): Promise<Response> {
   const apiKey = process.env.DEEPGRAM_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
@@ -64,6 +74,7 @@ export async function POST(): Promise<Response> {
       data: {
         token: grant.access_token,
         expiresIn: grant.expires_in ?? 600,
+        llm: await resolveLlmEndpoint(request, user.id),
       },
     });
   } catch (e) {
@@ -78,5 +89,33 @@ export async function POST(): Promise<Response> {
       { success: false, error: e instanceof Error ? e.message : "Token request failed" },
       { status: 502 },
     );
+  }
+}
+
+async function resolveLlmEndpoint(
+  request: Request,
+  userId: string,
+): Promise<{ url: string; token: string } | null> {
+  const url = getVoiceLlmProxyUrl();
+  if (!url) return null;
+
+  const body = (await request.json().catch(() => null)) as { interviewId?: unknown } | null;
+  const interviewId = typeof body?.interviewId === "string" ? body.interviewId : null;
+  if (!interviewId) return null;
+
+  try {
+    const { getInterview } = await import("@/lib/db/queries");
+    const interview = await getInterview(interviewId);
+    if (!interview || interview.user_id !== userId) return null;
+
+    const token = signVoiceLlmToken({
+      uid: userId,
+      tier: interview.is_free_trial ? "free" : "paid",
+      exp: Math.floor(Date.now() / 1000) + VOICE_LLM_TOKEN_TTL_SECONDS,
+    });
+    return token ? { url, token } : null;
+  } catch (e) {
+    console.error("[deepgram-token] llm endpoint", e);
+    return null;
   }
 }

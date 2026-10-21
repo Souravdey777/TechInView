@@ -216,6 +216,7 @@ export function EngineeringManagerInterviewRoom({
         hasWorkspaceNotes: false,
         totalMinutes: Math.round(maxDuration / 60),
       }),
+      interviewId,
       thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
       voiceModel: getInterviewerVoice(),
       functions: agentFunctions,
@@ -229,6 +230,7 @@ export function EngineeringManagerInterviewRoom({
       maxDuration,
       round,
       selectedDeviceId,
+      interviewId,
       storeConfig?.isFreeInterview,
     ]
   );

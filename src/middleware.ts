@@ -20,6 +20,7 @@ export const config = {
      * - favicon.ico, sitemap.xml, robots.txt
      * - public folder assets (images, fonts, sounds)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|public/|fonts/|images/|sounds/).*)",
+    // api/voice/llm is called by Deepgram's servers every turn: no cookies, latency-critical.
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|public/|fonts/|images/|sounds/|api/voice/llm).*)",
   ],
 };

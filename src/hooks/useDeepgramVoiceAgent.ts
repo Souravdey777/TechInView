@@ -10,7 +10,7 @@ import type {
 import type { VoiceState } from "@/components/interview/VoiceVisualizer";
 import type { InterviewPhase } from "@/lib/interview-phases";
 import { parseInterviewPhase, PHASE_ORDER } from "@/lib/interview-phases";
-import { LIVE_INTERVIEW_FREE_MODEL } from "@/lib/ai/models";
+import { LIVE_INTERVIEW_FREE_MODEL, MANAGED_LIVE_INTERVIEW_FALLBACK } from "@/lib/ai/models";
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -21,6 +21,8 @@ export type AgentFunctionHandler = (
 
 export type DeepgramVoiceAgentSettings = {
   systemPrompt: string;
+  /** Lets the token route pin the think model tier server-side. */
+  interviewId?: string;
   thinkModel?: string;
   voiceModel?: string;
   greeting?: string;
@@ -92,7 +94,13 @@ const PLAYBACK_FADE_OUT_SECONDS = 0.005;
 
 type AgentConnection = Awaited<ReturnType<DeepgramClient["agent"]["v1"]["connect"]>>;
 
-function buildThinkSettings(settings: DeepgramVoiceAgentSettings): ThinkSettingsV1 {
+/** Our BYO think endpoint (/api/voice/llm) and its session token, from the token route. */
+type LlmEndpoint = { url: string; token: string };
+
+function buildThinkSettings(
+  settings: DeepgramVoiceAgentSettings,
+  llm: LlmEndpoint | null,
+): ThinkSettingsV1 {
   const functions: ThinkSettingsV1.Functions = [
     {
       name: "set_interview_phase",
@@ -117,8 +125,20 @@ function buildThinkSettings(settings: DeepgramVoiceAgentSettings): ThinkSettings
     })),
   ];
 
+  const model = settings.thinkModel || DEFAULT_THINK_MODEL;
+  if (!llm) {
+    return {
+      provider: { type: "anthropic", model: MANAGED_LIVE_INTERVIEW_FALLBACK[model] ?? model },
+      prompt: settings.systemPrompt,
+      functions,
+    };
+  }
+
+  // The proxy holds the Anthropic key and pins the real model to the token's
+  // tier; `model` here is informational. The header is a session token, not a key.
   return {
-    provider: { type: "anthropic", model: settings.thinkModel || DEFAULT_THINK_MODEL },
+    provider: { type: "anthropic", model },
+    endpoint: { url: llm.url, headers: { authorization: `Bearer ${llm.token}` } },
     prompt: settings.systemPrompt,
     functions,
   };
@@ -132,7 +152,10 @@ function buildThinkSignature(settings: DeepgramVoiceAgentSettings): string {
   });
 }
 
-function buildAgentSettings(settings: DeepgramVoiceAgentSettings): AgentV1Settings {
+function buildAgentSettings(
+  settings: DeepgramVoiceAgentSettings,
+  llm: LlmEndpoint | null,
+): AgentV1Settings {
   const voiceModel = settings.voiceModel || DEFAULT_VOICE_MODEL;
 
   const base: AgentV1Settings = {
@@ -145,7 +168,7 @@ function buildAgentSettings(settings: DeepgramVoiceAgentSettings): AgentV1Settin
       listen: {
         provider: { version: "v2", type: "deepgram", model: "flux-general-en" },
       },
-      think: buildThinkSettings(settings),
+      think: buildThinkSettings(settings, llm),
       speak: {
         provider: { type: "deepgram", model: voiceModel },
       },
@@ -231,6 +254,7 @@ export function useDeepgramVoiceAgent(
   const welcomeRejectorRef = useRef<((error: Error) => void) | null>(null);
   const isClosingRef = useRef(false);
   const lastThinkSignatureRef = useRef<string | null>(null);
+  const llmEndpointRef = useRef<LlmEndpoint | null>(null);
   const suppressedUserMessagesRef = useRef<string[]>([]);
 
   /** Schedule TTS chunks on a single timeline so there are no gaps between WebSocket frames. */
@@ -511,7 +535,7 @@ export function useDeepgramVoiceAgent(
 
     conn.sendUpdateThink({
       type: "UpdateThink",
-      think: buildThinkSettings(settingsRef.current),
+      think: buildThinkSettings(settingsRef.current, llmEndpointRef.current),
     });
     lastThinkSignatureRef.current = nextSignature;
   }, []);
@@ -819,6 +843,8 @@ export function useDeepgramVoiceAgent(
       try {
         tokenRes = await fetch("/api/voice/deepgram-token", {
           method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ interviewId: settingsRef.current.interviewId }),
           signal: tokenController.signal,
         });
       } catch (error) {
@@ -831,13 +857,14 @@ export function useDeepgramVoiceAgent(
       }
       const tokenJson = (await tokenRes.json()) as {
         success: boolean;
-        data?: { token: string };
+        data?: { token: string; llm?: LlmEndpoint | null };
         error?: string;
       };
       if (!tokenJson.success || !tokenJson.data?.token) {
         throw new Error(tokenJson.error || "Failed to get voice token");
       }
       const token = tokenJson.data.token;
+      llmEndpointRef.current = tokenJson.data.llm ?? null;
 
       playbackAbortRef.current = new AbortController();
       isClosingRef.current = false;
@@ -895,7 +922,7 @@ export function useDeepgramVoiceAgent(
       ]);
 
       startKeepalive();
-      connection.sendSettings(buildAgentSettings(settingsRef.current));
+      connection.sendSettings(buildAgentSettings(settingsRef.current, llmEndpointRef.current));
       lastThinkSignatureRef.current = buildThinkSignature(settingsRef.current);
 
       await Promise.race([
