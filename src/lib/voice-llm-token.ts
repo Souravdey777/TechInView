@@ -6,10 +6,11 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  * (or reveal) the Anthropic key: it only names who may use the proxy, on which
  * model tier, until when.
  */
-export type VoiceLlmClaims = { uid: string; tier: "free" | "paid"; exp: number };
+export type VoiceLlmClaims = { uid: string; iid: string; tier: "free" | "paid"; exp: number };
 
-// Longest interview plus slack; Deepgram reuses the header for the whole session.
-export const VOICE_LLM_TOKEN_TTL_SECONDS = 2 * 60 * 60;
+// Deepgram reuses the header for the whole session, so the token lives for the
+// interview's max duration plus this slack (reconnects mint a fresh one).
+export const VOICE_LLM_TOKEN_SLACK_SECONDS = 10 * 60;
 
 function signingKey(): Buffer | null {
   const secret = process.env.VOICE_LLM_PROXY_SECRET || process.env.ANTHROPIC_API_KEY;

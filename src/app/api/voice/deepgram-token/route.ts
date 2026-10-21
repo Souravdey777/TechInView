@@ -5,7 +5,7 @@ import { enforceApiRateLimit } from "@/lib/api-security";
 import {
   getVoiceLlmProxyUrl,
   signVoiceLlmToken,
-  VOICE_LLM_TOKEN_TTL_SECONDS,
+  VOICE_LLM_TOKEN_SLACK_SECONDS,
 } from "@/lib/voice-llm-token";
 
 const VOICE_TOKEN_SERVER_TIMEOUT_MS = 10000;
@@ -106,12 +106,18 @@ async function resolveLlmEndpoint(
   try {
     const { getInterview } = await import("@/lib/db/queries");
     const interview = await getInterview(interviewId);
-    if (!interview || interview.user_id !== userId) return null;
+    if (!interview || interview.user_id !== userId || interview.status !== "in_progress") {
+      return null;
+    }
 
     const token = signVoiceLlmToken({
       uid: userId,
+      iid: interview.id,
       tier: interview.is_free_trial ? "free" : "paid",
-      exp: Math.floor(Date.now() / 1000) + VOICE_LLM_TOKEN_TTL_SECONDS,
+      exp:
+        Math.floor(Date.now() / 1000) +
+        interview.max_duration_seconds +
+        VOICE_LLM_TOKEN_SLACK_SECONDS,
     });
     return token ? { url, token } : null;
   } catch (e) {
