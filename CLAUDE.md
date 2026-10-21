@@ -66,6 +66,11 @@ prep.
 - LLM/scoring: Anthropic via `@anthropic-ai/sdk`
 - Voice transport: Deepgram Voice Agent
 - Token minting: `src/app/api/voice/deepgram-token/route.ts`
+- Think LLM: Deepgram calls our BYO Anthropic endpoint `src/app/api/voice/llm/route.ts`
+  (Haiku 5.5 free / Sonnet 5.5 paid, tier pinned by a signed session token from
+  the token route, prompt caching on). The Anthropic key never reaches the
+  browser. Deepgram's cloud must reach that URL, so local dev without
+  `VOICE_LLM_PROXY_URL` (a tunnel) falls back to Deepgram-managed models.
 - Core room wiring: `src/components/interview/InterviewRoom.tsx`
 - Voice hook: `src/hooks/useDeepgramVoiceAgent.ts`
 - Text fallback exists in the voice panel for cases where mic access is denied
@@ -247,6 +252,10 @@ The core tables are:
 - `RESEND_FROM_EMAIL`
 - `RESEND_REPLY_TO_EMAIL`
 - `DATABASE_URL` for direct DB scripts and migrations outside the normal app flow
+- `VOICE_LLM_PROXY_URL` public URL of `/api/voice/llm` (defaults to
+  `NEXT_PUBLIC_APP_URL` + path unless that is localhost)
+- `VOICE_LLM_PROXY_SECRET` HMAC secret for proxy tokens (defaults to a key
+  derived from `ANTHROPIC_API_KEY`)
 
 ## Product Guardrails
 

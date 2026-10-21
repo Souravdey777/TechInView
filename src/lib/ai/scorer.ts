@@ -6,17 +6,16 @@ import { ROUND_SCORING_DIMENSIONS, SCORING_DIMENSIONS, type InterviewMode, type 
 import type { CompetencyReport, InterviewResult } from "@/types";
 import type { RoundContextSnapshot } from "@/lib/loops/types";
 import { resolveValueCompetencies } from "@/lib/interview-values";
-import { INTERVIEW_MODEL } from "./models";
+import { SCORING_MODEL } from "./models";
 
-const MAX_TOKENS = 1500;
 /**
- * Behaviour-led rounds emit the five dimensions *plus* a per-competency report
- * with evidence, gap and upgrade text for up to four competencies, STAR
- * coverage, a debrief note and rehearsal drills. Measured at ~3.3k output
- * tokens for two competencies, so this leaves real headroom for four: a
- * `max_tokens` stop truncates the JSON mid-string and loses the whole score.
+ * The scoring model always thinks, and thinking tokens count against
+ * `max_tokens`. A `max_tokens` stop truncates the JSON mid-string and loses the
+ * whole score, so leave room for thinking on top of the JSON itself (~1.5k
+ * tokens plain, ~3.3k for a two-competency report, more for four).
  */
-const COMPETENCY_MAX_TOKENS = 8000;
+const MAX_TOKENS = 16000;
+const COMPETENCY_MAX_TOKENS = 16000;
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -277,11 +276,12 @@ export async function scoreInterview(
 
   async function requestScores(schema: z.ZodType, maxTokens: number, prompt: string) {
     const response = await client.messages.parse({
-      model: INTERVIEW_MODEL,
+      model: SCORING_MODEL,
       max_tokens: maxTokens,
       system: getScorerSystemPrompt(),
       messages: [{ role: "user", content: prompt }],
       output_config: {
+        effort: "low",
         format: zodOutputFormat(schema),
       },
     });

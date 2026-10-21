@@ -217,6 +217,7 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
         hasWorkspaceNotes: true,
         totalMinutes: Math.round(maxDuration / 60),
       }),
+      interviewId,
       thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
       voiceModel: getInterviewerVoice(),
       functions: agentFunctions,
@@ -230,6 +231,7 @@ export function BehavioralInterviewRoom({ interviewId }: BehavioralInterviewRoom
       maxDuration,
       round,
       selectedDeviceId,
+      interviewId,
       storeConfig?.isFreeInterview,
     ]
   );

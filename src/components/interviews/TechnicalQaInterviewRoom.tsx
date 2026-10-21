@@ -223,6 +223,7 @@ export function TechnicalQaInterviewRoom({
         hasWorkspaceNotes: false,
         totalMinutes: Math.round(maxDuration / 60),
       }),
+      interviewId,
       thinkModel: getLiveInterviewModel(storeConfig?.isFreeInterview ?? false),
       voiceModel: getInterviewerVoice(),
       functions: agentFunctions,
@@ -236,6 +237,7 @@ export function TechnicalQaInterviewRoom({
       maxDuration,
       round,
       selectedDeviceId,
+      interviewId,
       storeConfig?.isFreeInterview,
     ]
   );
