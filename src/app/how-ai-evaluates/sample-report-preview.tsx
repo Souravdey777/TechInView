@@ -12,11 +12,11 @@ const SAMPLE_DIMENSION_ORDER: ScoringDimension[] = [
 ];
 
 const SHORT: Record<ScoringDimension, string> = {
-  problem_solving: "PROBLEM SOLVING",
-  code_quality: "CODE QUALITY",
-  communication: "COMMUNICATION",
-  technical_knowledge: "TECH KNOWLEDGE",
-  testing: "TESTING",
+  problem_solving: "Problem solving",
+  code_quality: "Code quality",
+  communication: "Communication",
+  technical_knowledge: "Tech knowledge",
+  testing: "Testing",
 };
 
 const SAMPLE_SCORES: Record<ScoringDimension, number> = {

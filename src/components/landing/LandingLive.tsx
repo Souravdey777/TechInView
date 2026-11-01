@@ -5,10 +5,9 @@ import { VoiceVisualizer, type VoiceState } from "@/components/interview/VoiceVi
 import { cn } from "@/lib/utils";
 
 /*
- * Interactive pieces of the landing page. Everything here shares one clock
- * (performance.now) so the hero orb, the status line and the room orb agree
- * on what "Tia" is doing. Both orbs are the real interview-room
- * VoiceVisualizer; the hero canvas only draws the dot grid.
+ * Interactive pieces of the landing page. The room orb is the real
+ * interview-room VoiceVisualizer, driven by one shared clock
+ * (performance.now) so it and the status line agree on what "Tia" is doing.
  */
 
 // Accent comes from the --brand-cyan token so the landing theme can re-skin it.
@@ -31,126 +30,18 @@ const STATE_LABEL: Record<VoiceState, string> = {
 };
 
 /** The interviewer's current state on the shared clock, updated a few times a second. */
-function useOrbState() {
+function useOrbState(paused = false) {
   const [state, setState] = useState<VoiceState>("speaking");
   useEffect(() => {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || paused) return;
     const id = window.setInterval(() => setState(orbStateAt(performance.now() / 1000)), 200);
     return () => window.clearInterval(id);
-  }, []);
+  }, [paused]);
   return state;
 }
 
 function prefersReducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-function fitCanvas(c: HTMLCanvasElement) {
-  const d = Math.min(window.devicePixelRatio || 1, 2);
-  const w = c.clientWidth;
-  const h = c.clientHeight;
-  if (c.width !== Math.round(w * d) || c.height !== Math.round(h * d)) {
-    c.width = Math.round(w * d);
-    c.height = Math.round(h * d);
-  }
-  const x = c.getContext("2d")!;
-  x.setTransform(d, 0, 0, d, 0, 0);
-  x.clearRect(0, 0, w, h);
-  return [x, w, h] as const;
-}
-
-/** Runs `draw(seconds)` every frame while the canvas is on screen; once if reduced motion. */
-function useCanvasLoop(ref: React.RefObject<HTMLCanvasElement>, draw: (c: HTMLCanvasElement, t: number) => void) {
-  const drawRef = useRef(draw);
-  drawRef.current = draw;
-
-  useEffect(() => {
-    const c = ref.current;
-    if (!c) return;
-    if (prefersReducedMotion()) {
-      drawRef.current(c, 2);
-      return;
-    }
-    let raf = 0;
-    let visible = true;
-    const loop = (ts: number) => {
-      raf = requestAnimationFrame(loop);
-      if (visible) drawRef.current(c, ts / 1000);
-    };
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
-    io.observe(c);
-    raf = requestAnimationFrame(loop);
-    return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-    };
-  }, [ref]);
-}
-
-// VoiceVisualizer's orb body is 76px; it is scaled up to the ring size.
-const ORB_PX = 76;
-
-export function HeroCanvas() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const orbRef = useRef<HTMLDivElement>(null);
-  const mouse = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      mouse.current.tx = e.clientX / window.innerWidth - 0.5;
-      mouse.current.ty = e.clientY / window.innerHeight - 0.5;
-    };
-    window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
-
-  useCanvasLoop(ref, (c) => {
-    const m = mouse.current;
-    m.x += (m.tx - m.x) * 0.05;
-    m.y += (m.ty - m.y) * 0.05;
-    const [x, w, h] = fitCanvas(c);
-
-    x.fillStyle = "rgba(255,255,255,0.07)";
-    for (let gx = 16; gx < w; gx += 32) for (let gy = 16; gy < h; gy += 32) x.fillRect(gx, gy, 1, 1);
-
-    const wide = w > 900;
-    const cx = (wide ? w * 0.72 : w * 0.5) + m.x * 30;
-    const cy = (wide ? h * 0.44 : h * 0.26) + m.y * 30;
-    const R = Math.min(wide ? h * 0.2 : w * 0.24, 200);
-    if (orbRef.current) {
-      const scale = (R * 1.8) / ORB_PX;
-      orbRef.current.style.transform = `translate(${cx - ORB_PX / 2}px, ${cy - ORB_PX / 2}px) scale(${scale})`;
-      orbRef.current.style.opacity = "0.55";
-    }
-  });
-
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0">
-      <canvas ref={ref} className="absolute inset-0 block h-full w-full" />
-      <div ref={orbRef} className="absolute left-0 top-0 h-[76px] w-[76px] opacity-0 brightness-125 transition-opacity duration-700">
-        <VoiceVisualizer state="speaking" followCursor className="h-[76px] w-[76px]" />
-      </div>
-    </div>
-  );
-}
-
-/** "Tia · Speaking · 00:05" under the hero, whose orb always shows the speaking (green) state. */
-export function LiveStatus({ name }: { name: string }) {
-  const [secs, setSecs] = useState(0);
-
-  useEffect(() => {
-    const start = performance.now();
-    const id = window.setInterval(() => setSecs(Math.floor((performance.now() - start) / 1000)), 250);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return (
-    <span className="flex items-center gap-2.5 text-brand-text">
-      <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan" />
-      {name} · {STATE_LABEL.speaking} · {pad(Math.floor(secs / 60) % 60)}:{pad(secs % 60)}
-    </span>
-  );
 }
 
 const CODE = `def two_sum(nums, target):
@@ -161,9 +52,38 @@ const CODE = `def two_sum(nums, target):
             return [seen[complement], i]
         seen[num] = i`;
 
+/**
+ * Loops on the landing page hold still while the pointer or keyboard focus is
+ * inside them, and the visitor can pause them outright.
+ */
+function usePausable() {
+  const [hover, setHover] = useState(false);
+  const [focus, setFocus] = useState(false);
+  const [held, setHeld] = useState(false);
+  return {
+    paused: hover || focus || held,
+    held,
+    toggle: () => setHeld((h) => !h),
+    bind: {
+      onPointerEnter: () => setHover(true),
+      onPointerLeave: () => setHover(false),
+      onFocus: () => setFocus(true),
+      onBlur: (e: React.FocusEvent) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus(false);
+      },
+    },
+  };
+}
+
+const PAUSE_BTN =
+  "rounded-full border border-brand-border px-3 py-1 text-xs text-brand-muted transition-colors hover:border-brand-muted hover:text-brand-text active:text-brand-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan motion-reduce:hidden";
+
 export function InterviewRoomDemo({ name }: { name: string }) {
   const [typed, setTyped] = useState(0);
-  const orbState = useOrbState();
+  const loop = usePausable();
+  const pausedRef = useRef(loop.paused);
+  pausedRef.current = loop.paused;
+  const orbState = useOrbState(loop.paused);
   const codeRef = useRef<HTMLDivElement>(null);
 
   // Type the solution while the editor is visible; pause 5s when done, then restart.
@@ -179,7 +99,7 @@ export function InterviewRoomDemo({ name }: { name: string }) {
     const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
     io.observe(el);
     const id = window.setInterval(() => {
-      if (!visible) return;
+      if (!visible || pausedRef.current) return;
       setTyped((n) => {
         if (n < CODE.length) {
           doneAt = Date.now();
@@ -194,51 +114,54 @@ export function InterviewRoomDemo({ name }: { name: string }) {
     };
   }, []);
 
-
   const done = typed >= CODE.length;
   const typedLines = CODE.slice(0, typed).split("\n");
 
   return (
-    <div className="overflow-hidden rounded-[20px] border border-white/[0.09] bg-brand-surface">
-
+    <div {...loop.bind} className="overflow-hidden rounded-[20px] border border-brand-border bg-brand-surface">
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))]">
-        <div className="flex flex-col gap-8 border-white/[0.07] p-6 sm:p-10 md:border-r">
-          <div className="flex items-center gap-4">
-            <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-brand-cyan/50 text-lg text-brand-cyan">
-              {name[0]}
-            </div>
-            <div>
-              <div className="text-lg tracking-tight">
-                {name}
+        <div className="flex flex-col gap-8 border-brand-border p-6 sm:p-10 md:border-r">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-brand-cyan/50 text-lg text-brand-cyan">
+                {name[0]}
               </div>
-              <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-brand-muted">
-                AI interviewer · {STATE_LABEL[orbState]}
+              <div>
+                <div className="text-lg tracking-tight">{name}</div>
+                <div className="mt-1 text-sm text-brand-muted">
+                  AI interviewer, <span role="status">{STATE_LABEL[orbState].toLowerCase()}</span>
+                </div>
               </div>
             </div>
+            <button type="button" onClick={loop.toggle} className={PAUSE_BTN} aria-pressed={loop.held}>
+              {loop.held ? "Play" : "Pause"}
+            </button>
           </div>
           <div aria-hidden className="flex h-60 w-full items-center justify-center">
             <div className="scale-[1.7]">
-              <VoiceVisualizer state={orbState} followCursor className="h-[76px] w-[76px]" />
+              <VoiceVisualizer state={orbState} className="h-[76px] w-[76px]" />
             </div>
           </div>
-          <div>
-            <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-subtle">Live prompt</div>
-            <p className="text-pretty text-lg leading-snug tracking-tight sm:text-[22px]">
+          <figure className="m-0">
+            <blockquote className="text-pretty text-lg leading-snug tracking-tight sm:text-[22px]">
               “Talk me through the brute force first, then tell me how you would get it to O(n). I care about how you
               reason, not just the final answer.”
-            </p>
-          </div>
+            </blockquote>
+            <figcaption className="mt-3 text-sm text-brand-muted">Live prompt</figcaption>
+          </figure>
         </div>
 
-        <div ref={codeRef} className="flex flex-col bg-[#0B0C0F]">
-          <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-3.5 font-mono text-xs text-brand-muted">
-            <span>solution.py</span>
-            {done ? <span className="text-brand-cyan">● 2/2 tests passing</span> : <span>○ running 0/2</span>}
+        <div ref={codeRef} className="flex flex-col bg-brand-deep">
+          <div className="flex items-center justify-between border-b border-brand-border px-5 py-3.5 text-sm text-brand-muted">
+            <span className="font-mono">solution.py</span>
+            <span role="status" className={done ? "text-brand-cyan" : undefined}>
+              {done ? "2/2 tests passing" : "Running 0/2"}
+            </span>
           </div>
-          <pre className="flex-1 overflow-x-auto px-5 py-6 font-mono text-sm leading-[1.9] text-[#D5D8DC]">
+          <pre className="flex-1 overflow-x-auto px-5 py-6 font-mono text-sm leading-[1.9] text-brand-text">
             {CODE.split("\n").map((_, i) => (
               <div key={i} className="flex min-h-[26px] gap-5">
-                <span className="w-3.5 flex-none text-right text-[#3E434A]">{i + 1}</span>
+                <span aria-hidden className="w-3.5 flex-none text-right text-brand-muted">{i + 1}</span>
                 <span className="whitespace-pre">
                   {typedLines[i] ?? ""}
                   {i === typedLines.length - 1 && (
@@ -248,9 +171,9 @@ export function InterviewRoomDemo({ name }: { name: string }) {
               </div>
             ))}
           </pre>
-          <div className="flex justify-between border-t border-white/[0.07] px-5 py-3.5 font-mono text-[11px] uppercase tracking-[0.08em] text-brand-subtle">
-            <span>Phase 5 · Coding</span>
-            <span>Python · JavaScript</span>
+          <div className="flex justify-between border-t border-brand-border px-5 py-3.5 text-sm text-brand-muted">
+            <span>Coding, phase 5 of 9</span>
+            <span>Python and JavaScript</span>
           </div>
         </div>
       </div>
@@ -275,6 +198,9 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
 /** 45-minute arc: segments sized by duration, autoplaying playhead, click to jump. */
 export function PhaseTimeline() {
   const [phase, setPhase] = useState(0);
+  const loop = usePausable();
+  const pausedRef = useRef(loop.paused);
+  pausedRef.current = loop.paused;
   const playhead = useRef<HTMLDivElement>(null);
   const start = useRef(0);
 
@@ -283,8 +209,18 @@ export function PhaseTimeline() {
     start.current = performance.now();
     let raf = 0;
     let current = 0;
-    const loop = (ts: number) => {
-      raf = requestAnimationFrame(loop);
+    let pausedAt = 0;
+    const tick = (ts: number) => {
+      raf = requestAnimationFrame(tick);
+      // While paused, hold the playhead where it is by sliding the start forward.
+      if (pausedRef.current) {
+        if (!pausedAt) pausedAt = ts;
+        return;
+      }
+      if (pausedAt) {
+        start.current += ts - pausedAt;
+        pausedAt = 0;
+      }
       let el = ts - start.current;
       if (el > PHASE_MS && !reduced) {
         start.current = ts;
@@ -294,13 +230,16 @@ export function PhaseTimeline() {
       }
       const p = PHASES[current];
       const k = reduced ? 0 : Math.min(1, el / PHASE_MS);
-      if (playhead.current) playhead.current.style.left = `${((p.s + (p.e - p.s) * k) / 45) * 100}%`;
+      if (playhead.current) playhead.current.style.transform = `translateX(${((p.s + (p.e - p.s) * k) / 45) * 100}%)`;
     };
-    raf = requestAnimationFrame(loop);
+    raf = requestAnimationFrame(tick);
     // Clicking a segment jumps the loop there.
     const jump = (e: Event) => {
       current = (e as CustomEvent<number>).detail;
       start.current = performance.now();
+      pausedAt = pausedRef.current ? start.current : 0;
+      const p = PHASES[current];
+      if (playhead.current) playhead.current.style.transform = `translateX(${(p.s / 45) * 100}%)`;
     };
     window.addEventListener("landing-phase", jump);
     return () => {
@@ -316,12 +255,15 @@ export function PhaseTimeline() {
 
   const p = PHASES[phase];
   return (
-    <div>
-      <div className="mb-3 flex justify-between font-mono text-[11px] text-brand-subtle">
+    <div {...loop.bind}>
+      <div className="mb-3 flex items-center justify-between gap-4 font-mono text-xs text-brand-muted">
         <span>00:00</span>
+        <button type="button" onClick={loop.toggle} className={cn(PAUSE_BTN, "font-sans")} aria-pressed={loop.held}>
+          {loop.held ? "Play" : "Pause"}
+        </button>
         <span>45:00</span>
       </div>
-      <div className="relative flex h-11 gap-[3px]">
+      <div className="relative flex h-11 gap-[3px] [overflow-x:clip]">
         {PHASES.map((sg, i) => (
           <button
             key={sg.label}
@@ -331,30 +273,31 @@ export function PhaseTimeline() {
             onClick={() => select(i)}
             style={{ flex: sg.e - sg.s }}
             className={cn(
-              "min-w-0 overflow-hidden rounded font-mono text-[10px] transition-colors",
+              "min-w-[22px] overflow-hidden rounded font-mono text-xs transition-colors sm:min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan active:bg-brand-cyan/[0.24]",
               i === phase
                 ? "bg-brand-cyan/[0.16] text-brand-cyan shadow-[inset_0_0_0_1px_rgb(var(--brand-cyan))]"
-                : "bg-white/5 text-brand-subtle hover:bg-white/10 hover:text-brand-text"
+                : "bg-brand-border/60 text-brand-muted shadow-[inset_0_0_0_1px_rgb(var(--brand-border))] hover:bg-brand-border hover:text-brand-text"
             )}
           >
             {pad2(i + 1)}
           </button>
         ))}
-        <div
-          ref={playhead}
-          aria-hidden
-          className="pointer-events-none absolute -bottom-2 -top-2 left-0 w-px bg-brand-text shadow-[0_0_12px_#EDEEF0]"
-        />
+        <div ref={playhead} aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-full">
+          <div className="h-full w-px bg-brand-text" />
+        </div>
       </div>
-      <div className="mt-16 grid min-h-[220px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] gap-12" aria-live="polite">
+      <div className="mt-12 grid min-h-[160px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] gap-12" aria-live="polite">
         <div>
-          <div className="mb-5 font-mono text-[13px] text-brand-cyan">
-            {pad2(p.s)}:00 to {pad2(p.e)}:00 · Phase {phase + 1} · {p.label}
-          </div>
+          <p className="mb-5 text-sm text-brand-cyan">
+            {p.label}, phase {phase + 1} of 9,{" "}
+            <span className="font-mono">
+              {pad2(p.s)}:00 to {pad2(p.e)}:00
+            </span>
+          </p>
           <h3 className="text-balance text-[clamp(28px,3.2vw,44px)] font-normal leading-[1.08] tracking-[-0.03em]">{p.title}</h3>
         </div>
         <div className="pt-1">
-          <p className="mb-5 text-[15px] leading-normal text-brand-text">{p.sub}</p>
+          <p className="mb-5 text-[17px] leading-normal text-brand-text">{p.sub}</p>
           <p className="text-pretty text-[17px] leading-relaxed text-brand-muted">{p.body}</p>
         </div>
       </div>
@@ -418,10 +361,10 @@ export function ScoreCard({
   const poly = (r: (i: number) => number) => dims.map((_, i) => pt(i, r(i)).join(",")).join(" ");
 
   return (
-    <div ref={ref} className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] items-center gap-16">
+    <div ref={ref} className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] items-start gap-16">
       <div>
         {header}
-        <div className="flex flex-col border-t border-white/[0.08]">
+        <div className="flex flex-col border-t border-brand-border">
         {dims.map((d, i) => {
           const on = hover === i;
           return (
@@ -430,15 +373,18 @@ export function ScoreCard({
               onMouseEnter={() => setHover(i)}
               onMouseLeave={() => setHover(null)}
               className={cn(
-                "grid grid-cols-[minmax(0,1fr)_120px_36px] items-center gap-4 border-b border-white/[0.08] py-3.5 transition-[padding,background-color] duration-300",
-                on && "bg-white/[0.02] pl-2"
+                "grid grid-cols-[minmax(0,1fr)_120px_36px] items-center gap-4 border-b border-brand-border py-3.5 transition-colors duration-300",
+                on && "bg-brand-card"
               )}
             >
               <span className={cn("text-[15px] transition-colors", on && "text-brand-cyan")}>{d.name}</span>
-              <span className={cn("relative bg-white/[0.08] transition-[height] duration-300", on ? "h-1" : "h-0.5")}>
-                <span className="absolute inset-y-0 left-0 bg-brand-cyan" style={{ width: `${d.score * k}%` }} />
+              <span className="relative h-1 overflow-hidden bg-brand-border">
+                <span
+                  className="absolute inset-0 origin-left bg-brand-cyan"
+                  style={{ transform: `scaleX(${(d.score * k) / 100})` }}
+                />
               </span>
-              <span className={cn("text-right font-mono text-[13px] transition-colors", on ? "text-brand-text" : "text-brand-muted")}>
+              <span className={cn("text-right font-mono text-sm tabular-nums transition-colors", on ? "text-brand-text" : "text-brand-muted")}>
                 {Math.round(d.score * k)}
               </span>
             </div>
@@ -448,18 +394,18 @@ export function ScoreCard({
         {footer}
       </div>
 
-      <div className="flex flex-col gap-3 rounded-[20px] border border-white/[0.09] bg-brand-surface p-7">
-        <div className="flex justify-between font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">
+      <div className="flex flex-col gap-3 rounded-[20px] border border-brand-border bg-brand-surface p-7">
+        <div className="flex justify-between gap-4 text-sm text-brand-muted">
           <span>Performance breakdown</span>
-          <span>{interviewerName} · sample round</span>
+          <span>Sample round with {interviewerName}</span>
         </div>
         <svg viewBox="-40 0 400 320" className="mx-auto block w-full max-w-[520px] overflow-visible" role="img" aria-label="Sample five-dimension score radar">
           {[0.25, 0.5, 0.75, 1].map((l) => (
-            <polygon key={l} points={poly(() => R * l)} fill="none" stroke="rgba(255,255,255,0.09)" />
+            <polygon key={l} points={poly(() => R * l)} fill="none" style={{ stroke: "rgb(var(--brand-border))" }} />
           ))}
           {dims.map((_, i) => {
             const [x, y] = pt(i, R);
-            return <line key={i} x1={c} y1={c} x2={x} y2={y} stroke="rgba(255,255,255,0.07)" />;
+            return <line key={i} x1={c} y1={c} x2={x} y2={y} style={{ stroke: "rgb(var(--brand-border))" }} />;
           })}
           <polygon points={poly((i) => (R * dims[i].score * k) / 100)} style={{ fill: ACCENT(0.14), stroke: ACCENT() }} strokeWidth={1.5} />
           {hover !== null ? (
@@ -471,7 +417,7 @@ export function ScoreCard({
             return (
               <g key={d.name} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} className="cursor-default">
                 {on ? <circle cx={x} cy={y} r={10} style={{ fill: ACCENT(0.18) }} /> : null}
-                <circle cx={x} cy={y} r={on ? 5 : 3.5} style={{ fill: ACCENT(), transition: "r 200ms" }} />
+                <circle cx={x} cy={y} r={on ? 5 : 3.5} style={{ fill: ACCENT() }} />
                 {/* Generous invisible hit target around each vertex. */}
                 <circle cx={x} cy={y} r={18} fill="transparent" />
               </g>
@@ -486,22 +432,22 @@ export function ScoreCard({
                 y={y}
                 onMouseEnter={() => setHover(i)}
                 onMouseLeave={() => setHover(null)}
-                style={{ fill: hover === i ? ACCENT() : "#8E939B", transition: "fill 200ms" }}
+                style={{ fill: hover === i ? ACCENT() : "rgb(var(--brand-muted))" }}
                 dominantBaseline="middle"
                 textAnchor={x < c - 5 ? "end" : x > c + 5 ? "start" : "middle"}
-                className="font-mono text-[10px] tracking-[0.06em]"
+                className="text-xs"
               >
                 {d.short}
-                {hover === i ? <tspan fill="#E6E8EB"> {d.score}</tspan> : null}
+                {hover === i ? <tspan style={{ fill: "rgb(var(--brand-text))" }}> {d.score}</tspan> : null}
               </text>
             );
           })}
         </svg>
-        <div className="flex items-baseline justify-between border-t border-white/[0.07] pt-4">
-          <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-brand-subtle">Overall</span>
-          <span className="text-[44px] font-light tracking-[-0.04em]">
+        <div className="flex items-baseline justify-between border-t border-brand-border pt-4">
+          <span className="text-sm text-brand-muted">Overall</span>
+          <span className="text-[44px] font-light tabular-nums tracking-[-0.04em]">
             {Math.round(overall * k)}
-            <span className="text-base text-brand-subtle">/100</span>
+            <span className="text-base text-brand-muted">/100</span>
           </span>
         </div>
       </div>
